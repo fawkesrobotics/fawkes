@@ -172,8 +172,8 @@ BlackBoardInterfaceListener::bb_interface_message_received(Interface *interface,
  * added.
  */
 void
-BlackBoardInterfaceListener::bb_interface_reader_added(Interface *  interface,
-                                                       unsigned int instance_serial) throw()
+BlackBoardInterfaceListener::bb_interface_reader_added(Interface *interface,
+                                                       Uuid       instance_serial) throw()
 {
 }
 
@@ -185,8 +185,8 @@ BlackBoardInterfaceListener::bb_interface_reader_added(Interface *  interface,
  * removed.
  */
 void
-BlackBoardInterfaceListener::bb_interface_reader_removed(Interface *  interface,
-                                                         unsigned int instance_serial) throw()
+BlackBoardInterfaceListener::bb_interface_reader_removed(Interface *interface,
+                                                         Uuid       instance_serial) throw()
 {
 }
 
@@ -198,8 +198,8 @@ BlackBoardInterfaceListener::bb_interface_reader_removed(Interface *  interface,
  * added.
  */
 void
-BlackBoardInterfaceListener::bb_interface_writer_added(Interface *  interface,
-                                                       unsigned int instance_serial) throw()
+BlackBoardInterfaceListener::bb_interface_writer_added(Interface *interface,
+                                                       Uuid       instance_serial) throw()
 {
 }
 
@@ -211,8 +211,8 @@ BlackBoardInterfaceListener::bb_interface_writer_added(Interface *  interface,
  * removed.
  */
 void
-BlackBoardInterfaceListener::bb_interface_writer_removed(Interface *  interface,
-                                                         unsigned int instance_serial) throw()
+BlackBoardInterfaceListener::bb_interface_writer_removed(Interface *interface,
+                                                         Uuid       instance_serial) throw()
 {
 }
 

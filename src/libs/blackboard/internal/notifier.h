@@ -28,6 +28,7 @@
 #include <blackboard/interface_listener.h>
 #include <blackboard/interface_observer.h>
 #include <core/utils/rwlock_map.h>
+#include <utils/uuid.h>
 
 #include <list>
 #include <string>
@@ -58,14 +59,10 @@ public:
 	bool notify_of_message_received(const Interface *interface, Message *message);
 	void notify_of_interface_created(const char *type, const char *id) throw();
 	void notify_of_interface_destroyed(const char *type, const char *id) throw();
-	void notify_of_writer_added(const Interface *interface,
-	                            unsigned int     event_instance_serial) throw();
-	void notify_of_writer_removed(const Interface *interface,
-	                              unsigned int     event_instance_serial) throw();
-	void notify_of_reader_added(const Interface *interface,
-	                            unsigned int     event_instance_serial) throw();
-	void notify_of_reader_removed(const Interface *interface,
-	                              unsigned int     event_instance_serial) throw();
+	void notify_of_writer_added(const Interface *interface, Uuid event_instance_serial) throw();
+	void notify_of_writer_removed(const Interface *interface, Uuid event_instance_serial) throw();
+	void notify_of_reader_added(const Interface *interface, Uuid event_instance_serial) throw();
+	void notify_of_reader_removed(const Interface *interface, Uuid event_instance_serial) throw();
 
 private:
 	/// @cond INTERNALS

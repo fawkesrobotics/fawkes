@@ -493,7 +493,7 @@ BlackBoardNotifier::process_bbio_queue()
  */
 void
 BlackBoardNotifier::notify_of_writer_added(const Interface *interface,
-                                           unsigned int     event_instance_serial) throw()
+                                           Uuid             event_instance_serial) throw()
 {
 	bbil_writer_mutex_->lock();
 	bbil_writer_events_ += 1;
@@ -530,7 +530,7 @@ BlackBoardNotifier::notify_of_writer_added(const Interface *interface,
  */
 void
 BlackBoardNotifier::notify_of_writer_removed(const Interface *interface,
-                                             unsigned int     event_instance_serial) throw()
+                                             Uuid             event_instance_serial) throw()
 {
 	bbil_writer_mutex_->lock();
 	bbil_writer_events_ += 1;
@@ -587,7 +587,7 @@ BlackBoardNotifier::process_writer_queue()
  */
 void
 BlackBoardNotifier::notify_of_reader_added(const Interface *interface,
-                                           unsigned int     event_instance_serial) throw()
+                                           Uuid             event_instance_serial) throw()
 {
 	bbil_reader_mutex_->lock();
 	bbil_reader_events_ += 1;
@@ -624,7 +624,7 @@ BlackBoardNotifier::notify_of_reader_added(const Interface *interface,
  */
 void
 BlackBoardNotifier::notify_of_reader_removed(const Interface *interface,
-                                             unsigned int     event_instance_serial) throw()
+                                             Uuid             event_instance_serial) throw()
 {
 	bbil_reader_mutex_->lock();
 	bbil_reader_events_ += 1;
