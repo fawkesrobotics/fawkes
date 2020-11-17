@@ -375,12 +375,12 @@ BlackboardCLIPSFeature::clips_blackboard_open_interface(const std::string &env_n
 			iface_map.insert(std::make_pair(type, std::list<fawkes::Interface *>(1, iface)));
 			fawkes::MutexLocker lock(clips.objmutex_ptr());
 			clips->assert_fact_f("(blackboard-interface (id \"%s\") (type \"%s\") (uid \"%s\") "
-			                     "                      (hash \"%s\") (serial %u) (writing %s))",
+			                     "                      (hash \"%s\") (serial \"%s\") (writing %s))",
 			                     iface->id(),
 			                     iface->type(),
 			                     iface->uid(),
 			                     iface->hash_printable(),
-			                     iface->serial(),
+			                     iface->serial().get_string().c_str(),
 			                     writing ? "TRUE" : "FALSE");
 		}
 	} else {
@@ -403,12 +403,12 @@ BlackboardCLIPSFeature::clips_blackboard_open_interface(const std::string &env_n
 				                  iface->is_writer() ? "writing" : "reading");
 				fawkes::MutexLocker lock(clips.objmutex_ptr());
 				clips->assert_fact_f("(blackboard-interface (id \"%s\") (type \"%s\") (uid \"%s\") "
-				                     "                      (hash \"%s\") (serial %u) (writing %s))",
+				                     "                      (hash \"%s\") (serial \"%s\") (writing %s))",
 				                     iface->id(),
 				                     iface->type(),
 				                     iface->uid(),
 				                     iface->hash_printable(),
-				                     iface->serial(),
+				                     iface->serial().get_string().c_str(),
 				                     writing ? "TRUE" : "FALSE");
 			} catch (Exception &e) {
 				logger_->log_warn(name.c_str(),
