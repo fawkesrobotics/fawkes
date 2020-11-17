@@ -26,6 +26,7 @@
 
 #include <interface/mediators/interface_mediator.h>
 #include <interface/mediators/message_mediator.h>
+#include <utils/uuid.h>
 
 #include <cstdlib>
 
@@ -49,14 +50,14 @@ public:
 
 	void process_data_refreshed(FawkesNetworkMessage *msg);
 	void process_interface_message(FawkesNetworkMessage *msg);
-	void reader_added(unsigned int event_serial);
-	void reader_removed(unsigned int event_serial);
-	void writer_added(unsigned int event_serial);
-	void writer_removed(unsigned int event_serial);
+	void reader_added(Uuid event_serial);
+	void reader_removed(Uuid event_serial);
+	void writer_added(Uuid event_serial);
+	void writer_removed(Uuid event_serial);
 
-	unsigned int serial() const;
-	unsigned int clid() const;
-	Interface *  interface() const;
+	Uuid       serial() const;
+	Uuid       clid() const;
+	Interface *interface() const;
 
 	/* InterfaceMediator */
 	virtual bool         exists_writer(const Interface *interface) const;
@@ -72,7 +73,9 @@ private:
 	inline unsigned int
 	next_msg_id()
 	{
-		return ((instance_serial_ << 16) | next_msg_id_++);
+		// TODO use instance_serial_
+		//return ((instance_serial_ << 16) | next_msg_id_++);
+		return next_msg_id_++;
 	}
 
 private:
@@ -86,7 +89,7 @@ private:
 	void * data_chunk_;
 	size_t data_size_;
 
-	unsigned short instance_serial_;
+	Uuid           instance_serial_;
 	unsigned short next_msg_id_;
 	unsigned int   num_readers_;
 	bool           has_writer_;

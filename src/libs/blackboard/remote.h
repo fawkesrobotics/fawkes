@@ -27,6 +27,7 @@
 #include <core/exceptions/software.h>
 #include <core/utils/lock_map.h>
 #include <netcomm/fawkes/client_handler.h>
+#include <utils/uuid.h>
 
 #include <list>
 
@@ -55,7 +56,7 @@ public:
 	virtual Interface *
 	open_for_reading(const char *interface_type, const char *identifier, const char *owner = NULL);
 	virtual Interface *
-	             open_for_writing(const char *interface_type, const char *identifier, const char *owner = NULL);
+	open_for_writing(const char *interface_type, const char *identifier, const char *owner = NULL);
 	virtual void close(Interface *interface);
 
 	virtual InterfaceInfoList *list_all();
@@ -86,15 +87,15 @@ private: /* methods */
 	void reopen_interfaces();
 
 private: /* members */
-	Mutex *                                                     mutex_;
-	FawkesNetworkClient *                                       fnc_;
-	bool                                                        fnc_owner_;
-	FawkesNetworkMessage *                                      m_;
-	BlackBoardInstanceFactory *                                 instance_factory_;
-	LockMap<unsigned int, BlackBoardInterfaceProxy *>           proxies_;
-	LockMap<unsigned int, BlackBoardInterfaceProxy *>::iterator pit_;
-	std::list<BlackBoardInterfaceProxy *>                       invalid_proxies_;
-	std::list<BlackBoardInterfaceProxy *>::iterator             ipit_;
+	Mutex *                                             mutex_;
+	FawkesNetworkClient *                               fnc_;
+	bool                                                fnc_owner_;
+	FawkesNetworkMessage *                              m_;
+	BlackBoardInstanceFactory *                         instance_factory_;
+	LockMap<Uuid, BlackBoardInterfaceProxy *>           proxies_;
+	LockMap<Uuid, BlackBoardInterfaceProxy *>::iterator pit_;
+	std::list<BlackBoardInterfaceProxy *>               invalid_proxies_;
+	std::list<BlackBoardInterfaceProxy *>::iterator     ipit_;
 
 	Mutex *        wait_mutex_;
 	WaitCondition *wait_cond_;

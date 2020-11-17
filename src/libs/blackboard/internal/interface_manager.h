@@ -56,7 +56,7 @@ public:
 	Interface *
 	open_for_reading(const char *interface_type, const char *identifier, const char *owner = NULL);
 	Interface *
-	     open_for_writing(const char *interface_type, const char *identifier, const char *owner = NULL);
+	open_for_writing(const char *interface_type, const char *identifier, const char *owner = NULL);
 	void close(Interface *interface);
 
 	InterfaceInfoList *list_all() const;
@@ -84,7 +84,6 @@ private:
 
 	void *       find_interface_in_memory(const char *type, const char *identifier);
 	unsigned int next_mem_serial();
-	unsigned int next_instance_serial();
 	void         create_interface(const char *type,
 	                              const char *identifier,
 	                              const char *owner,

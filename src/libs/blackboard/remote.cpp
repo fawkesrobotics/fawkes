@@ -321,7 +321,7 @@ RemoteBlackBoard::close(Interface *interface)
 	if (interface == NULL)
 		return;
 
-	unsigned int serial = interface->serial();
+	Uuid serial = interface->serial();
 
 	if (proxies_.find(serial) != proxies_.end()) {
 		delete proxies_[serial];
@@ -331,7 +331,7 @@ RemoteBlackBoard::close(Interface *interface)
 	if (fnc_->connected()) {
 		// We cannot "officially" close it, if we are disconnected it cannot be used anyway
 		bb_iserial_msg_t *sm = (bb_iserial_msg_t *)calloc(1, sizeof(bb_iserial_msg_t));
-		sm->serial           = htonl(interface->serial());
+		sm->serial           = interface->serial();
 
 		FawkesNetworkMessage *omsg =
 		  new FawkesNetworkMessage(FAWKES_CID_BLACKBOARD, MSG_BB_CLOSE, sm, sizeof(bb_iserial_msg_t));
@@ -459,34 +459,34 @@ RemoteBlackBoard::inbound_received(FawkesNetworkMessage *m, unsigned int id) thr
 		unsigned int msgid = m->msgid();
 		try {
 			if (msgid == MSG_BB_DATA_CHANGED || msgid == MSG_BB_DATA_REFRESHED) {
-				unsigned int serial = ntohl(((unsigned int *)m->payload())[0]);
+				Uuid serial = ((Uuid *)m->payload())[0];
 				if (proxies_.find(serial) != proxies_.end()) {
 					proxies_[serial]->process_data_refreshed(m);
 				}
 			} else if (msgid == MSG_BB_INTERFACE_MESSAGE) {
-				unsigned int serial = ntohl(((unsigned int *)m->payload())[0]);
+				Uuid serial = ((Uuid *)m->payload())[0];
 				if (proxies_.find(serial) != proxies_.end()) {
 					proxies_[serial]->process_interface_message(m);
 				}
 			} else if (msgid == MSG_BB_READER_ADDED) {
 				bb_ieventserial_msg_t *esm = m->msg<bb_ieventserial_msg_t>();
-				if (proxies_.find(ntohl(esm->serial)) != proxies_.end()) {
-					proxies_[ntohl(esm->serial)]->reader_added(ntohl(esm->event_serial));
+				if (proxies_.find(esm->serial) != proxies_.end()) {
+					proxies_[esm->serial]->reader_added(esm->event_serial);
 				}
 			} else if (msgid == MSG_BB_READER_REMOVED) {
 				bb_ieventserial_msg_t *esm = m->msg<bb_ieventserial_msg_t>();
-				if (proxies_.find(ntohl(esm->serial)) != proxies_.end()) {
-					proxies_[ntohl(esm->serial)]->reader_removed(ntohl(esm->event_serial));
+				if (proxies_.find(esm->serial) != proxies_.end()) {
+					proxies_[esm->serial]->reader_removed(esm->event_serial);
 				}
 			} else if (msgid == MSG_BB_WRITER_ADDED) {
 				bb_ieventserial_msg_t *esm = m->msg<bb_ieventserial_msg_t>();
-				if (proxies_.find(ntohl(esm->serial)) != proxies_.end()) {
-					proxies_[ntohl(esm->serial)]->writer_added(ntohl(esm->event_serial));
+				if (proxies_.find(esm->serial) != proxies_.end()) {
+					proxies_[esm->serial]->writer_added(esm->event_serial);
 				}
 			} else if (msgid == MSG_BB_WRITER_REMOVED) {
 				bb_ieventserial_msg_t *esm = m->msg<bb_ieventserial_msg_t>();
-				if (proxies_.find(ntohl(esm->serial)) != proxies_.end()) {
-					proxies_[ntohl(esm->serial)]->writer_removed(ntohl(esm->event_serial));
+				if (proxies_.find(esm->serial) != proxies_.end()) {
+					proxies_[esm->serial]->writer_removed(esm->event_serial);
 				}
 			} else if (msgid == MSG_BB_INTERFACE_CREATED) {
 				bb_ievent_msg_t *em = m->msg<bb_ievent_msg_t>();

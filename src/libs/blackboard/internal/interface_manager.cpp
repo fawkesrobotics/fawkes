@@ -100,7 +100,7 @@ BlackBoardInterfaceManager::new_interface_instance(const char *type,
 {
 	Interface *iface = instance_factory->new_interface_instance(type, identifier);
 
-	iface->set_instance_serial(next_instance_serial());
+	//iface->set_instance_serial(next_instance_serial());
 	iface->set_mediators(this, msgmgr);
 	if (owner)
 		iface->set_owner(owner);
@@ -169,20 +169,6 @@ BlackBoardInterfaceManager::next_mem_serial()
 	}
 
 	return serial;
-}
-
-/** Get next instance serial.
- * @return next unique instance serial
- */
-unsigned int
-BlackBoardInterfaceManager::next_instance_serial()
-{
-	if (memmgr->is_master()) {
-		// simple, just increment value and return it
-		return instance_serial++;
-	} else {
-		throw BBNotMasterException("Instance serial can only be requested by BB Master");
-	}
 }
 
 /** Create an interface instance.

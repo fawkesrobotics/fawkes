@@ -204,7 +204,7 @@ BlackBoardNetworkHandler::loop()
 
 		case MSG_BB_CLOSE: {
 			bb_iserial_msg_t *sm        = msg->msg<bb_iserial_msg_t>();
-			unsigned int      sm_serial = ntohl(sm->serial);
+			Uuid              sm_serial = sm->serial;
 			if (interfaces_.find(sm_serial) != interfaces_.end()) {
 				bool close = false;
 				client_interfaces_.lock();
@@ -241,14 +241,14 @@ BlackBoardNetworkHandler::loop()
 					                    "Client %u tried to close "
 					                    "interface with serial %u, but opened by other client",
 					                    clid,
-					                    sm_serial);
+					                    sm_serial.get_string().c_str());
 				}
 			} else {
 				LibLogger::log_warn("BlackBoardNetworkHandler",
 				                    "Client %u tried to close "
 				                    "interface with serial %u which has not been opened",
 				                    clid,
-				                    sm_serial);
+				                    sm_serial.get_string().c_str());
 			}
 
 			//LibLogger::log_debug("BBNH", "C: interfaces: %zu  s2c: %zu  ci: %zu",
@@ -261,7 +261,7 @@ BlackBoardNetworkHandler::loop()
 			bool            data_changed = msg->msgid() == MSG_BB_DATA_CHANGED;
 			void *          payload      = msg->payload();
 			bb_idata_msg_t *dm           = (bb_idata_msg_t *)payload;
-			unsigned int    dm_serial    = ntohl(dm->serial);
+			Uuid            dm_serial    = dm->serial;
 			if (interfaces_.find(dm_serial) != interfaces_.end()) {
 				if (ntohl(dm->data_size) != interfaces_[dm_serial]->datasize()) {
 					LibLogger::log_error("BlackBoardNetworkHandler",
@@ -280,14 +280,14 @@ BlackBoardNetworkHandler::loop()
 				                     "%s: Interface with "
 				                     "serial %u not found, ignoring.",
 				                     data_changed ? "DATA_CHANGED" : "DATA_REFRESHED",
-				                     dm_serial);
+				                     dm_serial.get_string().c_str());
 			}
 		} break;
 
 		case MSG_BB_INTERFACE_MESSAGE: {
 			void *             payload   = msg->payload();
 			bb_imessage_msg_t *mm        = (bb_imessage_msg_t *)payload;
-			unsigned int       mm_serial = ntohl(mm->serial);
+			Uuid               mm_serial = mm->serial;
 			if (interfaces_.find(mm_serial) != interfaces_.end()) {
 				if (!interfaces_[mm_serial]->is_writer()) {
 					try {
@@ -321,7 +321,7 @@ BlackBoardNetworkHandler::loop()
 				LibLogger::log_error("BlackBoardNetworkHandler",
 				                     "DATA_CHANGED: Interface with "
 				                     "serial %u not found, ignoring.",
-				                     mm_serial);
+				                     mm_serial.get_string().c_str());
 			}
 		} break;
 
@@ -343,7 +343,7 @@ BlackBoardNetworkHandler::send_opensuccess(unsigned int clid, Interface *interfa
 {
 	void *              payload = calloc(1, sizeof(bb_iopensucc_msg_t) + interface->datasize());
 	bb_iopensucc_msg_t *osm     = (bb_iopensucc_msg_t *)payload;
-	osm->serial                 = htonl(interface->serial());
+	osm->serial                 = interface->serial();
 	osm->writer_readers         = htonl(interface->num_readers());
 	if (interface->has_writer()) {
 		osm->writer_readers |= htonl(0x80000000);
@@ -436,7 +436,7 @@ BlackBoardNetworkHandler::client_disconnected(unsigned int clid)
 			                     (*ciit_)->id(),
 			                     clid);
 
-			unsigned int serial = (*ciit_)->serial();
+			Uuid serial = (*ciit_)->serial();
 			serial_to_clid_.erase(serial);
 			interfaces_.erase_locked(serial);
 			delete listeners_[serial];
