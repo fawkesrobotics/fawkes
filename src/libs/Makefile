@@ -45,7 +45,7 @@ interface: core utils
 blackboard: core utils interface netcomm logging
 netcomm: core utils
 navgraph: core utils aspect
-interfaces: core interface
+interfaces: core interface utils
 config: core netcomm utils logging
 plugin: core netcomm utils config logging
 aspect: core utils blackboard netcomm config plugin webview logging tf pcl_utils syncpoint
