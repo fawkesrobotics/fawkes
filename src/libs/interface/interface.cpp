@@ -110,7 +110,7 @@ InterfaceInvalidMessageException::InterfaceInvalidMessageException(const Interfa
 InterfaceInvalidException::InterfaceInvalidException(const Interface *interface, const char *method)
 : Exception("The interface %s (instance serial %u) is invalid. You cannot call %s anymore.",
             interface->uid(),
-            interface->serial(),
+            interface->serial().get_string().c_str(),
             method)
 {
 }
@@ -564,7 +564,7 @@ Interface::set_type_id(const char *type, const char *id)
  * @param instance_serial instance serial
  */
 void
-Interface::set_instance_serial(unsigned short instance_serial)
+Interface::set_instance_serial(const Uuid &instance_serial)
 {
 	instance_serial_ = instance_serial;
 }
@@ -691,7 +691,7 @@ Interface::uid() const
 /** Get instance serial of interface.
  * @return instance serial of the interface.
  */
-unsigned short
+Uuid
 Interface::serial() const
 {
 	return instance_serial_;
