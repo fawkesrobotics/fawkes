@@ -69,7 +69,6 @@ Message::Message(const char *type)
 	num_fields_    = 0;
 	data_ptr       = NULL;
 	data_ts        = NULL;
-	_sender_id     = 0;
 	_type          = strdup(type);
 	time_enqueued_ = new Time();
 
@@ -312,7 +311,7 @@ Message::sender_thread_name() const
 /** Get ID of sender.
  * @return name of sending thread.
  */
-unsigned int
+Uuid
 Message::sender_id() const
 {
 	return _sender_id;

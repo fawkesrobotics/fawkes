@@ -26,6 +26,7 @@
 #include <core/exception.h>
 #include <interface/message.h>
 #include <interface/message_queue.h>
+#include <utils/uuid.h>
 
 #include <cstddef>
 #include <list>
@@ -91,7 +92,7 @@ public:
 	const char *         type() const;
 	const char *         id() const;
 	const char *         uid() const;
-	unsigned short       serial() const;
+	Uuid                 serial() const;
 	unsigned int         mem_serial() const;
 	bool                 operator==(Interface &comp) const;
 	const unsigned char *hash() const;
@@ -249,7 +250,7 @@ protected:
 
 private:
 	void set_type_id(const char *type, const char *id);
-	void set_instance_serial(unsigned short instance_serial);
+	void set_instance_serial(const Uuid &serial);
 	void set_mediators(InterfaceMediator *iface_mediator, MessageMediator *msg_mediator);
 	void set_memory(unsigned int serial, void *real_ptr, void *data_ptr);
 	void set_readwrite(bool write_access, RefCountRWLock *rwlock);
@@ -258,7 +259,9 @@ private:
 	inline unsigned int
 	next_msg_id()
 	{
-		return (instance_serial_ << 16) | ++next_message_id_;
+		// TODO use instance_serial_
+		//return (instance_serial_ << 16) | ++next_message_id_;
+		return ++next_message_id_;
 	}
 
 	char          type_[INTERFACE_TYPE_SIZE_ + 1];
@@ -268,8 +271,8 @@ private:
 	char          hash_printable_[INTERFACE_HASH_SIZE_ * 2 + 1];
 	char *        owner_;
 
-	unsigned short instance_serial_;
-	bool           valid_;
+	Uuid instance_serial_;
+	bool valid_;
 
 	void *       mem_data_ptr_;
 	void *       mem_real_ptr_;

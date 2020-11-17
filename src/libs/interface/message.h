@@ -29,6 +29,7 @@
 #include <interface/change_field.h>
 #include <interface/field_iterator.h>
 #include <interface/types.h>
+#include <utils/uuid.h>
 
 #define INTERFACE_MESSAGE_TYPE_SIZE_ 64
 
@@ -57,10 +58,10 @@ public:
 	bool         enqueued() const;
 	const Time * time_enqueued() const;
 
-	unsigned int sender_id() const;
-	const char * sender_thread_name() const;
-	Interface *  interface() const;
-	const char * type() const;
+	Uuid        sender_id() const;
+	const char *sender_thread_name() const;
+	Interface * interface() const;
+	const char *type() const;
 
 	InterfaceFieldIterator fields();
 	InterfaceFieldIterator fields_end();
@@ -102,9 +103,9 @@ private: // fields
 	unsigned int recipient_interface_mem_serial;
 	unsigned int sender_interface_instance_serial;
 
-	char *       _type;
-	char *       _sender_thread_name;
-	unsigned int _sender_id;
+	char *_type;
+	char *_sender_thread_name;
+	Uuid  _sender_id;
 
 	Interface *_transmit_via_iface;
 
