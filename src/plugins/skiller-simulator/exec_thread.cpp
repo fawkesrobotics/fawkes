@@ -56,14 +56,14 @@ SkillerSimulatorExecutionThread::loop()
 			  skiller_if_->msgq_first<SkillerInterface::AcquireControlMessage>();
 			if (skiller_if_->exclusive_controller() == 0) {
 				logger->log_debug(name(),
-				                  "%s is new exclusive controller (ID %u)",
+				                  "%s is new exclusive controller (ID %s)",
 				                  m->sender_thread_name(),
-				                  m->sender_id());
-				skiller_if_->set_exclusive_controller(m->sender_id());
+				                  m->sender_id().get_string().c_str());
+				skiller_if_->set_exclusive_controller(m->sender_id().get_string().c_str());
 				write_interface = true;
 			} else if (m->is_steal_control()) {
 				logger->log_warn(name(), "%s steals exclusive control", m->sender_thread_name());
-				skiller_if_->set_exclusive_controller(m->sender_id());
+				skiller_if_->set_exclusive_controller(m->sender_id().get_string().c_str());
 				skiller_if_->set_msgid(m->id());
 				write_interface = true;
 			} else {
