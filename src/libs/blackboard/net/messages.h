@@ -118,7 +118,7 @@ typedef struct
  */
 typedef struct
 {
-	uint32_t serial; /**< instance serial to unique identify this instance */
+	Uuid serial; /**< instance serial to unique identify this instance */
 } bb_iserial_msg_t;
 
 /** Message to identify an two interface instances.
@@ -127,8 +127,8 @@ typedef struct
  */
 typedef struct
 {
-	uint32_t serial;       /**< instance serial to unique identify own instance */
-	uint32_t event_serial; /**< instance serial to unique identify instance that
+	Uuid serial;       /**< instance serial to unique identify own instance */
+	Uuid event_serial; /**< instance serial to unique identify instance that
 				 * caused the event. */
 } bb_ieventserial_msg_t;
 
@@ -140,7 +140,7 @@ typedef struct
  */
 typedef struct
 {
-	uint32_t serial;         /**< instance serial to unique identify this instance */
+	Uuid     serial;         /**< instance serial to unique identify this instance */
 	uint32_t writer_readers; /**< combined writer reader information. First
 				 * bit (any endian) is 1 if writer exists, 0 otherwise.
 				 * The remaining 31 bits encode the number of readers
@@ -163,7 +163,7 @@ typedef struct
  */
 typedef struct
 {
-	uint32_t serial;    /**< instance serial to unique identify this instance */
+	Uuid     serial;    /**< instance serial to unique identify this instance */
 	uint32_t data_size; /**< size in bytes of the following data. */
 } bb_idata_msg_t;
 
@@ -173,7 +173,7 @@ typedef struct
  */
 typedef struct
 {
-	uint32_t serial;                                 /**< interface instance serial */
+	Uuid     serial;                                 /**< interface instance serial */
 	char     msg_type[INTERFACE_MESSAGE_TYPE_SIZE_]; /**< message type */
 	uint32_t msgid;                                  /**< message ID */
 	uint32_t hops;      /**< number of hops this message already passed */
