@@ -251,11 +251,8 @@
    If the top-most precondition is removed, replace it by a trivially true one
    (empty conjunction)."
   (?precond-fact)
-  (bind ?parent-facts (find-fact ((?parent domain-precondition))
-               (eq (fact-slot-value ?precond-fact part-of) ?parent:name)))
-  (if (= (length$ ?parent-facts) 1)
-   then
-    (bind ?parent (nth$ 1 ?parent-facts))
+  (if (not (do-for-fact ((?parent domain-precondition))
+               (eq (fact-slot-value ?precond-fact part-of) ?parent:name)
     (if (or (eq (fact-slot-value ?parent type) negation)
             (and (eq (fact-slot-value ?parent type) disjunction)
                  (not (any-factp ((?sibling domain-precondition))
@@ -264,15 +261,15 @@
                        (eq (fact-slot-value ?parent name) ?sibling:part-of)))))
      then
       (remove-precondition ?parent)
-    )
-    (retract ?precond-fact)
-   else
+    )))
+   then
     (assert (domain-precondition
               (part-of (fact-slot-value ?precond-fact part-of))
               (name (fact-slot-value ?precond-fact name))
               (type conjunction)))
     (retract ?precond-fact)
   )
+  (retract ?precond-fact)
 )
 
 (deffunction domain-retract-grounding
