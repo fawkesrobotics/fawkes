@@ -977,7 +977,7 @@ ClipsProtobufCommunicator::clips_assert_message(std::pair<std::string, unsigned 
                                                 uint16_t                                msg_type,
                                                 std::shared_ptr<google::protobuf::Message> &msg,
                                                 ClipsProtobufCommunicator::ClientType       ct,
-                                                unsigned int client_id)
+                                                long int client_id)
 {
 	CLIPS::Template::pointer temp = clips_->get_template("protobuf-msg");
 	if (temp) {

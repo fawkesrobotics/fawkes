@@ -166,7 +166,7 @@ private:
 	                          uint16_t                                    msg_type,
 	                          std::shared_ptr<google::protobuf::Message> &msg,
 	                          ClientType                                  ct,
-	                          unsigned int                                client_id = 0);
+	                          long int                                    client_id = 0);
 	void handle_server_client_connected(protobuf_comm::ProtobufStreamServer::ClientID client,
 	                                    boost::asio::ip::tcp::endpoint &              endpoint);
 	void handle_server_client_disconnected(protobuf_comm::ProtobufStreamServer::ClientID client,
