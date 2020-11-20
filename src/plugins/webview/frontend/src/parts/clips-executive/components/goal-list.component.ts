@@ -4,7 +4,8 @@
 
 import { Component, OnInit, OnDestroy, ViewChildren, AfterViewInit, QueryList } from '@angular/core';
 import { Router } from '@angular/router';
-import { MatTableDataSource } from '@angular/material';
+import {MatTableDataSource} from '@angular/material/table';
+
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 
 import { BackendConfigurationService } from '../../../services/backend-config/backend-config.service';
