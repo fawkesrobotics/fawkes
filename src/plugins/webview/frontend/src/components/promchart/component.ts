@@ -143,7 +143,7 @@ export class PrometheusChartComponent implements AfterViewInit, OnInit, OnDestro
               timeline.push(i * 1000);
             }
 
-            const columns = [['__x', ...timeline]];
+            const columns: [string, ...number[]][] = [['__x', ...timeline]];
             const groups = this.group_all ? [[]] : this.groups;
             const types = {};
 

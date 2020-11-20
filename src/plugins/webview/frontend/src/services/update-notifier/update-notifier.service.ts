@@ -3,7 +3,7 @@
 // License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 import { Injectable } from '@angular/core';
-import { MatSnackBar } from '@angular/material';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { SwUpdate } from '@angular/service-worker';
 import { interval } from 'rxjs';
 import { environment } from '../../environments/environment';
