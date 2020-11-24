@@ -24,7 +24,9 @@
 #include <syncpoint/syncpoint.h>
 #include <utils/time/time.h>
 
+#include <algorithm>
 #include <pthread.h>
+#include <sstream>
 #include <string.h>
 
 using namespace std;
@@ -599,15 +601,21 @@ SyncPoint::handle_default(string component, WakeupType type)
 	                  get_identifier().c_str(),
 	                  max_waittime_sec_ + static_cast<float>(max_waittime_nsec_) / 1000000000.f);
 	bad_components_.insert(pending_emitters_.begin(), pending_emitters_.end());
-	if (bad_components_.size() > 1) {
-		string bad_components_string = "";
+	if (!bad_components_.empty()) {
+		stringstream bad_components_string;
 		for (set<string>::const_iterator it = bad_components_.begin(); it != bad_components_.end();
 		     it++) {
-			bad_components_string += " " + *it;
+			bad_components_string << " " << *it;
+			const auto &last_call =
+			  std::find_if(emit_calls_.rbegin(), emit_calls_.rend(), [&](const SyncPointCall &call) {
+				  return call.get_caller() == *it;
+			  });
+			if (last_call != emit_calls_.rend()) {
+				bad_components_string << " (" << Time().in_sec() - last_call->get_call_time().in_sec()
+				                      << "s)";
+			}
 		}
-		logger_->log_warn(component.c_str(), "bad components:%s", bad_components_string.c_str());
-	} else if (bad_components_.size() == 1) {
-		logger_->log_warn(component.c_str(), "bad component: %s", bad_components_.begin()->c_str());
+		logger_->log_warn(component.c_str(), "bad components:%s", bad_components_string.str().c_str());
 	} else if (type == SyncPoint::WAIT_FOR_ALL) {
 		throw Exception("SyncPoints: component %s defaulted, "
 		                "but there is no pending emitter. This is probably a bug.",
