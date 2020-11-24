@@ -48,6 +48,8 @@ public:
 	typedef size_t size_type;
 	/** The CircularBuffer's iterator is a std::deque iterator */
 	typedef typename std::deque<Type>::const_iterator const_iterator;
+	/** The CircularBuffer's reverse iterator is a std::deque reverse iterator */
+	typedef typename std::deque<Type>::const_reverse_iterator const_reverse_iterator;
 	/** iterator is also const, we don't want to manipulate any elements */
 	typedef const_iterator iterator;
 
@@ -174,6 +176,24 @@ public:
 	end() const
 	{
 		return deque_.end();
+	}
+
+	/** Get reverse iterator to the beginning
+   * @return iterator
+   */
+	const_reverse_iterator
+	rbegin() const
+	{
+		return deque_.rbegin();
+	}
+
+	/** Get reverse iterator to the end
+   * @return iterator
+   */
+	const_reverse_iterator
+	rend() const
+	{
+		return deque_.rend();
 	}
 
 	/** Get actual size of the buffer

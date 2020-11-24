@@ -19,7 +19,6 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#define CATCH_CONFIG_MAIN
 #include <core/utils/circular_buffer.h>
 
 #include <catch2/catch.hpp>
@@ -79,4 +78,28 @@ TEST_CASE("Copy constructor", "[circular_buffer]")
 	REQUIRE(b1[0] == 1);
 	REQUIRE(b1[1] == 2);
 	REQUIRE_THROWS_AS(b1.at(2), std::out_of_range);
+}
+
+TEST_CASE("Iterator", "[circular_buffer]")
+{
+	CircularBuffer<int> buffer(5);
+	for (int i = 0; i < 10; i++) {
+		buffer.push_back(i);
+	}
+	int i = 5;
+	for (auto it = buffer.begin(); it != buffer.end(); it++) {
+		REQUIRE(*it == i++);
+	}
+}
+
+TEST_CASE("Reverse Iterator", "[circular_buffer]")
+{
+	CircularBuffer<int> buffer(5);
+	for (int i = 0; i < 10; i++) {
+		buffer.push_back(i);
+	}
+	int i = 9;
+	for (auto it = buffer.rbegin(); it != buffer.rend(); it++) {
+		REQUIRE(*it == i--);
+	}
 }
