@@ -22,6 +22,8 @@ include $(BUILDCONFDIR)/tf/tf.mk
 include $(BUILDSYSDIR)/fvconf.mk
 include $(BUILDSYSDIR)/boost.mk
 
+SUBDIRS = frontend
+
 ifneq ($(PKGCONFIG),)
   HAVE_APR_UTIL = $(if $(shell $(PKGCONFIG) --exists 'apr-util-1'; echo $${?/1/}),1,0)
   ifeq ($(HAVE_APR_UTIL),1)
