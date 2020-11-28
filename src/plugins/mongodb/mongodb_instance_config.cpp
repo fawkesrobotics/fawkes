@@ -30,6 +30,7 @@
 
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/operations.hpp>
+#include <boost/format.hpp>
 #include <bsoncxx/builder/basic/document.hpp>
 #include <bsoncxx/json.hpp>
 #include <chrono>
@@ -91,8 +92,11 @@ MongoDBInstanceConfig::MongoDBInstanceConfig(Configuration *config,
 		  config->get_bool_or_default((prefix + "clear-data-on-termination").c_str(),
 		                              use_tmp_directory_);
 		if (use_tmp_directory_) {
-			const boost::filesystem::path path = boost::filesystem::unique_path(
-			  boost::filesystem::temp_directory_path() / "mongodb-%%%%-%%%%-%%%%");
+			// Add the port to the filename, escape all literal "%" as "%%".
+			const std::string filename =
+			  boost::str(boost::format("mongodb-%1%-%%%%%%%%-%%%%%%%%-%%%%%%%%") % port_);
+			const boost::filesystem::path path =
+			  boost::filesystem::unique_path(boost::filesystem::temp_directory_path() / filename);
 			data_path_ = path.string();
 			log_path_  = (path / "mongodb.log").string();
 		} else {
