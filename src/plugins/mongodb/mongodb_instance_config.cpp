@@ -29,6 +29,7 @@
 #include <utils/time/wait.h>
 
 #include <boost/filesystem.hpp>
+#include <boost/filesystem/operations.hpp>
 #include <bsoncxx/builder/basic/document.hpp>
 #include <bsoncxx/json.hpp>
 #include <chrono>
@@ -81,12 +82,23 @@ MongoDBInstanceConfig::MongoDBInstanceConfig(Configuration *config,
 			loop_interval_ = config->get_float(prefix + "loop-interval");
 		} catch (Exception &e) {
 		} // ignored, use default
-		termination_grace_period_  = config->get_uint(prefix + "termination-grace-period");
-		clear_data_on_termination_ = config->get_bool(prefix + "clear-data-on-termination");
-		port_                      = config->get_uint(prefix + "port");
-		bind_ip_    = config->get_string_or_default(std::string(prefix + "bind_ip").c_str(), "0.0.0.0");
-		data_path_  = config->get_string(prefix + "data-path");
-		log_path_   = config->get_string(prefix + "log/path");
+		termination_grace_period_ = config->get_uint(prefix + "termination-grace-period");
+		port_                     = config->get_uint(prefix + "port");
+		bind_ip_ = config->get_string_or_default(std::string(prefix + "bind_ip").c_str(), "0.0.0.0");
+		use_tmp_directory_ = config->get_bool_or_default((prefix + "use-tmp-directory").c_str(), false);
+		// By default, clear data if we use a tmp directory, otherwise don't.
+		clear_data_on_termination_ =
+		  config->get_bool_or_default((prefix + "clear-data-on-termination").c_str(),
+		                              use_tmp_directory_);
+		if (use_tmp_directory_) {
+			const boost::filesystem::path path = boost::filesystem::unique_path(
+			  boost::filesystem::temp_directory_path() / "mongodb-%%%%-%%%%-%%%%");
+			data_path_ = path.string();
+			log_path_  = (path / "mongodb.log").string();
+		} else {
+			data_path_ = config->get_string(prefix + "data-path");
+			log_path_  = config->get_string(prefix + "log/path");
+		}
 		log_append_ = config->get_bool(prefix + "log/append");
 		try {
 			replica_set_ = config->get_string(prefix + "replica-set");
