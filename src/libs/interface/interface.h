@@ -137,7 +137,7 @@ public:
 
 	std::list<const char *> get_message_types();
 
-	unsigned int msgq_enqueue(Message *message);
+	unsigned int msgq_enqueue(Message *message, bool proxy = false);
 	unsigned int msgq_enqueue_copy(Message *message);
 	void         msgq_remove(Message *message);
 	void         msgq_remove(unsigned int message_id);
