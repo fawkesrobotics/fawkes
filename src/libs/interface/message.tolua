@@ -36,6 +36,7 @@ class Message : public RefCount
   unsigned int      id() const;
 
 	fawkes::Uuid      sender_id() const;
+	fawkes::Uuid      source_id() const;
   const char *      sender_thread_name() const;
   Interface *       interface() const;
   const char *      type() const;

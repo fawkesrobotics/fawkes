@@ -97,6 +97,7 @@ Message::Message(const Message &mesg)
 	data_ptr            = malloc(data_size);
 	data_ts             = (message_data_ts_t *)data_ptr;
 	_sender_id          = mesg.sender_id();
+	_source_id          = mesg.source_id();
 	_sender_thread_name = strdup(mesg.sender_thread_name());
 	_type               = strdup(mesg._type);
 	time_enqueued_      = new Time(mesg.time_enqueued_);
@@ -134,6 +135,7 @@ Message::Message(const Message *mesg)
 	data_ptr                         = malloc(data_size);
 	data_ts                          = (message_data_ts_t *)data_ptr;
 	_sender_id                       = mesg->sender_id();
+	_source_id                       = mesg->source_id();
 	_sender_thread_name              = strdup(mesg->sender_thread_name());
 	_type                            = strdup(mesg->_type);
 	_transmit_via_iface              = NULL;
@@ -206,6 +208,16 @@ void
 Message::set_sender_id(const Uuid &sender_id)
 {
 	_sender_id = sender_id;
+}
+
+/** Set source ID. The source is the original interface where the message comes
+ * from.
+ * @param source_id source ID
+ */
+void
+Message::set_source_id(const Uuid &source_id)
+{
+	_source_id = source_id;
 }
 
 /** Set number of hops.
@@ -317,8 +329,8 @@ Message::sender_thread_name() const
 	return _sender_thread_name;
 }
 
-/** Get ID of sender.
- * @return name of sending thread.
+/** Get ID of the immediate sender, not necessarily the creator of the message.
+ * @return unique ID of the immediate sender
  */
 Uuid
 Message::sender_id() const
@@ -326,15 +338,30 @@ Message::sender_id() const
 	return _sender_id;
 }
 
+/** Get ID of the original source of the message. This differs from the sender
+ * ID if the message is relayed.
+ * @return unique ID of the source
+ */
+Uuid
+Message::source_id() const
+{
+	return _source_id;
+}
+
 /** Set transmitting interface.
  * Called by Message Manager
  * @param iface transmitting interface
+ * @param proxy if set to true, the transmitting interface is only a proxy, do
+ * not modify the sender
  */
 void
-Message::set_interface(Interface *iface)
+Message::set_interface(Interface *iface, bool proxy)
 {
-	_transmit_via_iface            = iface;
-	_sender_id                     = iface->serial();
+	_transmit_via_iface = iface;
+	_sender_id          = iface->serial();
+	if (!proxy) {
+		_source_id = iface->serial();
+	}
 	recipient_interface_mem_serial = iface->mem_serial();
 }
 
