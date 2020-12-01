@@ -59,7 +59,9 @@ public:
 	const Time * time_enqueued() const;
 
 	Uuid        sender_id() const;
+	Uuid        source_id() const;
 	void        set_sender_id(const Uuid &id);
+	void        set_source_id(const Uuid &id);
 	const char *sender_thread_name() const;
 	Interface * interface() const;
 	const char *type() const;
@@ -107,6 +109,7 @@ private: // fields
 	char *_type;
 	char *_sender_thread_name;
 	Uuid  _sender_id;
+	Uuid  _source_id;
 
 	Interface *_transmit_via_iface;
 
@@ -115,7 +118,7 @@ private: // fields
 	unsigned int num_fields_;
 
 private: // methods
-	void set_interface(Interface *iface);
+	void set_interface(Interface *iface, bool proxy = false);
 
 protected:
 	void add_fieldinfo(interface_fieldtype_t       type,

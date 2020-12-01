@@ -905,19 +905,21 @@ Interface::readers() const
  * status you have to reference it _before_ enqueuing it!
  * This can only be called on a reading interface instance.
  * @param message Message to enqueue.
+ * @param proxy if set to true, this interface is only proxying the message and
+ * the sender is not overwritten
  * @return message id after message has been queued
  * @exception MessageAlreadyQueuedException thrown if the message has
  * already been enqueued to an interface.
  */
 unsigned int
-Interface::msgq_enqueue(Message *message)
+Interface::msgq_enqueue(Message *message, bool proxy)
 {
 	if (write_access_) {
 		throw InterfaceMessageEnqueueException(type_, id_);
 	}
 
 	if (message_valid(message)) {
-		message->set_interface(this);
+		message->set_interface(this, proxy);
 		message->set_id(next_msg_id());
 		// transmit might change the message id!
 		message_mediator_->transmit(message);
