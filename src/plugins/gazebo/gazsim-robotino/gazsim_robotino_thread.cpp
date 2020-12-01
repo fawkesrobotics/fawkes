@@ -91,35 +91,64 @@ RobotinoSimThread::init()
 	imu_if_    = blackboard->open_for_writing<IMUInterface>("IMU Robotino");
 
 	//Create suscribers
-	pos_sub_  = gazebonode->Subscribe(config->get_string("/gazsim/topics/gps"),
-                                   &RobotinoSimThread::on_pos_msg,
-                                   this);
-	gyro_sub_ = gazebonode->Subscribe(config->get_string("/gazsim/topics/gyro"),
-	                                  &RobotinoSimThread::on_gyro_msg,
-	                                  this);
-	infrared_puck_sensor_sub_ =
-	  gazebonode->Subscribe(config->get_string("/gazsim/topics/infrared-puck-sensor"),
-	                        &RobotinoSimThread::on_infrared_puck_sensor_msg,
-	                        this);
-	if (have_gripper_sensors_) {
-		gripper_laser_left_sensor_sub_ =
-		  gazebonode->Subscribe(config->get_string("/gazsim/topics/gripper-laser-left"),
-		                        &RobotinoSimThread::on_gripper_laser_left_sensor_msg,
-		                        this);
-		gripper_laser_right_sensor_sub_ =
-		  gazebonode->Subscribe(config->get_string("/gazsim/topics/gripper-laser-right"),
-		                        &RobotinoSimThread::on_gripper_laser_right_sensor_msg,
+	{
+		const std::string gps_topic = config->get_string("/gazsim/topics/gps");
+		logger->log_info(name(), "Subscribing to GPS topic '%s'", gps_topic.c_str());
+		pos_sub_ = gazebonode->Subscribe(gps_topic, &RobotinoSimThread::on_pos_msg, this);
+	}
+
+	{
+		const std::string gyro_topic = config->get_string("/gazsim/topics/gyro");
+		logger->log_info(name(), "Subscribing to Gyro topic '%s'", gyro_topic.c_str());
+		gyro_sub_ = gazebonode->Subscribe(gyro_topic, &RobotinoSimThread::on_gyro_msg, this);
+	}
+
+	{
+		const std::string puck_sensor_topic = config->get_string("/gazsim/topics/infrared-puck-sensor");
+		logger->log_info(name(), "Subscribing to puck sensor topic '%s'", puck_sensor_topic.c_str());
+		infrared_puck_sensor_sub_ =
+		  gazebonode->Subscribe(puck_sensor_topic,
+		                        &RobotinoSimThread::on_infrared_puck_sensor_msg,
 		                        this);
 	}
 
-	gripper_has_puck_sub_ =
-	  gazebonode->Subscribe(config->get_string("/gazsim/topics/gripper-has-puck"),
-	                        &RobotinoSimThread::on_gripper_has_puck_msg,
-	                        this);
+	if (have_gripper_sensors_) {
+		{
+			const std::string left_gripper_sensor_topic =
+			  config->get_string("/gazsim/topics/gripper-laser-left");
+			logger->log_info(name(),
+			                 "Subscribing to left gripper topic '%s'",
+			                 left_gripper_sensor_topic.c_str());
+			gripper_laser_left_sensor_sub_ =
+			  gazebonode->Subscribe(left_gripper_sensor_topic,
+			                        &RobotinoSimThread::on_gripper_laser_left_sensor_msg,
+			                        this);
+		}
+
+		{
+			const std::string right_gripper_sensor_topic =
+			  config->get_string("/gazsim/topics/gripper-laser-right");
+			logger->log_info(name(),
+			                 "Subscribing to right gripper topic '%s'",
+			                 right_gripper_sensor_topic.c_str());
+			gripper_laser_right_sensor_sub_ =
+			  gazebonode->Subscribe(right_gripper_sensor_topic,
+			                        &RobotinoSimThread::on_gripper_laser_right_sensor_msg,
+			                        this);
+		}
+	}
+
+	{
+		const std::string has_puck_topic = config->get_string("/gazsim/topics/gripper-has-puck");
+		logger->log_info(name(), "Subscribing to has-puck topic '%s'", has_puck_topic.c_str());
+		gripper_has_puck_sub_ =
+		  gazebonode->Subscribe(has_puck_topic, &RobotinoSimThread::on_gripper_has_puck_msg, this);
+	}
 
 	//Create publishers
-	motor_move_pub_ =
-	  gazebonode->Advertise<msgs::Vector3d>(config->get_string("/gazsim/topics/motor-move"));
+	const std::string motor_topic = config->get_string("/gazsim/topics/motor-move");
+	logger->log_info(name(), "Publishing to motor topic '%s'", motor_topic.c_str());
+	motor_move_pub_ = gazebonode->Advertise<msgs::Vector3d>(motor_topic);
 	string_pub_ = gazebonode->Advertise<msgs::Header>(config->get_string("/gazsim/topics/message"));
 
 	//enable motor by default
