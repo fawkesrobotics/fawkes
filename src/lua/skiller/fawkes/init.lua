@@ -89,24 +89,25 @@ function process_skiller_messages()
 	 
 	 while not skiller_if:msgq_empty() do
 			local m = skiller_if:msgq_first()
+      print_info("Received message, sender: %s, source: %s", m:sender_id():get_string(), m:source_id():get_string())
 			local mtype = m:type()
 			if mtype == "AcquireControlMessage" then
 				 if skiller_if:exclusive_controller() == 0 then
-						print_debug("%s is new exclusive controller", m:sender_thread_name())
-						skiller_if:set_exclusive_controller(m:sender_id():get_string())
+						print_debug("%s (serial %s) is new exclusive controller", m:sender_thread_name(), m:source_id():get_string())
+						skiller_if:set_exclusive_controller(m:source_id():get_string())
 						write_skiller_if = true
 				 elseif m:is_steal_control() then
-						print_warn("%s steals exclusive control", m:sender_thread_name())
-						skiller_if:set_exclusive_controller(m:sender_id():get_string())
+						print_warn("%s (serial %s) steals exclusive control", m:sender_thread_name(), m:source_id():get_string())
+						skiller_if:set_exclusive_controller(m:source_id():get_string())
 						write_skiller_if = true
-				 elseif skiller_if:exclusive_controller() == m:sender_id():get_string() then
+				 elseif skiller_if:exclusive_controller() == m:source_id():get_string() then
 						-- ignored, already has control
 				 else
 						print_warn("%s tried to acquire exclusive control, but another controller exists "..
 											 "already", m:sender_thread_name())
 				 end
 			elseif mtype == "ReleaseControlMessage" then
-				 if skiller_if:exclusive_controller() == m:sender_id():get_string() then
+				 if skiller_if:exclusive_controller() == m:source_id():get_string() then
 						print_debug("%s releases exclusive control", m:sender_thread_name())
 
 						-- __continuous_reset = true
@@ -119,7 +120,7 @@ function process_skiller_messages()
 				 end
 
 			elseif mtype == "ExecSkillMessage" then
-				 if skiller_if:exclusive_controller() == 0 or skiller_if:exclusive_controller() == m:sender_id():get_string() then
+				 if skiller_if:exclusive_controller() == 0 or skiller_if:exclusive_controller() == m:source_id():get_string() then
 						if skill_enqueued then
 							 print_warn("More than one skill string enqueued, ignoring previous string (%s).",
                                                                     skiller_if:skill_string())
@@ -163,7 +164,7 @@ function process_skiller_messages()
 				 end
 
 			elseif mtype == "StopExecMessage" then
-				 if skiller_if:exclusive_controller() == m:sender_id():get_string() then
+				 if skiller_if:exclusive_controller() == m:source_id():get_string() then
 						print_debug("Stopping execution of '%s' on request", skiller_if:skill_string())
 						sksf = nil
 						skillenv.reset_all()
