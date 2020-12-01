@@ -59,6 +59,7 @@ public:
 	const Time * time_enqueued() const;
 
 	Uuid        sender_id() const;
+	void        set_sender_id(const Uuid &id);
 	const char *sender_thread_name() const;
 	Interface * interface() const;
 	const char *type() const;
