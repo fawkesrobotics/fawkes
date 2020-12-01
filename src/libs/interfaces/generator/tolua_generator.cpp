@@ -372,6 +372,7 @@ ToLuaInterfaceGenerator::write_message_superclass_h(FILE *f)
 	        "    unsigned int      id() const;\n"
 	        "\n"
 	        "    fawkes::Uuid      sender_id() const;\n"
+	        "    fawkes::Uuid      source_id() const;\n"
 	        "    const char *      sender_thread_name() const;\n"
 	        "    Interface *       interface() const;\n"
 	        "    const char *      type() const;\n"
