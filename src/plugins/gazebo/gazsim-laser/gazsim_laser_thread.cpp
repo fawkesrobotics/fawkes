@@ -63,7 +63,7 @@ LaserSimThread::init()
 	laser_if_ = blackboard->open_for_writing<Laser360Interface>(interface_id_.c_str());
 	laser_if_->set_auto_timestamping(false);
 
-	//subscribing to gazebo publisher
+	logger->log_info(name(), "Subscribing to laser topic '%s'", laser_topic_.c_str());
 	laser_sub_ = gazebonode->Subscribe(laser_topic_, &LaserSimThread::on_laser_data_msg, this);
 
 	//initialize laser data
