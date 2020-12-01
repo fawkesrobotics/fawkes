@@ -174,6 +174,7 @@ typedef struct
 typedef struct
 {
 	Uuid     serial;                                 /**< interface instance serial */
+	Uuid     source;                                 /**< serial of the original message source */
 	char     msg_type[INTERFACE_MESSAGE_TYPE_SIZE_]; /**< message type */
 	uint32_t msgid;                                  /**< message ID */
 	uint32_t hops;      /**< number of hops this message already passed */

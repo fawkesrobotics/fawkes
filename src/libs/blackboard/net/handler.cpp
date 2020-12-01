@@ -288,6 +288,11 @@ BlackBoardNetworkHandler::loop()
 			void *             payload   = msg->payload();
 			bb_imessage_msg_t *mm        = (bb_imessage_msg_t *)payload;
 			Uuid               mm_serial = mm->serial;
+			Uuid               mm_source = mm->source;
+			LibLogger::log_debug("BlackBoardNetworkHandler",
+			                     "Received message from sender %s, source %s",
+			                     mm_serial.get_string().c_str(),
+			                     mm_source.get_string().c_str());
 			if (interfaces_.find(mm_serial) != interfaces_.end()) {
 				if (!interfaces_[mm_serial]->is_writer()) {
 					try {
@@ -303,8 +308,14 @@ BlackBoardNetworkHandler::loop()
 							                     ntohl(mm->data_size));
 						} else {
 							ifm->set_from_chunk((char *)payload + sizeof(bb_imessage_msg_t));
+							ifm->set_source_id(mm_source);
+							LibLogger::log_debug("BlackBoardNetworkHandler",
+							                     "Processing message from sender %s, source %s, mm source %s",
+							                     ifm->sender_id().get_string().c_str(),
+							                     ifm->source_id().get_string().c_str(),
+							                     mm_source.get_string().c_str());
 
-							interfaces_[mm_serial]->msgq_enqueue(ifm);
+							interfaces_[mm_serial]->msgq_enqueue(ifm, true);
 						}
 					} catch (Exception &e) {
 						LibLogger::log_error("BlackBoardNetworkHandler",
