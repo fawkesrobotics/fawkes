@@ -199,6 +199,15 @@ Message::set_id(unsigned int message_id)
 	message_id_ = message_id;
 }
 
+/** Set sender ID.
+ * @param sender_id sender ID
+ */
+void
+Message::set_sender_id(const Uuid &sender_id)
+{
+	_sender_id = sender_id;
+}
+
 /** Set number of hops.
  * @param hops number of hops
  */

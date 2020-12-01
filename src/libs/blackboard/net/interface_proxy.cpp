@@ -183,6 +183,7 @@ BlackBoardInterfaceProxy::process_interface_message(FawkesNetworkMessage *msg)
 		Message *im = interface_->create_message(mm->msg_type);
 		im->set_id(ntohl(mm->msgid));
 		im->set_hops(ntohl(mm->hops) + 1);
+		im->set_sender_id(mm->serial);
 
 		if (im->hops() > 1) {
 			LibLogger::log_warn("BlackBoardInterfaceProxy",
