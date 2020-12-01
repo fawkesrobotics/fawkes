@@ -69,14 +69,13 @@ private:
 	gazebo::transport::NodePtr gazebonode_;
 	//Node to control the gazebo world (e.g. spawn visual objects)
 	gazebo::transport::NodePtr gazebo_world_node_;
+	// Heartbeat publisher
+	gazebo::transport::PublisherPtr status_publisher_;
 	//Publisher to send Messages:
 	gazebo::transport::PublisherPtr visual_publisher_, model_publisher_, request_publisher_,
 	  light_publisher_;
 
 	fawkes::GazeboAspectIniFin gazebo_aspect_inifin_;
-
-	//channel of a specified robot for the gazebo node communication
-	std::string robot_channel, world_name;
 };
 
 #endif

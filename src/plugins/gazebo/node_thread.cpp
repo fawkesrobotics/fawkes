@@ -22,10 +22,10 @@
 
 #include "node_thread.h"
 
-// from Gazebo
 #include <gazebo/gazebo_config.h>
 #include <google/protobuf/message.h>
 
+#include <gazebo/gazebo_client.hh>
 #include <gazebo/msgs/msgs.hh>
 #include <gazebo/transport/Node.hh>
 #include <gazebo/transport/TransportIface.hh>
@@ -57,42 +57,30 @@ GazeboNodeThread::~GazeboNodeThread()
 void
 GazeboNodeThread::init()
 {
-	//read config values
-	robot_channel =
+	const std::string robot_channel =
 	  config->get_string("/gazsim/world-name") + "/" + config->get_string("/gazsim/robot-name");
 
-	world_name = config->get_string("/gazsim/world-name");
+	logger->log_info(name(), "Robot channel: %s", robot_channel.c_str());
+	const std::string world_name = config->get_string("/gazsim/world-name");
 
-	if (gazebo::transport::is_stopped()) {
-		gazebo::transport::init();
-		gazebo::transport::run();
-	} else {
-		logger->log_warn(name(), "Gazebo already running ");
+	if (!gazebo::client::setup()) {
+		throw Exception("Failed to initialize Gazebo client");
 	}
 
-	//Initialize Communication nodes:
-	//the common one for the robot
-	gazebo::transport::NodePtr node(new gazebo::transport::Node());
-	gazebonode_ = node;
-	//initialize node (this node only communicates with nodes that were initialized with the same string)
-	gazebonode_->Init(robot_channel.c_str());
-	gazebo_aspect_inifin_.set_gazebonode(gazebonode_);
-	// init Topic Manager, required to subscribe to topics
-	// and to init the connection manager
-	gazebo::transport::TopicManager::Instance();
-	std::string  uri;
-	unsigned int port;
-	bool         master_reached = gazebo::transport::get_master_uri(uri, port);
-	if (!master_reached) {
-		logger->log_error(name(), "Gazebo master uri could not be retrieved");
-	} else {
-		// init connection manager, required to publish topics
-		gazebo::transport::ConnectionManager::Instance()->Init(uri, port);
-	}
-	//and the node for world change messages
+	// Initialize Communication nodes:
+	// Global world node
 	gazebo_world_node_ = gazebo::transport::NodePtr(new gazebo::transport::Node());
+	logger->log_info(name(), "Initializing world node to namespace '%s'", world_name.c_str());
 	gazebo_world_node_->Init(world_name.c_str());
 	gazebo_aspect_inifin_.set_gazebo_world_node(gazebo_world_node_);
+	// Robot-specific node
+	// This node only communicates with nodes that were initialized with the same string.
+	gazebonode_ = gazebo::transport::NodePtr(new gazebo::transport::Node());
+	logger->log_info(name(), "Initializing node to namespace '%s'", robot_channel.c_str());
+	gazebonode_->Init(robot_channel);
+	// For some reason, we need to advertise a topic to be connected to the master properly.
+	status_publisher_ = gazebonode_->Advertise<gazebo::msgs::Time>("~/heartbeat");
+	gazebo_aspect_inifin_.set_gazebonode(gazebonode_);
 }
 
 void
@@ -109,4 +97,6 @@ GazeboNodeThread::finalize()
 void
 GazeboNodeThread::loop()
 {
+	gazebo::msgs::Time time;
+	status_publisher_->Publish(time);
 }
