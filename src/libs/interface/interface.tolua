@@ -28,6 +28,11 @@ $#include <utils/time/clock.h>
 
 namespace fawkes {
 
+class Uuid
+{
+  std::string get_string() const;
+};
+
 class Interface 
 {
   bool                    oftype(const char *interface_type) const;
