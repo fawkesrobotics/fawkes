@@ -128,6 +128,11 @@ BlackBoardNetHandlerInterfaceListener::bb_interface_message_received(Interface *
 	void *             payload      = calloc(1, payload_size);
 	bb_imessage_msg_t *dm           = (bb_imessage_msg_t *)payload;
 	dm->serial                      = interface->serial();
+	dm->source                      = message->source_id();
+	LibLogger::log_debug(bbil_name(),
+	                     "Received message from sender %s, source %s",
+	                     dm->serial.get_string().c_str(),
+	                     dm->source.get_string().c_str());
 	strncpy(dm->msg_type, message->type(), INTERFACE_MESSAGE_TYPE_SIZE_ - 1);
 	dm->data_size = htonl(message->datasize());
 	dm->msgid     = htonl(message->id());
