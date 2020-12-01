@@ -226,6 +226,9 @@ BlackBoardSynchronizationThread::open_interfaces()
 			                  i->second.reader_id.c_str());
 			iface_reader =
 			  reader_bb->open_for_reading(i->second.type.c_str(), i->second.reader_id.c_str());
+			logger->log_debug(name(),
+			                  "Opened interface with serial %s",
+			                  iface_reader->serial().get_string().c_str());
 
 			if (iface_reader->has_writer()) {
 				logger->log_debug(name(),

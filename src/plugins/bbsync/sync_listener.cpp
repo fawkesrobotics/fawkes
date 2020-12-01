@@ -80,11 +80,21 @@ SyncInterfaceListener::bb_interface_message_received(Interface *interface, Messa
 	try {
 		if (interface == writer_) {
 			//logger_->log_debug(bbil_name(), "Forwarding message");
+			logger_->log_debug(bbil_name(),
+			                   "Forwarding message from sender %s, source %s",
+			                   message->sender_id().get_string().c_str(),
+			                   message->source_id().get_string().c_str());
 			Message *m = message->clone();
 			m->set_hops(message->hops());
 			m->ref();
-			reader_->msgq_enqueue(m);
+			reader_->msgq_enqueue(m, true);
 			message->set_id(m->id());
+			logger_->log_debug(bbil_name(),
+			                   "Sender after enqueueing: %s",
+			                   m->sender_id().get_string().c_str());
+			logger_->log_debug(bbil_name(),
+			                   "Source after enqueueing: %s",
+			                   m->source_id().get_string().c_str());
 			m->unref();
 			return false;
 		} else {
