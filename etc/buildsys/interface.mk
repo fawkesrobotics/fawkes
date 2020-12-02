@@ -49,8 +49,8 @@ else
   INTERFACE_GENERATOR_ERROR = ($(call merge, and ,$(INTERFACE_GENERATOR_MISSING_PACKAGE)) not installed)
 endif
 
-_LIBS_INTERFACE   = fawkescore fawkesinterface
-_LIBS_TOLUA       = fawkescore fawkesinterface $(TOLUA_LIBS)
+_LIBS_INTERFACE   = fawkescore fawkesinterface fawkesutils
+_LIBS_TOLUA       = fawkescore fawkesinterface fawkesutils $(TOLUA_LIBS)
 _CFLAGS_TOLUA     = -Wno-unused-function $(CFLAGS_LUA)
 _LDFLAGS_TOLUA    = $(LDFLAGS_LUA)
 

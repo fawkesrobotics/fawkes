@@ -25,7 +25,7 @@ HDRS_libfawkesinterface = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.h))
 CFLAGS_fawkesinterface_tolua = -Wno-unused-function $(CFLAGS_LUA)
 TOLUA_fawkesinterface = $(wildcard $(SRCDIR)/*.tolua)
 LDFLAGS_lua_fawkesinterface = $(LDFLAGS_LUA)
-LIBS_lua_fawkesinterface = fawkescore fawkesinterface $(TOLUA_LIBS)
+LIBS_lua_fawkesinterface = fawkescore fawkesinterface fawkesutils $(TOLUA_LIBS)
 OBJS_lua_fawkesinterface = fawkesinterface_tolua.o
 
 OBJS_all = $(OBJS_libfawkesinterface) $(OBJS_lua_fawkesinterface) $(SRCDIR)/interface_tolua.cpp

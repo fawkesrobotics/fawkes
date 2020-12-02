@@ -18,7 +18,7 @@ include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/lua.mk
 include $(BASEDIR)/etc/buildsys/boost.mk
 
-FILTER_OUT=%_tolua.o
+FILTER_OUT=%_tolua.o tests/%
 
 REQ_BOOST_LIBS = asio system
 HAVE_BOOST_LIBS = $(call boost-have-libs,$(REQ_BOOST_LIBS))
@@ -31,7 +31,7 @@ else
   WARN_TARGETS += warning_libmagic
 endif
 
-LIBS_libfawkesutils = stdc++ m rt fawkescore fawkeslogging $(LIBS_LIBMAGIC) $(if $(filter-out Darwin,$(OS)),rt) $(if $(filter Linux,$(OS)),dl pthread)
+LIBS_libfawkesutils = stdc++ m rt fawkescore fawkeslogging $(LIBS_LIBMAGIC) $(if $(filter-out Darwin,$(OS)),rt) $(if $(filter Linux,$(OS)),dl pthread) uuid
 OBJS_libfawkesutils =	$(filter-out $(FILTER_OUT),$(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp))))))
 HDRS_libfawkesutils = $(subst $(SRCDIR)/,,$(filter-out $(patsubst %.o,%.h,$(FILTER_OUT)),$(wildcard $(SRCDIR)/*.h $(SRCDIR)/*/*.h)))
 

@@ -68,7 +68,7 @@ BlackBoardInterfaceProxy::BlackBoardInterfaceProxy(FawkesNetworkClient * client,
 
 	notifier_        = notifier;
 	interface_       = interface;
-	instance_serial_ = ntohl(osm->serial);
+	instance_serial_ = osm->serial;
 	has_writer_      = osm->writer_readers & htonl(0x80000000);
 	num_readers_     = ntohl(osm->writer_readers & htonl(0x7FFFFFFF));
 	data_size_       = ntohl(osm->data_size);
@@ -95,6 +95,10 @@ BlackBoardInterfaceProxy::BlackBoardInterfaceProxy(FawkesNetworkClient * client,
 	ih->num_readers        = num_readers_;
 	ih->refcount           = 1;
 
+	LibLogger::log_debug("BlackBoardInterfaceProxy",
+	                     "Old serial: %s, new serial: %s",
+	                     interface->serial().get_string().c_str(),
+	                     instance_serial_.get_string().c_str());
 	interface->set_instance_serial(instance_serial_);
 	interface->set_memory(0, mem_chunk_, data_chunk_);
 	interface->set_mediators(this, this);
@@ -123,12 +127,12 @@ BlackBoardInterfaceProxy::process_data_refreshed(FawkesNetworkMessage *msg)
 
 	void *          payload = msg->payload();
 	bb_idata_msg_t *dm      = (bb_idata_msg_t *)payload;
-	if (ntohl(dm->serial) != instance_serial_) {
+	if (dm->serial != instance_serial_) {
 		LibLogger::log_error("BlackBoardInterfaceProxy",
 		                     "Serial mismatch, expected %u, "
 		                     "but got %u, ignoring.",
-		                     instance_serial_,
-		                     ntohl(dm->serial));
+		                     instance_serial_.get_string().c_str(),
+		                     dm->serial.get_string().c_str());
 		return;
 	}
 
@@ -162,12 +166,12 @@ BlackBoardInterfaceProxy::process_interface_message(FawkesNetworkMessage *msg)
 
 	void *             payload = msg->payload();
 	bb_imessage_msg_t *mm      = (bb_imessage_msg_t *)payload;
-	if (ntohl(mm->serial) != instance_serial_) {
+	if (mm->serial != instance_serial_) {
 		LibLogger::log_error("BlackBoardInterfaceProxy",
-		                     "Serial mismatch (msg), expected %u, "
-		                     "but got %u, ignoring.",
-		                     instance_serial_,
-		                     ntohl(mm->serial));
+		                     "Serial mismatch (msg), expected %s, "
+		                     "but got %s, ignoring.",
+		                     instance_serial_.get_string().c_str(),
+		                     mm->serial.get_string().c_str());
 		return;
 	}
 
@@ -183,6 +187,12 @@ BlackBoardInterfaceProxy::process_interface_message(FawkesNetworkMessage *msg)
 		Message *im = interface_->create_message(mm->msg_type);
 		im->set_id(ntohl(mm->msgid));
 		im->set_hops(ntohl(mm->hops) + 1);
+		im->set_sender_id(mm->serial);
+		im->set_source_id(mm->source);
+		LibLogger::log_debug("BlackBoardInterfaceProxy",
+		                     "Setting sender id to %s, source id to %s",
+		                     mm->serial.get_string().c_str(),
+		                     mm->source.get_string().c_str());
 
 		if (im->hops() > 1) {
 			LibLogger::log_warn("BlackBoardInterfaceProxy",
@@ -219,7 +229,7 @@ BlackBoardInterfaceProxy::process_interface_message(FawkesNetworkMessage *msg)
  * @param event_serial instance serial of the interface that caused the event
  */
 void
-BlackBoardInterfaceProxy::reader_added(unsigned int event_serial)
+BlackBoardInterfaceProxy::reader_added(Uuid event_serial)
 {
 	++num_readers_;
 	notifier_->notify_of_reader_added(interface_, event_serial);
@@ -229,7 +239,7 @@ BlackBoardInterfaceProxy::reader_added(unsigned int event_serial)
  * @param event_serial instance serial of the interface that caused the event
  */
 void
-BlackBoardInterfaceProxy::reader_removed(unsigned int event_serial)
+BlackBoardInterfaceProxy::reader_removed(Uuid event_serial)
 {
 	if (num_readers_ > 0) {
 		--num_readers_;
@@ -241,7 +251,7 @@ BlackBoardInterfaceProxy::reader_removed(unsigned int event_serial)
  * @param event_serial instance serial of the interface that caused the event
  */
 void
-BlackBoardInterfaceProxy::writer_added(unsigned int event_serial)
+BlackBoardInterfaceProxy::writer_added(Uuid event_serial)
 {
 	has_writer_ = true;
 	notifier_->notify_of_writer_added(interface_, event_serial);
@@ -251,7 +261,7 @@ BlackBoardInterfaceProxy::writer_added(unsigned int event_serial)
  * @param event_serial instance serial of the interface that caused the event
  */
 void
-BlackBoardInterfaceProxy::writer_removed(unsigned int event_serial)
+BlackBoardInterfaceProxy::writer_removed(Uuid event_serial)
 {
 	has_writer_ = false;
 	notifier_->notify_of_writer_removed(interface_, event_serial);
@@ -260,7 +270,7 @@ BlackBoardInterfaceProxy::writer_removed(unsigned int event_serial)
 /** Get instance serial of interface.
  * @return instance serial
  */
-unsigned int
+Uuid
 BlackBoardInterfaceProxy::serial() const
 {
 	return instance_serial_;
@@ -269,7 +279,7 @@ BlackBoardInterfaceProxy::serial() const
 /** Get client ID of assigned client.
  * @return client ID
  */
-unsigned int
+Uuid
 BlackBoardInterfaceProxy::clid() const
 {
 	return instance_serial_;
@@ -316,7 +326,7 @@ BlackBoardInterfaceProxy::notify_of_data_refresh(const Interface *interface, boo
 	size_t          payload_size = sizeof(bb_idata_msg_t) + interface->datasize();
 	void *          payload      = malloc(payload_size);
 	bb_idata_msg_t *dm           = (bb_idata_msg_t *)payload;
-	dm->serial                   = htonl(interface->serial());
+	dm->serial                   = interface->serial();
 	dm->data_size                = htonl(interface->datasize());
 	memcpy((char *)payload + sizeof(bb_idata_msg_t), interface->datachunk(), interface->datasize());
 
@@ -337,10 +347,14 @@ BlackBoardInterfaceProxy::transmit(Message *message)
 	size_t             payload_size = sizeof(bb_imessage_msg_t) + message->datasize();
 	void *             payload      = calloc(1, payload_size);
 	bb_imessage_msg_t *dm           = (bb_imessage_msg_t *)payload;
-	dm->serial                      = htonl(interface_->serial());
-	unsigned int msgid              = next_msg_id();
-	dm->msgid                       = htonl(msgid);
-	dm->hops                        = htonl(message->hops());
+	dm->serial                      = interface_->serial();
+	dm->source                      = message->source_id();
+	LibLogger::log_debug("BlackBoardInterfaceProxy",
+	                     "Transmitting from sender %s",
+	                     dm->serial.get_string().c_str());
+	unsigned int msgid = next_msg_id();
+	dm->msgid          = htonl(msgid);
+	dm->hops           = htonl(message->hops());
 	message->set_id(msgid);
 	strncpy(dm->msg_type, message->type(), INTERFACE_MESSAGE_TYPE_SIZE_ - 1);
 	dm->data_size = htonl(message->datasize());

@@ -213,7 +213,7 @@ p_bb_instance_serial()
 	std::map<std::string, Interface *> &interfaces = EclExternalBlackBoard::instance()->interfaces();
 
 	if (interfaces.find(uid) != interfaces.end()) {
-		if (EC_succeed != EC_arg(2).unify(interfaces[uid]->serial())) {
+		if (EC_succeed != EC_arg(2).unify(interfaces[uid]->serial().get_string().c_str())) {
 			fprintf(stderr, "p_bb_instance_serial(): could not bind return value\n");
 			return EC_fail;
 		} else {

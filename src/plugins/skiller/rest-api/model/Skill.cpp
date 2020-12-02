@@ -103,7 +103,7 @@ Skill::to_json_value(rapidjson::Document &d, rapidjson::Value &v) const
 	}
 	if (exclusive_controller_) {
 		rapidjson::Value v_exclusive_controller;
-		v_exclusive_controller.SetInt64(*exclusive_controller_);
+		v_exclusive_controller.SetString(*exclusive_controller_, allocator);
 		v.AddMember("exclusive_controller", v_exclusive_controller, allocator);
 	}
 	if (status_) {
@@ -147,7 +147,7 @@ Skill::from_json_value(const rapidjson::Value &d)
 		msg_id_ = d["msg_id"].GetInt64();
 	}
 	if (d.HasMember("exclusive_controller") && d["exclusive_controller"].IsInt64()) {
-		exclusive_controller_ = d["exclusive_controller"].GetInt64();
+		exclusive_controller_ = d["exclusive_controller"].GetString();
 	}
 	if (d.HasMember("status") && d["status"].IsString()) {
 		status_ = d["status"].GetString();

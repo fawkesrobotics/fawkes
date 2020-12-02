@@ -323,7 +323,7 @@ ToLuaInterfaceGenerator::write_superclass_h(FILE *f)
 	        "  const char *            type() const;\n"
 	        "  const char *            id() const;\n"
 	        "  const char *            uid() const;\n"
-	        "  unsigned int            serial() const;\n"
+	        "  fawkes::Uuid            serial() const;\n"
 	        "  unsigned int            mem_serial() const;\n"
 	        "  bool                    operator== (Interface &comp) const;\n"
 	        "  const unsigned char *   hash() const;\n"
@@ -371,7 +371,8 @@ ToLuaInterfaceGenerator::write_message_superclass_h(FILE *f)
 	fprintf(f,
 	        "    unsigned int      id() const;\n"
 	        "\n"
-	        "    unsigned int      sender_id() const;\n"
+	        "    fawkes::Uuid      sender_id() const;\n"
+	        "    fawkes::Uuid      source_id() const;\n"
 	        "    const char *      sender_thread_name() const;\n"
 	        "    Interface *       interface() const;\n"
 	        "    const char *      type() const;\n"
