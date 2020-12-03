@@ -261,9 +261,9 @@ BlackBoardMemoryManager::alloc_nolock(unsigned int num_bytes)
 		// we will have a new free chunk afterwards
 		chunk_list_t *nfc = (chunk_list_t *)((char *)f + sizeof(chunk_list_t) + num_bytes);
 		nfc->ptr          = shmem_ ? shmem_->addr((char *)nfc + sizeof(chunk_list_t))
-		                  : (char *)nfc + sizeof(chunk_list_t);
-		nfc->size     = f->size - num_bytes - sizeof(chunk_list_t);
-		nfc->overhang = 0;
+		                           : (char *)nfc + sizeof(chunk_list_t);
+		nfc->size         = f->size - num_bytes - sizeof(chunk_list_t);
+		nfc->overhang     = 0;
 
 		if (shmem_) {
 			shmem_header_->set_free_list_head(list_add(shmem_header_->free_list_head(), nfc));

@@ -56,7 +56,7 @@ public:
 	Interface *
 	open_for_reading(const char *interface_type, const char *identifier, const char *owner = NULL);
 	Interface *
-	     open_for_writing(const char *interface_type, const char *identifier, const char *owner = NULL);
+	open_for_writing(const char *interface_type, const char *identifier, const char *owner = NULL);
 	void close(Interface *interface);
 
 	InterfaceInfoList *list_all() const;
