@@ -39,7 +39,7 @@ public:
 	virtual ~Classifier();
 
 	virtual void
-	                    set_src_buffer(unsigned char *yuv422_planar, unsigned int width, unsigned int height);
+	set_src_buffer(unsigned char *yuv422_planar, unsigned int width, unsigned int height);
 	virtual const char *name() const;
 
 	virtual ROIList *classify() = 0;

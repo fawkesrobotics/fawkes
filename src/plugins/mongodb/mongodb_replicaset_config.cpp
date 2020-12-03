@@ -389,7 +389,7 @@ MongoDBReplicaSetConfig::rs_status(bsoncxx::document::value &reply)
 			}
 			status.primary_status = have_primary ? MongoDBManagedReplicaSetInterface::HAVE_PRIMARY
 			                                     : MongoDBManagedReplicaSetInterface::NO_PRIMARY;
-			status.member_status = self_status;
+			status.member_status  = self_status;
 			return status;
 		} else {
 			logger->log_error(name(),

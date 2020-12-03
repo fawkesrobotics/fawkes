@@ -77,8 +77,8 @@ public:
 	struct video_tuner * tuner;   // Tuner Information: if the card has tuners...
 	struct video_audio   audio;   // If the card has audio
 	struct video_mbuf
-	                   captured_frame_buffer; // Information for the frame to be captured: norm, palette, etc
-	struct video_mmap *buf_v4l;               // mmap() buffer VIDIOCMCAPTURE
+	  captured_frame_buffer;    // Information for the frame to be captured: norm, palette, etc
+	struct video_mmap *buf_v4l; // mmap() buffer VIDIOCMCAPTURE
 };
 
 /// @endcond

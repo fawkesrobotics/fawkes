@@ -63,7 +63,7 @@ public:
 	virtual bool release_all_objects();
 
 	virtual bool
-	             set_target_rel(float trans_x, float trans_y, float trans_z, bool is_extension = false);
+	set_target_rel(float trans_x, float trans_y, float trans_z, bool is_extension = false);
 	virtual bool set_target_straight(float trans_x, float trans_y, float trans_z);
 	virtual bool set_target_quat(float                     trans_x,
 	                             float                     trans_y,

@@ -70,7 +70,7 @@ public:
 	~ProtobufStreamServer();
 
 	void
-	     send(ClientID client, uint16_t component_id, uint16_t msg_type, google::protobuf::Message &m);
+	send(ClientID client, uint16_t component_id, uint16_t msg_type, google::protobuf::Message &m);
 	void send(ClientID                                   client,
 	          uint16_t                                   component_id,
 	          uint16_t                                   msg_type,

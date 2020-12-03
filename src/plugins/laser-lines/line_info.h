@@ -69,12 +69,12 @@ public:
 	  *         transformer;    ///< Transformer used to transform from input_frame_id_to odom
 	std::string input_frame_id; ///< Input frame ID of raw line infos (base_laser usually)
 	std::string
-	      tracking_frame_id; ///< Track lines relative to this frame (e.g. odom helps compensate movement)
+	  tracking_frame_id; ///< Track lines relative to this frame (e.g. odom helps compensate movement)
 	float cfg_switch_tolerance; ///< Configured line jitter threshold
 	boost::circular_buffer<LineInfo>
 	  history; ///< history of raw line geometries for computing moving average
 	float
-	                bearing_center; ///< Bearing towards line center, used to select lines "in front of us" when there
+	  bearing_center; ///< Bearing towards line center, used to select lines "in front of us" when there
 	fawkes::Logger *logger;      ///< Logger pointer of the calling class
 	std::string     plugin_name; ///< Plugin name of the calling class
 

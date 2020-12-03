@@ -157,7 +157,7 @@ public:
 	};
 
 	static SharedMemoryIterator
-	                            find(const char *magic_token, SharedMemoryHeader *header, const char *registry_name = 0);
+	find(const char *magic_token, SharedMemoryHeader *header, const char *registry_name = 0);
 	static SharedMemoryIterator end();
 
 protected:

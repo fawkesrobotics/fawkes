@@ -76,11 +76,11 @@ public:
 	virtual TimeCacheInterfacePtr
 	clone(const fawkes::Time &look_back_until = fawkes::Time(0, 0)) const = 0;
 	virtual bool
-	                         get_data(fawkes::Time time, TransformStorage &data_out, std::string *error_str = 0) = 0;
-	virtual bool             insert_data(const TransformStorage &new_data)         = 0;
-	virtual void             clear_list()                                          = 0;
-	virtual CompactFrameID   get_parent(fawkes::Time time, std::string *error_str) = 0;
-	virtual P_TimeAndFrameID get_latest_time_and_parent()                          = 0;
+	get_data(fawkes::Time time, TransformStorage &data_out, std::string *error_str = 0) = 0;
+	virtual bool             insert_data(const TransformStorage &new_data)              = 0;
+	virtual void             clear_list()                                               = 0;
+	virtual CompactFrameID   get_parent(fawkes::Time time, std::string *error_str)      = 0;
+	virtual P_TimeAndFrameID get_latest_time_and_parent()                               = 0;
 
 	/// Debugging information methods
 	virtual unsigned int get_list_length() const      = 0;

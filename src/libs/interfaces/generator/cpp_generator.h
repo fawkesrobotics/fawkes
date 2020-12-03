@@ -82,7 +82,7 @@ public:
 	void write_message_clone_method_cpp(FILE *f, std::string classname);
 
 	void
-	     write_methods_h(FILE *f, std::string /* indent space */ is, std::vector<InterfaceField> fields);
+	write_methods_h(FILE *f, std::string /* indent space */ is, std::vector<InterfaceField> fields);
 	void write_methods_cpp(FILE *                      f,
 	                       std::string                 interface_classname,
 	                       std::string                 classname,

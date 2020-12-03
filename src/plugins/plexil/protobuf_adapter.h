@@ -112,7 +112,7 @@ private:
 	                     uint16_t                                   msg_type,
 	                     std::shared_ptr<google::protobuf::Message> msg);
 	void
-	     handle_peer_recv_error(int peer_id, boost::asio::ip::udp::endpoint &endpoint, std::string msg);
+	handle_peer_recv_error(int peer_id, boost::asio::ip::udp::endpoint &endpoint, std::string msg);
 	void handle_peer_send_error(int peer_id, std::string msg);
 
 private:

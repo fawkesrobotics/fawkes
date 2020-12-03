@@ -109,7 +109,7 @@ private:
 #if GTK_VERSION_GE(3, 0)
 	Gtk::ComboBox *cbe_skillstring;
 #else
-	Gtk::ComboBoxEntry *      cbe_skillstring;
+	Gtk::ComboBoxEntry *cbe_skillstring;
 #endif
 	Gtk::Label *           lab_status;
 	Gtk::Label *           lab_alive;

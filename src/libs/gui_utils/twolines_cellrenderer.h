@@ -46,7 +46,7 @@ protected:
 	virtual void
 	get_preferred_width_vfunc(Gtk::Widget &widget, int &minimum_width, int &natural_width) const;
 	virtual void
-	             get_preferred_height_vfunc(Gtk::Widget &widget, int &minimum_height, int &natural_height) const;
+	get_preferred_height_vfunc(Gtk::Widget &widget, int &minimum_height, int &natural_height) const;
 	virtual void get_size(Gtk::Widget &widget, int *width, int *height) const;
 	virtual void render_vfunc(const Cairo::RefPtr<Cairo::Context> &cr,
 	                          Gtk::Widget &                        widget,

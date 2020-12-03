@@ -55,7 +55,7 @@ public:
 	virtual Interface *
 	open_for_reading(const char *interface_type, const char *identifier, const char *owner = NULL);
 	virtual Interface *
-	             open_for_writing(const char *interface_type, const char *identifier, const char *owner = NULL);
+	open_for_writing(const char *interface_type, const char *identifier, const char *owner = NULL);
 	virtual void close(Interface *interface);
 
 	virtual InterfaceInfoList *list_all();

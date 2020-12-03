@@ -70,7 +70,7 @@ public:
 
 	virtual void send(FawkesNetworkMessage *msg);
 	virtual void
-	             send(unsigned int to_clid, unsigned short int component_id, unsigned short int msg_id);
+	send(unsigned int to_clid, unsigned short int component_id, unsigned short int msg_id);
 	virtual void send(unsigned int       to_clid,
 	                  unsigned short int component_id,
 	                  unsigned short int msg_id,
