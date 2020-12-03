@@ -63,7 +63,7 @@ public:
 	virtual bool is_gripper_open();
 	virtual void set_speed_points(float s1, float s2, float s3);
 	virtual void
-	             get_act_velocity(float &a1, float &a2, float &a3, unsigned int &seq, fawkes::Time &t);
+	get_act_velocity(float &a1, float &a2, float &a3, unsigned int &seq, fawkes::Time &t);
 	virtual void get_odometry(double &x, double &y, double &phi);
 
 	virtual void reset_odometry();
