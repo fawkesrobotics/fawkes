@@ -61,7 +61,7 @@ public:
 	void write_superclass_h(FILE *f);
 	void write_lua_code(FILE *f, std::string classname);
 	void
-	     write_methods_h(FILE *f, std::string /* indent space */ is, std::vector<InterfaceField> fields);
+	write_methods_h(FILE *f, std::string /* indent space */ is, std::vector<InterfaceField> fields);
 	void write_methods_h(FILE *                          f,
 	                     std::string /* indent space */  is,
 	                     std::vector<InterfaceField>     fields,
