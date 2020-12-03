@@ -74,7 +74,7 @@ public:
 	void pcall(int nargs = 0, int nresults = 0, int errfunc = 0);
 
 	void
-	     set_usertype(const char *name, void *data, const char *type_name, const char *name_space = 0);
+	set_usertype(const char *name, void *data, const char *type_name, const char *name_space = 0);
 	void set_string(const char *name, const char *value);
 	void set_number(const char *name, lua_Number value);
 	void set_boolean(const char *name, bool value);
