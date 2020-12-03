@@ -65,7 +65,7 @@ public:
 		Gtk::TreeModelColumn<Glib::ustring>
 		  interface; /**< Name of network interface to reach service */
 		Gtk::TreeModelColumn<Glib::ustring>
-		                                              ipaddr; /**< The IP address as string of the host the service is running on */
+		  ipaddr; /**< The IP address as string of the host the service is running on */
 		Gtk::TreeModelColumn<unsigned short>          port; /**< The port the service is running on */
 		Gtk::TreeModelColumn<Glib::ustring>           addrport; /**< Address:port string */
 		Gtk::TreeModelColumn<struct sockaddr_storage> sockaddr; /**< sockaddr structure */
