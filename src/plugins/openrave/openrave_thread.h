@@ -91,13 +91,13 @@ public:
 	                         fawkes::OpenRaveRobotPtr &robot);
 	virtual bool move_object(const std::string &name, float trans_x, float trans_y, float trans_z);
 	virtual bool
-	             rotate_object(const std::string &name, float quat_x, float quat_y, float quat_z, float quat_w);
+	rotate_object(const std::string &name, float quat_x, float quat_y, float quat_z, float quat_w);
 	virtual bool rotate_object(const std::string &name, float rot_x, float rot_y, float rot_z);
 	virtual bool
 	set_target_object(const std::string &name, fawkes::OpenRaveRobotPtr &robot, float rot_x = 0);
 
 	virtual bool
-	             attach_object(const char *name, fawkes::OpenRaveRobotPtr &robot, const char *manip_name = NULL);
+	attach_object(const char *name, fawkes::OpenRaveRobotPtr &robot, const char *manip_name = NULL);
 	virtual bool attach_object(const char *name, const char *manip_name = NULL);
 	virtual bool release_object(const std::string &name, fawkes::OpenRaveRobotPtr &robot);
 	virtual bool release_object(const std::string &name);
