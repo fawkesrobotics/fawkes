@@ -140,13 +140,13 @@ public:
 	virtual std::vector<float>        get_floats_or_defaults(const char *              path,
 	                                                         const std::vector<float> &default_val);
 	virtual std::vector<unsigned int>
-	                          get_uints_or_defaults(const char *path, const std::vector<unsigned int> &default_val);
+	get_uints_or_defaults(const char *path, const std::vector<unsigned int> &default_val);
 	virtual std::vector<int>  get_ints_or_defaults(const char *            path,
 	                                               const std::vector<int> &default_val);
 	virtual std::vector<bool> get_bools_or_defaults(const char *             path,
 	                                                const std::vector<bool> &default_val);
 	virtual std::vector<std::string>
-	                       get_strings_or_defaults(const char *path, const std::vector<std::string> &default_val);
+	get_strings_or_defaults(const char *path, const std::vector<std::string> &default_val);
 	virtual ValueIterator *get_value(const char *path)           = 0;
 	virtual std::string    get_type(const char *path)            = 0;
 	virtual std::string    get_comment(const char *path)         = 0;
