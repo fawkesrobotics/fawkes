@@ -72,10 +72,10 @@ typedef struct
 	uint8_t  first_half;              /**< 1 = game in first half, 0 otherwise */
 	uint8_t  kick_off_team;           /**< the next team to kick off */
 	uint8_t
-	        secondary_state; /**< Extra state information - (STATE2_NORMAL, STATE2_PENALTYSHOOT, etc) */
-	uint8_t drop_in_team;    /**< team that caused last drop in */
+	  secondary_state;    /**< Extra state information - (STATE2_NORMAL, STATE2_PENALTYSHOOT, etc) */
+	uint8_t drop_in_team; /**< team that caused last drop in */
 	uint16_t
-	               drop_in_time; /**< number of seconds passed since the last drop in.  -1 before first dropin */
+	  drop_in_time; /**< number of seconds passed since the last drop in.  -1 before first dropin */
 	uint32_t       secs_remaining; /**< estimate of number of seconds remaining in the half */
 	spl_teaminfo_t teams[2];       /**< Info about the teams */
 } spl_gamecontrol_t;
