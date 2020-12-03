@@ -57,7 +57,7 @@ public:
 
 	void set_target(float x, float y, float z, float phi, float theta, float psi);
 	void
-	     set_target(float x, float y, float z, float quat_x, float quat_y, float quat_z, float quat_w);
+	set_target(float x, float y, float z, float quat_x, float quat_y, float quat_z, float quat_w);
 	void set_target(const std::string &object_name, float rot_x);
 	void set_theta_error(float error);
 	void set_move_straight(bool move_straight);
