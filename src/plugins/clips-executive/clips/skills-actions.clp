@@ -35,13 +35,14 @@
 (defrule skill-action-start
 	?pa <- (plan-action (goal-id ?goal-id) (plan-id ?plan-id) (id ?id) (state PENDING)
 	                    (action-name ?action-name) (executable TRUE)
+	                    (skiller ?skiller)
 	                    (param-names $?params)
 	                    (param-values $?param-values))
 	(skill-action-mapping (name ?action-name))
 	(not (skill-action-execinfo))
 	(skiller-control (acquired TRUE))
 	=>
-	(bind ?skill-id (skill-call ?action-name ?params ?param-values))
+	(bind ?skill-id (skill-call ?action-name ?params ?param-values ?skiller))
 	(modify ?pa (state WAITING))
 	(bind ?args (create$))
 	(loop-for-count (?i (length$ ?params))
@@ -89,13 +90,14 @@
 (defrule skill-action-cancel-if-action-does-not-exist
 	?pe <- (skill-action-execinfo (goal-id ?goal-id) (plan-id ?plan-id)
 	                              (action-id ?id) (skill-id ?skill-id))
-	(skill (id ?skill-id) (status S_RUNNING))
-	(not (plan-action (goal-id ?goal-id) (plan-id ?plan-id) (id ?id)))
+	(skill (id ?skill-id) (status S_RUNNING) (skiller ?skiller))
+	(not (plan-action (goal-id ?goal-id) (plan-id ?plan-id) (id ?id)
+	                  (skiller ?skiller)))
 	=>
 	(printout warn
 		  "Cancelling Skill Execution, corresponding action does not exist" crlf)
-	(bind ?m
-	  (blackboard-create-msg "SkillerInterface::Skiller" "StopExecMessage"))
+	(bind ?m (blackboard-create-msg (str-cat "SkillerInterface::" ?skiller)
+	                                "StopExecMessage"))
 	(blackboard-send-msg ?m)
 	(retract ?pe)
 )
