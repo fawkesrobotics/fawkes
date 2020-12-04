@@ -48,8 +48,10 @@
 	(loop-for-count (?i (length$ ?params))
 		(bind ?args (append$ ?args (nth$ ?i ?params) (nth$ ?i ?param-values)))
 	)
-	(assert (skill-action-execinfo (goal-id ?goal-id) (plan-id ?plan-id) (action-id ?id)
-																 (skill-id ?skill-id) (skill-name ?action-name) (skill-args ?args)))
+	(assert (skill-action-execinfo (goal-id ?goal-id) (plan-id ?plan-id)
+	                               (action-id ?id) (skill-id ?skill-id)
+	                               (skill-name ?action-name)
+	                               (skill-args ?args)))
 )
 
 (defrule skill-action-running

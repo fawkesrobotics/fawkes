@@ -122,13 +122,13 @@
 (defrule skill-control-acquire
 	(time $?now)
 	?sc <- (skiller-control (skiller ?skiller) (acquired FALSE) (acquiring FALSE)
-													(last-try $?lt&:(timeout ?now ?lt ?*SKILL-ACQUIRE-CONTROL-RETRY-INTERVAL-SEC*)))
+	       (last-try $?lt&:(timeout ?now ?lt ?*SKILL-ACQUIRE-CONTROL-RETRY-INTERVAL-SEC*)))
 	=>
 	(printout t "Acquiring exclusive skiller control for " ?skiller crlf)
 	(bind ?m (blackboard-create-msg (str-cat "SkillerInterface::" ?skiller) "AcquireControlMessage"))
 
 	(if (any-factp ((?c confval)) (and (eq ?c:path "/clips-executive/steal-skiller-control")
-																		 (eq ?c:value TRUE)))
+		(eq ?c:value TRUE)))
 	then
 		(blackboard-set-msg-field ?m "steal_control" TRUE)
 	)
@@ -171,7 +171,7 @@
 	(blackboard-close "SkillerInterface" ?skiller)
 	(modify ?sc (acquired FALSE))
 	(retract ?bi)
-)	
+)
 
 (defrule skill-status-update
   ?su <- (SkillerInterface (id ?skiller) (msgid ?msgid) (status ?new-status)
@@ -194,7 +194,7 @@
 (defrule skill-start-timeout
 	(time $?now)
   ?sf <- (skill (name ?n) (status S_IDLE)
-								(start-time $?st&:(timeout ?now ?st ?*SKILL-INIT-TIMEOUT-SEC*)))
+	(start-time $?st&:(timeout ?now ?st ?*SKILL-INIT-TIMEOUT-SEC*)))
   =>
 	(printout warn "Timeout starting skill " ?n " (" ?*SKILL-INIT-TIMEOUT-SEC* " sec): assuming failure" crlf)
 	(modify ?sf (status S_FAILED) (error-msg "Start timeout"))
