@@ -40,7 +40,7 @@
 	                    (param-values $?param-values))
 	(skill-action-mapping (name ?action-name))
 	(not (skill-action-execinfo))
-	(skiller-control (acquired TRUE))
+	(skiller-control (skiller ?skiller) (acquired TRUE))
 	=>
 	(bind ?skill-id (skill-call ?action-name ?params ?param-values ?skiller))
 	(modify ?pa (state WAITING))
