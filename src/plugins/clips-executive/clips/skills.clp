@@ -36,7 +36,7 @@
 
 ; Expects that the file is batch-loaded
 (blackboard-open-reading "SkillerInterface" "Skiller")
-(assert (skiller-control))
+;(assert (skiller-control))
 (assert (ff-feature-loaded skills))
 
 (deffunction merge-params (?params ?param-values)
