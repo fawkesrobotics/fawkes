@@ -38,7 +38,7 @@ steps:
       - .buildkite/annotate
     artifact_paths:
       - tests.out.d/**/*
-    timeout_in_minutes: 30
+    timeout_in_minutes: 45
     plugins:
       - *merged-pr-plugin
       - kennasecurity/podman#master:
