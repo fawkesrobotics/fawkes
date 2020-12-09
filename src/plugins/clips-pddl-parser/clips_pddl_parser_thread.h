@@ -31,6 +31,7 @@ class ClipsPddlParserThread : public fawkes::Thread,
 {
 public:
 	ClipsPddlParserThread();
+	void init();
 	//virtual ~ClipsPddlParserThread();
 };
 #endif /* !PLUGINS_CLIPS_PDDL_PARSER_THEAD_H__ */

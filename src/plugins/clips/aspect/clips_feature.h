@@ -63,7 +63,7 @@ public:
 	CLIPSFeatureAspect(const std::list<CLIPSFeature *> features);
 	virtual ~CLIPSFeatureAspect();
 
-private:
+protected:
 	std::list<CLIPSFeature *> clips_features_;
 };
 

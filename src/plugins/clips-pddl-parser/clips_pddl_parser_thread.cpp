@@ -29,6 +29,17 @@
 
 ClipsPddlParserThread::ClipsPddlParserThread()
 : Thread("ClipsPddlParserThread", Thread::OPMODE_WAITFORWAKEUP),
-  CLIPSFeatureAspect(new PDDLCLIPSFeature(logger))
+  CLIPSFeatureAspect(new PDDLCLIPSFeature())
 {
+}
+
+void
+ClipsPddlParserThread::init()
+{
+	for (auto &feature : clips_features_) {
+		auto pddl_feature = dynamic_cast<PDDLCLIPSFeature *>(feature);
+		if (pddl_feature) {
+			pddl_feature->init_logger(logger);
+		}
+	}
 }
