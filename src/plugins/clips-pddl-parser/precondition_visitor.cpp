@@ -45,6 +45,18 @@ PreconditionToCLIPSFactVisitor::PreconditionToCLIPSFactVisitor(const string &par
 {
 }
 
+/** Translate a quantified formula to a vector of strings.
+ * Not implemented yet.
+ * @param a The quantified formula to translate into a string.
+ * @return An empty vector.
+ */
+vector<string>
+PreconditionToCLIPSFactVisitor::operator()(QuantifiedFormula &a) const
+{
+	throw PddlParserException("QuantifiedFormulas are not supported in CLIPS yet.");
+	return vector<string>();
+}
+
 /** Translate an Atom into a vector of strings.
  * Note that this does not return a CLIPS fact because we do not store atoms
  * (parameter names or constants) as separate facts. This needs to be further
@@ -95,7 +107,7 @@ PreconditionToCLIPSFactVisitor::operator()(Predicate &p) const
 		uint sub_counter = 1;
 		for (Expression &sub : p.arguments) {
 			vector<string> args =
-			  boost::apply_visitor(PreconditionToCLIPSFactVisitor(name, sub_counter++), sub);
+			  boost::apply_visitor(PreconditionToCLIPSFactVisitor(name, sub_counter++), sub.expression);
 			res.insert(res.end(), args.begin(), args.end());
 		}
 		return res;
@@ -127,7 +139,8 @@ PreconditionToCLIPSFactVisitor::operator()(Predicate &p) const
 		string params    = "";
 		string constants = "";
 		for (auto &p : p.arguments) {
-			vector<string> p_strings = boost::apply_visitor(PreconditionToCLIPSFactVisitor(name, 0), p);
+			vector<string> p_strings =
+			  boost::apply_visitor(PreconditionToCLIPSFactVisitor(name, 0), p.expression);
 			if (p_strings.size() != 1) {
 				throw PddlParserException("Unexpected parameter length, expected exactly one");
 			}
