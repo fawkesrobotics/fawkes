@@ -54,6 +54,16 @@ public:
 	: fawkes::Exception(msg), error_type(error_type)
 	{
 	}
+
+	const char *
+	what() const throw() override
+	{
+		if (messages != NULL) {
+			return messages->msg;
+		} else {
+			return "Uknown Error";
+		}
+	}
 	/** Constructor with a string message.
    * This wraps the constructor with a char* message for usage with std::string.
    * @param msg A message describing the error.
