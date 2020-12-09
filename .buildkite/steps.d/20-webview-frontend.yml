@@ -2,7 +2,7 @@
     command: .buildkite/build-webview-frontend
     plugins:
       - *merged-pr-plugin
-      - docker#v3.0.1:
-          <<: *docker-plugin-base
+      - kennasecurity/podman#master:
+          <<: *podman-plugin-base
           volumes:
             - /var/lib/buildkite-agent/npm_cache:/home/builder/.npm
