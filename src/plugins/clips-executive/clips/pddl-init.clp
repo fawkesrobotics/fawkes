@@ -8,12 +8,19 @@
 
 (defglobal
 	?*PDDL-INIT-CONTROL-RETRY-INTERVAL-SEC* = 1
+	?*PDDL-ROBMEM-COLLECTION* = "robmem.clipswm"
 )
 
 (deftemplate pddl-init-control
   (slot interface-id (type STRING))
   (slot has-writer (type SYMBOL) (allowed-values TRUE FALSE) (default FALSE))
   (multislot last-try (type INTEGER) (cardinality 2 2) (default (create$ 0 0)))
+)
+
+(deffunction pddl-robmem-flush ()
+	(bind ?query (bson-create))
+	(robmem-remove ?*PDDL-ROBMEM-COLLECTION* ?query)
+	(bson-destroy ?query)
 )
 
 (defrule pddl-init-open-interfaces
