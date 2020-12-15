@@ -79,7 +79,7 @@ public:
 
 	/* BlackBoardInterfaceListener */
 	void bb_interface_reader_removed(fawkes::Interface *interface,
-	                                 unsigned int       instance_serial) throw();
+	                                 fawkes::Uuid       instance_serial) throw();
 
 	// LuaContextWatcher
 	void lua_restarted(fawkes::LuaContext *context);
@@ -100,7 +100,7 @@ private: /* members */
 	std::string cfg_skillspace_;
 	bool        cfg_watch_files_;
 
-	fawkes::LockQueue<unsigned int> skiller_if_removed_readers_;
+	fawkes::LockQueue<fawkes::Uuid> skiller_if_removed_readers_;
 
 	fawkes::SkillerInterface *skiller_if_;
 

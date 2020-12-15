@@ -207,8 +207,8 @@ SkillerExecutionThread::lua_restarted(LuaContext *context)
 }
 
 void
-SkillerExecutionThread::bb_interface_reader_removed(Interface *  interface,
-                                                    unsigned int instance_serial) throw()
+SkillerExecutionThread::bb_interface_reader_removed(Interface *interface,
+                                                    Uuid       instance_serial) throw()
 {
 	skiller_if_removed_readers_.push_locked(instance_serial);
 }
@@ -223,7 +223,7 @@ SkillerExecutionThread::loop()
 	skiller_if_removed_readers_.lock();
 	while (!skiller_if_removed_readers_.empty()) {
 		lua_->do_string("skiller.fawkes.notify_reader_removed(%u)",
-		                skiller_if_removed_readers_.front());
+		                skiller_if_removed_readers_.front().get_string().c_str());
 		skiller_if_removed_readers_.pop();
 	}
 	skiller_if_removed_readers_.unlock();
