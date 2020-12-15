@@ -44,9 +44,9 @@ public:
 
 	// BlackBoardInterfaceListener
 	virtual void bb_interface_writer_added(fawkes::Interface *interface,
-	                                       unsigned int       instance_serial) throw();
+	                                       fawkes::Uuid       instance_serial) throw();
 	virtual void bb_interface_writer_removed(fawkes::Interface *interface,
-	                                         unsigned int       instance_serial) throw();
+	                                         fawkes::Uuid       instance_serial) throw();
 
 private:
 	fawkes::Logger *                 logger_;
