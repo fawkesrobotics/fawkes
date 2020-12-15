@@ -61,6 +61,9 @@ public:
 	CouldNotOpenConfigException(const char *format, ...);
 };
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Woverloaded-virtual"
+
 class Configuration
 {
 public:
@@ -437,6 +440,8 @@ public:
 		return search(path.c_str());
 	}
 	/// @endcond
+
+#pragma GCC diagnostic pop
 
 protected:
 	/** List that contains pointers to ConfigurationChangeHandler */
