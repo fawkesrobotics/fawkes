@@ -71,9 +71,9 @@ public:
 	// for BlackBoardInterfaceListener
 	virtual void bb_interface_data_refreshed(fawkes::Interface *interface) throw();
 	virtual void bb_interface_writer_removed(fawkes::Interface *interface,
-	                                         unsigned int       instance_serial) throw();
+	                                         fawkes::Uuid       instance_serial) throw();
 	virtual void bb_interface_reader_removed(fawkes::Interface *interface,
-	                                         unsigned int       instance_serial) throw();
+	                                         fawkes::Uuid       instance_serial) throw();
 
 private:
 	void tf_message_cb(const ros::MessageEvent<::tf::tfMessage const> &msg_evt);
