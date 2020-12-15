@@ -268,15 +268,15 @@ RobotStatePublisherThread::bb_interface_created(const char *type, const char *id
 }
 
 void
-RobotStatePublisherThread::bb_interface_writer_removed(Interface *  interface,
-                                                       unsigned int instance_serial) throw()
+RobotStatePublisherThread::bb_interface_writer_removed(Interface *interface,
+                                                       Uuid       instance_serial) throw()
 {
 	conditional_close(interface);
 }
 
 void
-RobotStatePublisherThread::bb_interface_reader_removed(Interface *  interface,
-                                                       unsigned int instance_serial) throw()
+RobotStatePublisherThread::bb_interface_reader_removed(Interface *interface,
+                                                       Uuid       instance_serial) throw()
 {
 	conditional_close(interface);
 }
