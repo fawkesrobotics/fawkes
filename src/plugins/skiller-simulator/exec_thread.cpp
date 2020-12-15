@@ -55,15 +55,21 @@ SkillerSimulatorExecutionThread::loop()
 			SkillerInterface::AcquireControlMessage *m =
 			  skiller_if_->msgq_first<SkillerInterface::AcquireControlMessage>();
 			if (skiller_if_->exclusive_controller() == 0) {
+				const std::string new_controller = m->source_id().get_string();
 				logger->log_debug(name(),
 				                  "%s is new exclusive controller (ID %s)",
 				                  m->sender_thread_name(),
-				                  m->sender_id().get_string().c_str());
-				skiller_if_->set_exclusive_controller(m->sender_id().get_string().c_str());
+				                  new_controller.c_str());
+				skiller_if_->set_exclusive_controller(new_controller.c_str());
+				skiller_if_->set_msgid(m->id());
 				write_interface = true;
 			} else if (m->is_steal_control()) {
-				logger->log_warn(name(), "%s steals exclusive control", m->sender_thread_name());
-				skiller_if_->set_exclusive_controller(m->sender_id().get_string().c_str());
+				const std::string new_controller = m->source_id().get_string();
+				logger->log_warn(name(),
+				                 "%s steals exclusive control (ID %s)",
+				                 m->sender_thread_name(),
+				                 new_controller.c_str());
+				skiller_if_->set_exclusive_controller(new_controller.c_str());
 				skiller_if_->set_msgid(m->id());
 				write_interface = true;
 			} else {
@@ -75,7 +81,7 @@ SkillerSimulatorExecutionThread::loop()
 		} else if (skiller_if_->msgq_first_is<SkillerInterface::ReleaseControlMessage>()) {
 			SkillerInterface::ReleaseControlMessage *m =
 			  skiller_if_->msgq_first<SkillerInterface::ReleaseControlMessage>();
-			if (skiller_if_->exclusive_controller() == m->sender_id()) {
+			if (skiller_if_->exclusive_controller() == m->source_id()) {
 				logger->log_debug(name(), "%s releases exclusive control", m->sender_thread_name());
 			} else if (skiller_if_->exclusive_controller() != 0) {
 				logger->log_warn(name(),
@@ -86,7 +92,7 @@ SkillerSimulatorExecutionThread::loop()
 			SkillerInterface::ExecSkillMessage *m =
 			  skiller_if_->msgq_first<SkillerInterface::ExecSkillMessage>();
 			if (skiller_if_->exclusive_controller() == 0
-			    || skiller_if_->exclusive_controller() == m->sender_id()) {
+			    || skiller_if_->exclusive_controller() == m->source_id()) {
 				if (skill_enqueued) {
 					logger->log_warn(name(),
 					                 "More than one skill string enqueued, ignoring previous string (%s).",
@@ -125,7 +131,7 @@ SkillerSimulatorExecutionThread::loop()
 		} else if (skiller_if_->msgq_first_is<SkillerInterface::StopExecMessage>()) {
 			SkillerInterface::StopExecMessage *m =
 			  skiller_if_->msgq_first<SkillerInterface::StopExecMessage>();
-			if (skiller_if_->exclusive_controller() == m->sender_id()) {
+			if (skiller_if_->exclusive_controller() == m->source_id()) {
 				logger->log_debug(name(),
 				                  "Stopping execution of '%s' on request",
 				                  skiller_if_->skill_string());
