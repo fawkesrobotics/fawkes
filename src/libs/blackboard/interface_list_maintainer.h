@@ -31,6 +31,7 @@
 #include <core/utils/lock_list.h>
 #include <interface/interface.h>
 #include <logging/logger.h>
+#include <utils/uuid.h>
 
 #include <list>
 #include <string>
@@ -63,9 +64,9 @@ private:
 
 	// for BlackBoardInterfaceListener
 	virtual void bb_interface_writer_removed(fawkes::Interface *interface,
-	                                         unsigned int       instance_serial) throw();
+	                                         fawkes::Uuid       instance_serial) throw();
 	virtual void bb_interface_reader_removed(fawkes::Interface *interface,
-	                                         unsigned int       instance_serial) throw();
+	                                         fawkes::Uuid       instance_serial) throw();
 
 	void conditional_close(fawkes::Interface *interface) throw();
 

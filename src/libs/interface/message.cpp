@@ -212,7 +212,7 @@ Message::set_sender_id(const Uuid &sender_id)
 
 /** Set source ID. The source is the original interface where the message comes
  * from.
- * param source_id source ID
+ * @param source_id source ID
  */
 void
 Message::set_source_id(const Uuid &source_id)

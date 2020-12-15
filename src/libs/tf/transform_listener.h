@@ -78,10 +78,8 @@ public:
 
 	// for BlackBoardInterfaceListener
 	virtual void bb_interface_data_refreshed(Interface *interface) throw();
-	virtual void bb_interface_writer_removed(Interface *  interface,
-	                                         unsigned int instance_serial) throw();
-	virtual void bb_interface_reader_removed(Interface *  interface,
-	                                         unsigned int instance_serial) throw();
+	virtual void bb_interface_writer_removed(Interface *interface, Uuid instance_serial) throw();
+	virtual void bb_interface_reader_removed(Interface *interface, Uuid instance_serial) throw();
 
 private:
 	void conditional_close(Interface *interface) throw();

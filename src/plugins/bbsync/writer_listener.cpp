@@ -72,14 +72,14 @@ SyncWriterInterfaceListener::remove_interface(Interface *interface)
 
 void
 SyncWriterInterfaceListener::bb_interface_writer_added(fawkes::Interface *interface,
-                                                       unsigned int       instance_serial) throw()
+                                                       fawkes::Uuid       instance_serial) throw()
 {
 	sync_thread_->writer_added(interface);
 }
 
 void
 SyncWriterInterfaceListener::bb_interface_writer_removed(fawkes::Interface *interface,
-                                                         unsigned int       instance_serial) throw()
+                                                         fawkes::Uuid       instance_serial) throw()
 {
 	sync_thread_->writer_removed(interface);
 }
