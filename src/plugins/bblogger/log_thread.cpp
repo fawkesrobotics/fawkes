@@ -403,15 +403,13 @@ BBLoggerThread::bb_interface_data_refreshed(Interface *interface) throw()
 }
 
 void
-BBLoggerThread::bb_interface_writer_added(Interface *  interface,
-                                          unsigned int instance_serial) throw()
+BBLoggerThread::bb_interface_writer_added(Interface *interface, Uuid instance_serial) throw()
 {
 	session_start_ = num_data_items_;
 }
 
 void
-BBLoggerThread::bb_interface_writer_removed(Interface *  interface,
-                                            unsigned int instance_serial) throw()
+BBLoggerThread::bb_interface_writer_removed(Interface *interface, Uuid instance_serial) throw()
 {
 	logger->log_info(name(),
 	                 "Writer removed (wrote %u entries), flushing",
