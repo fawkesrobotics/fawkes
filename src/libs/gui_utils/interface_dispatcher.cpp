@@ -220,32 +220,28 @@ InterfaceDispatcher::bb_interface_message_received(Interface *interface, Message
 }
 
 void
-InterfaceDispatcher::bb_interface_writer_added(Interface *  interface,
-                                               unsigned int instance_serial) throw()
+InterfaceDispatcher::bb_interface_writer_added(Interface *interface, Uuid instance_serial) throw()
 {
 	queue_writer_added_.push_locked(interface);
 	dispatcher_writer_added_();
 }
 
 void
-InterfaceDispatcher::bb_interface_writer_removed(Interface *  interface,
-                                                 unsigned int instance_serial) throw()
+InterfaceDispatcher::bb_interface_writer_removed(Interface *interface, Uuid instance_serial) throw()
 {
 	queue_writer_removed_.push_locked(interface);
 	dispatcher_writer_removed_();
 }
 
 void
-InterfaceDispatcher::bb_interface_reader_added(Interface *  interface,
-                                               unsigned int instance_serial) throw()
+InterfaceDispatcher::bb_interface_reader_added(Interface *interface, Uuid instance_serial) throw()
 {
 	queue_reader_added_.push_locked(interface);
 	dispatcher_reader_added_();
 }
 
 void
-InterfaceDispatcher::bb_interface_reader_removed(Interface *  interface,
-                                                 unsigned int instance_serial) throw()
+InterfaceDispatcher::bb_interface_reader_removed(Interface *interface, Uuid instance_serial) throw()
 {
 	queue_reader_removed_.push_locked(interface);
 	dispatcher_reader_removed_();
