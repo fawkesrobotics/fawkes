@@ -19,7 +19,7 @@ endif
 
 include $(BUILDSYSDIR)/ext/gmsl
 
-_CFLAGS_PLEXIL_COMMON = -DHAVE_PLEXIL -Wno-deprecated
+_CFLAGS_PLEXIL_COMMON = -DHAVE_PLEXIL -Wno-deprecated -Wno-overloaded-virtual
 
 ifneq ($(PLEXIL_HOME),)
   ifneq ($(wildcard $(PLEXIL_HOME)/include/ExecApplication.hh),)
