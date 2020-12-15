@@ -162,14 +162,14 @@ NavGraphClustersThread::bb_interface_created(const char *type, const char *id) t
 
 void
 NavGraphClustersThread::bb_interface_writer_removed(fawkes::Interface *interface,
-                                                    unsigned int       instance_serial) throw()
+                                                    fawkes::Uuid       instance_serial) throw()
 {
 	conditional_close(interface);
 }
 
 void
 NavGraphClustersThread::bb_interface_reader_removed(fawkes::Interface *interface,
-                                                    unsigned int       instance_serial) throw()
+                                                    fawkes::Uuid       instance_serial) throw()
 {
 	conditional_close(interface);
 }
