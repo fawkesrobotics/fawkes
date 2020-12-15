@@ -45,17 +45,3 @@ steps:
           <<: *podman-plugin-base
           volumes:
             - /var/lib/buildkite-agent/ccache_fedora:/var/cache/ccache
-
-  - label: ":ubuntu: Ubuntu"
-    command:
-      - .buildkite/build
-      - .buildkite/test
-      - .buildkite/annotate
-    plugins:
-      - *merged-pr-plugin
-      - kennasecurity/podman#master:
-          <<: *podman-plugin-base
-          image: fawkesrobotics/fawkes-builder:ubuntu1804-melodic
-          volumes:
-            - /var/lib/buildkite-agent/ccache_ubuntu:/var/cache/ccache
-
