@@ -5,8 +5,8 @@ merged-pr-plugin: &merged-pr-plugin
   seek-oss/github-merged-pr#v1.1.2:
     mode: checkout
 
-docker-plugin-base: &docker-plugin-base
-  image: fawkesrobotics/fawkes-builder:fedora32-noetic
+podman-plugin-base: &podman-plugin-base
+  image: fawkesrobotics/fawkes-builder:fedora33-noetic
   always-pull: true
   debug: true
   environment: ["BUILDKITE", "BUILDKITE_LABEL"]
@@ -16,8 +16,8 @@ steps:
     command: .buildkite/lint
     plugins:
       - *merged-pr-plugin
-      - docker#v3.3.0:
-          <<: *docker-plugin-base
+      - kennasecurity/podman#master:
+          <<: *podman-plugin-base
           environment:
             - BUILDKITE
             - BUILDKITE_REPO
@@ -38,11 +38,11 @@ steps:
       - .buildkite/annotate
     artifact_paths:
       - tests.out.d/**/*
-    timeout_in_minutes: 30
+    timeout_in_minutes: 45
     plugins:
       - *merged-pr-plugin
-      - docker#v3.3.0:
-          <<: *docker-plugin-base
+      - kennasecurity/podman#master:
+          <<: *podman-plugin-base
           volumes:
             - /var/lib/buildkite-agent/ccache_fedora:/var/cache/ccache
 
@@ -53,8 +53,8 @@ steps:
       - .buildkite/annotate
     plugins:
       - *merged-pr-plugin
-      - docker#v3.3.0:
-          <<: *docker-plugin-base
+      - kennasecurity/podman#master:
+          <<: *podman-plugin-base
           image: fawkesrobotics/fawkes-builder:ubuntu1804-melodic
           volumes:
             - /var/lib/buildkite-agent/ccache_ubuntu:/var/cache/ccache

@@ -67,7 +67,7 @@ public:
 	virtual void gripper_open(bool blocking = false);
 	virtual void gripper_close(bool blocking = false);
 	virtual void
-	             move_to(float x, float y, float z, float phi, float theta, float psi, bool blocking = false);
+	move_to(float x, float y, float z, float phi, float theta, float psi, bool blocking = false);
 	virtual void move_to(std::vector<int> encoders, bool blocking = false);
 	virtual void move_to(std::vector<float> angles, bool blocking = false);
 	virtual void move_motor_to(unsigned short id, int enc, bool blocking = false);

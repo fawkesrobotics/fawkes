@@ -62,7 +62,7 @@ public:
 	virtual void vlog_error(const char *component, const char *format, va_list va);
 
 	virtual void
-	             tlog(LogLevel level, struct timeval *t, const char *component, const char *format, ...);
+	tlog(LogLevel level, struct timeval *t, const char *component, const char *format, ...);
 	virtual void tlog_debug(struct timeval *t, const char *component, const char *format, ...);
 	virtual void tlog_info(struct timeval *t, const char *component, const char *format, ...);
 	virtual void tlog_warn(struct timeval *t, const char *component, const char *format, ...);
@@ -77,7 +77,7 @@ public:
 	virtual void
 	vtlog(LogLevel level, struct timeval *t, const char *component, const char *format, va_list va);
 	virtual void
-	             vtlog_debug(struct timeval *t, const char *component, const char *format, va_list va);
+	vtlog_debug(struct timeval *t, const char *component, const char *format, va_list va);
 	virtual void vtlog_info(struct timeval *t, const char *component, const char *format, va_list va);
 	virtual void vtlog_warn(struct timeval *t, const char *component, const char *format, va_list va);
 	virtual void

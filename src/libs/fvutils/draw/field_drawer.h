@@ -60,7 +60,7 @@ public:
 protected:
 	inline void clear_own_pos();
 	inline float
-	             get_scale(unsigned int img_width, unsigned int img_height, bool draw_landscape = true) const;
+	get_scale(unsigned int img_width, unsigned int img_height, bool draw_landscape = true) const;
 	virtual void draw_line_points(bool draw_landscape = true, float scale = 0) const;
 	virtual void draw_lines(YUV_t color, bool draw_landscape = true, float scale = 0) const;
 

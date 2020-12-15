@@ -43,7 +43,7 @@ public:
 	InitOptions &net_tcp_port(unsigned short int port);
 	InitOptions &net_service_name(const char *service_name);
 	InitOptions &
-	             daemonize(bool daemonize, bool kill = false, bool status = false, const char *pid_file = 0);
+	daemonize(bool daemonize, bool kill = false, bool status = false, const char *pid_file = 0);
 	InitOptions &loggers(const char *loggers);
 	InitOptions &log_level(Logger::LogLevel log_level);
 	InitOptions &show_help(bool show_help);

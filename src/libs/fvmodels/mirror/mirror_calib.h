@@ -146,12 +146,12 @@ private:
 	static PolarAngle imageRotationToRelativeOrientation(PolarAngle ori);
 
 	static void
-	            apply_sobel(unsigned char *src, unsigned char *dst, int widt, int height, orientation_t ori);
+	apply_sobel(unsigned char *src, unsigned char *dst, int widt, int height, orientation_t ori);
 	static void apply_sharpen(unsigned char *src, unsigned char *dst, int widt, int height);
 	static void apply_median(unsigned char *src, unsigned char *dst, int widt, int height, int i);
 	static void apply_min(unsigned char *src, unsigned char *dst, int widt, int height);
 	static void
-	                                 apply_or(unsigned char *src1, unsigned char *src2, unsigned char *dst, int widt, int height);
+	apply_or(unsigned char *src1, unsigned char *src2, unsigned char *dst, int widt, int height);
 	static void                      make_contrast(unsigned char *buf, size_t buflen);
 	static void                      make_grayscale(unsigned char *buf, size_t buflen);
 	static MirrorCalibTool::MarkList premark(const StepResult &   prev,

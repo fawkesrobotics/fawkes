@@ -178,7 +178,7 @@ private:
 
 	std::shared_ptr<YamlConfigurationNode> query(const char *path) const;
 	void
-	                                       read_meta_doc(YAML::Node &doc, std::queue<LoadQueueEntry> &load_queue, std::string &host_file);
+	read_meta_doc(YAML::Node &doc, std::queue<LoadQueueEntry> &load_queue, std::string &host_file);
 	std::shared_ptr<YamlConfigurationNode> read_config_doc(const YAML::Node &doc);
 	std::shared_ptr<YamlConfigurationNode> read_yaml_file(std::string                 filename,
 	                                                      bool                        ignore_missing,

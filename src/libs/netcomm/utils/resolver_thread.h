@@ -61,7 +61,7 @@ public:
 	void resolve_address(struct sockaddr *addr, socklen_t addrlen);
 
 	bool
-	     resolve_name_immediately(const std::string &name, struct sockaddr **addr, socklen_t *addr_len);
+	resolve_name_immediately(const std::string &name, struct sockaddr **addr, socklen_t *addr_len);
 	bool resolve_address_immediately(struct sockaddr *addr, std::string &name, bool &namefound);
 
 	virtual void resolved_name(char *name, struct sockaddr *addr, socklen_t addrlen);

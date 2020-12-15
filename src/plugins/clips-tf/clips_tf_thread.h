@@ -70,7 +70,7 @@ private:
 
 	CLIPS::Value clips_tf_frame_exists(std::string frame_id);
 	CLIPS::Value
-	              clips_tf_can_transform(std::string target_frame, std::string source_frame, CLIPS::Values time);
+	clips_tf_can_transform(std::string target_frame, std::string source_frame, CLIPS::Values time);
 	CLIPS::Values clips_tf_transform_point(std::string   target_frame,
 	                                       std::string   source_frame,
 	                                       CLIPS::Values time,

@@ -53,8 +53,8 @@ ColorModelBlack::determine(unsigned int y, unsigned int u, unsigned int v) const
 #else
 	        && (diff_u < 0)
 	      ? (diff_u > -1 * (int)u_thresh_)
-	      : (diff_u < (int)u_thresh_) && (diff_v < 0) ? (diff_v > -1 * (int)v_thresh_)
-	                                                  : (diff_v < (int)v_thresh_)
+	    : (diff_u < (int)u_thresh_) && (diff_v < 0) ? (diff_v > -1 * (int)v_thresh_)
+	                                                : (diff_v < (int)v_thresh_)
 #endif
 	) {
 		return C_BLACK;

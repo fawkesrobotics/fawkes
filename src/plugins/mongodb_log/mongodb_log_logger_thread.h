@@ -78,7 +78,7 @@ public:
 	virtual void tlog_error(struct timeval *t, const char *component, fawkes::Exception &e);
 
 	virtual void
-	             vtlog_debug(struct timeval *t, const char *component, const char *format, va_list va);
+	vtlog_debug(struct timeval *t, const char *component, const char *format, va_list va);
 	virtual void vtlog_info(struct timeval *t, const char *component, const char *format, va_list va);
 	virtual void vtlog_warn(struct timeval *t, const char *component, const char *format, va_list va);
 	virtual void
