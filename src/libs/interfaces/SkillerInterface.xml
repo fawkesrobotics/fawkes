@@ -30,6 +30,7 @@
       Instance serial of the exclusive controller of the skiller. If this does not
       carry your instance serial your exec messages will be ignored. Aquire control with
       the AquireControlMessage. Make sure you release control before exiting.
+      The serial is a null-terminated 36 character string.
     </field>
     <field type="uint32" name="msgid">
       The ID of the message that is currently being processed,
