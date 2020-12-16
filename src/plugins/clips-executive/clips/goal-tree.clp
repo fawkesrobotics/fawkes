@@ -56,18 +56,32 @@
 )
 
 (deffunction goal-tree-assert-run-parallel (?class ?continue-on $?fact-addresses)
+	(bind ?run-parallel-option NONE)
+	(if (member$ ?continue-on (create$ FAILED REJECTED NONE))
+	 then (bind ?run-parallel-option ?continue-on)
+	 else (printout warn "ignoring unrecognized option " ?continue-on
+	                     " for run-parallel goal, expected FAILED|REJECTED|NONE"
+	                     ", using default: NONE" crlf)
+	)
 	(bind ?id (sym-cat PARALLEL- ?class - (gensym*)))
 	(bind ?goal (assert (goal (id ?id) (class ?class) (sub-type RUN-SUBGOALS-IN-PARALLEL)
-	                          (params continue-on ?continue-on))))
+	                          (params continue-on ?run-parallel-option))))
 	(foreach ?f ?fact-addresses
 		(goal-tree-update-child ?f ?id 0))
 	(return ?goal)
 )
 
 (deffunction goal-tree-assert-run-parallel-delayed (?class ?continue-on $?fact-addresses)
+	(bind ?run-parallel-option NONE)
+	(if (member$ ?continue-on (create$ FAILED REJECTED NONE))
+	 then (bind ?run-parallel-option ?continue-on)
+	 else (printout warn "ignoring unrecognized option " ?continue-on
+	                     " for run-parallel goal, expected FAILED|REJECTED|NONE"
+	                     ", using default: NONE" crlf)
+	)
 	(bind ?id (sym-cat PARALLEL- ?class - (gensym*)))
 	(bind ?goal (assert (goal (id ?id) (class ?class) (sub-type RUN-SUBGOALS-IN-PARALLEL)
-	                          (params continue-on ?continue-on))))
+	                          (params continue-on ?run-parallel-option))))
 	(foreach ?f ?fact-addresses
 		(goal-tree-update-child ?f ?id (+ 1 (- (length$ ?fact-addresses) ?f-index))))
 	(return ?goal)

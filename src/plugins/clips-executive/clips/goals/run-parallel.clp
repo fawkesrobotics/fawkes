@@ -10,6 +10,7 @@
 ; Perform: all sub-goals in parallel
 ; Params: (params continue-on FAILED|REJECTED) to not stop SELECTION of
 ;         other goals when a sub-goal FAILED/is REJECTED
+;         other values will be ignored
 ; Succeed: if all sub-goal succeeds
 ; Fail:    if at least one sub-goal fails
 ; Reject:  if any sub-goal is rejected but no sub-goal failed
