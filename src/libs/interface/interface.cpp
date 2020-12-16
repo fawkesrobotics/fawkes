@@ -108,7 +108,7 @@ InterfaceInvalidMessageException::InterfaceInvalidMessageException(const Interfa
  * @param method the method that was tried to execute
  */
 InterfaceInvalidException::InterfaceInvalidException(const Interface *interface, const char *method)
-: Exception("The interface %s (instance serial %u) is invalid. You cannot call %s anymore.",
+: Exception("The interface %s (instance serial %s) is invalid. You cannot call %s anymore.",
             interface->uid(),
             interface->serial().get_string().c_str(),
             method)
