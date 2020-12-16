@@ -222,7 +222,7 @@ SkillerExecutionThread::loop()
 
 	skiller_if_removed_readers_.lock();
 	while (!skiller_if_removed_readers_.empty()) {
-		lua_->do_string("skiller.fawkes.notify_reader_removed(%u)",
+		lua_->do_string("skiller.fawkes.notify_reader_removed(%s)",
 		                skiller_if_removed_readers_.front().get_string().c_str());
 		skiller_if_removed_readers_.pop();
 	}
