@@ -239,14 +239,14 @@ BlackBoardNetworkHandler::loop()
 				} else {
 					LibLogger::log_warn("BlackBoardNetworkHandler",
 					                    "Client %u tried to close "
-					                    "interface with serial %u, but opened by other client",
+					                    "interface with serial %s, but opened by other client",
 					                    clid,
 					                    sm_serial.get_string().c_str());
 				}
 			} else {
 				LibLogger::log_warn("BlackBoardNetworkHandler",
 				                    "Client %u tried to close "
-				                    "interface with serial %u which has not been opened",
+				                    "interface with serial %s which has not been opened",
 				                    clid,
 				                    sm_serial.get_string().c_str());
 			}
@@ -278,7 +278,7 @@ BlackBoardNetworkHandler::loop()
 			} else {
 				LibLogger::log_error("BlackBoardNetworkHandler",
 				                     "%s: Interface with "
-				                     "serial %u not found, ignoring.",
+				                     "serial %s not found, ignoring.",
 				                     data_changed ? "DATA_CHANGED" : "DATA_REFRESHED",
 				                     dm_serial.get_string().c_str());
 			}
@@ -331,7 +331,7 @@ BlackBoardNetworkHandler::loop()
 			} else {
 				LibLogger::log_error("BlackBoardNetworkHandler",
 				                     "DATA_CHANGED: Interface with "
-				                     "serial %u not found, ignoring.",
+				                     "serial %s not found, ignoring.",
 				                     mm_serial.get_string().c_str());
 			}
 		} break;

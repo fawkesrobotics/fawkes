@@ -129,8 +129,8 @@ BlackBoardInterfaceProxy::process_data_refreshed(FawkesNetworkMessage *msg)
 	bb_idata_msg_t *dm      = (bb_idata_msg_t *)payload;
 	if (dm->serial != instance_serial_) {
 		LibLogger::log_error("BlackBoardInterfaceProxy",
-		                     "Serial mismatch, expected %u, "
-		                     "but got %u, ignoring.",
+		                     "Serial mismatch, expected %s, "
+		                     "but got %s, ignoring.",
 		                     instance_serial_.get_string().c_str(),
 		                     dm->serial.get_string().c_str());
 		return;
