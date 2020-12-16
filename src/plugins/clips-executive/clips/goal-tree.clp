@@ -54,3 +54,21 @@
 	(goal-tree-update-child ?fact-address ?id 0)
 	(return ?goal)
 )
+
+(deffunction goal-tree-assert-run-parallel (?class ?continue-on $?fact-addresses)
+	(bind ?id (sym-cat PARALLEL- ?class - (gensym*)))
+	(bind ?goal (assert (goal (id ?id) (class ?class) (sub-type RUN-SUBGOALS-IN-PARALLEL)
+	                          (params continue-on ?continue-on))))
+	(foreach ?f ?fact-addresses
+		(goal-tree-update-child ?f ?id 0))
+	(return ?goal)
+)
+
+(deffunction goal-tree-assert-run-parallel-delayed (?class ?continue-on $?fact-addresses)
+	(bind ?id (sym-cat PARALLEL- ?class - (gensym*)))
+	(bind ?goal (assert (goal (id ?id) (class ?class) (sub-type RUN-SUBGOALS-IN-PARALLEL)
+	                          (params continue-on ?continue-on))))
+	(foreach ?f ?fact-addresses
+		(goal-tree-update-child ?f ?id (+ 1 (- (length$ ?fact-addresses) ?f-index))))
+	(return ?goal)
+)
