@@ -67,7 +67,7 @@
 )
 
 (defrule goal-reasoner-expanded
-	?g <- (goal (id ?goal-id) (class TALK) (mode SELECTED))
+	?g <- (goal (id ?goal-id) (class TALK|PRINT) (mode SELECTED))
 	(plan (goal-id ?goal-id))
 	=>
   (modify ?g (mode EXPANDED))
