@@ -22,6 +22,10 @@
 (define (domain hello-world)
   (:requirements :strips :typing)
   (:types name text howoften)
+  (:constants
+    hello goodbye - text
+    once - howoften
+  )
   (:predicates
 	 (said ?n - name ?t - text)
 	 (spoken ?h - howoften)

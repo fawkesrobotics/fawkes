@@ -259,8 +259,6 @@ private:
 	inline unsigned int
 	next_msg_id()
 	{
-		// TODO use instance_serial_
-		//return (instance_serial_ << 16) | ++next_message_id_;
 		return ++next_message_id_;
 	}
 

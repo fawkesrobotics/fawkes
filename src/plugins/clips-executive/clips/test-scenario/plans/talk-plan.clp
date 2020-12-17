@@ -42,3 +42,22 @@
 		             (action-name say-cleanup))
 	)
 )
+
+(defrule plan-print-expand
+	?g <- (goal (mode SELECTED) (id ?goal-id) (class PRINT))
+	=>
+	(bind ?plan-id (sym-cat ?goal-id -PLAN))
+	(assert
+		(plan (id ?plan-id) (goal-id ?goal-id) (type SEQUENTIAL))
+		(plan-action (id 10) (goal-id ?goal-id) (plan-id ?plan-id)
+		             (duration 4.0)
+		             (action-name print)
+								 (param-names severity text)
+		             (param-values warn (str-cat ?goal-id " prints something")))
+		(plan-action (id 20) (goal-id ?goal-id) (plan-id ?plan-id)
+		             (duration 4.0)
+		             (action-name print)
+								 (param-names severity text)
+		             (param-values warn (str-cat ?goal-id " prints something else")))
+	)
+)
