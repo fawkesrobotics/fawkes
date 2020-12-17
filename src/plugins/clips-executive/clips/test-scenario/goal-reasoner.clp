@@ -5,6 +5,7 @@
 	(not (goal))
 	(not (test-performed))
   (domain-facts-loaded)
+  (skiller-control (acquired TRUE))
 	=>
 	; (bind ?goal-id (sym-cat TEST-PARENT- (gensym*)))
 	; (assert (goal (id ?goal-id) (class TESTGOAL-PARENT)
