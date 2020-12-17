@@ -25,8 +25,9 @@
 )
 
 (defrule talk-goal-evaluate-failed
-	?g <- (goal (id ?goal-id) (class TALK|PRINT) (mode FINISHED) (outcome FAILED|REJECTED))
+	?g <- (goal (id ?goal-id) (class TALK|PRINT) (mode FINISHED)
+	            (outcome ?outcome&FAILED|REJECTED))
 	=>
-	(printout t "Goal '" ?goal-id "' has failed, evaluating" crlf)
+	(printout t "Goal '" ?goal-id "' has failed (" ?outcome "), evaluating" crlf)
 	(modify ?g (mode EVALUATED))
 )
