@@ -15,8 +15,8 @@
 ; Fail:    if at least one sub-goal fails
 ; Reject:  if any sub-goal is rejected but no sub-goal failed
 ;
-; A RUN-PARALLEL parent goal will run all sub-goals in parallel, starting
-; then ordered by their priorities.
+; A RUN-PARALLEL parent goal will run all sub-goals in parallel by
+; continuously SELECTING all sub-goals with the highest priority.
 ; If any goal fails, the parent fails. If any sub-goal is rejected,
 ; the parent is rejected. If all goals have been completed successfully,
 ; the parent goal succeeds.
@@ -34,9 +34,9 @@
 ;   * set RUN-PARALLEL goal mode to EXPANDED
 ; - Automatic: if no sub-goal formulated -> FAIL
 ; - Automatic: if all sub-goals rejected -> REJECT
-; - Automatic: DISPATCH all formulated sub-goals with highest priority by
-;              SELECTING them- SELECT next batch of sub-goals once all
-;              previously SELECTED subgoals are past COMMITTMENT stage.
+; - Automatic: SELECT all formulated sub-goals with highest priority,
+;              SELECT next batch of sub-goals once all
+;              previously SELECTED sub-goals are DISPATCHED|FINISHED|RETRACTED.
 ; - User: handle sub-goal expansion, committing, dispatching, evaluating
 ; - Automatic: when sub-goal is EVALUATED, outcome determines parent goal:
 ;   * REJECTED or FAILED: Reject formulated sub-goals
