@@ -43,17 +43,13 @@ public:
 	virtual void bb_interface_data_refreshed(Interface *interface) throw();
 	virtual void bb_interface_data_changed(Interface *interface) throw();
 	virtual bool bb_interface_message_received(Interface *interface, Message *message) throw();
-	virtual void bb_interface_writer_added(Interface *  interface,
-	                                       unsigned int instance_serial) throw();
-	virtual void bb_interface_writer_removed(Interface *  interface,
-	                                         unsigned int instance_serial) throw();
-	virtual void bb_interface_reader_added(Interface *  interface,
-	                                       unsigned int instance_serial) throw();
-	virtual void bb_interface_reader_removed(Interface *  interface,
-	                                         unsigned int instance_serial) throw();
+	virtual void bb_interface_writer_added(Interface *interface, Uuid instance_serial) throw();
+	virtual void bb_interface_writer_removed(Interface *interface, Uuid instance_serial) throw();
+	virtual void bb_interface_reader_added(Interface *interface, Uuid instance_serial) throw();
+	virtual void bb_interface_reader_removed(Interface *interface, Uuid instance_serial) throw();
 
 private:
-	void send_event_serial(Interface *interface, unsigned int msg_id, unsigned int event_serial);
+	void send_event_serial(Interface *interface, unsigned int msg_id, Uuid event_serial);
 
 	BlackBoard *      blackboard_;
 	Interface *       interface_;

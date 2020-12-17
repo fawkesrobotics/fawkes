@@ -28,6 +28,11 @@ $#include <utils/time/clock.h>
 
 namespace fawkes {
 
+class Uuid
+{
+  std::string get_string() const;
+};
+
 class Interface 
 {
   bool                    oftype(const char *interface_type) const;
@@ -36,7 +41,7 @@ class Interface
   const char *            type() const;
   const char *            id() const;
   const char *            uid() const;
-  unsigned int            serial() const;
+  fawkes::Uuid            serial() const;
   unsigned int            mem_serial() const;
   bool                    operator== (Interface &comp) const;
   const unsigned char *   hash() const;

@@ -84,7 +84,6 @@ private:
 
 	void *       find_interface_in_memory(const char *type, const char *identifier);
 	unsigned int next_mem_serial();
-	unsigned int next_instance_serial();
 	void         create_interface(const char *type,
 	                              const char *identifier,
 	                              const char *owner,

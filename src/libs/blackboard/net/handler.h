@@ -28,6 +28,7 @@
 #include <core/utils/lock_map.h>
 #include <core/utils/lock_queue.h>
 #include <netcomm/fawkes/handler.h>
+#include <utils/uuid.h>
 
 #include <list>
 
@@ -67,16 +68,16 @@ private:
 	LockQueue<FawkesNetworkMessage *> inbound_queue_;
 
 	// All interfaces, key is the instance serial, value the interface
-	LockMap<unsigned int, Interface *>           interfaces_;
-	LockMap<unsigned int, Interface *>::iterator iit_;
+	LockMap<Uuid, Interface *>           interfaces_;
+	LockMap<Uuid, Interface *>::iterator iit_;
 
-	std::map<unsigned int, BlackBoardNetHandlerInterfaceListener *>           listeners_;
-	std::map<unsigned int, BlackBoardNetHandlerInterfaceListener *>::iterator lit_;
+	std::map<Uuid, BlackBoardNetHandlerInterfaceListener *>           listeners_;
+	std::map<Uuid, BlackBoardNetHandlerInterfaceListener *>::iterator lit_;
 
 	BlackBoardNetHandlerInterfaceObserver *observer_;
 
 	// Map from instance serial to clid
-	LockMap<unsigned int, unsigned int> serial_to_clid_;
+	LockMap<Uuid, unsigned int> serial_to_clid_;
 
 	// Interfaces per client, key is the client ID, value a list of interfaces opened by client
 	LockMap<unsigned int, std::list<Interface *>> client_interfaces_;

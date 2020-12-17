@@ -27,10 +27,6 @@ USE_BASELINK_FRAME = 1
 
 REQUIRED_PCL_LIBS = sample_consensus segmentation filters surface features
 
-#CFLAGS += -Wno-unknown-pragmas
-ifeq ($(CC),clang)
-  CFLAGS += -Wno-overloaded-virtual
-endif
 ifeq ($(CC),gcc)
   ifneq ($(call gcc_atleast_version,4,5),1)
     GCC_TOO_OLD=1

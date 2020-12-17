@@ -12,7 +12,7 @@
   (slot type (type STRING))
 	(slot uid (type STRING))
   (slot hash (type STRING))
-	(slot serial (type INTEGER))
+	(slot serial (type STRING))
 	(slot writing (type SYMBOL) (allowed-values FALSE TRUE))
 )
 

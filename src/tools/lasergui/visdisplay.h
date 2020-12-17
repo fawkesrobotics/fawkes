@@ -44,7 +44,7 @@ public:
 	{
 	public:
 		Shape(unsigned int                                id,
-		      unsigned int                                owner,
+		      fawkes::Uuid                                owner,
 		      fawkes::VisualDisplay2DInterface::LineStyle line_style =
 		        fawkes::VisualDisplay2DInterface::LS_SOLID,
 		      unsigned char r = 0,
@@ -64,7 +64,7 @@ public:
 		{
 			return _id;
 		}
-		inline unsigned int
+		inline fawkes::Uuid
 		owner()
 		{
 			return _owner;
@@ -86,7 +86,7 @@ public:
 		float                                       _color_a;    /**< alpha part of RGBA object color */
 
 		unsigned int _id;    /**< Object ID */
-		unsigned int _owner; /**< Owner ID */
+		fawkes::Uuid _owner; /**< Owner ID */
 	};
 
 	class Line : public Shape
@@ -97,7 +97,7 @@ public:
 		     float                                       x2,
 		     float                                       y2,
 		     unsigned int                                id,
-		     unsigned int                                owner,
+		     fawkes::Uuid                                owner,
 		     fawkes::VisualDisplay2DInterface::LineStyle line_style =
 		       fawkes::VisualDisplay2DInterface::LS_SOLID,
 		     unsigned char r = 0,
@@ -121,7 +121,7 @@ public:
 		          float                                       width,
 		          float                                       height,
 		          unsigned int                                id,
-		          unsigned int                                owner,
+		          fawkes::Uuid                                owner,
 		          fawkes::VisualDisplay2DInterface::LineStyle line_style =
 		            fawkes::VisualDisplay2DInterface::LS_SOLID,
 		          unsigned char r = 0,
@@ -144,7 +144,7 @@ public:
 		       float                                       y,
 		       float                                       radius,
 		       unsigned int                                id,
-		       unsigned int                                owner,
+		       fawkes::Uuid                                owner,
 		       fawkes::VisualDisplay2DInterface::LineStyle line_style =
 		         fawkes::VisualDisplay2DInterface::LS_SOLID,
 		       unsigned char r = 0,
@@ -168,7 +168,7 @@ public:
 		     fawkes::VisualDisplay2DInterface::Anchor anchor,
 		     float                                    size,
 		     unsigned int                             id,
-		     unsigned int                             owner,
+		     fawkes::Uuid                             owner,
 		     unsigned char                            r = 0,
 		     unsigned char                            g = 0,
 		     unsigned char                            b = 0,

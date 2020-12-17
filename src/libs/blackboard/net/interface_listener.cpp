@@ -86,7 +86,7 @@ BlackBoardNetHandlerInterfaceListener::bb_interface_data_refreshed(Interface *in
 	size_t          payload_size = sizeof(bb_idata_msg_t) + interface->datasize();
 	void *          payload      = malloc(payload_size);
 	bb_idata_msg_t *dm           = (bb_idata_msg_t *)payload;
-	dm->serial                   = htonl(interface->serial());
+	dm->serial                   = interface->serial();
 	dm->data_size                = htonl(interface->datasize());
 	memcpy((char *)payload + sizeof(bb_idata_msg_t), interface->datachunk(), interface->datasize());
 
@@ -107,7 +107,7 @@ BlackBoardNetHandlerInterfaceListener::bb_interface_data_changed(Interface *inte
 	size_t          payload_size = sizeof(bb_idata_msg_t) + interface->datasize();
 	void *          payload      = malloc(payload_size);
 	bb_idata_msg_t *dm           = (bb_idata_msg_t *)payload;
-	dm->serial                   = htonl(interface->serial());
+	dm->serial                   = interface->serial();
 	dm->data_size                = htonl(interface->datasize());
 	memcpy((char *)payload + sizeof(bb_idata_msg_t), interface->datachunk(), interface->datasize());
 
@@ -127,7 +127,12 @@ BlackBoardNetHandlerInterfaceListener::bb_interface_message_received(Interface *
 	size_t             payload_size = sizeof(bb_imessage_msg_t) + message->datasize();
 	void *             payload      = calloc(1, payload_size);
 	bb_imessage_msg_t *dm           = (bb_imessage_msg_t *)payload;
-	dm->serial                      = htonl(interface->serial());
+	dm->serial                      = interface->serial();
+	dm->source                      = message->source_id();
+	LibLogger::log_debug(bbil_name(),
+	                     "Received message from sender %s, source %s",
+	                     dm->serial.get_string().c_str(),
+	                     dm->source.get_string().c_str());
 	strncpy(dm->msg_type, message->type(), INTERFACE_MESSAGE_TYPE_SIZE_ - 1);
 	dm->data_size = htonl(message->datasize());
 	dm->msgid     = htonl(message->id());
@@ -148,11 +153,11 @@ BlackBoardNetHandlerInterfaceListener::bb_interface_message_received(Interface *
 void
 BlackBoardNetHandlerInterfaceListener::send_event_serial(Interface *  interface,
                                                          unsigned int msg_id,
-                                                         unsigned int event_serial)
+                                                         Uuid         event_serial)
 {
 	bb_ieventserial_msg_t *esm = (bb_ieventserial_msg_t *)malloc(sizeof(bb_ieventserial_msg_t));
-	esm->serial                = htonl(interface->serial());
-	esm->event_serial          = htonl(event_serial);
+	esm->serial                = interface->serial();
+	esm->event_serial          = event_serial;
 
 	try {
 		fnh_->send(clid_, FAWKES_CID_BLACKBOARD, msg_id, esm, sizeof(bb_ieventserial_msg_t));
@@ -163,33 +168,29 @@ BlackBoardNetHandlerInterfaceListener::send_event_serial(Interface *  interface,
 }
 
 void
-BlackBoardNetHandlerInterfaceListener::bb_interface_writer_added(
-  Interface *  interface,
-  unsigned int instance_serial) throw()
+BlackBoardNetHandlerInterfaceListener::bb_interface_writer_added(Interface *interface,
+                                                                 Uuid       instance_serial) throw()
 {
 	send_event_serial(interface, MSG_BB_WRITER_ADDED, instance_serial);
 }
 
 void
-BlackBoardNetHandlerInterfaceListener::bb_interface_writer_removed(
-  Interface *  interface,
-  unsigned int instance_serial) throw()
+BlackBoardNetHandlerInterfaceListener::bb_interface_writer_removed(Interface *interface,
+                                                                   Uuid instance_serial) throw()
 {
 	send_event_serial(interface, MSG_BB_WRITER_REMOVED, instance_serial);
 }
 
 void
-BlackBoardNetHandlerInterfaceListener::bb_interface_reader_added(
-  Interface *  interface,
-  unsigned int instance_serial) throw()
+BlackBoardNetHandlerInterfaceListener::bb_interface_reader_added(Interface *interface,
+                                                                 Uuid       instance_serial) throw()
 {
 	send_event_serial(interface, MSG_BB_READER_ADDED, instance_serial);
 }
 
 void
-BlackBoardNetHandlerInterfaceListener::bb_interface_reader_removed(
-  Interface *  interface,
-  unsigned int instance_serial) throw()
+BlackBoardNetHandlerInterfaceListener::bb_interface_reader_removed(Interface *interface,
+                                                                   Uuid instance_serial) throw()
 {
 	send_event_serial(interface, MSG_BB_READER_REMOVED, instance_serial);
 }

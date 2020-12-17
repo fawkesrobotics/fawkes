@@ -295,14 +295,14 @@ LaserPointCloudThread::bb_interface_created(const char *type, const char *id) th
 
 void
 LaserPointCloudThread::bb_interface_writer_removed(fawkes::Interface *interface,
-                                                   unsigned int       instance_serial) throw()
+                                                   fawkes::Uuid       instance_serial) throw()
 {
 	conditional_close(interface);
 }
 
 void
 LaserPointCloudThread::bb_interface_reader_removed(fawkes::Interface *interface,
-                                                   unsigned int       instance_serial) throw()
+                                                   fawkes::Uuid       instance_serial) throw()
 {
 	conditional_close(interface);
 }

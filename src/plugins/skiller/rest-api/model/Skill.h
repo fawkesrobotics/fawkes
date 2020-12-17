@@ -210,7 +210,7 @@ public:
 	/** Get exclusive_controller value.
    * @return exclusive_controller value
    */
-	std::optional<int64_t>
+	std::optional<std::string>
 	exclusive_controller() const
 	{
 		return exclusive_controller_;
@@ -220,7 +220,7 @@ public:
 	 * @param exclusive_controller new value
 	 */
 	void
-	set_exclusive_controller(const int64_t &exclusive_controller)
+	set_exclusive_controller(const std::string &exclusive_controller)
 	{
 		exclusive_controller_ = exclusive_controller;
 	}
@@ -250,6 +250,6 @@ private:
 	std::optional<std::string> skill_string_;
 	std::optional<std::string> error_;
 	std::optional<int64_t>     msg_id_;
-	std::optional<int64_t>     exclusive_controller_;
+	std::optional<std::string> exclusive_controller_;
 	std::optional<std::string> status_;
 };

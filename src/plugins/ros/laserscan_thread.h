@@ -64,9 +64,9 @@ public:
 	// for BlackBoardInterfaceListener
 	virtual void bb_interface_data_refreshed(fawkes::Interface *interface) throw();
 	virtual void bb_interface_writer_removed(fawkes::Interface *interface,
-	                                         unsigned int       instance_serial) throw();
+	                                         fawkes::Uuid       instance_serial) throw();
 	virtual void bb_interface_reader_removed(fawkes::Interface *interface,
-	                                         unsigned int       instance_serial) throw();
+	                                         fawkes::Uuid       instance_serial) throw();
 
 private:
 	void        laser_scan_message_cb(const ros::MessageEvent<sensor_msgs::LaserScan const> &msg_evt);
