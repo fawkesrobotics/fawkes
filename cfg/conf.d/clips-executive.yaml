@@ -92,6 +92,7 @@ clips-executive:
               - goals/run-one.clp
               - goals/run-all.clp
               - goals/try-all.clp
+              - goals/run-parallel.clp
               - goals/retry.clp
               - goals/timeout.clp
               - goals/automatic.clp
