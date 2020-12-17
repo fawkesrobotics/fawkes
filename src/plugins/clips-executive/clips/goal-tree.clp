@@ -56,6 +56,17 @@
 )
 
 (deffunction goal-tree-assert-run-parallel (?class ?continue-on $?fact-addresses)
+" Assert a run-parallel goal, where all sub-goals have the same priority.
+  @param ?class: class name of the run-parallel goal
+  @param ?continue-on: If 'REJECTED', then the run-parallel goal continues to
+                       SELECT sub-goals, even if some sub-goal already got
+                       REJECTED.
+                       IF 'FAILED', then it continues to SELECT sub-goals even
+                       if some sub-gaol already got REJECTED or has FAILED.
+                       Else set this to 'NONE'.
+  @param fact-addresses: fact-addresses of the sub-goals
+  @return fact-address of run-parallel goal
+"
 	(bind ?run-parallel-option NONE)
 	(if (member$ ?continue-on (create$ FAILED REJECTED NONE))
 	 then (bind ?run-parallel-option ?continue-on)
@@ -72,6 +83,10 @@
 )
 
 (deffunction goal-tree-assert-run-parallel-delayed (?class ?continue-on $?fact-addresses)
+" See goal-tree-assert-run-parallel, but sub-goals receive descending
+  priorities, causing them to be DISPATCHED in the order of the given
+  fact-addresses.
+"
 	(bind ?run-parallel-option NONE)
 	(if (member$ ?continue-on (create$ FAILED REJECTED NONE))
 	 then (bind ?run-parallel-option ?continue-on)
