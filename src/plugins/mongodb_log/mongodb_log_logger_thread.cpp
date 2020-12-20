@@ -172,9 +172,9 @@ MongoLogLoggerThread::insert_message(LogLevel    ll,
 	if (msg_s.find("(wm-fact (id \"/domain/") != std::string::npos
 	    && msg_s.find("<==") != std::string::npos) {
 		std::string clips_id = msg_s.substr(msg_s.find("<== ") + 4).substr(0, msg_s.find("(") - 5);
-
+		
 		mongodb_client->database(database_)["gamestate_recovery_test"].update_one(
-		  make_document(kvp("clips-id", clips_id)),
+		  make_document(kvp("clips-id", clips_id),kvp("game", gametime_)),//add gametime for synchronization purposes :D 
 		  make_document(kvp("$set", make_document(kvp("retracted", nowd)))));
 	}
 	free(msg);
