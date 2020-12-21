@@ -52,6 +52,6 @@ cat $SCRIPT_PATH/pipeline.yml
 # Execute conditional steps, pass along env vars
 export MERGE_BASE
 export AFFECTED_FILES
-for f in $SCRIPT_PATH/steps.d/*.sh; do
+for f in $(find $SCRIPT_PATH/steps.d -type f -name "*.sh" -executable); do
 	$f
 done
