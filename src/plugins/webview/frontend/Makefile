@@ -19,19 +19,13 @@ include $(BASEDIR)/etc/buildsys/config.mk
 
 NPM = $(shell type -p npm)
 
-TARGETS_all += dist/index.html
-
 ifneq ($(NPM),)
-  TARGETS_build = $(TARGETS_all)
+  TARGETS_all += dist/index.html
   INST_RESDIRS = webview
 
   SRCS_FRONTEND = $(shell find $(SRCDIR)/src/ -regex '.*\.\(html\|ts\|json\|js\|scss\)')
 else
   WARN_TARGETS += warning_npm
-endif
-
-ifneq ($(TARGETS_build),)
-all: deploy
 endif
 
 dist/index.html: $(SRCS_FRONTEND) $(SRCDIR)/node_modules
