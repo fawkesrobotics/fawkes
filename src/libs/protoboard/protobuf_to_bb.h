@@ -70,6 +70,9 @@ public:
 	virtual void
 	init(fawkes::BlackBoard *blackboard, fawkes::Logger *logger, const std::string & = "");
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Woverloaded-virtual"
+
 	/** Dereference @a msg and pass it on to handle it by reference
 	 * @param msg shared_ptr to a ProtoBuf message */
 	virtual void handle(std::shared_ptr<google::protobuf::Message> msg);
@@ -77,6 +80,8 @@ public:
 	/** Handle a ProtoBuf message by reference. Overridden in @ref pb_converter
 	 * @param msg Reference to a generic ProtoBuf message */
 	virtual void handle(const google::protobuf::Message &msg);
+
+#pragma GCC diagnostic pop
 
 protected:
 	/// Blackboard used by the main thread
