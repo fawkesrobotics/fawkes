@@ -90,6 +90,9 @@ MongoLogLoggerThread::insert_message(LogLevel    ll,
                                      va_list     va)
 {
 	MutexLocker            lock(mutex_);
+	if(config->get_string("fawkes/agent/name") != "Icks") {
+		return;
+	}
 	bsoncxx::types::b_date nowd{std::chrono::high_resolution_clock::now()};
 
 	char *msg;
@@ -174,7 +177,7 @@ MongoLogLoggerThread::insert_message(LogLevel    ll,
 		std::string clips_id = msg_s.substr(msg_s.find("<== ") + 4).substr(0, msg_s.find("(") - 5);
 		
 		mongodb_client->database(database_)["gamestate_recovery_test"].update_one(
-		  make_document(kvp("clips-id", clips_id),kvp("game", gametime_)),//add gametime for synchronization purposes :D 
+		  make_document(kvp("clips-id", clips_id),kvp("game", gametime_)),
 		  make_document(kvp("$set", make_document(kvp("retracted", nowd)))));
 	}
 	free(msg);
