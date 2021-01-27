@@ -131,6 +131,18 @@ MongoLogLoggerThread::insert_message(LogLevel    ll,
 		df.append(basic::kvp("game", gametime_));
 		mongodb_client->database(database_)["gamestate_recovery_test"].insert_one(df.view());
 	}
+
+	//track rule firing
+	if (msg_s.find("FIRE") != std::string::npos) {
+		basic::document df;
+		df.append(basic::kvp("rule",
+		                     msg_s.substr(msg_s.find("FIRE") + 10,
+		                                  msg_s.find("f-") - 2 - msg_s.find("FIRE") - 10)));
+		df.append(basic::kvp("fired", nowd));
+		df.append(basic::kvp("game", gametime_));
+		mongodb_client->database(database_)["gamestate_recovery_test"].insert_one(df.view());
+	}
+
 	//track assertion
 	if (msg_s.find("(wm-fact (id \"/domain/") != std::string::npos
 	    && msg_s.find("==>") != std::string::npos) {
