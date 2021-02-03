@@ -94,7 +94,7 @@
 	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type RUN-ALL-OF-SUBGOALS) (mode DISPATCHED)
 	             (committed-to ?sub-goal))
 	?sg <- (goal (id ?sub-goal) (parent ?id) (acquired-resources)
-	             (type ACHIEVE) (mode EVALUATED) (outcome FAILED))
+	             (type ACHIEVE) (mode RETRACTED) (outcome FAILED))
 	=>
 	(modify ?gf (mode FINISHED) (outcome FAILED) (committed-to nil)
 					(error SUB-GOAL-FAILED ?sub-goal)

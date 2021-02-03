@@ -60,7 +60,7 @@
 (defrule try-all-goal-reject
 	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type TRY-ALL-OF-SUBGOALS) (mode EXPANDED))
 	(forall (goal (id ?sub-goal) (parent ?id) (type ACHIEVE))
-		(goal (id ?sub-goal) (mode EVALUATED) (outcome REJECTED)))
+		(goal (id ?sub-goal) (acquired-resources) (mode RETRACTED) (outcome REJECTED)))
 	=>
 	(modify ?gf (mode FINISHED) (outcome REJECTED) (committed-to nil)
 	        (error SUB-GOALS-REJECTED))
@@ -69,8 +69,8 @@
 (defrule try-all-goal-failed
 	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type TRY-ALL-OF-SUBGOALS) (mode EXPANDED))
 	(forall (goal (id ?sub-goal) (parent ?id) (type ACHIEVE))
-		(goal (id ?sub-goal) (mode EVALUATED) (outcome FAILED|REJECTED)))
-	(goal (id ?some-subgoal) (mode EVALUATED) (outcome FAILED))
+		(goal (id ?sub-goal) (acquired-resources) (mode RETRACTED) (outcome FAILED|REJECTED)))
+	(goal (id ?some-subgoal) (mode RETRACTED) (outcome FAILED))
 	=>
 	(modify ?gf (mode FINISHED) (outcome FAILED) (committed-to nil)
 	        (error SUB-GOALS-FAILED))
