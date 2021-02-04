@@ -13,6 +13,10 @@
 	(slot cost (type FLOAT))
 	(slot type (type SYMBOL))
 	(multislot start-time (type INTEGER) (cardinality 2 2) (default 0 0))
+	; Resources
+	(slot r (type SYMBOL))
+	(slot mps (type SYMBOL))
+	(slot wp (type SYMBOL))
 )
 
 ; TODO: Rename slots
