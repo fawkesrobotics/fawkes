@@ -54,11 +54,11 @@ ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 .PHONY: warning_tf warning_pcl warning_pcl_libs
 warning_tf:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting laser calibration tool (TF not available)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting laser calibration tool$(TNORMAL) (TF not available)"
 warning_pcl:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting laser calibration tool (PCL not available)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting laser calibration tool$(TNORMAL) (PCL not available)"
 warning_pcl_libs:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting laser calibration tool (not all PCL libs available, required: $(REQUIRED_PCL_LIBS))"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting laser calibration tool$(TNORMAL) (not all PCL libs available, required: $(REQUIRED_PCL_LIBS))"
 endif
 
 include $(BUILDSYSDIR)/base.mk
