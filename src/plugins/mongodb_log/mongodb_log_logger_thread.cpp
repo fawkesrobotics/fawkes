@@ -165,7 +165,6 @@ MongoLogLoggerThread::insert_message(LogLevel    ll,
 
 			std::string values_string = msg_s.substr(msg_s.find("(values") + 8)
 			                              .substr(0, msg_s.substr(msg_s.find("(values") + 8).find(")"));
-
 			size_t      pos = 0;
 			std::string token;
 			while ((pos = values_string.find(" ")) != std::string::npos) {
@@ -173,6 +172,7 @@ MongoLogLoggerThread::insert_message(LogLevel    ll,
 				array_builder.append(token);
 				values_string.erase(0, pos + 1);
 			}
+			array_builder.append(values_string);
 			df.append(basic::kvp("values", array_builder.extract()));
 		} else {
 			df.append(basic::kvp("value",
