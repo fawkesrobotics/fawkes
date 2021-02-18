@@ -126,7 +126,12 @@ MongoLogLoggerThread::insert_message(LogLevel    ll,
 	//track gamestate set to running
 	if(msg_s.find("(key refbox state)") != std::string::npos || msg_s.find("(key refbox phase)") != std::string::npos) {
 		basic::document df;
-		df.append(basic::kvp("gamestate",  msg_s.substr(msg_s.find("(value ") + 7, msg_s.substr(msg_s.find("(value ") + 7).find(")"))));
+		std::string value = msg_s.substr(msg_s.find("(value ") + 7, msg_s.substr(msg_s.find("(value ") + 7).find(")"));
+		if (value == "PRE_GAME" || value == "PRODUCTION" || value == "SETUP" || value ==  "POST_GAME") {
+			df.append(basic::kvp("gamephase",  value));
+		} else {
+			df.append(basic::kvp("gamestate",  value));
+		}
 		df.append(basic::kvp("set", nowd));
 		df.append(basic::kvp("game", gametime_));
 		mongodb_client->database(database_)["gamestate_recovery_test"].insert_one(df.view());
