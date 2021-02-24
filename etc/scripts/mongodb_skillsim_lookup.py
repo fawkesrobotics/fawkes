@@ -152,7 +152,7 @@ class MongoInterface:
           if skill_args != None:
              for arg in skill_args:
                  if(len(arg) == 1):
-                   args_dict[arg[0]]='*'
+                   args_dict[arg[0]]='.*'
                  else:
                    args_dict[arg[0]]=np.random.choice(arg[1:])
           doc["args"] = args_dict
