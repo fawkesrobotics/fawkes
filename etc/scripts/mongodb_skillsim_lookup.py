@@ -3,7 +3,7 @@
 # vim:fenc=utf-8
 ##########################################################################
 #
-#  mongodb_bb_connector.py transform mongo skiller logs to lookup entries
+#  mongodb_skillsim_lookup.py: provide data for the lookup estimator
 #
 #  Copyright © 2020 Tarik Viehmann <viehmann@kbsg.rwth-aachen.de>
 #
@@ -23,7 +23,8 @@
 
 
 """
-Extract skill durations from the skiller messages obtained via mongodb blackboard logger.
+Extract skill durations from the skiller messages obtained via mongodb
+blackboard logger or sample durations from mixed gaussian distributions.
 """
 
 import argparse
