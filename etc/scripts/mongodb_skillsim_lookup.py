@@ -220,7 +220,7 @@ def main():
   group.add_argument(
       '--mongodb-uri',
       type=str,
-      help='The MongoDB URI of the execution time estimator lookup database',
+      help='The MongoDB URI of the execution time estimator lookup database (default: %(default)s)',
       default='mongodb://localhost:27017/')
   group.add_argument(
       '--db',
@@ -234,7 +234,7 @@ def main():
   group.add_argument(
       '--collection', '-c',
       type=str,
-      help='name of the lookup collection',
+      help='name of the lookup collection (default: %(default)s)',
       default='exec_times')
   group.add_argument(
       '--drop-collection-first', '-dc',
@@ -272,17 +272,17 @@ def main():
   bb_log.add_argument(
       '--src-uri',
       type=str,
-      help='The MongoDB URI of the blackboard log connection',
+      help='The MongoDB URI of the blackboard log connection (default: %(default)s)',
       default='mongodb://localhost:27017/')
   bb_log.add_argument(
       '--src-db',
       type=str,
-      help='The name of the blackboard log database',
+      help='The name of the blackboard log database (default: %(default)s)',
       default='fflog')
   bb_log.add_argument(
       '--src-col',
       type=str,
-      help='The name of the blackboard log collection',
+      help='The name of the blackboard log collection (default: %(default)s)',
       default='SkillerInterface.Skiller')
   bb_log.add_argument(
       '--drop-src-col',
@@ -340,12 +340,12 @@ def main():
   visual.add_argument(
       '--bin-size', '-b',
       type=int,
-      help='number of bins to display sampled durations',
-      default=1000)
+      help='number of bins to display sampled durations (default: %(default)s)',
+      default=50)
   visual.add_argument(
       '--non-interactive', '-y',
       action='store_true',
-      help='skip drawing the sample range and asking for confirmation')
+      help='skip drawing the sample range')
   parser.epilog = "--- Arguments common to all sub-parsers ---" \
       + common.format_help().replace(common.format_usage(), '')
   args = parser.parse_args(args=None if sys.argv[1:] else ['--help'])
