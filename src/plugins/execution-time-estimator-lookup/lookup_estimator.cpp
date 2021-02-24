@@ -164,11 +164,13 @@ LookupEstimator::get_skill_query(const Skill &skill) const
 	query.append(kvp(skill_name_field_, skill.skill_name));
 	if (get_property(fully_match_args_)) {
 		for (const auto &skill_arg : skill.skill_args) {
-			query.append(kvp("args." + skill_arg.first, skill_arg.second));
+			query.append((kvp("$or", kvp("args." + skill_arg.first, skill_arg.second)),
+			              kvp("args." + skill_arg.first, ".*")));
 		}
 	} else if (active_whitelist_entry_ != whitelist_.end()) {
 		for (const auto &skill_arg : active_whitelist_entry_->second.skill_args) {
-			query.append(kvp("args." + skill_arg.first, skill_arg.second));
+			query.append((kvp("$or", kvp("args." + skill_arg.first, skill_arg.second)),
+			              kvp("args." + skill_arg.first, ".*")));
 		}
 	}
 	return query;
