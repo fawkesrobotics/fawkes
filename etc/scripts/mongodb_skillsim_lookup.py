@@ -59,18 +59,20 @@ def drop_collection(mongodb_uri, database, collection):
   curr_client = pymongo.MongoClient(mongodb_uri)
   curr_client[database][collection].drop()
 
-class MongoTransformer:
+class MongoInterface:
 
   def __init__(
           self,
           dst_mongodb_uri,
           dst_database,
-          dst_collection):
+          dst_collection,
+          dry_run):
     self.client = pymongo.MongoClient(dst_mongodb_uri)
     self.dst_mongodb_uri = dst_mongodb_uri
     self.lookup_col = self.client[dst_database][dst_collection]
+    self.dry_run = dry_run
 
-  def transform(self, src_mongodb_uri, src_database, src_collection):
+  def transform(self, src_mongodb_uri, src_database, src_collection, lower_bound, upper_bound):
     if src_mongodb_uri != self.dst_mongodb_uri:
       self.clone_collection(src_mongodb_uri, src_database, src_collection)
     col = self.client[src_database][src_collection]
@@ -89,12 +91,15 @@ class MongoTransformer:
                             "name": name,
                             "args": args,
                             "duration": time_diff_in_sec(skill_end["timestamp"],skill_start["timestamp"])}
-            if lookup_entry["duration"] > 60:
-              print("Warning: suspiciously long duration of {} seconds\n{}\n{}".format(lookup_entry["duration"], skill_start, skill_end))
+            if lookup_entry["duration"] > upper_bound or lookup_entry["duration"] < lower_bound:
+                print("duration out of bounds, omitting: {} seconds\n{}\n{}".format(lookup_entry["duration"], skill_start, skill_end))
             else:
               if not self.lookup_col.find_one(lookup_entry):
-                self.lookup_col.insert_one(lookup_entry)
+                if(not self.dry_run):
+                  self.lookup_col.insert_one(lookup_entry)
                 print("Adding: {}".format(lookup_entry))
+              else:
+                print("Entry already present, omitting")
     if src_mongodb_uri != self.dst_mongodb_uri:
       self.client.drop_database(src_database)
 
@@ -107,47 +112,104 @@ class MongoTransformer:
 
 
 def main():
-  parser = argparse.ArgumentParser(description='Blackboard log to skill time lookup transformer', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-  parser.add_argument(
+  header = '''
+###############################################################################
+#                                                                             #
+#   Obtain data for the lookup execution time estimator                       #
+#                                                                             #
+# --------------------------------------------------------------------------- #
+#                                                                             #
+#   Import execution times to mongodb from                                    #
+#   1. mongodb_log via recorded blackboard skiller calls                      #
+#   2. samples of a mixed gaussian distribution                               #
+#                                                                             #
+###############################################################################
+'''
+  parser = argparse.ArgumentParser(description=textwrap.dedent(header),
+                                   formatter_class=argparse.RawTextHelpFormatter)
+  common = argparse.ArgumentParser(add_help=False)
+  group = common.add_argument_group("Mongodb options")
+  group.add_argument(
+      '--mongodb-uri',
+      type=str,
+      help='The MongoDB URI of the execution time estimator lookup database',
+      default='mongodb://localhost:27017/')
+  group.add_argument(
+      '--db',
+      type=str,
+      help=textwrap.dedent('''name of the lookup database (default: %(default)s)'''),
+      default='skills')
+  group.add_argument(
+      '--dry-run', '-d',
+      action='store_true',
+      help='only create samples without uploading them to mongodb')
+  group.add_argument(
+      '--collection', '-c',
+      type=str,
+      help='name of the lookup collection',
+      default='exec_times')
+  group.add_argument(
+      '--drop-collection-first', '-dc',
+      action='store_true',
+      help='clear all old data from the collection')
+  subparsers = parser.add_subparsers(help='Source of the execution time data',dest='subparser')
+  bb_parser = subparsers.add_parser("bblog",parents=[common],
+                                    description=textwrap.dedent(header + '''\
+#                                                                             #
+# Selected option 1                                                           #
+#                                                                             #
+###############################################################################
+'''),formatter_class=argparse.RawTextHelpFormatter)
+  bb_parser.set_defaults()
+  bb_sanity = bb_parser.add_argument_group("Sanity checks to avoid faulty entries")
+  bb_sanity.add_argument(
+      '--lower-bound', '-l',
+      type=float,
+      default=0,
+      help='ignore entries with duration smaller than this')
+  bb_sanity.add_argument(
+      '--upper-bound', '-u',
+      type=float,
+      default=float('inf'),
+      help='ignore entries with duration smaller than this')
+  bb_log = bb_parser.add_argument_group("Blackboard log information")
+  bb_log.add_argument(
       '--src-uri',
       type=str,
       help='The MongoDB URI of the blackboard log connection',
       default='mongodb://localhost:27017/')
-  parser.add_argument(
-      '--dst-uri',
-      type=str,
-      help='The MongoDB URI of the skiller simulator lookup connection',
-      default='mongodb://localhost:27017/')
-  parser.add_argument(
+  bb_log.add_argument(
       '--src-db',
       type=str,
       help='The name of the blackboard log database',
       default='fflog')
-  parser.add_argument(
-      '--dst-db',
-      type=str,
-      help='The name of the skiller simulator lookup database',
-      default='skills')
-  parser.add_argument(
+  bb_log.add_argument(
       '--src-col',
       type=str,
       help='The name of the blackboard log collection',
       default='SkillerInterface.Skiller')
-  parser.add_argument(
-      '--dst-col',
-      type=str,
-      help='The name of the skiller simulator lookup collection',
-      default='exec_times')
-  parser.add_argument(
+  bb_log.add_argument(
       '--drop-src-col',
       type=bool,
       help='Delete the skiller blackboard log collection afterwards',
       default=False)
-  args = parser.parse_args()
-  transformer = MongoTransformer(args.dst_uri,args.dst_db,args.dst_col)
-  transformer.transform(args.src_uri,args.src_db,args.src_col)
-  if args.drop_src_col:
-      drop_collection(args.src_mongodb_uri, args.src_db, args.src_col)
+
+  args = parser.parse_args(args=None if sys.argv[1:] else ['--help'])
+  # validate inputs
+  if args==None:
+      parser.exit(1)
+
+  mongoIf = MongoInterface(args.mongodb_uri,args.db,args.collection,args.dry_run)
+  if(args.drop_collection_first and not args.dry_run):
+      print("Drop collection before uploading...")
+      drop_collection(args.mongodb_uri,args.db,args.collection)
+  if args.subparser == 'bblog':
+    mongoIf.transform(args.src_uri,args.src_db,args.src_col,
+                      args.lower_bound,args.upper_bound)
+    if args.drop_src_col:
+        drop_collection(args.src_mongodb_uri, args.src_db, args.src_col)
+  else:
+    print("unrecognized mode")
 
 
 if __name__ == '__main__':
