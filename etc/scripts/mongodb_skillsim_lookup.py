@@ -128,7 +128,7 @@ class GaussSampler:
     if(self.lower_bound > 0):
       plt.vlines([self.lower_bound],ymin,ymax,color='crimson')
     if(self.upper_bound < float('inf')):
-      plt.vlines([self.lower_bound],ymin,ymax,color='crimson')
+      plt.vlines([self.upper_bound],ymin,ymax,color='crimson')
     plt.show()
 
 
@@ -348,6 +348,10 @@ def main():
       help='skip drawing the sample range')
   parser.epilog = "--- Arguments common to all sub-parsers ---" \
       + common.format_help().replace(common.format_usage(), '')
+  random_parser.epilog = '''
+example call: ./mongodb_skillsim_lookup.py generate -d -n \
+1000 -g 10 2 -g 20 3 -w 1 5 -s test -a arg1 value1 value2 -a arg2
+  '''
   args = parser.parse_args(args=None if sys.argv[1:] else ['--help'])
   # validate inputs
   if args==None:
