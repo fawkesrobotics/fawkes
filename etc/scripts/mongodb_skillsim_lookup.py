@@ -32,7 +32,6 @@ import pymongo
 import re
 import textwrap
 import sys
-import math
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.stats as ss
@@ -95,7 +94,6 @@ class GaussSampler:
     sample_size = quantity
     self.sample_min, self.sample_max = [float("inf"),-float("inf")]
     while(True):
-      i = 0
       # determine the gaussian to sample from for each sample
       mixture_idx = np.random.choice(len(self.dist_weights),
                                      size=sample_size,
@@ -124,7 +122,7 @@ class GaussSampler:
     plt.hist(self.samples, density=True, bins=bin_size,color='palegreen')
     plt.xlabel("duration")
     plt.ylabel("density")
-    xmin, xmax, ymin, ymax = plt.axis()
+    _, _, ymin, ymax = plt.axis()
     if(self.lower_bound > 0):
       plt.vlines([self.lower_bound],ymin,ymax,color='crimson')
     if(self.upper_bound < float('inf')):
