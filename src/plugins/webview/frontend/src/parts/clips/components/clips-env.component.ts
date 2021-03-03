@@ -33,7 +33,7 @@ export class ClipsEnvComponent implements OnInit, OnDestroy {
 
   data_source = new MatTableDataSource();
 
-  @ViewChild(CardListFilterComponent) private readonly card_filter_: CardListFilterComponent;
+  @ViewChild(CardListFilterComponent, {static: true}) private readonly card_filter_: CardListFilterComponent;
 
   constructor(private readonly api_service: ClipsApiService,
               private route: ActivatedRoute,

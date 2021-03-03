@@ -34,7 +34,7 @@ export class PluginOverviewComponent implements OnInit, OnDestroy {
   ops_pending = {};
   data_source = new MatTableDataSource();
 
-  @ViewChild(CardListFilterComponent) private readonly card_filter_: CardListFilterComponent;
+  @ViewChild(CardListFilterComponent, {static: true}) private readonly card_filter_: CardListFilterComponent;
 
   selection = new SelectionModel<Plugin>(true, []);
 

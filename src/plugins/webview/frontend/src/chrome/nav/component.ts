@@ -15,7 +15,7 @@ import { LockoutService } from '../../services/lockout/lockout.service';
   styleUrls: ['./style.scss'],
 })
 export class NavComponent implements AfterContentInit, OnInit {
-  @ViewChild(MatDrawer) private readonly nav_: MatDrawer;
+  @ViewChild(MatDrawer, {static: true}) private readonly nav_: MatDrawer;
 
   constructor(private readonly navService_: NavService,
               public lockout: LockoutService) {}

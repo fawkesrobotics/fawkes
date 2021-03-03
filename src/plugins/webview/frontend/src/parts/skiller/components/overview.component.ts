@@ -18,7 +18,7 @@ import { SkillCall } from '../models/SkillCall';
 })
 export class SkillerOverviewComponent implements OnInit, OnDestroy {
 
-  @ViewChild('f') form;
+  @ViewChild('f', {static: true}) form;
 
   loading = false;
   auto_refresh_subscription = null;

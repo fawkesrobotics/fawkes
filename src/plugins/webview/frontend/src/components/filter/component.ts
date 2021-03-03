@@ -13,7 +13,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
   styleUrls: ['style.scss'],
 })
 export class CardListFilterComponent implements OnInit {
-  @ViewChild('filterInput') private readonly filterInput_: ElementRef;
+  @ViewChild('filterInput', {static: true}) private readonly filterInput_: ElementRef;
   private hidden_ = true;
   keyUpEvent = new Subject<string>();
   query = '';
