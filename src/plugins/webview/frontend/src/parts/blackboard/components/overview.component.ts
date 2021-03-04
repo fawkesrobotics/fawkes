@@ -4,7 +4,7 @@
 
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { interval } from 'rxjs';
-import { SessionStorage } from 'ngx-store';
+import { SessionStorage } from '@efaps/ngx-store';
 
 import { BackendConfigurationService } from '../../../services/backend-config/backend-config.service';
 import { BlackboardApiService } from '../services/api.service';

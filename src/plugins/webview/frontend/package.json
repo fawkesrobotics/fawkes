@@ -11,7 +11,7 @@
     "lint": "ng lint",
     "e2e": "ng e2e",
     "postinstall": "ngcc",
-    "update": "ng add @angular/localize"
+    "update": "ng update"
   },
   "private": true,
   "dependencies": {
@@ -29,6 +29,7 @@
     "@angular/platform-server": "^9.1.13",
     "@angular/router": "^9.1.13",
     "@angular/service-worker": "^9.1.13",
+    "@efaps/ngx-store": "^3.0.0",
     "@types/c3": "^0.6.4",
     "c3": "^0.6.14",
     "core-js": "^3.9.1",
