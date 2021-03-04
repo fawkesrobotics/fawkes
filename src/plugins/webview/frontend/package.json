@@ -10,7 +10,8 @@
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "update": "ng update -C --allow-dirty @angular/flex-layout@9.0.0-beta.31 @angular/material@9"
+    "postinstall": "ngcc",
+    "update": "ng add @angular/localize"
   },
   "private": true,
   "dependencies": {
@@ -21,6 +22,7 @@
     "@angular/core": "^9.1.13",
     "@angular/flex-layout": "^9.0.0-beta.31",
     "@angular/forms": "^9.1.13",
+    "@angular/localize": "^9.1.13",
     "@angular/material": "^9.2.4",
     "@angular/platform-browser": "^9.1.13",
     "@angular/platform-browser-dynamic": "^9.1.13",
