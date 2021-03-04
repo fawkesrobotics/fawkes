@@ -4,7 +4,7 @@
 
 import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { Router, ActivatedRoute, ParamMap } from '@angular/router';
-import { MatTableDataSource } from '@angular/material';
+import { MatTableDataSource } from '@angular/material/table';
 
 import { BackendConfigurationService } from '../../../services/backend-config/backend-config.service';
 import { CardListFilterComponent } from '../../../components/filter/component';

@@ -3,7 +3,7 @@
 // Copyright  2017  The Kubernetes Authors
 // License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-import {MatDrawer} from '@angular/material';
+import { MatDrawer } from '@angular/material/sidenav';
 import { Injectable } from "@angular/core";
 
 @Injectable()
