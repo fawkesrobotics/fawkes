@@ -29,14 +29,14 @@
     "@angular/service-worker": "^9.1.13",
     "@types/c3": "^0.6.4",
     "c3": "^0.6.14",
-    "core-js": "^3.1.3",
+    "core-js": "^3.9.1",
     "hammerjs": "^2.0.8",
     "material-design-icons": "^3.0.1",
     "ngx-store": "^2.1.0",
-    "rxjs": "^6.5.0",
+    "rxjs": "^6.6.6",
     "tslib": "^1.10.0",
     "viz.js": "^1.8.2",
-    "zone.js": "~0.10.2"
+    "zone.js": "^0.11.4"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "~0.901.15",
