@@ -3,7 +3,8 @@
 // License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
-import { MAT_CHECKBOX_CLICK_ACTION } from '@angular/material/checkbox';
+import { MatCheckboxClickAction } from '@angular/material/checkbox';
+import { MatCheckboxDefaultOptions, MAT_CHECKBOX_DEFAULT_OPTIONS } from '@angular/material/checkbox';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTableDataSource } from '@angular/material/table';
 import { SelectionModel } from '@angular/cdk/collections';
@@ -21,7 +22,7 @@ import { interval } from 'rxjs';
   selector: 'ff-plugins-overview',
   templateUrl: './overview.component.html',
   styleUrls: ['./overview.component.scss'],
-  providers: [{provide: MAT_CHECKBOX_CLICK_ACTION, useValue: 'noop'}]
+  providers: [{provide: MAT_CHECKBOX_DEFAULT_OPTIONS, useValue: { clickAction: 'noop' } as MatCheckboxDefaultOptions }]
 })
 export class PluginOverviewComponent implements OnInit, OnDestroy {
 
