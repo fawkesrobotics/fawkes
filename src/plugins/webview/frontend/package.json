@@ -11,7 +11,8 @@
     "lint": "ng lint",
     "e2e": "ng e2e",
     "postinstall": "ngcc",
-    "update": "ng update -C --allow-dirty @angular/material"
+    "update": "ng update -C --allow-dirty @angular/core @angular/cli ",
+    "analytics": "ng analytics off"
   },
   "private": true,
   "dependencies": {
