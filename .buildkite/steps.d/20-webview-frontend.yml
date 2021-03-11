@@ -1,7 +1,9 @@
   - label: ":angular: Webview"
     env:
       NG_CLI_ANALYTICS: "false"
-    command: .buildkite/build-webview-frontend
+    commands:
+      - export NG_CLI_ANALYTICS=false
+      - .buildkite/build-webview-frontend
     plugins:
       - *merged-pr-plugin
       - kennasecurity/podman#master:
