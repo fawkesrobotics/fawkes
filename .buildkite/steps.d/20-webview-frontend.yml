@@ -1,4 +1,6 @@
   - label: ":angular: Webview"
+    env:
+      NG_CLI_ANALYTICS: "false"
     command: .buildkite/build-webview-frontend
     plugins:
       - *merged-pr-plugin
