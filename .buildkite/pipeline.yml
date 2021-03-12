@@ -6,7 +6,7 @@ merged-pr-plugin: &merged-pr-plugin
     mode: checkout
 
 podman-plugin-base: &podman-plugin-base
-  image: fawkesrobotics/fawkes-builder:fedora33-noetic
+  image: docker.io/fawkesrobotics/fawkes-builder:fedora33-noetic
   always-pull: true
   debug: true
   environment: ["BUILDKITE", "BUILDKITE_LABEL"]
