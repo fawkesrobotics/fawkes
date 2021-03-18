@@ -313,8 +313,8 @@ def main():
   gauss.add_argument(
       '--gauss-params', '-g',
       type=float,
-      help='mean and standard deviation (in that order)',
-      nargs='+',
+      help='mean and standard deviation (in that order) of a gaussian, repeat this option to add more gaussians',
+      nargs=2,
       required=True,
       action='append')
   gauss.add_argument(
