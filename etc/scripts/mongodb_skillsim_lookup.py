@@ -43,9 +43,11 @@ S_FINAL = 1
 S_FAILED = 3
 
 def time_diff_in_sec(end, start):
+      """ Computee the time diff in seconds from ms precision times. """
     return int(max((end - start)/1000, 0))
 
 def split_skill_string(skill):
+      """ Separate skill name and arguments from a fawkes skill string. """
     skill = skill.strip().replace(" ","").replace("\n","")
     skill_regex = "([\w_-]+)\{(.*)\}"
     try_match = re.match(skill_regex, skill)
@@ -62,10 +64,12 @@ def split_skill_string(skill):
         raise Exception("invalid skill format", skill)
 
 def drop_collection(mongodb_uri, database, collection):
+  """ Drop a collection from a mongodb instance. """
   curr_client = pymongo.MongoClient(mongodb_uri)
   curr_client[database][collection].drop()
 
 class GaussSampler:
+""" Sampler to obtain points from a meixture of gaussians. """
 
   def __init__(
           self,
@@ -74,6 +78,7 @@ class GaussSampler:
           gauss_params,
           upper_bound,
           lower_bound):
+      """ Sample points from a bounded and weighted mixture of gaussians. """
     self.dist_weights = dist_weights
     self.lower_bound = lower_bound
     self.upper_bound = upper_bound
@@ -114,6 +119,7 @@ class GaussSampler:
           break
 
   def display(self, bin_size):
+    """ Show the sampled points using pyplot. """
     xs = np.linspace(self.sample_min, self.sample_max, 2000)
     ys = np.zeros_like(xs)
     for (l, s), w in zip(self.gauss_params, self.dist_weights):
@@ -131,6 +137,7 @@ class GaussSampler:
 
 
 class MongoInterface:
+""" Interface to a mongodb instance. """
 
   def __init__(
           self,
@@ -138,12 +145,14 @@ class MongoInterface:
           dst_database,
           dst_collection,
           dry_run):
+    """ Set up a connection to a mongodb collection. """
     self.client = pymongo.MongoClient(dst_mongodb_uri)
     self.dst_mongodb_uri = dst_mongodb_uri
     self.lookup_col = self.client[dst_database][dst_collection]
     self.dry_run = dry_run
 
   def upload(self, durations, skill_name, skill_args):
+    """ Upload skill exec time entries, randomly sample from skill arg choices. """
       for dur in durations:
           doc = {"outcome": 1, "error": "", "name": skill_name, "duration": dur}
           args_dict  = dict()
@@ -159,6 +168,7 @@ class MongoInterface:
             self.lookup_col.insert_one(doc)
 
   def transform(self, src_mongodb_uri, src_database, src_collection, lower_bound, upper_bound):
+    """ Transform blackboard log data from the Skiller to exec time entries. """
     if src_mongodb_uri != self.dst_mongodb_uri:
       self.clone_collection(src_mongodb_uri, src_database, src_collection)
     col = self.client[src_database][src_collection]
@@ -190,6 +200,7 @@ class MongoInterface:
       self.client.drop_database(src_database)
 
   def clone_collection(self, src_mongodb_uri, src_database,src_collection):
+    """ Clone a mongodb collection to the client. """
     # drop "mongodb://" suffix from uri
     src_conn = src_mongodb_uri[10:]
     if src_conn[-1] == "/":
@@ -199,6 +210,8 @@ class MongoInterface:
 
 def main():
   header = '''
+    """ Obtain data for the lookup execution time estimator. """
+    header = """
 ###############################################################################
 #                                                                             #
 #   Obtain data for the lookup execution time estimator                       #
@@ -377,5 +390,5 @@ example call: ./mongodb_skillsim_lookup.py generate -d -n \
     print("unrecognized mode")
 
 
-if __name__ == '__main__':
-  main()
+if __name__ == "__main__":
+    main()
