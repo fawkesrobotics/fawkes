@@ -152,7 +152,8 @@ MongoLogLoggerThread::insert_message(LogLevel    ll,
 	if ((msg_s.find("(wm-fact (id \"/domain/") != std::string::npos
 		|| msg_s.find("(wm-fact (id \"/refbox/") != std::string::npos
 		|| msg_s.find("(wm-fact (id \"/order/") != std::string::npos)
-	    && msg_s.find("==>") != std::string::npos) {
+	    && msg_s.find("==>") != std::string::npos
+		&& msg_s.find("(wm-fact (id \"/refbox/comm") == std::string::npos) {
 		basic::document df;
 		basic::document dfc;
 		df.append(basic::kvp("id",
