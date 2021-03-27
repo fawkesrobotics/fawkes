@@ -71,6 +71,9 @@ MongoLogLoggerThread::init()
 	collection_ = config->get_string_or_default("/plugins/mongodb/logger/collection", "msglog");
 	mongocxx::uri uri("mongodb://localhost:27021");
 	mongodb_client = new mongocxx::client(uri);
+
+    assert_regex = std::regex("==> f-[0-9]*\\s*\\(wm-fact \\(id \\\"\\/((refbox)|(order)|(domain))\\/(?!comm)");
+    retract_regex = std::regex("<== f-[0-9]*\\s*\\(wm-fact \\(id \\\"\\/((refbox)|(order)|(domain))\\/(?!comm)");
 }
 
 void
@@ -149,11 +152,7 @@ MongoLogLoggerThread::insert_message(LogLevel    ll,
 	}
 
 	//track assertion
-	if ((msg_s.find("(wm-fact (id \"/domain/") != std::string::npos
-		|| msg_s.find("(wm-fact (id \"/refbox/") != std::string::npos
-		|| msg_s.find("(wm-fact (id \"/order/") != std::string::npos)
-	    && msg_s.find("==>") != std::string::npos
-		&& msg_s.find("(wm-fact (id \"/refbox/comm") == std::string::npos) {
+    if (std::regex_search(msg_s, assert_regex)) {
 		basic::document df;
 		basic::document dfc;
 		df.append(basic::kvp("id",
@@ -200,11 +199,7 @@ MongoLogLoggerThread::insert_message(LogLevel    ll,
 	}
 
 	//track retraction
-	if ((msg_s.find("(wm-fact (id \"/domain/") != std::string::npos
-		|| msg_s.find("(wm-fact (id \"/refbox/") != std::string::npos
-		|| msg_s.find("(wm-fact (id \"/order/") != std::string::npos)
-	    && msg_s.find("<==") != std::string::npos
-		&& msg_s.find("(wm-fact (id \"/refbox/comm") == std::string::npos) {
+    if (std::regex_search(msg_s, retract_regex)) {
 		std::string clips_id = msg_s.substr(msg_s.find("<== ") + 4).substr(0, msg_s.find("(") - 5);
 		
 		mongodb_client->database(database_)["gamestate_recovery_test"].update_one(
