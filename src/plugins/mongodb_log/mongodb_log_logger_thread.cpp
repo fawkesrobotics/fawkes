@@ -137,7 +137,7 @@ MongoLogLoggerThread::insert_message(LogLevel    ll,
 		}
 		df.append(basic::kvp("set", nowd));
 		df.append(basic::kvp("game", gametime_));
-		mongodb_client->database(database_)["gamestate_recovery_test"].insert_one(df.view());
+		mongodb_client->database(database_)[collection_name].insert_one(df.view());
 	}
 
 	//track rule firing
@@ -148,7 +148,7 @@ MongoLogLoggerThread::insert_message(LogLevel    ll,
 		                                  msg_s.find("f-") - 2 - msg_s.find("FIRE") - 10)));
 		df.append(basic::kvp("fired", nowd));
 		df.append(basic::kvp("game", gametime_));
-		mongodb_client->database(database_)["gamestate_recovery_test"].insert_one(df.view());
+		mongodb_client->database(database_)[collection_name].insert_one(df.view());
 	}
 
 	//track assertion
@@ -195,14 +195,14 @@ MongoLogLoggerThread::insert_message(LogLevel    ll,
 		dfc.append(basic::kvp("msg", msg_s));
 		dfc.append(
 		  basic::kvp("clips-id", msg_s.substr(msg_s.find("==> ") + 4).substr(0, msg_s.find("(") - 5)));
-		mongodb_client->database(database_)["gamestate_recovery_test"].insert_one(dfc.view());
+		mongodb_client->database(database_)[collection_name].insert_one(dfc.view());
 	}
 
 	//track retraction
     if (std::regex_search(msg_s, retract_regex)) {
 		std::string clips_id = msg_s.substr(msg_s.find("<== ") + 4).substr(0, msg_s.find("(") - 5);
 		
-		mongodb_client->database(database_)["gamestate_recovery_test"].update_one(
+		mongodb_client->database(database_)[collection_name].update_one(
 		  make_document(kvp("clips-id", clips_id),kvp("game", gametime_)),
 		  make_document(kvp("$set", make_document(kvp("retracted", nowd)))));
 	}

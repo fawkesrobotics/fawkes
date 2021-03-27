@@ -111,6 +111,7 @@ private:
 	fawkes::Mutex *        mutex_;
 	std::regex			   assert_regex;
 	std::regex			   retract_regex;
+	std::string			   collection_name = "gamestate_recovery";
 };
 
 #endif
