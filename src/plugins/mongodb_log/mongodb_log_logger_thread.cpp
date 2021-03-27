@@ -72,8 +72,10 @@ MongoLogLoggerThread::init()
 	mongocxx::uri uri("mongodb://localhost:27021");
 	mongodb_client = new mongocxx::client(uri);
 
-    assert_regex = std::regex("==> f-[0-9]*\\s*\\(wm-fact \\(id \\\"\\/((refbox)|(order)|(domain))\\/(?!comm)");
-    retract_regex = std::regex("<== f-[0-9]*\\s*\\(wm-fact \\(id \\\"\\/((refbox)|(order)|(domain))\\/(?!comm)");
+	assert_regex =
+	  std::regex("==> f-[0-9]*\\s*\\(wm-fact \\(id \\\"\\/((refbox)|(order)|(domain))\\/(?!comm)");
+	retract_regex =
+	  std::regex("<== f-[0-9]*\\s*\\(wm-fact \\(id \\\"\\/((refbox)|(order)|(domain))\\/(?!comm)");
 }
 
 void
@@ -92,8 +94,8 @@ MongoLogLoggerThread::insert_message(LogLevel    ll,
                                      const char *format,
                                      va_list     va)
 {
-	MutexLocker            lock(mutex_);
-	if(config->get_string("fawkes/agent/name") != "Icks") {
+	MutexLocker lock(mutex_);
+	if (config->get_string("fawkes/agent/name") != "Icks") {
 		return;
 	}
 	bsoncxx::types::b_date nowd{std::chrono::high_resolution_clock::now()};
@@ -127,13 +129,15 @@ MongoLogLoggerThread::insert_message(LogLevel    ll,
 	std::string msg_s(msg);
 
 	//track gamestate set to running
-	if(msg_s.find("(key refbox state)") != std::string::npos || msg_s.find("(key refbox phase)") != std::string::npos) {
+	if (msg_s.find("(key refbox state)") != std::string::npos
+	    || msg_s.find("(key refbox phase)") != std::string::npos) {
 		basic::document df;
-		std::string value = msg_s.substr(msg_s.find("(value ") + 7, msg_s.substr(msg_s.find("(value ") + 7).find(")"));
-		if (value == "PRE_GAME" || value == "PRODUCTION" || value == "SETUP" || value ==  "POST_GAME") {
-			df.append(basic::kvp("gamephase",  value));
+		std::string     value =
+		  msg_s.substr(msg_s.find("(value ") + 7, msg_s.substr(msg_s.find("(value ") + 7).find(")"));
+		if (value == "PRE_GAME" || value == "PRODUCTION" || value == "SETUP" || value == "POST_GAME") {
+			df.append(basic::kvp("gamephase", value));
 		} else {
-			df.append(basic::kvp("gamestate",  value));
+			df.append(basic::kvp("gamestate", value));
 		}
 		df.append(basic::kvp("set", nowd));
 		df.append(basic::kvp("game", gametime_));
@@ -152,7 +156,7 @@ MongoLogLoggerThread::insert_message(LogLevel    ll,
 	}
 
 	//track assertion
-    if (std::regex_search(msg_s, assert_regex)) {
+	if (std::regex_search(msg_s, assert_regex)) {
 		basic::document df;
 		basic::document dfc;
 		df.append(basic::kvp("id",
@@ -199,11 +203,11 @@ MongoLogLoggerThread::insert_message(LogLevel    ll,
 	}
 
 	//track retraction
-    if (std::regex_search(msg_s, retract_regex)) {
+	if (std::regex_search(msg_s, retract_regex)) {
 		std::string clips_id = msg_s.substr(msg_s.find("<== ") + 4).substr(0, msg_s.find("(") - 5);
-		
+
 		mongodb_client->database(database_)[collection_name].update_one(
-		  make_document(kvp("clips-id", clips_id),kvp("game", gametime_)),
+		  make_document(kvp("clips-id", clips_id), kvp("game", gametime_)),
 		  make_document(kvp("$set", make_document(kvp("retracted", nowd)))));
 	}
 	free(msg);

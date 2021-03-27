@@ -30,8 +30,8 @@
 #include <core/threading/thread.h>
 #include <plugins/mongodb/aspect/mongodb.h>
 
-#include <string>
 #include <regex>
+#include <string>
 
 namespace fawkes {
 class Mutex;
@@ -109,9 +109,9 @@ private:
 	std::string            collection_;
 	bsoncxx::types::b_date gametime_{std::chrono::high_resolution_clock::now()};
 	fawkes::Mutex *        mutex_;
-	std::regex			   assert_regex;
-	std::regex			   retract_regex;
-	std::string			   collection_name = "gamestate_recovery";
+	std::regex             assert_regex;
+	std::regex             retract_regex;
+	std::string            collection_name = "gamestate_recovery";
 };
 
 #endif
