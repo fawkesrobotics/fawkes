@@ -411,7 +411,7 @@ BlackboardPlexilAdapter::unsubscribe(const PLEXIL::State &state)
 }
 
 void
-BlackboardPlexilAdapter::bb_interface_data_refreshed(fawkes::Interface *interface) throw()
+BlackboardPlexilAdapter::bb_interface_data_refreshed(fawkes::Interface *interface) noexcept
 {
 	//logger_->log_debug("PlexilBB", "Event for %s", interface->uid());
 	interface->read();
