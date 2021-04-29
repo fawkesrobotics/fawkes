@@ -36,9 +36,9 @@ public:
 	                                     float                   cost_factor);
 	virtual ~NavGraphClustersStaticCostConstraint();
 
-	virtual bool  compute(void) throw();
+	virtual bool  compute(void) noexcept;
 	virtual float cost_factor(const fawkes::NavGraphNode &from,
-	                          const fawkes::NavGraphNode &to) throw();
+	                          const fawkes::NavGraphNode &to) noexcept;
 
 private:
 	NavGraphClustersThread *                       parent_;

@@ -74,7 +74,7 @@ NavGraphClustersDistanceCostConstraint::~NavGraphClustersDistanceCostConstraint(
 }
 
 bool
-NavGraphClustersDistanceCostConstraint::compute(void) throw()
+NavGraphClustersDistanceCostConstraint::compute(void) noexcept
 {
 	blocked_ = parent_->blocked_edges_centroids();
 	valid_   = parent_->robot_pose(pose_);
@@ -83,7 +83,7 @@ NavGraphClustersDistanceCostConstraint::compute(void) throw()
 
 float
 NavGraphClustersDistanceCostConstraint::cost_factor(const fawkes::NavGraphNode &from,
-                                                    const fawkes::NavGraphNode &to) throw()
+                                                    const fawkes::NavGraphNode &to) noexcept
 {
 	if (valid_) {
 		std::string to_n   = to.name();
