@@ -428,26 +428,26 @@ NetworkCamera::image_list()
 }
 
 void
-NetworkCamera::fuse_invalid_server_version(uint32_t local_version, uint32_t remote_version) throw()
+NetworkCamera::fuse_invalid_server_version(uint32_t local_version, uint32_t remote_version) noexcept
 {
 	local_version_  = local_version;
 	remote_version_ = remote_version;
 }
 
 void
-NetworkCamera::fuse_connection_established() throw()
+NetworkCamera::fuse_connection_established() noexcept
 {
 	connected_ = true;
 }
 
 void
-NetworkCamera::fuse_connection_died() throw()
+NetworkCamera::fuse_connection_died() noexcept
 {
 	connected_ = false;
 }
 
 void
-NetworkCamera::fuse_inbound_received(FuseNetworkMessage *m) throw()
+NetworkCamera::fuse_inbound_received(FuseNetworkMessage *m) noexcept
 {
 	switch (m->type()) {
 	case FUSE_MT_IMAGE:
