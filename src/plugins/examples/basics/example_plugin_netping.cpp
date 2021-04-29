@@ -47,7 +47,7 @@ public:
    * @param id the id of the calling client
    */
 	virtual void
-	deregistered(unsigned int id) throw()
+	deregistered(unsigned int id) noexcept
 	{
 		printf("Got deregistered\n");
 		quit = true;
@@ -58,7 +58,7 @@ public:
    * @param id the id of the calling thread
    */
 	virtual void
-	inbound_received(FawkesNetworkMessage *m, unsigned int id) throw()
+	inbound_received(FawkesNetworkMessage *m, unsigned int id) noexcept
 	{
 		if (m->payload_size() == sizeof(unsigned int)) {
 			unsigned int *u = (unsigned int *)m->payload();
@@ -70,14 +70,14 @@ public:
 	}
 
 	virtual void
-	connection_died(unsigned int id) throw()
+	connection_died(unsigned int id) noexcept
 	{
 		printf("Connection died.\n");
 		quit = true;
 	}
 
 	virtual void
-	connection_established(unsigned int id) throw()
+	connection_established(unsigned int id) noexcept
 	{
 		printf("Connection established\n");
 	}
