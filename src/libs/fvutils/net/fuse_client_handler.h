@@ -36,10 +36,10 @@ public:
 	virtual ~FuseClientHandler();
 
 	virtual void fuse_invalid_server_version(uint32_t local_version,
-	                                         uint32_t remote_version) throw() = 0;
-	virtual void fuse_connection_established() throw()                        = 0;
-	virtual void fuse_connection_died() throw()                               = 0;
-	virtual void fuse_inbound_received(FuseNetworkMessage *m) throw()         = 0;
+	                                         uint32_t remote_version) noexcept = 0;
+	virtual void fuse_connection_established() noexcept                        = 0;
+	virtual void fuse_connection_died() noexcept                               = 0;
+	virtual void fuse_inbound_received(FuseNetworkMessage *m) noexcept         = 0;
 };
 
 } // end namespace firevision

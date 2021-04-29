@@ -110,7 +110,7 @@ FuseServer::~FuseServer()
 }
 
 void
-FuseServer::add_connection(StreamSocket *s) throw()
+FuseServer::add_connection(StreamSocket *s) noexcept
 {
 	FuseServerClientThread *client = new FuseServerClientThread(this, s);
 	if (thread_collector_) {
@@ -125,7 +125,7 @@ FuseServer::add_connection(StreamSocket *s) throw()
  * @param client client whose connection died
  */
 void
-FuseServer::connection_died(FuseServerClientThread *client) throw()
+FuseServer::connection_died(FuseServerClientThread *client) noexcept
 {
 	dead_clients_.push_back_locked(client);
 	wakeup();
