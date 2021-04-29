@@ -74,7 +74,7 @@ RosJointThread::finalize()
 }
 
 void
-RosJointThread::bb_interface_created(const char *type, const char *id) throw()
+RosJointThread::bb_interface_created(const char *type, const char *id) noexcept
 {
 	if (strncmp(type, "JointInterface", INTERFACE_TYPE_SIZE_) != 0)
 		return;
@@ -97,19 +97,19 @@ RosJointThread::bb_interface_created(const char *type, const char *id) throw()
 }
 
 void
-RosJointThread::bb_interface_writer_removed(Interface *interface, Uuid instance_serial) throw()
+RosJointThread::bb_interface_writer_removed(Interface *interface, Uuid instance_serial) noexcept
 {
 	conditional_close(interface);
 }
 
 void
-RosJointThread::bb_interface_reader_removed(Interface *interface, Uuid instance_serial) throw()
+RosJointThread::bb_interface_reader_removed(Interface *interface, Uuid instance_serial) noexcept
 {
 	conditional_close(interface);
 }
 
 void
-RosJointThread::conditional_close(Interface *interface) throw()
+RosJointThread::conditional_close(Interface *interface) noexcept
 {
 	// Verify it's a JointInterface
 	JointInterface *jiface = dynamic_cast<JointInterface *>(interface);
@@ -132,7 +132,7 @@ RosJointThread::conditional_close(Interface *interface) throw()
 }
 
 void
-RosJointThread::bb_interface_data_refreshed(Interface *interface) throw()
+RosJointThread::bb_interface_data_refreshed(Interface *interface) noexcept
 {
 	JointInterface *jiface = dynamic_cast<JointInterface *>(interface);
 	if (!jiface)

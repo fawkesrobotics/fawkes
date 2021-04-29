@@ -59,18 +59,18 @@ public:
 	virtual void finalize();
 
 	// for BlackBoardInterfaceObserver
-	virtual void bb_interface_created(const char *type, const char *id) throw();
+	virtual void bb_interface_created(const char *type, const char *id) noexcept;
 
 	// for BlackBoardInterfaceListener
-	virtual void bb_interface_data_refreshed(fawkes::Interface *interface) throw();
+	virtual void bb_interface_data_refreshed(fawkes::Interface *interface) noexcept;
 	virtual void bb_interface_writer_removed(fawkes::Interface *interface,
-	                                         fawkes::Uuid       instance_serial) throw();
+	                                         fawkes::Uuid       instance_serial) noexcept;
 	virtual void bb_interface_reader_removed(fawkes::Interface *interface,
-	                                         fawkes::Uuid       instance_serial) throw();
+	                                         fawkes::Uuid       instance_serial) noexcept;
 
 private:
 	void        laser_scan_message_cb(const ros::MessageEvent<sensor_msgs::LaserScan const> &msg_evt);
-	void        conditional_close(fawkes::Interface *interface) throw();
+	void        conditional_close(fawkes::Interface *interface) noexcept;
 	std::string topic_name(const char *if_id, const char *suffix);
 
 	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */

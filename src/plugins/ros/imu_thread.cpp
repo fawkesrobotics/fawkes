@@ -98,7 +98,7 @@ RosIMUThread::finalize()
  * @param interface interface instance that you supplied to bbil_add_data_interface()
  */
 void
-RosIMUThread::bb_interface_data_refreshed(Interface *interface) throw()
+RosIMUThread::bb_interface_data_refreshed(Interface *interface) noexcept
 {
 	IMUInterface *imu_iface = dynamic_cast<IMUInterface *>(interface);
 	if (!imu_iface)

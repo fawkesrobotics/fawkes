@@ -82,7 +82,7 @@ RosPosition3DThread::finalize()
 }
 
 void
-RosPosition3DThread::bb_interface_created(const char *type, const char *id) throw()
+RosPosition3DThread::bb_interface_created(const char *type, const char *id) noexcept
 {
 	if (strncmp(type, "Position3DInterface", INTERFACE_TYPE_SIZE_) != 0)
 		return;
@@ -105,19 +105,21 @@ RosPosition3DThread::bb_interface_created(const char *type, const char *id) thro
 }
 
 void
-RosPosition3DThread::bb_interface_writer_removed(Interface *interface, Uuid instance_serial) throw()
+RosPosition3DThread::bb_interface_writer_removed(Interface *interface,
+                                                 Uuid       instance_serial) noexcept
 {
 	conditional_close(interface);
 }
 
 void
-RosPosition3DThread::bb_interface_reader_removed(Interface *interface, Uuid instance_serial) throw()
+RosPosition3DThread::bb_interface_reader_removed(Interface *interface,
+                                                 Uuid       instance_serial) noexcept
 {
 	conditional_close(interface);
 }
 
 void
-RosPosition3DThread::conditional_close(Interface *interface) throw()
+RosPosition3DThread::conditional_close(Interface *interface) noexcept
 {
 	// Verify it's a Position3DInterface
 	Position3DInterface *iface = dynamic_cast<Position3DInterface *>(interface);
@@ -140,7 +142,7 @@ RosPosition3DThread::conditional_close(Interface *interface) throw()
 }
 
 void
-RosPosition3DThread::bb_interface_data_refreshed(Interface *interface) throw()
+RosPosition3DThread::bb_interface_data_refreshed(Interface *interface) noexcept
 {
 	Position3DInterface *iface = dynamic_cast<Position3DInterface *>(interface);
 	if (!iface)
