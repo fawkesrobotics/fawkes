@@ -30,7 +30,7 @@ namespace fawkes {
  * Note that the password might be a hash for digest authentication.
  * @author Tim Niemueller
  *
- * @fn bool WebUserVerifier::verify_user(const char *user, const char *password) throw()
+ * @fn bool WebUserVerifier::verify_user(const char *user, const char *password) noexcept
  * Verify a user.
  * Check if the passed credentials are valid.
  * @param user user name
