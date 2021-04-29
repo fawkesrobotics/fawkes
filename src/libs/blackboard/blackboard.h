@@ -60,8 +60,8 @@ public:
 
 	virtual InterfaceInfoList *list_all()                                             = 0;
 	virtual InterfaceInfoList *list(const char *type_pattern, const char *id_pattern) = 0;
-	virtual bool               is_alive() const throw()                               = 0;
-	virtual bool               try_aliveness_restore() throw()                        = 0;
+	virtual bool               is_alive() const noexcept                              = 0;
+	virtual bool               try_aliveness_restore() noexcept                       = 0;
 
 	virtual std::list<Interface *> open_multiple_for_reading(const char *type_pattern,
 	                                                         const char *id_pattern = "*",

@@ -37,8 +37,8 @@ public:
 	BlackBoardNetHandlerInterfaceObserver(BlackBoard *blackboard, FawkesNetworkHub *hub);
 	virtual ~BlackBoardNetHandlerInterfaceObserver();
 
-	virtual void bb_interface_created(const char *type, const char *id) throw();
-	virtual void bb_interface_destroyed(const char *type, const char *id) throw();
+	virtual void bb_interface_created(const char *type, const char *id) noexcept;
+	virtual void bb_interface_destroyed(const char *type, const char *id) noexcept;
 
 private:
 	void send_event(unsigned int msg_id, const char *type, const char *id);

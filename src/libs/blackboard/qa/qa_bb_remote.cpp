@@ -143,7 +143,7 @@ public:
 	}
 
 	bool
-	bb_interface_message_received(Interface *interface, Message *message) throw()
+	bb_interface_message_received(Interface *interface, Message *message) noexcept
 	{
 		try {
 			if (interface == writer_) {
@@ -168,7 +168,7 @@ public:
 	}
 
 	void
-	bb_interface_data_refreshed(Interface *interface) throw()
+	bb_interface_data_refreshed(Interface *interface) noexcept
 	{
 		try {
 			if (interface == reader_) {

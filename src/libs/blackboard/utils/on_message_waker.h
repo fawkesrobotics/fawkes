@@ -38,7 +38,7 @@ public:
 	BlackBoardOnMessageWaker(BlackBoard *bb, Interface *interface, Thread *thread);
 	virtual ~BlackBoardOnMessageWaker();
 
-	virtual bool bb_interface_message_received(Interface *interface, Message *message) throw();
+	virtual bool bb_interface_message_received(Interface *interface, Message *message) noexcept;
 
 private:
 	BlackBoard *bb_;

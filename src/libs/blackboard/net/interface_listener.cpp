@@ -78,7 +78,7 @@ BlackBoardNetHandlerInterfaceListener::~BlackBoardNetHandlerInterfaceListener()
 }
 
 void
-BlackBoardNetHandlerInterfaceListener::bb_interface_data_refreshed(Interface *interface) throw()
+BlackBoardNetHandlerInterfaceListener::bb_interface_data_refreshed(Interface *interface) noexcept
 {
 	// send out data refreshed notification
 	interface->read();
@@ -99,7 +99,7 @@ BlackBoardNetHandlerInterfaceListener::bb_interface_data_refreshed(Interface *in
 }
 
 void
-BlackBoardNetHandlerInterfaceListener::bb_interface_data_changed(Interface *interface) throw()
+BlackBoardNetHandlerInterfaceListener::bb_interface_data_changed(Interface *interface) noexcept
 {
 	// send out data changed notification
 	interface->read();
@@ -121,7 +121,7 @@ BlackBoardNetHandlerInterfaceListener::bb_interface_data_changed(Interface *inte
 
 bool
 BlackBoardNetHandlerInterfaceListener::bb_interface_message_received(Interface *interface,
-                                                                     Message *  message) throw()
+                                                                     Message *  message) noexcept
 {
 	// send out interface message
 	size_t             payload_size = sizeof(bb_imessage_msg_t) + message->datasize();
@@ -169,28 +169,28 @@ BlackBoardNetHandlerInterfaceListener::send_event_serial(Interface *  interface,
 
 void
 BlackBoardNetHandlerInterfaceListener::bb_interface_writer_added(Interface *interface,
-                                                                 Uuid       instance_serial) throw()
+                                                                 Uuid instance_serial) noexcept
 {
 	send_event_serial(interface, MSG_BB_WRITER_ADDED, instance_serial);
 }
 
 void
 BlackBoardNetHandlerInterfaceListener::bb_interface_writer_removed(Interface *interface,
-                                                                   Uuid instance_serial) throw()
+                                                                   Uuid instance_serial) noexcept
 {
 	send_event_serial(interface, MSG_BB_WRITER_REMOVED, instance_serial);
 }
 
 void
 BlackBoardNetHandlerInterfaceListener::bb_interface_reader_added(Interface *interface,
-                                                                 Uuid       instance_serial) throw()
+                                                                 Uuid instance_serial) noexcept
 {
 	send_event_serial(interface, MSG_BB_READER_ADDED, instance_serial);
 }
 
 void
 BlackBoardNetHandlerInterfaceListener::bb_interface_reader_removed(Interface *interface,
-                                                                   Uuid instance_serial) throw()
+                                                                   Uuid instance_serial) noexcept
 {
 	send_event_serial(interface, MSG_BB_READER_REMOVED, instance_serial);
 }

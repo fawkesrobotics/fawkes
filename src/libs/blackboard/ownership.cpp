@@ -101,13 +101,13 @@ BlackBoardWithOwnership::list(const char *type_pattern, const char *id_pattern)
 }
 
 bool
-BlackBoardWithOwnership::is_alive() const throw()
+BlackBoardWithOwnership::is_alive() const noexcept
 {
 	return blackboard_->is_alive();
 }
 
 bool
-BlackBoardWithOwnership::try_aliveness_restore() throw()
+BlackBoardWithOwnership::try_aliveness_restore() noexcept
 {
 	return blackboard_->try_aliveness_restore();
 }

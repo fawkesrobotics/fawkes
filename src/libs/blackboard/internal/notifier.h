@@ -57,12 +57,12 @@ public:
 
 	void notify_of_data_refresh(const Interface *interface, bool has_changed);
 	bool notify_of_message_received(const Interface *interface, Message *message);
-	void notify_of_interface_created(const char *type, const char *id) throw();
-	void notify_of_interface_destroyed(const char *type, const char *id) throw();
-	void notify_of_writer_added(const Interface *interface, Uuid event_instance_serial) throw();
-	void notify_of_writer_removed(const Interface *interface, Uuid event_instance_serial) throw();
-	void notify_of_reader_added(const Interface *interface, Uuid event_instance_serial) throw();
-	void notify_of_reader_removed(const Interface *interface, Uuid event_instance_serial) throw();
+	void notify_of_interface_created(const char *type, const char *id) noexcept;
+	void notify_of_interface_destroyed(const char *type, const char *id) noexcept;
+	void notify_of_writer_added(const Interface *interface, Uuid event_instance_serial) noexcept;
+	void notify_of_writer_removed(const Interface *interface, Uuid event_instance_serial) noexcept;
+	void notify_of_reader_added(const Interface *interface, Uuid event_instance_serial) noexcept;
+	void notify_of_reader_removed(const Interface *interface, Uuid event_instance_serial) noexcept;
 
 private:
 	/// @cond INTERNALS

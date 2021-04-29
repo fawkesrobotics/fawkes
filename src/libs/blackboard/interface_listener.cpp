@@ -122,7 +122,7 @@ BlackBoardInterfaceListener::bbil_name() const
  * @see bb_interface_data_changed
  */
 void
-BlackBoardInterfaceListener::bb_interface_data_refreshed(Interface *interface) throw()
+BlackBoardInterfaceListener::bb_interface_data_refreshed(Interface *interface) noexcept
 {
 }
 
@@ -136,7 +136,7 @@ BlackBoardInterfaceListener::bb_interface_data_refreshed(Interface *interface) t
  * @see bb_interface_data_refreshed
  */
 void
-BlackBoardInterfaceListener::bb_interface_data_changed(Interface *interface) throw()
+BlackBoardInterfaceListener::bb_interface_data_changed(Interface *interface) noexcept
 {
 }
 
@@ -159,7 +159,7 @@ BlackBoardInterfaceListener::bb_interface_data_changed(Interface *interface) thr
  */
 bool
 BlackBoardInterfaceListener::bb_interface_message_received(Interface *interface,
-                                                           Message *  message) throw()
+                                                           Message *  message) noexcept
 {
 	return true;
 }
@@ -173,7 +173,7 @@ BlackBoardInterfaceListener::bb_interface_message_received(Interface *interface,
  */
 void
 BlackBoardInterfaceListener::bb_interface_reader_added(Interface *interface,
-                                                       Uuid       instance_serial) throw()
+                                                       Uuid       instance_serial) noexcept
 {
 }
 
@@ -186,7 +186,7 @@ BlackBoardInterfaceListener::bb_interface_reader_added(Interface *interface,
  */
 void
 BlackBoardInterfaceListener::bb_interface_reader_removed(Interface *interface,
-                                                         Uuid       instance_serial) throw()
+                                                         Uuid       instance_serial) noexcept
 {
 }
 
@@ -199,7 +199,7 @@ BlackBoardInterfaceListener::bb_interface_reader_removed(Interface *interface,
  */
 void
 BlackBoardInterfaceListener::bb_interface_writer_added(Interface *interface,
-                                                       Uuid       instance_serial) throw()
+                                                       Uuid       instance_serial) noexcept
 {
 }
 
@@ -212,7 +212,7 @@ BlackBoardInterfaceListener::bb_interface_writer_added(Interface *interface,
  */
 void
 BlackBoardInterfaceListener::bb_interface_writer_removed(Interface *interface,
-                                                         Uuid       instance_serial) throw()
+                                                         Uuid       instance_serial) noexcept
 {
 }
 
@@ -333,14 +333,14 @@ BlackBoardInterfaceListener::bbil_remove_writer_interface(Interface *interface)
 }
 
 const BlackBoardInterfaceListener::InterfaceQueue &
-BlackBoardInterfaceListener::bbil_acquire_queue() throw()
+BlackBoardInterfaceListener::bbil_acquire_queue() noexcept
 {
 	bbil_queue_mutex_->lock();
 	return bbil_queue_;
 }
 
 void
-BlackBoardInterfaceListener::bbil_release_queue(BlackBoard::ListenerRegisterFlag flag) throw()
+BlackBoardInterfaceListener::bbil_release_queue(BlackBoard::ListenerRegisterFlag flag) noexcept
 {
 	bbil_maps_mutex_->lock();
 
@@ -426,14 +426,14 @@ BlackBoardInterfaceListener::bbil_release_queue(BlackBoard::ListenerRegisterFlag
 }
 
 const BlackBoardInterfaceListener::InterfaceMaps &
-BlackBoardInterfaceListener::bbil_acquire_maps() throw()
+BlackBoardInterfaceListener::bbil_acquire_maps() noexcept
 {
 	bbil_maps_mutex_->lock();
 	return bbil_maps_;
 }
 
 void
-BlackBoardInterfaceListener::bbil_release_maps() throw()
+BlackBoardInterfaceListener::bbil_release_maps() noexcept
 {
 	bbil_queue_mutex_->lock();
 
@@ -483,7 +483,7 @@ BlackBoardInterfaceListener::bbil_find_interface(const char *iuid, InterfaceMap 
  * @return interface instance, NULL if not in list (non-fatal error)
  */
 Interface *
-BlackBoardInterfaceListener::bbil_data_interface(const char *iuid) throw()
+BlackBoardInterfaceListener::bbil_data_interface(const char *iuid) noexcept
 {
 	return bbil_find_interface(iuid, bbil_maps_.data);
 }
@@ -495,7 +495,7 @@ BlackBoardInterfaceListener::bbil_data_interface(const char *iuid) throw()
  * @return interface instance, NULL if not in list (non-fatal error)
  */
 Interface *
-BlackBoardInterfaceListener::bbil_message_interface(const char *iuid) throw()
+BlackBoardInterfaceListener::bbil_message_interface(const char *iuid) noexcept
 {
 	return bbil_find_interface(iuid, bbil_maps_.messages);
 }
@@ -507,7 +507,7 @@ BlackBoardInterfaceListener::bbil_message_interface(const char *iuid) throw()
  * @return interface instance, NULL if not in list (non-fatal error)
  */
 Interface *
-BlackBoardInterfaceListener::bbil_reader_interface(const char *iuid) throw()
+BlackBoardInterfaceListener::bbil_reader_interface(const char *iuid) noexcept
 {
 	return bbil_find_interface(iuid, bbil_maps_.reader);
 }
@@ -519,7 +519,7 @@ BlackBoardInterfaceListener::bbil_reader_interface(const char *iuid) throw()
  * @return interface instance, NULL if not in list (non-fatal error)
  */
 Interface *
-BlackBoardInterfaceListener::bbil_writer_interface(const char *iuid) throw()
+BlackBoardInterfaceListener::bbil_writer_interface(const char *iuid) noexcept
 {
 	return bbil_find_interface(iuid, bbil_maps_.writer);
 }
