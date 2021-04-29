@@ -79,7 +79,7 @@ public:
 
 	/* BlackBoardInterfaceListener */
 	void bb_interface_reader_removed(fawkes::Interface *interface,
-	                                 fawkes::Uuid       instance_serial) throw();
+	                                 fawkes::Uuid       instance_serial) noexcept;
 
 	// LuaContextWatcher
 	void lua_restarted(fawkes::LuaContext *context);
