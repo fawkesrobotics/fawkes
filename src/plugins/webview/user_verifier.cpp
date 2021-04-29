@@ -59,7 +59,7 @@ WebviewUserVerifier::~WebviewUserVerifier()
 }
 
 bool
-WebviewUserVerifier::verify_user(const char *user, const char *password) throw()
+WebviewUserVerifier::verify_user(const char *user, const char *password) noexcept
 {
 	try {
 		std::string userpath = std::string("/webview/users/") + user;
