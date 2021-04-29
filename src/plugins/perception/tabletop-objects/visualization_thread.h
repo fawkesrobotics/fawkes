@@ -60,7 +60,7 @@ public:
 	                       M_Vector4f &                        centroids,
 	                       M_Vector4f &                        cylinder_params,
 	                       std::map<unsigned int, double> &    obj_confidence,
-	                       std::map<unsigned int, signed int> &best_obj_guess) throw();
+	                       std::map<unsigned int, signed int> &best_obj_guess) noexcept;
 
 private:
 	void triangulate_hull();

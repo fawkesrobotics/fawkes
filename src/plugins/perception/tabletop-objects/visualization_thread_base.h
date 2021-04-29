@@ -56,7 +56,7 @@ public:
 	                       M_Vector4f &                        centroids,
 	                       M_Vector4f &                        cylinder_params,
 	                       std::map<unsigned int, double> &    obj_confidence,
-	                       std::map<unsigned int, signed int> &best_obj_guess) throw() = 0;
+	                       std::map<unsigned int, signed int> &best_obj_guess) noexcept = 0;
 };
 
 #endif

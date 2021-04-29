@@ -394,7 +394,7 @@ FvAcquisitionThread::loop()
 }
 
 bool
-FvAcquisitionThread::bb_interface_message_received(Interface *interface, Message *message) throw()
+FvAcquisitionThread::bb_interface_message_received(Interface *interface, Message *message) noexcept
 {
 	// in continuous mode wait for signal if disabled
 	MutexLocker lock(enabled_mutex_);
