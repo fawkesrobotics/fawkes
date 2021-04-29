@@ -270,7 +270,7 @@ void
 HardwareModelsThread::clips_add_transition(const std::string &component,
                                            const std::string &transition) throw()
 {
-	for (const auto e : envs_) {
+	for (const auto &e : envs_) {
 		fawkes::LockPtr<CLIPS::Environment> clips = e.second;
 		clips.lock();
 		CLIPS::Template::pointer temp = clips->get_template("hm-transition");
