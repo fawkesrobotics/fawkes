@@ -1378,7 +1378,7 @@ Thread::current_thread()
  * @return Thread instance of the current thread
  */
 Thread *
-Thread::current_thread_noexc() throw()
+Thread::current_thread_noexc() noexcept
 {
 	if (THREAD_KEY == PTHREAD_KEYS_MAX) {
 		return 0;

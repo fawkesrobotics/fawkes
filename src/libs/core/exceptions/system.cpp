@@ -32,7 +32,7 @@ namespace fawkes {
 /** Constructor
  * @param format message format string
  */
-OutOfMemoryException::OutOfMemoryException(const char *format, ...) throw() : Exception()
+OutOfMemoryException::OutOfMemoryException(const char *format, ...) noexcept : Exception()
 {
 	va_list va;
 	va_start(va, format);
@@ -43,7 +43,7 @@ OutOfMemoryException::OutOfMemoryException(const char *format, ...) throw() : Ex
 /** Constructor.
  * Message simply is "Out of memory"
  */
-OutOfMemoryException::OutOfMemoryException() throw() : Exception("Out of memory")
+OutOfMemoryException::OutOfMemoryException() noexcept : Exception("Out of memory")
 {
 }
 
@@ -54,14 +54,14 @@ OutOfMemoryException::OutOfMemoryException() throw() : Exception("Out of memory"
  * @ingroup Exceptions
  */
 /** Constructor */
-InterruptedException::InterruptedException() throw() : Exception("Interrupted system call")
+InterruptedException::InterruptedException() noexcept : Exception("Interrupted system call")
 {
 }
 
 /** Constructor
  * @param format message format string
  */
-InterruptedException::InterruptedException(const char *format, ...) throw() : Exception()
+InterruptedException::InterruptedException(const char *format, ...) noexcept : Exception()
 {
 	va_list va;
 	va_start(va, format);
@@ -76,14 +76,14 @@ InterruptedException::InterruptedException(const char *format, ...) throw() : Ex
  * @ingroup Exceptions
  */
 /** Constructor */
-TimeoutException::TimeoutException() throw() : Exception("Timeout reached.")
+TimeoutException::TimeoutException() noexcept : Exception("Timeout reached.")
 {
 }
 
 /** Constructor
  * @param format message format string
  */
-TimeoutException::TimeoutException(const char *format, ...) throw() : Exception()
+TimeoutException::TimeoutException(const char *format, ...) noexcept : Exception()
 {
 	va_list va;
 	va_start(va, format);
@@ -105,7 +105,7 @@ TimeoutException::TimeoutException(const char *format, ...) throw() : Exception(
  */
 CouldNotOpenFileException::CouldNotOpenFileException(const char *filename,
                                                      int         errnum,
-                                                     const char *additional_msg) throw()
+                                                     const char *additional_msg) noexcept
 : Exception(errnum,
             "Could not open file '%s' %s%s%s",
             filename,
@@ -120,7 +120,7 @@ CouldNotOpenFileException::CouldNotOpenFileException(const char *filename,
  * @param additional_msg optional additional message
  */
 CouldNotOpenFileException::CouldNotOpenFileException(const char *filename,
-                                                     const char *additional_msg) throw()
+                                                     const char *additional_msg) noexcept
 : Exception("Could not open file '%s' %s%s%s",
             filename,
             (additional_msg) ? "(" : "",
@@ -143,7 +143,7 @@ CouldNotOpenFileException::CouldNotOpenFileException(const char *filename,
  */
 FileReadException::FileReadException(const char *filename,
                                      int         errnum,
-                                     const char *additional_msg) throw()
+                                     const char *additional_msg) noexcept
 : Exception(errnum,
             "Could not read from file '%s' %s%s%s",
             filename,
@@ -157,7 +157,7 @@ FileReadException::FileReadException(const char *filename,
  * @param filename name of file which could not be read
  * @param additional_msg optional additional message
  */
-FileReadException::FileReadException(const char *filename, const char *additional_msg) throw()
+FileReadException::FileReadException(const char *filename, const char *additional_msg) noexcept
 : Exception("Could not read from file '%s' %s%s%s",
             filename,
             (additional_msg) ? "(" : "",
@@ -180,7 +180,7 @@ FileReadException::FileReadException(const char *filename, const char *additiona
  */
 FileWriteException::FileWriteException(const char *filename,
                                        int         errnum,
-                                       const char *additional_msg) throw()
+                                       const char *additional_msg) noexcept
 : Exception(errnum,
             "Could not write to file '%s' %s%s%s",
             filename,
@@ -194,7 +194,7 @@ FileWriteException::FileWriteException(const char *filename,
  * @param filename name of file which could not be written
  * @param additional_msg optional additional message
  */
-FileWriteException::FileWriteException(const char *filename, const char *additional_msg) throw()
+FileWriteException::FileWriteException(const char *filename, const char *additional_msg) noexcept
 : Exception("Could not write to file '%s' %s%s%s",
             filename,
             (additional_msg) ? "(" : "",
