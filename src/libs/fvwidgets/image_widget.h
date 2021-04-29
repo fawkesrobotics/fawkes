@@ -98,7 +98,7 @@ public:
 	Glib::RefPtr<Gdk::Pixbuf> get_buffer() const;
 	void set_rgb(unsigned int x, unsigned int y, unsigned char r, unsigned char g, unsigned char b);
 	void set_rgb(unsigned int x, unsigned int y, RGB_t rgb);
-	bool save_image(std::string filename, Glib::ustring type) const throw();
+	bool save_image(std::string filename, Glib::ustring type) const noexcept;
 	void save_on_refresh_cam(bool          enabled,
 	                         std::string   path    = "",
 	                         Glib::ustring type    = "",

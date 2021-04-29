@@ -432,7 +432,7 @@ ImageWidget::set_cam()
  * @return true on success, false otherwise
  */
 bool
-ImageWidget::save_image(std::string filename, Glib::ustring type) const throw()
+ImageWidget::save_image(std::string filename, Glib::ustring type) const noexcept
 {
 	cam_mutex_->lock();
 
