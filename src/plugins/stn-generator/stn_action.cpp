@@ -197,7 +197,7 @@ StnAction::genConditionEdgeLabel(size_t cond_action) const
 			edge_label += "<FONT COLOR=\"red\">";
 		}
 		edge_label += p.name() + ": ";
-		for (const std::string s : p.attrs()) {
+		for (const std::string &s : p.attrs()) {
 			edge_label += s + " ";
 		}
 		edge_label += "</FONT>";
