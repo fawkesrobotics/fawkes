@@ -364,7 +364,7 @@ NavGraphGeneratorThread::loop()
 
 bool
 NavGraphGeneratorThread::bb_interface_message_received(Interface *interface,
-                                                       Message *  message) throw()
+                                                       Message *  message) noexcept
 {
 	// in continuous mode wait for signal if disabled
 	MutexLocker lock(loop_mutex);
