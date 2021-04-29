@@ -112,10 +112,10 @@ public:
 
 	virtual void erase_default(const char *path);
 
-	virtual void deregistered(unsigned int id) throw();
-	virtual void inbound_received(FawkesNetworkMessage *msg, unsigned int id) throw();
-	virtual void connection_died(unsigned int id) throw();
-	virtual void connection_established(unsigned int id) throw();
+	virtual void deregistered(unsigned int id) noexcept;
+	virtual void inbound_received(FawkesNetworkMessage *msg, unsigned int id) noexcept;
+	virtual void connection_died(unsigned int id) noexcept;
+	virtual void connection_established(unsigned int id) noexcept;
 
 	virtual void set_mirror_mode(bool mirror);
 

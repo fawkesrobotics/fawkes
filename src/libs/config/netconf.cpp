@@ -918,12 +918,12 @@ NetworkConfiguration::erase_default(const char *path)
  * @param id the id of the calling client
  */
 void
-NetworkConfiguration::deregistered(unsigned int id) throw()
+NetworkConfiguration::deregistered(unsigned int id) noexcept
 {
 }
 
 void
-NetworkConfiguration::inbound_received(FawkesNetworkMessage *m, unsigned int id) throw()
+NetworkConfiguration::inbound_received(FawkesNetworkMessage *m, unsigned int id) noexcept
 {
 	if (m->cid() == FAWKES_CID_CONFIGMANAGER) {
 		if (mirror_mode_) {
@@ -1228,7 +1228,7 @@ NetworkConfiguration::inbound_received(FawkesNetworkMessage *m, unsigned int id)
 }
 
 void
-NetworkConfiguration::connection_died(unsigned int id) throw()
+NetworkConfiguration::connection_died(unsigned int id) noexcept
 {
 	connected_                          = false;
 	mirror_mode_before_connection_dead_ = mirror_mode_;
@@ -1237,7 +1237,7 @@ NetworkConfiguration::connection_died(unsigned int id) throw()
 }
 
 void
-NetworkConfiguration::connection_established(unsigned int id) throw()
+NetworkConfiguration::connection_established(unsigned int id) noexcept
 {
 	connected_ = true;
 	set_mirror_mode(mirror_mode_before_connection_dead_);
