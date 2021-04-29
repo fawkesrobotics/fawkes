@@ -147,7 +147,7 @@ MetricsThread::loop()
 }
 
 void
-MetricsThread::bb_interface_created(const char *type, const char *id) throw()
+MetricsThread::bb_interface_created(const char *type, const char *id) noexcept
 {
 	MutexLocker            lock(metric_bbs_.mutex());
 	MetricFamilyInterface *mfi;
@@ -337,20 +337,20 @@ MetricsThread::parse_labels(const std::string &labels, io::prometheus::client::M
 
 void
 MetricsThread::bb_interface_writer_removed(fawkes::Interface *interface,
-                                           unsigned int       instance_serial) throw()
+                                           unsigned int       instance_serial) noexcept
 {
 	conditional_close(interface);
 }
 
 void
 MetricsThread::bb_interface_reader_removed(fawkes::Interface *interface,
-                                           unsigned int       instance_serial) throw()
+                                           unsigned int       instance_serial) noexcept
 {
 	conditional_close(interface);
 }
 
 void
-MetricsThread::bb_interface_data_refreshed(fawkes::Interface *interface) throw()
+MetricsThread::bb_interface_data_refreshed(fawkes::Interface *interface) noexcept
 {
 	MetricFamilyInterface *mfi = dynamic_cast<MetricFamilyInterface *>(interface);
 	if (!mfi)
@@ -447,7 +447,7 @@ MetricsThread::conditional_open(const std::string &id, MetricFamilyBB &mfbb)
 }
 
 void
-MetricsThread::conditional_close(Interface *interface) throw()
+MetricsThread::conditional_close(Interface *interface) noexcept
 {
 	MetricFamilyInterface *mfi = dynamic_cast<MetricFamilyInterface *>(interface);
 	if (!mfi)
