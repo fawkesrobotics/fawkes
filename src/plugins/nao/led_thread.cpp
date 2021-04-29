@@ -429,7 +429,7 @@ NaoQiLedThread::loop()
 }
 
 bool
-NaoQiLedThread::bb_interface_message_received(Interface *interface, Message *message) throw()
+NaoQiLedThread::bb_interface_message_received(Interface *interface, Message *message) noexcept
 {
 	// some string magic to find the correct ALValue to write to
 	std::string kind     = "Merge";
