@@ -45,7 +45,7 @@ class CircularBuffer
 {
 public:
 	/** The size_type of the buffer */
-	typedef size_t size_type;
+	typedef std::size_t size_type;
 	/** The CircularBuffer's iterator is a std::deque iterator */
 	typedef typename std::deque<Type>::const_iterator const_iterator;
 	/** The CircularBuffer's reverse iterator is a std::deque reverse iterator */
