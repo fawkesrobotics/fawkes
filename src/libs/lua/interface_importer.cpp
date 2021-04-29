@@ -458,7 +458,7 @@ LuaInterfaceImporter::InterfaceObserver::InterfaceObserver(LuaInterfaceImporter 
 
 void
 LuaInterfaceImporter::InterfaceObserver::bb_interface_created(const char *type,
-                                                              const char *id) throw()
+                                                              const char *id) noexcept
 {
 	lii_->add_observed_interface(varname_, type, id);
 }

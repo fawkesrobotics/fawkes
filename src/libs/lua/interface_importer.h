@@ -48,7 +48,7 @@ class LuaInterfaceImporter : public LuaContextWatcher
 		                  const char *          type,
 		                  const char *          id_pattern);
 
-		virtual void bb_interface_created(const char *type, const char *id) throw();
+		virtual void bb_interface_created(const char *type, const char *id) noexcept;
 
 	private:
 		LuaInterfaceImporter *lii_;
