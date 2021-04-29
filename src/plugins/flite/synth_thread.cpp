@@ -93,7 +93,7 @@ FliteSynthThread::loop()
 }
 
 bool
-FliteSynthThread::bb_interface_message_received(Interface *interface, Message *message) throw()
+FliteSynthThread::bb_interface_message_received(Interface *interface, Message *message) noexcept
 {
 	wakeup();
 	return true;
