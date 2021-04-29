@@ -42,8 +42,8 @@ public:
 	virtual void init(Thread *thread);
 	virtual void finalize(Thread *thread);
 
-	virtual bool thread_started(Thread *thread) throw();
-	virtual bool thread_init_failed(Thread *thread) throw();
+	virtual bool thread_started(Thread *thread) noexcept;
+	virtual bool thread_init_failed(Thread *thread) noexcept;
 
 private:
 	MainLoopEmployer *                   employer_;
