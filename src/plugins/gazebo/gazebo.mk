@@ -31,8 +31,12 @@ ifneq ($(PKGCONFIG),)
 endif
 
 ifeq ($(HAVE_GAZEBO),1)
+	# -Wno-range-loop-construct: gazebo uses range-based for loops without
+	#  references in its headers. Disable the warning until this is fixed
+	#  upstream.
   CFLAGS_GAZEBO  = -DHAVE_GAZEBO $(shell $(PKGCONFIG) --cflags 'gazebo') \
-                   -DTBB_SUPPRESS_DEPRECATED_MESSAGES
+                   -DTBB_SUPPRESS_DEPRECATED_MESSAGES \
+                   -Wno-range-loop-construct
   ifneq ($(HAVE_GAZEBO_101),1)
     # Gazebo 8 declared several symbols as deprecated but still uses them.
 		# Those were fixed in Gazebo 10.
