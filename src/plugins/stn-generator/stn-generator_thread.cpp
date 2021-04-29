@@ -158,7 +158,7 @@ StnGeneratorThread::finalize()
 }
 
 void
-StnGeneratorThread::bb_interface_data_refreshed(Interface *interface) throw()
+StnGeneratorThread::bb_interface_data_refreshed(Interface *interface) noexcept
 {
 	if (interface->uid() == plan_if_->uid()) {
 		plan_if_->read();
