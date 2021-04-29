@@ -34,7 +34,7 @@ namespace fawkes {
 /** Constructor
  * @param format message format, takes sprintf() parameters as variadic arguments
  */
-KatanaNoSolutionException::KatanaNoSolutionException(const char *format, ...) throw() : Exception()
+KatanaNoSolutionException::KatanaNoSolutionException(const char *format, ...) noexcept : Exception()
 {
 	va_list va;
 	va_start(va, format);
@@ -49,7 +49,7 @@ KatanaNoSolutionException::KatanaNoSolutionException(const char *format, ...) th
 /** Constructor
  * @param format message format, takes sprintf() parameters as variadic arguments
  */
-KatanaOutOfRangeException::KatanaOutOfRangeException(const char *format, ...) throw() : Exception()
+KatanaOutOfRangeException::KatanaOutOfRangeException(const char *format, ...) noexcept : Exception()
 {
 	va_list va;
 	va_start(va, format);
@@ -64,7 +64,7 @@ KatanaOutOfRangeException::KatanaOutOfRangeException(const char *format, ...) th
 /** Constructor
  * @param format message format, takes sprintf() parameters as variadic arguments
  */
-KatanaMotorCrashedException::KatanaMotorCrashedException(const char *format, ...) throw()
+KatanaMotorCrashedException::KatanaMotorCrashedException(const char *format, ...) noexcept
 : Exception()
 {
 	va_list va;
@@ -80,7 +80,7 @@ KatanaMotorCrashedException::KatanaMotorCrashedException(const char *format, ...
 /** Constructor
  * @param format message format, takes sprintf() parameters as variadic arguments
  */
-KatanaUnsupportedException::KatanaUnsupportedException(const char *format, ...) throw()
+KatanaUnsupportedException::KatanaUnsupportedException(const char *format, ...) noexcept
 : Exception()
 {
 	va_list va;
