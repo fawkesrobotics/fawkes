@@ -40,7 +40,7 @@ class PluginLoadException : public Exception
 public:
 	PluginLoadException(const char *plugin, const char *message);
 	PluginLoadException(const char *plugin, const char *message, Exception &e);
-	~PluginLoadException() throw();
+	~PluginLoadException() noexcept;
 
 	std::string plugin_name() const;
 

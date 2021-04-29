@@ -64,7 +64,7 @@ PluginLoadException::PluginLoadException(const char *plugin, const char *message
 }
 
 /** Destructor. */
-PluginLoadException::~PluginLoadException() throw()
+PluginLoadException::~PluginLoadException() noexcept
 {
 }
 
