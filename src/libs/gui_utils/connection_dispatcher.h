@@ -52,10 +52,10 @@ public:
 	sigc::signal<void>                         signal_disconnected();
 	sigc::signal<void, FawkesNetworkMessage *> signal_message_received();
 
-	virtual void deregistered(unsigned int id) throw();
-	virtual void inbound_received(FawkesNetworkMessage *m, unsigned int id) throw();
-	virtual void connection_died(unsigned int id) throw();
-	virtual void connection_established(unsigned int id) throw();
+	virtual void deregistered(unsigned int id) noexcept;
+	virtual void inbound_received(FawkesNetworkMessage *m, unsigned int id) noexcept;
+	virtual void connection_died(unsigned int id) noexcept;
+	virtual void connection_established(unsigned int id) noexcept;
 
 	operator bool();
 

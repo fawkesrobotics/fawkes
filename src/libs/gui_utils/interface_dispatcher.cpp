@@ -204,14 +204,14 @@ InterfaceDispatcher::on_reader_removed()
 }
 
 void
-InterfaceDispatcher::bb_interface_data_refreshed(Interface *interface) throw()
+InterfaceDispatcher::bb_interface_data_refreshed(Interface *interface) noexcept
 {
 	queue_data_changed_.push_locked(interface);
 	dispatcher_data_changed_();
 }
 
 bool
-InterfaceDispatcher::bb_interface_message_received(Interface *interface, Message *message) throw()
+InterfaceDispatcher::bb_interface_message_received(Interface *interface, Message *message) noexcept
 {
 	message->ref();
 	queue_message_received_.push_locked(std::make_pair(interface, message));
@@ -220,28 +220,30 @@ InterfaceDispatcher::bb_interface_message_received(Interface *interface, Message
 }
 
 void
-InterfaceDispatcher::bb_interface_writer_added(Interface *interface, Uuid instance_serial) throw()
+InterfaceDispatcher::bb_interface_writer_added(Interface *interface, Uuid instance_serial) noexcept
 {
 	queue_writer_added_.push_locked(interface);
 	dispatcher_writer_added_();
 }
 
 void
-InterfaceDispatcher::bb_interface_writer_removed(Interface *interface, Uuid instance_serial) throw()
+InterfaceDispatcher::bb_interface_writer_removed(Interface *interface,
+                                                 Uuid       instance_serial) noexcept
 {
 	queue_writer_removed_.push_locked(interface);
 	dispatcher_writer_removed_();
 }
 
 void
-InterfaceDispatcher::bb_interface_reader_added(Interface *interface, Uuid instance_serial) throw()
+InterfaceDispatcher::bb_interface_reader_added(Interface *interface, Uuid instance_serial) noexcept
 {
 	queue_reader_added_.push_locked(interface);
 	dispatcher_reader_added_();
 }
 
 void
-InterfaceDispatcher::bb_interface_reader_removed(Interface *interface, Uuid instance_serial) throw()
+InterfaceDispatcher::bb_interface_reader_removed(Interface *interface,
+                                                 Uuid       instance_serial) noexcept
 {
 	queue_reader_removed_.push_locked(interface);
 	dispatcher_reader_removed_();

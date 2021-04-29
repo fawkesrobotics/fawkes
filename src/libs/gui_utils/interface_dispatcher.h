@@ -53,12 +53,12 @@ public:
 	sigc::signal<void, Interface *>            signal_reader_added();
 	sigc::signal<void, Interface *>            signal_reader_removed();
 
-	virtual void bb_interface_data_refreshed(Interface *interface) throw();
-	virtual bool bb_interface_message_received(Interface *interface, Message *message) throw();
-	virtual void bb_interface_writer_added(Interface *interface, Uuid instance_serial) throw();
-	virtual void bb_interface_writer_removed(Interface *interface, Uuid instance_serial) throw();
-	virtual void bb_interface_reader_added(Interface *interface, Uuid instance_serial) throw();
-	virtual void bb_interface_reader_removed(Interface *interface, Uuid instance_serial) throw();
+	virtual void bb_interface_data_refreshed(Interface *interface) noexcept;
+	virtual bool bb_interface_message_received(Interface *interface, Message *message) noexcept;
+	virtual void bb_interface_writer_added(Interface *interface, Uuid instance_serial) noexcept;
+	virtual void bb_interface_writer_removed(Interface *interface, Uuid instance_serial) noexcept;
+	virtual void bb_interface_reader_added(Interface *interface, Uuid instance_serial) noexcept;
+	virtual void bb_interface_reader_removed(Interface *interface, Uuid instance_serial) noexcept;
 
 protected:
 	virtual void on_data_changed();
