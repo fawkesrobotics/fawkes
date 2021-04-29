@@ -75,7 +75,8 @@ SyncInterfaceListener::~SyncInterfaceListener()
 }
 
 bool
-SyncInterfaceListener::bb_interface_message_received(Interface *interface, Message *message) throw()
+SyncInterfaceListener::bb_interface_message_received(Interface *interface,
+                                                     Message *  message) noexcept
 {
 	try {
 		if (interface == writer_) {
@@ -110,7 +111,7 @@ SyncInterfaceListener::bb_interface_message_received(Interface *interface, Messa
 }
 
 void
-SyncInterfaceListener::bb_interface_data_refreshed(Interface *interface) throw()
+SyncInterfaceListener::bb_interface_data_refreshed(Interface *interface) noexcept
 {
 	try {
 		if (interface == reader_) {

@@ -310,7 +310,7 @@ BlackBoardSynchronizationThread::close_interfaces()
  * @param interface the interface a writer has been added for.
  */
 void
-BlackBoardSynchronizationThread::writer_added(fawkes::Interface *interface) throw()
+BlackBoardSynchronizationThread::writer_added(fawkes::Interface *interface) noexcept
 {
 	MutexLocker lock(interfaces_.mutex());
 
@@ -358,7 +358,7 @@ BlackBoardSynchronizationThread::writer_added(fawkes::Interface *interface) thro
  * @param interface the interface a writer has been removed for.
  */
 void
-BlackBoardSynchronizationThread::writer_removed(fawkes::Interface *interface) throw()
+BlackBoardSynchronizationThread::writer_removed(fawkes::Interface *interface) noexcept
 {
 	MutexLocker lock(interfaces_.mutex());
 
