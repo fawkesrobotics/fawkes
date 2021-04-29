@@ -78,7 +78,7 @@ public:
 	}
 
 	virtual void
-	inbound_received(FawkesNetworkMessage *m, unsigned int id) throw()
+	inbound_received(FawkesNetworkMessage *m, unsigned int id) noexcept
 	{
 		if ((m->cid() == FAWKES_CID_NETWORKLOGGER)
 		    && (m->msgid() == NetworkLogger::MSGTYPE_LOGMESSAGE)) {
@@ -90,20 +90,20 @@ public:
 	}
 
 	virtual void
-	deregistered(unsigned int id) throw()
+	deregistered(unsigned int id) noexcept
 	{
 		quit = true;
 	}
 
 	virtual void
-	connection_died(unsigned int id) throw()
+	connection_died(unsigned int id) noexcept
 	{
 		printf("Connection to host died. Aborting.\n");
 		quit = true;
 	}
 
 	virtual void
-	connection_established(unsigned int id) throw()
+	connection_established(unsigned int id) noexcept
 	{
 	}
 
