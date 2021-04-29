@@ -329,7 +329,8 @@ PluginTool::inbound_received(FawkesNetworkMessage *msg, unsigned int id) noexcep
 				if (plm->has_next()) {
 					plugin_desc = plm->next();
 				} else {
-					throw Exception("Invalid plugin list received");
+					printf("Invalid plugin list received");
+					return;
 				}
 				printf(" %-16s (%s)\n", plugin_name, plugin_desc);
 				free(plugin_name);
