@@ -346,7 +346,7 @@ BBLoggerThread::loop()
 }
 
 bool
-BBLoggerThread::bb_interface_message_received(Interface *interface, Message *message) throw()
+BBLoggerThread::bb_interface_message_received(Interface *interface, Message *message) noexcept
 {
 	SwitchInterface::EnableSwitchMessage * enm;
 	SwitchInterface::DisableSwitchMessage *dism;
@@ -375,7 +375,7 @@ BBLoggerThread::bb_interface_message_received(Interface *interface, Message *mes
 }
 
 void
-BBLoggerThread::bb_interface_data_refreshed(Interface *interface) throw()
+BBLoggerThread::bb_interface_data_refreshed(Interface *interface) noexcept
 {
 	if (!enabled_)
 		return;
@@ -403,13 +403,13 @@ BBLoggerThread::bb_interface_data_refreshed(Interface *interface) throw()
 }
 
 void
-BBLoggerThread::bb_interface_writer_added(Interface *interface, Uuid instance_serial) throw()
+BBLoggerThread::bb_interface_writer_added(Interface *interface, Uuid instance_serial) noexcept
 {
 	session_start_ = num_data_items_;
 }
 
 void
-BBLoggerThread::bb_interface_writer_removed(Interface *interface, Uuid instance_serial) throw()
+BBLoggerThread::bb_interface_writer_removed(Interface *interface, Uuid instance_serial) noexcept
 {
 	logger->log_info(name(),
 	                 "Writer removed (wrote %u entries), flushing",
