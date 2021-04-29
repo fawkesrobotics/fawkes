@@ -53,7 +53,7 @@ public:
 	virtual void finalize();
 
 	// for BlackBoardInterfaceObserver
-	virtual void bb_interface_created(const char *type, const char *id) throw();
+	virtual void bb_interface_created(const char *type, const char *id) noexcept;
 
 	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
 protected:
@@ -87,7 +87,7 @@ private:
 		}
 
 		// for BlackBoardInterfaceListener
-		virtual void bb_interface_data_refreshed(fawkes::Interface *interface) throw();
+		virtual void bb_interface_data_refreshed(fawkes::Interface *interface) noexcept;
 
 	private:
 		fawkes::BlackBoard *          blackboard_;

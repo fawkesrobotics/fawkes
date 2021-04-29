@@ -131,7 +131,7 @@ MongoLogBlackboardThread::loop()
 
 // for BlackBoardInterfaceObserver
 void
-MongoLogBlackboardThread::bb_interface_created(const char *type, const char *id) throw()
+MongoLogBlackboardThread::bb_interface_created(const char *type, const char *id) noexcept
 {
 	MutexLocker lock(listeners_.mutex());
 
@@ -216,7 +216,7 @@ MongoLogBlackboardThread::InterfaceListener::~InterfaceListener()
 
 void
 MongoLogBlackboardThread::InterfaceListener::bb_interface_data_refreshed(
-  Interface *interface) throw()
+  Interface *interface) noexcept
 {
 	now_->stamp();
 	interface->read();
