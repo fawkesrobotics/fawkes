@@ -74,7 +74,7 @@ SkelIfObserver::~SkelIfObserver()
 }
 
 void
-SkelIfObserver::bb_interface_created(const char *type, const char *id) throw()
+SkelIfObserver::bb_interface_created(const char *type, const char *id) noexcept
 {
 	if (users_.find(id) == users_.end()) {
 		queue_lock_->lock();

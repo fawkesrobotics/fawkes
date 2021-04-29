@@ -41,7 +41,7 @@ public:
 	HandIfObserver(BlackBoard *bb, HandMap &hands);
 	~HandIfObserver();
 
-	virtual void bb_interface_created(const char *type, const char *id) throw();
+	virtual void bb_interface_created(const char *type, const char *id) noexcept;
 
 	void process_queue();
 
