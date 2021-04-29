@@ -225,7 +225,7 @@ PddlRobotMemoryThread::finalize()
 
 bool
 PddlRobotMemoryThread::bb_interface_message_received(Interface *      interface,
-                                                     fawkes::Message *message) throw()
+                                                     fawkes::Message *message) noexcept
 {
 	if (message->is_of_type<PddlGenInterface::GenerateMessage>()) {
 		PddlGenInterface::GenerateMessage *msg = (PddlGenInterface::GenerateMessage *)message;
