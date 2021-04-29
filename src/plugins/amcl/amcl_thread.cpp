@@ -1127,7 +1127,7 @@ AmclThread::set_initial_pose(const std::string & frame_id,
 }
 
 bool
-AmclThread::bb_interface_message_received(Interface *interface, Message *message) throw()
+AmclThread::bb_interface_message_received(Interface *interface, Message *message) noexcept
 {
 	LocalizationInterface::SetInitialPoseMessage *ipm =
 	  dynamic_cast<LocalizationInterface::SetInitialPoseMessage *>(message);

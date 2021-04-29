@@ -109,7 +109,7 @@ private:
 	                                    const fawkes::tf::Pose &pose,
 	                                    const double *          covariance);
 	virtual bool       bb_interface_message_received(fawkes::Interface *interface,
-	                                                 fawkes::Message *  message) throw();
+	                                                 fawkes::Message *  message) noexcept;
 
 private:
 	fawkes::Mutex *conf_mutex_;
