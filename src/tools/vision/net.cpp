@@ -68,23 +68,23 @@ public:
 	}
 
 	void
-	fuse_invalid_server_version(uint32_t local_version, uint32_t remote_version) throw()
+	fuse_invalid_server_version(uint32_t local_version, uint32_t remote_version) noexcept
 	{
 		printf("Invalid version received (local: %u, remote: %u)\n", local_version, remote_version);
 	}
 
 	virtual void
-	fuse_connection_established() throw()
+	fuse_connection_established() noexcept
 	{
 	}
 
 	virtual void
-	fuse_connection_died() throw()
+	fuse_connection_died() noexcept
 	{
 	}
 
 	virtual void
-	fuse_inbound_received(FuseNetworkMessage *m) throw()
+	fuse_inbound_received(FuseNetworkMessage *m) noexcept
 	{
 		// printf("Received message of type %u\n", m->type());
 

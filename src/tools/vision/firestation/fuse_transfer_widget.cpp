@@ -451,18 +451,18 @@ FuseTransferWidget::remote_lut_selected()
 
 void
 FuseTransferWidget::fuse_invalid_server_version(uint32_t local_version,
-                                                uint32_t remote_version) throw()
+                                                uint32_t remote_version) noexcept
 {
 	printf("Invalid versions: local: %u   remote: %u\n", local_version, remote_version);
 }
 
 void
-FuseTransferWidget::fuse_connection_established() throw()
+FuseTransferWidget::fuse_connection_established() noexcept
 {
 }
 
 void
-FuseTransferWidget::fuse_connection_died() throw()
+FuseTransferWidget::fuse_connection_died() noexcept
 {
 	if (m_cur_client.active) {
 		m_delete_clients.push_locked(m_cur_client.client);
@@ -473,7 +473,7 @@ FuseTransferWidget::fuse_connection_died() throw()
 }
 
 void
-FuseTransferWidget::fuse_inbound_received(FuseNetworkMessage *m) throw()
+FuseTransferWidget::fuse_inbound_received(FuseNetworkMessage *m) noexcept
 {
 	switch (m->type()) {
 	case FUSE_MT_LUT_LIST:
