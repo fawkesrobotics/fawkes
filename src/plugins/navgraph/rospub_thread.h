@@ -51,7 +51,7 @@ public:
 	virtual void loop();
 	virtual void finalize();
 
-	virtual void graph_changed() throw();
+	virtual void graph_changed() noexcept;
 
 	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
 protected:

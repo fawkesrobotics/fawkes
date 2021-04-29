@@ -56,7 +56,7 @@ public:
 	void set_current_edge(const std::string &from, const std::string &to);
 	void reset_plan();
 
-	virtual void graph_changed() throw();
+	virtual void graph_changed() noexcept;
 
 private:
 	void  publish();
