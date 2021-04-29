@@ -72,7 +72,7 @@ NavGraphTimedReservationListNodeConstraint::~NavGraphTimedReservationListNodeCon
 }
 
 bool
-NavGraphTimedReservationListNodeConstraint::compute(void) throw()
+NavGraphTimedReservationListNodeConstraint::compute(void) noexcept
 {
 	fawkes::Time                                       now(clock_);
 	std::vector<std::pair<NavGraphNode, fawkes::Time>> erase_list;
@@ -175,7 +175,7 @@ NavGraphTimedReservationListNodeConstraint::has_node(const fawkes::NavGraphNode 
 }
 
 bool
-NavGraphTimedReservationListNodeConstraint::blocks(const fawkes::NavGraphNode &node) throw()
+NavGraphTimedReservationListNodeConstraint::blocks(const fawkes::NavGraphNode &node) noexcept
 {
 	for (const std::pair<fawkes::NavGraphNode, fawkes::Time> &te : node_time_list_) {
 		if (te.first.name() == node.name()) {

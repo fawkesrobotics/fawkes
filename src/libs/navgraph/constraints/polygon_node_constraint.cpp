@@ -53,7 +53,7 @@ NavGraphPolygonNodeConstraint::~NavGraphPolygonNodeConstraint()
 }
 
 bool
-NavGraphPolygonNodeConstraint::compute(void) throw()
+NavGraphPolygonNodeConstraint::compute(void) noexcept
 {
 	if (!polygons_.empty()) {
 		return true;
@@ -63,7 +63,7 @@ NavGraphPolygonNodeConstraint::compute(void) throw()
 }
 
 bool
-NavGraphPolygonNodeConstraint::blocks(const fawkes::NavGraphNode &node) throw()
+NavGraphPolygonNodeConstraint::blocks(const fawkes::NavGraphNode &node) noexcept
 {
 	for (auto p : polygons_) {
 		Point point(node.x(), node.y());

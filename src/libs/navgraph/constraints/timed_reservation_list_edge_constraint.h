@@ -56,8 +56,8 @@ public:
 	void clear_edges();
 	bool has_edge(const fawkes::NavGraphEdge &edge);
 
-	virtual bool compute(void) throw();
-	virtual bool blocks(const fawkes::NavGraphNode &from, const fawkes::NavGraphNode &to) throw();
+	virtual bool compute(void) noexcept;
+	virtual bool blocks(const fawkes::NavGraphNode &from, const fawkes::NavGraphNode &to) noexcept;
 
 private:
 	std::vector<std::pair<fawkes::NavGraphEdge, fawkes::Time>> edge_time_list_;

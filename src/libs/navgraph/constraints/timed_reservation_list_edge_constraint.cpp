@@ -73,7 +73,7 @@ NavGraphTimedReservationListEdgeConstraint::~NavGraphTimedReservationListEdgeCon
 }
 
 bool
-NavGraphTimedReservationListEdgeConstraint::compute(void) throw()
+NavGraphTimedReservationListEdgeConstraint::compute(void) noexcept
 {
 	fawkes::Time                                       now(clock_);
 	std::vector<std::pair<NavGraphEdge, fawkes::Time>> erase_list;
@@ -182,7 +182,7 @@ NavGraphTimedReservationListEdgeConstraint::has_edge(const fawkes::NavGraphEdge 
 
 bool
 NavGraphTimedReservationListEdgeConstraint::blocks(const fawkes::NavGraphNode &from,
-                                                   const fawkes::NavGraphNode &to) throw()
+                                                   const fawkes::NavGraphNode &to) noexcept
 {
 	for (const std::pair<fawkes::NavGraphEdge, fawkes::Time> &te : edge_time_list_) {
 		if (((te.first.from() == from.name()) && (te.first.to() == to.name()))

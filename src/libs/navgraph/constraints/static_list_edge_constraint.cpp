@@ -60,7 +60,7 @@ NavGraphStaticListEdgeConstraint::~NavGraphStaticListEdgeConstraint()
 }
 
 bool
-NavGraphStaticListEdgeConstraint::compute(void) throw()
+NavGraphStaticListEdgeConstraint::compute(void) noexcept
 {
 	if (modified_) {
 		modified_ = false;
@@ -137,7 +137,7 @@ NavGraphStaticListEdgeConstraint::clear_edges()
 
 bool
 NavGraphStaticListEdgeConstraint::blocks(const fawkes::NavGraphNode &from,
-                                         const fawkes::NavGraphNode &to) throw()
+                                         const fawkes::NavGraphNode &to) noexcept
 {
 	for (NavGraphEdge &e : edge_list_) {
 		if ((e.from() == from.name() && e.to() == to.name())

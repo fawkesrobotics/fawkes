@@ -39,9 +39,9 @@ public:
 
 	virtual ~NavGraphPolygonNodeConstraint();
 
-	virtual bool compute(void) throw();
+	virtual bool compute(void) noexcept;
 
-	virtual bool blocks(const fawkes::NavGraphNode &node) throw();
+	virtual bool blocks(const fawkes::NavGraphNode &node) noexcept;
 };
 
 } // end namespace fawkes

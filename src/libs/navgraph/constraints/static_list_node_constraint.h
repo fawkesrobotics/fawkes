@@ -48,10 +48,10 @@ public:
 	void clear_nodes();
 	bool has_node(const fawkes::NavGraphNode &node);
 
-	virtual bool compute(void) throw();
+	virtual bool compute(void) noexcept;
 
 	virtual bool
-	blocks(const fawkes::NavGraphNode &node) throw()
+	blocks(const fawkes::NavGraphNode &node) noexcept
 	{
 		return has_node(node);
 	}

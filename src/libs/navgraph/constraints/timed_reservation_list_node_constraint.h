@@ -56,8 +56,8 @@ public:
 	void clear_nodes();
 	bool has_node(const fawkes::NavGraphNode &node);
 
-	virtual bool compute(void) throw();
-	virtual bool blocks(const fawkes::NavGraphNode &node) throw();
+	virtual bool compute(void) noexcept;
+	virtual bool blocks(const fawkes::NavGraphNode &node) noexcept;
 
 private:
 	std::vector<std::pair<fawkes::NavGraphNode, fawkes::Time>> node_time_list_;
