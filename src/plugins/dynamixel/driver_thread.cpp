@@ -428,7 +428,8 @@ DynamixelDriverThread::exec_act()
 }
 
 bool
-DynamixelDriverThread::bb_interface_message_received(Interface *interface, Message *message) throw()
+DynamixelDriverThread::bb_interface_message_received(Interface *interface,
+                                                     Message *  message) noexcept
 {
 	std::map<unsigned int, Servo>::iterator si =
 	  std::find_if(servos_.begin(),

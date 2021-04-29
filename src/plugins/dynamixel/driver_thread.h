@@ -63,7 +63,7 @@ public:
 
 	// For BlackBoardInterfaceListener
 	virtual bool bb_interface_message_received(fawkes::Interface *interface,
-	                                           fawkes::Message *  message) throw();
+	                                           fawkes::Message *  message) noexcept;
 
 	void exec_sensor();
 	void exec_act();
