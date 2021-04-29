@@ -268,7 +268,7 @@ HardwareModelsThread::clips_add_edge(LockPtr<CLIPS::Environment> &clips,
  */
 void
 HardwareModelsThread::clips_add_transition(const std::string &component,
-                                           const std::string &transition) throw()
+                                           const std::string &transition) noexcept
 {
 	for (const auto &e : envs_) {
 		fawkes::LockPtr<CLIPS::Environment> clips = e.second;
