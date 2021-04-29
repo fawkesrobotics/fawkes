@@ -31,14 +31,14 @@ namespace fawkes {
  * @ingroup NetComm
  * @author Tim Niemueller
  *
- * @fn virtual void FawkesNetworkClientHandler::deregistered(unsigned int id) throw() = 0
+ * @fn virtual void FawkesNetworkClientHandler::deregistered(unsigned int id) noexcept = 0
  * This handler has been deregistered.
  * This is called when this handler is deregistered from the
  * FawkesNetworkClient. Sometimes you may not want to allow this and post
  * a big fat warning into the log.
  * @param id the id of the calling client
  *
- * @fn virtual void FawkesNetworkClientHandler::inbound_received(FawkesNetworkMessage *m, unsigned int id) throw() = 0
+ * @fn virtual void FawkesNetworkClientHandler::inbound_received(FawkesNetworkMessage *m, unsigned int id) noexcept = 0
  * Called for incoming messages.
  * This is called when an incoming message has been received. If this
  * method was called one or more times then the a previously carried out
@@ -46,7 +46,7 @@ namespace fawkes {
  * @param m Message to handle
  * @param id the id of the calling client
  *
- * @fn virtual void FawkesNetworkClientHandler::connection_established(unsigned int id) throw() = 0
+ * @fn virtual void FawkesNetworkClientHandler::connection_established(unsigned int id) noexcept = 0
  * Client has established a connection.
  * Whenever the client establishes a connection this is signaled to handlers with this
  * method. You can register to a client at any time, you may even enqueue messages to
@@ -56,7 +56,7 @@ namespace fawkes {
  * the user know about the connection status.
  * @param id the id of the calling client
  *
- * @fn virtual void FawkesNetworkClientHandler::connection_died(unsigned int id) throw() = 0
+ * @fn virtual void FawkesNetworkClientHandler::connection_died(unsigned int id) noexcept = 0
  * Client connection died.
  * This method is used to inform handlers that the connection has died for any reason.
  * No more data can be send and no more messages should be enqueued because it is unclear

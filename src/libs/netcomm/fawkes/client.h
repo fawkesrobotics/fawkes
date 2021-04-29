@@ -76,7 +76,7 @@ public:
 	void register_handler(FawkesNetworkClientHandler *handler, unsigned int component_id);
 	void deregister_handler(unsigned int component_id);
 
-	bool connected() const throw();
+	bool connected() const noexcept;
 
 	bool         has_id() const;
 	unsigned int id() const;

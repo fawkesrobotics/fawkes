@@ -81,7 +81,7 @@ public:
 	                  unsigned short int           msg_id,
 	                  FawkesNetworkMessageContent *content);
 
-	void add_connection(StreamSocket *s) throw();
+	void add_connection(StreamSocket *s) noexcept;
 	void dispatch(FawkesNetworkMessage *msg);
 
 	void force_send();

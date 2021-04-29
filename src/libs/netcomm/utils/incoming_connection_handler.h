@@ -33,7 +33,7 @@ class NetworkIncomingConnectionHandler
 public:
 	virtual ~NetworkIncomingConnectionHandler();
 
-	virtual void add_connection(StreamSocket *s) throw() = 0;
+	virtual void add_connection(StreamSocket *s) noexcept = 0;
 };
 
 } // end namespace fawkes
