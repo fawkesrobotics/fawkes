@@ -33,7 +33,7 @@ export class ClipsEnvComponent implements OnInit, OnDestroy {
 
   data_source = new MatTableDataSource();
 
-  @ViewChild(CardListFilterComponent, {static: true}) private readonly card_filter_: CardListFilterComponent;
+  @ViewChild(CardListFilterComponent, {static: true}) private readonly cardFilter_: CardListFilterComponent;
 
   constructor(private readonly api_service: ClipsApiService,
               private route: ActivatedRoute,
@@ -45,13 +45,13 @@ export class ClipsEnvComponent implements OnInit, OnDestroy {
     this.route.paramMap
       .subscribe((params: ParamMap) => {
         this.env = params.get('env');
-        this.card_filter_.clearInput();
+        this.cardFilter_.clearInput();
         this.refresh();
       });
 
     this.refresh_envs();
 
-    this.card_filter_.filterEvent
+    this.cardFilter_.filterEvent
       .subscribe((query: string) => {
         this.apply_filter(query);
       });

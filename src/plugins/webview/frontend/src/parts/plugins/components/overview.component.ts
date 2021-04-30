@@ -37,7 +37,7 @@ export class PluginOverviewComponent implements OnInit, OnDestroy {
   ops_pending = {};
   data_source = new MatTableDataSource();
 
-  @ViewChild(CardListFilterComponent, {static: true}) private readonly card_filter_: CardListFilterComponent;
+  @ViewChild(CardListFilterComponent, {static: true}) private readonly cardFilter_: CardListFilterComponent;
 
   selection = new SelectionModel<Plugin>(true, []);
 
@@ -49,7 +49,7 @@ export class PluginOverviewComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.refresh();
 
-    this.card_filter_.filterEvent
+    this.cardFilter_.filterEvent
       .subscribe((query: string) => {
         this.apply_filter(query);
       });
