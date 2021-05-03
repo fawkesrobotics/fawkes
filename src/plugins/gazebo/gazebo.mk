@@ -43,7 +43,7 @@ ifeq ($(HAVE_GAZEBO),1)
     # Disable the deprecated declarations warning with older gazebo versions.
     CFLAGS += -Wno-deprecated-declarations
   endif
-  LDFLAGS_GAZEBO = $(shell $(PKGCONFIG) --libs 'gazebo') -ldl
+  LDFLAGS_GAZEBO = $(shell $(PKGCONFIG) --libs 'gazebo') -ldl -lm
 
   ifeq ($(HAVE_GAZEBO_96)$(boost-have-lib system),11)
     LDFLAGS_GAZEBO += $(boost-lib-ldflags system)
