@@ -28,6 +28,7 @@ ifneq ($(PKGCONFIG),)
   HAVE_GAZEBO_96 = $(if $(shell $(PKGCONFIG) --atleast-version=9.6.0 'gazebo'; echo $${?/1/}),1,0)
   HAVE_GAZEBO_10 = $(if $(shell $(PKGCONFIG) --atleast-version=10 'gazebo'; echo $${?/1/}),1,0)
   HAVE_GAZEBO_11 = $(if $(shell $(PKGCONFIG) --atleast-version=11 'gazebo'; echo $${?/1/}),1,0)
+  HAVE_GAZEBO_12 = $(if $(shell $(PKGCONFIG) --atleast-version=12 'gazebo'; echo $${?/1/}),1,0)
 endif
 
 ifeq ($(HAVE_GAZEBO),1)
@@ -35,9 +36,8 @@ ifeq ($(HAVE_GAZEBO),1)
 	#  references in its headers. Disable the warning until this is fixed
 	#  upstream.
   CFLAGS_GAZEBO  = -DHAVE_GAZEBO $(shell $(PKGCONFIG) --cflags 'gazebo') \
-                   -DTBB_SUPPRESS_DEPRECATED_MESSAGES \
-                   -Wno-range-loop-construct
-  ifneq ($(HAVE_GAZEBO_101),1)
+                   -DTBB_SUPPRESS_DEPRECATED_MESSAGES
+  ifneq ($(HAVE_GAZEBO_10),1)
     # Gazebo 8 declared several symbols as deprecated but still uses them.
 		# Those were fixed in Gazebo 10.
     # Disable the deprecated declarations warning with older gazebo versions.
@@ -52,9 +52,12 @@ ifeq ($(HAVE_GAZEBO),1)
   ifneq ($(HAVE_GAZEBO_11),1)
     CFLAGS_GAZEBO += -DBOOST_BIND_GLOBAL_PLACEHOLDERS
   endif
-
+  # Assume that this is no longer necessary in Gazebo 12.
+  ifneq ($(HAVE_GAZEBO_12),1)
+    CFLAGS_GAZEBO += -Wno-range-loop-construct
+  endif
   # if ffmpeg is installed, gazebo may have been compiled with support for it
-  #   # hence check for headers and add the respective include directories
+  # hence check for headers and add the respective include directories
   ifneq ($(wildcard $(SYSROOT)/usr/include/ffmpeg/libavcodec/avcodec.h),)
     CFLAGS_GAZEBO += -I$(SYSROOT)/usr/include/ffmpeg
   endif
