@@ -3,7 +3,6 @@
 // License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
-import { MatCheckboxClickAction } from '@angular/material/checkbox';
 import { MatCheckboxDefaultOptions, MAT_CHECKBOX_DEFAULT_OPTIONS } from '@angular/material/checkbox';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTableDataSource } from '@angular/material/table';
