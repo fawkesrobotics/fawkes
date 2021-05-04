@@ -26,6 +26,9 @@ source /etc/profile
 # Error out on any error in the script, pipes etc.
 set -euo pipefail
 
+# Disables Angular analytics
+export NG_CLI_ANALYTICS=false
+
 # Get Angular CLI
 echo 'prefix = ~/.npm' > ~/.npmrc
 

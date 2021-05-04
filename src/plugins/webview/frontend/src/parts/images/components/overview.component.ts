@@ -36,7 +36,7 @@ export class ImageOverviewComponent implements OnInit, OnDestroy {
    * completely remove the img element from the DOM. This, in fact,
    * does stop the transfer reliably.
    */
-  @ViewChild('image')
+  @ViewChild('image', {static: true})
   image_div: ElementRef;
 
   loading = false;

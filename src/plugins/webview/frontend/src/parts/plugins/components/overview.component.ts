@@ -3,7 +3,9 @@
 // License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
-import { MatTableDataSource, MatSnackBar, MAT_CHECKBOX_CLICK_ACTION } from '@angular/material';
+import { MatCheckboxDefaultOptions, MAT_CHECKBOX_DEFAULT_OPTIONS } from '@angular/material/checkbox';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatTableDataSource } from '@angular/material/table';
 import { SelectionModel } from '@angular/cdk/collections';
 
 import { BackendConfigurationService } from '../../../services/backend-config/backend-config.service';
@@ -19,7 +21,7 @@ import { interval } from 'rxjs';
   selector: 'ff-plugins-overview',
   templateUrl: './overview.component.html',
   styleUrls: ['./overview.component.scss'],
-  providers: [{provide: MAT_CHECKBOX_CLICK_ACTION, useValue: 'noop'}]
+  providers: [{provide: MAT_CHECKBOX_DEFAULT_OPTIONS, useValue: { clickAction: 'noop' } as MatCheckboxDefaultOptions }]
 })
 export class PluginOverviewComponent implements OnInit, OnDestroy {
 
@@ -34,7 +36,7 @@ export class PluginOverviewComponent implements OnInit, OnDestroy {
   ops_pending = {};
   data_source = new MatTableDataSource();
 
-  @ViewChild(CardListFilterComponent) private readonly card_filter_: CardListFilterComponent;
+  @ViewChild(CardListFilterComponent, {static: true}) private readonly cardFilter_: CardListFilterComponent;
 
   selection = new SelectionModel<Plugin>(true, []);
 
@@ -46,7 +48,7 @@ export class PluginOverviewComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.refresh();
 
-    this.card_filter_.filterEvent
+    this.cardFilter_.filterEvent
       .subscribe((query: string) => {
         this.apply_filter(query);
       });

@@ -3,7 +3,7 @@
 // License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 import { Injectable, EventEmitter } from '@angular/core';
-import { LocalStorage } from 'ngx-store';
+import { LocalStorage } from '@efaps/ngx-store';
 
 @Injectable()
 export class LockoutService {

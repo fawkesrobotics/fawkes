@@ -56,7 +56,7 @@ export class PrometheusChartComponent implements AfterViewInit, OnInit, OnDestro
   @Input() y_axis_center?: number = null;
   @Input() refresh_interval_sec = 60;
 
-  @ViewChild('chart') chart_elem;
+  @ViewChild('chart', {static: true}) chartElem;
 
   have_data = false;
   zero_message = 'No data received';
@@ -221,7 +221,7 @@ export class PrometheusChartComponent implements AfterViewInit, OnInit, OnDestro
               };
 
             c3.generate({
-              bindto: this.chart_elem.nativeElement,
+              bindto: this.chartElem.nativeElement,
               size: {
                 height: 200
               },

@@ -7,7 +7,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { HttpClientModule } from '@angular/common/http';
-import { WebStorageModule } from 'ngx-store';
+import { WebStorageModule } from '@efaps/ngx-store';
 
 import { environment } from '../environments/environment';
 

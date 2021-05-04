@@ -4,7 +4,7 @@
 
 import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { interval } from 'rxjs';
-import { SessionStorage } from 'ngx-store';
+import { SessionStorage } from '@efaps/ngx-store';
 
 import { BackendConfigurationService } from '../../../services/backend-config/backend-config.service';
 import { LockoutService } from '../../../services/lockout/lockout.service';
@@ -18,7 +18,7 @@ import { SkillCall } from '../models/SkillCall';
 })
 export class SkillerOverviewComponent implements OnInit, OnDestroy {
 
-  @ViewChild('f') form;
+  @ViewChild('f', {static: true}) form;
 
   loading = false;
   auto_refresh_subscription = null;
