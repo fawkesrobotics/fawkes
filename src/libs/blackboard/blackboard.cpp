@@ -115,11 +115,11 @@ namespace fawkes {
  * @param interface interface to close
  *
  *
- * @fn bool BlackBoard::is_alive() const throw() = 0
+ * @fn bool BlackBoard::is_alive() const noexcept = 0
  * Check if the BlackBoard is still alive.
  * @return true, if the BlackBoard is still alive and may be used, false otherwise.
  *
- * @fn bool BlackBoard::try_aliveness_restore() throw()
+ * @fn bool BlackBoard::try_aliveness_restore() noexcept
  * Try to restore the aliveness of the BlackBoard instance.
  * Note that even though the aliveness of the BlackBoard is restored single
  * interfaces may still be invalid. That can for instance happen if a remote

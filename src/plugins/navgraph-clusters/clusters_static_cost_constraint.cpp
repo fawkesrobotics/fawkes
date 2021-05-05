@@ -48,7 +48,7 @@ NavGraphClustersStaticCostConstraint::~NavGraphClustersStaticCostConstraint()
 }
 
 bool
-NavGraphClustersStaticCostConstraint::compute(void) throw()
+NavGraphClustersStaticCostConstraint::compute(void) noexcept
 {
 	blocked_ = parent_->blocked_edges();
 	return true;
@@ -56,7 +56,7 @@ NavGraphClustersStaticCostConstraint::compute(void) throw()
 
 float
 NavGraphClustersStaticCostConstraint::cost_factor(const fawkes::NavGraphNode &from,
-                                                  const fawkes::NavGraphNode &to) throw()
+                                                  const fawkes::NavGraphNode &to) noexcept
 {
 	std::string to_n   = to.name();
 	std::string from_n = from.name();

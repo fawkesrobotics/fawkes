@@ -36,7 +36,7 @@ public:
 	WebviewUserVerifier(fawkes::Configuration *config, fawkes::Logger *logger);
 	virtual ~WebviewUserVerifier();
 
-	virtual bool verify_user(const char *user, const char *password) throw();
+	virtual bool verify_user(const char *user, const char *password) noexcept;
 
 private:
 	fawkes::Configuration *config;

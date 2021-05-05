@@ -128,7 +128,7 @@ draw_points()
 		for (unsigned int h = 0; h < height; ++h) {
 			for (unsigned int w = 0; w < width; ++w, rgb += 3, ++pcl) {
 				//++num_values;
-				register const pcl_point_t &p = *pcl;
+				const pcl_point_t &p = *pcl;
 				if ((p.x != 0) || (p.y != 0) || (p.z != 0)) {
 					glColor3f(rgb[0] / 255., rgb[1] / 255., rgb[2] / 255.);
 					glVertex3f(p.x, p.y, p.z);
@@ -140,7 +140,7 @@ draw_points()
 		for (unsigned int h = 0; h < height; ++h) {
 			for (unsigned int w = 0; w < width; ++w, ++pcl) {
 				//++num_values;
-				register const pcl_point_t &p = *pcl;
+				const pcl_point_t &p = *pcl;
 				if ((p.x != 0) || (p.y != 0) || (p.z != 0)) {
 					glVertex3f(p.x, p.y, p.z);
 				}

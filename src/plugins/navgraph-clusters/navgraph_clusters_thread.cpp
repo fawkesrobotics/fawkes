@@ -128,7 +128,7 @@ NavGraphClustersThread::loop()
 }
 
 void
-NavGraphClustersThread::bb_interface_created(const char *type, const char *id) throw()
+NavGraphClustersThread::bb_interface_created(const char *type, const char *id) noexcept
 {
 	Position3DInterface *pif;
 	try {
@@ -162,20 +162,20 @@ NavGraphClustersThread::bb_interface_created(const char *type, const char *id) t
 
 void
 NavGraphClustersThread::bb_interface_writer_removed(fawkes::Interface *interface,
-                                                    fawkes::Uuid       instance_serial) throw()
+                                                    fawkes::Uuid       instance_serial) noexcept
 {
 	conditional_close(interface);
 }
 
 void
 NavGraphClustersThread::bb_interface_reader_removed(fawkes::Interface *interface,
-                                                    fawkes::Uuid       instance_serial) throw()
+                                                    fawkes::Uuid       instance_serial) noexcept
 {
 	conditional_close(interface);
 }
 
 void
-NavGraphClustersThread::conditional_close(Interface *interface) throw()
+NavGraphClustersThread::conditional_close(Interface *interface) noexcept
 {
 	Position3DInterface *pif = dynamic_cast<Position3DInterface *>(interface);
 
@@ -211,7 +211,7 @@ NavGraphClustersThread::conditional_close(Interface *interface) throw()
  * @return list of pairs of blocked edges' start and end name.
  */
 std::list<std::pair<std::string, std::string>>
-NavGraphClustersThread::blocked_edges() throw()
+NavGraphClustersThread::blocked_edges() noexcept
 {
 	std::list<std::pair<std::string, std::string>>                   blocked;
 	std::list<std::tuple<std::string, std::string, Eigen::Vector2f>> blocked_c =
@@ -231,7 +231,7 @@ NavGraphClustersThread::blocked_edges() throw()
  * of the object close to the edge.
  */
 std::list<std::tuple<std::string, std::string, Eigen::Vector2f>>
-NavGraphClustersThread::blocked_edges_centroids() throw()
+NavGraphClustersThread::blocked_edges_centroids() noexcept
 {
 	MutexLocker                                                      lock(cluster_ifs_.mutex());
 	std::list<std::tuple<std::string, std::string, Eigen::Vector2f>> blocked;
@@ -310,7 +310,7 @@ NavGraphClustersThread::fixed_frame_pose(std::string         frame,
  * @return true if the pose could be determined, false otherwise
  */
 bool
-NavGraphClustersThread::robot_pose(Eigen::Vector2f &pose) throw()
+NavGraphClustersThread::robot_pose(Eigen::Vector2f &pose) noexcept
 {
 	tf::Stamped<tf::Point> tpose;
 	tf::Stamped<tf::Point> input(tf::Point(0, 0, 0), fawkes::Time(0, 0), cfg_base_frame_);

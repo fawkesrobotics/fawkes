@@ -271,7 +271,7 @@ ExogManager::BlackboardEventHandler::make_exog_event(Interface *iface) const
 }
 
 void
-ExogManager::InterfaceWatcher::bb_interface_data_refreshed(Interface *iface) throw()
+ExogManager::InterfaceWatcher::bb_interface_data_refreshed(Interface *iface) noexcept
 {
 	try {
 		exog_manager_.exog_queue_push(make_exog_event(iface));
@@ -302,7 +302,7 @@ ExogManager::PatternObserver::~PatternObserver()
 }
 
 void
-ExogManager::PatternObserver::bb_interface_created(const char *type, const char *id) throw()
+ExogManager::PatternObserver::bb_interface_created(const char *type, const char *id) noexcept
 {
 	std::lock_guard<std::mutex> locked{handler_mutex_};
 	exog_manager_.watchers_.push_back(std::make_unique<InterfaceWatcher>(

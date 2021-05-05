@@ -120,7 +120,7 @@ FawkesNetworkServerThread::~FawkesNetworkServerThread()
  * @param s socket for new client
  */
 void
-FawkesNetworkServerThread::add_connection(StreamSocket *s) throw()
+FawkesNetworkServerThread::add_connection(StreamSocket *s) noexcept
 {
 	FawkesNetworkServerClientThread *client = new FawkesNetworkServerClientThread(s, this);
 

@@ -95,7 +95,7 @@ private:
 		                 ExogManager &exog_mgr);
 		virtual ~InterfaceWatcher() override;
 
-		virtual void bb_interface_data_refreshed(Interface *) throw() override;
+		virtual void bb_interface_data_refreshed(Interface *) noexcept override;
 
 	private:
 		Interface *iface_;
@@ -111,7 +111,7 @@ private:
 		                ExogManager &exog_mgr);
 		virtual ~PatternObserver() override;
 
-		virtual void bb_interface_created(const char *type, const char *id) throw() override;
+		virtual void bb_interface_created(const char *type, const char *id) noexcept override;
 
 	private:
 		std::string pattern_;

@@ -54,25 +54,25 @@ public:
 	}
 
 	virtual void
-	bb_interface_created(const char *type, const char *id) throw()
+	bb_interface_created(const char *type, const char *id) noexcept
 	{
 		printf("BBIO: Interface %s of type %s has been created\n", id, type);
 	}
 
 	virtual void
-	bb_interface_destroyed(const char *type, const char *id) throw()
+	bb_interface_destroyed(const char *type, const char *id) noexcept
 	{
 		printf("BBIO: Interface %s of type %s has been destroyed\n", id, type);
 	}
 
 	virtual void
-	bb_interface_data_refreshed(Interface *interface) throw()
+	bb_interface_data_refreshed(Interface *interface) noexcept
 	{
 		printf("BBIL: Data in interface %s has been modified\n", interface->uid());
 	}
 
 	virtual bool
-	bb_interface_message_received(Interface *interface, Message *message) throw()
+	bb_interface_message_received(Interface *interface, Message *message) noexcept
 	{
 		printf("BBIL: Message of type %s for interface %s has been received\n",
 		       message->type(),
@@ -89,7 +89,7 @@ public:
 	}
 
 	virtual void
-	bb_interface_writer_added(Interface *interface, unsigned int instance_serial) throw()
+	bb_interface_writer_added(Interface *interface, unsigned int instance_serial) noexcept
 	{
 		printf("BBIL: Writer has been added to interface %s/%u (event serial %u)\n",
 		       interface->uid(),
@@ -98,7 +98,7 @@ public:
 	}
 
 	virtual void
-	bb_interface_writer_removed(Interface *interface, unsigned int instance_serial) throw()
+	bb_interface_writer_removed(Interface *interface, unsigned int instance_serial) noexcept
 	{
 		printf("BBIL: Writer has been removed from interface %s/%u (event serial %u)\n",
 		       interface->uid(),
@@ -107,7 +107,7 @@ public:
 	}
 
 	virtual void
-	bb_interface_reader_added(Interface *interface, unsigned int instance_serial) throw()
+	bb_interface_reader_added(Interface *interface, unsigned int instance_serial) noexcept
 	{
 		printf("BBIL: Reader has been added to interface %s/%u (event serial %u)\n",
 		       interface->uid(),
@@ -116,7 +116,7 @@ public:
 	}
 
 	virtual void
-	bb_interface_reader_removed(Interface *interface, unsigned int instance_serial) throw()
+	bb_interface_reader_removed(Interface *interface, unsigned int instance_serial) noexcept
 	{
 		printf("BBIL: Reader has been removed from interface %s/%u (event serial %u)\n",
 		       interface->uid(),
@@ -125,7 +125,7 @@ public:
 	}
 
 	virtual void
-	add_interface(Interface *interface) throw()
+	add_interface(Interface *interface) noexcept
 	{
 		printf("Listener: Adding interface %s (this: %p)\n", interface->uid(), this);
 		bbil_add_data_interface(interface);

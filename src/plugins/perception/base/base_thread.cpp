@@ -431,7 +431,7 @@ FvBaseThread::unregister_thread(Thread *thread)
 }
 
 bool
-FvBaseThread::thread_started(Thread *thread) throw()
+FvBaseThread::thread_started(Thread *thread) noexcept
 {
 	aqts_.lock();
 	for (ait_ = aqts_.begin(); ait_ != aqts_.end(); ++ait_) {
@@ -447,7 +447,7 @@ FvBaseThread::thread_started(Thread *thread) throw()
 }
 
 bool
-FvBaseThread::thread_init_failed(Thread *thread) throw()
+FvBaseThread::thread_init_failed(Thread *thread) noexcept
 {
 	aqts_.lock();
 	for (ait_ = aqts_.begin(); ait_ != aqts_.end(); ++ait_) {

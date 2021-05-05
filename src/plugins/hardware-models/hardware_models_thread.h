@@ -86,7 +86,7 @@ private:
 	                    const std::string &                  from,
 	                    const std::string &                  to,
 	                    const std::string &                  trans);
-	void clips_add_transition(const std::string &component, const std::string &transition) throw();
+	void clips_add_transition(const std::string &component, const std::string &transition) noexcept;
 };
 
 #endif

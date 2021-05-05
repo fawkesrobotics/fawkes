@@ -825,7 +825,7 @@ FawkesNetworkClient::wake(unsigned int component_id)
  * @return true if connection is alive at the moment, false otherwise
  */
 bool
-FawkesNetworkClient::connected() const throw()
+FawkesNetworkClient::connected() const noexcept
 {
 	return (!connection_died_recently && (s != NULL));
 }

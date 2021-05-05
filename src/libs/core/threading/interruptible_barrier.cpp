@@ -186,7 +186,7 @@ InterruptibleBarrier::passed_threads()
  * the next time.
  */
 void
-InterruptibleBarrier::interrupt() throw()
+InterruptibleBarrier::interrupt() noexcept
 {
 	if (likely(data_->own_mutex))
 		data_->mutex->lock();
@@ -202,7 +202,7 @@ InterruptibleBarrier::interrupt() throw()
  * passed the barrier the last time did pass it.
  */
 void
-InterruptibleBarrier::reset() throw()
+InterruptibleBarrier::reset() noexcept
 {
 	if (likely(data_->own_mutex))
 		data_->mutex->lock();

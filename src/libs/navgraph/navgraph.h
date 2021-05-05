@@ -173,13 +173,13 @@ public:
 	NavGraph &operator=(const NavGraph &g);
 
 	void set_notifications_enabled(bool enabled);
-	void notify_of_change() throw();
+	void notify_of_change() noexcept;
 
 	class ChangeListener
 	{
 	public:
 		virtual ~ChangeListener();
-		virtual void graph_changed() throw() = 0;
+		virtual void graph_changed() noexcept = 0;
 	};
 
 	void add_change_listener(ChangeListener *listener);

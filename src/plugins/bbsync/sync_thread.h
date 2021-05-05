@@ -57,8 +57,8 @@ public:
 	virtual void loop();
 	virtual void finalize();
 
-	void writer_added(fawkes::Interface *interface) throw();
-	void writer_removed(fawkes::Interface *interface) throw();
+	void writer_added(fawkes::Interface *interface) noexcept;
+	void writer_removed(fawkes::Interface *interface) noexcept;
 
 	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
 protected:

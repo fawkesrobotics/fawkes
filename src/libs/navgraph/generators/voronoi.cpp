@@ -192,7 +192,7 @@ NavGraphGeneratorVoronoi::compute(fawkes::LockPtr<fawkes::NavGraph> graph)
 		}
 
 		polygons_.remove_if([&node_coords](const Polygon2D &poly) {
-			for (const auto nc : node_coords) {
+			for (const auto &nc : node_coords) {
 				if (polygon_contains(poly, nc))
 					return true;
 			}

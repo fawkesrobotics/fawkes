@@ -129,7 +129,7 @@ RemoteBlackBoard::~RemoteBlackBoard()
 }
 
 bool
-RemoteBlackBoard::is_alive() const throw()
+RemoteBlackBoard::is_alive() const noexcept
 {
 	return fnc_->connected();
 }
@@ -154,7 +154,7 @@ RemoteBlackBoard::reopen_interfaces()
 }
 
 bool
-RemoteBlackBoard::try_aliveness_restore() throw()
+RemoteBlackBoard::try_aliveness_restore() noexcept
 {
 	bool rv = true;
 	try {
@@ -444,12 +444,12 @@ RemoteBlackBoard::list(const char *type_pattern, const char *id_pattern)
  * @param id the id of the calling client
  */
 void
-RemoteBlackBoard::deregistered(unsigned int id) throw()
+RemoteBlackBoard::deregistered(unsigned int id) noexcept
 {
 }
 
 void
-RemoteBlackBoard::inbound_received(FawkesNetworkMessage *m, unsigned int id) throw()
+RemoteBlackBoard::inbound_received(FawkesNetworkMessage *m, unsigned int id) noexcept
 {
 	mutex_->lock();
 	inbound_thread_ = Thread::current_thread()->name();
@@ -512,7 +512,7 @@ RemoteBlackBoard::inbound_received(FawkesNetworkMessage *m, unsigned int id) thr
 }
 
 void
-RemoteBlackBoard::connection_died(unsigned int id) throw()
+RemoteBlackBoard::connection_died(unsigned int id) noexcept
 {
 	// mark all assigned interfaces as invalid
 	proxies_.lock();
@@ -526,7 +526,7 @@ RemoteBlackBoard::connection_died(unsigned int id) throw()
 }
 
 void
-RemoteBlackBoard::connection_established(unsigned int id) throw()
+RemoteBlackBoard::connection_established(unsigned int id) noexcept
 {
 }
 

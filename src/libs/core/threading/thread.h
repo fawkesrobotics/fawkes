@@ -108,7 +108,7 @@ public:
 	bool flagged_bad() const;
 
 	static Thread *    current_thread();
-	static Thread *    current_thread_noexc() throw();
+	static Thread *    current_thread_noexc() noexcept;
 	static pthread_t   current_thread_id();
 	static std::string current_thread_name();
 	static void        current_thread_name(const std::string &thread_name);

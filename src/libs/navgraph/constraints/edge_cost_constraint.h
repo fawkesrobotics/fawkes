@@ -39,9 +39,9 @@ public:
 
 	std::string name();
 
-	virtual bool  compute(void) throw();
+	virtual bool  compute(void) noexcept;
 	virtual float cost_factor(const fawkes::NavGraphNode &from,
-	                          const fawkes::NavGraphNode &to) throw() = 0;
+	                          const fawkes::NavGraphNode &to) noexcept = 0;
 
 	bool operator==(const std::string &name) const;
 

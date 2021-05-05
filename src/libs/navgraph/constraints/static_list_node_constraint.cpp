@@ -59,7 +59,7 @@ NavGraphStaticListNodeConstraint::~NavGraphStaticListNodeConstraint()
 }
 
 bool
-NavGraphStaticListNodeConstraint::compute(void) throw()
+NavGraphStaticListNodeConstraint::compute(void) noexcept
 {
 	if (modified_) {
 		modified_ = false;

@@ -64,8 +64,7 @@ RosPointCloudThread::finalize()
 	for (const std::string &item : ros_pointcloud_available_) {
 		pcl_manager->remove_pointcloud(item.c_str());
 	}
-	for (const std::pair<std::string, fawkes::pcl_utils::StorageAdapter *> &item :
-	     ros_pointcloud_available_ref_) {
+	for (const auto &item : ros_pointcloud_available_ref_) {
 		delete item.second;
 	}
 	for (std::pair<std::string, ros::Subscriber> item : ros_pointcloud_subs_) {
@@ -111,7 +110,7 @@ RosPointCloudThread::ros_pointcloud_search()
 		if (0 == info.datatype.compare("sensor_msgs/PointCloud2")) {
 			// check if this is a topic comming from fawkes
 			bool topic_not_from_fawkes = true;
-			for (const std::pair<std::string, PublisherInfo> &fawkes_cloud : fawkes_pubs_) {
+			for (const auto &fawkes_cloud : fawkes_pubs_) {
 				if (0 == info.name.compare(fawkes_cloud.second.pub.getTopic())) {
 					topic_not_from_fawkes = false;
 				}
@@ -164,8 +163,7 @@ RosPointCloudThread::ros_pointcloud_search()
 void
 RosPointCloudThread::ros_pointcloud_check_for_listener_in_fawkes()
 {
-	for (const std::pair<std::string, fawkes::pcl_utils::StorageAdapter *> &item :
-	     ros_pointcloud_available_ref_) {
+	for (const auto &item : ros_pointcloud_available_ref_) {
 		unsigned int use_count = 0;
 		if (item.second->is_pointtype<pcl::PointXYZ>()) {
 			use_count =

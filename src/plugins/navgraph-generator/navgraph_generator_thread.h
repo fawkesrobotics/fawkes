@@ -86,7 +86,7 @@ private:
 	typedef std::list<Edge>                                EdgeList;
 
 	virtual bool bb_interface_message_received(fawkes::Interface *interface,
-	                                           fawkes::Message *  message) throw();
+	                                           fawkes::Message *  message) noexcept;
 
 	ObstacleMap map_obstacles(float line_max_dist);
 	map_t *     load_map(std::vector<std::pair<int, int>> &free_space_indices);

@@ -70,10 +70,11 @@ public:
 
 	virtual std::vector<FUSE_imageinfo_t> &image_list();
 
-	virtual void fuse_invalid_server_version(uint32_t local_version, uint32_t remote_version) throw();
-	virtual void fuse_connection_established() throw();
-	virtual void fuse_connection_died() throw();
-	virtual void fuse_inbound_received(FuseNetworkMessage *m) throw();
+	virtual void fuse_invalid_server_version(uint32_t local_version,
+	                                         uint32_t remote_version) noexcept;
+	virtual void fuse_connection_established() noexcept;
+	virtual void fuse_connection_died() noexcept;
+	virtual void fuse_inbound_received(FuseNetworkMessage *m) noexcept;
 
 private:
 	bool started_;

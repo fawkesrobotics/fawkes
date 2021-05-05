@@ -36,7 +36,7 @@ namespace fawkes {
 /** Constructor
  * @param format message format, takes sprintf() parameters as variadic arguments
  */
-NullPointerException::NullPointerException(const char *format, ...) throw() : Exception()
+NullPointerException::NullPointerException(const char *format, ...) noexcept : Exception()
 {
 	va_list va;
 	va_start(va, format);
@@ -52,7 +52,7 @@ NullPointerException::NullPointerException(const char *format, ...) throw() : Ex
 /** Constructor
  * @param format message format, takes sprintf() parameters as variadic arguments
  */
-DivisionByZeroException::DivisionByZeroException(const char *format, ...) throw() : Exception()
+DivisionByZeroException::DivisionByZeroException(const char *format, ...) noexcept : Exception()
 {
 	va_list va;
 	va_start(va, format);
@@ -68,7 +68,7 @@ DivisionByZeroException::DivisionByZeroException(const char *format, ...) throw(
 /** Constructor
  * @param format message format, takes sprintf() parameters as variadic arguments
  */
-TypeMismatchException::TypeMismatchException(const char *format, ...) throw() : Exception()
+TypeMismatchException::TypeMismatchException(const char *format, ...) noexcept : Exception()
 {
 	va_list va;
 	va_start(va, format);
@@ -84,7 +84,7 @@ TypeMismatchException::TypeMismatchException(const char *format, ...) throw() : 
 /** Constructor
  * @param format message format, takes sprintf() parameters as variadic arguments
  */
-UnknownTypeException::UnknownTypeException(const char *format, ...) throw() : Exception()
+UnknownTypeException::UnknownTypeException(const char *format, ...) noexcept : Exception()
 {
 	va_list va;
 	va_start(va, format);
@@ -101,7 +101,7 @@ UnknownTypeException::UnknownTypeException(const char *format, ...) throw() : Ex
 /** Constructor
  * @param format message format, takes sprintf() parameters as variadic arguments
  */
-DestructionInProgressException::DestructionInProgressException(const char *format, ...) throw()
+DestructionInProgressException::DestructionInProgressException(const char *format, ...) noexcept
 : Exception()
 {
 	va_list va;
@@ -119,7 +119,7 @@ DestructionInProgressException::DestructionInProgressException(const char *forma
 /** Constructor.
  * @param format message format, takes sprintf() parameters as variadic arguments
  */
-NotLockedException::NotLockedException(const char *format, ...) throw() : Exception()
+NotLockedException::NotLockedException(const char *format, ...) noexcept : Exception()
 {
 	va_list va;
 	va_start(va, format);
@@ -136,7 +136,7 @@ NotLockedException::NotLockedException(const char *format, ...) throw() : Except
 /** Constructor.
  * @param format message format, takes sprintf() parameters as variadic arguments
  */
-NonPointerTypeExpectedException::NonPointerTypeExpectedException(const char *format, ...) throw()
+NonPointerTypeExpectedException::NonPointerTypeExpectedException(const char *format, ...) noexcept
 : Exception()
 {
 	va_list va;
@@ -154,7 +154,7 @@ NonPointerTypeExpectedException::NonPointerTypeExpectedException(const char *for
 /** Constructor.
  * @param format message format, takes sprintf() parameters as variadic arguments
  */
-MissingParameterException::MissingParameterException(const char *format, ...) throw() : Exception()
+MissingParameterException::MissingParameterException(const char *format, ...) noexcept : Exception()
 {
 	va_list va;
 	va_start(va, format);
@@ -171,7 +171,7 @@ MissingParameterException::MissingParameterException(const char *format, ...) th
 /** Constructor.
  * @param format message format, takes sprintf() parameters as variadic arguments
  */
-IllegalArgumentException::IllegalArgumentException(const char *format, ...) throw() : Exception()
+IllegalArgumentException::IllegalArgumentException(const char *format, ...) noexcept : Exception()
 {
 	va_list va;
 	va_start(va, format);
@@ -190,7 +190,7 @@ IllegalArgumentException::IllegalArgumentException(const char *format, ...) thro
  * @param msg informative message, appended to exception, base message is
  * "Out Of Bounds"
  */
-OutOfBoundsException::OutOfBoundsException(const char *msg) throw()
+OutOfBoundsException::OutOfBoundsException(const char *msg) noexcept
 : Exception("Out Of Bounds: %s", msg)
 {
 }
@@ -203,7 +203,10 @@ OutOfBoundsException::OutOfBoundsException(const char *msg) throw()
  * @param min minimum required value
  * @param max maximum allowed value
  */
-OutOfBoundsException::OutOfBoundsException(const char *msg, float val, float min, float max) throw()
+OutOfBoundsException::OutOfBoundsException(const char *msg,
+                                           float       val,
+                                           float       min,
+                                           float       max) noexcept
 : Exception()
 {
 	if ((roundf(val) == val) && (roundf(min) == min) && (roundf(max) == max)) {
@@ -224,7 +227,7 @@ OutOfBoundsException::OutOfBoundsException(const char *msg, float val, float min
 /** Constructor.
  * @param format message format, takes sprintf() parameters as variadic arguments
  */
-AccessViolationException::AccessViolationException(const char *format, ...) throw() : Exception()
+AccessViolationException::AccessViolationException(const char *format, ...) noexcept : Exception()
 {
 	va_list va;
 	va_start(va, format);
@@ -241,7 +244,7 @@ AccessViolationException::AccessViolationException(const char *format, ...) thro
 /** Constructor
  * @param format message format, takes sprintf() parameters as variadic arguments
  */
-SyntaxErrorException::SyntaxErrorException(const char *format, ...) throw() : Exception()
+SyntaxErrorException::SyntaxErrorException(const char *format, ...) noexcept : Exception()
 {
 	va_list va;
 	va_start(va, format);
@@ -259,7 +262,7 @@ SyntaxErrorException::SyntaxErrorException(const char *format, ...) throw() : Ex
 /** Constructor
  * @param format message format, takes sprintf() parameters as variadic arguments
  */
-NotImplementedException::NotImplementedException(const char *format, ...) throw() : Exception()
+NotImplementedException::NotImplementedException(const char *format, ...) noexcept : Exception()
 {
 	va_list va;
 	va_start(va, format);

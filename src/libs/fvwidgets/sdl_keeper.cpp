@@ -82,7 +82,7 @@ SDLKeeper::init(unsigned int flags)
  * users of SDL quit the usage. Then the whole SDL will be released at once.
  */
 void
-SDLKeeper::quit() throw()
+SDLKeeper::quit() noexcept
 {
 	MutexLocker lock(&_mutex);
 

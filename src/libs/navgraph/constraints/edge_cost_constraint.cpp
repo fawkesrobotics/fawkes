@@ -26,7 +26,7 @@ namespace fawkes {
  * Constraint that can be queried for an edge cost factor.
  * @author Tim Niemueller
  *
- * @fn bool NavGraphEdgeCostConstraint::cost_factor(const fawkes::NavGraphNode &from, const fawkes::NavGraphNode &to) throw() = 0
+ * @fn bool NavGraphEdgeCostConstraint::cost_factor(const fawkes::NavGraphNode &from, const fawkes::NavGraphNode &to) noexcept = 0
  * Get cost factor for given edge.
  * This method must be implemented by constraint classes. It is called
  * to determine a cost factor for an edge. That is, the path costs
@@ -100,7 +100,7 @@ NavGraphEdgeCostConstraint::name()
  * the last call, false otherwise
  */
 bool
-NavGraphEdgeCostConstraint::compute(void) throw()
+NavGraphEdgeCostConstraint::compute(void) noexcept
 {
 	return false;
 }

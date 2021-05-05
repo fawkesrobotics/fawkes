@@ -418,18 +418,18 @@ FuseImageListWidget::update_image_list()
 
 void
 FuseImageListWidget::fuse_invalid_server_version(uint32_t local_version,
-                                                 uint32_t remote_version) throw()
+                                                 uint32_t remote_version) noexcept
 {
 	printf("Invalid versions: local: %u   remote: %u\n", local_version, remote_version);
 }
 
 void
-FuseImageListWidget::fuse_connection_established() throw()
+FuseImageListWidget::fuse_connection_established() noexcept
 {
 }
 
 void
-FuseImageListWidget::fuse_connection_died() throw()
+FuseImageListWidget::fuse_connection_died() noexcept
 {
 	if (m_cur_client.active) {
 		m_delete_clients.push_locked(m_cur_client.client);
@@ -440,7 +440,7 @@ FuseImageListWidget::fuse_connection_died() throw()
 }
 
 void
-FuseImageListWidget::fuse_inbound_received(FuseNetworkMessage *m) throw()
+FuseImageListWidget::fuse_inbound_received(FuseNetworkMessage *m) noexcept
 {
 	switch (m->type()) {
 	case FUSE_MT_IMAGE_LIST: {

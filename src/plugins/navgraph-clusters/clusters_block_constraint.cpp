@@ -44,7 +44,7 @@ NavGraphClustersBlockConstraint::~NavGraphClustersBlockConstraint()
 }
 
 bool
-NavGraphClustersBlockConstraint::compute(void) throw()
+NavGraphClustersBlockConstraint::compute(void) noexcept
 {
 	blocked_ = parent_->blocked_edges();
 	return true;
@@ -52,7 +52,7 @@ NavGraphClustersBlockConstraint::compute(void) throw()
 
 bool
 NavGraphClustersBlockConstraint::blocks(const fawkes::NavGraphNode &from,
-                                        const fawkes::NavGraphNode &to) throw()
+                                        const fawkes::NavGraphNode &to) noexcept
 {
 	std::string to_n   = to.name();
 	std::string from_n = from.name();

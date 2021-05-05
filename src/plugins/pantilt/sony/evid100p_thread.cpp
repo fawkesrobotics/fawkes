@@ -336,7 +336,7 @@ PanTiltSonyEviD100PThread::loop()
 
 bool
 PanTiltSonyEviD100PThread::bb_interface_message_received(Interface *interface,
-                                                         Message *  message) throw()
+                                                         Message *  message) noexcept
 {
 	if (message->is_of_type<PanTiltInterface::StopMessage>()) {
 		wt_->stop_motion();

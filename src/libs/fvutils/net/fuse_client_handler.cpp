@@ -31,20 +31,20 @@ namespace firevision {
  * @ingroup FireVision
  * @author Tim Niemueller
  *
- * @fn void FuseClientHandler::fuse_invalid_server_version(uint32_t local_version, uint32_t remote_version) throw() = 0
+ * @fn void FuseClientHandler::fuse_invalid_server_version(uint32_t local_version, uint32_t remote_version) noexcept = 0
  * Invalid version string received.
  * The remote end has a different incompatible FUSE version.
  * @param local_version version that the FuseClient speaks
  * @param remote_version version that the remote FUSE server speaks.
  *
- * @fn void FuseClientHandler::fuse_connection_established() throw() = 0
+ * @fn void FuseClientHandler::fuse_connection_established() noexcept = 0
  * Connection has been established.
  *
- * @fn void FuseClientHandler::fuse_connection_died()  throw() = 0
+ * @fn void FuseClientHandler::fuse_connection_died()  noexcept = 0
  * Connection died.
  *
  *
- * @fn void FuseClientHandler::fuse_inbound_received(FuseNetworkMessage *m) throw() = 0
+ * @fn void FuseClientHandler::fuse_inbound_received(FuseNetworkMessage *m) noexcept = 0
  * Message received.
  * An incoming message has been received and can now be processed. Note that if you want
  * to work on the message after this method has finished you have to reference the message

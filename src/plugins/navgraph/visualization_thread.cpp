@@ -166,7 +166,7 @@ NavGraphVisualizationThread::set_current_edge(const std::string &from, const std
 }
 
 void
-NavGraphVisualizationThread::graph_changed() throw()
+NavGraphVisualizationThread::graph_changed() noexcept
 {
 	regenerate();
 }

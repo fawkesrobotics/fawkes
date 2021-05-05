@@ -30,7 +30,7 @@ class WebUserVerifier
 public:
 	virtual ~WebUserVerifier();
 
-	virtual bool verify_user(const char *user, const char *password) throw() = 0;
+	virtual bool verify_user(const char *user, const char *password) noexcept = 0;
 };
 
 } // end namespace fawkes

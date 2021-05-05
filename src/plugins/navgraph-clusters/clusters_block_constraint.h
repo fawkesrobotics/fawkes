@@ -34,8 +34,8 @@ public:
 	NavGraphClustersBlockConstraint(const char *name, NavGraphClustersThread *parent);
 	virtual ~NavGraphClustersBlockConstraint();
 
-	virtual bool compute(void) throw();
-	virtual bool blocks(const fawkes::NavGraphNode &from, const fawkes::NavGraphNode &to) throw();
+	virtual bool compute(void) noexcept;
+	virtual bool blocks(const fawkes::NavGraphNode &from, const fawkes::NavGraphNode &to) noexcept;
 
 private:
 	NavGraphClustersThread *                       parent_;

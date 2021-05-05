@@ -79,13 +79,13 @@ public:
 
 	const char *bbil_name() const;
 
-	virtual void bb_interface_data_refreshed(Interface *interface) throw();
-	virtual void bb_interface_data_changed(Interface *interface) throw();
-	virtual bool bb_interface_message_received(Interface *interface, Message *message) throw();
-	virtual void bb_interface_writer_added(Interface *interface, Uuid instance_serial) throw();
-	virtual void bb_interface_writer_removed(Interface *interface, Uuid instance_serial) throw();
-	virtual void bb_interface_reader_added(Interface *interface, Uuid instance_serial) throw();
-	virtual void bb_interface_reader_removed(Interface *interface, Uuid instance_serial) throw();
+	virtual void bb_interface_data_refreshed(Interface *interface) noexcept;
+	virtual void bb_interface_data_changed(Interface *interface) noexcept;
+	virtual bool bb_interface_message_received(Interface *interface, Message *message) noexcept;
+	virtual void bb_interface_writer_added(Interface *interface, Uuid instance_serial) noexcept;
+	virtual void bb_interface_writer_removed(Interface *interface, Uuid instance_serial) noexcept;
+	virtual void bb_interface_reader_added(Interface *interface, Uuid instance_serial) noexcept;
+	virtual void bb_interface_reader_removed(Interface *interface, Uuid instance_serial) noexcept;
 
 protected:
 	void bbil_add_data_interface(Interface *interface);
@@ -98,10 +98,10 @@ protected:
 	void bbil_remove_reader_interface(Interface *interface);
 	void bbil_remove_writer_interface(Interface *interface);
 
-	Interface *bbil_data_interface(const char *iuid) throw();
-	Interface *bbil_message_interface(const char *iuid) throw();
-	Interface *bbil_reader_interface(const char *iuid) throw();
-	Interface *bbil_writer_interface(const char *iuid) throw();
+	Interface *bbil_data_interface(const char *iuid) noexcept;
+	Interface *bbil_message_interface(const char *iuid) noexcept;
+	Interface *bbil_reader_interface(const char *iuid) noexcept;
+	Interface *bbil_writer_interface(const char *iuid) noexcept;
 
 private:
 	void       bbil_queue_add(QueueEntryType type,
@@ -111,11 +111,11 @@ private:
 	                          const char *   hint);
 	Interface *bbil_find_interface(const char *iuid, InterfaceMap &map);
 
-	const InterfaceQueue &bbil_acquire_queue() throw();
-	void                  bbil_release_queue(BlackBoard::ListenerRegisterFlag flag) throw();
+	const InterfaceQueue &bbil_acquire_queue() noexcept;
+	void                  bbil_release_queue(BlackBoard::ListenerRegisterFlag flag) noexcept;
 
-	const InterfaceMaps &bbil_acquire_maps() throw();
-	void                 bbil_release_maps() throw();
+	const InterfaceMaps &bbil_acquire_maps() noexcept;
+	void                 bbil_release_maps() noexcept;
 
 private:
 	Mutex *bbil_queue_mutex_;

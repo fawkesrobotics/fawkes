@@ -143,13 +143,13 @@ LocalBlackBoard::list(const char *type_pattern, const char *id_pattern)
 }
 
 bool
-LocalBlackBoard::is_alive() const throw()
+LocalBlackBoard::is_alive() const noexcept
 {
 	return true;
 }
 
 bool
-LocalBlackBoard::try_aliveness_restore() throw()
+LocalBlackBoard::try_aliveness_restore() noexcept
 {
 	return true;
 }

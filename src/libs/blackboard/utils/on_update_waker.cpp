@@ -59,7 +59,7 @@ BlackBoardOnUpdateWaker::~BlackBoardOnUpdateWaker()
 }
 
 void
-BlackBoardOnUpdateWaker::bb_interface_data_refreshed(Interface *interface) throw()
+BlackBoardOnUpdateWaker::bb_interface_data_refreshed(Interface *interface) noexcept
 {
 	thread_->wakeup();
 }

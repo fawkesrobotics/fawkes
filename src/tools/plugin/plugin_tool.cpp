@@ -249,7 +249,7 @@ PluginTool::watch()
 /** Handler has been deregistered.
  */
 void
-PluginTool::deregistered(unsigned int id) throw()
+PluginTool::deregistered(unsigned int id) noexcept
 {
 	quit = true;
 }
@@ -258,7 +258,7 @@ PluginTool::deregistered(unsigned int id) throw()
  * @param msg message.
  */
 void
-PluginTool::inbound_received(FawkesNetworkMessage *msg, unsigned int id) throw()
+PluginTool::inbound_received(FawkesNetworkMessage *msg, unsigned int id) noexcept
 {
 	if (msg->cid() != FAWKES_CID_PLUGINMANAGER)
 		return;
@@ -329,7 +329,8 @@ PluginTool::inbound_received(FawkesNetworkMessage *msg, unsigned int id) throw()
 				if (plm->has_next()) {
 					plugin_desc = plm->next();
 				} else {
-					throw Exception("Invalid plugin list received");
+					printf("Invalid plugin list received");
+					return;
 				}
 				printf(" %-16s (%s)\n", plugin_name, plugin_desc);
 				free(plugin_name);
@@ -362,13 +363,13 @@ PluginTool::inbound_received(FawkesNetworkMessage *msg, unsigned int id) throw()
 }
 
 void
-PluginTool::connection_established(unsigned int id) throw()
+PluginTool::connection_established(unsigned int id) noexcept
 {
 	// ignored, client has to be connected already
 }
 
 void
-PluginTool::connection_died(unsigned int id) throw()
+PluginTool::connection_died(unsigned int id) noexcept
 {
 	printf("Connection died, exiting\n");
 	quit = true;

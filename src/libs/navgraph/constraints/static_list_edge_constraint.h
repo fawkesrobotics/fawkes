@@ -48,9 +48,9 @@ public:
 	void clear_edges();
 	bool has_edge(const fawkes::NavGraphEdge &edge);
 
-	virtual bool compute(void) throw();
+	virtual bool compute(void) noexcept;
 
-	virtual bool blocks(const fawkes::NavGraphNode &from, const fawkes::NavGraphNode &to) throw();
+	virtual bool blocks(const fawkes::NavGraphNode &from, const fawkes::NavGraphNode &to) noexcept;
 
 private:
 	std::vector<fawkes::NavGraphEdge> edge_list_;

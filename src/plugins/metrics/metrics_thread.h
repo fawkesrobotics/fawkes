@@ -102,14 +102,14 @@ private:
 
 private:
 	// for BlackBoardInterfaceObserver
-	virtual void bb_interface_created(const char *type, const char *id) throw();
+	virtual void bb_interface_created(const char *type, const char *id) noexcept;
 
 	// for BlackBoardInterfaceListener
 	virtual void bb_interface_writer_removed(fawkes::Interface *interface,
-	                                         unsigned int       instance_serial) throw();
+	                                         unsigned int       instance_serial) noexcept;
 	virtual void bb_interface_reader_removed(fawkes::Interface *interface,
-	                                         unsigned int       instance_serial) throw();
-	virtual void bb_interface_data_refreshed(fawkes::Interface *interface) throw();
+	                                         unsigned int       instance_serial) noexcept;
+	virtual void bb_interface_data_refreshed(fawkes::Interface *interface) noexcept;
 
 	// for MetricsSupplier
 	virtual std::list<io::prometheus::client::MetricFamily> metrics();
@@ -123,7 +123,7 @@ private:
 	virtual const fawkes::LockList<MetricsSupplier *> &metrics_suppliers() const;
 
 	bool conditional_open(const std::string &id, MetricFamilyBB &mfbb);
-	void conditional_close(fawkes::Interface *interface) throw();
+	void conditional_close(fawkes::Interface *interface) noexcept;
 	void parse_labels(const std::string &labels, io::prometheus::client::Metric *m);
 
 private:

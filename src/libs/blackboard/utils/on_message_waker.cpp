@@ -60,7 +60,7 @@ BlackBoardOnMessageWaker::~BlackBoardOnMessageWaker()
 
 bool
 BlackBoardOnMessageWaker::bb_interface_message_received(Interface *interface,
-                                                        Message *  message) throw()
+                                                        Message *  message) noexcept
 {
 	try {
 		interface->msgq_append(message);

@@ -129,7 +129,7 @@ public:
 	}
 
 	virtual void
-	bb_interface_data_refreshed(Interface *interface) throw()
+	bb_interface_data_refreshed(Interface *interface) noexcept
 	{
 		if (!bb_->is_alive()) {
 			if (bb_->try_aliveness_restore()) {
@@ -226,7 +226,7 @@ public:
 	}
 
 	virtual bool
-	bb_interface_message_received(Interface *interface, Message *message) throw()
+	bb_interface_message_received(Interface *interface, Message *message) noexcept
 	{
 		try {
 			msgproc_->process();

@@ -181,7 +181,7 @@ public:
    * @return pointer to message if it is of the desired type, 0 otherwise
    */
 	template <class MessageType>
-	MessageType *msgq_first_safe(MessageType *&msg) throw();
+	MessageType *msgq_first_safe(MessageType *&msg) noexcept;
 
 	MessageQueue::MessageIterator msgq_begin();
 	MessageQueue::MessageIterator msgq_end();
@@ -337,7 +337,7 @@ Interface::msgq_first(MessageType *&msg)
 
 template <class MessageType>
 MessageType *
-Interface::msgq_first_safe(MessageType *&msg) throw()
+Interface::msgq_first_safe(MessageType *&msg) noexcept
 {
 	msg = dynamic_cast<MessageType *>(message_queue_->first());
 	return msg;

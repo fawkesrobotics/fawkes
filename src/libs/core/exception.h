@@ -35,29 +35,29 @@ class Mutex;
 class Exception : public std::exception
 {
 public:
-	Exception(const char *format, ...) throw();
-	Exception(int errnoval, const char *format, ...) throw();
-	Exception(const Exception &exc) throw();
-	virtual ~Exception() throw();
+	Exception(const char *format, ...) noexcept;
+	Exception(int errnoval, const char *format, ...) noexcept;
+	Exception(const Exception &exc) noexcept;
+	virtual ~Exception() noexcept;
 
 	virtual void raise();
-	void         prepend(const char *format, ...) throw();
-	void         append(const char *format, ...) throw();
-	void         append_va(const char *format, va_list va) throw();
-	void         append(const Exception &e) throw();
-	void         print_trace() throw();
-	void         print_backtrace() const throw();
-	char *       generate_backtrace() const throw();
+	void         prepend(const char *format, ...) noexcept;
+	void         append(const char *format, ...) noexcept;
+	void         append_va(const char *format, va_list va) noexcept;
+	void         append(const Exception &e) noexcept;
+	void         print_trace() noexcept;
+	void         print_backtrace() const noexcept;
+	char *       generate_backtrace() const noexcept;
 
-	int get_errno() throw();
+	int get_errno() noexcept;
 
 	void        set_type_id(const char *id);
 	const char *type_id() const;
 
-	virtual const char *what() const throw();
-	virtual const char *what_no_backtrace() const throw();
+	virtual const char *what() const noexcept;
+	virtual const char *what_no_backtrace() const noexcept;
 
-	Exception &operator=(const Exception &exc) throw();
+	Exception &operator=(const Exception &exc) noexcept;
 
 protected:
 	/** Internal exception message list */
@@ -93,17 +93,17 @@ public:
 		message_list_t *mlist;
 	};
 
-	iterator begin() throw();
-	iterator end() throw();
+	iterator begin() noexcept;
+	iterator end() noexcept;
 
 protected:
-	Exception() throw();
+	Exception() noexcept;
 
-	void append_nolock(const char *format, ...) throw();
-	void append_nolock_va(const char *format, va_list va) throw();
-	void append_nolock_nocopy(char *msg) throw();
-	void prepend_nolock_va(const char *format, va_list va) throw();
-	void copy_messages(const Exception &exc) throw();
+	void append_nolock(const char *format, ...) noexcept;
+	void append_nolock_va(const char *format, va_list va) noexcept;
+	void append_nolock_nocopy(char *msg) noexcept;
+	void prepend_nolock_va(const char *format, va_list va) noexcept;
+	void copy_messages(const Exception &exc) noexcept;
 
 	message_list_t *messages;
 	message_list_t *messages_iterator;

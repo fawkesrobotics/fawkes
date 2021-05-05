@@ -44,7 +44,7 @@ public:
 	virtual void init();
 	virtual void finalize();
 
-	virtual void bb_interface_data_refreshed(fawkes::Interface *interface) throw();
+	virtual void bb_interface_data_refreshed(fawkes::Interface *interface) noexcept;
 
 private:
 	ros::Publisher        ros_pub_;

@@ -52,15 +52,15 @@ public:
 	virtual void init();
 	virtual void finalize();
 
-	virtual void bb_interface_created(const char *type, const char *id) throw();
+	virtual void bb_interface_created(const char *type, const char *id) noexcept;
 	virtual void bb_interface_writer_removed(fawkes::Interface *interface,
-	                                         fawkes::Uuid       instance_serial) throw();
+	                                         fawkes::Uuid       instance_serial) noexcept;
 	virtual void bb_interface_reader_removed(fawkes::Interface *interface,
-	                                         fawkes::Uuid       instance_serial) throw();
-	virtual void bb_interface_data_refreshed(fawkes::Interface *interface) throw();
+	                                         fawkes::Uuid       instance_serial) noexcept;
+	virtual void bb_interface_data_refreshed(fawkes::Interface *interface) noexcept;
 
 private:
-	void conditional_close(fawkes::Interface *interface) throw();
+	void conditional_close(fawkes::Interface *interface) noexcept;
 
 private:
 	ros::Publisher                      ros_pub_;

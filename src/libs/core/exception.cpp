@@ -141,7 +141,7 @@ namespace fawkes {
  * arguments as append(). The message is copied and not just referenced.
  * Thus the memory has to be freed if it is a dynamic  string on the heap.
  */
-Exception::Exception(const char *format, ...) throw()
+Exception::Exception(const char *format, ...) noexcept
 {
 	messages_mutex = new Mutex();
 
@@ -171,7 +171,7 @@ Exception::Exception(const char *format, ...) throw()
  * arguments as append(). The message is copied and not just referenced.
  * Thus the memory has to be freed if it is a dynamic  string on the heap.
  */
-Exception::Exception(int errnoval, const char *format, ...) throw()
+Exception::Exception(int errnoval, const char *format, ...) noexcept
 {
 	messages_mutex = new Mutex();
 
@@ -232,7 +232,7 @@ Exception::Exception(int errnoval, const char *format, ...) throw()
  * and copy the memory area or take care that only one exception frees the memory.
  * @param exc Exception to copy
  */
-Exception::Exception(const Exception &exc) throw()
+Exception::Exception(const Exception &exc) noexcept
 {
 	messages_mutex = new Mutex();
 
@@ -250,7 +250,7 @@ Exception::Exception(const Exception &exc) throw()
  * needed (like sprintf) to assign the message. At least assign the empty
  * string to the message.
  */
-Exception::Exception() throw()
+Exception::Exception() noexcept
 {
 	messages_mutex    = new Mutex();
 	_errno            = 0;
@@ -261,7 +261,7 @@ Exception::Exception() throw()
 }
 
 /** Destructor. */
-Exception::~Exception() throw()
+Exception::~Exception() noexcept
 {
 	message_list_t *msg_this;
 	messages_iterator = messages;
@@ -311,7 +311,7 @@ Exception::type_id() const
  * options.
  */
 void
-Exception::prepend(const char *format, ...) throw()
+Exception::prepend(const char *format, ...) noexcept
 {
 	// do not append empty messages
 	if (format == NULL)
@@ -330,7 +330,7 @@ Exception::prepend(const char *format, ...) throw()
  * options.
  */
 void
-Exception::append(const char *format, ...) throw()
+Exception::append(const char *format, ...) noexcept
 {
 	// do not append empty messages
 	if (format == NULL)
@@ -350,7 +350,7 @@ Exception::append(const char *format, ...) throw()
  * @param va va_list with arguments matching the format
  */
 void
-Exception::append_va(const char *format, va_list va) throw()
+Exception::append_va(const char *format, va_list va) noexcept
 {
 	// do not append empty messages
 	if (format == NULL)
@@ -365,7 +365,7 @@ Exception::append_va(const char *format, va_list va) throw()
  * @param e Exception to copy messages from
  */
 void
-Exception::append(const Exception &e) throw()
+Exception::append(const Exception &e) noexcept
 {
 	copy_messages(e);
 }
@@ -380,7 +380,7 @@ Exception::append(const Exception &e) throw()
  * Thus the memory has to be freed if it is a dynamic  string on the heap.
  */
 void
-Exception::append_nolock(const char *format, ...) throw()
+Exception::append_nolock(const char *format, ...) noexcept
 {
 	va_list arg;
 	va_start(arg, format);
@@ -416,7 +416,7 @@ Exception::append_nolock(const char *format, ...) throw()
  * @param ap argument va_list for format
  */
 void
-Exception::prepend_nolock_va(const char *format, va_list ap) throw()
+Exception::prepend_nolock_va(const char *format, va_list ap) noexcept
 {
 	char *msg;
 	if (vasprintf(&msg, format, ap) == -1) {
@@ -446,7 +446,7 @@ Exception::prepend_nolock_va(const char *format, va_list ap) throw()
  * @param ap argument va_list for format
  */
 void
-Exception::append_nolock_va(const char *format, va_list ap) throw()
+Exception::append_nolock_va(const char *format, va_list ap) noexcept
 {
 	char *msg;
 	if (vasprintf(&msg, format, ap) == -1) {
@@ -476,7 +476,7 @@ Exception::append_nolock_va(const char *format, va_list ap) throw()
  * @param msg Message to append.
  */
 void
-Exception::append_nolock_nocopy(char *msg) throw()
+Exception::append_nolock_nocopy(char *msg) noexcept
 {
 	if (messages == NULL) {
 		// This is our first message
@@ -503,7 +503,7 @@ Exception::append_nolock_nocopy(char *msg) throw()
  * @return reference to this object. Allows assignment chaining.
  */
 Exception &
-Exception::operator=(const Exception &exc) throw()
+Exception::operator=(const Exception &exc) noexcept
 {
 	messages_mutex = new Mutex();
 	copy_messages(exc);
@@ -516,7 +516,7 @@ Exception::operator=(const Exception &exc) throw()
  * @param exc Exception to copy messages from.
  */
 void
-Exception::copy_messages(const Exception &exc) throw()
+Exception::copy_messages(const Exception &exc) noexcept
 {
 	messages_mutex->lock();
 	exc.messages_mutex->lock();
@@ -544,7 +544,7 @@ Exception::raise()
 
 /** Prints a backtrace. */
 void
-Exception::print_backtrace() const throw()
+Exception::print_backtrace() const noexcept
 {
 #ifdef HAVE_EXECINFO
 	void * array[25];
@@ -566,7 +566,7 @@ Exception::print_backtrace() const throw()
  * @return freshly allocated string of backtrace. Free after you are done.
  */
 char *
-Exception::generate_backtrace() const throw()
+Exception::generate_backtrace() const noexcept
 {
 #ifdef HAVE_BACKTRACE
 	void * array[25];
@@ -598,7 +598,7 @@ Exception::generate_backtrace() const throw()
  * via constructor or append(). Output will be sent to stderr.
  */
 void
-Exception::print_trace() throw()
+Exception::print_trace() noexcept
 {
 	messages_mutex->lock();
 	fprintf(stderr, "=================================================== BEGIN OF EXCEPTION =====\n");
@@ -619,7 +619,7 @@ Exception::print_trace() throw()
  * @return error number, may be 0 if not set
  */
 int
-Exception::get_errno() throw()
+Exception::get_errno() noexcept
 {
 	return _errno;
 }
@@ -636,7 +636,7 @@ Exception::get_errno() throw()
  * @return string describing the general cause of the current error
  */
 const char *
-Exception::what() const throw()
+Exception::what() const noexcept
 {
 #ifdef HAVE_EXECINFO
 	print_backtrace();
@@ -660,7 +660,7 @@ Exception::what() const throw()
  * @return string describing the general cause of the current error
  */
 const char *
-Exception::what_no_backtrace() const throw()
+Exception::what_no_backtrace() const noexcept
 {
 	if (messages != NULL) {
 		return messages->msg;
@@ -673,7 +673,7 @@ Exception::what_no_backtrace() const throw()
  * @return iterator for messages
  */
 Exception::iterator
-Exception::begin() throw()
+Exception::begin() noexcept
 {
 	Exception::iterator i(messages);
 	return i;
@@ -689,7 +689,7 @@ Exception::begin() throw()
  * @return end iterator for messages.
  */
 Exception::iterator
-Exception::end() throw()
+Exception::end() noexcept
 {
 	Exception::iterator i;
 	return i;

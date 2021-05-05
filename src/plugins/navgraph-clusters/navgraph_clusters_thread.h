@@ -62,12 +62,12 @@ public:
 	virtual void loop();
 	virtual void finalize();
 
-	std::list<std::pair<std::string, std::string>> blocked_edges() throw();
+	std::list<std::pair<std::string, std::string>> blocked_edges() noexcept;
 
 	std::list<std::tuple<std::string, std::string, Eigen::Vector2f>>
-	blocked_edges_centroids() throw();
+	blocked_edges_centroids() noexcept;
 
-	bool robot_pose(Eigen::Vector2f &pose) throw();
+	bool robot_pose(Eigen::Vector2f &pose) noexcept;
 
 	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
 protected:
@@ -79,15 +79,15 @@ protected:
 
 private:
 	// for BlackBoardInterfaceObserver
-	virtual void bb_interface_created(const char *type, const char *id) throw();
+	virtual void bb_interface_created(const char *type, const char *id) noexcept;
 
 	// for BlackBoardInterfaceListener
 	virtual void bb_interface_writer_removed(fawkes::Interface *interface,
-	                                         fawkes::Uuid       instance_serial) throw();
+	                                         fawkes::Uuid       instance_serial) noexcept;
 	virtual void bb_interface_reader_removed(fawkes::Interface *interface,
-	                                         fawkes::Uuid       instance_serial) throw();
+	                                         fawkes::Uuid       instance_serial) noexcept;
 
-	void conditional_close(fawkes::Interface *interface) throw();
+	void conditional_close(fawkes::Interface *interface) noexcept;
 
 	Eigen::Vector2f
 	fixed_frame_pose(std::string frame, const fawkes::Time &timestamp, float x, float y);

@@ -88,14 +88,14 @@ BlackBoardNetHandlerInterfaceObserver::send_event(unsigned int msg_id,
 
 void
 BlackBoardNetHandlerInterfaceObserver::bb_interface_created(const char *type,
-                                                            const char *id) throw()
+                                                            const char *id) noexcept
 {
 	send_event(MSG_BB_INTERFACE_CREATED, type, id);
 }
 
 void
 BlackBoardNetHandlerInterfaceObserver::bb_interface_destroyed(const char *type,
-                                                              const char *id) throw()
+                                                              const char *id) noexcept
 {
 	send_event(MSG_BB_INTERFACE_DESTROYED, type, id);
 }

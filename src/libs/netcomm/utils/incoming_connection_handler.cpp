@@ -29,7 +29,7 @@ namespace fawkes {
  * Interface for handling incoming connections.
  * @author Tim Niemueller
  *
- * @fn void NetworkIncomingConnectionHandler::add_connection(StreamSocket *s) throw() = 0
+ * @fn void NetworkIncomingConnectionHandler::add_connection(StreamSocket *s) noexcept = 0
  * Add an incoming connection.
  * This is called for instance by the NetworkAcceptorThread whenever a new connection has
  * been accepted.

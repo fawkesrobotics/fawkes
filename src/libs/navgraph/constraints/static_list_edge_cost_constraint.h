@@ -46,10 +46,10 @@ public:
 	void clear_edges();
 	bool has_edge(const fawkes::NavGraphEdge &edge);
 
-	virtual bool compute(void) throw();
+	virtual bool compute(void) noexcept;
 
 	virtual float cost_factor(const fawkes::NavGraphNode &from,
-	                          const fawkes::NavGraphNode &to) throw();
+	                          const fawkes::NavGraphNode &to) noexcept;
 
 private:
 	std::vector<std::pair<fawkes::NavGraphEdge, float>>        edge_cost_list_;

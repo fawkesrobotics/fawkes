@@ -32,7 +32,7 @@ class SDLKeeper
 {
 public:
 	static void init(unsigned int flags);
-	static void quit() throw();
+	static void quit() noexcept;
 
 	static void force_quit();
 

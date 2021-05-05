@@ -208,7 +208,7 @@ SkillerExecutionThread::lua_restarted(LuaContext *context)
 
 void
 SkillerExecutionThread::bb_interface_reader_removed(Interface *interface,
-                                                    Uuid       instance_serial) throw()
+                                                    Uuid       instance_serial) noexcept
 {
 	skiller_if_removed_readers_.push_locked(instance_serial);
 }

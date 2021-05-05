@@ -57,7 +57,7 @@ WebviewJpegStreamProducer::Buffer::~Buffer()
 /** @class WebviewJpegStreamProducer::Subscriber "jpeg_stream_producer.h"
  * JPEG stream subscriber.
  *
- * @fn void WebviewJpegStreamProducer::Subscriber::handle_buffer(std::shared_ptr<Buffer> buffer) throw() = 0
+ * @fn void WebviewJpegStreamProducer::Subscriber::handle_buffer(std::shared_ptr<Buffer> buffer) noexcept = 0
  * Notification if a new buffer is available.
  * @param buffer new buffer
  */

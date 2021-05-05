@@ -46,8 +46,8 @@ public:
 		wait(0, 0);
 	}
 
-	void interrupt() throw();
-	void reset() throw();
+	void interrupt() noexcept;
+	void reset() noexcept;
 
 	RefPtr<ThreadList> passed_threads();
 

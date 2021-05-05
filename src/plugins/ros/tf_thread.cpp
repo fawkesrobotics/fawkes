@@ -163,7 +163,7 @@ RosTfThread::loop()
 }
 
 void
-RosTfThread::bb_interface_data_refreshed(fawkes::Interface *interface) throw()
+RosTfThread::bb_interface_data_refreshed(fawkes::Interface *interface) noexcept
 {
 	TransformInterface *tfif = dynamic_cast<TransformInterface *>(interface);
 	if (!tfif)
@@ -197,7 +197,7 @@ RosTfThread::bb_interface_data_refreshed(fawkes::Interface *interface) throw()
 }
 
 void
-RosTfThread::bb_interface_created(const char *type, const char *id) throw()
+RosTfThread::bb_interface_created(const char *type, const char *id) noexcept
 {
 	if (strncmp(type, "TransformInterface", INTERFACE_TYPE_SIZE_) != 0)
 		return;
@@ -233,20 +233,20 @@ RosTfThread::bb_interface_created(const char *type, const char *id) throw()
 
 void
 RosTfThread::bb_interface_writer_removed(fawkes::Interface *interface,
-                                         fawkes::Uuid       instance_serial) throw()
+                                         fawkes::Uuid       instance_serial) noexcept
 {
 	conditional_close(interface);
 }
 
 void
 RosTfThread::bb_interface_reader_removed(fawkes::Interface *interface,
-                                         fawkes::Uuid       instance_serial) throw()
+                                         fawkes::Uuid       instance_serial) noexcept
 {
 	conditional_close(interface);
 }
 
 void
-RosTfThread::conditional_close(Interface *interface) throw()
+RosTfThread::conditional_close(Interface *interface) noexcept
 {
 	// Verify it's a TransformInterface
 	TransformInterface *tfif = dynamic_cast<TransformInterface *>(interface);

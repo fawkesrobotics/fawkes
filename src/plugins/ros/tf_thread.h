@@ -66,14 +66,14 @@ public:
 	virtual void finalize();
 
 	// for BlackBoardInterfaceObserver
-	virtual void bb_interface_created(const char *type, const char *id) throw();
+	virtual void bb_interface_created(const char *type, const char *id) noexcept;
 
 	// for BlackBoardInterfaceListener
-	virtual void bb_interface_data_refreshed(fawkes::Interface *interface) throw();
+	virtual void bb_interface_data_refreshed(fawkes::Interface *interface) noexcept;
 	virtual void bb_interface_writer_removed(fawkes::Interface *interface,
-	                                         fawkes::Uuid       instance_serial) throw();
+	                                         fawkes::Uuid       instance_serial) noexcept;
 	virtual void bb_interface_reader_removed(fawkes::Interface *interface,
-	                                         fawkes::Uuid       instance_serial) throw();
+	                                         fawkes::Uuid       instance_serial) noexcept;
 
 private:
 	void tf_message_cb(const ros::MessageEvent<::tf::tfMessage const> &msg_evt);
@@ -83,7 +83,7 @@ private:
 	void tf_message_cb(const ros::MessageEvent<tf2_msgs::TFMessage const> &msg_evt, bool static_tf);
 #endif
 
-	void conditional_close(fawkes::Interface *interface) throw();
+	void conditional_close(fawkes::Interface *interface) noexcept;
 	void publish_static_transforms_to_ros();
 	void publish_transform_to_fawkes(const geometry_msgs::TransformStamped &ts,
 	                                 bool                                   static_tf = false);

@@ -41,12 +41,12 @@ public:
 	BlackBoardInterfaceObserver();
 	virtual ~BlackBoardInterfaceObserver();
 
-	virtual void bb_interface_created(const char *type, const char *id) throw();
-	virtual void bb_interface_destroyed(const char *type, const char *id) throw();
+	virtual void bb_interface_created(const char *type, const char *id) noexcept;
+	virtual void bb_interface_destroyed(const char *type, const char *id) noexcept;
 
 protected:
-	void bbio_add_observed_create(const char *type_pattern, const char *id_pattern = "*") throw();
-	void bbio_add_observed_destroy(const char *type_pattern, const char *id_pattern = "*") throw();
+	void bbio_add_observed_create(const char *type_pattern, const char *id_pattern = "*") noexcept;
+	void bbio_add_observed_destroy(const char *type_pattern, const char *id_pattern = "*") noexcept;
 
 	/** Type for lockable interface type hash sets. */
 	typedef LockMap<std::string, std::list<std::string>> ObservedInterfaceLockMap;
@@ -54,8 +54,8 @@ protected:
 	/** Type for iterator of lockable interface type hash sets. */
 	typedef ObservedInterfaceLockMap::iterator ObservedInterfaceLockMapIterator;
 
-	ObservedInterfaceLockMap *bbio_get_observed_create() throw();
-	ObservedInterfaceLockMap *bbio_get_observed_destroy() throw();
+	ObservedInterfaceLockMap *bbio_get_observed_create() noexcept;
+	ObservedInterfaceLockMap *bbio_get_observed_destroy() noexcept;
 
 private:
 	ObservedInterfaceLockMap         bbio_observed_create_;

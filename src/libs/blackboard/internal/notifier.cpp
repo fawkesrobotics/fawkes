@@ -398,7 +398,7 @@ BlackBoardNotifier::unregister_observer(BlackBoardInterfaceObserver *observer)
  * @param id ID of the interface
  */
 void
-BlackBoardNotifier::notify_of_interface_created(const char *type, const char *id) throw()
+BlackBoardNotifier::notify_of_interface_created(const char *type, const char *id) noexcept
 {
 	bbio_mutex_->lock();
 	bbio_events_ += 1;
@@ -433,7 +433,7 @@ BlackBoardNotifier::notify_of_interface_created(const char *type, const char *id
  * @param id ID of the interface
  */
 void
-BlackBoardNotifier::notify_of_interface_destroyed(const char *type, const char *id) throw()
+BlackBoardNotifier::notify_of_interface_destroyed(const char *type, const char *id) noexcept
 {
 	bbio_mutex_->lock();
 	bbio_events_ += 1;
@@ -493,7 +493,7 @@ BlackBoardNotifier::process_bbio_queue()
  */
 void
 BlackBoardNotifier::notify_of_writer_added(const Interface *interface,
-                                           Uuid             event_instance_serial) throw()
+                                           Uuid             event_instance_serial) noexcept
 {
 	bbil_writer_mutex_->lock();
 	bbil_writer_events_ += 1;
@@ -530,7 +530,7 @@ BlackBoardNotifier::notify_of_writer_added(const Interface *interface,
  */
 void
 BlackBoardNotifier::notify_of_writer_removed(const Interface *interface,
-                                             Uuid             event_instance_serial) throw()
+                                             Uuid             event_instance_serial) noexcept
 {
 	bbil_writer_mutex_->lock();
 	bbil_writer_events_ += 1;
@@ -587,7 +587,7 @@ BlackBoardNotifier::process_writer_queue()
  */
 void
 BlackBoardNotifier::notify_of_reader_added(const Interface *interface,
-                                           Uuid             event_instance_serial) throw()
+                                           Uuid             event_instance_serial) noexcept
 {
 	bbil_reader_mutex_->lock();
 	bbil_reader_events_ += 1;
@@ -624,7 +624,7 @@ BlackBoardNotifier::notify_of_reader_added(const Interface *interface,
  */
 void
 BlackBoardNotifier::notify_of_reader_removed(const Interface *interface,
-                                             Uuid             event_instance_serial) throw()
+                                             Uuid             event_instance_serial) noexcept
 {
 	bbil_reader_mutex_->lock();
 	bbil_reader_events_ += 1;

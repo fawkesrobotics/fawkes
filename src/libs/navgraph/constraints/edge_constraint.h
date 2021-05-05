@@ -40,8 +40,9 @@ public:
 
 	std::string name();
 
-	virtual bool compute(void) throw();
-	virtual bool blocks(const fawkes::NavGraphNode &from, const fawkes::NavGraphNode &to) throw() = 0;
+	virtual bool compute(void) noexcept;
+	virtual bool blocks(const fawkes::NavGraphNode &from,
+	                    const fawkes::NavGraphNode &to) noexcept = 0;
 
 	bool operator==(const std::string &name) const;
 

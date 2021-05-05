@@ -73,8 +73,8 @@ public:
 	virtual firevision::CameraControl *acquire_camctrl(const char *cam_string);
 	virtual void                       release_camctrl(firevision::CameraControl *cc);
 
-	virtual bool thread_started(fawkes::Thread *thread) throw();
-	virtual bool thread_init_failed(fawkes::Thread *thread) throw();
+	virtual bool thread_started(fawkes::Thread *thread) noexcept;
+	virtual bool thread_init_failed(fawkes::Thread *thread) noexcept;
 
 	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
 protected:

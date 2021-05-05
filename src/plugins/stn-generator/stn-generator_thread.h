@@ -50,7 +50,7 @@ public:
 	virtual void finalize();
 	virtual void loop();
 
-	virtual void bb_interface_data_refreshed(fawkes::Interface *interface) throw();
+	virtual void bb_interface_data_refreshed(fawkes::Interface *interface) noexcept;
 
 	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
 protected:

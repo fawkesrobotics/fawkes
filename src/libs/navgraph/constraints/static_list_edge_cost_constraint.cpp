@@ -46,7 +46,7 @@ NavGraphStaticListEdgeCostConstraint::~NavGraphStaticListEdgeCostConstraint()
 }
 
 bool
-NavGraphStaticListEdgeCostConstraint::compute(void) throw()
+NavGraphStaticListEdgeCostConstraint::compute(void) noexcept
 {
 	if (modified_) {
 		modified_ = false;
@@ -145,7 +145,7 @@ NavGraphStaticListEdgeCostConstraint::clear_edges()
 
 float
 NavGraphStaticListEdgeCostConstraint::cost_factor(const fawkes::NavGraphNode &from,
-                                                  const fawkes::NavGraphNode &to) throw()
+                                                  const fawkes::NavGraphNode &to) noexcept
 {
 	for (std::pair<NavGraphEdge, float> &ec : edge_cost_list_) {
 		if ((ec.first.from() == from.name() && ec.first.to() == to.name())

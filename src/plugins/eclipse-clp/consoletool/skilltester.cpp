@@ -177,17 +177,17 @@ public:
 	}
 
 	virtual void
-	deregistered(unsigned int id) throw()
+	deregistered(unsigned int id) noexcept
 	{
 	}
 
 	virtual void
-	inbound_received(FawkesNetworkMessage *m, unsigned int id) throw()
+	inbound_received(FawkesNetworkMessage *m, unsigned int id) noexcept
 	{
 	}
 
 	virtual void
-	connection_died(unsigned int id) throw()
+	connection_died(unsigned int id) noexcept
 	{
 		prompt = "-# ";
 
@@ -204,7 +204,7 @@ public:
 	}
 
 	virtual void
-	connection_established(unsigned int id) throw()
+	connection_established(unsigned int id) noexcept
 	{
 		printf("Connection established\n");
 		just_connected = true;

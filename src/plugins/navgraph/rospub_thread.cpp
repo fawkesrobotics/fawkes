@@ -80,7 +80,7 @@ NavGraphROSPubThread::loop()
 }
 
 void
-NavGraphROSPubThread::graph_changed() throw()
+NavGraphROSPubThread::graph_changed() noexcept
 {
 	try {
 		publish_graph();

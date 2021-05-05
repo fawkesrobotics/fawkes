@@ -68,12 +68,12 @@ public:
 	virtual void loop();
 
 	virtual bool bb_interface_message_received(fawkes::Interface *interface,
-	                                           fawkes::Message *  message) throw();
-	virtual void bb_interface_data_refreshed(fawkes::Interface *interface) throw();
+	                                           fawkes::Message *  message) noexcept;
+	virtual void bb_interface_data_refreshed(fawkes::Interface *interface) noexcept;
 	virtual void bb_interface_writer_added(fawkes::Interface *interface,
-	                                       fawkes::Uuid       instance_serial) throw();
+	                                       fawkes::Uuid       instance_serial) noexcept;
 	virtual void bb_interface_writer_removed(fawkes::Interface *interface,
-	                                         fawkes::Uuid       instance_serial) throw();
+	                                         fawkes::Uuid       instance_serial) noexcept;
 
 	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
 protected:

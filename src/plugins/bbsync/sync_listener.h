@@ -41,8 +41,8 @@ public:
 	virtual ~SyncInterfaceListener();
 
 	virtual bool bb_interface_message_received(fawkes::Interface *interface,
-	                                           fawkes::Message *  message) throw();
-	virtual void bb_interface_data_refreshed(fawkes::Interface *interface) throw();
+	                                           fawkes::Message *  message) noexcept;
+	virtual void bb_interface_data_refreshed(fawkes::Interface *interface) noexcept;
 
 private:
 	fawkes::Logger *logger_;

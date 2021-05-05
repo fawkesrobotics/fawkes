@@ -112,7 +112,7 @@ FestivalSynthThread::loop()
 }
 
 bool
-FestivalSynthThread::bb_interface_message_received(Interface *interface, Message *message) throw()
+FestivalSynthThread::bb_interface_message_received(Interface *interface, Message *message) noexcept
 {
 	wakeup();
 	return true;

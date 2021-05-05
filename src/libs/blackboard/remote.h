@@ -61,18 +61,18 @@ public:
 
 	virtual InterfaceInfoList *list_all();
 	virtual InterfaceInfoList *list(const char *type_pattern, const char *id_pattern);
-	virtual bool               is_alive() const throw();
-	virtual bool               try_aliveness_restore() throw();
+	virtual bool               is_alive() const noexcept;
+	virtual bool               try_aliveness_restore() noexcept;
 
 	std::list<Interface *> open_multiple_for_reading(const char *interface_type,
 	                                                 const char *id_pattern = "*",
 	                                                 const char *owner      = NULL);
 
 	/* for FawkesNetworkClientHandler */
-	virtual void deregistered(unsigned int id) throw();
-	virtual void inbound_received(FawkesNetworkMessage *msg, unsigned int id) throw();
-	virtual void connection_died(unsigned int id) throw();
-	virtual void connection_established(unsigned int id) throw();
+	virtual void deregistered(unsigned int id) noexcept;
+	virtual void inbound_received(FawkesNetworkMessage *msg, unsigned int id) noexcept;
+	virtual void connection_died(unsigned int id) noexcept;
+	virtual void connection_established(unsigned int id) noexcept;
 
 	/* extensions for RemoteBlackBoard */
 

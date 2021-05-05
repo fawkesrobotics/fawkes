@@ -111,7 +111,7 @@ BlackBoardInterfaceListMaintainer::~BlackBoardInterfaceListMaintainer()
  * @param id    the name of the interface
  */
 void
-BlackBoardInterfaceListMaintainer::bb_interface_created(const char *type, const char *id) throw()
+BlackBoardInterfaceListMaintainer::bb_interface_created(const char *type, const char *id) noexcept
 {
 	Interface *pif;
 	try {
@@ -149,8 +149,9 @@ BlackBoardInterfaceListMaintainer::bb_interface_created(const char *type, const 
  * @param instance_serial defiend by the callback, not used here
  */
 void
-BlackBoardInterfaceListMaintainer::bb_interface_writer_removed(fawkes::Interface *interface,
-                                                               fawkes::Uuid instance_serial) throw()
+BlackBoardInterfaceListMaintainer::bb_interface_writer_removed(
+  fawkes::Interface *interface,
+  fawkes::Uuid       instance_serial) noexcept
 {
 	conditional_close(interface);
 }
@@ -161,8 +162,9 @@ BlackBoardInterfaceListMaintainer::bb_interface_writer_removed(fawkes::Interface
  * @param instance_serial defiend by the callback, not used here
  */
 void
-BlackBoardInterfaceListMaintainer::bb_interface_reader_removed(fawkes::Interface *interface,
-                                                               fawkes::Uuid instance_serial) throw()
+BlackBoardInterfaceListMaintainer::bb_interface_reader_removed(
+  fawkes::Interface *interface,
+  fawkes::Uuid       instance_serial) noexcept
 {
 	conditional_close(interface);
 }
@@ -173,7 +175,7 @@ BlackBoardInterfaceListMaintainer::bb_interface_reader_removed(fawkes::Interface
  * @param pif interface to close
  */
 void
-BlackBoardInterfaceListMaintainer::conditional_close(Interface *pif) throw()
+BlackBoardInterfaceListMaintainer::conditional_close(Interface *pif) noexcept
 {
 	bool        close = false;
 	MutexLocker lock(ifs_.mutex());

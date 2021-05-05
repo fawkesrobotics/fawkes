@@ -58,16 +58,16 @@ public:
 	virtual void finalize();
 
 	// for BlackBoardInterfaceObserver
-	virtual void bb_interface_created(const char *type, const char *id) throw();
+	virtual void bb_interface_created(const char *type, const char *id) noexcept;
 
 	// for BlackBoardInterfaceListener
 	virtual void bb_interface_writer_removed(fawkes::Interface *interface,
-	                                         fawkes::Uuid       instance_serial) throw();
+	                                         fawkes::Uuid       instance_serial) noexcept;
 	virtual void bb_interface_reader_removed(fawkes::Interface *interface,
-	                                         fawkes::Uuid       instance_serial) throw();
+	                                         fawkes::Uuid       instance_serial) noexcept;
 
 private:
-	void        conditional_close(fawkes::Interface *interface) throw();
+	void        conditional_close(fawkes::Interface *interface) noexcept;
 	std::string interface_to_pcl_name(const char *interface_id);
 
 	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */

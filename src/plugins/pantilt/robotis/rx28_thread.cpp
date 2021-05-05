@@ -415,7 +415,7 @@ PanTiltRX28Thread::loop()
 }
 
 bool
-PanTiltRX28Thread::bb_interface_message_received(Interface *interface, Message *message) throw()
+PanTiltRX28Thread::bb_interface_message_received(Interface *interface, Message *message) noexcept
 {
 	if (message->is_of_type<PanTiltInterface::StopMessage>()) {
 		wt_->stop_motion();

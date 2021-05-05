@@ -123,13 +123,15 @@ ifeq ($(HAVE_PLEXIL)$(HAVE_PLEXIL_BOOST_LIBS),11)
     WARN_TARGETS += warning_navgraph
   endif
 
+  ifeq ($(HAVE_CPP17),1)
+    # Enforce C++14, as plexil is not compatible with ISO C++17.
+    CFLAGS += -std=c++14
+  endif
+
 else
   ifneq ($(HAVE_PLEXIL),1)
     WARN_TARGETS += warning_plexil
   endif
-  #ifneq ($(HAVE_CPP17),1)
-  #  WARN_TARGETS += warning_cpp17
-  #endif
   ifneq ($(HAVE_OPENPRS_BOOST_LIBS),1)
     PLEXIL_ERROR += Boost libraries missing
     PLEXIL_WARN_TARGETS_BOOST = $(foreach l,$(PLEXIL_REQ_BOOST_LIBS),$(if $(call boost-have-lib,$l),, warning_plexil_boost_$l))

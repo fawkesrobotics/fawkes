@@ -185,7 +185,7 @@ ClipsNavGraphThread::clips_navgraph_unblock_edge(std::string env_name,
 }
 
 void
-ClipsNavGraphThread::graph_changed() throw()
+ClipsNavGraphThread::graph_changed() noexcept
 {
 	for (auto e : envs_) {
 		logger->log_debug(name(), "Graph changed, re-asserting in environment %s", e.first.c_str());

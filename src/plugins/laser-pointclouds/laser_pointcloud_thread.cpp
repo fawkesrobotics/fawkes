@@ -196,7 +196,7 @@ LaserPointCloudThread::loop()
 }
 
 void
-LaserPointCloudThread::bb_interface_created(const char *type, const char *id) throw()
+LaserPointCloudThread::bb_interface_created(const char *type, const char *id) noexcept
 {
 	InterfaceCloudMapping mapping;
 	mapping.id    = interface_to_pcl_name(id);
@@ -295,20 +295,20 @@ LaserPointCloudThread::bb_interface_created(const char *type, const char *id) th
 
 void
 LaserPointCloudThread::bb_interface_writer_removed(fawkes::Interface *interface,
-                                                   fawkes::Uuid       instance_serial) throw()
+                                                   fawkes::Uuid       instance_serial) noexcept
 {
 	conditional_close(interface);
 }
 
 void
 LaserPointCloudThread::bb_interface_reader_removed(fawkes::Interface *interface,
-                                                   fawkes::Uuid       instance_serial) throw()
+                                                   fawkes::Uuid       instance_serial) noexcept
 {
 	conditional_close(interface);
 }
 
 void
-LaserPointCloudThread::conditional_close(Interface *interface) throw()
+LaserPointCloudThread::conditional_close(Interface *interface) noexcept
 {
 	Laser360Interface * l360if  = dynamic_cast<Laser360Interface *>(interface);
 	Laser720Interface * l720if  = dynamic_cast<Laser720Interface *>(interface);

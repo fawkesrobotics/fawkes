@@ -31,80 +31,80 @@ namespace fawkes {
 class NullPointerException : public Exception
 {
 public:
-	NullPointerException(const char *format, ...) throw();
+	NullPointerException(const char *format, ...) noexcept;
 };
 
 class DivisionByZeroException : public Exception
 {
 public:
-	DivisionByZeroException(const char *format, ...) throw();
+	DivisionByZeroException(const char *format, ...) noexcept;
 };
 
 class TypeMismatchException : public Exception
 {
 public:
-	TypeMismatchException(const char *format, ...) throw();
+	TypeMismatchException(const char *format, ...) noexcept;
 };
 
 class UnknownTypeException : public Exception
 {
 public:
-	UnknownTypeException(const char *format, ...) throw();
+	UnknownTypeException(const char *format, ...) noexcept;
 };
 
 class DestructionInProgressException : public Exception
 {
 public:
-	DestructionInProgressException(const char *format, ...) throw();
+	DestructionInProgressException(const char *format, ...) noexcept;
 };
 
 class NotLockedException : public Exception
 {
 public:
-	NotLockedException(const char *format, ...) throw();
+	NotLockedException(const char *format, ...) noexcept;
 };
 
 class NonPointerTypeExpectedException : public Exception
 {
 public:
-	NonPointerTypeExpectedException(const char *format, ...) throw();
+	NonPointerTypeExpectedException(const char *format, ...) noexcept;
 };
 
 class MissingParameterException : public Exception
 {
 public:
-	MissingParameterException(const char *format, ...) throw();
+	MissingParameterException(const char *format, ...) noexcept;
 };
 
 class IllegalArgumentException : public Exception
 {
 public:
-	IllegalArgumentException(const char *format, ...) throw();
+	IllegalArgumentException(const char *format, ...) noexcept;
 };
 
 class OutOfBoundsException : public Exception
 {
 public:
-	OutOfBoundsException(const char *msg) throw();
-	OutOfBoundsException(const char *msg, float val, float min, float max) throw();
+	OutOfBoundsException(const char *msg) noexcept;
+	OutOfBoundsException(const char *msg, float val, float min, float max) noexcept;
 };
 
 class AccessViolationException : public Exception
 {
 public:
-	AccessViolationException(const char *format, ...) throw();
+	AccessViolationException(const char *format, ...) noexcept;
 };
 
 class SyntaxErrorException : public Exception
 {
 public:
-	SyntaxErrorException(const char *format, ...) throw();
+	SyntaxErrorException(const char *format, ...) noexcept;
 };
 
 class NotImplementedException : public Exception
 {
 public:
-	NotImplementedException(const char *format, ...) throw();
+	NotImplementedException(const char *format, ...) noexcept;
 };
 
 } // end namespace fawkes

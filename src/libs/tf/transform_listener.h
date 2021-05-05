@@ -74,15 +74,15 @@ public:
 	virtual ~TransformListener();
 
 	// for BlackBoardInterfaceObserver
-	virtual void bb_interface_created(const char *type, const char *id) throw();
+	virtual void bb_interface_created(const char *type, const char *id) noexcept;
 
 	// for BlackBoardInterfaceListener
-	virtual void bb_interface_data_refreshed(Interface *interface) throw();
-	virtual void bb_interface_writer_removed(Interface *interface, Uuid instance_serial) throw();
-	virtual void bb_interface_reader_removed(Interface *interface, Uuid instance_serial) throw();
+	virtual void bb_interface_data_refreshed(Interface *interface) noexcept;
+	virtual void bb_interface_writer_removed(Interface *interface, Uuid instance_serial) noexcept;
+	virtual void bb_interface_reader_removed(Interface *interface, Uuid instance_serial) noexcept;
 
 private:
-	void conditional_close(Interface *interface) throw();
+	void conditional_close(Interface *interface) noexcept;
 
 private:
 	BlackBoard * bb_;

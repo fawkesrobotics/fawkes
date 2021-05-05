@@ -172,13 +172,13 @@ ConnectionDispatcher::on_message_received()
 }
 
 void
-ConnectionDispatcher::deregistered(unsigned int id) throw()
+ConnectionDispatcher::deregistered(unsigned int id) noexcept
 {
 	// ignored
 }
 
 void
-ConnectionDispatcher::inbound_received(FawkesNetworkMessage *m, unsigned int id) throw()
+ConnectionDispatcher::inbound_received(FawkesNetworkMessage *m, unsigned int id) noexcept
 {
 	m->ref();
 	queue_message_received_.push_locked(m);
@@ -186,13 +186,13 @@ ConnectionDispatcher::inbound_received(FawkesNetworkMessage *m, unsigned int id)
 }
 
 void
-ConnectionDispatcher::connection_died(unsigned int id) throw()
+ConnectionDispatcher::connection_died(unsigned int id) noexcept
 {
 	dispatcher_disconnected_();
 }
 
 void
-ConnectionDispatcher::connection_established(unsigned int id) throw()
+ConnectionDispatcher::connection_established(unsigned int id) noexcept
 {
 	dispatcher_connected_();
 }

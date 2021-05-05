@@ -384,7 +384,7 @@ private:
 	}
 
 	virtual void
-	bb_interface_data_refreshed(Interface *interface) throw()
+	bb_interface_data_refreshed(Interface *interface) noexcept
 	{
 		if (!start_measuring_)
 			return;

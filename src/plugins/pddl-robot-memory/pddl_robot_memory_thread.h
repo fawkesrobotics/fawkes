@@ -76,7 +76,7 @@ private:
 	void generate();
 
 	virtual bool bb_interface_message_received(fawkes::Interface *interface,
-	                                           fawkes::Message *  message) throw();
+	                                           fawkes::Message *  message) noexcept;
 };
 
 #endif

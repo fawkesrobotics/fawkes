@@ -65,7 +65,7 @@ HandIfObserver::~HandIfObserver()
 }
 
 void
-HandIfObserver::bb_interface_created(const char *type, const char *id) throw()
+HandIfObserver::bb_interface_created(const char *type, const char *id) noexcept
 {
 	if (hands_.find(id) == hands_.end()) {
 		queue_lock_->lock();

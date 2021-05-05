@@ -51,8 +51,8 @@ public:
 	           fawkes::ThreadCollector *collector = 0);
 	virtual ~FuseServer();
 
-	virtual void add_connection(fawkes::StreamSocket *s) throw();
-	void         connection_died(FuseServerClientThread *client) throw();
+	virtual void add_connection(fawkes::StreamSocket *s) noexcept;
+	void         connection_died(FuseServerClientThread *client) noexcept;
 
 	virtual void loop();
 

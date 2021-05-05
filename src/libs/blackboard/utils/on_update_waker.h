@@ -37,7 +37,7 @@ public:
 	BlackBoardOnUpdateWaker(BlackBoard *bb, Interface *interface, Thread *thread);
 	virtual ~BlackBoardOnUpdateWaker();
 
-	virtual void bb_interface_data_refreshed(Interface *interface) throw();
+	virtual void bb_interface_data_refreshed(Interface *interface) noexcept;
 
 private:
 	BlackBoard *bb_;

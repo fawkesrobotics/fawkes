@@ -794,7 +794,7 @@ KatanaActThread::loop()
 }
 
 bool
-KatanaActThread::bb_interface_message_received(Interface *interface, Message *message) throw()
+KatanaActThread::bb_interface_message_received(Interface *interface, Message *message) noexcept
 {
 	if (message->is_of_type<KatanaInterface::StopMessage>()) {
 		stop_motion();

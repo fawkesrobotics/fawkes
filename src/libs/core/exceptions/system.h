@@ -31,22 +31,22 @@ namespace fawkes {
 class OutOfMemoryException : public Exception
 {
 public:
-	OutOfMemoryException(const char *format, ...) throw();
-	OutOfMemoryException() throw();
+	OutOfMemoryException(const char *format, ...) noexcept;
+	OutOfMemoryException() noexcept;
 };
 
 class InterruptedException : public Exception
 {
 public:
-	InterruptedException() throw();
-	InterruptedException(const char *format, ...) throw();
+	InterruptedException() noexcept;
+	InterruptedException(const char *format, ...) noexcept;
 };
 
 class TimeoutException : public Exception
 {
 public:
-	TimeoutException() throw();
-	TimeoutException(const char *format, ...) throw();
+	TimeoutException() noexcept;
+	TimeoutException(const char *format, ...) noexcept;
 };
 
 class CouldNotOpenFileException : public Exception
@@ -54,22 +54,22 @@ class CouldNotOpenFileException : public Exception
 public:
 	CouldNotOpenFileException(const char *filename,
 	                          int         errnum,
-	                          const char *additional_msg = 0) throw();
-	CouldNotOpenFileException(const char *filename, const char *additional_msg = 0) throw();
+	                          const char *additional_msg = 0) noexcept;
+	CouldNotOpenFileException(const char *filename, const char *additional_msg = 0) noexcept;
 };
 
 class FileReadException : public Exception
 {
 public:
-	FileReadException(const char *filename, int errnum, const char *additional_msg = 0) throw();
-	FileReadException(const char *filename, const char *additional_msg = 0) throw();
+	FileReadException(const char *filename, int errnum, const char *additional_msg = 0) noexcept;
+	FileReadException(const char *filename, const char *additional_msg = 0) noexcept;
 };
 
 class FileWriteException : public Exception
 {
 public:
-	FileWriteException(const char *filename, int errnum, const char *additional_msg = 0) throw();
-	FileWriteException(const char *filename, const char *additional_msg = 0) throw();
+	FileWriteException(const char *filename, int errnum, const char *additional_msg = 0) noexcept;
+	FileWriteException(const char *filename, const char *additional_msg = 0) noexcept;
 };
 
 } // end namespace fawkes

@@ -1502,7 +1502,7 @@ NavGraph::set_notifications_enabled(bool enabled)
 
 /** Notify all listeners of a change. */
 void
-NavGraph::notify_of_change() throw()
+NavGraph::notify_of_change() noexcept
 {
 	if (!notifications_enabled_)
 		return;
@@ -1519,7 +1519,7 @@ NavGraph::notify_of_change() throw()
  * Topological graph change listener.
  * @author Tim Niemueller
  *
- * @fn void NavGraph::ChangeListener::graph_changed() throw() = 0
+ * @fn void NavGraph::ChangeListener::graph_changed() noexcept = 0
  * Function called if the graph has been changed.
  */
 

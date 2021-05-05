@@ -123,7 +123,7 @@ ClipsExecutiveThread::init()
 	}
 
 	std::vector<std::string> files{SRCDIR "/clips/saliences.clp", SRCDIR "/clips/init.clp"};
-	for (const auto f : files) {
+	for (const auto &f : files) {
 		if (!clips->batch_evaluate(f)) {
 			logger->log_error(name(),
 			                  "Failed to initialize CLIPS environment, "

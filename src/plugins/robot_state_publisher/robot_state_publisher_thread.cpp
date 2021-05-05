@@ -235,7 +235,7 @@ RobotStatePublisherThread::joint_is_in_model(const char *id)
 
 // InterfaceObserver
 void
-RobotStatePublisherThread::bb_interface_created(const char *type, const char *id) throw()
+RobotStatePublisherThread::bb_interface_created(const char *type, const char *id) noexcept
 {
 	if (strncmp(type, "JointInterface", INTERFACE_TYPE_SIZE_) != 0)
 		return;
@@ -269,20 +269,20 @@ RobotStatePublisherThread::bb_interface_created(const char *type, const char *id
 
 void
 RobotStatePublisherThread::bb_interface_writer_removed(Interface *interface,
-                                                       Uuid       instance_serial) throw()
+                                                       Uuid       instance_serial) noexcept
 {
 	conditional_close(interface);
 }
 
 void
 RobotStatePublisherThread::bb_interface_reader_removed(Interface *interface,
-                                                       Uuid       instance_serial) throw()
+                                                       Uuid       instance_serial) noexcept
 {
 	conditional_close(interface);
 }
 
 void
-RobotStatePublisherThread::conditional_close(Interface *interface) throw()
+RobotStatePublisherThread::conditional_close(Interface *interface) noexcept
 {
 	// Verify it's a JointInterface
 	JointInterface *jiface = dynamic_cast<JointInterface *>(interface);
@@ -307,7 +307,7 @@ RobotStatePublisherThread::conditional_close(Interface *interface) throw()
 }
 
 void
-RobotStatePublisherThread::bb_interface_data_refreshed(fawkes::Interface *interface) throw()
+RobotStatePublisherThread::bb_interface_data_refreshed(fawkes::Interface *interface) noexcept
 {
 	JointInterface *jiface = dynamic_cast<JointInterface *>(interface);
 	if (!jiface)

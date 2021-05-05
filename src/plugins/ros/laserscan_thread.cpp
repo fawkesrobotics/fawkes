@@ -256,7 +256,7 @@ RosLaserScanThread::loop()
 }
 
 void
-RosLaserScanThread::bb_interface_data_refreshed(fawkes::Interface *interface) throw()
+RosLaserScanThread::bb_interface_data_refreshed(fawkes::Interface *interface) noexcept
 {
 	Laser360Interface * ls360if  = dynamic_cast<Laser360Interface *>(interface);
 	Laser720Interface * ls720if  = dynamic_cast<Laser720Interface *>(interface);
@@ -331,7 +331,7 @@ RosLaserScanThread::bb_interface_data_refreshed(fawkes::Interface *interface) th
 }
 
 void
-RosLaserScanThread::bb_interface_created(const char *type, const char *id) throw()
+RosLaserScanThread::bb_interface_created(const char *type, const char *id) noexcept
 {
 	// Ignore ID pattern of our own interfaces
 	if (fnmatch("ROS *", id, FNM_NOESCAPE) == 0)
@@ -461,20 +461,20 @@ RosLaserScanThread::bb_interface_created(const char *type, const char *id) throw
 
 void
 RosLaserScanThread::bb_interface_writer_removed(fawkes::Interface *interface,
-                                                fawkes::Uuid       instance_serial) throw()
+                                                fawkes::Uuid       instance_serial) noexcept
 {
 	conditional_close(interface);
 }
 
 void
 RosLaserScanThread::bb_interface_reader_removed(fawkes::Interface *interface,
-                                                fawkes::Uuid       instance_serial) throw()
+                                                fawkes::Uuid       instance_serial) noexcept
 {
 	conditional_close(interface);
 }
 
 void
-RosLaserScanThread::conditional_close(Interface *interface) throw()
+RosLaserScanThread::conditional_close(Interface *interface) noexcept
 {
 	// Verify it's a laser interface
 	Laser360Interface * ls360if  = dynamic_cast<Laser360Interface *>(interface);

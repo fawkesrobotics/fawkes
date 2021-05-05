@@ -97,7 +97,7 @@ MainLoopAspectIniFin::finalize(Thread *thread)
 }
 
 bool
-MainLoopAspectIniFin::thread_started(Thread *thread) throw()
+MainLoopAspectIniFin::thread_started(Thread *thread) noexcept
 {
 	MainLoopAspect *mainloop_thread;
 	if ((mainloop_thread = dynamic_cast<MainLoopAspect *>(thread)) != NULL) {
@@ -113,7 +113,7 @@ MainLoopAspectIniFin::thread_started(Thread *thread) throw()
 }
 
 bool
-MainLoopAspectIniFin::thread_init_failed(Thread *thread) throw()
+MainLoopAspectIniFin::thread_init_failed(Thread *thread) noexcept
 {
 	MainLoopAspect *mainloop_thread;
 	if ((mainloop_thread = dynamic_cast<MainLoopAspect *>(thread)) != NULL) {

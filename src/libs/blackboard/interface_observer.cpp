@@ -88,7 +88,7 @@ BlackBoardInterfaceObserver::~BlackBoardInterfaceObserver()
  * the duration of the method call
  */
 void
-BlackBoardInterfaceObserver::bb_interface_created(const char *type, const char *id) throw()
+BlackBoardInterfaceObserver::bb_interface_created(const char *type, const char *id) noexcept
 {
 }
 
@@ -103,7 +103,7 @@ BlackBoardInterfaceObserver::bb_interface_created(const char *type, const char *
  * the duration of the method call
  */
 void
-BlackBoardInterfaceObserver::bb_interface_destroyed(const char *type, const char *id) throw()
+BlackBoardInterfaceObserver::bb_interface_destroyed(const char *type, const char *id) noexcept
 {
 }
 
@@ -117,7 +117,7 @@ BlackBoardInterfaceObserver::bb_interface_destroyed(const char *type, const char
  */
 void
 BlackBoardInterfaceObserver::bbio_add_observed_create(const char *type_pattern,
-                                                      const char *id_pattern) throw()
+                                                      const char *id_pattern) noexcept
 {
 	bbio_observed_create_.lock();
 	bbio_observed_create_[type_pattern].push_back(id_pattern);
@@ -136,7 +136,7 @@ BlackBoardInterfaceObserver::bbio_add_observed_create(const char *type_pattern,
  */
 void
 BlackBoardInterfaceObserver::bbio_add_observed_destroy(const char *type_pattern,
-                                                       const char *id_pattern) throw()
+                                                       const char *id_pattern) noexcept
 {
 	bbio_observed_destroy_.lock();
 	bbio_observed_destroy_[type_pattern].push_back(id_pattern);
@@ -149,7 +149,7 @@ BlackBoardInterfaceObserver::bbio_add_observed_destroy(const char *type_pattern,
  * @return interface type watch list
  */
 BlackBoardInterfaceObserver::ObservedInterfaceLockMap *
-BlackBoardInterfaceObserver::bbio_get_observed_create() throw()
+BlackBoardInterfaceObserver::bbio_get_observed_create() noexcept
 {
 	return &bbio_observed_create_;
 }
@@ -158,7 +158,7 @@ BlackBoardInterfaceObserver::bbio_get_observed_create() throw()
  * @return interface type watch list
  */
 BlackBoardInterfaceObserver::ObservedInterfaceLockMap *
-BlackBoardInterfaceObserver::bbio_get_observed_destroy() throw()
+BlackBoardInterfaceObserver::bbio_get_observed_destroy() noexcept
 {
 	return &bbio_observed_destroy_;
 }

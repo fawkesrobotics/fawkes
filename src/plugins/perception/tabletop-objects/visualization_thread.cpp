@@ -629,7 +629,7 @@ TabletopVisualizationThread::visualize(const std::string &                 frame
                                        M_Vector4f &                        centroids,
                                        M_Vector4f &                        cylinder_params,
                                        std::map<unsigned int, double> &    obj_confidence,
-                                       std::map<unsigned int, signed int> &best_obj_guess) throw()
+                                       std::map<unsigned int, signed int> &best_obj_guess) noexcept
 {
 	MutexLocker lock(&mutex_);
 	frame_id_              = frame_id;

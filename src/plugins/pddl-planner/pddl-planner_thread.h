@@ -83,7 +83,7 @@ private:
 	void                     print_action_list();
 	std::string              run_planner(std::string command);
 	virtual bool             bb_interface_message_received(fawkes::Interface *interface,
-	                                                       fawkes::Message *  message) throw();
+	                                                       fawkes::Message *  message) noexcept;
 };
 
 #endif
