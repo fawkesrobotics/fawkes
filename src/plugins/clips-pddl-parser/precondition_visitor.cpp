@@ -92,6 +92,18 @@ PreconditionToCLIPSFactVisitor::operator()(Predicate &p) const
 		                     + type
 		                     + ")"
 		                       ")"));
+
+		res.push_back(string("(pddl-formula"
+		                     " (id "
+		                     + name
+		                     + ")"
+		                       " (part-of "
+		                     + parent_
+		                     + ")"
+		                       " (type "
+		                     + type
+		                     + ")"
+		                       ")"));
 		uint sub_counter = 1;
 		for (Expression &sub : p.arguments) {
 			vector<string> args =
@@ -111,6 +123,15 @@ PreconditionToCLIPSFactVisitor::operator()(Predicate &p) const
 			                     + parent_
 			                     + ")"
 			                       " (name "
+			                     + name
+			                     + ")"
+			                       " (type conjunction)"
+			                       ")"));
+			res.push_back(string("(pddl-formula"
+			                     " (part-of "
+			                     + parent_
+			                     + ")"
+			                       " (id "
 			                     + name
 			                     + ")"
 			                       " (type conjunction)"
@@ -158,6 +179,17 @@ PreconditionToCLIPSFactVisitor::operator()(Predicate &p) const
 		                     + new_parent
 		                     + ")"
 		                       " (name "
+		                     + name + ")" + predicate_string + " (param-names (create$" + params
+		                     + "))"
+		                       " (param-constants (create$"
+		                     + constants
+		                     + "))"
+		                       ")"));
+		res.push_back(string("(pddl-predicate"
+		                     " (part-of "
+		                     + new_parent
+		                     + ")"
+		                       " (id "
 		                     + name + ")" + predicate_string + " (param-names (create$" + params
 		                     + "))"
 		                       " (param-constants (create$"
