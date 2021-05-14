@@ -303,6 +303,7 @@
   ?p <- (plan-action (executable FALSE) (id ?id) (preconditions $? ?formula-id $?))
   (grounded-pddl-formula (is-satisfied TRUE) (id ?formula-id))
   =>
+  (modify ?p (executable TRUE))
   (printout t crlf crlf crlf "Action " ?id " is executable based on " ?formula-id crlf crlf crlf)
 )
 
@@ -313,6 +314,7 @@
   ?p <- (plan-action (executable TRUE) (id ?id) (preconditions $? ?formula-id $?))
   (not (grounded-pddl-formula (is-satisfied TRUE) (id ?formula-id)))
   =>
+  (modify ?p (executable FALSE))
   (printout t crlf crlf crlf "Action " ?id " is no longer executable" crlf crlf crlf)
 )
 
@@ -1149,33 +1151,33 @@
   (domain-retract-grounding)
 )
 
-(defrule domain-check-if-action-is-executable
-  "If the precondition of an action is satisfied, the action is executable."
-  (declare (salience ?*SALIENCE-DOMAIN-CHECK*))
-  (goal (id ?g))
-  (plan (id ?p) (goal-id ?g))
-  ?action <- (plan-action (id ?action-id) (goal-id ?g) (plan-id ?p)
-                          (action-name ?op) (executable FALSE))
-  (domain-precondition (plan-id ?p) (goal-id ?g) (grounded-with ?action-id)
-                       (part-of ?op)  (is-satisfied TRUE))
- =>
-  (modify ?action (executable TRUE))
-)
+; (defrule domain-check-if-action-is-executable
+;   "If the precondition of an action is satisfied, the action is executable."
+;   (declare (salience ?*SALIENCE-DOMAIN-CHECK*))
+;   (goal (id ?g))
+;   (plan (id ?p) (goal-id ?g))
+;   ?action <- (plan-action (id ?action-id) (goal-id ?g) (plan-id ?p)
+;                           (action-name ?op) (executable FALSE))
+;   (domain-precondition (plan-id ?p) (goal-id ?g) (grounded-with ?action-id)
+;                        (part-of ?op)  (is-satisfied TRUE))
+;  =>
+;   (modify ?action (executable TRUE))
+; )
 
-(defrule domain-check-if-action-is-no-longer-executable
-  "If the precondition of an action is not satisfied (anymore),
-   the action is not executable."
-  (declare (salience ?*SALIENCE-DOMAIN-CHECK*))
+; (defrule domain-check-if-action-is-no-longer-executable
+;   "If the precondition of an action is not satisfied (anymore),
+;    the action is not executable."
+;   (declare (salience ?*SALIENCE-DOMAIN-CHECK*))
 
-  (goal (id ?g))
-  (plan (id ?p) (goal-id ?g))
-  ?action <- (plan-action (id ?action-id) (goal-id ?g) (plan-id ?p)
-                          (action-name ?op) (executable TRUE))
-  (domain-precondition (plan-id ?p) (goal-id ?g) (grounded-with ?action-id)
-                       (part-of ?op)  (is-satisfied FALSE))
- =>
-  (modify ?action (executable FALSE))
-)
+;   (goal (id ?g))
+;   (plan (id ?p) (goal-id ?g))
+;   ?action <- (plan-action (id ?action-id) (goal-id ?g) (plan-id ?p)
+;                           (action-name ?op) (executable TRUE))
+;   (domain-precondition (plan-id ?p) (goal-id ?g) (grounded-with ?action-id)
+;                        (part-of ?op)  (is-satisfied FALSE))
+;  =>
+;   (modify ?action (executable FALSE))
+; )
 
 (defrule domain-check-if-action-is-executable-without-precondition
   "If the precondition of an action is satisfied, the action is executable."
