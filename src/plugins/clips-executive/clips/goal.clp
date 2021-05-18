@@ -191,7 +191,7 @@
 
 	; Amount of information to print. If set to quiet, regular events such as a
 	; committed or dispatched goal will only be logged to the debug log.
-	(slot verbosity (type SYMBOL) (allowed-values QUIET DEFAULT) (default DEFAULT))
+	(slot verbosity (type SYMBOL) (allowed-values QUIET DEFAULT NOISY) (default DEFAULT))
 )
 
 (deffunction goal-retract-goal-tree (?id)
