@@ -192,6 +192,11 @@
 	; Amount of information to print. If set to quiet, regular events such as a
 	; committed or dispatched goal will only be logged to the debug log.
 	(slot verbosity (type SYMBOL) (allowed-values QUIET DEFAULT NOISY) (default DEFAULT))
+
+	; Indicates whether the given goal is executable, meaning if it is generally
+	; feasible to expand it in the current situation.
+	(slot is-executable (type SYMBOL) (allowed-values TRUE FALSE)
+	                    (default FALSE))
 )
 
 (deffunction goal-retract-goal-tree (?id)
