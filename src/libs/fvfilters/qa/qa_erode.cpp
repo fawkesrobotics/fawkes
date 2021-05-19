@@ -23,7 +23,7 @@
 /// @cond QA
 
 #include <fvfilters/morphology/erosion.h>
-#include <fvutils/adapters/iplimage.h>
+#include <fvutils/adapters/cvmatadapter.h>
 #include <fvutils/color/colorspaces.h>
 #include <fvutils/draw/drawer.h>
 #include <fvutils/readers/jpeg.h>

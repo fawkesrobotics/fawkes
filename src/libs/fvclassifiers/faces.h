@@ -26,9 +26,7 @@
 
 #include <fvclassifiers/classifier.h>
 
-struct CvHaarClassifierCascade;
-struct CvMemStorage;
-typedef struct _IplImage IplImage;
+#include <opencv2/objdetect.hpp>
 
 namespace firevision {
 
@@ -38,7 +36,7 @@ public:
 	FacesClassifier(const char * haarcascade_file,
 	                unsigned int pixel_width,
 	                unsigned int pixel_height,
-	                IplImage *   image             = 0,
+	                cv::Mat &    image,
 	                float        haar_scale_factor = 1.1,
 	                int          min_neighbours    = 3,
 	                int          flags             = 0);
@@ -48,13 +46,12 @@ public:
 	virtual std::list<ROI> *classify();
 
 private:
-	CvHaarClassifierCascade *cascade_;
-	CvMemStorage *           storage_;
-	IplImage *               image_;
-	float                    haar_scale_factor_;
-	int                      min_neighbours_;
-	int                      flags_;
-	bool                     own_image_;
+	cv::CascadeClassifier cascade_;
+	cv::Mat               image_;
+	float                 haar_scale_factor_;
+	int                   min_neighbours_;
+	int                   flags_;
+	bool                  own_image_;
 };
 
 } // end namespace firevision
