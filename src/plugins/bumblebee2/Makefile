@@ -35,8 +35,8 @@ OBJS_bumblebee2 = bumblebee2_plugin.o bumblebee2_thread.o
 OBJS_all    = $(OBJS_bumblebee2)
 PLUGINS_all = $(PLUGINDIR)/bumblebee2.$(SOEXT)
 
-ifeq ($(HAVE_PCL)$(HAVE_TF)$(HAVE_TRICLOPS)$(HAVE_OPENCV),1111)
-  CFLAGS  += $(CFLAGS_TF) $(CFLAGS_PCL) $(CFLAGS_TRICLOPS) $(CFLAGS_OPENCV)
+ifeq ($(HAVE_PCL)$(HAVE_TF)$(HAVE_TRICLOPS)$(HAVE_OPENCV),1110)
+  CFLAGS  += $(CFLAGS_TF) $(CFLAGS_PCL) $(CFLAGS_TRICLOPS) $(CFLAGS_OPENCV) -Wno-error
   LDFLAGS += $(LDFLAGS_TF) $(LDFLAGS_PCL) $(LDFLAGS_TRICLOPS)
   PLUGINS_build = $(PLUGINS_all)
 else
@@ -49,7 +49,7 @@ else
   ifneq ($(HAVE_TRICLOPS),1)
     WARN_TARGETS += warning_triclops
   endif
-  ifneq ($(HAVE_OPENCV),1)
+  ifneq ($(HAVE_OPENCV),0)
     WARN_TARGETS += warning_opencv
   endif
 endif
