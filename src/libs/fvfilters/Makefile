@@ -18,13 +18,13 @@ BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/fvconf.mk
 
-CFLAGS   += $(VISION_CFLAGS)
+CFLAGS   += $(VISION_CFLAGS) -Wno-error
 LDFLAGS  += $(VISION_LDFLAGS)
 INCDIRS  += $(VISION_INCDIRS)
 LIBDIRS  += $(VISION_LIBDIRS)
 LIBS     += $(VISION_LIBS)
 
-ifeq ($(HAVE_IPP)$(HAVE_OPENCV),00)
+ifeq ($(HAVE_IPP)$(HAVE_OPENCV),01)
   # We neither IPP nor OpenCV, hence we have to eliminate some filters
   IPPI_FILTERS  = $(wildcard $(SRCDIR)/morphology/*.cpp)
   ALLFILES=$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp))

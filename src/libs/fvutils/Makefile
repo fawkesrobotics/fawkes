@@ -50,7 +50,7 @@ else
   LDFLAGS += $(LDFLAGS_LIBPNG)
 endif
 
-ifneq ($(HAVE_OPENCV),1)
+ifneq ($(HAVE_OPENCV),0)
   WARN_TARGETS += warning_opencv
   FILTER_OUT   += recognition/faces.o $(patsubst %.cpp,%.o,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/recognition/forest/*.cpp)))
   FILTER_OUT   += adapters/iplimage.o
