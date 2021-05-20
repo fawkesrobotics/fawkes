@@ -26,7 +26,7 @@
     <field type="uint32" name="zoom_min">Minimum zoom</field>
     <field type="bool"   name="mirror">Is the image mirrored?</field>
     <field type="bool"   name="mirror_supported">Is mirroring supported?</field>
-    <field type="string" name="image_name" length="32">Filename of the image file</field>
+    <field type="string" name="image_name" length="1024">Filename of the image file</field>
   </data>
 
   <message name="SetEffect">
