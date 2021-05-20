@@ -115,6 +115,8 @@ Realsense2Thread::loop()
 			png_writer_.set_dimensions(color_frame.get_width(), color_frame.get_height());
 			png_writer_.set_buffer(firevision::RGB, (unsigned char *)color_frame.get_data());
 			png_writer_.write();
+			camera_if_->set_image_name(image_name_.c_str());
+			camera_if_->write();
 			logger->log_info(name(), "Saving image to %s", image_name_.c_str());
 		} else {
 			error_counter_++;
