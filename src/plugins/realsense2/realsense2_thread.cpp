@@ -62,8 +62,8 @@ Realsense2Thread::init()
 	rgb_path_ = config->get_string_or_default((cfg_prefix + "rgb_path").c_str(),
 	                                          "/home/robotino/realsense_images/");
 	//rgb camera resolution/frame rate
-	rgb_width_      = config->get_int_or_default((cfg_prefix + "rgb_width").c_str(), 1920);
-	rgb_height_     = config->get_int_or_default((cfg_prefix + "rgb_height").c_str(), 1080);
+	//rgb_width_      = config->get_int_or_default((cfg_prefix + "rgb_width").c_str(), 1920);
+	//rgb_height_     = config->get_int_or_default((cfg_prefix + "rgb_height").c_str(), 1080);
 	rgb_frame_rate_ = config->get_int_or_default((cfg_prefix + "rgb_frame_rate").c_str(), 10);
 
 	camera_if_name_ =
@@ -227,6 +227,8 @@ Realsense2Thread::start_camera()
 
 		//rgb config
 		rs2::config rgb_config;
+		rgb_width_  = intrinsics_.width;
+		rgb_height_ = intrinsics_.height;
 		rgb_config.enable_stream(
 		  RS2_STREAM_COLOR, rgb_width_, rgb_height_, RS2_FORMAT_RGB8, rgb_frame_rate_);
 		rs2::pipeline_profile rs_pipeline_profile_rgb_ = rs_rgb_pipe_->start(rgb_config);
