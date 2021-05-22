@@ -287,3 +287,27 @@
 	=>
 	(retract ?f)
 )
+
+(defrule goal-assert-default-meta
+	(declare (salience ?*SALIENCE-HIGH*))
+	?g <- (goal (id ?id) (meta-fact 0) (verbosity ?v)
+	            (meta-template ?t&:(member$ ?t (get-deftemplate-list)))
+	            (mode ~RETRACTED))
+	=>
+	(modify ?g (meta-fact (fact-index (assert-string (str-cat "(" ?t
+	        " (goal-id " ?id"))")))))
+	(if (eq ?v NOISY) then
+		(printout t "Goal " ?id " attached default meta fact from template " ?t crlf)
+	)
+)
+
+(defrule goal-meta-template-invalid
+	(declare (salience ?*SALIENCE-HIGH*))
+	?g <- (goal (id ?id) (meta-template ?t&:
+	            (and (neq ?t nil)
+	                 (not (member$ ?t (get-deftemplate-list)))))
+	            (mode ~RETRACTED))
+	=>
+	(printout error "Goal " ?id " attached goal meta template '"
+	                ?t "' unknown" crlf)
+)
