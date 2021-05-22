@@ -168,6 +168,12 @@
 	; the goal and that is not passed as a parameter. For example, it
 	; could contain the number of tries performed for a goal.
 	(multislot meta)
+	; Goal meta data may depend on the application, hence application-specific
+	; templates may be used to attach information.
+	; The only requirement for custom templates is to contain a slot 'goal-id'
+	; which is used to keep track of fact updates.
+	(slot meta-fact (type INTEGER) (default 0))
+	(slot meta-template (type SYMBOL))
 
 	; Resource handling for the given goal.  A goal may list a number of
 	; required resources. The resources can be of different types and
@@ -235,4 +241,49 @@
 	(exists (plan (goal-id ?id)))
 	=>
 	(plan-retract-all-for-goal ?id)
+)
+
+(defrule goal-meta-fact-template-missing-goal-id
+	(declare (salience ?*SALIENCE-FIRST*))
+	(goal (id ?id) (meta-fact ~0) (meta-template ?t&~nil))
+	(test (not (deftemplate-slot-existp ?t goal-id)))
+	=>
+	(printout error "Goal " ?id " uses meta fact '" ?t
+	                "' without slot 'goal-id'" crlf)
+)
+
+(defrule goal-meta-ambiguous-meta-facts
+	?g <- (goal (id ?id) (meta-fact ~0) (meta-template ?t&~nil))
+	(test (> (length$ (find-all-facts ((?fact ?t)) (eq ?fact:goal-id ?id))) 1))
+	=>
+	(printout error "Goal " ?id " has ambiguous meta facts" crlf)
+)
+
+(defrule goal-update-meta-template
+	(declare (salience ?*SALIENCE-HIGH*))
+	?g <- (goal (id ?id) (meta-fact ?f&:(> ?f 0))
+	            (meta-template ?t&:(neq ?t (fact-relation ?f))))
+	(test (fact-existp ?f))
+	=>
+	(modify ?g (meta-template (fact-relation ?f)))
+)
+
+(defrule goal-meta-fact-update
+	(declare (salience ?*SALIENCE-HIGH*))
+	?g <- (goal (id ?id) (meta-fact ?f&~0) (meta-template ?t&~nil))
+	(test (not (fact-existp ?f)))
+	=>
+	(if (not (do-for-fact ((?new-fact ?t)) (eq ?new-fact:goal-id ?id)
+	                      (modify ?g (meta-fact (fact-index ?new-fact)))))
+	 then
+		(modify ?g (meta-fact 0))
+	)
+)
+
+(defrule goal-cleanup-meta-facts
+	(confval (path "/clips-executive/automatic-goal-retraction") (type BOOL) (value TRUE))
+	(goal (meta-fact ?f&~0) (mode RETRACTED))
+	(test (fact-existp ?f))
+	=>
+	(retract ?f)
 )
