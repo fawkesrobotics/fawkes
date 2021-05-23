@@ -24,6 +24,7 @@
 #include "realsense2_thread.h"
 
 #include <interfaces/CameraControlInterface.h>
+#include <interfaces/Realsense2Interface.h>
 #include <interfaces/SwitchInterface.h>
 
 using namespace fawkes;
@@ -82,6 +83,9 @@ Realsense2Thread::init()
 	//CameraControlInterface
 	camera_if_ = blackboard->open_for_writing<CameraControlInterface>(camera_if_name_.c_str());
 
+	//Realsense2Interface
+	rs_if_ = blackboard->open_for_writing<Realsense2Interface>("BoundingBoxInterface");
+
 	camera_scale_ = 1;
 	// initalize pointcloud
 	realsense_depth_refptr_           = new Cloud();
@@ -104,6 +108,7 @@ Realsense2Thread::loop()
 		camera_running_ = start_camera();
 		return;
 	}
+
 	// take picture
 	if (enable_camera_ && read_camera_control() != "") {
 		if (rs_rgb_pipe_->poll_for_frames(&rs_rgb_data_)) {
@@ -143,6 +148,12 @@ Realsense2Thread::loop()
 	} else if (!depth_enabled_) {
 		return;
 	}
+
+	// get bounding box
+	if (read_bounding_box(bb)) {
+		pixel_to_xyz();
+	}
+
 	if (rs_pipe_->poll_for_frames(&rs_data_)) {
 		rs2::frame depth_frame = rs_data_.first(RS2_STREAM_DEPTH);
 		error_counter_         = 0;
@@ -185,6 +196,7 @@ Realsense2Thread::finalize()
 	pcl_manager->remove_pointcloud(pcl_id_.c_str());
 	blackboard->close(switch_if_);
 	blackboard->close(camera_if_);
+	blackboard->close(rs_if_);
 }
 
 /* Create RS context and start the depth stream
@@ -397,6 +409,76 @@ Realsense2Thread::stop_camera()
 	}
 }
 
+/*
+ * Write XYZ to Interface from aligned depth frame
+ */
+void
+Realsense2Thread::pixel_to_xyz()
+{
+	rs2::depth_frame tmp_frm      = align_rgb_to_depth();
+	const uint16_t * image        = reinterpret_cast<const uint16_t *>(tmp_frm.get_data());
+	float            scaled_depth = camera_scale_ * (static_cast<float>(*image));
+	float            center[2]    = {static_cast<float>(bb[0]), static_cast<float>(bb[1])};
+	float            xyz0[3];
+	float            xyz1[3];
+	float            xyz2[3];
+	float            xyz3[3];
+	float            x = 0;
+	float            y = 0;
+	float            z = 0;
+	int              counter;
+
+	// get average xyz from (bounding box/2), throw away xyz = 0,0,0
+	int qwidth  = int(bb[2] / 4);
+	int qheight = int(bb[3] / 4);
+	for (int i = 0; i < qwidth; i++) {
+		for (int j = 0; j < qheight; j++) {
+			float pixel0[2] = {center[0] + i, center[1] + j};
+			float pixel1[2] = {center[0] + i, center[1] - j};
+			float pixel2[2] = {center[0] - i, center[1] + j};
+			float pixel3[2] = {center[0] - i, center[1] - j};
+			rs2_deproject_pixel_to_point(xyz0, &intrinsics_, pixel0, scaled_depth);
+			rs2_deproject_pixel_to_point(xyz1, &intrinsics_, pixel1, scaled_depth);
+			rs2_deproject_pixel_to_point(xyz2, &intrinsics_, pixel2, scaled_depth);
+			rs2_deproject_pixel_to_point(xyz3, &intrinsics_, pixel3, scaled_depth);
+
+			// add up
+			if (xyz0[0] != 0. && xyz0[1] != 0. && xyz0[2] != 0.) {
+				x = x + xyz0[0];
+				y = y + xyz0[1];
+				z = z + xyz0[2];
+				counter++;
+			}
+			if (xyz1[0] != 0. && xyz1[1] != 0. && xyz1[2] != 0.) {
+				x = x + xyz1[0];
+				y = y + xyz1[1];
+				z = z + xyz1[2];
+				counter++;
+			}
+			if (xyz2[0] != 0. && xyz2[1] != 0. && xyz2[2] != 0.) {
+				x = x + xyz2[0];
+				y = y + xyz2[1];
+				z = z + xyz2[2];
+				counter++;
+			}
+			if (xyz3[0] != 0. && xyz3[1] != 0. && xyz3[2] != 0.) {
+				x = x + xyz3[0];
+				y = y + xyz3[1];
+				z = z + xyz3[2];
+				counter++;
+			}
+		}
+	}
+	x = x / counter;
+	y = y / counter;
+	z = z / counter;
+	rs_if_->set_translation(0, x);
+	rs_if_->set_translation(1, y);
+	rs_if_->set_translation(2, z);
+	rs_if_->set_msgid(bb[4]);
+	rs_if_->write();
+}
+
 /**
  * Read the switch interface and start/stop the camera if necessary.
  * @return true iff the interface is currently enabled.
@@ -437,4 +519,43 @@ Realsense2Thread::read_camera_control()
 		camera_if_->msgq_pop();
 	}
 	return object_name_;
+}
+
+/**
+ * Read the Realsense2 interface to get the ROI to determine a XYZ pose.
+ * @return new_msg
+ */
+bool
+Realsense2Thread::read_bounding_box(std::vector<int> &bb)
+{
+	bool new_msg = false;
+	while (!rs_if_->msgq_empty()) {
+		if (rs_if_->msgq_first_is<Realsense2Interface::BoundingBoxMessage>()) {
+			Realsense2Interface::BoundingBoxMessage *msg =
+			  rs_if_->msgq_first<Realsense2Interface::BoundingBoxMessage>();
+			bb.push_back(msg->center_x());
+			bb.push_back(msg->center_y());
+			bb.push_back(msg->width());
+			bb.push_back(msg->height());
+			bb.push_back(msg->id());
+			new_msg = true;
+		} else {
+			logger->log_warn(name(), "Unknown message received");
+		}
+		rs_if_->msgq_pop();
+	}
+	return new_msg;
+}
+
+/**
+ * Align the depth and color stream to get the 3D coordinates from pixels
+ * @return aligned depth frame
+ */
+rs2::depth_frame
+Realsense2Thread::align_rgb_to_depth()
+{
+	rs2::align    align(RS2_STREAM_COLOR);
+	rs2::frameset frameset  = rs_rgb_pipe_->wait_for_frames();
+	auto          processed = align.process(frameset);
+	return processed.get_depth_frame();
 }

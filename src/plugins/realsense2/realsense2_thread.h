@@ -44,6 +44,7 @@
 namespace fawkes {
 class SwitchInterface;
 class CameraControlInterface;
+class Realsense2Interface;
 } // namespace fawkes
 
 class Realsense2Thread : public fawkes::Thread,
@@ -62,11 +63,14 @@ public:
 	virtual void loop();
 
 private:
-	bool start_camera();
-	bool get_camera(rs2::device &dev);
-	void enable_depth_stream();
-	void disable_depth_stream();
-	void stop_camera();
+	bool             start_camera();
+	bool             get_camera(rs2::device &dev);
+	bool             read_bounding_box(std::vector<int> &bb);
+	void             enable_depth_stream();
+	void             disable_depth_stream();
+	void             stop_camera();
+	void             pixel_to_xyz();
+	rs2::depth_frame align_rgb_to_depth();
 
 	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
 protected:
@@ -84,6 +88,7 @@ private:
 	fawkes::SwitchInterface *       switch_if_;
 	bool                            cfg_use_switch_;
 	fawkes::CameraControlInterface *camera_if_;
+	fawkes::Realsense2Interface *   rs_if_;
 
 	typedef pcl::PointXYZ              PointType;
 	typedef pcl::PointCloud<PointType> Cloud;
@@ -122,6 +127,8 @@ private:
 	bool        depth_enabled_  = false;
 	uint        restart_after_num_errors_;
 	uint        error_counter_ = 0;
+
+	std::vector<int> bb;
 };
 
 #endif
