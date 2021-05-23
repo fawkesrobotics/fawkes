@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "interface.dtd">
+<interface name="Realsense2Interface" author="Niklas Sebastian Eltester" year="2021">
+  <constants>
+  </constants>
+  <data>
+    <comment>
+      Determine 3D position from ROI in RGB Frame
+    </comment>
+    <field type="uint32" name="msgid">
+      Last processed Message
+    </field>
+    <field type="double" length="4" name="rotation">
+      Rotation quaternion relative to reference frame, ordered as (x, y, z, w).
+    </field>
+    <field type="double" length="3" name="translation">
+      Translation vector from the reference frame's origin, ordered as (x, y, z).
+    </field>
+  </data>
+  <message name="BoundingBoxMessage">
+    <comment>
+      Bounding Box data to determine position in 3D space from depth frame
+    </comment>
+    <field type="int64" name="center_x">
+        X Axis center of bounding box
+    </field>
+    <field type="int64" name="center_y">
+        Y Axis center of bounding box
+    </field>
+    <field type="int64" name="width">
+        i
+    </field>
+    <field type="int64" name="height">
+        X Axis center of bounding box
+    </field>
+  </message>
+</interface>

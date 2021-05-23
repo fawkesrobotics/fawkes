@@ -24,6 +24,8 @@ CFLAGS  +=  $(CFLAGS_CPP11)
 CFLAGS  +=  $(CFLAGS_TF) $(CFLAGS_PCL) $(CFFLAGS_conveyor_pose)
 LDFLAGS +=  $(LDFLAGS_TF) $(LDFLAGS_PCL)
 
+PRESUBDIRS = interfaces
+
 LIBS_realsense2 = m fawkescore fawkesutils fawkesaspects fawkesbaseapp \
                       fawkesblackboard fawkesinterface fvutils \
                       fawkespcl_utils SwitchInterface CameraControlInterface
