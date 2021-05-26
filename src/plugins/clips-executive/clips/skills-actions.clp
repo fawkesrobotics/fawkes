@@ -14,6 +14,7 @@
 	;(slot channel (type INTEGER))
 	(slot skill-name (type SYMBOL))
 	(slot skill-id (type SYMBOL))
+	(slot skiller (type STRING) (default "Skiller"))
 	(multislot skill-args)
 )
 
@@ -35,27 +36,30 @@
 (defrule skill-action-start
 	?pa <- (plan-action (goal-id ?goal-id) (plan-id ?plan-id) (id ?id) (state PENDING)
 	                    (action-name ?action-name) (executable TRUE)
+	                    (skiller ?skiller)
 	                    (param-names $?params)
 	                    (param-values $?param-values))
 	(skill-action-mapping (name ?action-name))
-	(not (skill-action-execinfo))
-	(skiller-control (acquired TRUE))
+	(not (skill-action-execinfo (skiller ?skiller)))
+	(skiller-control (skiller ?skiller) (acquired TRUE))
 	=>
-	(bind ?skill-id (skill-call ?action-name ?params ?param-values))
+	(bind ?skill-id (skill-call ?action-name ?params ?param-values ?skiller))
 	(modify ?pa (state WAITING))
 	(bind ?args (create$))
 	(loop-for-count (?i (length$ ?params))
 		(bind ?args (append$ ?args (nth$ ?i ?params) (nth$ ?i ?param-values)))
 	)
-	(assert (skill-action-execinfo (goal-id ?goal-id) (plan-id ?plan-id) (action-id ?id)
-																 (skill-id ?skill-id) (skill-name ?action-name) (skill-args ?args)))
+	(assert (skill-action-execinfo (goal-id ?goal-id) (plan-id ?plan-id)
+	                               (action-id ?id) (skill-id ?skill-id)
+	                               (skill-name ?action-name)
+	                               (skill-args ?args) (skiller ?skiller)))
 )
 
 (defrule skill-action-running
 	?pa <- (plan-action (goal-id ?goal-id) (plan-id ?plan-id) (id ?id)
-	                    (action-name ?action-name) (state WAITING))
+	                    (action-name ?action-name) (state WAITING) (skiller ?skiller))
 	?pe <- (skill-action-execinfo (goal-id ?goal-id) (plan-id ?plan-id)
-	                              (action-id ?id) (skill-id ?skill-id))
+	                              (action-id ?id) (skill-id ?skill-id) (skiller ?skiller))
 	(skill (id ?skill-id) (status S_RUNNING))
 	=>
 	(printout t "Action " ?action-name " is running" crlf)
@@ -64,10 +68,10 @@
 
 (defrule skill-action-final
 	?pa <- (plan-action (goal-id ?goal-id) (plan-id ?plan-id) (id ?id)
-	                    (action-name ?action-name) (state WAITING|RUNNING))
+	                    (action-name ?action-name) (state WAITING|RUNNING) (skiller ?skiller))
 	?pe <- (skill-action-execinfo (goal-id ?goal-id) (plan-id ?plan-id)
-	                              (action-id ?id) (skill-id ?skill-id))
-	?sf <- (skill (id ?skill-id) (status S_FINAL))
+	                              (action-id ?id) (skill-id ?skill-id) (skiller ?skiller))
+	?sf <- (skill (id ?skill-id) (status S_FINAL) (skiller ?skiller))
 	=>
 	(printout t "Execution of " ?action-name " completed successfully" crlf)
 	(modify ?pa (state EXECUTION-SUCCEEDED))
@@ -76,10 +80,10 @@
 
 (defrule skill-action-failed
 	?pa <- (plan-action (goal-id ?goal-id) (plan-id ?plan-id) (id ?id)
-	                    (action-name ?action-name) (state WAITING|RUNNING))
+	                    (action-name ?action-name) (state WAITING|RUNNING) (skiller ?skiller))
 	?pe <- (skill-action-execinfo (goal-id ?goal-id) (plan-id ?plan-id)
-	                              (action-id ?id) (skill-id ?skill-id))
-	?sf <- (skill (id ?skill-id) (status S_FAILED) (error-msg ?error))
+	                              (action-id ?id) (skill-id ?skill-id) (skiller ?skiller))
+	?sf <- (skill (id ?skill-id) (status S_FAILED) (error-msg ?error) (skiller ?skiller))
 	=>
 	(printout warn "Execution of " ?action-name " FAILED (" ?error ")" crlf)
 	(modify ?pa (state EXECUTION-FAILED) (error-msg ?error))
@@ -88,21 +92,22 @@
 
 (defrule skill-action-cancel-if-action-does-not-exist
 	?pe <- (skill-action-execinfo (goal-id ?goal-id) (plan-id ?plan-id)
-	                              (action-id ?id) (skill-id ?skill-id))
-	(skill (id ?skill-id) (status S_RUNNING))
-	(not (plan-action (goal-id ?goal-id) (plan-id ?plan-id) (id ?id)))
+	                              (action-id ?id) (skill-id ?skill-id) (skiller ?skiller))
+	(skill (id ?skill-id) (status S_RUNNING) (skiller ?skiller))
+	(not (plan-action (goal-id ?goal-id) (plan-id ?plan-id) (id ?id)
+	                  (skiller ?skiller)))
 	=>
 	(printout warn
 		  "Cancelling Skill Execution, corresponding action does not exist" crlf)
-	(bind ?m
-	  (blackboard-create-msg "SkillerInterface::Skiller" "StopExecMessage"))
+	(bind ?m (blackboard-create-msg (str-cat "SkillerInterface::" ?skiller)
+	                                "StopExecMessage"))
 	(blackboard-send-msg ?m)
 	(retract ?pe)
 )
 
 (defrule skill-action-retract-execinfo-without-action
 	?pe <- (skill-action-execinfo (goal-id ?goal-id) (plan-id ?plan-id)
-	                              (action-id ?id) (skill-id ?skill-id))
+	                              (action-id ?id) (skill-id ?skill-id) (skiller ?skiller))
 	(not (skill (status S_RUNNING) (id ?skill-id)))
 	(not (plan-action (goal-id ?goal-id) (plan-id ?plan-id) (id ?action-id)))
 	=>

@@ -12,6 +12,7 @@
 =>
   (parse-pddl-domain (path-resolve "test-scenario/domain.pddl"))
   (assert (domain-loaded))
+  (assert (skiller-control))
 )
 
 (defrule test-domain-set-sensed-predicates

@@ -23,10 +23,12 @@
   (slot error-msg (type STRING))
   (slot skill-string (type STRING))
 	(slot msgid (type INTEGER))
-  (multislot start-time (type INTEGER) (cardinality 2 2) (default (create$ 0 0)))
+	(multislot start-time (type INTEGER) (cardinality 2 2) (default (create$ 0 0)))
+	(slot skiller (type STRING) (default "Skiller"))
 )
 
 (deftemplate skiller-control
+	(slot skiller (type STRING) (default "Skiller"))
 	(slot acquired (type SYMBOL) (allowed-values FALSE TRUE))
 	(slot acquiring (type SYMBOL) (allowed-values FALSE TRUE))
   (multislot last-try (type INTEGER) (cardinality 2 2) (default (create$ 0 0)))
@@ -34,7 +36,7 @@
 
 ; Expects that the file is batch-loaded
 (blackboard-open-reading "SkillerInterface" "Skiller")
-(assert (skiller-control))
+;(assert (skiller-control))
 (assert (ff-feature-loaded skills))
 
 (deffunction merge-params (?params ?param-values)
@@ -52,7 +54,13 @@
   )
 )
 
-(deffunction skill-call (?name ?param-names ?param-values)
+(deffunction skill-call (?name ?param-names ?param-values $?opt-skiller)
+	(bind ?skiller "Skiller")
+	(if (> (length$ ?opt-skiller) 0) then (bind ?skiller (nth$ 1 ?opt-skiller)))
+	(if (> (length$ ?opt-skiller) 1)
+	 then
+		(printout warn "skill-call: ignore unexpected params " (rest$ ?opt-skiller) crlf)
+	)
 	; The following is a basic 1-to-1 mapping from action to skill
   ; (bind ?args (merge-params ?param-names ?param-values))
   ; (if (eq FALSE ?args) then
@@ -97,7 +105,7 @@
 		(assert (skill (id ?id) (name (sym-cat ?name)) (status S_FAILED) (start-time (now))
 		        (error-msg (str-cat "Failed to convert action '" ?name "' to skill string"))))
 	else
-		(bind ?m (blackboard-create-msg "SkillerInterface::Skiller" "ExecSkillMessage"))
+		(bind ?m (blackboard-create-msg (str-cat "SkillerInterface::" ?skiller) "ExecSkillMessage"))
 		(blackboard-set-msg-field ?m "skill_string" ?sks)
 
 		(printout logwarn "Calling skill '" ?sks "'" crlf)
@@ -105,21 +113,22 @@
 		(bind ?status (if (eq ?msgid 0) then S_FAILED else S_IDLE))
 		(bind ?id (sym-cat ?name "-" ?msgid))
 		(assert (skill (id ?id) (name (sym-cat ?name)) (skill-string ?sks)
-									 (status ?status) (msgid ?msgid) (start-time (now))))
+		               (skiller ?skiller)
+		               (status ?status) (msgid ?msgid) (start-time (now))))
 	)
 	(return ?id)
 )
 
 (defrule skill-control-acquire
 	(time $?now)
-	?sc <- (skiller-control (acquired FALSE) (acquiring FALSE)
-													(last-try $?lt&:(timeout ?now ?lt ?*SKILL-ACQUIRE-CONTROL-RETRY-INTERVAL-SEC*)))
+	?sc <- (skiller-control (skiller ?skiller) (acquired FALSE) (acquiring FALSE)
+	       (last-try $?lt&:(timeout ?now ?lt ?*SKILL-ACQUIRE-CONTROL-RETRY-INTERVAL-SEC*)))
 	=>
-	(printout t "Acquiring exclusive skiller control" crlf)
-	(bind ?m (blackboard-create-msg "SkillerInterface::Skiller" "AcquireControlMessage"))
+	(printout t "Acquiring exclusive skiller control for " ?skiller crlf)
+	(bind ?m (blackboard-create-msg (str-cat "SkillerInterface::" ?skiller) "AcquireControlMessage"))
 
 	(if (any-factp ((?c confval)) (and (eq ?c:path "/clips-executive/steal-skiller-control")
-																		 (eq ?c:value TRUE)))
+		(eq ?c:value TRUE)))
 	then
 		(blackboard-set-msg-field ?m "steal_control" TRUE)
 	)
@@ -133,18 +142,18 @@
 )
 
 (defrule skill-control-acquired
-	?sc <- (skiller-control (acquired FALSE) (acquiring TRUE))
-	(blackboard-interface (type "SkillerInterface") (id "Skiller") (serial ?s))
-  (SkillerInterface (id "Skiller") (exclusive_controller ?s))
+	?sc <- (skiller-control (skiller ?skiller) (acquired FALSE) (acquiring TRUE))
+	(blackboard-interface (type "SkillerInterface") (id ?skiller) (serial ?s))
+  (SkillerInterface (id ?skiller) (exclusive_controller ?s))
 	=>
 	(printout t "Acquired exclusive skiller control" crlf)
 	(modify ?sc (acquired TRUE) (acquiring FALSE))
 )
-		
+
 (defrule skill-control-lost
-	?sc <- (skiller-control (acquired TRUE))
-	(blackboard-interface (type "SkillerInterface") (id "Skiller") (serial ?s))
-  (SkillerInterface (id "Skiller") (exclusive_controller ~?s))
+	?sc <- (skiller-control (skiller ?skiller) (acquired TRUE))
+	(blackboard-interface (type "SkillerInterface") (id ?skiller) (serial ?s))
+	(SkillerInterface (id ?skiller) (exclusive_controller ~?s))
 	=>
 	(printout t "Lost exclusive skiller control" crlf)
 	(modify ?sc (acquired FALSE))
@@ -153,21 +162,22 @@
 (defrule skill-control-release
 	(declare (salience 1000))
 	(executive-finalize)
-	?sc <- (skiller-control (acquired TRUE))
-	?bi <- (blackboard-interface (type "SkillerInterface") (id "Skiller"))
+	?sc <- (skiller-control (skiller ?skiller) (acquired TRUE))
+	?bi <- (blackboard-interface (type "SkillerInterface") (id ?skiller))
 	=>
 	(printout t "Releasing control on finalize" crlf)
-	(bind ?m (blackboard-create-msg "SkillerInterface::Skiller" "ReleaseControlMessage"))
+	(bind ?m (blackboard-create-msg (str-cat "SkillerInterface::" ?skiller) "ReleaseControlMessage"))
 	(blackboard-send-msg ?m)
-	(blackboard-close "SkillerInterface" "Skiller")
+	(blackboard-close "SkillerInterface" ?skiller)
 	(modify ?sc (acquired FALSE))
 	(retract ?bi)
-)	
+)
 
 (defrule skill-status-update
-  ?su <- (SkillerInterface (id "Skiller") (msgid ?msgid) (status ?new-status)
+  ?su <- (SkillerInterface (id ?skiller) (msgid ?msgid) (status ?new-status)
                            (error ?error-msg))
-  ?sf <- (skill (name ?n) (msgid ?msgid) (status ?old-status&~?new-status))
+  ?sf <- (skill (name ?n) (msgid ?msgid) (status ?old-status&~?new-status)
+                (skiller ?skiller))
   =>
   (printout t "Skill " ?n " is " ?new-status", was: " ?old-status crlf)
   (retract ?su)
@@ -175,8 +185,8 @@
 )
 
 (defrule skill-status-update-nochange
-  ?su <- (SkillerInterface (id "Skiller") (msgid ?msgid) (status ?new-status))
-  (skill (name ?n) (msgid ?msgid) (status ?new-status))
+  ?su <- (SkillerInterface (id ?skiller) (msgid ?msgid) (status ?new-status))
+  (skill (name ?n) (msgid ?msgid) (status ?new-status) (skiller ?skiller)
   =>
   (retract ?su)
 )
@@ -184,7 +194,7 @@
 (defrule skill-start-timeout
 	(time $?now)
   ?sf <- (skill (name ?n) (status S_IDLE)
-								(start-time $?st&:(timeout ?now ?st ?*SKILL-INIT-TIMEOUT-SEC*)))
+	(start-time $?st&:(timeout ?now ?st ?*SKILL-INIT-TIMEOUT-SEC*)))
   =>
 	(printout warn "Timeout starting skill " ?n " (" ?*SKILL-INIT-TIMEOUT-SEC* " sec): assuming failure" crlf)
 	(modify ?sf (status S_FAILED) (error-msg "Start timeout"))
