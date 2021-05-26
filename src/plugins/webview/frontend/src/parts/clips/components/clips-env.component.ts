@@ -32,6 +32,7 @@ export class ClipsEnvComponent implements OnInit, OnDestroy {
   envs: string[] = [];
 
   data_source = new MatTableDataSource();
+  regExpr: any;
 
   @ViewChild(CardListFilterComponent, {static: true}) private readonly cardFilter_: CardListFilterComponent;
 
@@ -60,12 +61,26 @@ export class ClipsEnvComponent implements OnInit, OnDestroy {
       this.refresh_envs();
       this.refresh();
     });
+
+    this.data_source.filterPredicate = this.regExprFilter()
   }
 
   ngOnDestroy() {
     this.backend_subscription.unsubscribe();
     this.backend_subscription = null;
     this.disable_autorefresh();
+  }
+
+  // Custom function for the MatTableDataSource filter predicate
+  regExprFilter()
+  { 
+    return (data: any, filter: string) => {
+        try {
+          return this.regExpr.test(data.formatted)
+        } catch (e) {
+          return false
+        }
+      }
   }
 
   refresh() {
@@ -120,6 +135,16 @@ export class ClipsEnvComponent implements OnInit, OnDestroy {
     }
   }
 
+
+  // Helper function to automatically escape special characters 
+  private escapeRegExp(input) {
+    // Escapes every special character by adding \ before it
+    let escapedInput = input.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+    // Allows "anything" search, as it was escaped previously
+    let formattedInput = escapedInput.replaceAll('\\*', '([\\s\\S]*?)');    
+    return formattedInput;
+  }
+
   toggle_autorefresh() {
     if (this.auto_refresh_subscription) {
       this.disable_autorefresh();
@@ -136,6 +161,11 @@ export class ClipsEnvComponent implements OnInit, OnDestroy {
     filter_value = filter_value.trim();
     // MatTableDataSource defaults to lowercase matches
     filter_value = filter_value.toLowerCase();
+    // Update regex if there is a provided input 
+    if (filter_value) {
+      filter_value = this.escapeRegExp(filter_value)
+      this.regExpr = new RegExp(filter_value);
+    }
     this.data_source.filter = filter_value;
   }
 }
