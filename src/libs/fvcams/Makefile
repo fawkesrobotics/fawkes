@@ -41,9 +41,7 @@ OBJS_libfvcams = camera.o          \
                  cam_exceptions.o  \
                  factory.o         \
                  control/factory.o
-ifeq ($(HAVE_OPENCV),0)
-  HAVE_OPENCV=1
-endif
+
 ifeq ($(HAVE_VISCA_CTRL),1)
   OBJS_libfvcams += control/visca.o
 endif

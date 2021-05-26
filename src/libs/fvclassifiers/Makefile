@@ -18,13 +18,13 @@ BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/fvconf.mk
 
-CFLAGS   += $(VISION_CFLAGS) -Wno-error
+CFLAGS   += $(VISION_CFLAGS) -Wno-overloaded-virtual
 LDFLAGS  += $(VISION_LDFLAGS)
 INCDIRS  += $(VISION_INCDIRS)
 LIBDIRS  += $(VISION_LIBDIRS)
 LIBS     += $(VISION_LIBS)
 
-ifeq ($(HAVE_OPENCV),0)
+ifeq ($(HAVE_OPENCV),1)
   CFLAGS  += $(CFLAGS_OPENCV)
   LDFLAGS += $(LDFLAGS_OPENCV)
   ifeq ($(filter-out 2.0 2.1,$(VERSION_MAJOR_OPENCV).$(VERSION_MINOR_OPENCV)),)

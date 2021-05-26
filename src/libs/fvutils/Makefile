@@ -19,7 +19,7 @@ include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/fvconf.mk
 include $(BUILDSYSDIR)/pcl.mk
 
-CFLAGS   += $(VISION_CFLAGS) -Wno-unknown-pragmas -Wno-deprecated-declarations
+CFLAGS   += $(VISION_CFLAGS) -Wno-unknown-pragmas -Wno-deprecated-declarations -Wno-overloaded-virtual
 LDFLAGS  += $(VISION_LDFLAGS)
 INCDIRS  += $(VISION_INCDIRS)
 LIBDIRS  += $(VISION_LIBDIRS)
@@ -50,7 +50,7 @@ else
   LDFLAGS += $(LDFLAGS_LIBPNG)
 endif
 
-ifneq ($(HAVE_OPENCV),0)
+ifneq ($(HAVE_OPENCV),1)
   WARN_TARGETS += warning_opencv
   FILTER_OUT   += recognition/faces.o $(patsubst %.cpp,%.o,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/recognition/forest/*.cpp)))
   FILTER_OUT   += adapters/iplimage.o
