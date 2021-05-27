@@ -262,6 +262,7 @@
 )
 
 (defrule goal-meta-ambiguous-meta-facts
+	(declare (salience ?*SALIENCE-HIGH*))
 	?g <- (goal (id ?id) (meta-fact ~0) (meta-template ?t&~nil))
 	(test (> (length$ (find-all-facts ((?fact ?t)) (eq ?fact:goal-id ?id))) 1))
 	=>
@@ -318,7 +319,7 @@
 )
 
 (defrule goal-meta-template-invalid
-	(declare (salience ?*SALIENCE-HIGH*))
+	(declare (salience ?*SALIENCE-FIRST*))
 	?g <- (goal (id ?id) (meta-template ?t&:
 	            (and (neq ?t nil)
 	                 (not (member$ ?t (get-deftemplate-list)))))
