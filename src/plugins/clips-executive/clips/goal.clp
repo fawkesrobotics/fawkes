@@ -309,12 +309,13 @@
 "
 	(declare (salience ?*SALIENCE-HIGH*))
 	?g <- (goal (id ?id) (meta-fact ?f&~0) (meta-template ?t&~nil))
+	(time $?) ; Re-evaluate the LHS continuously
 	(test (not (fact-existp ?f)))
 	=>
 	(if (not (do-for-fact ((?new-fact ?t)) (eq ?new-fact:goal-id ?id)
 	                      (modify ?g (meta-fact (fact-index ?new-fact)))))
 	 then
-		(modify ?g (meta-fact 0))
+		(modify ?g (meta-fact 0) (meta-template nil))
 	)
 )
 
