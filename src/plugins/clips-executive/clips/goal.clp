@@ -272,9 +272,8 @@
 (defrule goal-update-meta-template
 " A goal meta is set via fact-index. Update the template name accordingly."
 	(declare (salience ?*SALIENCE-HIGH*))
-	?g <- (goal (id ?id) (meta-fact ?f&:(> ?f 0))
+	?g <- (goal (id ?id) (meta-fact ?f&:(and (> ?f 0) (?fact-existp ?f)))
 	            (meta-template ?t&:(neq ?t (fact-relation ?f))))
-	(test (fact-existp ?f))
 	=>
 	(modify ?g (meta-template (fact-relation ?f)))
 )
