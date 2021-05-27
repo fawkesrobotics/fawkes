@@ -279,6 +279,30 @@
 	(modify ?g (meta-template (fact-relation ?f)))
 )
 
+(defrule goal-meta-fact-init-fact-id
+" The meta fact template is specified and a goal meta fact exists for the goal.
+  Update the goal meta fact-index.
+"
+	(declare (salience ?*SALIENCE-HIGH*))
+	?g <- (goal (id ?id) (meta-fact 0) (meta-template ?t&~nil))
+	(test (any-factp ((?f ?t)) (eq ?f:goal-id ?id)))
+	=>
+	(do-for-fact ((?f ?t)) (eq ?f:goal-id ?id)
+	  (modify ?g (meta-fact (fact-index ?f)))
+	)
+)
+
+(defrule goal-meta-fact-init-goal-id
+" The meta-fact is already set, but the goal id does not match, update the
+  goal-id of the goal meta fact.
+"
+	(declare (salience ?*SALIENCE-HIGH*))
+	?g <- (goal (id ?id) (meta-fact ?f&~0) (meta-template ?t&~nil))
+	(test (and (fact-existp ?f) (neq (fact-slot-value ?f goal-id) ?id)))
+	=>
+	(modify ?f (goal-id ?id))
+)
+
 (defrule goal-meta-fact-update
 " The stored meta fact does not exist anymore, it was updated or deleted.
   If another goal meta fact exists with matching goal id, then update the
