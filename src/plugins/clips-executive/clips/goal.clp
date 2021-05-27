@@ -172,6 +172,15 @@
 	; templates may be used to attach information.
 	; The only requirement for custom templates is to contain a slot 'goal-id'
 	; which is used to keep track of fact updates.
+	; When formulating a goal it is sufficient to either set the template name or
+	; a fact-index of the meta fact.
+	; If 'meta-template' is set:
+	;   - if no meta fact of that template is present matching the goal id,
+	;     then a new meta fact is asserted with default values
+	;   - else the existing meta fact with the matching goal id is attached to
+	;     the goal
+	; If 'meta-fact' is set the meta-template slot is updated automatically.
+	; Also, if the goal-id field does not match the goals id, it is updated.
 	(slot meta-fact (type INTEGER) (default 0))
 	(slot meta-template (type SYMBOL))
 
@@ -260,6 +269,7 @@
 )
 
 (defrule goal-update-meta-template
+" A goal meta is set via fact-index. Update the template name accordingly."
 	(declare (salience ?*SALIENCE-HIGH*))
 	?g <- (goal (id ?id) (meta-fact ?f&:(> ?f 0))
 	            (meta-template ?t&:(neq ?t (fact-relation ?f))))
@@ -269,6 +279,10 @@
 )
 
 (defrule goal-meta-fact-update
+" The stored meta fact does not exist anymore, it was updated or deleted.
+  If another goal meta fact exists with matching goal id, then update the
+  stored fact-index, else remove the outdated goal-meta information.
+"
 	(declare (salience ?*SALIENCE-HIGH*))
 	?g <- (goal (id ?id) (meta-fact ?f&~0) (meta-template ?t&~nil))
 	(test (not (fact-existp ?f)))
@@ -289,6 +303,8 @@
 )
 
 (defrule goal-assert-default-meta
+" A goal meta template is specified but no corresponding fact exits,
+  assert default goal meta fact."
 	(declare (salience ?*SALIENCE-HIGH*))
 	?g <- (goal (id ?id) (meta-fact 0) (verbosity ?v)
 	            (meta-template ?t&:(member$ ?t (get-deftemplate-list)))
