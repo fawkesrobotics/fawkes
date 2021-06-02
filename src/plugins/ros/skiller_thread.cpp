@@ -87,7 +87,7 @@ RosSkillerThread::once()
 void
 RosSkillerThread::stop()
 {
-	if (skiller_if_->exclusive_controller() != skiller_if_->serial()) {
+	if (skiller_if_->exclusive_controller() != skiller_if_->serial().get_string()) {
 		logger->log_warn(name(), "Skill abortion requested, but currently not in control");
 		return;
 	}
@@ -158,7 +158,7 @@ RosSkillerThread::loop()
 
 	// currently idle, release skiller control
 	if (!exec_running_ && !exec_request_
-	    && skiller_if_->exclusive_controller() == skiller_if_->serial()) {
+	    && skiller_if_->exclusive_controller() == skiller_if_->serial().get_string()) {
 		logger->log_debug(name(), "No skill running and no skill requested, releasing control");
 		skiller_if_->msgq_enqueue(new SkillerInterface::ReleaseControlMessage());
 		return;
@@ -171,7 +171,7 @@ RosSkillerThread::loop()
 			return;
 		}
 
-		if (skiller_if_->exclusive_controller() != skiller_if_->serial()) {
+		if (skiller_if_->exclusive_controller() != skiller_if_->serial().get_string()) {
 			// we need the skiller control, acquire it first
 			logger->log_debug(name(), "Skill execution requested, but currently not in control");
 			skiller_if_->msgq_enqueue(new SkillerInterface::AcquireControlMessage());

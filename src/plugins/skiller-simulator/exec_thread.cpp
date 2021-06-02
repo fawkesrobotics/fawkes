@@ -54,7 +54,7 @@ SkillerSimulatorExecutionThread::loop()
 		if (skiller_if_->msgq_first_is<SkillerInterface::AcquireControlMessage>()) {
 			SkillerInterface::AcquireControlMessage *m =
 			  skiller_if_->msgq_first<SkillerInterface::AcquireControlMessage>();
-			if (skiller_if_->exclusive_controller() == 0) {
+			if (strcmp(skiller_if_->exclusive_controller(), "") == 0) {
 				const std::string new_controller = m->source_id().get_string();
 				logger->log_debug(name(),
 				                  "%s is new exclusive controller (ID %s)",
@@ -81,9 +81,9 @@ SkillerSimulatorExecutionThread::loop()
 		} else if (skiller_if_->msgq_first_is<SkillerInterface::ReleaseControlMessage>()) {
 			SkillerInterface::ReleaseControlMessage *m =
 			  skiller_if_->msgq_first<SkillerInterface::ReleaseControlMessage>();
-			if (skiller_if_->exclusive_controller() == m->source_id()) {
+			if (skiller_if_->exclusive_controller() == m->source_id().get_string()) {
 				logger->log_debug(name(), "%s releases exclusive control", m->sender_thread_name());
-			} else if (skiller_if_->exclusive_controller() != 0) {
+			} else if (strcmp(skiller_if_->exclusive_controller(), "") != 0) {
 				logger->log_warn(name(),
 				                 "%s tried to release exclusive control, but it's not the controller",
 				                 m->sender_thread_name());
@@ -91,14 +91,14 @@ SkillerSimulatorExecutionThread::loop()
 		} else if (skiller_if_->msgq_first_is<SkillerInterface::ExecSkillMessage>()) {
 			SkillerInterface::ExecSkillMessage *m =
 			  skiller_if_->msgq_first<SkillerInterface::ExecSkillMessage>();
-			if (skiller_if_->exclusive_controller() == 0
-			    || skiller_if_->exclusive_controller() == m->source_id()) {
+			if (strcmp(skiller_if_->exclusive_controller(), "") == 0
+			    || skiller_if_->exclusive_controller() == m->source_id().get_string()) {
 				if (skill_enqueued) {
 					logger->log_warn(name(),
 					                 "More than one skill string enqueued, ignoring previous string (%s).",
 					                 skiller_if_->skill_string());
 				}
-				if (skiller_if_->exclusive_controller() == 0) {
+				if (strcmp(skiller_if_->exclusive_controller(), "") == 0) {
 					std::string sender = m->sender_thread_name();
 					if (sender == "Unknown") {
 						sender = "Remote";
@@ -131,7 +131,7 @@ SkillerSimulatorExecutionThread::loop()
 		} else if (skiller_if_->msgq_first_is<SkillerInterface::StopExecMessage>()) {
 			SkillerInterface::StopExecMessage *m =
 			  skiller_if_->msgq_first<SkillerInterface::StopExecMessage>();
-			if (skiller_if_->exclusive_controller() == m->source_id()) {
+			if (skiller_if_->exclusive_controller() == m->source_id().get_string()) {
 				logger->log_debug(name(),
 				                  "Stopping execution of '%s' on request",
 				                  skiller_if_->skill_string());

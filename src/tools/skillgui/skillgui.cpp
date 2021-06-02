@@ -288,12 +288,12 @@ void
 SkillGuiGtkWindow::on_controller_clicked()
 {
 	if (skiller_if_ && skiller_if_->is_valid() && skiller_if_->has_writer()
-	    && skiller_if_->exclusive_controller() == skiller_if_->serial()) {
+	    && skiller_if_->exclusive_controller() == skiller_if_->serial().get_string()) {
 		// we are exclusive controller, release control
 		SkillerInterface::ReleaseControlMessage *rcm = new SkillerInterface::ReleaseControlMessage();
 		skiller_if_->msgq_enqueue(rcm);
 	} else if (skiller_if_ && skiller_if_->is_valid() && skiller_if_->has_writer()
-	           && skiller_if_->exclusive_controller() == 0) {
+	           && strcmp(skiller_if_->exclusive_controller(), "") == 0) {
 		// there is no exclusive controller, try to acquire control
 		SkillerInterface::AcquireControlMessage *acm = new SkillerInterface::AcquireControlMessage();
 		skiller_if_->msgq_enqueue(acm);
@@ -330,7 +330,7 @@ SkillGuiGtkWindow::close_bb()
 		delete skdbg_ifd_;
 		delete agdbg_ifd_;
 		if (skiller_if_ && skiller_if_->is_valid() && skiller_if_->has_writer()
-		    && (skiller_if_->exclusive_controller() == skiller_if_->serial())) {
+		    && skiller_if_->exclusive_controller() == skiller_if_->serial().get_string()) {
 			SkillerInterface::ReleaseControlMessage *rcm = new SkillerInterface::ReleaseControlMessage();
 			skiller_if_->msgq_enqueue(rcm);
 		}
@@ -375,7 +375,7 @@ SkillGuiGtkWindow::on_connect()
 			// always try to acquire control on connect, this may well fail, for
 			// example if agent is running, but we don't care
 			skiller_if_->read();
-			if (skiller_if_->has_writer() && skiller_if_->exclusive_controller() == 0) {
+			if (skiller_if_->has_writer() && strcmp(skiller_if_->exclusive_controller(), "") == 0) {
 				SkillerInterface::AcquireControlMessage *aqm =
 				  new SkillerInterface::AcquireControlMessage();
 				skiller_if_->msgq_enqueue(aqm);
@@ -452,7 +452,7 @@ SkillGuiGtkWindow::on_exec_clicked()
 #endif
 
 		if (skiller_if_ && skiller_if_->is_valid() && skiller_if_->has_writer()
-		    && skiller_if_->exclusive_controller() == skiller_if_->serial()) {
+		    && skiller_if_->exclusive_controller() == skiller_if_->serial().get_string()) {
 			SkillerInterface::ExecSkillMessage *esm = new SkillerInterface::ExecSkillMessage(sks.c_str());
 			skiller_if_->msgq_enqueue(esm);
 
@@ -543,7 +543,7 @@ SkillGuiGtkWindow::on_skiller_data_changed()
 #endif
 		lab_alive->set_text(skiller_if_->has_writer() ? "Yes" : "No");
 
-		if (skiller_if_->exclusive_controller() == skiller_if_->serial()) {
+		if (skiller_if_->exclusive_controller() == skiller_if_->serial().get_string()) {
 			if (tb_controller->get_stock_id() == Gtk::Stock::NO.id) {
 				tb_controller->set_stock_id(Gtk::Stock::YES);
 #if GTKMM_MAJOR_VERSION > 2 || (GTKMM_MAJOR_VERSION == 2 && GTKMM_MINOR_VERSION >= 12)

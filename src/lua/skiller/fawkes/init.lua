@@ -49,7 +49,7 @@ local loop_has_run = false
 function notify_reader_removed(instance_serial)
 	 if instance_serial == skiller_if:exclusive_controller() then
 			print_info("Controlling interface instance was closed, revoking exclusive control")
-			skiller_if:set_exclusive_controller(0)
+			skiller_if:set_exclusive_controller("")
 			skiller_if:write()
 	 end
 end
@@ -89,10 +89,9 @@ function process_skiller_messages()
 	 
 	 while not skiller_if:msgq_empty() do
 			local m = skiller_if:msgq_first()
-      print_info("Received message, sender: %s, source: %s", m:sender_id():get_string(), m:source_id():get_string())
 			local mtype = m:type()
 			if mtype == "AcquireControlMessage" then
-				 if skiller_if:exclusive_controller() == 0 then
+				 if skiller_if:exclusive_controller() == "" then
 						print_debug("%s (serial %s) is new exclusive controller", m:sender_thread_name(), m:source_id():get_string())
 						skiller_if:set_exclusive_controller(m:source_id():get_string())
 						write_skiller_if = true
@@ -112,20 +111,20 @@ function process_skiller_messages()
 
 						-- __continuous_reset = true
 						-- __last_exclusive_controller = __skiller_if->exclusive_controller()
-						skiller_if:set_exclusive_controller(0)
+						skiller_if:set_exclusive_controller("")
 						write_skiller_if = true
-				 elseif skiller_if:exclusive_controller() ~= 0 then
+				 elseif skiller_if:exclusive_controller() ~= "" then
 						print_warn("%s tried to release exclusive control, but it's not the controller",
 											 m:sender_thread_name())						
 				 end
 
 			elseif mtype == "ExecSkillMessage" then
-				 if skiller_if:exclusive_controller() == 0 or skiller_if:exclusive_controller() == m:source_id():get_string() then
+				 if skiller_if:exclusive_controller() == "" or skiller_if:exclusive_controller() == m:source_id():get_string() then
 						if skill_enqueued then
 							 print_warn("More than one skill string enqueued, ignoring previous string (%s).",
                                                                     skiller_if:skill_string())
 						end
-						if skiller_if:exclusive_controller() == 0 then
+						if skiller_if:exclusive_controller() == "" then
 							 if m:sender_thread_name() == "Unknown" then
 									print_debug("Remote executes '%s' without any exclusive controller",
 															m:skill_string())

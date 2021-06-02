@@ -179,7 +179,7 @@ ClipsAgentThread::loop()
 	if (!cfg_skill_sim_) {
 		skiller_if_->read();
 
-		if ((skiller_if_->exclusive_controller() != skiller_if_->serial())
+		if ((skiller_if_->exclusive_controller() != skiller_if_->serial().get_string())
 		    && skiller_if_->has_writer()) {
 			if (ctrl_recheck_) {
 				logger->log_info(name(), "Acquiring exclusive skiller control");
