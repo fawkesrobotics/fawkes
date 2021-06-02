@@ -28,7 +28,8 @@ PRESUBDIRS = interfaces
 
 LIBS_realsense2 = m fawkescore fawkesutils fawkesaspects fawkesbaseapp \
                       fawkesblackboard fawkesinterface fvutils \
-                      fawkespcl_utils SwitchInterface CameraControlInterface
+                      fawkespcl_utils SwitchInterface CameraControlInterface \
+		      Realsense2Interface
 
 OBJS_realsense2 = realsense2_plugin.o realsense2_thread.o 
 
