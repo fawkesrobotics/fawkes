@@ -89,7 +89,6 @@ function process_skiller_messages()
 	 
 	 while not skiller_if:msgq_empty() do
 			local m = skiller_if:msgq_first()
-      print_info("Received message, sender: %s, source: %s", m:sender_id():get_string(), m:source_id():get_string())
 			local mtype = m:type()
 			if mtype == "AcquireControlMessage" then
 				 if skiller_if:exclusive_controller() == "" then
