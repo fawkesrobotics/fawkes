@@ -32,7 +32,7 @@ public:
 	~Uuid() noexcept;
 	Uuid(const Uuid &other) noexcept;
 	Uuid(Uuid &&other) noexcept;
-	Uuid(const char *string);
+	explicit Uuid(const char *string);
 	Uuid &      operator=(const Uuid &other) noexcept;
 	Uuid &      operator=(Uuid &&other) noexcept;
 	std::string get_string() const;
