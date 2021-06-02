@@ -95,10 +95,6 @@ BlackBoardInterfaceProxy::BlackBoardInterfaceProxy(FawkesNetworkClient * client,
 	ih->num_readers        = num_readers_;
 	ih->refcount           = 1;
 
-	LibLogger::log_debug("BlackBoardInterfaceProxy",
-	                     "Old serial: %s, new serial: %s",
-	                     interface->serial().get_string().c_str(),
-	                     instance_serial_.get_string().c_str());
 	interface->set_instance_serial(instance_serial_);
 	interface->set_memory(0, mem_chunk_, data_chunk_);
 	interface->set_mediators(this, this);
@@ -349,12 +345,9 @@ BlackBoardInterfaceProxy::transmit(Message *message)
 	bb_imessage_msg_t *dm           = (bb_imessage_msg_t *)payload;
 	dm->serial                      = interface_->serial();
 	dm->source                      = message->source_id();
-	LibLogger::log_debug("BlackBoardInterfaceProxy",
-	                     "Transmitting from sender %s",
-	                     dm->serial.get_string().c_str());
-	unsigned int msgid = next_msg_id();
-	dm->msgid          = htonl(msgid);
-	dm->hops           = htonl(message->hops());
+	unsigned int msgid              = next_msg_id();
+	dm->msgid                       = htonl(msgid);
+	dm->hops                        = htonl(message->hops());
 	message->set_id(msgid);
 	strncpy(dm->msg_type, message->type(), INTERFACE_MESSAGE_TYPE_SIZE_ - 1);
 	dm->data_size = htonl(message->datasize());

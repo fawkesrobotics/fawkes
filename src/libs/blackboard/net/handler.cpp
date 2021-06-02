@@ -289,10 +289,6 @@ BlackBoardNetworkHandler::loop()
 			bb_imessage_msg_t *mm        = (bb_imessage_msg_t *)payload;
 			Uuid               mm_serial = mm->serial;
 			Uuid               mm_source = mm->source;
-			LibLogger::log_debug("BlackBoardNetworkHandler",
-			                     "Received message from sender %s, source %s",
-			                     mm_serial.get_string().c_str(),
-			                     mm_source.get_string().c_str());
 			if (interfaces_.find(mm_serial) != interfaces_.end()) {
 				if (!interfaces_[mm_serial]->is_writer()) {
 					try {
