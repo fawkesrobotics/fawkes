@@ -18,6 +18,7 @@
   <data>
     <comment>
     </comment>
+    <field type="uint32" name="msgid">Last processed message.</field>
     <field type="Effect" name="effect">Currently active effect.</field>
     <field type="bool"   name="effect_supported">Are effects supported?</field>
     <field type="uint32" name="zoom">Current zoom setting.</field>
