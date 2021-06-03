@@ -110,17 +110,17 @@ Realsense2Thread::loop()
 	}
 
 	// take picture
-	if (enable_camera_ && read_camera_control() != "") {
+	if (enable_camera_ && read_camera_control()) {
 		if (rs_rgb_pipe_->poll_for_frames(&rs_rgb_data_)) {
 			error_counter_               = 0;
 			rs2::video_frame color_frame = rs_rgb_data_.first(RS2_STREAM_COLOR, RS2_FORMAT_RGB8);
-			image_name_ =
-			  rgb_path_ + read_camera_control() + color_frame.get_profile().stream_name() + ".png";
+			image_name_ = rgb_path_ + obj_name_ + color_frame.get_profile().stream_name() + ".png";
 			png_writer_.set_filename(image_name_.c_str());
 			png_writer_.set_dimensions(color_frame.get_width(), color_frame.get_height());
 			png_writer_.set_buffer(firevision::RGB, (unsigned char *)color_frame.get_data());
 			png_writer_.write();
 			camera_if_->set_image_name(image_name_.c_str());
+			camera_if_->set_msgid(camera_if_last_msgid_);
 			camera_if_->write();
 			logger->log_info(name(), "Saving image to %s", image_name_.c_str());
 		} else {
@@ -423,10 +423,10 @@ Realsense2Thread::pixel_to_xyz()
 	float            xyz1[3];
 	float            xyz2[3];
 	float            xyz3[3];
-	float            x = 0;
-	float            y = 0;
-	float            z = 0;
-	int              counter;
+	float            x       = 0;
+	float            y       = 0;
+	float            z       = 0;
+	int              counter = 0;
 
 	// get average xyz from (bounding box/2), throw away xyz = 0,0,0
 	int qwidth  = int(bb[2] / 4);
@@ -469,6 +469,8 @@ Realsense2Thread::pixel_to_xyz()
 			}
 		}
 	}
+	if (counter == 0)
+		counter++;
 	x = x / counter;
 	y = y / counter;
 	z = z / counter;
@@ -502,23 +504,25 @@ Realsense2Thread::read_switch()
 
 /**
  * Read the CameraControl interface to take a picture.
- * @return object name.
+ * @return new msg recevied
  */
-std::string
+bool
 Realsense2Thread::read_camera_control()
 {
-	std::string object_name_ = "";
+	bool save = false;
 	while (!camera_if_->msgq_empty()) {
 		if (camera_if_->msgq_first_is<CameraControlInterface::SaveImageMessage>()) {
 			CameraControlInterface::SaveImageMessage *msg =
 			  camera_if_->msgq_first<CameraControlInterface::SaveImageMessage>();
-			std::string object_name_(msg->image_name());
+			obj_name_             = std::string(msg->image_name());
+			camera_if_last_msgid_ = msg->id();
+			save                  = true;
 		} else {
 			logger->log_warn(name(), "Unknown message received");
 		}
 		camera_if_->msgq_pop();
 	}
-	return object_name_;
+	return save;
 }
 
 /**

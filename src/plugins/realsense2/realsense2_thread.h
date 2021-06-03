@@ -65,7 +65,6 @@ public:
 private:
 	bool             start_camera();
 	bool             get_camera(rs2::device &dev);
-	bool             read_bounding_box(std::vector<int> &bb);
 	void             enable_depth_stream();
 	void             disable_depth_stream();
 	void             stop_camera();
@@ -81,8 +80,9 @@ protected:
 	}
 
 protected:
-	bool        read_switch();
-	std::string read_camera_control();
+	bool read_switch();
+	bool read_camera_control();
+	bool read_bounding_box(std::vector<int> &bb);
 
 private:
 	fawkes::SwitchInterface *       switch_if_;
@@ -117,10 +117,12 @@ private:
 	std::string rgb_path_;
 	std::string image_name_;
 	std::string camera_if_name_;
+	std::string obj_name_;
 	uint        frame_rate_;
 	int         rgb_frame_rate_;
 	int         rgb_width_;
 	int         rgb_height_;
+	int         camera_if_last_msgid_;
 	float       laser_power_;
 	bool        camera_running_ = false;
 	bool        enable_camera_  = true;
