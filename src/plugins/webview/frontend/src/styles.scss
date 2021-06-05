@@ -1,16 +1,14 @@
-
 // Copyright  2018  Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
 // Copyright  2017  The Kubernetes Authors
 // License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-
 /* You can add global styles to this file, and also import other style files */
-@import '~@angular/material/prebuilt-themes/deeppurple-amber.css';
+@import "~@angular/material/prebuilt-themes/deeppurple-amber.css";
 @import "~material-design-icons/iconfont/material-icons.css";
 @import "~roboto-fontface/css/roboto/roboto-fontface.css";
 
-@import './variables';
-@import './theming';
+@import "./variables";
+@import "./theming";
 
 html,
 body {
@@ -32,7 +30,7 @@ body {
 }
 
 .mat-progress-spinner-center {
-	margin: auto;
+  margin: auto;
 }
 
 .mat-card {
@@ -74,7 +72,7 @@ body {
 }
 
 .mat-cell {
-  margin: (.5 * $baseline-grid) 0 !important;
+  margin: (0.5 * $baseline-grid) 0 !important;
 
   &:not(:first-child) {
     &:not(:last-child) {
@@ -94,8 +92,8 @@ body {
   flex-grow: 2 !important;
 }
 
-[class^='mat-column-action'],
-[class*='mat-column-action'] {
+[class^="mat-column-action"],
+[class*="mat-column-action"] {
   flex: 0 0 ($baseline-grid * 5) !important;
 }
 
@@ -111,4 +109,8 @@ body {
 
 .mat-paginator-container {
   padding-right: 3 * $baseline-grid !important;
+}
+
+.snackbar-red-color {
+  color: rgb(245, 53, 53);
 }

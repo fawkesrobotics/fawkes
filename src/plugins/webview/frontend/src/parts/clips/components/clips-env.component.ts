@@ -1,32 +1,31 @@
-
 // Copyright  2018  Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
 // License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
-import { Router, ActivatedRoute, ParamMap } from '@angular/router';
-import { MatTableDataSource } from '@angular/material/table';
+import { Component, OnInit, OnDestroy, ViewChild } from "@angular/core";
+import { Router, ActivatedRoute, ParamMap } from "@angular/router";
+import { MatTableDataSource } from "@angular/material/table";
+import { MatSnackBar } from "@angular/material/snack-bar";
 
-import { BackendConfigurationService } from '../../../services/backend-config/backend-config.service';
-import { CardListFilterComponent } from '../../../components/filter/component';
-import { ClipsApiService } from '../services/api.service';
+import { BackendConfigurationService } from "../../../services/backend-config/backend-config.service";
+import { CardListFilterComponent } from "../../../components/filter/component";
+import { ClipsApiService } from "../services/api.service";
 
-import { interval } from 'rxjs';
+import { interval } from "rxjs";
 
 @Component({
-  selector: 'ff-clips-env',
-  templateUrl: './clips-env.component.html',
-  styleUrls: ['./clips-env.component.scss']
+  selector: "ff-clips-env",
+  templateUrl: "./clips-env.component.html",
+  styleUrls: ["./clips-env.component.scss"],
 })
 export class ClipsEnvComponent implements OnInit, OnDestroy {
-
   private backend_subscription = null;
 
-  displayed_columns = ['index', 'formatted'];
+  displayed_columns = ["index", "formatted"];
 
-  env = '';
+  env = "";
   auto_refresh_subscription = null;
   loading = false;
-  zero_message = 'No facts received.';
+  zero_message = "No facts received.";
   font_large = false;
 
   envs: string[] = [];
@@ -34,35 +33,38 @@ export class ClipsEnvComponent implements OnInit, OnDestroy {
   data_source = new MatTableDataSource();
   regExpr: any;
 
-  @ViewChild(CardListFilterComponent, {static: true}) private readonly cardFilter_: CardListFilterComponent;
+  @ViewChild(CardListFilterComponent, { static: true })
+  private readonly cardFilter_: CardListFilterComponent;
 
-  constructor(private readonly api_service: ClipsApiService,
-              private route: ActivatedRoute,
-              private router: Router,
-              private backendcfg: BackendConfigurationService) {}
+  constructor(
+    private readonly api_service: ClipsApiService,
+    private route: ActivatedRoute,
+    private router: Router,
+    private backendcfg: BackendConfigurationService,
+    private snack_bar: MatSnackBar
+  ) {}
 
   ngOnInit() {
-
-    this.route.paramMap
-      .subscribe((params: ParamMap) => {
-        this.env = params.get('env');
-        this.cardFilter_.clearInput();
-        this.refresh();
-      });
-
-    this.refresh_envs();
-
-    this.cardFilter_.filterEvent
-      .subscribe((query: string) => {
-        this.apply_filter(query);
-      });
-
-    this.backend_subscription = this.backendcfg.backend_changed.subscribe((b) => {
-      this.refresh_envs();
+    this.route.paramMap.subscribe((params: ParamMap) => {
+      this.env = params.get("env");
+      this.cardFilter_.clearInput();
       this.refresh();
     });
 
-    this.data_source.filterPredicate = this.regExprFilter()
+    this.refresh_envs();
+
+    this.cardFilter_.filterEvent.subscribe((query: string) => {
+      this.apply_filter(query);
+    });
+
+    this.backend_subscription = this.backendcfg.backend_changed.subscribe(
+      (b) => {
+        this.refresh_envs();
+        this.refresh();
+      }
+    );
+
+    this.data_source.filterPredicate = this.regExprFilter();
   }
 
   ngOnDestroy() {
@@ -72,46 +74,44 @@ export class ClipsEnvComponent implements OnInit, OnDestroy {
   }
 
   // Custom function for the MatTableDataSource filter predicate
-  regExprFilter()
-  { 
+  regExprFilter() {
     return (data: any, filter: string) => {
-        try {
-          return this.regExpr.test(data.formatted)
-        } catch (e) {
-          return false
-        }
+      try {
+        return this.regExpr.test(data.formatted);
+      } catch (e) {
+        return false;
       }
+    };
   }
 
   refresh() {
     this.loading = true;
-    this.zero_message = 'Retrieving facts';
+    this.zero_message = "Retrieving facts";
 
-    this.api_service.get_facts(this.env, false, true)
-      .subscribe(
-        (facts) => {
-          this.data_source.data = facts;
-          if (facts.length === 0) {
-            this.zero_message = 'No facts in fact base';
-          }
-          this.loading = false;
-        },
-        (err) => {
-          this.data_source.data = [];
-          if (err.status === 0) {
-            this.zero_message = 'API server unavailable. Robot down?';
-          } else {
-            this.zero_message = `Failed to retrieve facts: ${err.error}`;
-          }
-          this.loading = false;
+    this.api_service.get_facts(this.env, false, true).subscribe(
+      (facts) => {
+        this.data_source.data = facts;
+        if (facts.length === 0) {
+          this.zero_message = "No facts in fact base";
         }
-      );
+        this.loading = false;
+      },
+      (err) => {
+        this.data_source.data = [];
+        if (err.status === 0) {
+          this.zero_message = "API server unavailable. Robot down?";
+        } else {
+          this.zero_message = `Failed to retrieve facts: ${err.error}`;
+        }
+        this.loading = false;
+      }
+    );
   }
 
   refresh_envs() {
     this.api_service.list_environments().subscribe(
       (envs) => {
-        this.envs = envs.map(env => env.name);
+        this.envs = envs.map((env) => env.name);
       },
       (err) => {
         this.envs = [this.env];
@@ -120,11 +120,12 @@ export class ClipsEnvComponent implements OnInit, OnDestroy {
   }
 
   private enable_autorefresh() {
-    if (this.auto_refresh_subscription) {  return; }
-    this.auto_refresh_subscription =
-      interval(2000).subscribe((num) => {
-        this.refresh();
-      });
+    if (this.auto_refresh_subscription) {
+      return;
+    }
+    this.auto_refresh_subscription = interval(2000).subscribe((num) => {
+      this.refresh();
+    });
     this.refresh();
   }
 
@@ -135,13 +136,12 @@ export class ClipsEnvComponent implements OnInit, OnDestroy {
     }
   }
 
-
-  // Helper function to automatically escape special characters 
+  // Helper function to automatically escape special characters
   private escapeRegExp(input) {
     // Escapes every special character by adding \ before it
-    let escapedInput = input.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+    let escapedInput = input.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
     // Allows "anything" search, as it was escaped previously
-    let formattedInput = escapedInput.replaceAll('\\*', '([\\s\\S]*?)');    
+    let formattedInput = escapedInput.replaceAll("\\*", "([\\s\\S]*?)");
     return formattedInput;
   }
 
@@ -161,10 +161,25 @@ export class ClipsEnvComponent implements OnInit, OnDestroy {
     filter_value = filter_value.trim();
     // MatTableDataSource defaults to lowercase matches
     filter_value = filter_value.toLowerCase();
-    // Update regex if there is a provided input 
-    if (filter_value) {
-      filter_value = this.escapeRegExp(filter_value)
+    // Check for regex syntax
+    if (
+      filter_value &&
+      (filter_value.charAt(0) !== "/" ||
+        filter_value.charAt(filter_value.length - 1) !== "/")
+    ) {
+      // Uses the default filtering with '*' an input option
+      filter_value = this.escapeRegExp(filter_value);
       this.regExpr = new RegExp(filter_value);
+    } else {
+      // Uses the provided regex
+      try {
+        this.regExpr = new RegExp(filter_value);
+      } catch (e) {
+        this.snack_bar.open(`Regular expression syntax error`, "Dismiss", {
+          duration: 3000,
+          panelClass: "snackbar-red-color",
+        });
+      }
     }
     this.data_source.filter = filter_value;
   }
