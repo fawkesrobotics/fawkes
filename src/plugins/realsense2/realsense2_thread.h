@@ -63,13 +63,13 @@ public:
 	virtual void loop();
 
 private:
-	bool             start_camera();
-	bool             get_camera(rs2::device &dev);
-	void             enable_depth_stream();
-	void             disable_depth_stream();
-	void             stop_camera();
-	void             pixel_to_xyz();
-	rs2::depth_frame align_rgb_to_depth();
+	bool start_camera();
+	bool get_camera(rs2::device &dev);
+	void enable_depth_stream();
+	void disable_depth_stream();
+	void stop_camera();
+	void pixel_to_xyz();
+	void align_rgb_to_depth(rs2::depth_frame &input_frame);
 
 	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
 protected:
@@ -109,6 +109,8 @@ private:
 	rs2::frameset  rs_rgb_data_;
 	rs2_intrinsics intrinsics_;
 	rs2_intrinsics rgb_intrinsics_;
+	rs2_extrinsics extrinsics_;
+	rs2_extrinsics rgb_extrinsics;
 
 	float       camera_scale_;
 	std::string frame_id_;

@@ -254,6 +254,11 @@ Realsense2Thread::start_camera()
 		                 rgb_intrinsics_.width,
 		                 rgb_frame_rate_);
 
+		extrinsics_ =
+		  sensor.get_stream_profiles()[15].get_extrinsics_to(rgb_sensor.get_stream_profiles()[81]);
+		rgb_extrinsics =
+		  rgb_sensor.get_stream_profiles()[81].get_extrinsics_to(sensor.get_stream_profiles()[15]);
+
 		return true;
 
 	} catch (const rs2::error &e) {
@@ -415,70 +420,139 @@ Realsense2Thread::stop_camera()
 void
 Realsense2Thread::pixel_to_xyz()
 {
-	rs2::depth_frame tmp_frm      = align_rgb_to_depth();
-	const uint16_t * image        = reinterpret_cast<const uint16_t *>(tmp_frm.get_data());
-	float            scaled_depth = camera_scale_ * (static_cast<float>(*image));
-	float            center[2]    = {static_cast<float>(bb[0]), static_cast<float>(bb[1])};
-	float            xyz0[3];
-	float            xyz1[3];
-	float            xyz2[3];
-	float            xyz3[3];
-	float            x       = 0;
-	float            y       = 0;
-	float            z       = 0;
-	int              counter = 0;
+	try {
+		rs2::depth_frame tmp_frm = rs2::depth_frame::frame();
+		//while (not rs_pipe_->poll_for_frames(&rs_data_)) {
+		//}
+		//tmp_frm      = rs_data_.first(RS2_STREAM_DEPTH);
+		align_rgb_to_depth(tmp_frm);
 
-	// get average xyz from (bounding box/2), throw away xyz = 0,0,0
-	int qwidth  = int(bb[2] / 4);
-	int qheight = int(bb[3] / 4);
-	for (int i = 0; i < qwidth; i++) {
-		for (int j = 0; j < qheight; j++) {
-			float pixel0[2] = {center[0] + i, center[1] + j};
-			float pixel1[2] = {center[0] + i, center[1] - j};
-			float pixel2[2] = {center[0] - i, center[1] + j};
-			float pixel3[2] = {center[0] - i, center[1] - j};
-			rs2_deproject_pixel_to_point(xyz0, &intrinsics_, pixel0, scaled_depth);
-			rs2_deproject_pixel_to_point(xyz1, &intrinsics_, pixel1, scaled_depth);
-			rs2_deproject_pixel_to_point(xyz2, &intrinsics_, pixel2, scaled_depth);
-			rs2_deproject_pixel_to_point(xyz3, &intrinsics_, pixel3, scaled_depth);
+		float x       = 0;
+		float y       = 0;
+		float z       = 0;
+		int   counter = 0;
 
-			// add up
-			if (xyz0[0] != 0. && xyz0[1] != 0. && xyz0[2] != 0.) {
-				x = x + xyz0[0];
-				y = y + xyz0[1];
-				z = z + xyz0[2];
-				counter++;
-			}
-			if (xyz1[0] != 0. && xyz1[1] != 0. && xyz1[2] != 0.) {
-				x = x + xyz1[0];
-				y = y + xyz1[1];
-				z = z + xyz1[2];
-				counter++;
-			}
-			if (xyz2[0] != 0. && xyz2[1] != 0. && xyz2[2] != 0.) {
-				x = x + xyz2[0];
-				y = y + xyz2[1];
-				z = z + xyz2[2];
-				counter++;
-			}
-			if (xyz3[0] != 0. && xyz3[1] != 0. && xyz3[2] != 0.) {
-				x = x + xyz3[0];
-				y = y + xyz3[1];
-				z = z + xyz3[2];
-				counter++;
+		// get average xyz from (bounding box/2), throw away xyz = 0,0,0
+		int qwidth  = int(bb[2] / 4);
+		int qheight = int(bb[3] / 4);
+		for (int i = 0; i < qwidth; i++) {
+			for (int j = 0; j < qheight; j++) {
+				const uint16_t *image        = reinterpret_cast<const uint16_t *>(tmp_frm.get_data());
+				float           scaled_depth = camera_scale_ * (static_cast<float>(*image));
+				float           center[2]    = {static_cast<float>(bb[0]), static_cast<float>(bb[1])};
+				float           depth_p0[2];
+				float           depth_p1[2];
+				float           depth_p2[2];
+				float           depth_p3[2];
+				float           xyz0[3];
+				float           xyz1[3];
+				float           xyz2[3];
+				float           xyz3[3];
+				float           pixel0[2] = {center[0] + i, center[1] + j};
+				float           pixel1[2] = {center[0] + i, center[1] - j};
+				float           pixel2[2] = {center[0] - i, center[1] + j};
+				float           pixel3[2] = {center[0] - i, center[1] - j};
+				rs2_project_color_pixel_to_depth_pixel(depth_p0,
+				                                       image,
+				                                       camera_scale_,
+				                                       0.0,
+				                                       1.0,
+				                                       &intrinsics_,
+				                                       &rgb_intrinsics_,
+				                                       &extrinsics_,
+				                                       &rgb_extrinsics,
+				                                       pixel0);
+
+				logger->log_warn(name(), "d0 x: %f, y: %f", depth_p0[0], depth_p0[1]);
+
+				rs2_project_color_pixel_to_depth_pixel(depth_p1,
+				                                       image,
+				                                       camera_scale_,
+				                                       0.0,
+				                                       1.0,
+				                                       &intrinsics_,
+				                                       &rgb_intrinsics_,
+				                                       &extrinsics_,
+				                                       &rgb_extrinsics,
+				                                       pixel1);
+
+				logger->log_warn(name(), "d1 x: %f, y: %f", depth_p1[0], depth_p1[1]);
+
+				rs2_project_color_pixel_to_depth_pixel(depth_p2,
+				                                       image,
+				                                       camera_scale_,
+				                                       0.0,
+				                                       1.0,
+				                                       &intrinsics_,
+				                                       &rgb_intrinsics_,
+				                                       &extrinsics_,
+				                                       &rgb_extrinsics,
+				                                       pixel2);
+
+				logger->log_warn(name(), "d2 x: %f, y: %f", depth_p2[0], depth_p2[1]);
+
+				rs2_project_color_pixel_to_depth_pixel(depth_p3,
+				                                       image,
+				                                       camera_scale_,
+				                                       0.0,
+				                                       1.0,
+				                                       &intrinsics_,
+				                                       &rgb_intrinsics_,
+				                                       &extrinsics_,
+				                                       &rgb_extrinsics,
+				                                       pixel3);
+
+				logger->log_warn(name(), "d3 x: %f, y: %f", depth_p3[0], depth_p3[1]);
+
+				rs2_deproject_pixel_to_point(xyz0, &intrinsics_, depth_p0, scaled_depth);
+				rs2_deproject_pixel_to_point(xyz1, &intrinsics_, depth_p1, scaled_depth);
+				rs2_deproject_pixel_to_point(xyz2, &intrinsics_, depth_p2, scaled_depth);
+				rs2_deproject_pixel_to_point(xyz3, &intrinsics_, depth_p3, scaled_depth);
+
+				logger->log_warn(name(), "0 x: %f, y: %f, z: %f", xyz0[0], xyz0[1], xyz0[2]);
+				logger->log_warn(name(), "1 x: %f, y: %f, z: %f", xyz1[0], xyz1[1], xyz1[2]);
+				logger->log_warn(name(), "2 x: %f, y: %f, z: %f", xyz2[0], xyz2[1], xyz2[2]);
+				logger->log_warn(name(), "3 x: %f, y: %f, z: %f", xyz3[0], xyz3[1], xyz3[2]);
+				// add up
+				if (xyz0[0] != 0. && xyz0[1] != 0. && xyz0[2] != 0.) {
+					x = x + xyz0[0];
+					y = y + xyz0[1];
+					z = z + xyz0[2];
+					counter++;
+				}
+				if (xyz1[0] != 0. && xyz1[1] != 0. && xyz1[2] != 0.) {
+					x = x + xyz1[0];
+					y = y + xyz1[1];
+					z = z + xyz1[2];
+					counter++;
+				}
+				if (xyz2[0] != 0. && xyz2[1] != 0. && xyz2[2] != 0.) {
+					x = x + xyz2[0];
+					y = y + xyz2[1];
+					z = z + xyz2[2];
+					counter++;
+				}
+				if (xyz3[0] != 0. && xyz3[1] != 0. && xyz3[2] != 0.) {
+					x = x + xyz3[0];
+					y = y + xyz3[1];
+					z = z + xyz3[2];
+					counter++;
+				}
 			}
 		}
+		if (counter == 0)
+			counter++;
+		x = x / counter;
+		y = y / counter;
+		z = z / counter;
+		rs_if_->set_translation(0, x);
+		rs_if_->set_translation(1, y);
+		rs_if_->set_translation(2, z);
+		rs_if_->set_msgid(bb[4]);
+		rs_if_->write();
+	} catch (std::exception &exc) {
+		logger->log_error(name(), "%s", exc.what());
 	}
-	if (counter == 0)
-		counter++;
-	x = x / counter;
-	y = y / counter;
-	z = z / counter;
-	rs_if_->set_translation(0, x);
-	rs_if_->set_translation(1, y);
-	rs_if_->set_translation(2, z);
-	rs_if_->set_msgid(bb[4]);
-	rs_if_->write();
 }
 
 /**
@@ -555,11 +629,12 @@ Realsense2Thread::read_bounding_box(std::vector<int> &bb)
  * Align the depth and color stream to get the 3D coordinates from pixels
  * @return aligned depth frame
  */
-rs2::depth_frame
-Realsense2Thread::align_rgb_to_depth()
+void
+Realsense2Thread::align_rgb_to_depth(rs2::depth_frame &input_frame)
 {
 	rs2::align    align(RS2_STREAM_COLOR);
-	rs2::frameset frameset  = rs_rgb_pipe_->wait_for_frames();
-	auto          processed = align.process(frameset);
-	return processed.get_depth_frame();
+	rs2::frameset frameset = rs2::frameset();
+	while (not rs_pipe_->poll_for_frames(&frameset)) {}
+	auto processed = align.process(frameset);
+	input_frame    = processed.get_depth_frame();
 }
