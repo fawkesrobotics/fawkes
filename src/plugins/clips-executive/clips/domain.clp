@@ -412,14 +412,27 @@
   ?predicate <- (grounded-pddl-predicate 
                   (is-satisfied ?is-sat) 
                   (predicate-id ?id)
-                  (param-values $?params& :
-                    (and (= (length$ ?params) 2)
-                       (neq ?is-sat (eq (nth$ 1 ?params) (nth$ 2 ?params))))
-                  ))
+                  (param-values ?p1 ?p2&:(and 
+                    (eq ?p1 ?p2)
+                    (neq ?is-sat (eq ?p1 ?p2))))
+                 )
   ?base <- (pddl-predicate (id ?id) (equality TRUE))
 =>
-  (modify ?predicate (is-satisfied (eq (nth$ 1 ?params) (nth$ 2 ?params))))
+  (modify ?predicate (is-satisfied TRUE))
 )
+(defrule domain-check-if-predicate-equality-is-unsatisfied
+  (declare (salience ?*SALIENCE-DOMAIN-CHECK*))
+  ?predicate <- (grounded-pddl-predicate
+                  (is-satisfied ?is-sat)
+                  (predicate-id ?id)
+                  (param-values ?p1 ?p2&:(and 
+                    (neq ?p1 ?p2)
+                    (eq ?is-sat (neq ?p1 ?p2))))
+                 )
+  ?base <- (pddl-predicate (id ?id) (equality TRUE))
+=>
+  (modify ?predicate (is-satisfied FALSE))
+ ) 
 
 (defrule domain-check-if-predicate-is-unsatisfied
   (declare (salience ?*SALIENCE-DOMAIN-CHECK*))
