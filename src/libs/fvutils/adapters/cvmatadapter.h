@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  iplimage.h - Helper to convert FireVision buffers to IplImages for OpenCV
+ *  cvmatadapter.h - Helper to convert FireVision buffers to cv::Mat for OpenCV
  *
- *  Created: Sat Apr 19 17:28:58 2008 (GO2008, day 1)
- *  Copyright  2008  Tim Niemueller [www.niemueller.de]
+ *  Created: Tue May 11 15:57:58 2021
+ *  Copyright  2021  Sebastian Eltester
  *
  ****************************************************************************/
 
@@ -21,24 +21,24 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef _FIREVISION_FVUTILS_ADAPTERS_IPLIMAGE_H_
-#define _FIREVISION_FVUTILS_ADAPTERS_IPLIMAGE_H_
+#ifndef CVMATADAPTER_H
+#define CVMATADAPTER_H
 
 #include <fvutils/base/roi.h>
 
-typedef struct _IplImage IplImage;
+#include <opencv2/opencv.hpp>
 
 namespace firevision {
 
-class IplImageAdapter
+class CvMatAdapter
 {
 public:
-	static void convert_image_bgr(unsigned char *buffer, IplImage *image);
-	static void convert_image_yuv422_planar(IplImage *image, unsigned char *buffer);
+	static void convert_image_bgr(unsigned char *buffer, cv::Mat &image);
+	static void convert_image_yuv422_planar(cv::Mat &image, unsigned char *buffer);
 
 	//static IplImage *  create_image_from_roi(unsigned char *buffer, ROI *roi);
 };
 
 } // end namespace firevision
 
-#endif
+#endif // CVMATADAPTER_H

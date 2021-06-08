@@ -27,18 +27,18 @@
 #include <cams/factory.h>
 #include <classifiers/faces.h>
 #include <filters/roidraw.h>
-#include <fvutils/adapters/iplimage.h>
+#include <fvutils/adapters/cvmatadapter.h>
 #include <fvutils/color/colorspaces.h>
 #include <fvutils/draw/drawer.h>
 #include <fvutils/readers/jpeg.h>
 #include <fvwidgets/image_display.h>
-#include <opencv/cv.h>
 #include <utils/system/argparser.h>
 #include <utils/time/tracker.h>
 
 #include <SDL.h>
 #include <cstdio>
 #include <cstdlib>
+#include <opencv2/opencv.hpp>
 
 using namespace fawkes;
 
@@ -115,11 +115,10 @@ main(int argc, char **argv)
 		unsigned int ttc_recognition = tt->add_class("Face recognition");
 		unsigned int loop_count      = 0;
 
-		IplImage *image =
-		  cvCreateImage(cvSize(camera->pixel_width(), camera->pixel_height()), IPL_DEPTH_8U, 3);
+		cv::Mat image = cv::Mat(cv::Size(camera->pixel_width(), camera->pixel_height()), CV_8UC1, 3);
 
-		IplImage *scaled_image =
-		  cvCreateImage(cvSize(camera->pixel_width() / 2, camera->pixel_height() / 2), IPL_DEPTH_8U, 3);
+		cv::Mat scaled_image =
+		  cv::Mat(cv::Size(camera->pixel_width() / 2, camera->pixel_height() / 2), CV_8UC1, 3);
 
 		FacesClassifier *classifier = new FacesClassifier(cascade_file,
 		                                                  camera->pixel_width(),
@@ -155,8 +154,8 @@ main(int argc, char **argv)
 						camera->capture();
 
 						if (camera->buffer() != NULL) {
-							IplImageAdapter::convert_image_bgr(camera->buffer(), image);
-							cvResize(image, scaled_image, CV_INTER_LINEAR);
+							CvMatAdapter::convert_image_bgr(camera->buffer(), image);
+							image.resize(scaled_image.rows, cv::INTER_LINEAR);
 							memcpy(display_buffer, camera->buffer(), camera->buffer_size());
 
 							tt->ping_start(ttc_recognition);
@@ -204,8 +203,8 @@ main(int argc, char **argv)
 		delete display;
 		delete drawer;
 		free(display_buffer);
-		cvReleaseImage(&image);
-		cvReleaseImage(&scaled_image);
+		image.release();
+		scaled_image.release();
 		delete tt;
 	}
 

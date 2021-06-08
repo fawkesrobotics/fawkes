@@ -117,23 +117,10 @@ ifeq ($(HAVE_OPENCV),1)
   VERSION_SPLITTED_OPENCV = $(call split,.,$(VERSION_OPENCV))
   VERSION_MAJOR_OPENCV    = $(word 1,$(VERSION_SPLITTED_OPENCV))
   VERSION_MINOR_OPENCV    = $(word 2,$(VERSION_SPLITTED_OPENCV))
-  ifeq ($(VERSION_MAJOR_OPENCV),4)
-    # We do not support opencv4 yet.
-    HAVE_OPENCV=0
-  endif
   CFLAGS_OPENCV      = -DHAVE_OPENCV -Wno-deprecated-declarations \
 		       $(shell $(PKGCONFIG) --cflags 'opencv$(OPENCV_VERSION_SUFFIX)') \
 		       $(CFLAG_W_NO_UNUSED_LOCAL_TYPEDEFS)
-  LDFLAGS_OPENCV     = $(shell $(PKGCONFIG) --libs-only-L 'opencv$(OPENCV_VERSION_SUFFIX)')
-  ifeq ($(filter-out 2.0 2.1,$(VERSION_MAJOR_OPENCV).$(VERSION_MINOR_OPENCV)),)
-    LDFLAGS_OPENCV      += -lcxcore -lcv
-    LDFLAGS_OPENCV_GUI   = -lhighgui
-    LDFLAGS_OPENCV_CONT  = -lopencv_contrib
-  else
-    LDFLAGS_OPENCV      += -lopencv_core -lopencv_imgproc -lopencv_ml
-    LDFLAGS_OPENCV_GUI   = -lopencv_highgui
-    LDFLAGS_OPENCV_CONT  = -lopencv_contrib
-  endif
+  LDFLAGS_OPENCV     = $(shell $(PKGCONFIG) --libs 'opencv$(OPENCV_VERSION_SUFFIX)')
 endif
 
 ifeq ($(HAVE_LIBUSB),1)

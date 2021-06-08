@@ -1,9 +1,10 @@
 
+
 /***************************************************************************
- *  iplimage.cpp - Helper to convert FireVision buffers to IplImages for OpenCV
+ *  cvmatadapter.cpp - Helper to convert FireVision buffers to cv::Mat for OpenCV
  *
- *  Created: Sat Apr 19 17:33:00 2008 (GO2008, day 1)
- *  Copyright  2008  Tim Niemueller [www.niemueller.de]
+ *  Created: Tue May 11 15:57:58 2021
+ *  Copyright  2021  Sebastian Eltester
  *
  ****************************************************************************/
 
@@ -21,40 +22,38 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <fvutils/adapters/iplimage.h>
+#include <fvutils/adapters/cvmatadapter.h>
 #include <fvutils/color/conversions.h>
-#include <opencv/cv.h>
 
 #include <cstddef>
+#include <opencv2/opencv.hpp>
 
 namespace firevision {
 
-/** @class IplImageAdapter <fvutils/adapters/iplimage.h>
- * Adapter for OpenCV IplImages.
- * Conversion routines from FireVision buffers to OpenCV IplImages.
- * @author Tim Niemueller
+/** @class CvMatAdapter <fvutils/adapters/cvmatadapter.h>
+ * Adapter for OpenCV Mat.
+ * Conversion routines from FireVision buffers to OpenCV Mat.
+ * @author Sebastian Eltester
  */
 
-/** Convert image from buffer into IplImage.
+/** Convert image from buffer into cv::Mat.
  * @param buffer YUV422_PLANAR buffer of the same size as image
- * @param image IplImage the result will be written to in BGR notation
+ * @param image cv::Mat the result will be written to in BGR notation
  */
 void
-IplImageAdapter::convert_image_bgr(unsigned char *buffer, IplImage *image)
+CvMatAdapter::convert_image_bgr(unsigned char *buffer, cv::Mat &image)
 {
-	convert(
-	  YUV422_PLANAR, BGR, buffer, (unsigned char *)image->imageData, image->width, image->height);
+	convert(YUV422_PLANAR, BGR, buffer, (unsigned char *)image.data, image.cols, image.rows);
 }
 
-/** Convert image from IplImage into buffer.
- * @param image IplImage with BGR notation
- * @param buffer YUV422_PLANAR of the same size to write the converted IplImage
+/** Convert image from cv::Mat into buffer.
+ * @param image cv::MAt with BGR notation
+ * @param buffer YUV422_PLANAR of the same size to write the converted cv::Mat
  */
 void
-IplImageAdapter::convert_image_yuv422_planar(IplImage *image, unsigned char *buffer)
+CvMatAdapter::convert_image_yuv422_planar(cv::Mat &image, unsigned char *buffer)
 {
-	convert(
-	  BGR, YUV422_PLANAR, (unsigned char *)image->imageData, buffer, image->width, image->height);
+	convert(BGR, YUV422_PLANAR, (unsigned char *)image.data, buffer, image.cols, image.rows);
 }
 
 /* Creates a new IplImage for a ROI.
@@ -72,7 +71,7 @@ IplImageAdapter::create_image_from_roi(unsigned char *buffer, ROI *roi)
   unsigned int to_line = roi->start.y + roi->extend.height;
   unsigned char *
   for ( unsigned int h = roi->start.y; h < to_line; ++h) {
-    
+
   }
   convert(YUV422_PLANAR, BGR, _src, (unsigned char *)image_->imageData, _width, _height);
 
