@@ -292,7 +292,7 @@
                      (preconditions $?precons&:(= (length$ ?precons) 0)))
   (domain-operator (name ?operator-id) (param-names $?op-param-names&:(= (length$ ?param-names) (length$ ?op-param-names))))
   =>
-  (bind ?grounded-formulas (ground-pddl-formula ?operator-id "" ?param-names ?param-values ""))
+  (bind ?grounded-formulas (ground-pddl-formula ?operator-id ?param-names ?param-values ""))
   (modify ?p (preconditions ?grounded-formulas))
 )
 
