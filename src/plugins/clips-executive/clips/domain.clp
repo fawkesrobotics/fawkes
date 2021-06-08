@@ -304,7 +304,7 @@
   (grounded-pddl-formula (is-satisfied TRUE) (id ?formula-id))
   =>
   (modify ?p (executable TRUE))
-  (printout t crlf crlf crlf "Action " ?id " is executable based on " ?formula-id crlf crlf crlf)
+  (printout t "Action " ?id " is executable based on " ?formula-id crlf)
 )
 
 (defrule domain-check-if-action-precondition-is-unsatisfied
