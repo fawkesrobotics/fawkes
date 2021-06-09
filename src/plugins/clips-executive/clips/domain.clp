@@ -209,7 +209,7 @@
   (slot equality (type SYMBOL) (allowed-values TRUE FALSE) (default FALSE)) 
 
   (multislot param-names (type SYMBOL))
-  (multislot param-constants (default (create$)))
+  (multislot param-constants)
 )
 
 (deftemplate grounded-pddl-predicate
@@ -219,8 +219,7 @@
   (slot predicate-id (type SYMBOL)) ; reference to ungrounded base version
   (slot part-of (type SYMBOL)) ; reference to its grounded parent
 
-  (multislot param-values (default (create$)))
-  (slot grounded (type SYMBOL) (allowed-values TRUE FALSE) (default FALSE))
+  (multislot param-values)
   (slot is-satisfied (type SYMBOL) (allowed-values TRUE FALSE) (default FALSE))
 )
 
