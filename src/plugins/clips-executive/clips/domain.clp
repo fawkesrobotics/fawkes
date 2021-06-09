@@ -266,24 +266,19 @@
     ;recursively ground subformulas 
     (bind ?grounded-id (sym-cat "grounded-" ?formula:id "-" (gensym*)))
     (bind ?grounded-formulas (insert$ ?grounded-formulas 1 ?grounded-id) )
-    (if (eq ?grounded-parent-id "")
-      then 
-      (assert (grounded-pddl-formula (formula-id ?formula:id) 
-                                     (part-of ?grounded-id) 
-                                     (id ?grounded-id)))
-      else
-      (assert (grounded-pddl-formula (formula-id ?formula:id) 
-                                     (part-of ?grounded-parent-id)
-                                      (id ?grounded-id)))
-    )
+    
+    (assert (grounded-pddl-formula (formula-id ?formula:id) 
+                                   (part-of ?grounded-parent-id)
+                                   (id ?grounded-id)))
+    
     (ground-pddl-formula ?formula:id ?action-param-names ?action-param-values ?grounded-id)
     (ground-pddl-predicate ?formula:id ?action-param-names ?action-param-values ?grounded-id)
   )
   (return ?grounded-formulas) ; return grounded formula root ids for referencing
 )
 
-(defrule domain-ground-plan-actions
-  "Created grounded pddl formulas for the precondition of a plan-action if it 
+(defrule domain-ground-plan-action-precondition
+  "Create grounded pddl formulas for the precondition of a plan-action if it 
   has not been grounded yet and add a reference to the plan-action fact"
   (declare (salience ?*SALIENCE-DOMAIN-GROUND*))
   ?p <- (plan-action (id ?action-id) (action-name ?operator-id) 
@@ -291,7 +286,7 @@
                      (preconditions $?precons&:(= (length$ ?precons) 0)))
   (domain-operator (name ?operator-id) (param-names $?op-param-names&:(= (length$ ?param-names) (length$ ?op-param-names))))
   =>
-  (bind ?grounded-formulas (ground-pddl-formula ?operator-id ?param-names ?param-values ""))
+  (bind ?grounded-formulas (ground-pddl-formula ?operator-id ?param-names ?param-values nil))
   (modify ?p (preconditions ?grounded-formulas))
 )
 
@@ -323,7 +318,7 @@
   ?parent <- (grounded-pddl-formula (id ?id) (formula-id ?base) (is-satisfied FALSE))
   (pddl-formula (id ?base) (type negation))
 
-  (or (grounded-pddl-formula (is-satisfied FALSE) (part-of ?id) (id ?child-id&:(neq ?id ?child-id)))
+  (or (grounded-pddl-formula (is-satisfied FALSE) (part-of ?id) (id ?child-id&~nil))
       (grounded-pddl-predicate (is-satisfied FALSE) (part-of ?id))
   )
 
@@ -337,7 +332,7 @@
   ?parent <- (grounded-pddl-formula (id ?id) (formula-id ?base) (is-satisfied TRUE))
   (pddl-formula (id ?base) (type negation))
 
-  (or (grounded-pddl-formula (is-satisfied TRUE) (part-of ?id) (id ?child-id&:(neq ?id ?child-id)))
+  (or (grounded-pddl-formula (is-satisfied TRUE) (part-of ?id) (id ?child-id&~nil))
       (grounded-pddl-predicate (is-satisfied TRUE) (part-of ?id))
   )
 =>
@@ -350,7 +345,7 @@
   ?parent <- (grounded-pddl-formula (id ?id) (formula-id ?base) (is-satisfied FALSE))
   (pddl-formula (id ?base) (type conjunction))
 
-  (not (grounded-pddl-formula (part-of ?id) (is-satisfied FALSE) (id ?child-id&:(neq ?id ?child-id))))
+  (not (grounded-pddl-formula (part-of ?id) (is-satisfied FALSE) (id ?child-id&~nil)))
   (not (grounded-pddl-predicate (part-of ?id) (is-satisfied FALSE)))
 =>
   (modify ?parent (is-satisfied TRUE))
@@ -362,7 +357,7 @@
   ?parent <- (grounded-pddl-formula (id ?id) (formula-id ?base) (is-satisfied TRUE))
   (pddl-formula (id ?base) (type conjunction))
 
-  (or (grounded-pddl-formula (is-satisfied FALSE) (part-of ?id) (id ?child-id&:(neq ?id ?child-id)))
+  (or (grounded-pddl-formula (is-satisfied FALSE) (part-of ?id) (id ?child-id&~nil))
       (grounded-pddl-predicate (is-satisfied FALSE) (part-of ?id))
   )
 =>
@@ -375,7 +370,7 @@
   ?parent <- (grounded-pddl-formula (id ?id) (formula-id ?base) (is-satisfied FALSE))
   (pddl-formula (id ?base) (type disjunction))
 
-  (or (grounded-pddl-formula (is-satisfied TRUE) (part-of ?id) (id ?child-id&:(neq ?id ?child-id)))
+  (or (grounded-pddl-formula (is-satisfied TRUE) (part-of ?id) (id ?child-id&~nil))
       (grounded-pddl-predicate (is-satisfied TRUE) (part-of ?id))
   )
  =>
@@ -388,7 +383,7 @@
   ?parent <- (grounded-pddl-formula (id ?id) (formula-id ?base) (is-satisfied TRUE))
   (pddl-formula (id ?base) (type disjunction))
 
-  (not (or (grounded-pddl-formula (is-satisfied TRUE) (part-of ?id) (id ?child-id&:(neq ?id ?child-id)))
+  (not (or (grounded-pddl-formula (is-satisfied TRUE) (part-of ?id) (id ?child-id&~nil))
       (grounded-pddl-predicate (is-satisfied TRUE) (part-of ?id))
   ))
 =>
