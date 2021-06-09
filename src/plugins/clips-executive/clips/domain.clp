@@ -315,7 +315,7 @@
   (not (grounded-pddl-formula (is-satisfied TRUE) (id ?formula-id)))
   =>
   (modify ?p (executable FALSE))
-  (printout t crlf crlf crlf "Action " ?id " is no longer executable" crlf crlf crlf)
+  (printout t "Action " ?id " is no longer executable" crlf)
 )
 
 (defrule domain-check-if-negated-formula-is-satisfied
