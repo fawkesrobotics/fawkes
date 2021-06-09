@@ -1321,3 +1321,17 @@
   =>
   (printout error "Domain error '" ?type "': " ?msg crlf)
 )
+
+
+(defrule domain-check-grounded-pddl-predicate-has-two-params
+  (grounded-pddl-predicate (param-values $?params&:(not (= (length$ ?params) 2)))
+                           (predicate-id ?pid)
+                           (id ?id))
+  (pddl-predicate (id ?pid) (predicate EQUALITY))
+  =>
+  (assert (domain-error
+    (error-type equality-must-have-exactly-two-parameters)
+    (error-msg (str-cat "Predicate " ?id " is an equality precondition"
+                        " but has " (length$ ?params) " parameters,"
+                        " should be 2."))))
+)
