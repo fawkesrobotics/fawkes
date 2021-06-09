@@ -167,11 +167,14 @@ PreconditionToCLIPSFactVisitor::operator()(Predicate &p) const
 			}
 		}
 		string predicate_string;
+		string predicate_string_new;
 		if (p.function == "=") {
 			// It's not a predicate but an equality.
 			predicate_string = " (equality TRUE)";
+			predicate_string_new = " (predicate EQUALITY)";
 		} else {
 			predicate_string = " (predicate " + p.function + ")";
+			predicate_string_new = predicate_string;
 		}
 
 		res.push_back(string("(domain-atomic-precondition"
@@ -190,7 +193,7 @@ PreconditionToCLIPSFactVisitor::operator()(Predicate &p) const
 		                     + new_parent
 		                     + ")"
 		                       " (id "
-		                     + name + ")" + predicate_string + " (param-names (create$" + params
+		                     + name + ")" + predicate_string_new + " (param-names (create$" + params
 		                     + "))"
 		                       " (param-constants (create$"
 		                     + constants

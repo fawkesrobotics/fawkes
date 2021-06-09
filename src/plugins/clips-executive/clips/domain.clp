@@ -205,8 +205,8 @@
   (slot part-of (type SYMBOL)) ; reference to parent formula
 
   ; a PDDL predicate is either an equality or references a domain-predicate
+  ; equalities are marked through the symbol 'equality'
   (slot predicate (type SYMBOL)) 
-  (slot equality (type SYMBOL) (allowed-values TRUE FALSE) (default FALSE)) 
 
   (multislot param-names (type SYMBOL))
   (multislot param-constants)
@@ -395,7 +395,7 @@
   ?predicate <- (grounded-pddl-predicate (param-values $?params) 
                                          (is-satisfied FALSE) 
                                          (predicate-id ?id))
-  ?base <- (pddl-predicate (id ?id) (equality FALSE) (predicate ?pred))                  
+  ?base <- (pddl-predicate (id ?id) (predicate ?pred&~EQUALITY))
   (domain-fact (name ?pred) (param-values $?params))
 =>
   (modify ?predicate (is-satisfied TRUE))
@@ -410,7 +410,7 @@
                     (eq ?p1 ?p2)
                     (neq ?is-sat (eq ?p1 ?p2))))
                  )
-  ?base <- (pddl-predicate (id ?id) (equality TRUE))
+  ?base <- (pddl-predicate (id ?id) (predicate EQUALITY))
 =>
   (modify ?predicate (is-satisfied TRUE))
 )
@@ -423,7 +423,7 @@
                     (neq ?p1 ?p2)
                     (eq ?is-sat (neq ?p1 ?p2))))
                  )
-  ?base <- (pddl-predicate (id ?id) (equality TRUE))
+  ?base <- (pddl-predicate (id ?id) (predicate EQUALITY))
 =>
   (modify ?predicate (is-satisfied FALSE))
  ) 
@@ -433,7 +433,7 @@
   ?predicate <- (grounded-pddl-predicate (param-values $?params) 
                                          (is-satisfied TRUE) 
                                          (predicate-id ?id))
-  ?base <- (pddl-predicate (id ?id) (equality FALSE) (predicate ?pred))                  
+  ?base <- (pddl-predicate (id ?id) (predicate ?pred&~EQUALITY))
   (not (domain-fact (name ?pred) (param-values $?params)))
 =>
   (modify ?predicate (is-satisfied FALSE))
