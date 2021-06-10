@@ -43,7 +43,11 @@ namespace firevision {
 void
 CvMatAdapter::convert_image_bgr(unsigned char *buffer, cv::Mat &image)
 {
-	unsigned char tmp[sizeof(buffer)];
+	int buffer_size = 0;
+	while (buffer[buffer_size] != '\0') {
+		buffer_size++;
+	}
+	unsigned char tmp[buffer_size];
 	convert(YUV422_PLANAR, YUV422_PACKED, buffer, tmp, image.cols, image.rows);
 	cv::Mat tmp_mat = cv::Mat(image.size(), CV_8UC2, tmp);
 	cv::cvtColor(tmp_mat, image, cv::COLOR_YUV2BGR_UYVY, 3);
