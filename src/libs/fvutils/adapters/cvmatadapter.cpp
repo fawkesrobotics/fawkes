@@ -43,17 +43,22 @@ namespace firevision {
 void
 CvMatAdapter::convert_image_bgr(unsigned char *buffer, cv::Mat &image)
 {
-	convert(YUV422_PLANAR, BGR, buffer, (unsigned char *)image.data, image.cols, image.rows);
+	unsigned char tmp[sizeof(buffer)];
+	convert(YUV422_PLANAR, YUV422_PACKED, buffer, tmp, image.cols, image.rows);
+	cv::Mat tmp_mat = cv::Mat(image.size(), CV_8UC2, tmp);
+	cv::cvtColor(tmp_mat, image, cv::COLOR_YUV2BGR_UYVY, 3);
 }
 
 /** Convert image from cv::Mat into buffer.
- * @param image cv::MAt with BGR notation
+ * @param image cv::Mat with BGR notation
  * @param buffer YUV422_PLANAR of the same size to write the converted cv::Mat
  */
 void
 CvMatAdapter::convert_image_yuv422_planar(cv::Mat &image, unsigned char *buffer)
 {
-	convert(BGR, YUV422_PLANAR, (unsigned char *)image.data, buffer, image.cols, image.rows);
+	cv::Mat tmp_mat = cv::Mat(image);
+	cv::cvtColor(image, tmp_mat, cv::COLOR_BGR2YUV, 3);
+	convert(YUV422_PACKED, YUV422_PLANAR, tmp_mat.data, buffer, image.cols, image.rows);
 }
 
 /* Creates a new IplImage for a ROI.
