@@ -110,7 +110,7 @@ private:
 	rs2_intrinsics intrinsics_;
 	rs2_intrinsics rgb_intrinsics_;
 	rs2_extrinsics extrinsics_;
-	rs2_extrinsics rgb_extrinsics;
+	rs2_extrinsics rgb_extrinsics_;
 
 	float       camera_scale_;
 	std::string frame_id_;
