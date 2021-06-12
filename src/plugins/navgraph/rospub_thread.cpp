@@ -107,7 +107,7 @@ NavGraphROSPubThread::convert_nodes(const std::vector<fawkes::NavGraphNode> &nod
 		}
 		ngn.unconnected                                 = node.unconnected();
 		const std::map<std::string, std::string> &props = node.properties();
-		for (const auto p : props) {
+		for (const auto &p : props) {
 			fawkes_msgs::NavGraphProperty ngp;
 			ngp.key   = p.first;
 			ngp.value = p.second;
@@ -134,7 +134,7 @@ NavGraphROSPubThread::publish_graph()
 		nge.to_node                                     = edge.to();
 		nge.directed                                    = edge.is_directed();
 		const std::map<std::string, std::string> &props = edge.properties();
-		for (const auto p : props) {
+		for (const auto &p : props) {
 			fawkes_msgs::NavGraphProperty ngp;
 			ngp.key   = p.first;
 			ngp.value = p.second;
