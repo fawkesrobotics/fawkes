@@ -429,28 +429,28 @@ Realsense2Thread::pixel_to_xyz()
 	float z       = 0;
 	int   counter = 0;
 
+	const uint16_t *image     = reinterpret_cast<const uint16_t *>(tmp_frm.get_data());
+	float           center[2] = {static_cast<float>(bb[0]), static_cast<float>(bb[1])};
+
 	// get average xyz from (bounding box/2), throw away xyz = 0,0,0
 	int qwidth  = int(bb[2] / 4);
 	int qheight = int(bb[3] / 4);
-	for (int i = 0; i < qwidth; i++) {
-		for (int j = 0; j < qheight; j++) {
-			const uint16_t *image        = reinterpret_cast<const uint16_t *>(tmp_frm.get_data());
-			float           scaled_depth = camera_scale_ * (static_cast<float>(*image));
-			float           center[2]    = {static_cast<float>(bb[0]), static_cast<float>(bb[1])};
-			float           depth_p0[2];
+	for (int i_x = 0; i_x < qwidth; i_x++) {
+		for (int i_y = 0; i_y < qheight; i_y++) {
+			/*float           depth_p0[2];
 			float           depth_p1[2];
 			float           depth_p2[2];
-			float           depth_p3[2];
-			float           xyz0[3];
-			float           xyz1[3];
-			float           xyz2[3];
-			float           xyz3[3];
-			float           pixel0[2] = {center[0] + i, center[1] + j};
-			float           pixel1[2] = {center[0] + i, center[1] - j};
-			float           pixel2[2] = {center[0] - i, center[1] + j};
-			float           pixel3[2] = {center[0] - i, center[1] - j};
+            float           depth_p3[2];*/
+			float xyz0[3];
+			float xyz1[3];
+			float xyz2[3];
+			float xyz3[3];
+			float pixel0[2] = {center[0] + i_x, center[1] + i_y};
+			float pixel1[2] = {center[0] + i_x, center[1] - i_y};
+			float pixel2[2] = {center[0] - i_x, center[1] + i_y};
+			float pixel3[2] = {center[0] - i_x, center[1] - i_y};
 
-			rs2_project_color_pixel_to_depth_pixel(depth_p0,
+			/*rs2_project_color_pixel_to_depth_pixel(depth_p0,
 			                                       image,
 			                                       camera_scale_,
 			                                       0.0,
@@ -492,12 +492,30 @@ Realsense2Thread::pixel_to_xyz()
 			                                       &rgb_intrinsics_,
 			                                       &rgb_extrinsics_,
 			                                       &extrinsics_,
-			                                       pixel3);
+                                                   pixel3);*/
 
-			rs2_deproject_pixel_to_point(xyz0, &intrinsics_, depth_p0, scaled_depth);
-			rs2_deproject_pixel_to_point(xyz1, &intrinsics_, depth_p1, scaled_depth);
-			rs2_deproject_pixel_to_point(xyz2, &intrinsics_, depth_p2, scaled_depth);
-			rs2_deproject_pixel_to_point(xyz3, &intrinsics_, depth_p3, scaled_depth);
+			float scaled_depth0 = camera_scale_
+			                      * image[intrinsics_.width * (static_cast<int>(center[1]) + i_y)
+			                              + (static_cast<int>(center[0]) + i_x)];
+			float scaled_depth1 = camera_scale_
+			                      * image[intrinsics_.width * (static_cast<int>(center[1]) + i_y)
+			                              + (static_cast<int>(center[0]) - i_x)];
+			float scaled_depth2 = camera_scale_
+			                      * image[intrinsics_.width * (static_cast<int>(center[1]) - i_y)
+			                              + (static_cast<int>(center[0]) + i_x)];
+			float scaled_depth3 = camera_scale_
+			                      * image[intrinsics_.width * (static_cast<int>(center[1]) - i_y)
+			                              + (static_cast<int>(center[0]) - i_x)];
+
+			rs2_deproject_pixel_to_point(xyz0, &intrinsics_, pixel0, scaled_depth0);
+			rs2_deproject_pixel_to_point(xyz1, &intrinsics_, pixel1, scaled_depth1);
+			rs2_deproject_pixel_to_point(xyz2, &intrinsics_, pixel2, scaled_depth2);
+			rs2_deproject_pixel_to_point(xyz3, &intrinsics_, pixel3, scaled_depth3);
+
+			/*rs2_deproject_pixel_to_point(xyz0, &intrinsics_, depth_p0, scaled_depth0);
+            rs2_deproject_pixel_to_point(xyz1, &intrinsics_, depth_p1, scaled_depth1);
+            rs2_deproject_pixel_to_point(xyz2, &intrinsics_, depth_p2, scaled_depth2);
+            rs2_deproject_pixel_to_point(xyz3, &intrinsics_, depth_p3, scaled_depth3);*/
 
 			// add up
 			if ((isfinite(xyz0[0]) && isfinite(xyz0[1]) && isfinite(xyz0[2]))
