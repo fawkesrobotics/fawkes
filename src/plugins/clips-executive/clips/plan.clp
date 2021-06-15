@@ -32,7 +32,7 @@
 	(slot executable (type SYMBOL) (allowed-values TRUE FALSE) (default FALSE))
 	(slot error-msg (type STRING))
 	(multislot start-time (type INTEGER) (cardinality 2 2) (default 0 0))
-	(multislot preconditions (type SYMBOL) (default (create$))) ;grounded PDDL formulas
+	(slot precondition (type SYMBOL) (default nil)) ;grounding fact reference
 )
 
 (deffunction plan-action-arg (?param-name ?param-names ?param-values $?default)
