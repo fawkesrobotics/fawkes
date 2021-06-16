@@ -611,6 +611,7 @@ Realsense2Thread::read_camera_control()
 
 /**
  * Read the Realsense2 interface to get the ROI to determine a XYZ pose.
+ * @param bounding box
  * @return new_msg
  */
 bool
