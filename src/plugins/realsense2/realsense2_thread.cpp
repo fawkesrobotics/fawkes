@@ -611,13 +611,14 @@ Realsense2Thread::read_camera_control()
 
 /**
  * Read the Realsense2 interface to get the ROI to determine a XYZ pose.
- * @param bounding box
+ * @param bb bounding box
  * @return new_msg
  */
 bool
 Realsense2Thread::read_bounding_box(std::vector<int> &bb)
 {
 	bool new_msg = false;
+	bb.clear();
 	while (!rs_if_->msgq_empty()) {
 		if (rs_if_->msgq_first_is<Realsense2Interface::BoundingBoxMessage>()) {
 			Realsense2Interface::BoundingBoxMessage *msg =
