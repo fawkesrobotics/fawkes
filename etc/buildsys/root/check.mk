@@ -96,10 +96,10 @@ check-parallel:
 	fi
 
 .PHONY: check
-check: quick-check quickdoc
+check: quick-check license-check quickdoc
 
 .PHONY: quick-check
-quick-check: format-check-branch $(if $(subst 0,,$(YAMLLINT)),yamllint) license-check
+quick-check: format-check-branch $(if $(subst 0,,$(YAMLLINT)),yamllint)
 	$(SILENT)touch $(BASEDIR)/.check_stamp
 
 endif # __buildsys_root_check_mk_
