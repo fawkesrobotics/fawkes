@@ -31,7 +31,8 @@ is_good_license () {
 }
 
 check_files () {
-  type -p licensecheck >/dev/null || (echo "Could not find licensecheck"; exit 1)
+  type -p licensecheck >/dev/null || \
+    (echo "Could not find licensecheck binary, please install it!"; exit 1)
   IFS=$'\n'
   local have_bad_license=0
   for line in $(licensecheck -m --deb-fmt $@) ; do
