@@ -38,7 +38,7 @@ check_files () {
   for line in $(licensecheck -m --deb-fmt $@) ; do
     local file=$(echo "$line" | cut -s -f 1)
     local license=$(echo "$line" | cut -s -f 2)
-    if ! is_good_license $license ; then
+    if ! is_good_license "$license" ; then
       echo -e "\e[31mBad license header ($license): $file\e[0m"
       have_bad_license=1
     fi
