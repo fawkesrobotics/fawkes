@@ -28,12 +28,15 @@ __buildsys_root_check_mk_ := 1
 
 YAMLLINT ?= 1
 
-GITFILES = git ls-files --full-name \*.{h,cpp,py} | awk "{ print \"$$(git rev-parse --show-toplevel)/\"\$$1 }"
+GIT_LICCHECK_FILES = git ls-files --full-name \*.{h,cpp,py} | \
+                     awk "{ print \"$$(git rev-parse --show-toplevel)/\"\$$1 }" | \
+                     git check-attr --stdin ignore-license-check | \
+                     awk '$$3 != "set" { print $$1; }' | tr -d ':'
 
 .PHONY: license-check
 license-check:
 	$(SILENT) echo -e "$(INDENT_PRINT)[CHK] Checking license headers"
-	$(SILENT) $(FAWKES_BASEDIR)/etc/licscripts/check_license.bash $$($(GITFILES))
+	$(SILENT) $(FAWKES_BASEDIR)/etc/licscripts/check_license.bash $$($(GIT_LICCHECK_FILES))
 
 .PHONY: format-check
 format-check: check-parallel
