@@ -16,6 +16,7 @@
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/openprs.mk
+include $(BUILDSYSDIR)/protobuf.mk
 
 LIBS_openprs_agent = fawkescore fawkesutils fawkesaspects fawkesblackboard \
                      fawkesinterface fawkesopenprsaspect fawkesopenprsutils
@@ -25,7 +26,7 @@ LIBS_openprs_mod_skiller = fawkescore fawkesutils fawkesblackboard \
 	                  fawkesinterface SkillerInterface
 OBJS_openprs_mod_skiller = mod_skiller.o
 
-LIBS_openprs_mod_protobuf = fawkescore fawkesutils fawkes_protobuf_comm
+LIBS_openprs_mod_protobuf = fawkescore fawkesutils
 OBJS_openprs_mod_protobuf = oprs_protobuf.o mod_protobuf.o
 
 LIBS_openprs_mod_navgraph = fawkescore fawkesnavgraph fawkesconfig fawkesnetcomm
@@ -51,9 +52,9 @@ NOSOVER_openprs_mod_navgraph = 1
 FILES_openprs_files   = $(subst $(SRCDIR)/,,$(wildcard $(addprefix $(SRCDIR)/data/,*.opf *.inc *.sym)))
 DESTDIR_openprs_files = $(EXEC_SHAREDIR)/openprs/openprs-agent
 
-ifeq ($(HAVE_OPENPRS)$(HAVE_CPP11),11)
-  CFLAGS  += $(CFLAGS_OPENPRS)
-  LDFLAGS += $(LDFLAGS_OPENPRS)
+ifeq ($(HAVE_OPENPRS)$(HAVE_CPP11)$(HAVE_PROTOBUF)$(HAVE_PROTOBUF_COMM),1111)
+  CFLAGS  += $(CFLAGS_OPENPRS) $(CFLAGS_PROTOBUF) $(CFLAGS_PROTOBUF_COMM)
+  LDFLAGS += $(LDFLAGS_OPENPRS) $(LDFLAGS_PROTOBUF) $(LDFLAGS_PROTOBUF_COMM)
 
   CFLAGS_mod_skiller = $(CFLAGS_OPENPRS) $(CFLAGS_OPENPRS_MOD)
   LDFLAGS_openprs_mod_skiller = $(LDFLAGS_OPENPRS) $(LDFLAGS_OPENPRS_MOD) -lpu
@@ -78,6 +79,12 @@ else
   ifneq ($(HAVE_CPP11),1)
     WARN_TARGETS += warning_cpp11
   endif
+  ifneq ($(HAVE_PROTOBUF),1)
+    WARN_TARGETS += warning_protobuf
+  endif
+  ifneq ($(HAVE_PROTOBUF_COMM),1)
+    WARN_TARGETS += warning_protobuf_comm
+  endif
 endif
 
 ifeq ($(OBJSSUBMAKE),1)
@@ -88,6 +95,10 @@ warning_openprs:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting OpenPRS agent plugin$(TNORMAL) ($(OPENPRS_ERROR))"
 warning_cpp11:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting OpenPRS agent plugin$(TNORMAL) (C++11 not available)"
+warning_protobuf:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting OpenPRS agent plugin$(TNORMAL) (protobuf not available)"
+warning_protobuf_comm:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting OpenPRS agent plugin$(TNORMAL) (protobuf_comm not available)"
 endif
 
 include $(BUILDSYSDIR)/base.mk
