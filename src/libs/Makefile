@@ -20,7 +20,7 @@ include $(BUILDSYSDIR)/fvconf.mk
 SUBDIRS = core utils interface netcomm blackboard interfaces config logging tf \
 	  plugin lua aspect network_logger webview gui_utils baseapp navgraph \
 	  fvutils fvcams fvmodels fvfilters fvclassifiers fvstereo fvwidgets \
-	  kdl_parser protobuf_comm protobuf_clips pcl_utils pddl_parser syncpoint \
+	  kdl_parser protobuf_clips pcl_utils pddl_parser syncpoint \
 	  googletest protoboard execution_time_estimator
 
 ifeq ($(HAVE_SIFT),1)
@@ -66,12 +66,12 @@ fvstereo: fvcams
 ifneq ($(CLASSIFIERS_DEPS),)
 fvclassifiers: $(CLASSIFIERS_DEPS)
 endif
-protobuf_clips: core logging protobuf_comm
+protobuf_clips: core logging
 pcl_utils: core tf
 kdl_parser: core
 pddl_parser: core
 syncpoint: core googletest logging utils
-protoboard: core aspect blackboard interface protobuf_comm interfaces
+protoboard: core aspect blackboard interface interfaces
 
 include $(BUILDSYSDIR)/rules.mk
 include $(LIBSRCDIR)/extlibs.mk
