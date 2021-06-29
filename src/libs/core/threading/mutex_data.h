@@ -43,8 +43,6 @@ namespace fawkes {
 class MutexData
 {
 public:
-	pthread_mutex_t mutex;
-
 #ifdef DEBUG_THREADING
 	MutexData()
 	{

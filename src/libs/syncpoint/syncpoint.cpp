@@ -33,6 +33,15 @@ using namespace std;
 
 namespace fawkes {
 
+/// @cond INTERNALS
+void
+cleanup_mutex(void *arg)
+{
+	Mutex *mutex = (Mutex *)arg;
+	mutex->unlock();
+}
+/// @endcond
+
 /** @class SyncPoint <syncpoint/syncpoint.h>
  * The SyncPoint class.
  * This class is used for dynamic synchronization of threads which depend

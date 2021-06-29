@@ -37,6 +37,10 @@
 
 namespace fawkes {
 
+/// @cond INTERNALS
+void cleanup_mutex(void *);
+/// @endcond
+
 class SyncPointManager;
 class SyncPoint;
 

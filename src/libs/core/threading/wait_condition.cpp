@@ -26,28 +26,10 @@
 #include <core/threading/mutex_data.h>
 #include <core/threading/wait_condition.h>
 
-#include <cerrno>
-#include <pthread.h>
-#if defined(__MACH__) && defined(__APPLE__)
-#	include <sys/time.h>
-#endif
+#include <chrono>
+#include <condition_variable>
 
 namespace fawkes {
-
-/// @cond INTERNALS
-class WaitConditionData
-{
-public:
-	pthread_cond_t cond;
-};
-
-void
-cleanup_mutex(void *arg)
-{
-	Mutex *mutex = (Mutex *)arg;
-	mutex->unlock();
-}
-/// @endcond
 
 /** @class WaitCondition <core/threading/wait_condition.h>
  * Wait until a given condition holds.
@@ -108,8 +90,6 @@ cleanup_mutex(void *arg)
  */
 WaitCondition::WaitCondition(Mutex *mutex)
 {
-	cond_data_ = new WaitConditionData();
-	pthread_cond_init(&(cond_data_->cond), NULL);
 	if (mutex) {
 		mutex_     = mutex;
 		own_mutex_ = false;
@@ -122,8 +102,6 @@ WaitCondition::WaitCondition(Mutex *mutex)
 /** Destructor. */
 WaitCondition::~WaitCondition()
 {
-	pthread_cond_destroy(&(cond_data_->cond));
-	delete cond_data_;
 	if (own_mutex_) {
 		delete mutex_;
 	}
@@ -138,19 +116,8 @@ WaitCondition::~WaitCondition()
 void
 WaitCondition::wait()
 {
-	int err;
-	if (own_mutex_) {
-		mutex_->lock();
-		pthread_cleanup_push(cleanup_mutex, mutex_);
-		err = pthread_cond_wait(&(cond_data_->cond), &(mutex_->mutex_data->mutex));
-		mutex_->unlock();
-		pthread_cleanup_pop(0);
-	} else {
-		err = pthread_cond_wait(&(cond_data_->cond), &(mutex_->mutex_data->mutex));
-	}
-	if (err != 0) {
-		throw Exception(err, "Waiting for wait condition failed");
-	}
+	auto lock = get_lock();
+	cond_var_.wait(lock);
 }
 
 /** Wait with absolute timeout.
@@ -168,27 +135,12 @@ WaitCondition::wait()
 bool
 WaitCondition::abstimed_wait(long int sec, long int nanosec)
 {
-	int             err = 0;
-	struct timespec ts  = {sec, nanosec};
-
-	if (own_mutex_) {
-		mutex_->lock();
-		pthread_cleanup_push(cleanup_mutex, mutex_);
-		err = pthread_cond_timedwait(&(cond_data_->cond), &(mutex_->mutex_data->mutex), &ts);
-		mutex_->unlock();
-		pthread_cleanup_pop(0);
-	} else {
-		err = pthread_cond_timedwait(&(cond_data_->cond), &(mutex_->mutex_data->mutex), &ts);
-	}
-
-	if (err == ETIMEDOUT) {
-		return false;
-	} else if (err != 0) {
-		// some other error happened, a "real" error
-		throw Exception(err, "Waiting for wait condition failed");
-	} else {
-		return true;
-	}
+	auto lock = get_lock();
+	return cond_var_.wait_until(
+	         lock,
+	         std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds>(
+	           std::chrono::seconds(sec) + std::chrono::nanoseconds(nanosec)))
+	       == std::cv_status::no_timeout;
 }
 
 /** Wait with relative timeout.
@@ -208,50 +160,11 @@ WaitCondition::reltimed_wait(unsigned int sec, unsigned int nanosec)
 	if (!(sec || nanosec)) {
 		wait();
 		return true;
-	} else {
-		struct timespec now;
-#if defined(__MACH__) && defined(__APPLE__)
-		struct timeval nowt;
-		if (gettimeofday(&nowt, NULL) != 0) {
-			throw Exception(errno, "WaitCondition::reltimed_wait: Failed to get current time");
-		}
-		now.tv_sec  = nowt.tv_sec;
-		now.tv_nsec = nowt.tv_usec * 1000;
-#else
-		if (clock_gettime(CLOCK_REALTIME, &now) != 0) {
-			throw Exception(errno, "WaitCondition::reltimed_wait: Failed to get current time");
-		}
-#endif
-
-		long int s  = now.tv_sec + sec;
-		long int ns = now.tv_nsec + nanosec;
-		if (ns >= 1000000000) {
-			s += 1;
-			ns -= 1000000000;
-		}
-
-		struct timespec ts  = {s, ns};
-		long            err = 0;
-
-		if (own_mutex_) {
-			mutex_->lock();
-			pthread_cleanup_push(cleanup_mutex, mutex_);
-			err = pthread_cond_timedwait(&(cond_data_->cond), &(mutex_->mutex_data->mutex), &ts);
-			mutex_->unlock();
-			pthread_cleanup_pop(0);
-		} else {
-			err = pthread_cond_timedwait(&(cond_data_->cond), &(mutex_->mutex_data->mutex), &ts);
-		}
-
-		if (err == ETIMEDOUT) {
-			return false;
-		} else if (err != 0) {
-			// some other error happened, a "real" error
-			throw Exception(err, "Waiting for wait condition failed");
-		} else {
-			return true;
-		}
 	}
+
+	auto lock = get_lock();
+	return cond_var_.wait_for(lock, std::chrono::seconds(sec) + std::chrono::nanoseconds(nanosec))
+	       == std::cv_status::no_timeout;
 }
 
 /** Wake another thread waiting for this condition.
@@ -268,10 +181,10 @@ WaitCondition::wake_one()
 {
 	if (own_mutex_) { // it's our internal mutex, lock!
 		mutex_->lock();
-		pthread_cond_signal(&(cond_data_->cond));
+	}
+	cond_var_.notify_one();
+	if (own_mutex_) {
 		mutex_->unlock();
-	} else { // it's an external mutex, the user should care
-		pthread_cond_signal(&(cond_data_->cond));
 	}
 }
 
@@ -288,11 +201,24 @@ WaitCondition::wake_all()
 {
 	if (own_mutex_) { // it's our internal mutex, lock!
 		mutex_->lock();
-		pthread_cond_broadcast(&(cond_data_->cond));
-		mutex_->unlock();
-	} else { // it's an external mutex, the user should care
-		pthread_cond_broadcast(&(cond_data_->cond));
 	}
+	cond_var_.notify_all();
+	if (own_mutex_) {
+		mutex_->unlock();
+	}
+}
+
+std::unique_lock<std::mutex>
+WaitCondition::get_lock()
+{
+	std::unique_lock<std::mutex> lock;
+	if (own_mutex_) {
+		lock = std::unique_lock<std::mutex>(mutex_->get_raw_mutex());
+	} else {
+		// We assume the caller has already locked the mutex, thuse we defer locking.
+		lock = std::unique_lock<std::mutex>(mutex_->get_raw_mutex(), std::defer_lock_t());
+	}
+	return lock;
 }
 
 } // end namespace fawkes
