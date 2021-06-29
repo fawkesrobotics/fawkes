@@ -67,7 +67,7 @@ ExecutionTimeEstimatorManager::register_provider(std::shared_ptr<ExecutionTimeEs
 void
 ExecutionTimeEstimatorManager::unregister_provider(std::shared_ptr<ExecutionTimeEstimator> provider)
 {
-#if __GNUC__ >= 9
+#if __cplusplus >= 202002L
 	std::erase_if(execution_time_estimators_, [&](auto &pair) { return provider == pair.second; });
 #else
 	for (auto it = execution_time_estimators_.begin(); it != execution_time_estimators_.end();) {
