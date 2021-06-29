@@ -191,7 +191,7 @@ BehaviorEnginePlexilAdapter::start()
 		logger_->log_error("PlexilBE", "No writer for skiller interface");
 		return false;
 	}
-	if (skiller_if_->exclusive_controller() != skiller_if_->serial()) {
+	if (skiller_if_->exclusive_controller() != skiller_if_->serial().get_string()) {
 		SkillerInterface::AcquireControlMessage *msg =
 		  new SkillerInterface::AcquireControlMessage(/* steal control */ true);
 		skiller_if_->msgq_enqueue(msg);
