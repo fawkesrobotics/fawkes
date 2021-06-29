@@ -24,15 +24,15 @@
 #ifndef _CORE_THREADING_MUTEX_H_
 #define _CORE_THREADING_MUTEX_H_
 
+#include <mutex>
+#include <variant>
+
 namespace fawkes {
 
 class MutexData;
-class WaitCondition;
 
 class Mutex
 {
-	friend WaitCondition;
-
 public:
 	/** Mutex type. */
 	typedef enum {
@@ -44,6 +44,8 @@ public:
 	Mutex(Type type = NORMAL);
 	~Mutex();
 
+	std::mutex &get_raw_mutex();
+
 	void lock();
 	bool try_lock();
 	void unlock();
@@ -51,7 +53,8 @@ public:
 	void stopby();
 
 private:
-	MutexData *mutex_data;
+	std::variant<std::mutex, std::recursive_mutex> mutex;
+	MutexData *                                    mutex_data;
 };
 
 } // end namespace fawkes

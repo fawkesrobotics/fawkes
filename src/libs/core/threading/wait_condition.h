@@ -24,14 +24,12 @@
 #ifndef _CORE_THREADING_WAIT_CONDITION_H_
 #define _CORE_THREADING_WAIT_CONDITION_H_
 
+#include <condition_variable>
+#include <mutex>
+
 namespace fawkes {
 
-class WaitConditionData;
 class Mutex;
-
-/// @cond INTERNALS
-void cleanup_mutex(void *);
-/// @endcond
 
 class WaitCondition
 {
@@ -47,9 +45,10 @@ public:
 	void wake_all();
 
 private:
-	WaitConditionData *cond_data_;
-	Mutex *            mutex_;
-	bool               own_mutex_;
+	std::unique_lock<std::mutex> get_lock();
+	std::condition_variable      cond_var_;
+	Mutex *                      mutex_;
+	bool                         own_mutex_;
 };
 
 } // end namespace fawkes

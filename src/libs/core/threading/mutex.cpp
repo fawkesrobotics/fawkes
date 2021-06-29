@@ -26,6 +26,7 @@
 #include <core/threading/mutex_data.h>
 #include <core/threading/thread.h>
 
+#include <mutex>
 #include <pthread.h>
 
 namespace fawkes {
@@ -60,23 +61,17 @@ Mutex::Mutex(Type type)
 {
 	mutex_data = new MutexData();
 
-	pthread_mutexattr_t attr;
-	pthread_mutexattr_init(&attr);
 	if (type == RECURSIVE) {
-		pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
+		mutex.emplace<std::recursive_mutex>();
 	} else {
-		pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_NORMAL);
+		mutex.emplace<std::mutex>();
 	}
-
-	pthread_mutex_init(&(mutex_data->mutex), &attr);
 }
 
 /** Destructor */
 Mutex::~Mutex()
 {
-	pthread_mutex_destroy(&(mutex_data->mutex));
 	delete mutex_data;
-	mutex_data = NULL;
 }
 
 /** Lock this mutex.
@@ -86,10 +81,7 @@ Mutex::~Mutex()
 void
 Mutex::lock()
 {
-	int err = 0;
-	if ((err = pthread_mutex_lock(&(mutex_data->mutex))) != 0) {
-		throw Exception(err, "Failed to aquire lock for thread %s", Thread::current_thread()->name());
-	}
+	std::visit([](auto &&m) { m.lock(); }, mutex);
 #ifdef DEBUG_THREADING
 	// do not switch order, lock holder must be protected with this mutex!
 	mutex_data->set_lock_holder();
@@ -116,7 +108,7 @@ Mutex::lock()
 bool
 Mutex::try_lock()
 {
-	if (pthread_mutex_trylock(&(mutex_data->mutex)) == 0) {
+	if (std::visit([](auto &&m) { return m.try_lock(); }, mutex)) {
 #ifdef DEBUG_THREADING
 		mutex_data->set_lock_holder();
 #endif
@@ -134,7 +126,7 @@ Mutex::unlock()
 	mutex_data->unset_lock_holder();
 	// do not switch order, lock holder must be protected with this mutex!
 #endif
-	pthread_mutex_unlock(&(mutex_data->mutex));
+	std::visit([](auto &&m) { m.unlock(); }, mutex);
 }
 
 /** Shortly stop by at the mutex.
@@ -149,8 +141,17 @@ Mutex::unlock()
 void
 Mutex::stopby()
 {
-	pthread_mutex_lock(&(mutex_data->mutex));
-	pthread_mutex_unlock(&(mutex_data->mutex));
+	lock();
+	unlock();
+}
+
+/** Get the underlying mutex.
+ * @return A reference to the mutex
+ */
+std::mutex &
+Mutex::get_raw_mutex()
+{
+	return std::get<std::mutex>(mutex);
 }
 
 } // end namespace fawkes
