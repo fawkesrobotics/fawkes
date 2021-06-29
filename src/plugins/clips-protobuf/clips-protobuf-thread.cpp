@@ -21,7 +21,7 @@
 
 #include "clips-protobuf-thread.h"
 
-#include <protobuf_clips/communicator.h>
+#include <clips_protobuf/communicator.h>
 
 using namespace fawkes;
 using namespace protobuf_clips;
@@ -90,7 +90,7 @@ ClipsProtobufThread::clips_context_init(const std::string &          env_name,
 {
 	logger->log_info(name(), "Called to initialize environment %s", env_name.c_str());
 	pb_comms_[env_name] =
-	  new ClipsProtobufCommunicator(*clips, *clips.objmutex_ptr(), cfg_proto_dirs_, logger);
+	  new ClipsProtobufCommunicator(*clips, *clips.objmutex_ptr(), cfg_proto_dirs_);
 	clips->batch_evaluate(SRCDIR "/clips/protobuf.clp");
 }
 

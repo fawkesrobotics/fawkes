@@ -52,5 +52,12 @@ ifeq ($(HAVE_CLIPS),1)
   endif
 endif
 
+ifeq ($(HAVE_CLIPS),1)
+  HAVE_CLIPS_PROTOBUF = $(if $(shell $(PKGCONFIG) --exists 'clips_protobuf'; echo $${?/1/}),1,0)
+  CFLAGS_CLIPS_PROTOBUF = $(shell $(PKGCONFIG) --cflags 'clips_protobuf')
+  LDFLAGS_CLIPS_PROTOBUF = $(shell $(PKGCONFIG) --libs 'clips_protobuf')
+endif
+
+
 endif # __buildsys_clips_mk_
 

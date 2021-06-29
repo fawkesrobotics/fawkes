@@ -20,8 +20,7 @@ include $(BUILDSYSDIR)/clips.mk
 include $(BUILDSYSDIR)/boost.mk
 
 LIBS_clips_protobuf = \
-	fawkescore fawkesutils fawkesaspects fawkesclipsaspect \
-	fawkes_protobuf_clips
+	fawkescore fawkesutils fawkesaspects fawkesclipsaspect
 OBJS_clips_protobuf = clips-protobuf-plugin.o clips-protobuf-thread.o
 
 OBJS_all    = $(OBJS_clips_protobuf)
@@ -34,11 +33,13 @@ DESTDIR_clips_files = $(EXEC_SHAREDIR)/clips/clips-protobuf
 REQ_BOOST_LIBS = system
 HAVE_BOOST_LIBS = $(call boost-have-libs,$(REQ_BOOST_LIBS))
 
-ifeq ($(HAVE_CPP11)$(HAVE_PROTOBUF)$(HAVE_PROTOBUF_COMM)$(HAVE_CLIPS)$(HAVE_BOOST_LIBS),11111)
-  CFLAGS  += $(CFLAGS_PROTOBUF) $(CFLAGS_PROTOBUF_COMM) $(CFLAGS_CLIPS) $(CFLAGS_CPP11) \
-	     $(call boost-libs-cflags,$(REQ_BOOST_LIBS))
-  LDFLAGS += $(LDFLAGS_PROTOBUF) $(LDFLAGS_PROTOBUF_COMM) $(LDFLAGS_CLIPS) \
-	     $(call boost-libs-ldflags,$(REQ_BOOST_LIBS))
+ifeq ($(HAVE_CPP11)$(HAVE_PROTOBUF)$(HAVE_PROTOBUF_COMM)$(HAVE_CLIPS)$(HAVE_CLIPS_PROTOBUF)$(HAVE_BOOST_LIBS),111111)
+  CFLAGS  += $(CFLAGS_PROTOBUF) $(CFLAGS_PROTOBUF_COMM) \
+             $(CFLAGS_CLIPS) $(CFLAGS_CLIPS_PROTOBUF) \
+             $(CFLAGS_CPP11) $(call boost-libs-cflags,$(REQ_BOOST_LIBS))
+  LDFLAGS += $(LDFLAGS_PROTOBUF) $(LDFLAGS_PROTOBUF_COMM) \
+             $(LDFLAGS_CLIPS) $(LDFLAGS_CLIPS_PROTOBUF) \
+             $(call boost-libs-ldflags,$(REQ_BOOST_LIBS))
 
   PLUGINS_build = $(PLUGINS_all)
 
@@ -56,6 +57,9 @@ else
   ifneq ($(HAVE_CLIPS),1)
     WARN_TARGETS = warning_clips
   endif
+  ifneq ($(HAVE_CLIPS_PROTOBUF),1)
+    WARN_TARGETS = warning_clips_protobuf
+  endif
   ifneq ($(HAVE_BOOST_LIBS),1)
     WARN_TARGETS_BOOST = $(foreach l,$(REQ_BOOST_LIBS),$(if $(call boost-have-lib,$l),, warning_boost_$l))
   endif
@@ -69,6 +73,8 @@ warning_protobuf_comm:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Cannot build clips-protobuf plugin$(TNORMAL) (protobuf_comm not found)"
 warning_clips:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting clips-protobuf plugin$(TNORMAL) ($(CLIPS_ERROR))"
+warning_clips_protobuf:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting clips-protobuf plugin$(TNORMAL) (clips_protobuf not found)"
 warning_cpp11:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting clips-protobuf plugin$(TNORMAL) (C++11 not supported)"
 
