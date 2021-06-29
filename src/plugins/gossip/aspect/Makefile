@@ -30,10 +30,10 @@ OBJS_libfawkesgossipaspect = gossip.o gossip_inifin.o
 OBJS_all = $(OBJS_libfawkesgossipaspect)
 LIBS_all = $(LIBDIR)/libfawkesgossipaspect.$(SOEXT)
 
-ifeq ($(HAVE_CPP11)$(HAVE_PROTOBUF)$(HAVE_BOOST_LIBS),111)
-  CFLAGS  += $(CFLAGS_PROTOBUF) \
+ifeq ($(HAVE_CPP11)$(HAVE_PROTOBUF)$(HAVE_PROTOBUF_COMM)$(HAVE_BOOST_LIBS),1111)
+  CFLAGS  += $(CFLAGS_PROTOBUF) $(CFLAGS_PROTOBUF_COMM) \
              $(call boost-libs-cflags,$(REQ_BOOST_LIBS))
-  LDFLAGS += $(LDFLAGS_PROTOBUF) \
+  LDFLAGS += $(LDFLAGS_PROTOBUF) $(LDFLAGS_PROTOBUF_COMM) \
              $(call boost-libs-ldflags,$(REQ_BOOST_LIBS))
 
   LIBS_build = $(LIBS_all)
