@@ -39,6 +39,11 @@ OBJS_all = $(OBJS_libfawkesprotoboard)
 ifeq ($(HAVE_PROTOBUF)$(HAVE_PROTOBUF_COMM),11)
   CFLAGS += $(CFLAGS_PROTOBUF) $(CFLAGS_PROTOBUF_COMM)
   LDFLAGS += $(LDFLAGS_PROTOBUF) $(LDFLAGS_PROTOBUF_COMM)
+  ifneq ($(GCC_TOO_OLD),1)
+    LIBS_build  = $(LIBS_all)
+  else
+    WARN_TARGETS += warning_old_gcc
+  endif
 else
   ifneq ($(HAVE_PROTOBUF),1)
     WARN_TARGETS += warning_protobuf
@@ -46,12 +51,6 @@ else
   ifneq ($(HAVE_PROTOBUF_COMM),1)
     WARN_TARGETS += warning_protobuf_comm
   endif
-endif
-
-ifneq ($(GCC_TOO_OLD),1)
-  LIBS_build  = $(LIBS_all)
-else
-  WARN_TARGETS += warning_old_gcc
 endif
 
 ALLOW_UNDEF_libfawkesprotoboard = 1
