@@ -191,21 +191,21 @@
 (deftemplate pddl-formula
   "A PDDL formula representation in CLIPS, sourced from the preconditions of
   the PDDL domain description."
-  (slot id (type SYMBOL) (default-dynamic (gensym*))) 
+  (slot id (type SYMBOL) (default-dynamic (gensym*)))
   (slot part-of (type SYMBOL))
-  
-  (slot type (type SYMBOL) (allowed-values conjunction disjunction negation)) 
+
+  (slot type (type SYMBOL) (allowed-values conjunction disjunction negation))
 )
 
 (deftemplate grounded-pddl-formula
-  "A grounded instance of a PDDL formula. Grounded instances are usually 
+  "A grounded instance of a PDDL formula. Grounded instances are usually
   associated with one plan-action. Grounding itself only occurs on the
   predicate level."
-  (slot id (type SYMBOL)) 
+  (slot id (type SYMBOL))
   (slot formula-id (type SYMBOL)); reference to ungrounded base version
   (slot grounding (type SYMBOL))
-  
-  (slot is-satisfied (type SYMBOL) (allowed-values TRUE FALSE) (default FALSE)) 
+
+  (slot is-satisfied (type SYMBOL) (allowed-values TRUE FALSE) (default FALSE))
 )
 
 (deftemplate pddl-predicate
@@ -216,7 +216,7 @@
 
   ; a PDDL predicate is either an equality or references a domain-predicate
   ; equalities are marked through the symbol 'equality'
-  (slot predicate (type SYMBOL)) 
+  (slot predicate (type SYMBOL))
 
   (multislot param-names (type SYMBOL))
   (multislot param-constants)
@@ -225,7 +225,7 @@
 (deftemplate grounded-pddl-predicate
   "A grounded instance of a PDDL predicate. Grounded instances have a value for
   each parameter slot and are part of a grounded formula."
-  (slot id (type SYMBOL) (default-dynamic (gensym*))) 
+  (slot id (type SYMBOL) (default-dynamic (gensym*)))
   (slot predicate-id (type SYMBOL)) ; reference to ungrounded base version
   (slot grounding (type SYMBOL))
 
@@ -237,11 +237,11 @@
   and param values."
   (?parent-id ?param-names ?param-values ?grounding-id)
 
-  (do-for-all-facts ((?predicate pddl-predicate)) 
-        (eq ?parent-id ?predicate:part-of) 
+  (do-for-all-facts ((?predicate pddl-predicate))
+        (eq ?parent-id ?predicate:part-of)
 
-    (assert (grounded-pddl-predicate 
-          (id (sym-cat "grounded-" ?predicate:id "-" (gensym*))) 
+    (assert (grounded-pddl-predicate
+          (id (sym-cat "grounded-" ?predicate:id "-" (gensym*)))
           (predicate-id ?predicate:id)
           (grounding ?grounding-id))
     )
@@ -254,7 +254,7 @@
   (?parent-id ?param-names ?param-values ?grounding-id)
 
   (bind ?grounding-id nil)
-  (do-for-all-facts ((?formula pddl-formula)) (eq ?parent-id ?formula:part-of) 
+  (do-for-all-facts ((?formula pddl-formula)) (eq ?parent-id ?formula:part-of)
     ;if no grounding fact created yet, create one
     (if (eq ?grounding-id nil) then
       (bind ?grounding (assert (pddl-grounding (id (sym-cat "grounding-" ?formula:id "-" (gensym*)))
@@ -263,13 +263,13 @@
       (bind ?grounding-id (fact-slot-value ?grounding id))
     )
 
-    ;recursively ground subformulas 
+    ;recursively ground subformulas
     (bind ?grounded-id (sym-cat "grounded-" ?formula:id "-" (gensym*)))
-    
-    (assert (grounded-pddl-formula (formula-id ?formula:id) 
+
+    (assert (grounded-pddl-formula (formula-id ?formula:id)
                                    (id ?grounded-id)
                                    (grounding ?grounding-id)))
-    
+
     (ground-pddl-formula ?formula:id ?param-names ?param-values ?grounding-id)
     (ground-pddl-predicate ?formula:id ?param-names ?param-values ?grounding-id)
   )
@@ -277,11 +277,11 @@
 )
 
 (defrule domain-ground-plan-action-precondition
-  "Create grounded pddl formulas for the precondition of a plan-action if it 
+  "Create grounded pddl formulas for the precondition of a plan-action if it
   has not been grounded yet and add a reference to the plan-action fact"
   (declare (salience ?*SALIENCE-DOMAIN-GROUND*))
-  ?p <- (plan-action (id ?action-id) (action-name ?operator-id) 
-                     (param-names $?param-names) (param-values $?param-values) 
+  ?p <- (plan-action (id ?action-id) (action-name ?operator-id)
+                     (param-names $?param-names) (param-values $?param-values)
                      (precondition nil))
   (domain-operator (name ?operator-id) (param-names $?op-param-names&:(= (length$ ?param-names) (length$ ?op-param-names))))
   =>
@@ -315,7 +315,7 @@
 
 (defrule domain-check-if-negated-formula-is-satisfied
   (declare (salience ?*SALIENCE-DOMAIN-CHECK*))
-  
+
   (pddl-grounding (id ?grounding-id))
 
   (pddl-formula (id ?parent-base) (type negation))
@@ -343,7 +343,7 @@
 
 (defrule domain-check-if-negated-formula-is-unsatisfied
   (declare (salience ?*SALIENCE-DOMAIN-CHECK*))
-  
+
   (pddl-grounding (id ?grounding-id))
 
   (pddl-formula (id ?parent-base) (type negation))
@@ -400,7 +400,7 @@
 
 (defrule domain-check-if-conjunctive-formula-is-unsatisfied
   (declare (salience ?*SALIENCE-DOMAIN-CHECK*))
-  
+
   (pddl-grounding (id ?grounding-id))
 
   (pddl-formula (id ?parent-base) (type conjunction))
@@ -885,7 +885,7 @@
   (plan-action
     (action-name ?op)
     (goal-id ?g)
-    (plan-id ?p)	
+    (plan-id ?p)
     (param-names $?action-param-names)
     (id ?action-id)
     (param-values $?action-values& :
@@ -1193,7 +1193,6 @@
   (return ?values)
 )
 
-; TODO: ?action-name should be ?op
 (defrule domain-effects-check-for-sensed
   "Apply effects of an action after it succeeded."
   (declare (salience ?*SALIENCE-DOMAIN-APPLY*))
