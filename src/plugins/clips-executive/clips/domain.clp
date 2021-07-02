@@ -679,6 +679,7 @@
 =>
   (modify ?precond (operator ?op))
 )
+;get rid
 
 (defrule domain-add-operator-to-nested-precondition
   "If a precondition does not have an operator but the parent has one, then copy
@@ -688,6 +689,7 @@
 =>
   (modify ?precond (operator ?op))
 )
+;get rid
 
 (defrule domain-add-operator-to-atomic-precondition
   "If an atomic precondition does not have an operator but the parent has one,
@@ -697,6 +699,7 @@
 =>
   (modify ?precond (operator ?op))
 )
+;get rid
 
 (deffunction remove-precondition
   "Remove an atomic precondition from its parent and clean up the precondition
@@ -726,6 +729,7 @@
   )
   (retract ?precond-fact)
 )
+;adapt
 
 (deffunction domain-retract-grounding
   "Retract all ground preconditions."
@@ -737,6 +741,7 @@
                     (eq ?precond:grounded TRUE)
                     (retract ?precond))
 )
+;adapt
 
 
 (deffunction domain-is-precond-negative
@@ -772,6 +777,7 @@
   ; If there are any grounded preconditions, we need to recompute them.
   (domain-retract-grounding)
 )
+;adapt
 
 (defrule domain-replace-precond-on-sensed-val-effect-of-exog-action
   "If an exogenous action has a precondition for a value predicate that is also
@@ -813,6 +819,7 @@
   ; If there are any grounded preconditions, we need to recompute them.
   (domain-retract-grounding)
 )
+;adapt
 
 (defrule domain-ground-action-precondition
   "Ground a non-atomic precondition. Grounding here merely means that we
@@ -833,6 +840,7 @@
     (goal-id ?g) (plan-id ?p) (grounded-with ?action-id)
     (grounded TRUE))
 )
+;get rid
 
 (defrule domain-ground-effect-precondition
   "Ground a non-atomic precondition. Grounding here merely means that we
@@ -853,6 +861,7 @@
   (duplicate ?precond (goal-id ?g) (plan-id ?p) (grounded-with ?action-id)
     (grounded TRUE))
 )
+;adapt
 
 (defrule domain-ground-nested-precondition
   "Ground a non-atomic precondition that is part of another precondition. Copy
@@ -876,6 +885,7 @@
   (duplicate ?precond (goal-id ?g) (plan-id ?p) (grounded-with ?action-id)
     (grounded TRUE))
 )
+;get rid
 
 (defrule domain-ground-atomic-precondition
   "Ground an atomic precondition of an operator."
@@ -929,6 +939,7 @@
     (param-values ?values) (goal-id ?g) (plan-id ?p)
     (grounded-with ?action-id) (grounded TRUE))
 )
+;get rid
 
 (deffunction intersect
   "Compute the intersection of two multi-fields."
@@ -957,6 +968,7 @@
 =>
   (modify ?precond (is-satisfied TRUE))
 )
+;get rid
 
 (defrule domain-check-if-atomic-equality-precondition-is-satisfied
   ?precond <- (domain-atomic-precondition
@@ -971,6 +983,7 @@
 =>
   (modify ?precond (is-satisfied (eq (nth$ 1 ?params) (nth$ 2 ?params))))
 )
+;get rid
 
 (defrule domain-retract-atomic-precondition-if-not-satisfied
   (declare (salience ?*SALIENCE-DOMAIN-CHECK*))
@@ -984,6 +997,7 @@
 =>
   (modify ?precond (is-satisfied FALSE))
 )
+;get rid
 
 (defrule domain-check-if-negative-precondition-is-satisfied
   "A negative precondition is satisfied iff its (only) child is not satisfied.
@@ -1014,6 +1028,7 @@
 =>
   (modify ?precond (is-satisfied TRUE))
 )
+;get rid
 
 (defrule domain-retract-negative-precondition-if-child-is-satisfied
   "If a negative precondition's child is satisfied, the precondition is not
@@ -1043,6 +1058,7 @@
 =>
   (modify ?precond (is-satisfied FALSE))
 )
+;get rid
 
 (defrule domain-check-if-conjunctive-precondition-is-satisfied
   "All the precondition's children must be satisfied."
@@ -1074,6 +1090,7 @@
 =>
   (modify ?precond (is-satisfied TRUE))
 )
+;get rid
 
 (defrule domain-retract-conjunctive-precondition-if-child-is-not-satisfied
   "Make sure that a conjunctive precondition is not satisfied if any of its
@@ -1109,6 +1126,7 @@
 =>
   (modify ?precond (is-satisfied FALSE))
 )
+;get rid
 
 (defrule domain-check-if-disjunctive-precondition-is-satisfied
   "Check a grounded disjunctive precondition. At least one child must be
@@ -1139,6 +1157,7 @@
  =>
   (modify ?precond (is-satisfied TRUE))
 )
+;get rid
 
 (defrule domain-retract-disjunctive-precondition-if-child-is-not-satisfied
   "If a disjunctive precondition is satisfied but none of its children are, then
@@ -1171,6 +1190,7 @@
 =>
   (modify ?precond (is-satisfied FALSE))
 )
+;get rid
 
 (deffunction domain-ground-effect
   "Ground action effect parameters by replacing them with constants and values."
@@ -1225,6 +1245,7 @@
 	)
 	(modify ?pa (state ?next-state))
 )
+;adapt
 
 (defrule domain-effects-ignore-sensed
   "Do not wait for sensed effects if the operator is not a waiting operator."
@@ -1290,6 +1311,7 @@
 	)
 	(modify ?pa (state EFFECTS-APPLIED))
 )
+;adapt
 
 (defrule domain-effect-sensed-positive-holds
   "Remove a pending sensed positive fact that has been sensed."
@@ -1336,6 +1358,7 @@
   (modify ?a (state FINAL))
   (domain-retract-grounding)
 )
+;adapt
 
 ; This might be extended: if an action failed, but still all effects
 ; have been achieved, consider execution to have succeeded.  This
@@ -1350,6 +1373,7 @@
   (modify ?a (state FAILED))
   (domain-retract-grounding)
 )
+;adapt
 
 ; (defrule domain-check-if-action-is-executable
 ;   "If the precondition of an action is satisfied, the action is executable."
@@ -1387,6 +1411,7 @@
 =>
   (modify ?action (executable TRUE))
 )
+;adapt
 
 (defrule domain-check-precondition-has-an-operator
   "Check that for each precondition, some operator is defined."
@@ -1399,6 +1424,7 @@
     (str-cat "Precondition " ?precond
       " does not belong to any operator or precondition."))))
 )
+;get rid
 
 (defrule domain-check-object-types-exist
   "Make sure that each specified type of an object actually exists."
@@ -1444,6 +1470,7 @@
                         " condition and a condition on the predicate "
                         ?predicate " at the same time"))))
 )
+;get rid
 
 (defrule domain-check-atomic-precondition-is-on-predicate-or-equality
   "Make sure that all preconditions have a predicate or are set to equality."
@@ -1458,6 +1485,7 @@
     (error-msg (str-cat "Precondition " ?precond " must have a predicate "
                         "or set to equality"))))
 )
+;adapt
 
 (defrule domain-check-equality-must-have-exactly-two-parameters
   "Make sure that equalities always have exactly two parameters."
@@ -1473,6 +1501,7 @@
                         " but has " (length$ ?param-names) " parameters,"
                         " should be 2."))))
 )
+;get rid
 
 (defrule domain-check-value-predicate-must-have-only-one-value
   "Make sure that each value predicate has at most one value."
