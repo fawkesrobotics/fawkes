@@ -1516,7 +1516,7 @@
 )
 
 
-(defrule domain-check-grounded-pddl-predicate-has-two-params
+(defrule domain-check-grounded-pddl-equality-has-two-params
   (pddl-grounding (id ?grounding-id)
                   (param-names $?grounding-names)
                   (param-values $?grounding-values))
