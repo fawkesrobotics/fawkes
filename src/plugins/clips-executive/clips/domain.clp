@@ -44,7 +44,7 @@
 
 (deffunction domain-wipe ()
 	(foreach ?t (create$ domain-object-type domain-object domain-predicate domain-fact
-											 domain-precondition domain-atomic-precondition
+											 pddl-formula pddl-predicate pddl-grounding
 											 domain-operator domain-operator-parameter
 											 domain-effect domain-error)
 		(delayed-do-for-all-facts ((?d ?t)) TRUE (retract ?d))
