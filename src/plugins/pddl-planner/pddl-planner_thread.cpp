@@ -36,8 +36,9 @@
 using namespace fawkes;
 using namespace mongocxx;
 using namespace bsoncxx;
+using bsoncxx::builder::basic::kvp;
 
-/** @class PddlPlannerThread 'pddl-planner_thread.h' 
+/** @class PddlPlannerThread 'pddl-planner_thread.h'
  * Starts a pddl planner and writes the resulting plan into the robot memory
  * @author Frederik Zwilling
  */
