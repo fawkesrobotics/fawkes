@@ -49,13 +49,15 @@ PddlParser::getErrorContext(const iterator_type &start_it,
                             const iterator_type &end_it,
                             const iterator_type &current_it)
 {
-	auto               line = get_current_line(start_it, current_it, end_it);
+	auto        line     = get_current_line(start_it, current_it, end_it);
+	std::string line_str = std::string(line.begin(), line.end());
+	std::replace(begin(line_str), end(line_str), '\t', ' ');
 	std::ostringstream error_msg;
 	error_msg << " line:" << get_line(current_it) << ", col:" << get_column(line.begin(), current_it)
 	          << "\n";
 	while (!line.empty() && std::strchr("\r\n", *line.begin()))
 		line.advance_begin(1);
-	error_msg << line << "\n";
+	error_msg << line_str << "\n";
 	error_msg << std::string(std::distance(line.begin(), current_it), ' ')
 	          << "^ --- parsing halted here\n";
 	return error_msg.str();
