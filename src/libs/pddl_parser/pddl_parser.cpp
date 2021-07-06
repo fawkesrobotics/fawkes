@@ -85,8 +85,13 @@ PddlParser::parseDomain(const std::string &pddl_domain)
 	try {
 		r = phrase_parse(iter, end, g, s, dom);
 	} catch (qi::expectation_failure<iterator_type> const &e) {
-		throw PddlParserException(std::string("Syntax Error: ") + e.what()
-		                            + getErrorContext(iter, end, e.first),
+		using boost::spirit::basic_info_walker;
+		std::stringstream                                                   expectation;
+		boost::spirit::simple_printer<std::stringstream>                    pr(expectation);
+		basic_info_walker<boost::spirit::simple_printer<std::stringstream>> walker(pr, e.what_.tag, 0);
+		boost::apply_visitor(walker, e.what_.value);
+		throw PddlParserException(std::string("Syntax Error: ") + e.what() + " expected "
+		                            + expectation.str() + " at " + getErrorContext(iter, end, e.first),
 		                          PddlErrorType::SYNTAX_ERROR);
 	} catch (PddlSemanticsException const &e) {
 		throw PddlParserException(std::string("Semantic Error: ") + e.what()
