@@ -57,7 +57,7 @@ PddlParser::getErrorContext(const iterator_type &start_it,
 		line.advance_begin(1);
 	error_msg << line << "\n";
 	error_msg << std::string(std::distance(line.begin(), current_it), ' ')
-	          << "^ --- last correctly parsed\n";
+	          << "^ --- parsing halted here\n";
 	return error_msg.str();
 }
 
