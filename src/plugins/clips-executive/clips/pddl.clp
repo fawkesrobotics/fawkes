@@ -118,12 +118,12 @@
           (status PLANNED)
           (goal-id ?goal-id)
           (plan-id ?plan-id&
-            :(eq ?plan-id (bson-get (bson-get ?obj "o") "msg_id")))
+            :(eq ?plan-id (bson-get (bson-get ?obj "fullDocument") "msg_id")))
         )
   (test (eq (bson-get (bson-get ?obj "fullDocument") "plan") 1))
   =>
   (printout t "Fetched a new plan!" crlf)
-  (progn$ (?action (bson-get-array (bson-get ?obj "o") "actions"))
+  (progn$ (?action (bson-get-array (bson-get ?obj "fullDocument") "actions"))
     (bind ?action-name (sym-cat (bson-get ?action "name")))
     ; FF sometimes returns the pseudo-action REACH-GOAL. Filter it out.
     (if (neq ?action-name REACH-GOAL) then
