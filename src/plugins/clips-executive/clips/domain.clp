@@ -188,6 +188,20 @@
   (multislot param-values (type SYMBOL))
 )
 
+(deffunction domain-param-value-for-name
+  "Given a list of param names, param values and a specific key, return the
+  corresponding value"
+  (?param-values ?param-names ?param-name)
+
+  (bind ?pos (member$ ?param-name ?param-names))
+
+  (if ?pos then
+    (return (nth$ ?pos ?param-values))
+  )
+
+  (return FALSE)
+)
+
 (deftemplate pddl-formula
   "A PDDL formula representation in CLIPS, sourced from the preconditions of
   the PDDL domain description."
