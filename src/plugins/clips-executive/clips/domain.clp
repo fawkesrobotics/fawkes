@@ -748,21 +748,27 @@
   )
 )
 
-
-(deffunction domain-is-precond-negative
-  "Check if a non-atomic precondition is negative by checking all its parents
-   and counting the number of negations. If the number is odd, the precondition
+(deffunction domain-is-formula-negative
+  "Check if a formula is negative by checking all its parents
+   and counting the number of negations. If the number is odd, the formula
    is negative, otherwise it's positive."
-  (?precond-name)
+  (?precond-id)
   (do-for-fact
-    ((?precond domain-precondition))
-    (eq ?precond:name ?precond-name)
+    ((?precond pddl-formula))
+    (eq ?precond:id ?precond-id)
     (if (any-factp ((?op domain-operator)) (eq ?op:name ?precond:part-of)) then
       return (eq ?precond:type negation)
     )
-    (bind ?parent-is-negative (domain-is-precond-negative ?precond:part-of))
+    (bind ?parent-is-negative (domain-is-formula-negative ?precond:part-of))
     (return (neq (eq ?precond:type negation) ?parent-is-negative))
   )
+)
+
+(deffunction domain-is-precond-negative
+  "Mapping of the old domain-is-precond-negative to the new replacement function
+  for PDDL formulas for compatibility reasons."
+  (?precond-name)
+  (return (domain-is-formula-negative ?precond-name))
 )
 
 (deffunction domain-get-operator-for-pddl-predicate
