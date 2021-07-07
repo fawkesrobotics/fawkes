@@ -39,12 +39,14 @@ using namespace pddl_parser;
  */
 
 /** Initialize the CLIPS feature.
- * @param logger The logger to use for logging in the feature
  */
 PDDLCLIPSFeature::PDDLCLIPSFeature() : CLIPSFeature("pddl-parser")
 {
 }
 
+/** Initialize the looger to use.
+ * @param logger The logger to use for logging in the feature
+ */
 void
 PDDLCLIPSFeature::init_logger(fawkes::Logger *logger)
 {

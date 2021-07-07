@@ -47,11 +47,11 @@ PreconditionToCLIPSFactVisitor::PreconditionToCLIPSFactVisitor(const string &par
 
 /** Translate a quantified formula to a vector of strings.
  * Not implemented yet.
- * @param a The quantified formula to translate into a string.
+ * @param q The quantified formula to translate into a string.
  * @return An empty vector.
  */
 vector<string>
-PreconditionToCLIPSFactVisitor::operator()(QuantifiedFormula &a) const
+PreconditionToCLIPSFactVisitor::operator()(QuantifiedFormula &q) const
 {
 	throw PddlParserException("QuantifiedFormulas are not supported in CLIPS yet.");
 	return vector<string>();

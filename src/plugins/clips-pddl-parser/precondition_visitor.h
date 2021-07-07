@@ -33,7 +33,7 @@ public:
 	PreconditionToCLIPSFactVisitor(const std::string &parent, int sub_counter, bool is_main = false);
 	std::vector<std::string> operator()(pddl_parser::Atom &a) const;
 	std::vector<std::string> operator()(pddl_parser::Predicate &p) const;
-	std::vector<std::string> operator()(pddl_parser::QuantifiedFormula &p) const;
+	std::vector<std::string> operator()(pddl_parser::QuantifiedFormula &q) const;
 
 private:
 	std::string parent_;
