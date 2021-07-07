@@ -310,6 +310,7 @@ PddlPlannerThread::BSONFromActionList()
 					args.append(arg);
 				}
 			}));
+			actions.append(action);
 		}
 	}));
 
