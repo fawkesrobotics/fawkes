@@ -76,4 +76,5 @@
   (retract ?pp)
   (path-load "pddl.clp")
   (assert (ff-feature-loaded pddl_planner))
+  (assert (executive-init-signal (id pddl-planner-initialized)))
 )
