@@ -64,6 +64,7 @@ public:
 	virtual ~CLIPSFeatureAspect();
 
 protected:
+	/** List of all clips features */
 	std::list<CLIPSFeature *> clips_features_;
 };
 
