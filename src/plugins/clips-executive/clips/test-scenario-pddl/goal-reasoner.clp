@@ -54,8 +54,8 @@
 )
 
 ; #  Goal Monitoring
-(defrule goal-reasonder-completed
-	?g <- (goal (id ?goal-id) (mode COMPLETED))
+(defrule goal-reasoner-completed
+	?g <- (goal (id ?goal-id) (mode FINISHED) (outcome COMPLETED))
 	?gm <- (goal-meta (goal-id ?goal-id))
 	=>
 	(printout t "Goal '" ?goal-id "' has been completed, cleaning up" crlf)
@@ -69,7 +69,7 @@
 )
 
 (defrule goal-reasoner-failed
-	?g <- (goal (id ?goal-id) (mode FAILED))
+	?g <- (goal (id ?goal-id) (mode FINISHED) (outcome FAILED))
 	?gm <- (goal-meta (goal-id ?goal-id) (num-tries ?num-tries))
 	=>
 	(printout error "Goal '" ?goal-id "' has failed, cleaning up" crlf)
