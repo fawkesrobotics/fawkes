@@ -671,7 +671,7 @@
   (modify ?a (param-names ?param-names))
 )
 
-(deffunction remove-precondition-new
+(deffunction remove-precondition
   "Remove a sub-formula from its parent and clean up the forumla tree.
    If the parent is a disjunction with no other disjunct, simplify it to
    true by removing it recursively. If it is a negation, remove it recursively.
@@ -688,7 +688,7 @@
 
   (if ?parent then
     (if (eq (fact-slot-value ?parent type) negation) then
-      (remove-precondition-new ?parent)
+      (remove-precondition ?parent)
     )
     (if (and (eq (fact-slot-value ?parent type) disjunction)
              (not (any-factp ((?sibling pddl-formula)) (eq (fact-slot-value ?parent id)
@@ -699,7 +699,7 @@
              )
         )
       then
-      (remove-precondition-new ?parent)
+      (remove-precondition ?parent)
     )
     else
       (assert (pddl-formula (id (fact-slot-value ?precond-fact id))
@@ -712,7 +712,7 @@
   (retract ?precond-fact)
 )
 
-(deffunction domain-retract-grounding-new
+(deffunction domain-retract-grounding
   "Retract all groundings and grounded formulas associated with plan-actions"
   ()
   (do-for-all-facts ((?grounding pddl-grounding)) TRUE
@@ -763,7 +763,7 @@
   (return FALSE)
 )
 
-(defrule domain-remove-precond-on-sensed-nonval-effect-of-exog-action-new
+(defrule domain-remove-precond-on-sensed-nonval-effect-of-exog-action
   (domain-operator (name ?op) (exogenous TRUE))
   (domain-predicate (name ?pred) (sensed TRUE) (value-predicate FALSE))
   (domain-effect (part-of ?op)
@@ -776,11 +776,11 @@
                           (param-constants $?constants)
                           (predicate ?pred))
   =>
-  (remove-precondition-new ?pre)
-  (domain-retract-grounding-new)
+  (remove-precondition ?pre)
+  (domain-retract-grounding)
 )
 
-(defrule domain-replace-precond-on-sensed-val-effect-of-exog-action-new
+(defrule domain-replace-precond-on-sensed-val-effect-of-exog-action
   (domain-operator (name ?op) (exogenous TRUE))
   (domain-predicate (name ?pred) (sensed TRUE) (value-predicate TRUE))
   (domain-effect (part-of ?op)
@@ -824,10 +824,10 @@
   (modify ?pre (part-of ?precond) (id (sym-cat ?precond 1)))
 
   ; If there are any grounded preconditions, we need to recompute them.
-  (domain-retract-grounding-new)
+  (domain-retract-grounding)
 )
 
-(defrule domain-ground-effect-precondition-new
+(defrule domain-ground-effect-precondition
   "Ground a non-atomic precondition. Grounding here merely means that we
    duplicate the precondition and tie it to one specific effect-id."
   (declare (salience ?*SALIENCE-DOMAIN-GROUND*))
@@ -881,7 +881,7 @@
   (return ?values)
 )
 
-(defrule domain-effects-check-for-sensed-new
+(defrule domain-effects-check-for-sensed
   "Apply effects of an action after it succeeded."
   (declare (salience ?*SALIENCE-DOMAIN-APPLY*))
   (goal (id ?g))
@@ -930,7 +930,7 @@
 	(modify ?pa (state SENSED-EFFECTS-HOLD))
 )
 
-(defrule domain-effects-apply-new
+(defrule domain-effects-apply
   "Apply effects of an action after it succeeded."
   (declare (salience ?*SALIENCE-DOMAIN-APPLY*))
   (goal (id ?g))
@@ -1029,25 +1029,25 @@
   (retract ?ef)
 )
 
-(defrule domain-action-final-new
+(defrule domain-action-final
   "After the effects of an action have been applied, change it to FINAL."
   (declare (salience ?*SALIENCE-DOMAIN-APPLY*))
   ?a <- (plan-action (id ?action-id) (state EFFECTS-APPLIED))
   =>
   (modify ?a (state FINAL))
-  (domain-retract-grounding-new)
+  (domain-retract-grounding)
 )
 
-(defrule domain-action-failed-new
+(defrule domain-action-failed
   "An action has failed."
   (declare (salience ?*SALIENCE-DOMAIN-APPLY*))
   ?a <- (plan-action (id ?action-id) (state EXECUTION-FAILED))
   =>
   (modify ?a (state FAILED))
-  (domain-retract-grounding-new)
+  (domain-retract-grounding)
 )
 
-(defrule domain-check-if-action-is-executable-without-precondition-new
+(defrule domain-check-if-action-is-executable-without-precondition
   "If the precondition of an action does not exist, the action is alwaysexecutable."
   (declare (salience ?*SALIENCE-DOMAIN-CHECK*))
   ?action <- (plan-action (id ?action-id)
