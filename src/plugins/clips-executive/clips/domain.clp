@@ -90,7 +90,6 @@
   (multislot param-values)
 )
 
-
 (deftemplate domain-operator
   "An operator of the domain. This only defines the name of the operator,
    other properties such as parameters, precondition, or effects are
@@ -109,54 +108,6 @@
   (slot name)
   (slot operator (type SYMBOL))
   (slot type (type SYMBOL) (default object))
-)
-
-(deftemplate domain-precondition
-  "A (non-atomic) precondition of an operator or a conditional effect.
-   Must be either part-of an operator or another precondition. Use the name to
-   assign other preconditions as part of this precondition. This can currently
-   be a conjunction or a negation. If it is a negation, it can have only one
-   sub-condition. If it is a conjunction, it can have an arbitrary number of
-   sub-conditions. The action is an optional ID of grounded action this
-   precondition belongs to. Note that grounded should always be yes if the
-   action is not nil."
-  (slot operator (type SYMBOL))
-  (slot part-of (type SYMBOL))
-  (slot goal-id (type SYMBOL))
-  (slot plan-id (type SYMBOL))
-  ; TODO: Rename to action for consistency. Do this when we no longer need to
-  ; stay compatible with lab course code.
-  (slot grounded-with (type INTEGER) (default 0))
-  (slot name (type SYMBOL) (default-dynamic (gensym*)))
-  (slot type (type SYMBOL) (allowed-values conjunction disjunction negation))
-  (slot grounded (type SYMBOL) (allowed-values TRUE FALSE) (default FALSE))
-  (slot is-satisfied (type SYMBOL) (allowed-values TRUE FALSE) (default FALSE))
-)
-
-(deftemplate domain-atomic-precondition
-  "An atomic precondition of an operator. This must always be part-of a
-   non-atomic precondition. The multislot param-constants can be used to define
-   predicate arguments that are not parameters of the operator. After grounding,
-   if the ith slot of param-constants contains the value v != nil, then the ith
-   slot of param-values will also contain the value v. In that case, the ith
-   value of param-names will be ignored and should be set to c (for constant).
-   See the tests for an example.
-"
-  (slot operator (type SYMBOL))
-  (slot part-of (type SYMBOL))
-  (slot goal-id (type SYMBOL))
-  (slot plan-id (type SYMBOL))
-  ; TODO: Rename to action for consistency. Do this when we no longer need to
-  ; stay compatible with lab course code.
-  (slot grounded-with (type INTEGER) (default 0))
-  (slot name (type SYMBOL) (default-dynamic (gensym*)))
-  (slot predicate (type SYMBOL))
-  (slot equality (type SYMBOL) (allowed-values TRUE FALSE) (default FALSE))
-  (multislot param-names (type SYMBOL))
-  (multislot param-values (default (create$)))
-  (multislot param-constants (default (create$)))
-  (slot grounded (type SYMBOL) (allowed-values TRUE FALSE) (default FALSE))
-  (slot is-satisfied (type SYMBOL) (allowed-values TRUE FALSE) (default FALSE))
 )
 
 (deftemplate domain-effect

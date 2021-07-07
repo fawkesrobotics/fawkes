@@ -81,17 +81,6 @@ PreconditionToCLIPSFactVisitor::operator()(Predicate &p) const
 		} else if (p.function == "not") {
 			type = "negation";
 		}
-		res.push_back(string("(domain-precondition"
-		                     " (name "
-		                     + name
-		                     + ")"
-		                       " (part-of "
-		                     + parent_
-		                     + ")"
-		                       " (type "
-		                     + type
-		                     + ")"
-		                       ")"));
 
 		res.push_back(string("(pddl-formula"
 		                     " (id "
@@ -118,15 +107,6 @@ PreconditionToCLIPSFactVisitor::operator()(Predicate &p) const
 			// Special case: this is the main precondition, but it's an atomic
 			// condition. Add an additional condition so we never have an atomic
 			// precondition as the main precondition.
-			res.push_back(string("(domain-precondition"
-			                     " (part-of "
-			                     + parent_
-			                     + ")"
-			                       " (name "
-			                     + name
-			                     + ")"
-			                       " (type conjunction)"
-			                       ")"));
 			res.push_back(string("(pddl-formula"
 			                     " (part-of "
 			                     + parent_
@@ -170,30 +150,16 @@ PreconditionToCLIPSFactVisitor::operator()(Predicate &p) const
 		string predicate_string_new;
 		if (p.function == "=") {
 			// It's not a predicate but an equality.
-			predicate_string = " (equality TRUE)";
-			predicate_string_new = " (predicate EQUALITY)";
+			predicate_string = " (predicate EQUALITY)";
 		} else {
 			predicate_string = " (predicate " + p.function + ")";
-			predicate_string_new = predicate_string;
 		}
-
-		res.push_back(string("(domain-atomic-precondition"
-		                     " (part-of "
-		                     + new_parent
-		                     + ")"
-		                       " (name "
-		                     + name + ")" + predicate_string + " (param-names (create$" + params
-		                     + "))"
-		                       " (param-constants (create$"
-		                     + constants
-		                     + "))"
-		                       ")"));
 		res.push_back(string("(pddl-predicate"
 		                     " (part-of "
 		                     + new_parent
 		                     + ")"
 		                       " (id "
-		                     + name + ")" + predicate_string_new + " (param-names (create$" + params
+		                     + name + ")" + predicate_string + " (param-names (create$" + params
 		                     + "))"
 		                       " (param-constants (create$"
 		                     + constants
