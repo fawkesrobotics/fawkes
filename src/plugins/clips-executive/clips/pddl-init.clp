@@ -62,7 +62,6 @@
   =>
   (printout t "Registering robot memory trigger for new plans" crlf)
   (bind ?query (bson-create))
-  (bson-append ?query "plan" 1)
   (bind ?trigger (robmem-trigger-register "robmem.pddl-plan" ?query "new-plan"))
   (bson-destroy ?query)
   (assert (registered-trigger "robmem.pddl-plan" ?trigger))
