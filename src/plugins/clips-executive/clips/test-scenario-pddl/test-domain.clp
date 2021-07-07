@@ -10,7 +10,7 @@
   (executive-init)
   (not (domain-loaded))
 =>
-  (parse-pddl-domain (path-resolve "test-scenario/domain.pddl"))
+  (parse-pddl-domain (path-resolve "test-scenario-pddl/domain.pddl"))
   (assert (domain-loaded))
   (assert (skiller-control))
 )
