@@ -41,7 +41,7 @@ public:
 		          ///< first unlocking it shall succeed in locking the mutex.
 	} Type;
 
-	Mutex(Type type = NORMAL);
+	Mutex();
 	~Mutex();
 
 	std::mutex &get_raw_mutex();
@@ -51,6 +51,9 @@ public:
 	void unlock();
 
 	void stopby();
+
+protected:
+	Mutex(Type type);
 
 private:
 	std::variant<std::mutex, std::recursive_mutex> mutex;

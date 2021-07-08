@@ -55,6 +55,13 @@ namespace fawkes {
  */
 
 /** Constructor.
+   * Construct a non-recursive mutex.
+   */
+Mutex::Mutex() : Mutex(Type::NORMAL)
+{
+}
+
+/** Constructor.
  * @param type mutex type 
  */
 Mutex::Mutex(Type type)

@@ -27,6 +27,7 @@
 #define _CORE_UTILS_LOCKPTR_H_
 
 #include <core/threading/mutex.h>
+#include <core/threading/recursive_mutex.h>
 #include <core/utils/refptr.h>
 
 namespace fawkes {
@@ -346,8 +347,8 @@ inline LockPtr<T_CppObject>::LockPtr(T_CppObject *cpp_object, bool recursive_mut
 {
 	if (cpp_object) {
 		ref_count_  = new int;
-		ref_mutex_  = new Mutex(Mutex::RECURSIVE);
-		obj_mutex_  = new Mutex(recursive_mutex ? Mutex::RECURSIVE : Mutex::NORMAL);
+		ref_mutex_  = new RecursiveMutex();
+		obj_mutex_  = recursive_mutex ? new RecursiveMutex() : new Mutex();
 		*ref_count_ = 1; //This will be decremented in the destructor.
 	}
 }
