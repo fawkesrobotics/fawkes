@@ -25,7 +25,6 @@
 #include "clock_adapter.h"
 #include "log_adapter.h"
 #include "log_stream.h"
-#include "protobuf_adapter.h"
 #include "thread_adapter.h"
 #ifdef HAVE_NAVGRAPH
 #	include "navgraph_access_thread.h"

@@ -25,7 +25,7 @@ include $(BUILDSYSDIR)/protobuf.mk
 
 CFLAGS += $(CFLAGS_CPP11)
 
-LIBS_gazsim_comm = fawkescore fawkesaspects fawkes_protobuf_comm
+LIBS_gazsim_comm = fawkescore fawkesaspects
 OBJS_gazsim_comm = gazsim_comm_plugin.o gazsim_comm_thread.o
 
 OBJS_all    = $(OBJS_gazsim_comm)
@@ -34,7 +34,7 @@ PLUGINS_all = $(PLUGINDIR)/gazsim-comm.so
 REQ_BOOST_LIBS = system
 HAVE_BOOST_LIBS = $(call boost-have-libs,$(REQ_BOOST_LIBS))
 
-ifeq ($(HAVE_GAZEBO)$(HAVE_PROTOBUF)$(HAVE_BOOST_LIBS),111)
+ifeq ($(HAVE_GAZEBO)$(HAVE_PROTOBUF)$(HAVE_PROTOBUF_COMM)$(HAVE_BOOST_LIBS),1111)
   CFLAGS  += $(CFLAGS_PROTOBUF) \
 	     $(call boost-libs-cflags,$(REQ_BOOST_LIBS))
   LDFLAGS += $(LDFLAGS_PROTOBUF) \
@@ -47,6 +47,9 @@ else
   endif
   ifneq ($(HAVE_PROTOBUF),1)
     WARN_TARGETS += warning_protobuf
+  endif
+  ifneq ($(HAVE_PROTOBUF_COMM),1)
+    WARN_TARGETS += warning_protobuf_comm
   endif
   ifneq ($(HAVE_BOOST_LIBS),1)
     WARN_TARGETS += warning_boost
@@ -63,6 +66,9 @@ warning_gazebo:
 warning_protobuf:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting gazsim-comm Plugin$(TNORMAL) " \
 		"(protobuf[-devel] not installed)"
+warning_protobuf_comm:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting gazsim-comm Plugin$(TNORMAL) " \
+		"(protobuf_comm[-devel] not installed)"
 warning_boost:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting gazsim-comm Plugin$(TNORMAL) " \
 		"(required boostlibs (system) not installed)"

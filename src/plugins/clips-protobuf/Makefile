@@ -21,7 +21,7 @@ include $(BUILDSYSDIR)/boost.mk
 
 LIBS_clips_protobuf = \
 	fawkescore fawkesutils fawkesaspects fawkesclipsaspect \
-	fawkes_protobuf_comm fawkes_protobuf_clips
+	fawkes_protobuf_clips
 OBJS_clips_protobuf = clips-protobuf-plugin.o clips-protobuf-thread.o
 
 OBJS_all    = $(OBJS_clips_protobuf)
@@ -34,10 +34,10 @@ DESTDIR_clips_files = $(EXEC_SHAREDIR)/clips/clips-protobuf
 REQ_BOOST_LIBS = system
 HAVE_BOOST_LIBS = $(call boost-have-libs,$(REQ_BOOST_LIBS))
 
-ifeq ($(HAVE_CPP11)$(HAVE_PROTOBUF)$(HAVE_CLIPS)$(HAVE_BOOST_LIBS),1111)
-  CFLAGS  += $(CFLAGS_PROTOBUF)  $(CFLAGS_CLIPS) $(CFLAGS_CPP11) \
+ifeq ($(HAVE_CPP11)$(HAVE_PROTOBUF)$(HAVE_PROTOBUF_COMM)$(HAVE_CLIPS)$(HAVE_BOOST_LIBS),11111)
+  CFLAGS  += $(CFLAGS_PROTOBUF) $(CFLAGS_PROTOBUF_COMM) $(CFLAGS_CLIPS) $(CFLAGS_CPP11) \
 	     $(call boost-libs-cflags,$(REQ_BOOST_LIBS))
-  LDFLAGS += $(LDFLAGS_PROTOBUF) $(LDFLAGS_CLIPS) \
+  LDFLAGS += $(LDFLAGS_PROTOBUF) $(LDFLAGS_PROTOBUF_COMM) $(LDFLAGS_CLIPS) \
 	     $(call boost-libs-ldflags,$(REQ_BOOST_LIBS))
 
   PLUGINS_build = $(PLUGINS_all)
@@ -50,6 +50,9 @@ else
   ifneq ($(HAVE_PROTOBUF),1)
     WARN_TARGETS += warning_protobuf
   endif
+  ifneq ($(HAVE_PROTOBUF_COMM),1)
+    WARN_TARGETS += warning_protobuf_comm
+  endif
   ifneq ($(HAVE_CLIPS),1)
     WARN_TARGETS = warning_clips
   endif
@@ -59,11 +62,11 @@ else
 endif
 
 ifeq ($(OBJSSUBMAKE),1)
-all: $(WARN_TARGETS)
+all: $(WARN_TARGETS) $(WARN_TARGETS_BOOST)
 warning_protobuf:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Cannot build clips-protobuf plugin$(TNORMAL) (protobuf not found)"
-
-.PHONY: warning_clips warning_cpp11
+warning_protobuf_comm:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Cannot build clips-protobuf plugin$(TNORMAL) (protobuf_comm not found)"
 warning_clips:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting clips-protobuf plugin$(TNORMAL) ($(CLIPS_ERROR))"
 warning_cpp11:

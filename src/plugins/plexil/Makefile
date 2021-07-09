@@ -47,14 +47,14 @@ LIBS_plexil_ThreadName = fawkescore \
 NOSOVER_plexil_ThreadName = 1
 
 OBJS_plexil_ProtobufCommAdapter = protobuf_adapter.o
-LIBS_plexil_ProtobufCommAdapter = fawkescore fawkesutils fawkes_protobuf_comm \
+LIBS_plexil_ProtobufCommAdapter = fawkescore fawkesutils \
                                   PlexilAppFramework PlexilValue PlexilIntfc PlexilUtils pugixml
-CFLAGS_protobuf_adapter            = $(CFLAGS) $(CFLAGS_PROTOBUF)
-LDFLAGS_plexil_ProtobufCommAdapter = $(LDFLAGS) $(LDFLAGS_PROTOBUF)
+CFLAGS_protobuf_adapter            = $(CFLAGS) $(CFLAGS_PROTOBUF) $(CFLAGS_PROTOBUF_COMM)
+LDFLAGS_plexil_ProtobufCommAdapter = $(LDFLAGS) $(LDFLAGS_PROTOBUF) $(LDFLAGS_PROTOBUF_COMM)
 NOSOVER_plexil_ProtobufCommAdapter = 1
 
 OBJS_plexil_NavGraphAdapter = navgraph_adapter.o
-LIBS_plexil_NavGraphAdapter = fawkescore fawkesutils fawkes_protobuf_comm fawkesblackboard \
+LIBS_plexil_NavGraphAdapter = fawkescore fawkesutils fawkesblackboard \
                               fawkesinterface Position3DInterface fawkesnavgraph \
                               PlexilAppFramework PlexilValue PlexilIntfc PlexilUtils
 NOSOVER_plexil_NavGraphAdapter = 1
@@ -108,10 +108,15 @@ ifeq ($(HAVE_PLEXIL)$(HAVE_PLEXIL_BOOST_LIBS),11)
 	LIBS_build = $(LIBS_base)
   PLUGINS_build = $(PLUGINS_all)
 
-  ifeq ($(HAVE_PROTOBUF),1)
+  ifeq ($(HAVE_PROTOBUF)$(HAVE_PROTOBUF_COMM),11)
     LIBS_build += $(LIBS_pb)
   else
-    WARN_TARGETS += warning_protobuf
+    ifneq ($(HAVE_PROTOBUF),1)
+      WARN_TARGETS += warning_protobuf
+    endif
+    ifneq ($(HAVE_PROTOBUF_COMM),1)
+      WARN_TARGETS += warning_protobuf_comm
+    endif
   endif
 
   ifeq ($(HAVE_NAVGRAPH),1)
@@ -154,6 +159,8 @@ warning_navgraph:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting NavGraphAdapter for plexil$(TNORMAL) (navgraphaspect not available)"
 warning_protobuf:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ProtobufCommAdapter for plexil$(TNORMAL) (protobuf not available)"
+warning_protobuf_comm:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ProtobufCommAdapter for plexil$(TNORMAL) (protobuf_comm not available)"
 endif
 
 include $(BUILDSYSDIR)/base.mk

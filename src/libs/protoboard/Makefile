@@ -29,7 +29,6 @@ endif
 LIBS_libfawkesprotoboard = \
   fawkescore fawkesaspects \
   fawkesblackboard fawkesinterface \
-  fawkes_protobuf_comm \
   ProtobufPeerInterface
 
 OBJS_libfawkesprotoboard = protobuf_thread.o protobuf_to_bb.o blackboard_manager.o
@@ -37,11 +36,21 @@ OBJS_libfawkesprotoboard = protobuf_thread.o protobuf_to_bb.o blackboard_manager
 LIBS_all = $(LIBDIR)/libfawkesprotoboard.$(SOEXT)
 OBJS_all = $(OBJS_libfawkesprotoboard)
 
-
-ifneq ($(GCC_TOO_OLD),1)
-  LIBS_build  = $(LIBS_all)
+ifeq ($(HAVE_PROTOBUF)$(HAVE_PROTOBUF_COMM),11)
+  CFLAGS += $(CFLAGS_PROTOBUF) $(CFLAGS_PROTOBUF_COMM)
+  LDFLAGS += $(LDFLAGS_PROTOBUF) $(LDFLAGS_PROTOBUF_COMM)
+  ifneq ($(GCC_TOO_OLD),1)
+    LIBS_build  = $(LIBS_all)
+  else
+    WARN_TARGETS += warning_old_gcc
+  endif
 else
-  WARN_TARGETS += warning_old_gcc
+  ifneq ($(HAVE_PROTOBUF),1)
+    WARN_TARGETS += warning_protobuf
+  endif
+  ifneq ($(HAVE_PROTOBUF_COMM),1)
+    WARN_TARGETS += warning_protobuf_comm
+  endif
 endif
 
 ALLOW_UNDEF_libfawkesprotoboard = 1
@@ -49,6 +58,10 @@ ALLOW_UNDEF_libfawkesprotoboard = 1
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS) $(WARN_TARGETS_BOOST)
 .PHONY: $(WARN_TARGETS)
+warning_protobuf:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Can't build protoboard plugin$(TNORMAL) (protobuf not found)"
+warning_protobuf_comm:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Can't build protoboard plugin$(TNORMAL) (protobuf_comm not found)"
 warning_old_gcc:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Can't build protoboard plugin$(TNORMAL) (GCC too old, have $(GCC_VERSION), required 4.8)"
 endif

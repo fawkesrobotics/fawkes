@@ -41,6 +41,12 @@ ifeq ($(HAVE_PROTOBUF),1)
   LIBDIRS_BASE += $(PROTOBUF_LIBDIR)
 endif
 
+ifeq ($(HAVE_PROTOBUF),1)
+  HAVE_PROTOBUF_COMM = $(if $(shell $(PKGCONFIG) --exists 'protobuf_comm'; echo $${?/1/}),1,0)
+  CFLAGS_PROTOBUF_COMM = $(shell $(PKGCONFIG) --cflags 'protobuf_comm')
+  LDFLAGS_PROTOBUF_COMM = $(shell $(PKGCONFIG) --libs 'protobuf_comm')
+endif
+
 # Backward compatibility if protobuf.mk was included last
 ifneq ($(PROTOBUF_all),)
   ifndef __buildsys_protobuf_msgs_mk_

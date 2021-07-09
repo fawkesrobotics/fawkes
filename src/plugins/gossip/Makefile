@@ -23,7 +23,7 @@ PRESUBDIRS = gossip aspect
 CFLAGS += $(CFLAGS_CPP11)
 
 LIBS_gossip = \
-	fawkescore fawkesutils fawkesaspects fawkes_protobuf_comm \
+	fawkescore fawkesutils fawkesaspects \
 	fawkesgossip fawkesgossipaspect
 OBJS_gossip = gossip_plugin.o gossip_thread.o
 
@@ -33,7 +33,7 @@ PLUGINS_all = $(PLUGINDIR)/gossip.so
 REQ_BOOST_LIBS = system
 HAVE_BOOST_LIBS = $(call boost-have-libs,$(REQ_BOOST_LIBS))
 
-ifeq ($(HAVE_PROTOBUF)$(HAVE_BOOST_LIBS),11)
+ifeq ($(HAVE_PROTOBUF)$(HAVE_PROTOBUF_COMM)$(HAVE_BOOST_LIBS),111)
   CFLAGS  += $(CFLAGS_PROTOBUF) \
 	     $(call boost-libs-cflags,$(REQ_BOOST_LIBS))
   LDFLAGS += $(LDFLAGS_PROTOBUF) \
@@ -43,6 +43,9 @@ ifeq ($(HAVE_PROTOBUF)$(HAVE_BOOST_LIBS),11)
 else
   ifneq ($(HAVE_PROTOBUF),1)
     WARN_TARGETS += warning_protobuf
+  endif
+  ifneq ($(HAVE_PROTOBUF_COMM),1)
+    WARN_TARGETS += warning_protobuf_comm
   endif
   ifneq ($(HAVE_BOOST_LIBS),1)
     WARN_TARGETS_BOOST = $(foreach l,$(REQ_BOOST_LIBS),$(if $(call boost-have-lib,$l),, warning_boost_$l))
@@ -55,9 +58,12 @@ aspect: gossip
 
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
-.PHONY: warning_protobuf $(WARN_TARGETS_BOOST)
+.PHONY: $(WARN_TARGETS) $(WARN_TARGETS_BOOST)
 warning_protobuf:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Cannot build gossip plugin$(TNORMAL) (protobuf not found)"
+
+warning_protobuf_comm:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Cannot build gossip plugin$(TNORMAL) (protobuf_comm not found)"
 
 $(WARN_TARGETS_BOOST): warning_boost_%:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Cannot build gossip plugin$(TNORMAL) (Boost library $* not found)"

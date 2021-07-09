@@ -19,12 +19,12 @@ include $(BUILDSYSDIR)/protobuf.mk
 include $(BUILDSYSDIR)/boost.mk
 
 LIBS_gex_sender = \
-	fawkescore fawkesutils fawkesaspects fawkes_protobuf_comm \
+	fawkescore fawkesutils fawkesaspects \
 	fawkesgossip fawkesgossipaspect gossip_example_msgs
 OBJS_gex_sender = gex_sender_plugin.o gex_sender_thread.o
 
 LIBS_gex_receiver = \
-	fawkescore fawkesutils fawkesaspects fawkes_protobuf_comm \
+	fawkescore fawkesutils fawkesaspects \
 	fawkesgossip fawkesgossipaspect gossip_example_msgs
 OBJS_gex_receiver = gex_receiver_plugin.o gex_receiver_thread.o
 
@@ -35,10 +35,10 @@ PLUGINS_all = $(PLUGINDIR)/gex-sender.$(SOEXT) \
 REQ_BOOST_LIBS = system signals2
 HAVE_BOOST_LIBS = $(call boost-have-libs,$(REQ_BOOST_LIBS))
 
-ifeq ($(HAVE_CPP11)$(HAVE_PROTOBUF)$(HAVE_BOOST_LIBS),111)
-  CFLAGS  += $(CFLAGS_PROTOBUF) $(CFLAGS_CPP11) \
+ifeq ($(HAVE_CPP11)$(HAVE_PROTOBUF)$(HAVE_PROTOBUF_COMM)$(HAVE_BOOST_LIBS),1111)
+  CFLAGS  += $(CFLAGS_PROTOBUF) $(CFLAGS_PROTOBUF_COMM) $(CFLAGS_CPP11) \
              $(call boost-libs-cflags,$(REQ_BOOST_LIBS))
-  LDFLAGS += $(LDFLAGS_PROTOBUF) \
+  LDFLAGS += $(LDFLAGS_PROTOBUF) $(LDFLAGS_PROTOBUF_COMM) \
              $(call boost-libs-ldflags,$(REQ_BOOST_LIBS))
 
   PLUGINS_build = $(PLUGINS_all)
@@ -48,6 +48,9 @@ else
   endif
   ifneq ($(HAVE_PROTOBUF),1)
     WARN_TARGETS += warning_protobuf
+  endif
+  ifneq ($(HAVE_PROTOBUF_COMM),1)
+    WARN_TARGETS += warning_protobuf_comm
   endif
   ifneq ($(HAVE_BOOST_LIBS),1)
     WARN_TARGETS_BOOST = $(foreach l,$(REQ_BOOST_LIBS),$(if $(call boost-have-lib,$l),, warning_boost_$l))
@@ -67,6 +70,9 @@ warning_cpp11:
 
 warning_protobuf:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Cannot build gossip examples$(TNORMAL) (protobuf not found)"
+
+warning_protobuf_comm:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Cannot build gossip examples$(TNORMAL) (protobuf_comm not found)"
 
 $(WARN_TARGETS_BOOST): warning_boost_%:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Cannot build gossip examples$(TNORMAL) (Boost library $* not found)"
