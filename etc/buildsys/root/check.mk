@@ -28,23 +28,15 @@ __buildsys_root_check_mk_ := 1
 
 YAMLLINT ?= 1
 
-GITFILES = git ls-files --full-name \*.{h,cpp,py} | awk "{ print \"$$(git rev-parse --show-toplevel)/\"\$$1 }"
+GIT_LICCHECK_FILES = git ls-files --full-name \*.{h,cpp,py} | \
+                     awk "{ print \"$$(git rev-parse --show-toplevel)/\"\$$1 }" | \
+                     git check-attr --stdin ignore-license-check | \
+                     awk '$$3 != "set" { print $$1; }' | tr -d ':'
 
 .PHONY: license-check
 license-check:
 	$(SILENT) echo -e "$(INDENT_PRINT)[CHK] Checking license headers"
-	$(SILENTSYMB)if which perl >/dev/null; then \
-		perl $(FAWKES_BASEDIR)/etc/licscripts/find_invlic.pl -k <($(GITFILES)) -p src -p etc $(if $(SUBMODULE_EXTERN),-p fawkes/src) $(wildcard $(FAWKES_BASEDIR)/doc/headers/lichead*.*); \
-		if [ $$? = 0 ]; then \
-			echo -e "$(INDENT_PRINT)$(TGREEN)--> All source files have a proper license header.$(TNORMAL)"; \
-		else \
-			echo -e "$(INDENT_PRINT)$(TRED)--> Some source files do not have a proper license header. Fix it!$(TNORMAL)"; \
-			exit 1; \
-		fi \
-	else \
-		echo -e "$(INDENT_PRINT)$(TRED)--- Cannot do license check$(TNORMAL) (perl not installed)"; \
-		exit 1; \
-	fi
+	$(SILENT) $(FAWKES_BASEDIR)/etc/licscripts/check_license.bash $$($(GIT_LICCHECK_FILES))
 
 .PHONY: format-check
 format-check: check-parallel
