@@ -280,7 +280,7 @@ StringConversions::resolve_path(std::string s)
 			res.replace(start_pos, it->first.size(), it->second);
 		}
 	}
-	return res;
+	return StringConversions::trim(res);
 }
 
 /** Resolves vector of path-string with \@...\@ tags
