@@ -70,11 +70,9 @@ PddlRobotMemoryThread::init()
 	//read config values
 	collection = config->get_string("plugins/pddl-robot-memory/collection");
 	input_path = StringConversions::resolve_path(
-	  "@BASEDIR@/src/agents/"
-	  + config->get_string("plugins/pddl-robot-memory/input-problem-description"));
+	  "@BASEDIR@/src/" + config->get_string("plugins/pddl-robot-memory/input-problem-description"));
 	output_path = StringConversions::resolve_path(
-	  "@BASEDIR@/src/agents/"
-	  + config->get_string("plugins/pddl-robot-memory/output-problem-description"));
+	  "@BASEDIR@/src/" + config->get_string("plugins/pddl-robot-memory/output-problem-description"));
 	if (config->exists("plugins/pddl-robot-memory/goal"))
 		goal = config->get_string("plugins/pddl-robot-memory/goal");
 
@@ -172,16 +170,35 @@ PddlRobotMemoryThread::loop()
 		}
 	}
 
-	basic::document aggregate_query;
-	aggregate_query.append(basic::kvp("$facet", facets.view()));
-	std::vector<document::view> aggregate_pipeline{aggregate_query.view()};
-	auto                        res    = robot_memory->aggregate(aggregate_pipeline, collection);
-	auto                        result = res.view()["result"]["0"].get_document().view();
-	//BSONObj                     result = res.getField("result").Obj()["0"].Obj();
-	for (auto e : result) {
-		for (auto f : e.get_document().view()) {
-			ctemplate::TemplateDictionary *entry_dict = dict.AddSectionDictionary(std::string(e.key()));
-			fill_dict_from_document(entry_dict, f.get_document().view());
+	basic::document    aggregate_query;
+	mongocxx::pipeline aggregate_pipeline{};
+	aggregate_pipeline.facet(facets.view());
+	auto res = robot_memory->aggregate(aggregate_pipeline, collection);
+	for (auto doc : res) {
+		for (document::element ele : doc) {
+			// check validity && type before trying to iterate
+			if (ele && ele.type() == type::k_array) {
+				array::view subarray{ele.get_array().value};
+				for (array::element msg : subarray) {
+					if (msg.type() == bsoncxx::type::k_document) {
+						ctemplate::TemplateDictionary *entry_dict =
+						  dict.AddSectionDictionary(std::string(ele.key()).c_str());
+						fill_dict_from_document(entry_dict, msg.get_document().view());
+					} else {
+						throw Exception(
+						  (std::string("Error while retrieving domain facts and objects: expected document "
+						               "type but got ")
+						   + bsoncxx::to_string(msg.type()))
+						    .c_str());
+					}
+				}
+			} else {
+				throw Exception(
+				  (std::string(
+				     "Error while retrieving domain facts and objects: expected k_array type but got: ")
+				   + bsoncxx::to_string(ele.type()))
+				    .c_str());
+			}
 		}
 	}
 
@@ -281,17 +298,22 @@ PddlRobotMemoryThread::fill_dict_from_document(ctemplate::TemplateDictionary *di
 			// access array elements as if they were a subdocument with key-value pairs
 			// using the indices as keys
 			basic::document b;
-			array::view     array = elem.get_array();
+			array::view     array = elem.get_array().value;
 			uint            i     = 0;
 			for (auto e : array) {
-				b.append(basic::kvp(std::to_string(i++), e.get_document().view()));
+				b.append(basic::kvp(std::to_string(i++), e.get_value()));
 			}
 			fill_dict_from_document(dict, b.view(), prefix + std::string(elem.key()) + "_");
 			// additionally feed the whole array as space-separated list
 			std::string array_string;
 			for (auto e : array) {
-				// TODO: This only works for string arrays, adapt to other types.
-				array_string += " " + e.get_utf8().value.to_string();
+				// TODO:adapt to other types.
+				array_string += " ";
+				switch (e.type()) {
+				case type::k_int64: array_string += std::to_string(e.get_int64()); break;
+				case type::k_utf8: array_string += e.get_utf8().value.to_string(); break;
+				default: throw Exception("Not implemented");
+				}
 			}
 			dict->SetValue(prefix + std::string(elem.key()), array_string);
 			break;

@@ -40,6 +40,18 @@ EffectToCLIPSFactVisitor::EffectToCLIPSFactVisitor(const string &pddl_operator, 
 {
 }
 
+/** Translate a quantified formula to a vector of strings.
+ * Not implemented yet.
+ * @param q The quantified formula to translate into a string.
+ * @return An empty vector.
+ */
+vector<string>
+EffectToCLIPSFactVisitor::operator()(QuantifiedFormula &q) const
+{
+	throw PddlParserException("QuantifiedFormulas are not supported in CLIPS yet.");
+	return vector<string>();
+}
+
 /** Translate an Atom into a vector of strings.
  * Note that this does not return a CLIPS fact because we do not store atoms
  * (parameter names or constants) as separate facts. This needs to be further
@@ -67,7 +79,8 @@ EffectToCLIPSFactVisitor::operator()(Predicate &p) const
 	if (p.function == "and") {
 		for (Expression &sub : p.arguments) {
 			vector<string> sub_effects =
-			  boost::apply_visitor(EffectToCLIPSFactVisitor(pddl_operator_, positive_effect_), sub);
+			  boost::apply_visitor(EffectToCLIPSFactVisitor(pddl_operator_, positive_effect_),
+			                       sub.expression);
 			res.insert(res.end(), sub_effects.begin(), sub_effects.end());
 		}
 	} else if (p.function == "not") {
@@ -76,7 +89,7 @@ EffectToCLIPSFactVisitor::operator()(Predicate &p) const
 		}
 		vector<string> sub_effects =
 		  boost::apply_visitor(EffectToCLIPSFactVisitor(pddl_operator_, !positive_effect_),
-		                       p.arguments[0]);
+		                       p.arguments[0].expression);
 		res.insert(res.end(), sub_effects.begin(), sub_effects.end());
 	} else {
 		// We expect p.function to be a predicate name.
@@ -84,7 +97,8 @@ EffectToCLIPSFactVisitor::operator()(Predicate &p) const
 		string constants = "";
 		for (auto &p : p.arguments) {
 			vector<string> p_strings =
-			  boost::apply_visitor(EffectToCLIPSFactVisitor(pddl_operator_, positive_effect_), p);
+			  boost::apply_visitor(EffectToCLIPSFactVisitor(pddl_operator_, positive_effect_),
+			                       p.expression);
 			if (p_strings.size() != 1) {
 				throw PddlParserException("Unexpected parameter length for a predicate parameter, "
 				                          "expected exactly one");

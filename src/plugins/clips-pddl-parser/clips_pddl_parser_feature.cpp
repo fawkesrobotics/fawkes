@@ -39,11 +39,18 @@ using namespace pddl_parser;
  */
 
 /** Initialize the CLIPS feature.
+ */
+PDDLCLIPSFeature::PDDLCLIPSFeature() : CLIPSFeature("pddl-parser")
+{
+}
+
+/** Initialize the looger to use.
  * @param logger The logger to use for logging in the feature
  */
-PDDLCLIPSFeature::PDDLCLIPSFeature(fawkes::Logger *logger)
-: CLIPSFeature("pddl-parser"), logger_(logger)
+void
+PDDLCLIPSFeature::init_logger(fawkes::Logger *logger)
 {
+	logger_ = logger;
 }
 
 /** Initialize the context and add a parse-pddl-domain CLIPS function.
@@ -145,12 +152,12 @@ PDDLCLIPSFeature::parse_domain(std::string env_name, std::string domain_file)
 		env.assert_fact("(domain-operator (name " + action.name + ")" + params_string + ")");
 		vector<string> precondition_facts =
 		  boost::apply_visitor(PreconditionToCLIPSFactVisitor(action.name, 1, true),
-		                       action.precondition);
+		                       action.precondition.expression);
 		for (auto &fact : precondition_facts) {
 			env.assert_fact(fact);
 		}
 		vector<string> effect_facts =
-		  boost::apply_visitor(EffectToCLIPSFactVisitor(action.name, true), action.effect);
+		  boost::apply_visitor(EffectToCLIPSFactVisitor(action.name, true), action.effect.expression);
 		for (auto &fact : effect_facts) {
 			env.assert_fact(fact);
 		}

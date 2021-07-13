@@ -19,14 +19,14 @@
 ; Read the full text in the LICENSE.GPL file in the doc directory.
 ;
 
-(define (problem hello-world-1)
+(define (problem hello-world-problem)
   (:domain hello-world)
   (:objects
-    hello goodbye meh - text
-    bob peggy - name
+    <<#DOMAINOBJECTS|{"relation": "domain-object"}>>
+    <<name>> - <<type>><</DOMAINOBJECTS>>
   )
   (:init
-    <<#DOMAINFACTS|{relation:'domain-fact'}>>(<<name>> <<param_values>>)
+    <<#DOMAINFACTS|{"relation": "domain-fact"}>>(<<name>> <<param_values>>)
     <</DOMAINFACTS>>
   )
   (:goal

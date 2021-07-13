@@ -26,6 +26,7 @@
 #include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/fusion/include/std_pair.hpp>
 #include <boost/spirit/include/qi.hpp>
+#include <boost/spirit/include/support_line_pos_iterator.hpp>
 #include <string>
 #include <vector>
 
@@ -36,19 +37,65 @@ namespace ascii = boost::spirit::ascii;
 typedef std::pair<std::string, std::string> pair_type;
 typedef std::vector<pair_type>              pairs_type;
 
-typedef std::vector<std::string>          type_list;
-typedef std::pair<type_list, std::string> pair_multi_const;
-typedef std::vector<pair_multi_const>     pairs_multi_consts;
+typedef std::vector<std::string>                                      type_list;
+typedef std::pair<type_list, std::string>                             pair_multi_const;
+typedef std::vector<pair_multi_const>                                 pairs_multi_consts;
+typedef std::pair<std::vector<std::string>, std::vector<std::string>> pair_strings_type;
 
 typedef std::pair<std::string, std::string>       string_pair_type;
 typedef std::vector<string_pair_type>             string_pairs_type;
 typedef std::pair<std::string, string_pairs_type> predicate_type;
 
+typedef boost::spirit::line_pos_iterator<std::string::const_iterator> iterator_type;
+
 using Atom = std::string;
 
 struct Predicate;
+struct QuantifiedFormula;
 
-using Expression = boost::variant<Atom, Predicate>;
+enum ExpressionType {
+	BOOL,
+	NUMERIC_COMP,
+	PREDICATE,
+	NUMERIC,
+	NUMERIC_CHANGE,
+	VALUE,
+	ATOM,
+	DURATIVE,
+	QUANTIFIED,
+	COND_EFFECT,
+	UNKNOWN
+};
+
+typedef boost::
+  variant<Atom, boost::recursive_wrapper<Predicate>, boost::recursive_wrapper<QuantifiedFormula>>
+    expression_t;
+
+/** @class Expression
+   * A PDDL Expression.
+   */
+struct Expression
+{
+	/** The type of the expression, determined at parsing time. */
+	ExpressionType type;
+	/** The expression formula */
+	expression_t expression;
+};
+
+/** @class QuantifiedFormula
+   * A PDDL quantified formula.
+   */
+struct QuantifiedFormula
+{
+	/** The name of the quantifier ('exists' or 'forall') */
+	Atom quantifier;
+
+	/** args that are bound by the quantifier */
+	string_pairs_type args;
+
+	/** Sub-expression that is quantified over */
+	Expression sub_expr;
+};
 
 /** @class Predicate
    * A PDDL formula (either part of a precondition or an effect(.
@@ -68,6 +115,17 @@ struct Predicate
 	std::vector<Expression> arguments;
 };
 
+/** @class Function
+   * A structured representation of a PDDL function.
+   */
+struct Function
+{
+	/** The name of the function. */
+	std::string name;
+	/** A typed list of function parameters. */
+	string_pairs_type object_params;
+};
+
 /** @class Action
    * A structured representation of a PDDL action.
    */
@@ -78,7 +136,7 @@ struct Action
 	/** A typed list of action parameters. */
 	string_pairs_type action_params;
 	/** The action duration in temporal domains. */
-	int duration;
+	Expression duration;
 	/** The precondition of an action. May be a compound. */
 	Expression precondition;
 	/** The effect of an action. May be a compound. */
@@ -109,6 +167,8 @@ struct Domain
      * arguments.
      */
 	std::vector<predicate_type> predicates;
+	/** A list of numeric functions in the domain. */
+	std::vector<Function> functions;
 	/** A list of actions defined in the domain. */
 	std::vector<Action> actions;
 };
@@ -138,6 +198,7 @@ BOOST_FUSION_ADAPT_STRUCT(pddl_parser::Domain,
                           types,
                           constants,
                           predicates,
+                          functions,
                           actions)
 
 BOOST_FUSION_ADAPT_STRUCT(pddl_parser::Problem, name, domain_name, objects, init, goal)
@@ -152,5 +213,9 @@ BOOST_FUSION_ADAPT_STRUCT(pddl_parser::Action,
                           temp_breakup)
 
 BOOST_FUSION_ADAPT_STRUCT(pddl_parser::Predicate, function, arguments)
+BOOST_FUSION_ADAPT_STRUCT(pddl_parser::QuantifiedFormula, quantifier, args, sub_expr)
+
+BOOST_FUSION_ADAPT_STRUCT(pddl_parser::Function, name, object_params)
+BOOST_FUSION_ADAPT_STRUCT(pddl_parser::Expression, type, expression)
 
 #endif

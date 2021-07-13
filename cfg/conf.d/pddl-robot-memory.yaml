@@ -9,11 +9,11 @@ plugins/pddl-robot-memory:
 
   # Where is the problem file to use as teplate (in src/agents)
   input-problem-description: >
-    clips-executive/test-scenario-pddl/problem-template.pddl
+    plugins/clips-executive/clips/test-scenario-pddl/problem-template.pddl
 
   # Where to put the generated problem file (in src/agents)
   output-problem-description: >
-    clips-executive/test-scenario-pddl/problem.pddl
+    plugins/clips-executive/clips/test-scenario-pddl/problem.pddl
 
   # Interface used to start generation with message and show when its final
   interface-name: "pddl-gen"

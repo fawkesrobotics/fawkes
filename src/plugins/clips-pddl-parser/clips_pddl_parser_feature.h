@@ -37,7 +37,8 @@ class Logger;
 class PDDLCLIPSFeature : public fawkes::CLIPSFeature
 {
 public:
-	PDDLCLIPSFeature(fawkes::Logger *logger);
+	PDDLCLIPSFeature();
+	void init_logger(fawkes::Logger *logger);
 	//virtual ~PDDLCLIPSFeature();
 	virtual void clips_context_init(const std::string &                  env_name,
 	                                fawkes::LockPtr<CLIPS::Environment> &clips);

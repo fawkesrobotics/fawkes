@@ -237,8 +237,8 @@ StringConversions::to_bool(std::string s)
 void
 StringConversions::trim_inplace(std::string &s)
 {
-	std::string::size_type p1 = s.find_first_not_of(' ');
-	std::string::size_type p2 = s.find_last_not_of(' ');
+	std::string::size_type p1 = s.find_first_not_of(" \n\r\t\f\v");
+	std::string::size_type p2 = s.find_last_not_of(" \n\r\t\f\v");
 	s                         = s.substr(p1 == std::string::npos ? 0 : p1,
                p2 == std::string::npos ? s.length() - 1 : p2 - p1 + 1);
 }
@@ -251,8 +251,8 @@ StringConversions::trim_inplace(std::string &s)
 std::string
 StringConversions::trim(const std::string &s)
 {
-	std::string::size_type p1 = s.find_first_not_of(' ');
-	std::string::size_type p2 = s.find_last_not_of(' ');
+	std::string::size_type p1 = s.find_first_not_of(" \n\r\t\f\v");
+	std::string::size_type p2 = s.find_last_not_of(" \n\r\t\f\v");
 	return s.substr(p1 == std::string::npos ? 0 : p1,
 	                p2 == std::string::npos ? s.length() - 1 : p2 - p1 + 1);
 }
@@ -280,7 +280,7 @@ StringConversions::resolve_path(std::string s)
 			res.replace(start_pos, it->first.size(), it->second);
 		}
 	}
-	return res;
+	return StringConversions::trim(res);
 }
 
 /** Resolves vector of path-string with \@...\@ tags
