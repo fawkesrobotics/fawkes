@@ -35,7 +35,7 @@ public:
 	NavGraphGeneratorVoronoi();
 	virtual ~NavGraphGeneratorVoronoi();
 
-	virtual void compute(fawkes::LockPtr<fawkes::NavGraph> graph);
+	virtual void compute(fawkes::RecursiveLockPtr<fawkes::NavGraph> graph);
 
 	/** Get list of polygons.
 	 * @return list of polygons, each polygon contains the vertices of a

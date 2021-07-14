@@ -65,8 +65,7 @@ const char *PROP_ORIENTATION = "orientation";
 NavGraph::NavGraph(const std::string &graph_name)
 {
 	graph_name_            = graph_name;
-	constraint_repo_       = LockPtr<NavGraphConstraintRepo>(new NavGraphConstraintRepo(),
-                                                     /* recursive mutex */ true);
+	constraint_repo_       = RecursiveLockPtr<NavGraphConstraintRepo>(new NavGraphConstraintRepo());
 	search_default_funcs_  = true;
 	search_estimate_func_  = NavGraphSearchState::straight_line_estimate;
 	search_cost_func_      = NavGraphSearchState::euclidean_cost;
@@ -148,7 +147,7 @@ NavGraph::edges() const
  * @return locked pointer to navgraph constraint repo. Note that you must
  * lock it when invoking operations on the repo.
  */
-fawkes::LockPtr<NavGraphConstraintRepo>
+fawkes::RecursiveLockPtr<NavGraphConstraintRepo>
 NavGraph::constraint_repo() const
 {
 	return constraint_repo_;

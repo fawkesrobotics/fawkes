@@ -114,7 +114,7 @@ NavGraphVisualizationThread::finalize()
  * @param graph graph to use
  */
 void
-NavGraphVisualizationThread::set_graph(fawkes::LockPtr<NavGraph> &graph)
+NavGraphVisualizationThread::set_graph(fawkes::RecursiveLockPtr<NavGraph> &graph)
 {
 	graph_ = graph;
 	traversal_.invalidate();
@@ -126,7 +126,8 @@ NavGraphVisualizationThread::set_graph(fawkes::LockPtr<NavGraph> &graph)
  * @param crepo constraint repo
  */
 void
-NavGraphVisualizationThread::set_constraint_repo(fawkes::LockPtr<NavGraphConstraintRepo> &crepo)
+NavGraphVisualizationThread::set_constraint_repo(
+  fawkes::RecursiveLockPtr<NavGraphConstraintRepo> &crepo)
 {
 	crepo_ = crepo;
 }

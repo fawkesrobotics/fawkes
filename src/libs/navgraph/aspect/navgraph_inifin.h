@@ -39,10 +39,10 @@ public:
 	virtual void init(Thread *thread);
 	virtual void finalize(Thread *thread);
 
-	void set_navgraph(LockPtr<NavGraph> &navgraph);
+	void set_navgraph(RecursiveLockPtr<NavGraph> &navgraph);
 
 private:
-	LockPtr<NavGraph> navgraph_;
+	RecursiveLockPtr<NavGraph> navgraph_;
 };
 
 } // end namespace fawkes

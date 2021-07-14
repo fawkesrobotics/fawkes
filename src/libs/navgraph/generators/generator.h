@@ -34,7 +34,7 @@ public:
 	NavGraphGenerator(std::map<std::string, std::string> params);
 	virtual ~NavGraphGenerator();
 
-	virtual void compute(fawkes::LockPtr<fawkes::NavGraph> graph) = 0;
+	virtual void compute(fawkes::RecursiveLockPtr<fawkes::NavGraph> graph) = 0;
 
 	virtual void set_bounding_box(float bbox_p1_x, float bbox_p1_y, float bbox_p2_x, float bbox_p2_y);
 	virtual void set_near_threshold(float near_threshold);

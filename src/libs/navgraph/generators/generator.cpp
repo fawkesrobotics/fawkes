@@ -41,7 +41,7 @@ namespace fawkes {
  * corner and P2 the "upper right" corner, i.e., P1 < P2, as in P1.x < P2.x and
  * P1.y < P2.y.
  *
- * @fn void NavGraphGenerator::compute(fawkes::LockPtr<fawkes::NavGraph> graph) = 0
+ * @fn void NavGraphGenerator::compute(fawkes::RecursiveLockPtr<fawkes::NavGraph> graph) = 0
  * Compute graph.
  * @param graph the resulting nodes and edges will be added to this graph.
  * The graph shall *not* be cleared automatically. The generator shall

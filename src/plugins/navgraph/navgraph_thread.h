@@ -89,9 +89,9 @@ private:
 	bool   node_ori_reached();
 	bool   node_ori_reached(const fawkes::NavGraphNode &node);
 	size_t shortcut_possible();
-	fawkes::LockPtr<fawkes::NavGraph> load_graph(std::string filename);
-	void                              log_graph();
-	void                              publish_path();
+	fawkes::RecursiveLockPtr<fawkes::NavGraph> load_graph(std::string filename);
+	void                                       log_graph();
+	void                                       publish_path();
 
 private:
 	fawkes::NavGraphAspectIniFin navgraph_aspect_inifin_;
@@ -118,7 +118,7 @@ private:
 	fawkes::NavigatorInterface *pp_nav_if_;
 	fawkes::NavPathInterface *  path_if_;
 
-	fawkes::LockPtr<fawkes::NavGraph> graph_;
+	fawkes::RecursiveLockPtr<fawkes::NavGraph> graph_;
 
 	fawkes::tf::Stamped<fawkes::tf::Pose> pose_;
 	bool                                  exec_active_;
@@ -132,7 +132,7 @@ private:
 	fawkes::NavGraphPath::Traversal       traversal_;
 	bool                                  constrained_plan_;
 
-	fawkes::LockPtr<fawkes::NavGraphConstraintRepo> constraint_repo_;
+	fawkes::RecursiveLockPtr<fawkes::NavGraphConstraintRepo> constraint_repo_;
 
 	unsigned int  cmd_msgid_;
 	fawkes::Time *cmd_sent_at_;

@@ -128,7 +128,7 @@ NavGraphThread::init()
 		}
 		graph_ = load_graph(cfg_graph_file_);
 	} else {
-		graph_ = LockPtr<NavGraph>(new NavGraph("generated"), /* recursive mutex */ true);
+		graph_ = RecursiveLockPtr<NavGraph>(new NavGraph("generated"));
 	}
 
 	if (!graph_->has_default_property("travel_tolerance")) {
@@ -436,7 +436,7 @@ NavGraphThread::loop()
 	}
 }
 
-fawkes::LockPtr<fawkes::NavGraph>
+fawkes::RecursiveLockPtr<fawkes::NavGraph>
 NavGraphThread::load_graph(std::string filename)
 {
 	std::ifstream inf(filename);
@@ -446,8 +446,7 @@ NavGraphThread::load_graph(std::string filename)
 
 	if (firstword == "%YAML") {
 		logger->log_info(name(), "Loading YAML graph from %s", filename.c_str());
-		return fawkes::LockPtr<NavGraph>(load_yaml_navgraph(filename, cfg_allow_multi_graph_),
-		                                 /* recursive mutex */ true);
+		return fawkes::RecursiveLockPtr<NavGraph>(load_yaml_navgraph(filename, cfg_allow_multi_graph_));
 	} else {
 		throw Exception("Unknown graph format");
 	}
@@ -1010,8 +1009,8 @@ NavGraphThread::fam_event(const char *filename, unsigned int mask)
 		logger->log_info(name(), "Graph changed on disk, reloading");
 
 		try {
-			LockPtr<NavGraph> new_graph = load_graph(cfg_graph_file_);
-			**graph_                    = **new_graph;
+			RecursiveLockPtr<NavGraph> new_graph = load_graph(cfg_graph_file_);
+			**graph_                             = **new_graph;
 		} catch (Exception &e) {
 			logger->log_warn(name(), "Loading new graph failed, exception follows");
 			logger->log_warn(name(), e);

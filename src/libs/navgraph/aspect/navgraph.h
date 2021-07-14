@@ -41,7 +41,7 @@ public:
 	virtual ~NavGraphAspect();
 
 protected:
-	fawkes::LockPtr<NavGraph> navgraph;
+	fawkes::RecursiveLockPtr<NavGraph> navgraph;
 };
 
 } // end namespace fawkes

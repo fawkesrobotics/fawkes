@@ -49,8 +49,8 @@ public:
 	virtual void loop();
 	virtual void finalize();
 
-	void set_graph(fawkes::LockPtr<fawkes::NavGraph> &graph);
-	void set_constraint_repo(fawkes::LockPtr<fawkes::NavGraphConstraintRepo> &crepo);
+	void set_graph(fawkes::RecursiveLockPtr<fawkes::NavGraph> &graph);
+	void set_constraint_repo(fawkes::RecursiveLockPtr<fawkes::NavGraphConstraintRepo> &crepo);
 
 	void set_traversal(fawkes::NavGraphPath::Traversal &traversal);
 	void set_current_edge(const std::string &from, const std::string &to);
@@ -88,8 +88,8 @@ private:
 	std::string                     plan_to_;
 	std::string                     plan_from_;
 
-	fawkes::LockPtr<fawkes::NavGraph>               graph_;
-	fawkes::LockPtr<fawkes::NavGraphConstraintRepo> crepo_;
+	fawkes::RecursiveLockPtr<fawkes::NavGraph>               graph_;
+	fawkes::RecursiveLockPtr<fawkes::NavGraphConstraintRepo> crepo_;
 
 	std::string cfg_global_frame_;
 

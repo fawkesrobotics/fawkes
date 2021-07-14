@@ -101,7 +101,7 @@ NavGraphGeneratorGrid::~NavGraphGeneratorGrid()
 }
 
 void
-NavGraphGeneratorGrid::compute(fawkes::LockPtr<fawkes::NavGraph> graph)
+NavGraphGeneratorGrid::compute(fawkes::RecursiveLockPtr<fawkes::NavGraph> graph)
 {
 	if (!bbox_enabled_) {
 		throw Exception("Grid algorithm requires bounding box");

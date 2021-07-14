@@ -72,10 +72,10 @@ public:
 	NavGraph(const NavGraph &g);
 	virtual ~NavGraph();
 
-	std::string                             name() const;
-	const std::vector<NavGraphNode> &       nodes() const;
-	const std::vector<NavGraphEdge> &       edges() const;
-	fawkes::LockPtr<NavGraphConstraintRepo> constraint_repo() const;
+	std::string                                      name() const;
+	const std::vector<NavGraphNode> &                nodes() const;
+	const std::vector<NavGraphEdge> &                edges() const;
+	fawkes::RecursiveLockPtr<NavGraphConstraintRepo> constraint_repo() const;
 
 	const std::map<std::string, std::string> &default_properties() const;
 	bool                                      has_default_property(const std::string &property) const;
@@ -211,12 +211,12 @@ private:
 	void edge_add_split_intersection(const NavGraphEdge &edge);
 
 private:
-	std::string                             graph_name_;
-	std::vector<NavGraphNode>               nodes_;
-	std::vector<NavGraphEdge>               edges_;
-	fawkes::LockPtr<NavGraphConstraintRepo> constraint_repo_;
-	std::list<ChangeListener *>             change_listeners_;
-	std::map<std::string, std::string>      default_properties_;
+	std::string                                      graph_name_;
+	std::vector<NavGraphNode>                        nodes_;
+	std::vector<NavGraphEdge>                        edges_;
+	fawkes::RecursiveLockPtr<NavGraphConstraintRepo> constraint_repo_;
+	std::list<ChangeListener *>                      change_listeners_;
+	std::map<std::string, std::string>               default_properties_;
 
 	bool                       search_default_funcs_;
 	navgraph::EstimateFunction search_estimate_func_;

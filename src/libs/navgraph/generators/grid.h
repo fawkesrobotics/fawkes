@@ -35,7 +35,7 @@ public:
 	NavGraphGeneratorGrid(const std::map<std::string, std::string> &params);
 	virtual ~NavGraphGeneratorGrid();
 
-	virtual void compute(fawkes::LockPtr<fawkes::NavGraph> graph);
+	virtual void compute(fawkes::RecursiveLockPtr<fawkes::NavGraph> graph);
 
 private:
 	float spacing_;

@@ -44,7 +44,7 @@ NavGraphAspectIniFin::NavGraphAspectIniFin() : AspectIniFin("NavGraphAspect")
  * @param navgraph navgraph to pass to thread with the NavGraphAspect
  */
 void
-NavGraphAspectIniFin::set_navgraph(LockPtr<NavGraph> &navgraph)
+NavGraphAspectIniFin::set_navgraph(RecursiveLockPtr<NavGraph> &navgraph)
 {
 	navgraph_ = navgraph;
 }

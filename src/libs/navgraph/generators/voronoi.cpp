@@ -99,7 +99,7 @@ contains(Point_map points, Point_2 point, std::string &name, float near_threshol
  * while adding nodes.
  */
 void
-NavGraphGeneratorVoronoi::compute(fawkes::LockPtr<fawkes::NavGraph> graph)
+NavGraphGeneratorVoronoi::compute(fawkes::RecursiveLockPtr<fawkes::NavGraph> graph)
 {
 	VD vd;
 	for (auto o : obstacles_) {
