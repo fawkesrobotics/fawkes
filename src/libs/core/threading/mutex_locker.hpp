@@ -21,72 +21,19 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <core/threading/mutex.h>
+#ifndef _CORE_THREADING_MUTEX_LOCKER_HPP_
+#define _CORE_THREADING_MUTEX_LOCKER_HPP_
+
 #include <core/threading/mutex_locker.h>
 
 namespace fawkes {
-
-/** @class MutexLocker <core/threading/mutex_locker.h>
- * Mutex locking helper.
- * This class is a convenience function which can help you prevent a quite
- * a few headaches. Consider the following code.
- * @code
- * void my_function()
- * {
- *   mutex->lock();
- *   for (int i = 0; i < LIMIT; ++i) {
- *     if ( failure ) {
- *       mutex->unlock
- *     }
- *   }
- *
- *   switch ( someval ) {
- *     VALA:
- *       mutex->unlock();
- *       return;
- *     VALB:
- *       do_something();
- *   }
- *
- *   try {
- *     do_function_that_throws_exceptions();
- *   } catch (Exception &e) {
- *     mutex->unlock();
- *     throw;
- *   }
- *   mutex->unlock();
- * }
- * @endcode
- * This is not a complete list of examples but as you see if you have many
- * exit points in a function it becomes more and more work to have correct
- * locking behavior.
- *
- * This is a lot simpler with the MutexLocker. The MutexLocker locks the
- * given mutex on creation, and unlocks it in the destructor. If you now
- * have a mutex locker on the stack as integral type the destructor is
- * called automagically on function exit and thus the mutex is appropriately
- * unlocked.
- * The code would look like this:
- * @code
- * void my_function()
- * {
- *   MutexLocker ml(mutex);
- *   // do anything, no need to call mutex->lock()/unlock() if only has to be
- *   // called on entering and exiting the function.
- * }
- * @endcode
- *
- * @ingroup Threading
- * @ingroup FCL
- *
- * @author Tim Niemueller
- */
 
 /** Constructor.
  * @param mutex Mutex to lock/unlock appropriately.
  * @param initially_lock true to lock the mutex in the constructor, false to not lock
  */
-MutexLocker::MutexLocker(RefPtr<Mutex> mutex, bool initially_lock)
+template <class T_Mutex>
+MutexLocker<T_Mutex>::MutexLocker(RefPtr<T_Mutex> mutex, bool initially_lock)
 {
 	rawmutex_ = 0;
 	refmutex_ = mutex;
@@ -100,7 +47,8 @@ MutexLocker::MutexLocker(RefPtr<Mutex> mutex, bool initially_lock)
  * @param mutex Mutex to lock/unlock appropriately.
  * @param initially_lock true to lock the mutex in the constructor, false to not lock
  */
-MutexLocker::MutexLocker(Mutex *mutex, bool initially_lock)
+template <class T_Mutex>
+MutexLocker<T_Mutex>::MutexLocker(T_Mutex *mutex, bool initially_lock)
 {
 	rawmutex_ = mutex;
 	if (initially_lock) {
@@ -113,7 +61,8 @@ MutexLocker::MutexLocker(Mutex *mutex, bool initially_lock)
  * @param mutex Mutex to lock/unlock appropriately.
  * @param initially_lock true to lock the mutex in the constructor, false to not lock
  */
-MutexLocker::MutexLocker(Mutex &mutex, bool initially_lock)
+template <class T_Mutex>
+MutexLocker<T_Mutex>::MutexLocker(T_Mutex &mutex, bool initially_lock)
 {
 	rawmutex_ = &mutex;
 	if (initially_lock) {
@@ -123,7 +72,8 @@ MutexLocker::MutexLocker(Mutex &mutex, bool initially_lock)
 }
 
 /** Destructor */
-MutexLocker::~MutexLocker()
+template <class T_Mutex>
+MutexLocker<T_Mutex>::~MutexLocker()
 {
 	if (locked_) {
 		if (rawmutex_) {
@@ -137,8 +87,9 @@ MutexLocker::~MutexLocker()
 /** Lock this mutex, again.
  * Use this if you unlocked the mutex from the outside.
  */
+template <class T_Mutex>
 void
-MutexLocker::relock()
+MutexLocker<T_Mutex>::relock()
 {
 	if (rawmutex_) {
 		rawmutex_->lock();
@@ -149,8 +100,9 @@ MutexLocker::relock()
 }
 
 /** Unlock the mutex. */
+template <class T_Mutex>
 void
-MutexLocker::unlock()
+MutexLocker<T_Mutex>::unlock()
 {
 	locked_ = false;
 	if (rawmutex_) {
@@ -161,3 +113,5 @@ MutexLocker::unlock()
 }
 
 } // end namespace fawkes
+
+#endif /* ifndef _CORE_THREADING_MUTEX_LOCKER_HPP_ */

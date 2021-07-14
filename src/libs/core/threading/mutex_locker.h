@@ -24,29 +24,87 @@
 #ifndef _CORE_THREADING_MUTEX_LOCKER_H_
 #define _CORE_THREADING_MUTEX_LOCKER_H_
 
+#include <core/threading/mutex.h>
 #include <core/utils/refptr.h>
 
 namespace fawkes {
 
-class Mutex;
+/** @class MutexLocker <core/threading/mutex_locker.h>
+ * Mutex locking helper.
+ * This class is a convenience function which can help you prevent a quite
+ * a few headaches. Consider the following code.
+ * @code
+ * void my_function()
+ * {
+ *   mutex->lock();
+ *   for (int i = 0; i < LIMIT; ++i) {
+ *     if ( failure ) {
+ *       mutex->unlock
+ *     }
+ *   }
+ *
+ *   switch ( someval ) {
+ *     VALA:
+ *       mutex->unlock();
+ *       return;
+ *     VALB:
+ *       do_something();
+ *   }
+ *
+ *   try {
+ *     do_function_that_throws_exceptions();
+ *   } catch (Exception &e) {
+ *     mutex->unlock();
+ *     throw;
+ *   }
+ *   mutex->unlock();
+ * }
+ * @endcode
+ * This is not a complete list of examples but as you see if you have many
+ * exit points in a function it becomes more and more work to have correct
+ * locking behavior.
+ *
+ * This is a lot simpler with the MutexLocker. The MutexLocker locks the
+ * given mutex on creation, and unlocks it in the destructor. If you now
+ * have a mutex locker on the stack as integral type the destructor is
+ * called automagically on function exit and thus the mutex is appropriately
+ * unlocked.
+ * The code would look like this:
+ * @code
+ * void my_function()
+ * {
+ *   MutexLocker ml(mutex);
+ *   // do anything, no need to call mutex->lock()/unlock() if only has to be
+ *   // called on entering and exiting the function.
+ * }
+ * @endcode
+ *
+ * @ingroup Threading
+ * @ingroup FCL
+ *
+ * @author Tim Niemueller
+ */
 
+template <class T_Mutex>
 class MutexLocker
 {
 public:
-	MutexLocker(RefPtr<Mutex> mutex, bool initially_lock = true);
-	MutexLocker(Mutex *mutex, bool initially_lock = true);
-	MutexLocker(Mutex &mutex, bool initially_lock = true);
+	MutexLocker(RefPtr<T_Mutex> mutex, bool initially_lock = true);
+	MutexLocker(T_Mutex *mutex, bool initially_lock = true);
+	MutexLocker(T_Mutex &mutex, bool initially_lock = true);
 	~MutexLocker();
 
 	void relock();
 	void unlock();
 
 private:
-	bool          locked_;
-	RefPtr<Mutex> refmutex_;
-	Mutex *       rawmutex_;
+	bool            locked_;
+	RefPtr<T_Mutex> refmutex_;
+	T_Mutex *       rawmutex_;
 };
 
 } // end namespace fawkes
+
+#include "mutex_locker.hpp"
 
 #endif
