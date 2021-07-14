@@ -38,6 +38,7 @@
 #define _PROTOBUF_CLIPS_COMMUNICATOR_H_
 
 #include <core/threading/mutex.h>
+#include <core/threading/recursive_mutex.h>
 #include <protobuf_comm/server.h>
 
 #include <clipsmm.h>
@@ -58,11 +59,11 @@ namespace protobuf_clips {
 class ClipsProtobufCommunicator
 {
 public:
-	ClipsProtobufCommunicator(CLIPS::Environment *env,
-	                          fawkes::Mutex &     env_mutex,
-	                          fawkes::Logger *    logger = NULL);
+	ClipsProtobufCommunicator(CLIPS::Environment *    env,
+	                          fawkes::RecursiveMutex &env_mutex,
+	                          fawkes::Logger *        logger = NULL);
 	ClipsProtobufCommunicator(CLIPS::Environment *      env,
-	                          fawkes::Mutex &           env_mutex,
+	                          fawkes::RecursiveMutex &  env_mutex,
 	                          std::vector<std::string> &proto_path,
 	                          fawkes::Logger *          logger = NULL);
 	~ClipsProtobufCommunicator();
@@ -206,8 +207,8 @@ private:
 	static std::string to_string(const CLIPS::Value &v);
 
 private:
-	CLIPS::Environment *clips_;
-	fawkes::Mutex &     clips_mutex_;
+	CLIPS::Environment *    clips_;
+	fawkes::RecursiveMutex &clips_mutex_;
 
 	fawkes::Logger *logger_;
 

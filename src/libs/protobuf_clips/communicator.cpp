@@ -64,9 +64,9 @@ namespace protobuf_clips {
  * @param env_mutex mutex to lock when operating on the CLIPS environment.
  * @param logger optional logger for informational output
  */
-ClipsProtobufCommunicator::ClipsProtobufCommunicator(CLIPS::Environment *env,
-                                                     fawkes::Mutex &     env_mutex,
-                                                     fawkes::Logger *    logger)
+ClipsProtobufCommunicator::ClipsProtobufCommunicator(CLIPS::Environment *    env,
+                                                     fawkes::RecursiveMutex &env_mutex,
+                                                     fawkes::Logger *        logger)
 : clips_(env), clips_mutex_(env_mutex), logger_(logger), server_(NULL), next_client_id_(0)
 {
 	message_register_ = new MessageRegister();
@@ -80,7 +80,7 @@ ClipsProtobufCommunicator::ClipsProtobufCommunicator(CLIPS::Environment *env,
  * @param logger optional logger for informational output
  */
 ClipsProtobufCommunicator::ClipsProtobufCommunicator(CLIPS::Environment *      env,
-                                                     fawkes::Mutex &           env_mutex,
+                                                     fawkes::RecursiveMutex &  env_mutex,
                                                      std::vector<std::string> &proto_path,
                                                      fawkes::Logger *          logger)
 : clips_(env), clips_mutex_(env_mutex), logger_(logger), server_(NULL), next_client_id_(0)
