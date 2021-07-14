@@ -24,40 +24,93 @@
 #ifndef _CORE_THREADING_MUTEX_H_
 #define _CORE_THREADING_MUTEX_H_
 
+#include "mutex_data.h"
+
 #include <mutex>
 #include <variant>
 
 namespace fawkes {
 
-class MutexData;
+/** @class Mutex core/threading/mutex.h
+ * Mutex mutual exclusion lock.
+ * This class is used in a multi-threading environment to lock access to
+ * resources. This is needed to prevent two threads from modifying a value
+ * at the same time or to prevent a thread from getting a dirty copy of
+ * a piece of data (the reader reads while a writer is writing, this could
+ * leave the data in a state where the reader reads half of the new and half
+ * of the old data).
+ *
+ * As a rule of thumb you should lock the mutex as short as possible and as
+ * long as needed. Locking the mutex too long will lead in a bad performance
+ * of the multi-threaded application because many threads are waiting for
+ * the lock and are not doing anything useful.
+ * If you do not lock enough code (and so serialize it) it will cause pain
+ * and errors.
+ *
+ * @ingroup Threading
+ * @ingroup FCL
+ * @see example_mutex_count.cpp
+ *
+ * @author Tim Niemueller
+ */
 
-class Mutex
+template <typename MutexT>
+class MutexWrapper
 {
 public:
-	/** Mutex type. */
-	typedef enum {
-		NORMAL,   ///< This type of mutex does not detect deadlock.
-		RECURSIVE ///< A thread attempting to relock this mutex without
-		          ///< first unlocking it shall succeed in locking the mutex.
-	} Type;
+	MutexT &
+	get_raw_mutex()
+	{
+		return mutex;
+	}
 
-	Mutex();
-	~Mutex();
+	void
+	lock()
+	{
+		mutex.lock();
+#ifdef DEBUG_THREADING
+		// do not switch order, lock holder must be protected with this mutex!
+		mutex_data->set_lock_holder();
+#endif
+	}
 
-	std::mutex &get_raw_mutex();
+	bool
+	try_lock()
+	{
+		if (mutex.try_lock()) {
+#ifdef DEBUG_THREADING
+			mutex_data->set_lock_holder();
+#endif
+			return true;
+		} else {
+			return false;
+		}
+	}
 
-	void lock();
-	bool try_lock();
-	void unlock();
+	void
+	unlock()
+	{
+#ifdef DEBUG_THREADING
+		mutex_data->unset_lock_holder();
+		// do not switch order, lock holder must be protected with this mutex!
+#endif
+		mutex.unlock();
+	}
 
-	void stopby();
-
-protected:
-	Mutex(Type type);
+	void
+	stopby()
+	{
+		lock();
+		unlock();
+	}
 
 private:
-	std::variant<std::mutex, std::recursive_mutex> mutex;
-	MutexData *                                    mutex_data;
+	MutexT    mutex;
+	MutexData mutex_data;
+};
+
+class Mutex : public MutexWrapper<std::mutex>
+{
 };
 
 } // end namespace fawkes

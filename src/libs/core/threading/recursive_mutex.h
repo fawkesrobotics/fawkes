@@ -26,16 +26,12 @@
 
 #include <core/threading/mutex.h>
 
+#include <mutex>
+
 namespace fawkes {
 
-class WaitCondition;
-
-class RecursiveMutex : public Mutex
+class RecursiveMutex : public MutexWrapper<std::recursive_mutex>
 {
-	friend WaitCondition;
-
-public:
-	RecursiveMutex();
 };
 
 } // end namespace fawkes
