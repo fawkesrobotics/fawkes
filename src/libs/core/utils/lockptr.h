@@ -51,43 +51,48 @@ namespace fawkes {
  *
  * @ingroup FCL
  */
-template <class T_CppObject>
-class LockPtr
+
+/** @class LockPtrBase
+   *
+   * The base class for lock pointer types. Do not use this directly but instead use LockPtr or RecursiveLockPtr.
+   *
+   * @tparam T_CppObject The type of the object to wrap
+   * @tparam T_Mutex The mutex type, e.g., Mutex or RecursiveMutex
+   */
+template <class T_CppObject, class T_Mutex>
+class LockPtrBase
 {
 public:
 	/** Default constructor
    *
    * Afterwards it will be null and use of -> will cause a segmentation fault.
    */
-	inline LockPtr();
+	inline LockPtrBase();
 
 	/// Destructor - decrements reference count.
-	inline ~LockPtr();
+	inline ~LockPtrBase();
 
 	/** Constructor that takes ownership.
    *
    * This takes ownership of @a cpp_object, so it will be deleted when the 
    * last LockPtr is deleted, for instance when it goes out of scope.
    * @param cpp_object C++ object to take ownership of
-   * @param recursive_mutex true to create a recursive mutex (with deadlock prevention
-   * when locked from the same thread) for the object mutex, false to create a normal
-   * mutex
    * @see Mutex
    */
-	explicit inline LockPtr(T_CppObject *cpp_object, bool recursive_mutex = false);
+	explicit inline LockPtrBase(T_CppObject *cpp_object);
 
 	/** Copy constructor
    * This increments the shared reference count.
    * @param src refptr to copy
    */
-	inline LockPtr(const LockPtr<T_CppObject> &src);
+	inline LockPtrBase(const LockPtrBase<T_CppObject, T_Mutex> &src);
 
 	/** Copy constructor (from different, but castable type).
    * Increments the reference count.
    * @param src refptr to copy
    */
 	template <class T_CastFrom>
-	inline LockPtr(const LockPtr<T_CastFrom> &src);
+	inline LockPtrBase(const LockPtrBase<T_CastFrom, T_Mutex> &src);
 
 	/** Swap the contents of two LockPtr<>.
    * This method swaps the internal pointers to T_CppObject.  This can be
@@ -95,13 +100,13 @@ public:
    * therefore highly efficient.
    * @param other other instance to swap with.
    */
-	inline void swap(LockPtr<T_CppObject> &other);
+	inline void swap(LockPtrBase<T_CppObject, T_Mutex> &other);
 
 	/** Copy from another LockPtr.
    * @param src refptr to copy from
    * @return reference to this instance
    */
-	inline LockPtr<T_CppObject> &operator=(const LockPtr<T_CppObject> &src);
+	inline LockPtrBase<T_CppObject, T_Mutex> &operator=(const LockPtrBase<T_CppObject, T_Mutex> &src);
 
 	/** Copy from different, but castable type).
    * Increments the reference count.
@@ -109,25 +114,25 @@ public:
    * @return reference to this instance
    */
 	template <class T_CastFrom>
-	inline LockPtr<T_CppObject> &operator=(const LockPtr<T_CastFrom> &src);
+	inline LockPtrBase<T_CppObject, T_Mutex> &operator=(const LockPtrBase<T_CastFrom, T_Mutex> &src);
 
 	/** Assign object and claim ownership.
    * @param ptr pointer to object, this refptr will claim ownership of the src!
    * @return reference to this instance
    */
-	inline LockPtr<T_CppObject> &operator=(T_CppObject *ptr);
+	inline LockPtrBase<T_CppObject, T_Mutex> &operator=(T_CppObject *ptr);
 
 	/** Tests whether the LockPtr<> point to the same underlying instance.
    * @param src refptr to compare to
    * @return true if both refptrs point to the same instance.
    */
-	inline bool operator==(const LockPtr<T_CppObject> &src) const;
+	inline bool operator==(const LockPtrBase<T_CppObject, T_Mutex> &src) const;
 
 	/** Tests whether the LockPtr<> do not point to the same underlying instance.
    * @param src refptr to compare to
    * @return true if both refptrs do not point to the same instance.
    */
-	inline bool operator!=(const LockPtr<T_CppObject> &src) const;
+	inline bool operator!=(const LockPtrBase<T_CppObject, T_Mutex> &src) const;
 
 	/** Dereferencing.
    * Use the methods of the underlying instance like so:
@@ -165,16 +170,16 @@ public:
    * @return refptr to object casted to given type
    */
 	template <class T_CastFrom>
-	static inline LockPtr<T_CppObject>
-	cast_dynamic(const LockPtr<T_CastFrom> &src)
+	static inline LockPtrBase<T_CppObject, T_Mutex>
+	cast_dynamic(const LockPtrBase<T_CastFrom, T_Mutex> &src)
 	{
 		T_CppObject *const cpp_object = dynamic_cast<T_CppObject *>(src.operator->());
 
 		if (
 		  cpp_object) //Check whether dynamic_cast<> succeeded so we don't pass a null object with a used refcount:
-			return LockPtr<T_CppObject>(cpp_object, src.refcount_ptr(), src.refmutex_ptr());
+			return LockPtrBase<T_CppObject, T_Mutex>(cpp_object, src.refcount_ptr(), src.refmutex_ptr());
 		else
-			return LockPtr<T_CppObject>();
+			return LockPtrBase<T_CppObject, T_Mutex>();
 	}
 
 	/** Static cast to derived class.
@@ -187,12 +192,12 @@ public:
    * @return refptr to object casted to given type
    */
 	template <class T_CastFrom>
-	static inline LockPtr<T_CppObject>
-	cast_static(const LockPtr<T_CastFrom> &src)
+	static inline LockPtrBase<T_CppObject, T_Mutex>
+	cast_static(const LockPtrBase<T_CastFrom, T_Mutex> &src)
 	{
 		T_CppObject *const cpp_object = static_cast<T_CppObject *>(src.operator->());
 
-		return LockPtr<T_CppObject>(cpp_object, src.refcount_ptr(), src.refmutex_ptr());
+		return LockPtrBase<T_CppObject, T_Mutex>(cpp_object, src.refcount_ptr(), src.refmutex_ptr());
 	}
 
 	/** Cast to non-const.
@@ -205,12 +210,12 @@ public:
    * @return refptr to object casted to given type
    */
 	template <class T_CastFrom>
-	static inline LockPtr<T_CppObject>
-	cast_const(const LockPtr<T_CastFrom> &src)
+	static inline LockPtrBase<T_CppObject, T_Mutex>
+	cast_const(const LockPtrBase<T_CastFrom, T_Mutex> &src)
 	{
 		T_CppObject *const cpp_object = const_cast<T_CppObject *>(src.operator->());
 
-		return LockPtr<T_CppObject>(cpp_object, src.refcount_ptr(), src.refmutex_ptr());
+		return LockPtrBase<T_CppObject, T_Mutex>(cpp_object, src.refcount_ptr(), src.refmutex_ptr());
 	}
 
 	/** For use only in the internal implementation of LockPtr.
@@ -219,7 +224,10 @@ public:
    * @param refcount reference count
    * @param refmutex reference count mutex
    */
-	explicit inline LockPtr(T_CppObject *cpp_object, Mutex *objmutex, int *refcount, Mutex *refmutex);
+	explicit inline LockPtrBase(T_CppObject *   cpp_object,
+	                            T_Mutex *       objmutex,
+	                            int *           refcount,
+	                            RecursiveMutex *refmutex);
 
 	/** Get current refcount.
    * Get reference count. Use this with care, as it may change any time.
@@ -247,7 +255,7 @@ public:
    * Get reference mutex.
    * @return pointer to refcount mutex
    */
-	inline Mutex *
+	inline RecursiveMutex *
 	refmutex_ptr() const
 	{
 		return ref_mutex_;
@@ -281,43 +289,44 @@ public:
    * and unlock() methods.
    * @return object mutex
    */
-	inline Mutex *
+	inline T_Mutex *
 	objmutex_ptr() const
 	{
 		return obj_mutex_;
 	}
 
 private:
-	T_CppObject *  cpp_object_;
-	mutable Mutex *obj_mutex_;
-	mutable int *  ref_count_;
-	mutable Mutex *ref_mutex_;
+	T_CppObject *           cpp_object_;
+	mutable T_Mutex *       obj_mutex_;
+	mutable int *           ref_count_;
+	mutable RecursiveMutex *ref_mutex_;
 };
 
 // LockPtr<>::operator->() comes first here since it's used by other methods.
 // If it would come after them it wouldn't be inlined.
 
-template <class T_CppObject>
+template <class T_CppObject, class T_Mutex>
 inline T_CppObject *
-LockPtr<T_CppObject>::operator->() const
+LockPtrBase<T_CppObject, T_Mutex>::operator->() const
 {
 	return cpp_object_;
 }
 
-template <class T_CppObject>
+template <class T_CppObject, class T_Mutex>
 inline T_CppObject *
-LockPtr<T_CppObject>::operator*() const
+LockPtrBase<T_CppObject, T_Mutex>::operator*() const
 {
 	return cpp_object_;
 }
 
-template <class T_CppObject>
-inline LockPtr<T_CppObject>::LockPtr() : cpp_object_(0), obj_mutex_(0), ref_count_(0), ref_mutex_(0)
+template <class T_CppObject, class T_Mutex>
+inline LockPtrBase<T_CppObject, T_Mutex>::LockPtrBase()
+: cpp_object_(0), obj_mutex_(0), ref_count_(0), ref_mutex_(0)
 {
 }
 
-template <class T_CppObject>
-inline LockPtr<T_CppObject>::~LockPtr()
+template <class T_CppObject, class T_Mutex>
+inline LockPtrBase<T_CppObject, T_Mutex>::~LockPtrBase()
 {
 	if (ref_count_ && ref_mutex_) {
 		ref_mutex_->lock();
@@ -341,24 +350,25 @@ inline LockPtr<T_CppObject>::~LockPtr()
 	}
 }
 
-template <class T_CppObject>
-inline LockPtr<T_CppObject>::LockPtr(T_CppObject *cpp_object, bool recursive_mutex)
+template <class T_CppObject, class T_Mutex>
+inline LockPtrBase<T_CppObject, T_Mutex>::LockPtrBase(T_CppObject *cpp_object)
 : cpp_object_(cpp_object), obj_mutex_(0), ref_count_(0), ref_mutex_(0)
 {
 	if (cpp_object) {
-		ref_count_  = new int;
-		ref_mutex_  = new RecursiveMutex();
-		obj_mutex_  = recursive_mutex ? new RecursiveMutex() : new Mutex();
+		ref_count_ = new int;
+		ref_mutex_ = new RecursiveMutex();
+		//obj_mutex_  = recursive_mutex ? new RecursiveMutex() : new Mutex();
+		obj_mutex_  = new T_Mutex();
 		*ref_count_ = 1; //This will be decremented in the destructor.
 	}
 }
 
 //Used by cast_*() implementations:
-template <class T_CppObject>
-inline LockPtr<T_CppObject>::LockPtr(T_CppObject *cpp_object,
-                                     Mutex *      objmutex,
-                                     int *        refcount,
-                                     Mutex *      refmutex)
+template <class T_CppObject, class T_Mutex>
+inline LockPtrBase<T_CppObject, T_Mutex>::LockPtrBase(T_CppObject *   cpp_object,
+                                                      T_Mutex *       objmutex,
+                                                      int *           refcount,
+                                                      RecursiveMutex *refmutex)
 : cpp_object_(cpp_object), obj_mutex_(objmutex), ref_count_(refcount), ref_mutex_(refmutex)
 {
 	if (cpp_object_ && obj_mutex_ && ref_count_ && ref_mutex_) {
@@ -368,8 +378,8 @@ inline LockPtr<T_CppObject>::LockPtr(T_CppObject *cpp_object,
 	}
 }
 
-template <class T_CppObject>
-inline LockPtr<T_CppObject>::LockPtr(const LockPtr<T_CppObject> &src)
+template <class T_CppObject, class T_Mutex>
+inline LockPtrBase<T_CppObject, T_Mutex>::LockPtrBase(const LockPtrBase<T_CppObject, T_Mutex> &src)
 : cpp_object_(src.cpp_object_),
   obj_mutex_(src.obj_mutex_),
   ref_count_(src.ref_count_),
@@ -385,9 +395,9 @@ inline LockPtr<T_CppObject>::LockPtr(const LockPtr<T_CppObject> &src)
 // The templated ctor allows copy construction from any object that's
 // castable.  Thus, it does downcasts:
 //   base_ref = derived_ref
-template <class T_CppObject>
+template <class T_CppObject, class T_Mutex>
 template <class T_CastFrom>
-inline LockPtr<T_CppObject>::LockPtr(const LockPtr<T_CastFrom> &src)
+inline LockPtrBase<T_CppObject, T_Mutex>::LockPtrBase(const LockPtrBase<T_CastFrom, T_Mutex> &src)
 : // A different LockPtr<> will not allow us access to cpp_object_.  We need
   // to add a get_underlying() for this, but that would encourage incorrect
   // use, so we use the less well-known operator->() accessor:
@@ -403,14 +413,14 @@ inline LockPtr<T_CppObject>::LockPtr(const LockPtr<T_CastFrom> &src)
 	}
 }
 
-template <class T_CppObject>
+template <class T_CppObject, class T_Mutex>
 inline void
-LockPtr<T_CppObject>::swap(LockPtr<T_CppObject> &other)
+LockPtrBase<T_CppObject, T_Mutex>::swap(LockPtrBase<T_CppObject, T_Mutex> &other)
 {
 	T_CppObject *const temp           = cpp_object_;
 	int *              temp_count     = ref_count_;
-	Mutex *            temp_ref_mutex = ref_mutex_;
-	Mutex *            temp_obj_mutex = obj_mutex_;
+	RecursiveMutex *   temp_ref_mutex = ref_mutex_;
+	T_Mutex *          temp_obj_mutex = obj_mutex_;
 
 	cpp_object_ = other.cpp_object_;
 	obj_mutex_  = other.obj_mutex_;
@@ -423,9 +433,9 @@ LockPtr<T_CppObject>::swap(LockPtr<T_CppObject> &other)
 	other.obj_mutex_  = temp_obj_mutex;
 }
 
-template <class T_CppObject>
-inline LockPtr<T_CppObject> &
-LockPtr<T_CppObject>::operator=(const LockPtr<T_CppObject> &src)
+template <class T_CppObject, class T_Mutex>
+inline LockPtrBase<T_CppObject, T_Mutex> &
+LockPtrBase<T_CppObject, T_Mutex>::operator=(const LockPtrBase<T_CppObject, T_Mutex> &src)
 {
 	// In case you haven't seen the swap() technique to implement copy
 	// assignment before, here's what it does:
@@ -451,55 +461,55 @@ LockPtr<T_CppObject>::operator=(const LockPtr<T_CppObject> &src)
 	//   even thinking about it to implement copy assignment whereever the
 	//   object data is managed indirectly via a pointer, which is very common.
 
-	LockPtr<T_CppObject> temp(src);
+	LockPtrBase<T_CppObject, T_Mutex> temp(src);
 	this->swap(temp);
 	return *this;
 }
 
-template <class T_CppObject>
-inline LockPtr<T_CppObject> &
-LockPtr<T_CppObject>::operator=(T_CppObject *ptr)
+template <class T_CppObject, class T_Mutex>
+inline LockPtrBase<T_CppObject, T_Mutex> &
+LockPtrBase<T_CppObject, T_Mutex>::operator=(T_CppObject *ptr)
 {
-	LockPtr<T_CppObject> temp(ptr);
+	LockPtrBase<T_CppObject, T_Mutex> temp(ptr);
 	this->swap(temp);
 	return *this;
 }
 
-template <class T_CppObject>
+template <class T_CppObject, class T_Mutex>
 template <class T_CastFrom>
-inline LockPtr<T_CppObject> &
-LockPtr<T_CppObject>::operator=(const LockPtr<T_CastFrom> &src)
+inline LockPtrBase<T_CppObject, T_Mutex> &
+LockPtrBase<T_CppObject, T_Mutex>::operator=(const LockPtrBase<T_CastFrom, T_Mutex> &src)
 {
-	LockPtr<T_CppObject> temp(src);
+	LockPtrBase<T_CppObject, T_Mutex> temp(src);
 	this->swap(temp);
 	return *this;
 }
 
-template <class T_CppObject>
+template <class T_CppObject, class T_Mutex>
 inline bool
-LockPtr<T_CppObject>::operator==(const LockPtr<T_CppObject> &src) const
+LockPtrBase<T_CppObject, T_Mutex>::operator==(const LockPtrBase<T_CppObject, T_Mutex> &src) const
 {
 	return (cpp_object_ == src.cpp_object_);
 }
 
-template <class T_CppObject>
+template <class T_CppObject, class T_Mutex>
 inline bool
-LockPtr<T_CppObject>::operator!=(const LockPtr<T_CppObject> &src) const
+LockPtrBase<T_CppObject, T_Mutex>::operator!=(const LockPtrBase<T_CppObject, T_Mutex> &src) const
 {
 	return (cpp_object_ != src.cpp_object_);
 }
 
-template <class T_CppObject>
-inline LockPtr<T_CppObject>::operator bool() const
+template <class T_CppObject, class T_Mutex>
+inline LockPtrBase<T_CppObject, T_Mutex>::operator bool() const
 {
 	return (cpp_object_ != 0);
 }
 
-template <class T_CppObject>
+template <class T_CppObject, class T_Mutex>
 inline void
-LockPtr<T_CppObject>::clear()
+LockPtrBase<T_CppObject, T_Mutex>::clear()
 {
-	LockPtr<T_CppObject> temp; // swap with an empty LockPtr<> to clear *this
+	LockPtrBase<T_CppObject, T_Mutex> temp; // swap with an empty LockPtr<> to clear *this
 	this->swap(temp);
 }
 
@@ -508,12 +518,30 @@ LockPtr<T_CppObject>::clear()
  * @param rrp "right" refptr
  * @relates fawkes::LockPtr
  */
-template <class T_CppObject>
+template <class T_CppObject, class T_Mutex>
 inline void
-swap(LockPtr<T_CppObject> &lrp, LockPtr<T_CppObject> &rrp)
+swap(LockPtrBase<T_CppObject, T_Mutex> &lrp, LockPtrBase<T_CppObject, T_Mutex> &rrp)
 {
 	lrp.swap(rrp);
 }
+
+/** @class LockPtr
+ * A non-recursive lock pointer.
+ *
+ * @tparam T_CppObject The type of the pointer object.
+ * @see LockPtrBase
+ */
+template <class T_CppObject>
+using LockPtr = LockPtrBase<T_CppObject, Mutex>;
+
+/** @class LockPtr
+ * A recursive lock pointer.
+ *
+ * @tparam T_CppObject The type of the pointer object.
+ * @see LockPtrBase
+ */
+template <class T_CppObject>
+using RecursiveLockPtr = LockPtrBase<T_CppObject, RecursiveMutex>;
 
 } // end namespace fawkes
 
