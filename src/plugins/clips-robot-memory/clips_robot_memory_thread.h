@@ -78,6 +78,7 @@ private:
 	void clips_bson_append_regex(void *bson, std::string field_name, CLIPS::Value regex_string);
 	void clips_bson_append_array(void *bson, std::string field_name, CLIPS::Values values);
 	void clips_bson_append_time(void *bson, std::string field_name, CLIPS::Values time);
+	void clips_bson_append_iso_time(void *bson, std::string field_name, std::string time);
 	CLIPS::Value  clips_bson_array_start();
 	void          clips_bson_array_finish(void *bson, std::string field_name, void *array);
 	void          clips_bson_array_append(void *barr, CLIPS::Value value);
@@ -137,6 +138,16 @@ private:
 	void         clips_robotmemory_destroy_trigger(void *trigger);
 
 	bool mutex_future_ready(const std::string &name);
+
+	CLIPS::Value clips_robotmemory_pipeline_create();
+	void         clips_robotmemory_pipeline_destroy(void *pipeline);
+	CLIPS::Value clips_robotmemory_pipeline_add_match(void *pipeline, void *match);
+	CLIPS::Value clips_robotmemory_pipeline_add_projection(void *pipeline, void *projection);
+	CLIPS::Value clips_robotmemory_aggregate(std::string collection, void *);
+	void         clips_bson_append_array_test(void *       bson,
+	                                          std::string  field_name,
+	                                          CLIPS::Value value1,
+	                                          CLIPS::Value value2);
 
 private:
 	std::list<ClipsRmTrigger *>              clips_triggers_;

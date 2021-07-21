@@ -30,6 +30,7 @@
 #include <core/threading/thread.h>
 #include <plugins/mongodb/aspect/mongodb.h>
 
+#include <regex>
 #include <string>
 
 namespace fawkes {
@@ -104,9 +105,13 @@ private:
 	tlog_insert_message(LogLevel ll, struct timeval *t, const char *component, fawkes::Exception &);
 
 private:
-	std::string    database_;
-	std::string    collection_;
-	fawkes::Mutex *mutex_;
+	std::string            database_;
+	std::string            collection_;
+	bsoncxx::types::b_date gametime_{std::chrono::high_resolution_clock::now()};
+	fawkes::Mutex *        mutex_;
+	std::regex             assert_regex;
+	std::regex             retract_regex;
+	std::string            collection_name = "gamestate_recovery";
 };
 
 #endif

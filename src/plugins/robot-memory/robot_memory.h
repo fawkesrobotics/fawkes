@@ -57,11 +57,9 @@ public:
 	virtual ~RobotMemory();
 
 	//robot memory functions
-	mongocxx::cursor         query(bsoncxx::document::view query,
-	                               const std::string &     collection_name = "",
-	                               mongocxx::options::find query_options = mongocxx::options::find());
-	bsoncxx::document::value aggregate(const std::vector<bsoncxx::document::view> &pipeline,
-	                                   const std::string &                         collection = "");
+	mongocxx::cursor query(bsoncxx::document::view query,
+	                       const std::string &     collection_name = "",
+	                       mongocxx::options::find query_options   = mongocxx::options::find());
 	// TODO fix int return codes, should be booleans
 	int insert(bsoncxx::document::view, const std::string &collection = "");
 	int insert(std::vector<bsoncxx::document::view> v_obj, const std::string &collection = "");
@@ -84,7 +82,7 @@ public:
 	                                   const std::string &            collection,
 	                                   const std::string &            js_map_fun,
 	                                   const std::string &            js_reduce_fun);
-	mongocxx::cursor aggregate(bsoncxx::document::view pipeline, const std::string &collection = "");
+	mongocxx::cursor aggregate(mongocxx::pipeline &pipeline, const std::string &collection_name = "");
 	int              drop_collection(const std::string &collection);
 	int              clear_memory();
 	int              restore_collection(const std::string &dbcollection,

@@ -26,18 +26,18 @@ LIBS_pddl_robot_memory = m fawkescore fawkesutils fawkesaspects fawkesbaseapp \
 OBJS_pddl_robot_memory = pddl_robot_memory_plugin.o pddl_robot_memory_thread.o
 
 OBJS_all   = $(OBJS_pddl_robot_memory)
-PLUGINS_all = $(PLUGINDIR)/pddl-robot-memory.$(SOEXT)	  
+PLUGINS_all = $(PLUGINDIR)/pddl-robot-memory.$(SOEXT)
 
-ifeq ($(HAVE_CPP11)$(HAVE_ROBOT_MEMORY)$(HAVE_CTEMPLATE),111)
+ifeq ($(HAVE_CPP17)$(HAVE_ROBOT_MEMORY)$(HAVE_CTEMPLATE),111)
   PRESUBDIRS = interfaces
 
-  CFLAGS  += $(CFLAGS_CPP11) $(CFLAGS_ROBOT_MEMORY)
+  CFLAGS  += $(CFLAGS_CPP17) $(CFLAGS_ROBOT_MEMORY)
   LDFLAGS += $(LDFLAGS_CTEMPLATE) $(LDFLAGS_ROBOT_MEMORY)
 
   PLUGINS_build = $(PLUGINS_all)
 else
-  ifneq ($(HAVE_CPP11),1)
-    WARN_TARGETS += warning_cpp11
+  ifneq ($(HAVE_CPP17),1)
+    WARN_TARGETS += warning_cpp17
   endif
   ifneq ($(HAVE_ROBOT_MEMORY),1)
     WARN_TARGETS += warning_robot_memory
@@ -54,7 +54,7 @@ all: $(WARN_TARGETS)
 warning_robot_memory:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting pddl-robot-memory plugin$(TNORMAL) (robot memory not available)"
 warning_cpp11:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Cannot build pddl-robot-memory plugin$(TNORMAL) (C++11 not supported)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Cannot build pddl-robot-memory plugin$(TNORMAL) (C++17 not supported)"
 warning_ctemplate:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Cannot build pddl-robot-memory plugin$(TNORMAL) (ctemplate-devel not installed)"
 endif

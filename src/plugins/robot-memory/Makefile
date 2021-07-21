@@ -61,7 +61,7 @@ all: $(WARN_TARGETS)
 
 .PHONY: warning_cpp17 warning_mongodb warning_tf warning_ubuntu
 warning_cpp17:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting RobotMemory Plugin$(TNORMAL) (C++11 required)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting RobotMemory Plugin$(TNORMAL) (C++17 required)"
 warning_mongodb:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting RobotMemory Plugin$(TNORMAL) (mongodb[-devel] not installed)"
 warning_tf:

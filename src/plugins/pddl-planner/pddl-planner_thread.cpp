@@ -36,6 +36,7 @@
 using namespace fawkes;
 using namespace mongocxx;
 using namespace bsoncxx;
+using namespace bsoncxx::builder;
 
 /** @class PddlPlannerThread 'pddl-planner_thread.h' 
  * Starts a pddl planner and writes the resulting plan into the robot memory
@@ -109,13 +110,16 @@ PddlPlannerThread::loop()
 
 	if (!action_list_.empty()) {
 		auto plan = BSONFromActionList();
-		robot_memory->update(from_json("{plan:{$exists:true}}").view(), plan, cfg_collection_, true);
+		robot_memory->update(builder::basic::make_document(basic::kvp("plan", "{$exists:true}")),
+		                     plan,
+		                     cfg_collection_,
+		                     true);
 		print_action_list();
 		plan_if_->set_success(true);
 	} else {
 		logger->log_error(name(), "Updating plan failed, action list empty!");
-		robot_memory->update(from_json("{plan:{$exists:true}}").view(),
-		                     from_json("{plan:0}").view(),
+		robot_memory->update(builder::basic::make_document(basic::kvp("plan", "{$exists:true}")),
+		                     builder::basic::make_document(basic::kvp("plan", 0)),
 		                     cfg_collection_,
 		                     true);
 		plan_if_->set_success(false);
@@ -148,8 +152,11 @@ PddlPlannerThread::ff_planner()
 	size_t cur_pos = 0;
 	if (result.find("found legal plan as follows", cur_pos) == std::string::npos) {
 		logger->log_error(name(), "Planning Failed: %s", result.c_str());
-		robot_memory->update(from_json("{plan:{$exists:true}}").view(),
-		                     from_json("{plan:1,fail:1,steps:[]}").view(),
+		robot_memory->update(builder::basic::make_document(basic::kvp("plan", "{$exists:true}")),
+		                     builder::basic::make_document(basic::kvp("plan", 1),
+		                                                   basic::kvp("fail", 1),
+		                                                   basic::kvp("steps",
+		                                                              builder::basic::array())),
 		                     cfg_collection_,
 		                     true);
 		return;
@@ -202,8 +209,11 @@ PddlPlannerThread::dbmp_planner()
 	size_t cur_pos = 0;
 	if (result.find("Planner failed", cur_pos) != std::string::npos) {
 		logger->log_error(name(), "Planning Failed: %s", result.c_str());
-		robot_memory->update(from_json("{plan:{$exists:true}}").view(),
-		                     from_json("{plan:1,fail:1,steps:[]}").view(),
+		robot_memory->update(builder::basic::make_document(basic::kvp("plan", "{$exists:true}")),
+		                     builder::basic::make_document(basic::kvp("plan", 1),
+		                                                   basic::kvp("fail", 1),
+		                                                   basic::kvp("steps",
+		                                                              builder::basic::array())),
 		                     cfg_collection_,
 		                     true);
 		return;
@@ -289,7 +299,6 @@ PddlPlannerThread::fd_planner()
 document::value
 PddlPlannerThread::BSONFromActionList()
 {
-	using namespace bsoncxx::builder;
 	basic::document plan;
 	plan.append(basic::kvp("plan", 1));
 	plan.append(basic::kvp("msg_id", static_cast<int64_t>(plan_if_->msg_id())));

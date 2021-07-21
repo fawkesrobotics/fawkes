@@ -465,7 +465,9 @@
 	(test (<= (fact-index ?wf) ?wf-idx))
 	=>
 	(bind ?new-wf (modify ?wf (values (append$ ?objs ?name))))
-	(modify ?wm (wm-fact-idx (fact-index ?new-wf)))
+	(if ?new-wf then 
+		(modify ?wm (wm-fact-idx (fact-index ?new-wf)))
+	)
 )
 
 (defrule wm-sync-domain-object-removed
