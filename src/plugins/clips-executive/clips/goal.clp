@@ -168,6 +168,21 @@
 	; the goal and that is not passed as a parameter. For example, it
 	; could contain the number of tries performed for a goal.
 	(multislot meta)
+	; Goal meta data may depend on the application, hence application-specific
+	; templates may be used to attach information.
+	; The only requirement for custom templates is to contain a slot 'goal-id'
+	; which is used to keep track of fact updates.
+	; When formulating a goal it is sufficient to either set the template name or
+	; a fact-index of the meta fact.
+	; If 'meta-template' is set:
+	;   - if no meta fact of that template is present matching the goal id,
+	;     then a new meta fact is asserted with default values
+	;   - else the existing meta fact with the matching goal id is attached to
+	;     the goal
+	; If 'meta-fact' is set the meta-template slot is updated automatically.
+	; Also, if the goal-id field does not match the goals id, it is updated.
+	(slot meta-fact (type INTEGER) (default 0))
+	(slot meta-template (type SYMBOL))
 
 	; Resource handling for the given goal.  A goal may list a number of
 	; required resources. The resources can be of different types and
@@ -191,7 +206,12 @@
 
 	; Amount of information to print. If set to quiet, regular events such as a
 	; committed or dispatched goal will only be logged to the debug log.
-	(slot verbosity (type SYMBOL) (allowed-values QUIET DEFAULT) (default DEFAULT))
+	(slot verbosity (type SYMBOL) (allowed-values QUIET DEFAULT NOISY) (default DEFAULT))
+
+	; Indicates whether the given goal is executable, meaning if it is generally
+	; feasible to expand it in the current situation.
+	(slot is-executable (type SYMBOL) (allowed-values TRUE FALSE)
+	                    (default FALSE))
 )
 
 (deffunction goal-retract-goal-tree (?id)
@@ -230,4 +250,106 @@
 	(exists (plan (goal-id ?id)))
 	=>
 	(plan-retract-all-for-goal ?id)
+)
+
+(defrule goal-meta-fact-template-missing-goal-id
+	(declare (salience ?*SALIENCE-FIRST*))
+	(goal (id ?id) (meta-fact ~0) (meta-template ?t&~nil))
+	(test (not (deftemplate-slot-existp ?t goal-id)))
+	=>
+	(printout error "Goal " ?id " uses meta fact '" ?t
+	                "' without slot 'goal-id'" crlf)
+)
+
+(defrule goal-meta-ambiguous-meta-facts
+	(declare (salience ?*SALIENCE-HIGH*))
+	?g <- (goal (id ?id) (meta-fact ~0) (meta-template ?t&~nil))
+	(test (> (length$ (find-all-facts ((?fact ?t)) (eq ?fact:goal-id ?id))) 1))
+	=>
+	(printout error "Goal " ?id " has ambiguous meta facts" crlf)
+)
+
+(defrule goal-update-meta-template
+" A goal meta is set via fact-index. Update the template name accordingly."
+	(declare (salience ?*SALIENCE-HIGH*))
+	?g <- (goal (id ?id) (meta-fact ?f&:(and (> ?f 0) (fact-existp ?f)))
+	            (meta-template ?t&:(neq ?t (fact-relation ?f))))
+	=>
+	(modify ?g (meta-template (fact-relation ?f)))
+)
+
+(defrule goal-meta-fact-init-fact-id
+" The meta fact template is specified and a goal meta fact exists for the goal.
+  Update the goal meta fact-index.
+"
+	(declare (salience ?*SALIENCE-HIGH*))
+	?g <- (goal (id ?id) (meta-fact 0) (meta-template ?t&~nil))
+	(test (any-factp ((?f ?t)) (eq ?f:goal-id ?id)))
+	=>
+	(do-for-fact ((?f ?t)) (eq ?f:goal-id ?id)
+	  (modify ?g (meta-fact (fact-index ?f)))
+	)
+)
+
+(defrule goal-meta-fact-init-goal-id
+" The meta-fact is already set, but the goal id does not match, update the
+  goal-id of the goal meta fact.
+"
+	(declare (salience ?*SALIENCE-HIGH*))
+	?g <- (goal (id ?id) (meta-fact ?f&~0) (meta-template ?t&~nil))
+	(test (and (fact-existp ?f) (neq (fact-slot-value ?f goal-id) ?id)))
+	=>
+	(modify ?f (goal-id ?id))
+)
+
+(defrule goal-meta-fact-update
+" The stored meta fact does not exist anymore, it was updated or deleted.
+  If another goal meta fact exists with matching goal id, then update the
+  stored fact-index, else remove the outdated goal-meta information.
+"
+	(declare (salience ?*SALIENCE-HIGH*))
+	?g <- (goal (id ?id) (meta-fact ?f&~0) (meta-template ?t&~nil))
+	(time $?) ; Re-evaluate the LHS continuously
+	(test (not (fact-existp ?f)))
+	=>
+	(if (not (do-for-fact ((?new-fact ?t)) (eq ?new-fact:goal-id ?id)
+	                      (modify ?g (meta-fact (fact-index ?new-fact)))))
+	 then
+		(modify ?g (meta-fact 0) (meta-template nil))
+	)
+)
+
+(defrule goal-cleanup-meta-facts
+	(confval (path "/clips-executive/automatic-goal-retraction") (type BOOL) (value TRUE))
+	(goal (meta-fact ?f&~0) (mode RETRACTED))
+	(test (fact-existp ?f))
+	=>
+	(retract ?f)
+)
+
+(defrule goal-assert-default-meta
+" A goal meta template is specified but no corresponding fact exits,
+  assert default goal meta fact."
+	(declare (salience ?*SALIENCE-HIGH*))
+	?g <- (goal (id ?id) (meta-fact 0) (verbosity ?v)
+	            (meta-template ?t&:(member$ ?t (get-deftemplate-list)))
+	            (mode ~RETRACTED))
+	(test (not (any-factp ((?fact ?t)) (eq ?fact:goal-id ?id))))
+	=>
+	(modify ?g (meta-fact (fact-index (assert-string (str-cat "(" ?t
+	        " (goal-id " ?id"))")))))
+	(if (eq ?v NOISY) then
+		(printout t "Goal " ?id " attached default meta fact from template " ?t crlf)
+	)
+)
+
+(defrule goal-meta-template-invalid
+	(declare (salience ?*SALIENCE-FIRST*))
+	?g <- (goal (id ?id) (meta-template ?t&:
+	            (and (neq ?t nil)
+	                 (not (member$ ?t (get-deftemplate-list)))))
+	            (mode ~RETRACTED))
+	=>
+	(printout error "Goal " ?id " attached goal meta template '"
+	                ?t "' unknown" crlf)
 )
