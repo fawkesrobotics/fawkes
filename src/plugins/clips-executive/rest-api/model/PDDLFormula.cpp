@@ -1,6 +1,6 @@
 
 /****************************************************************************
- *  Plan
+ *  PDDLFormula
  *  (auto-generated, do not modify directly)
  *
  *  CLIPS Executive REST API.
@@ -11,7 +11,7 @@
  *  API License: Apache 2.0
  ****************************************************************************/
 
-#include "Plan.h"
+#include "PDDLFormula.h"
 
 #include <rapidjson/document.h>
 #include <rapidjson/prettywriter.h>
@@ -21,26 +21,26 @@
 
 #include <sstream>
 
-Plan::Plan()
+PDDLFormula::PDDLFormula()
 {
 }
 
-Plan::Plan(const std::string &json)
+PDDLFormula::PDDLFormula(const std::string &json)
 {
 	from_json(json);
 }
 
-Plan::Plan(const rapidjson::Value &v)
+PDDLFormula::PDDLFormula(const rapidjson::Value &v)
 {
 	from_json_value(v);
 }
 
-Plan::~Plan()
+PDDLFormula::~PDDLFormula()
 {
 }
 
 std::string
-Plan::to_json(bool pretty) const
+PDDLFormula::to_json(bool pretty) const
 {
 	rapidjson::Document d;
 
@@ -59,7 +59,7 @@ Plan::to_json(bool pretty) const
 }
 
 void
-Plan::to_json_value(rapidjson::Document &d, rapidjson::Value &v) const
+PDDLFormula::to_json_value(rapidjson::Document &d, rapidjson::Value &v) const
 {
 	rapidjson::Document::AllocatorType &allocator = d.GetAllocator();
 	v.SetObject();
@@ -81,28 +81,20 @@ Plan::to_json_value(rapidjson::Document &d, rapidjson::Value &v) const
 		v_id.SetString(*id_, allocator);
 		v.AddMember("id", v_id, allocator);
 	}
-	if (goal_id_) {
-		rapidjson::Value v_goal_id;
-		v_goal_id.SetString(*goal_id_, allocator);
-		v.AddMember("goal-id", v_goal_id, allocator);
+	if (type_) {
+		rapidjson::Value v_type;
+		v_type.SetString(*type_, allocator);
+		v.AddMember("type", v_type, allocator);
 	}
-	if (cost_) {
-		rapidjson::Value v_cost;
-		v_cost.SetFloat(*cost_);
-		v.AddMember("cost", v_cost, allocator);
+	if (part_of_) {
+		rapidjson::Value v_part_of;
+		v_part_of.SetString(*part_of_, allocator);
+		v.AddMember("part-of", v_part_of, allocator);
 	}
-	rapidjson::Value v_actions(rapidjson::kArrayType);
-	v_actions.Reserve(actions_.size(), allocator);
-	for (const auto &e : actions_) {
-		rapidjson::Value v(rapidjson::kObjectType);
-		e->to_json_value(d, v);
-		v_actions.PushBack(v, allocator);
-	}
-	v.AddMember("actions", v_actions, allocator);
 }
 
 void
-Plan::from_json(const std::string &json)
+PDDLFormula::from_json(const std::string &json)
 {
 	rapidjson::Document d;
 	d.Parse(json);
@@ -111,7 +103,7 @@ Plan::from_json(const std::string &json)
 }
 
 void
-Plan::from_json_value(const rapidjson::Value &d)
+PDDLFormula::from_json_value(const rapidjson::Value &d)
 {
 	if (d.HasMember("kind") && d["kind"].IsString()) {
 		kind_ = d["kind"].GetString();
@@ -122,27 +114,16 @@ Plan::from_json_value(const rapidjson::Value &d)
 	if (d.HasMember("id") && d["id"].IsString()) {
 		id_ = d["id"].GetString();
 	}
-	if (d.HasMember("goal-id") && d["goal-id"].IsString()) {
-		goal_id_ = d["goal-id"].GetString();
+	if (d.HasMember("type") && d["type"].IsString()) {
+		type_ = d["type"].GetString();
 	}
-	if (d.HasMember("cost") && d["cost"].IsFloat()) {
-		cost_ = d["cost"].GetFloat();
-	}
-	if (d.HasMember("actions") && d["actions"].IsArray()) {
-		const rapidjson::Value &a = d["actions"];
-		actions_                  = std::vector<std::shared_ptr<PlanAction>>{};
-
-		actions_.reserve(a.Size());
-		for (auto &v : a.GetArray()) {
-			std::shared_ptr<PlanAction> nv{new PlanAction()};
-			nv->from_json_value(v);
-			actions_.push_back(std::move(nv));
-		}
+	if (d.HasMember("part-of") && d["part-of"].IsString()) {
+		part_of_ = d["part-of"].GetString();
 	}
 }
 
 void
-Plan::validate(bool subcall) const
+PDDLFormula::validate(bool subcall) const
 {
 	std::vector<std::string> missing;
 	if (!kind_) {
@@ -154,21 +135,11 @@ Plan::validate(bool subcall) const
 	if (!id_) {
 		missing.push_back("id");
 	}
-	if (!goal_id_) {
-		missing.push_back("goal-id");
+	if (!type_) {
+		missing.push_back("type");
 	}
-	for (size_t i = 0; i < actions_.size(); ++i) {
-		if (!actions_[i]) {
-			missing.push_back("actions[" + std::to_string(i) + "]");
-		} else {
-			try {
-				actions_[i]->validate(true);
-			} catch (std::vector<std::string> &subcall_missing) {
-				for (const auto &s : subcall_missing) {
-					missing.push_back("actions[" + std::to_string(i) + "]." + s);
-				}
-			}
-		}
+	if (!part_of_) {
+		missing.push_back("part-of");
 	}
 
 	if (!missing.empty()) {
@@ -180,7 +151,7 @@ Plan::validate(bool subcall) const
 			                  missing.end(),
 			                  missing.front(),
 			                  [](std::string &s, const std::string &n) { return s + ", " + n; });
-			throw std::runtime_error("Plan is missing " + s);
+			throw std::runtime_error("PDDLFormula is missing " + s);
 		}
 	}
 }

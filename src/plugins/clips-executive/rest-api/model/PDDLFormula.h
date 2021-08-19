@@ -1,6 +1,6 @@
 
 /****************************************************************************
- *  ClipsExecutive -- Schema DomainObjectType
+ *  ClipsExecutive -- Schema PDDLFormula
  *  (auto-generated, do not modify directly)
  *
  *  CLIPS Executive REST API.
@@ -23,23 +23,23 @@
 #include <string>
 #include <vector>
 
-/** DomainObjectType representation for JSON transfer. */
-class DomainObjectType
+/** PDDLFormula representation for JSON transfer. */
+class PDDLFormula
 {
 public:
 	/** Constructor. */
-	DomainObjectType();
+	PDDLFormula();
 	/** Constructor from JSON.
 	 * @param json JSON string to initialize from
 	 */
-	DomainObjectType(const std::string &json);
+	PDDLFormula(const std::string &json);
 	/** Constructor from JSON.
 	 * @param v RapidJSON value object to initialize from.
 	 */
-	DomainObjectType(const rapidjson::Value &v);
+	PDDLFormula(const rapidjson::Value &v);
 
 	/** Destructor. */
-	virtual ~DomainObjectType();
+	virtual ~PDDLFormula();
 
 	/** Get version of implemented API.
 	 * @return string representation of version
@@ -83,7 +83,7 @@ public:
 	 */
 	virtual void validate(bool subcall = false) const;
 
-	// Schema: DomainObjectType
+	// Schema: PDDLFormula
 public:
 	/** Get kind value.
    * @return kind value
@@ -119,44 +119,62 @@ public:
 	{
 		apiVersion_ = apiVersion;
 	}
-	/** Get name value.
-   * @return name value
+	/** Get id value.
+   * @return id value
    */
 	std::optional<std::string>
-	name() const
+	id() const
 	{
-		return name_;
+		return id_;
 	}
 
-	/** Set name value.
-	 * @param name new value
+	/** Set id value.
+	 * @param id new value
 	 */
 	void
-	set_name(const std::string &name)
+	set_id(const std::string &id)
 	{
-		name_ = name;
+		id_ = id;
 	}
-	/** Get super-type value.
-   * @return super-type value
+	/** Get type value.
+   * @return type value
    */
 	std::optional<std::string>
-	super_type() const
+	type() const
 	{
-		return super_type_;
+		return type_;
 	}
 
-	/** Set super-type value.
-	 * @param super_type new value
+	/** Set type value.
+	 * @param type new value
 	 */
 	void
-	set_super_type(const std::string &super_type)
+	set_type(const std::string &type)
 	{
-		super_type_ = super_type;
+		type_ = type;
+	}
+	/** Get part-of value.
+   * @return part-of value
+   */
+	std::optional<std::string>
+	part_of() const
+	{
+		return part_of_;
+	}
+
+	/** Set part-of value.
+	 * @param part_of new value
+	 */
+	void
+	set_part_of(const std::string &part_of)
+	{
+		part_of_ = part_of;
 	}
 
 private:
 	std::optional<std::string> kind_;
 	std::optional<std::string> apiVersion_;
-	std::optional<std::string> name_;
-	std::optional<std::string> super_type_;
+	std::optional<std::string> id_;
+	std::optional<std::string> type_;
+	std::optional<std::string> part_of_;
 };

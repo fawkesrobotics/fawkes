@@ -1,6 +1,6 @@
 
 /****************************************************************************
- *  DomainOperator
+ *  GroundedFormula
  *  (auto-generated, do not modify directly)
  *
  *  CLIPS Executive REST API.
@@ -11,7 +11,7 @@
  *  API License: Apache 2.0
  ****************************************************************************/
 
-#include "DomainOperator.h"
+#include "GroundedFormula.h"
 
 #include <rapidjson/document.h>
 #include <rapidjson/prettywriter.h>
@@ -21,26 +21,26 @@
 
 #include <sstream>
 
-DomainOperator::DomainOperator()
+GroundedFormula::GroundedFormula()
 {
 }
 
-DomainOperator::DomainOperator(const std::string &json)
+GroundedFormula::GroundedFormula(const std::string &json)
 {
 	from_json(json);
 }
 
-DomainOperator::DomainOperator(const rapidjson::Value &v)
+GroundedFormula::GroundedFormula(const rapidjson::Value &v)
 {
 	from_json_value(v);
 }
 
-DomainOperator::~DomainOperator()
+GroundedFormula::~GroundedFormula()
 {
 }
 
 std::string
-DomainOperator::to_json(bool pretty) const
+GroundedFormula::to_json(bool pretty) const
 {
 	rapidjson::Document d;
 
@@ -59,7 +59,7 @@ DomainOperator::to_json(bool pretty) const
 }
 
 void
-DomainOperator::to_json_value(rapidjson::Document &d, rapidjson::Value &v) const
+GroundedFormula::to_json_value(rapidjson::Document &d, rapidjson::Value &v) const
 {
 	rapidjson::Document::AllocatorType &allocator = d.GetAllocator();
 	v.SetObject();
@@ -81,23 +81,28 @@ DomainOperator::to_json_value(rapidjson::Document &d, rapidjson::Value &v) const
 		v_name.SetString(*name_, allocator);
 		v.AddMember("name", v_name, allocator);
 	}
-	if (wait_sensed_) {
-		rapidjson::Value v_wait_sensed;
-		v_wait_sensed.SetBool(*wait_sensed_);
-		v.AddMember("wait-sensed", v_wait_sensed, allocator);
+	if (type_) {
+		rapidjson::Value v_type;
+		v_type.SetString(*type_, allocator);
+		v.AddMember("type", v_type, allocator);
 	}
-	rapidjson::Value v_parameters(rapidjson::kArrayType);
-	v_parameters.Reserve(parameters_.size(), allocator);
-	for (const auto &e : parameters_) {
+	if (is_satisfied_) {
+		rapidjson::Value v_is_satisfied;
+		v_is_satisfied.SetBool(*is_satisfied_);
+		v.AddMember("is-satisfied", v_is_satisfied, allocator);
+	}
+	rapidjson::Value v_child(rapidjson::kArrayType);
+	v_child.Reserve(child_.size(), allocator);
+	for (const auto &e : child_) {
 		rapidjson::Value v(rapidjson::kObjectType);
 		e->to_json_value(d, v);
-		v_parameters.PushBack(v, allocator);
+		v_child.PushBack(v, allocator);
 	}
-	v.AddMember("parameters", v_parameters, allocator);
+	v.AddMember("child", v_child, allocator);
 }
 
 void
-DomainOperator::from_json(const std::string &json)
+GroundedFormula::from_json(const std::string &json)
 {
 	rapidjson::Document d;
 	d.Parse(json);
@@ -106,7 +111,7 @@ DomainOperator::from_json(const std::string &json)
 }
 
 void
-DomainOperator::from_json_value(const rapidjson::Value &d)
+GroundedFormula::from_json_value(const rapidjson::Value &d)
 {
 	if (d.HasMember("kind") && d["kind"].IsString()) {
 		kind_ = d["kind"].GetString();
@@ -117,24 +122,27 @@ DomainOperator::from_json_value(const rapidjson::Value &d)
 	if (d.HasMember("name") && d["name"].IsString()) {
 		name_ = d["name"].GetString();
 	}
-	if (d.HasMember("wait-sensed") && d["wait-sensed"].IsBool()) {
-		wait_sensed_ = d["wait-sensed"].GetBool();
+	if (d.HasMember("type") && d["type"].IsString()) {
+		type_ = d["type"].GetString();
 	}
-	if (d.HasMember("parameters") && d["parameters"].IsArray()) {
-		const rapidjson::Value &a = d["parameters"];
-		parameters_               = std::vector<std::shared_ptr<DomainOperatorParameter>>{};
+	if (d.HasMember("is-satisfied") && d["is-satisfied"].IsBool()) {
+		is_satisfied_ = d["is-satisfied"].GetBool();
+	}
+	if (d.HasMember("child") && d["child"].IsArray()) {
+		const rapidjson::Value &a = d["child"];
+		child_                    = std::vector<std::shared_ptr<GroundedFormula>>{};
 
-		parameters_.reserve(a.Size());
+		child_.reserve(a.Size());
 		for (auto &v : a.GetArray()) {
-			std::shared_ptr<DomainOperatorParameter> nv{new DomainOperatorParameter()};
+			std::shared_ptr<GroundedFormula> nv{new GroundedFormula()};
 			nv->from_json_value(v);
-			parameters_.push_back(std::move(nv));
+			child_.push_back(std::move(nv));
 		}
 	}
 }
 
 void
-DomainOperator::validate(bool subcall) const
+GroundedFormula::validate(bool subcall) const
 {
 	std::vector<std::string> missing;
 	if (!kind_) {
@@ -146,21 +154,11 @@ DomainOperator::validate(bool subcall) const
 	if (!name_) {
 		missing.push_back("name");
 	}
-	if (!wait_sensed_) {
-		missing.push_back("wait-sensed");
+	if (!type_) {
+		missing.push_back("type");
 	}
-	for (size_t i = 0; i < parameters_.size(); ++i) {
-		if (!parameters_[i]) {
-			missing.push_back("parameters[" + std::to_string(i) + "]");
-		} else {
-			try {
-				parameters_[i]->validate(true);
-			} catch (std::vector<std::string> &subcall_missing) {
-				for (const auto &s : subcall_missing) {
-					missing.push_back("parameters[" + std::to_string(i) + "]." + s);
-				}
-			}
-		}
+	if (!is_satisfied_) {
+		missing.push_back("is-satisfied");
 	}
 
 	if (!missing.empty()) {
@@ -172,7 +170,7 @@ DomainOperator::validate(bool subcall) const
 			                  missing.end(),
 			                  missing.front(),
 			                  [](std::string &s, const std::string &n) { return s + ", " + n; });
-			throw std::runtime_error("DomainOperator is missing " + s);
+			throw std::runtime_error("GroundedFormula is missing " + s);
 		}
 	}
 }

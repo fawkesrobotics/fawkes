@@ -17,6 +17,7 @@
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
+#include <numeric>
 
 #include <sstream>
 
@@ -92,7 +93,7 @@ DomainPreconditionCompound::from_json_value(const rapidjson::Value &d)
 	if (d.HasMember("elements") && d["elements"].IsArray()) {
 		const rapidjson::Value &a = d["elements"];
 		elements_                 = std::vector<std::shared_ptr<DomainPrecondition>>{};
-		;
+
 		elements_.reserve(a.Size());
 		for (auto &v : a.GetArray()) {
 			std::shared_ptr<DomainPrecondition> nv{new DomainPrecondition()};
@@ -129,16 +130,12 @@ DomainPreconditionCompound::validate(bool subcall) const
 		if (subcall) {
 			throw missing;
 		} else {
-			std::ostringstream s;
-			s << "DomainPreconditionCompound is missing field" << ((missing.size() > 0) ? "s" : "")
-			  << ": ";
-			for (std::vector<std::string>::size_type i = 0; i < missing.size(); ++i) {
-				s << missing[i];
-				if (i < (missing.size() - 1)) {
-					s << ", ";
-				}
-			}
-			throw std::runtime_error(s.str());
+			std::string s =
+			  std::accumulate(std::next(missing.begin()),
+			                  missing.end(),
+			                  missing.front(),
+			                  [](std::string &s, const std::string &n) { return s + ", " + n; });
+			throw std::runtime_error("DomainPreconditionCompound is missing " + s);
 		}
 	}
 }

@@ -1,6 +1,6 @@
 
 /****************************************************************************
- *  Plan
+ *  GroundedPDDLFormula
  *  (auto-generated, do not modify directly)
  *
  *  CLIPS Executive REST API.
@@ -11,7 +11,7 @@
  *  API License: Apache 2.0
  ****************************************************************************/
 
-#include "Plan.h"
+#include "GroundedPDDLFormula.h"
 
 #include <rapidjson/document.h>
 #include <rapidjson/prettywriter.h>
@@ -21,26 +21,26 @@
 
 #include <sstream>
 
-Plan::Plan()
+GroundedPDDLFormula::GroundedPDDLFormula()
 {
 }
 
-Plan::Plan(const std::string &json)
+GroundedPDDLFormula::GroundedPDDLFormula(const std::string &json)
 {
 	from_json(json);
 }
 
-Plan::Plan(const rapidjson::Value &v)
+GroundedPDDLFormula::GroundedPDDLFormula(const rapidjson::Value &v)
 {
 	from_json_value(v);
 }
 
-Plan::~Plan()
+GroundedPDDLFormula::~GroundedPDDLFormula()
 {
 }
 
 std::string
-Plan::to_json(bool pretty) const
+GroundedPDDLFormula::to_json(bool pretty) const
 {
 	rapidjson::Document d;
 
@@ -59,7 +59,7 @@ Plan::to_json(bool pretty) const
 }
 
 void
-Plan::to_json_value(rapidjson::Document &d, rapidjson::Value &v) const
+GroundedPDDLFormula::to_json_value(rapidjson::Document &d, rapidjson::Value &v) const
 {
 	rapidjson::Document::AllocatorType &allocator = d.GetAllocator();
 	v.SetObject();
@@ -81,28 +81,25 @@ Plan::to_json_value(rapidjson::Document &d, rapidjson::Value &v) const
 		v_id.SetString(*id_, allocator);
 		v.AddMember("id", v_id, allocator);
 	}
-	if (goal_id_) {
-		rapidjson::Value v_goal_id;
-		v_goal_id.SetString(*goal_id_, allocator);
-		v.AddMember("goal-id", v_goal_id, allocator);
+	if (formula_id_) {
+		rapidjson::Value v_formula_id;
+		v_formula_id.SetString(*formula_id_, allocator);
+		v.AddMember("formula-id", v_formula_id, allocator);
 	}
-	if (cost_) {
-		rapidjson::Value v_cost;
-		v_cost.SetFloat(*cost_);
-		v.AddMember("cost", v_cost, allocator);
+	if (grounding_) {
+		rapidjson::Value v_grounding;
+		v_grounding.SetString(*grounding_, allocator);
+		v.AddMember("grounding", v_grounding, allocator);
 	}
-	rapidjson::Value v_actions(rapidjson::kArrayType);
-	v_actions.Reserve(actions_.size(), allocator);
-	for (const auto &e : actions_) {
-		rapidjson::Value v(rapidjson::kObjectType);
-		e->to_json_value(d, v);
-		v_actions.PushBack(v, allocator);
+	if (is_satisfied_) {
+		rapidjson::Value v_is_satisfied;
+		v_is_satisfied.SetBool(*is_satisfied_);
+		v.AddMember("is-satisfied", v_is_satisfied, allocator);
 	}
-	v.AddMember("actions", v_actions, allocator);
 }
 
 void
-Plan::from_json(const std::string &json)
+GroundedPDDLFormula::from_json(const std::string &json)
 {
 	rapidjson::Document d;
 	d.Parse(json);
@@ -111,7 +108,7 @@ Plan::from_json(const std::string &json)
 }
 
 void
-Plan::from_json_value(const rapidjson::Value &d)
+GroundedPDDLFormula::from_json_value(const rapidjson::Value &d)
 {
 	if (d.HasMember("kind") && d["kind"].IsString()) {
 		kind_ = d["kind"].GetString();
@@ -122,27 +119,19 @@ Plan::from_json_value(const rapidjson::Value &d)
 	if (d.HasMember("id") && d["id"].IsString()) {
 		id_ = d["id"].GetString();
 	}
-	if (d.HasMember("goal-id") && d["goal-id"].IsString()) {
-		goal_id_ = d["goal-id"].GetString();
+	if (d.HasMember("formula-id") && d["formula-id"].IsString()) {
+		formula_id_ = d["formula-id"].GetString();
 	}
-	if (d.HasMember("cost") && d["cost"].IsFloat()) {
-		cost_ = d["cost"].GetFloat();
+	if (d.HasMember("grounding") && d["grounding"].IsString()) {
+		grounding_ = d["grounding"].GetString();
 	}
-	if (d.HasMember("actions") && d["actions"].IsArray()) {
-		const rapidjson::Value &a = d["actions"];
-		actions_                  = std::vector<std::shared_ptr<PlanAction>>{};
-
-		actions_.reserve(a.Size());
-		for (auto &v : a.GetArray()) {
-			std::shared_ptr<PlanAction> nv{new PlanAction()};
-			nv->from_json_value(v);
-			actions_.push_back(std::move(nv));
-		}
+	if (d.HasMember("is-satisfied") && d["is-satisfied"].IsBool()) {
+		is_satisfied_ = d["is-satisfied"].GetBool();
 	}
 }
 
 void
-Plan::validate(bool subcall) const
+GroundedPDDLFormula::validate(bool subcall) const
 {
 	std::vector<std::string> missing;
 	if (!kind_) {
@@ -154,21 +143,14 @@ Plan::validate(bool subcall) const
 	if (!id_) {
 		missing.push_back("id");
 	}
-	if (!goal_id_) {
-		missing.push_back("goal-id");
+	if (!formula_id_) {
+		missing.push_back("formula-id");
 	}
-	for (size_t i = 0; i < actions_.size(); ++i) {
-		if (!actions_[i]) {
-			missing.push_back("actions[" + std::to_string(i) + "]");
-		} else {
-			try {
-				actions_[i]->validate(true);
-			} catch (std::vector<std::string> &subcall_missing) {
-				for (const auto &s : subcall_missing) {
-					missing.push_back("actions[" + std::to_string(i) + "]." + s);
-				}
-			}
-		}
+	if (!grounding_) {
+		missing.push_back("grounding");
+	}
+	if (!is_satisfied_) {
+		missing.push_back("is-satisfied");
 	}
 
 	if (!missing.empty()) {
@@ -180,7 +162,7 @@ Plan::validate(bool subcall) const
 			                  missing.end(),
 			                  missing.front(),
 			                  [](std::string &s, const std::string &n) { return s + ", " + n; });
-			throw std::runtime_error("Plan is missing " + s);
+			throw std::runtime_error("GroundedPDDLFormula is missing " + s);
 		}
 	}
 }

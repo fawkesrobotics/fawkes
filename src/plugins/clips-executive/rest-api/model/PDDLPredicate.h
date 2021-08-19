@@ -1,6 +1,6 @@
 
 /****************************************************************************
- *  ClipsExecutive -- Schema DomainObjectType
+ *  ClipsExecutive -- Schema PDDLPredicate
  *  (auto-generated, do not modify directly)
  *
  *  CLIPS Executive REST API.
@@ -23,23 +23,23 @@
 #include <string>
 #include <vector>
 
-/** DomainObjectType representation for JSON transfer. */
-class DomainObjectType
+/** PDDLPredicate representation for JSON transfer. */
+class PDDLPredicate
 {
 public:
 	/** Constructor. */
-	DomainObjectType();
+	PDDLPredicate();
 	/** Constructor from JSON.
 	 * @param json JSON string to initialize from
 	 */
-	DomainObjectType(const std::string &json);
+	PDDLPredicate(const std::string &json);
 	/** Constructor from JSON.
 	 * @param v RapidJSON value object to initialize from.
 	 */
-	DomainObjectType(const rapidjson::Value &v);
+	PDDLPredicate(const rapidjson::Value &v);
 
 	/** Destructor. */
-	virtual ~DomainObjectType();
+	virtual ~PDDLPredicate();
 
 	/** Get version of implemented API.
 	 * @return string representation of version
@@ -83,7 +83,7 @@ public:
 	 */
 	virtual void validate(bool subcall = false) const;
 
-	// Schema: DomainObjectType
+	// Schema: PDDLPredicate
 public:
 	/** Get kind value.
    * @return kind value
@@ -119,44 +119,134 @@ public:
 	{
 		apiVersion_ = apiVersion;
 	}
-	/** Get name value.
-   * @return name value
+	/** Get id value.
+   * @return id value
    */
 	std::optional<std::string>
-	name() const
+	id() const
 	{
-		return name_;
+		return id_;
 	}
 
-	/** Set name value.
-	 * @param name new value
+	/** Set id value.
+	 * @param id new value
 	 */
 	void
-	set_name(const std::string &name)
+	set_id(const std::string &id)
 	{
-		name_ = name;
+		id_ = id;
 	}
-	/** Get super-type value.
-   * @return super-type value
+	/** Get part-of value.
+   * @return part-of value
    */
 	std::optional<std::string>
-	super_type() const
+	part_of() const
 	{
-		return super_type_;
+		return part_of_;
 	}
 
-	/** Set super-type value.
-	 * @param super_type new value
+	/** Set part-of value.
+	 * @param part_of new value
 	 */
 	void
-	set_super_type(const std::string &super_type)
+	set_part_of(const std::string &part_of)
 	{
-		super_type_ = super_type;
+		part_of_ = part_of;
+	}
+	/** Get predicate value.
+   * @return predicate value
+   */
+	std::optional<std::string>
+	predicate() const
+	{
+		return predicate_;
+	}
+
+	/** Set predicate value.
+	 * @param predicate new value
+	 */
+	void
+	set_predicate(const std::string &predicate)
+	{
+		predicate_ = predicate;
+	}
+	/** Get param-names value.
+   * @return param-names value
+   */
+	std::vector<std::string>
+	param_names() const
+	{
+		return param_names_;
+	}
+
+	/** Set param-names value.
+	 * @param param_names new value
+	 */
+	void
+	set_param_names(const std::vector<std::string> &param_names)
+	{
+		param_names_ = param_names;
+	}
+	/** Add element to param-names array.
+	 * @param param_names new value
+	 */
+	void
+	addto_param_names(const std::string &&param_names)
+	{
+		param_names_.push_back(std::move(param_names));
+	}
+
+	/** Add element to param-names array.
+	 * The move-semantics version (std::move) should be preferred.
+	 * @param param_names new value
+	 */
+	void
+	addto_param_names(const std::string &param_names)
+	{
+		param_names_.push_back(param_names);
+	}
+	/** Get param-constants value.
+   * @return param-constants value
+   */
+	std::vector<std::string>
+	param_constants() const
+	{
+		return param_constants_;
+	}
+
+	/** Set param-constants value.
+	 * @param param_constants new value
+	 */
+	void
+	set_param_constants(const std::vector<std::string> &param_constants)
+	{
+		param_constants_ = param_constants;
+	}
+	/** Add element to param-constants array.
+	 * @param param_constants new value
+	 */
+	void
+	addto_param_constants(const std::string &&param_constants)
+	{
+		param_constants_.push_back(std::move(param_constants));
+	}
+
+	/** Add element to param-constants array.
+	 * The move-semantics version (std::move) should be preferred.
+	 * @param param_constants new value
+	 */
+	void
+	addto_param_constants(const std::string &param_constants)
+	{
+		param_constants_.push_back(param_constants);
 	}
 
 private:
 	std::optional<std::string> kind_;
 	std::optional<std::string> apiVersion_;
-	std::optional<std::string> name_;
-	std::optional<std::string> super_type_;
+	std::optional<std::string> id_;
+	std::optional<std::string> part_of_;
+	std::optional<std::string> predicate_;
+	std::vector<std::string>   param_names_;
+	std::vector<std::string>   param_constants_;
 };

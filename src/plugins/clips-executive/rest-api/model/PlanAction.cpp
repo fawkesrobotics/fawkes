@@ -17,6 +17,7 @@
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
+#include <numeric>
 
 #include <sstream>
 
@@ -118,14 +119,11 @@ PlanAction::to_json_value(rapidjson::Document &d, rapidjson::Value &v) const
 		_operator_->to_json_value(d, v__operator);
 		v.AddMember("operator", v__operator, allocator);
 	}
-	rapidjson::Value v_preconditions(rapidjson::kArrayType);
-	v_preconditions.Reserve(preconditions_.size(), allocator);
-	for (const auto &e : preconditions_) {
-		rapidjson::Value v(rapidjson::kObjectType);
-		e->to_json_value(d, v);
-		v_preconditions.PushBack(v, allocator);
+	if (precondition_) {
+		rapidjson::Value v_precondition(rapidjson::kObjectType);
+		precondition_->to_json_value(d, v_precondition);
+		v.AddMember("precondition", v_precondition, allocator);
 	}
-	v.AddMember("preconditions", v_preconditions, allocator);
 	rapidjson::Value v_effects(rapidjson::kArrayType);
 	v_effects.Reserve(effects_.size(), allocator);
 	for (const auto &e : effects_) {
@@ -134,6 +132,11 @@ PlanAction::to_json_value(rapidjson::Document &d, rapidjson::Value &v) const
 		v_effects.PushBack(v, allocator);
 	}
 	v.AddMember("effects", v_effects, allocator);
+	if (preconditions_) {
+		rapidjson::Value v_preconditions(rapidjson::kObjectType);
+		preconditions_->to_json_value(d, v_preconditions);
+		v.AddMember("preconditions", v_preconditions, allocator);
+	}
 }
 
 void
@@ -163,7 +166,7 @@ PlanAction::from_json_value(const rapidjson::Value &d)
 	if (d.HasMember("param-values") && d["param-values"].IsArray()) {
 		const rapidjson::Value &a = d["param-values"];
 		param_values_             = std::vector<std::string>{};
-		;
+
 		param_values_.reserve(a.Size());
 		for (auto &v : a.GetArray()) {
 			param_values_.push_back(v.GetString());
@@ -185,21 +188,14 @@ PlanAction::from_json_value(const rapidjson::Value &d)
 		std::shared_ptr<DomainOperator> nv{new DomainOperator(d["operator"])};
 		_operator_ = std::move(nv);
 	}
-	if (d.HasMember("preconditions") && d["preconditions"].IsArray()) {
-		const rapidjson::Value &a = d["preconditions"];
-		preconditions_            = std::vector<std::shared_ptr<DomainPrecondition>>{};
-		;
-		preconditions_.reserve(a.Size());
-		for (auto &v : a.GetArray()) {
-			std::shared_ptr<DomainPrecondition> nv{new DomainPrecondition()};
-			nv->from_json_value(v);
-			preconditions_.push_back(std::move(nv));
-		}
+	if (d.HasMember("precondition") && d["precondition"].IsObject()) {
+		std::shared_ptr<PDDLGrounding> nv{new PDDLGrounding(d["precondition"])};
+		precondition_ = std::move(nv);
 	}
 	if (d.HasMember("effects") && d["effects"].IsArray()) {
 		const rapidjson::Value &a = d["effects"];
 		effects_                  = std::vector<std::shared_ptr<DomainEffect>>{};
-		;
+
 		effects_.reserve(a.Size());
 		for (auto &v : a.GetArray()) {
 			std::shared_ptr<DomainEffect> nv{new DomainEffect()};
@@ -207,36 +203,36 @@ PlanAction::from_json_value(const rapidjson::Value &d)
 			effects_.push_back(std::move(nv));
 		}
 	}
+	if (d.HasMember("preconditions") && d["preconditions"].IsObject()) {
+		std::shared_ptr<GroundedFormula> nv{new GroundedFormula(d["preconditions"])};
+		preconditions_ = std::move(nv);
+	}
 }
 
 void
 PlanAction::validate(bool subcall) const
 {
 	std::vector<std::string> missing;
-	if (!kind_)
+	if (!kind_) {
 		missing.push_back("kind");
-	if (!apiVersion_)
+	}
+	if (!apiVersion_) {
 		missing.push_back("apiVersion");
-	if (!id_)
+	}
+	if (!id_) {
 		missing.push_back("id");
-	if (!operator_name_)
+	}
+	if (!operator_name_) {
 		missing.push_back("operator-name");
-	if (!state_)
+	}
+	if (!state_) {
 		missing.push_back("state");
-	if (!executable_)
+	}
+	if (!executable_) {
 		missing.push_back("executable");
-	for (size_t i = 0; i < preconditions_.size(); ++i) {
-		if (!preconditions_[i]) {
-			missing.push_back("preconditions[" + std::to_string(i) + "]");
-		} else {
-			try {
-				preconditions_[i]->validate(true);
-			} catch (std::vector<std::string> &subcall_missing) {
-				for (const auto &s : subcall_missing) {
-					missing.push_back("preconditions[" + std::to_string(i) + "]." + s);
-				}
-			}
-		}
+	}
+	if (!preconditions_) {
+		missing.push_back("preconditions");
 	}
 	for (size_t i = 0; i < effects_.size(); ++i) {
 		if (!effects_[i]) {
@@ -256,15 +252,12 @@ PlanAction::validate(bool subcall) const
 		if (subcall) {
 			throw missing;
 		} else {
-			std::ostringstream s;
-			s << "PlanAction is missing field" << ((missing.size() > 0) ? "s" : "") << ": ";
-			for (std::vector<std::string>::size_type i = 0; i < missing.size(); ++i) {
-				s << missing[i];
-				if (i < (missing.size() - 1)) {
-					s << ", ";
-				}
-			}
-			throw std::runtime_error(s.str());
+			std::string s =
+			  std::accumulate(std::next(missing.begin()),
+			                  missing.end(),
+			                  missing.front(),
+			                  [](std::string &s, const std::string &n) { return s + ", " + n; });
+			throw std::runtime_error("PlanAction is missing " + s);
 		}
 	}
 }

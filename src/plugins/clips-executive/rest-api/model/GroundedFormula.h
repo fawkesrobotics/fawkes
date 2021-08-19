@@ -1,6 +1,6 @@
 
 /****************************************************************************
- *  ClipsExecutive -- Schema DomainObjectType
+ *  ClipsExecutive -- Schema GroundedFormula
  *  (auto-generated, do not modify directly)
  *
  *  CLIPS Executive REST API.
@@ -14,6 +14,7 @@
 #pragma once
 
 #define RAPIDJSON_HAS_STDSTRING 1
+#include "GroundedFormula.h"
 
 #include <rapidjson/fwd.h>
 
@@ -23,23 +24,23 @@
 #include <string>
 #include <vector>
 
-/** DomainObjectType representation for JSON transfer. */
-class DomainObjectType
+/** GroundedFormula representation for JSON transfer. */
+class GroundedFormula
 {
 public:
 	/** Constructor. */
-	DomainObjectType();
+	GroundedFormula();
 	/** Constructor from JSON.
 	 * @param json JSON string to initialize from
 	 */
-	DomainObjectType(const std::string &json);
+	GroundedFormula(const std::string &json);
 	/** Constructor from JSON.
 	 * @param v RapidJSON value object to initialize from.
 	 */
-	DomainObjectType(const rapidjson::Value &v);
+	GroundedFormula(const rapidjson::Value &v);
 
 	/** Destructor. */
-	virtual ~DomainObjectType();
+	virtual ~GroundedFormula();
 
 	/** Get version of implemented API.
 	 * @return string representation of version
@@ -83,7 +84,7 @@ public:
 	 */
 	virtual void validate(bool subcall = false) const;
 
-	// Schema: DomainObjectType
+	// Schema: GroundedFormula
 public:
 	/** Get kind value.
    * @return kind value
@@ -136,27 +137,89 @@ public:
 	{
 		name_ = name;
 	}
-	/** Get super-type value.
-   * @return super-type value
+	/** Get type value.
+   * @return type value
    */
 	std::optional<std::string>
-	super_type() const
+	type() const
 	{
-		return super_type_;
+		return type_;
 	}
 
-	/** Set super-type value.
-	 * @param super_type new value
+	/** Set type value.
+	 * @param type new value
 	 */
 	void
-	set_super_type(const std::string &super_type)
+	set_type(const std::string &type)
 	{
-		super_type_ = super_type;
+		type_ = type;
+	}
+	/** Get is-satisfied value.
+   * @return is-satisfied value
+   */
+	std::optional<bool>
+	is_satisfied() const
+	{
+		return is_satisfied_;
+	}
+
+	/** Set is-satisfied value.
+	 * @param is_satisfied new value
+	 */
+	void
+	set_is_satisfied(const bool &is_satisfied)
+	{
+		is_satisfied_ = is_satisfied;
+	}
+	/** Get child value.
+   * @return child value
+   */
+	std::vector<std::shared_ptr<GroundedFormula>>
+	child() const
+	{
+		return child_;
+	}
+
+	/** Set child value.
+	 * @param child new value
+	 */
+	void
+	set_child(const std::vector<std::shared_ptr<GroundedFormula>> &child)
+	{
+		child_ = child;
+	}
+	/** Add element to child array.
+	 * @param child new value
+	 */
+	void
+	addto_child(const std::shared_ptr<GroundedFormula> &&child)
+	{
+		child_.push_back(std::move(child));
+	}
+
+	/** Add element to child array.
+	 * The move-semantics version (std::move) should be preferred.
+	 * @param child new value
+	 */
+	void
+	addto_child(const std::shared_ptr<GroundedFormula> &child)
+	{
+		child_.push_back(child);
+	}
+	/** Add element to child array.
+	 * @param child new value
+	 */
+	void
+	addto_child(const GroundedFormula &&child)
+	{
+		child_.push_back(std::make_shared<GroundedFormula>(std::move(child)));
 	}
 
 private:
-	std::optional<std::string> kind_;
-	std::optional<std::string> apiVersion_;
-	std::optional<std::string> name_;
-	std::optional<std::string> super_type_;
+	std::optional<std::string>                    kind_;
+	std::optional<std::string>                    apiVersion_;
+	std::optional<std::string>                    name_;
+	std::optional<std::string>                    type_;
+	std::optional<bool>                           is_satisfied_;
+	std::vector<std::shared_ptr<GroundedFormula>> child_;
 };

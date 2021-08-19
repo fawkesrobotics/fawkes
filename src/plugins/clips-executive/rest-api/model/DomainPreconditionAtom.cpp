@@ -17,6 +17,7 @@
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
+#include <numeric>
 
 #include <sstream>
 
@@ -116,7 +117,7 @@ DomainPreconditionAtom::from_json_value(const rapidjson::Value &d)
 	if (d.HasMember("param-names") && d["param-names"].IsArray()) {
 		const rapidjson::Value &a = d["param-names"];
 		param_names_              = std::vector<std::string>{};
-		;
+
 		param_names_.reserve(a.Size());
 		for (auto &v : a.GetArray()) {
 			param_names_.push_back(v.GetString());
@@ -125,7 +126,7 @@ DomainPreconditionAtom::from_json_value(const rapidjson::Value &d)
 	if (d.HasMember("param-values") && d["param-values"].IsArray()) {
 		const rapidjson::Value &a = d["param-values"];
 		param_values_             = std::vector<std::string>{};
-		;
+
 		param_values_.reserve(a.Size());
 		for (auto &v : a.GetArray()) {
 			param_values_.push_back(v.GetString());
@@ -134,7 +135,7 @@ DomainPreconditionAtom::from_json_value(const rapidjson::Value &d)
 	if (d.HasMember("param-constants") && d["param-constants"].IsArray()) {
 		const rapidjson::Value &a = d["param-constants"];
 		param_constants_          = std::vector<std::string>{};
-		;
+
 		param_constants_.reserve(a.Size());
 		for (auto &v : a.GetArray()) {
 			param_constants_.push_back(v.GetString());
@@ -151,22 +152,20 @@ DomainPreconditionAtom::validate(bool subcall) const
 	} catch (std::vector<std::string> &supertype_missing) {
 		missing.insert(missing.end(), supertype_missing.begin(), supertype_missing.end());
 	}
-	if (!predicate_)
+	if (!predicate_) {
 		missing.push_back("predicate");
+	}
 
 	if (!missing.empty()) {
 		if (subcall) {
 			throw missing;
 		} else {
-			std::ostringstream s;
-			s << "DomainPreconditionAtom is missing field" << ((missing.size() > 0) ? "s" : "") << ": ";
-			for (std::vector<std::string>::size_type i = 0; i < missing.size(); ++i) {
-				s << missing[i];
-				if (i < (missing.size() - 1)) {
-					s << ", ";
-				}
-			}
-			throw std::runtime_error(s.str());
+			std::string s =
+			  std::accumulate(std::next(missing.begin()),
+			                  missing.end(),
+			                  missing.front(),
+			                  [](std::string &s, const std::string &n) { return s + ", " + n; });
+			throw std::runtime_error("DomainPreconditionAtom is missing " + s);
 		}
 	}
 }

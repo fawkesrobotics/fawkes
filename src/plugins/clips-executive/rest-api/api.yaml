@@ -94,7 +94,7 @@ paths:
                 $ref: '#/components/schemas/Goal'
         '400':
           description: bad input parameter
-    
+
 
   /clips-executive/plans:
     get:
@@ -159,7 +159,7 @@ paths:
                 $ref: '#/components/schemas/Plan'
         '400':
           description: bad input parameter
-            
+
   /clips-executive/domain-objects:
     get:
       tags:
@@ -263,7 +263,292 @@ paths:
                   $ref: '#/components/schemas/DomainOperator'
         '400':
           description: bad input parameter
-  
+
+  /clips-executive/pddl-groundings:
+    get:
+      tags:
+      - clips-executive
+      summary: List pddl groundings.
+      operationId: list_pddl_groundings
+      description: |
+        List all pddl groundings currently known to the CE.
+      parameters:
+        - name: pretty
+          in: query
+          description: Request pretty printed reply.
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: list pddl groundings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PDDLGrounding'
+        '400':
+          description: bad input parameter
+
+  /clips-executive/pddl-groundings/{id}:
+    get:
+      tags:
+      - clips-executive
+      summary: List pddl groundings with id.
+      operationId: get_pddl_groundings
+      description: |
+        List the pddl grounding with the given ID currently known to the CE.
+      parameters:
+        - name: id
+          in: path
+          description: ID of grounding to retrieve
+          required: true
+          schema:
+            type: string
+            format: symbol
+        - name: pretty
+          in: query
+          description: Request pretty printed reply.
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: list pddl grounding with id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PDDLGrounding'
+        '400':
+          description: bad input parameter
+
+  /clips-executive/pddl-formulas:
+    get:
+      tags:
+      - clips-executive
+      summary: List pddl formulas.
+      operationId: list_pddl_formulas
+      description: |
+        List all pddl formulas currently known to the CE.
+      parameters:
+        - name: pretty
+          in: query
+          description: Request pretty printed reply.
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: list pddl formulas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PDDLFormula'
+        '400':
+          description: bad input parameter
+
+  /clips-executive/pddl-formulas/{id}:
+    get:
+      tags:
+      - clips-executive
+      summary: List pddl formula with id.
+      operationId: get_pddl_formulas
+      description: |
+        List the formula with the given ID currently known to the CE.
+      parameters:
+        - name: id
+          in: path
+          description: ID of formulas to retrieve
+          required: true
+          schema:
+            type: string
+            format: symbol
+        - name: pretty
+          in: query
+          description: Request pretty printed reply.
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: list pddl formula with given ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PDDLFormula'
+        '400':
+          description: bad input parameter
+
+  /clips-executive/pddl-predicates:
+    get:
+      tags:
+      - clips-executive
+      summary: List pddl predicates.
+      operationId: list_pddl_predicates
+      description: |
+        List all pddl predicates currently known to the CE.
+      parameters:
+        - name: pretty
+          in: query
+          description: Request pretty printed reply.
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: list pddl predicates with given ID
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PDDLPredicate'
+        '400':
+          description: bad input parameter
+
+  /clips-executive/pddl-predicates/{id}:
+    get:
+      tags:
+      - clips-executive
+      summary: List pddl predicate with id.
+      operationId: get_pddl_predicates
+      description: |
+        List the pddl predicate with the given ID currently known to the CE.
+      parameters:
+        - name: id
+          in: path
+          description: ID of predicate to retrieve
+          required: true
+          schema:
+            type: string
+            format: symbol
+        - name: pretty
+          in: query
+          description: Request pretty printed reply.
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: list pddl predicate with id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PDDLPredicate'
+        '400':
+          description: bad input parameter
+
+  /clips-executive/grounded-pddl-formulas:
+    get:
+      tags:
+      - clips-executive
+      summary: List grounded pddl formulas.
+      operationId: list_grounded_pddl_formulas
+      description: |
+        List all grounded pddl formulas currently known to the CE.
+      parameters:
+        - name: pretty
+          in: query
+          description: Request pretty printed reply.
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: list grounded pddl formulas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GroundedPDDLFormula'
+        '400':
+          description: bad input parameter
+
+  /clips-executive/grounded-pddl-formulas/{id}:
+    get:
+      tags:
+      - clips-executive
+      summary: List grounded pddl formula with id.
+      operationId: get_grounded_pddl_formulas
+      description: |
+        List the grounded formula with the given ID currently known to the CE.
+      parameters:
+        - name: id
+          in: path
+          description: ID of grounded formula to retrieve
+          required: true
+          schema:
+            type: string
+            format: symbol
+        - name: pretty
+          in: query
+          description: Request pretty printed reply.
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: list grounded pddl formula with given ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroundedPDDLFormula'
+        '400':
+          description: bad input parameter
+
+  /clips-executive/grounded-pddl-predicates:
+    get:
+      tags:
+      - clips-executive
+      summary: List grounded pddl predicates.
+      operationId: list_grounded_pddl_predicates
+      description: |
+        List all grounded pddl predicates currently known to the CE.
+      parameters:
+        - name: pretty
+          in: query
+          description: Request pretty printed reply.
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: list grounded pddl predicates with given ID
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GroundedPDDLPredicate'
+        '400':
+          description: bad input parameter
+
+  /clips-executive/grounded-pddl-predicates/{id}:
+    get:
+      tags:
+      - clips-executive
+      summary: List grounded pddl predicate with id.
+      operationId: get_grounded_pddl_predicates
+      description: |
+        List the pddl grounded predicate with the given ID currently known to the CE.
+      parameters:
+        - name: id
+          in: path
+          description: ID of grounded predicate to retrieve
+          required: true
+          schema:
+            type: string
+            format: symbol
+        - name: pretty
+          in: query
+          description: Request pretty printed reply.
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: list grounded pddl predicate with id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroundedPDDLPredicate'
+        '400':
+          description: bad input parameter
+
 components:
   schemas:
     Goal:
@@ -409,14 +694,14 @@ components:
           type: boolean
         operator:
           $ref: "#/components/schemas/DomainOperator"
-        preconditions:
-          type: array
-          items:
-            $ref: "#/components/schemas/DomainPrecondition"
+        precondition:
+          $ref: "#/components/schemas/PDDLGrounding"
         effects:
           type: array
           items:
             $ref: "#/components/schemas/DomainEffect"
+        preconditions:
+          $ref: "#/components/schemas/GroundedFormula"
 
     DomainObjectType:
       type: object
@@ -539,7 +824,7 @@ components:
           type: boolean
         parameters:
           type: array
-          items: 
+          items:
             $ref: '#/components/schemas/DomainOperatorParameter'
 
     DomainPrecondition:
@@ -648,3 +933,168 @@ components:
           type: array
           items:
             type: string
+
+    PDDLFormula:
+      type: object
+      required:
+        - kind
+        - apiVersion
+        - id
+        - type
+        - part-of
+      properties:
+        kind:
+          type: string
+        apiVersion:
+          type: string
+        id:
+          type: string
+          format: symbol
+        type:
+          type: string
+          format: symbol
+          enum: ["conjunction", "disjunction", "negation", "atom"]
+        part-of:
+          type: string
+          format: symbol
+
+    PDDLPredicate:
+      type: object
+      required:
+        - kind
+        - apiVersion
+        - id
+        - part-of
+        - predicate
+        - param-names
+        - param-constants
+      properties:
+        kind:
+          type: string
+        apiVersion:
+          type: string
+        id:
+          type: string
+          format: symbol
+        part-of:
+          type: string
+          format: symbol
+        predicate:
+          type: string
+          format: symbol
+        param-names:
+          type: array
+          items:
+            type: string
+            format: symbol
+        param-constants:
+          type: array
+          items:
+            type: string
+            format: symbol
+
+    GroundedPDDLFormula:
+      type: object
+      required:
+        - kind
+        - apiVersion
+        - id
+        - formula-id
+        - grounding
+        - is-satisfied
+      properties:
+        kind:
+          type: string
+        apiVersion:
+          type: string
+        id:
+          type: string
+          format: symbol
+        formula-id:
+          type: string
+          format: symbol
+        grounding:
+          type: string
+          format: symbol
+        is-satisfied:
+          type: boolean
+
+    GroundedPDDLPredicate:
+      type: object
+      required:
+        - kind
+        - apiVersion
+        - id
+        - predicate-id
+        - grounding
+        - is-satisfied
+      properties:
+        kind:
+          type: string
+        apiVersion:
+          type: string
+        id:
+          type: string
+          format: symbol
+        predicate-id:
+          type: string
+          format: symbol
+        grounding:
+          type: string
+          format: symbol
+        is-satisfied:
+          type: boolean
+
+    PDDLGrounding:
+      type: object
+      required:
+        - kind
+        - apiVersion
+        - id
+        - param-values
+        - param-names
+      properties:
+        kind:
+          type: string
+        apiVersion:
+          type: string
+        id:
+          type: string
+          format: symbol
+        param-names:
+          type: array
+          items:
+            type: string
+            format: symbol
+        param-values:
+          type: array
+          items:
+            type: string
+            format: symbol
+
+    GroundedFormula:
+      type: object
+      required:
+        - kind
+        - apiVersion
+        - name
+        - type
+        - is-satisfied
+      properties:
+        kind:
+          type: string
+        apiVersion:
+          type: string
+        name:
+          type: string
+          format: symbol
+        type:
+          type: string
+          format: symbol
+          enum: ["conjunction", "disjunction", "negation", "atom"]
+        is-satisfied:
+          type: boolean
+        child:
+          type: array
+          items:
+            $ref: '#/components/schemas/GroundedFormula'

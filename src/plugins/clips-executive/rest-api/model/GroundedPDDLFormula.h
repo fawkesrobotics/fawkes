@@ -1,6 +1,6 @@
 
 /****************************************************************************
- *  ClipsExecutive -- Schema DomainObjectType
+ *  ClipsExecutive -- Schema GroundedPDDLFormula
  *  (auto-generated, do not modify directly)
  *
  *  CLIPS Executive REST API.
@@ -23,23 +23,23 @@
 #include <string>
 #include <vector>
 
-/** DomainObjectType representation for JSON transfer. */
-class DomainObjectType
+/** GroundedPDDLFormula representation for JSON transfer. */
+class GroundedPDDLFormula
 {
 public:
 	/** Constructor. */
-	DomainObjectType();
+	GroundedPDDLFormula();
 	/** Constructor from JSON.
 	 * @param json JSON string to initialize from
 	 */
-	DomainObjectType(const std::string &json);
+	GroundedPDDLFormula(const std::string &json);
 	/** Constructor from JSON.
 	 * @param v RapidJSON value object to initialize from.
 	 */
-	DomainObjectType(const rapidjson::Value &v);
+	GroundedPDDLFormula(const rapidjson::Value &v);
 
 	/** Destructor. */
-	virtual ~DomainObjectType();
+	virtual ~GroundedPDDLFormula();
 
 	/** Get version of implemented API.
 	 * @return string representation of version
@@ -83,7 +83,7 @@ public:
 	 */
 	virtual void validate(bool subcall = false) const;
 
-	// Schema: DomainObjectType
+	// Schema: GroundedPDDLFormula
 public:
 	/** Get kind value.
    * @return kind value
@@ -119,44 +119,80 @@ public:
 	{
 		apiVersion_ = apiVersion;
 	}
-	/** Get name value.
-   * @return name value
+	/** Get id value.
+   * @return id value
    */
 	std::optional<std::string>
-	name() const
+	id() const
 	{
-		return name_;
+		return id_;
 	}
 
-	/** Set name value.
-	 * @param name new value
+	/** Set id value.
+	 * @param id new value
 	 */
 	void
-	set_name(const std::string &name)
+	set_id(const std::string &id)
 	{
-		name_ = name;
+		id_ = id;
 	}
-	/** Get super-type value.
-   * @return super-type value
+	/** Get formula-id value.
+   * @return formula-id value
    */
 	std::optional<std::string>
-	super_type() const
+	formula_id() const
 	{
-		return super_type_;
+		return formula_id_;
 	}
 
-	/** Set super-type value.
-	 * @param super_type new value
+	/** Set formula-id value.
+	 * @param formula_id new value
 	 */
 	void
-	set_super_type(const std::string &super_type)
+	set_formula_id(const std::string &formula_id)
 	{
-		super_type_ = super_type;
+		formula_id_ = formula_id;
+	}
+	/** Get grounding value.
+   * @return grounding value
+   */
+	std::optional<std::string>
+	grounding() const
+	{
+		return grounding_;
+	}
+
+	/** Set grounding value.
+	 * @param grounding new value
+	 */
+	void
+	set_grounding(const std::string &grounding)
+	{
+		grounding_ = grounding;
+	}
+	/** Get is-satisfied value.
+   * @return is-satisfied value
+   */
+	std::optional<bool>
+	is_satisfied() const
+	{
+		return is_satisfied_;
+	}
+
+	/** Set is-satisfied value.
+	 * @param is_satisfied new value
+	 */
+	void
+	set_is_satisfied(const bool &is_satisfied)
+	{
+		is_satisfied_ = is_satisfied;
 	}
 
 private:
 	std::optional<std::string> kind_;
 	std::optional<std::string> apiVersion_;
-	std::optional<std::string> name_;
-	std::optional<std::string> super_type_;
+	std::optional<std::string> id_;
+	std::optional<std::string> formula_id_;
+	std::optional<std::string> grounding_;
+	std::optional<bool>        is_satisfied_;
 };

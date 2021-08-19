@@ -18,6 +18,7 @@ import { DomainPreconditionAtom } from '../models/DomainPreconditionAtom';
 import { DomainPreconditionCompound } from '../models/DomainPreconditionCompound';
 
 import { interval, forkJoin } from 'rxjs';
+import { GroundedFormula } from '../models/GroundedFormula';
 
 @Component({
   selector: 'ff-clips-executive-goal-list',
@@ -292,15 +293,14 @@ export class GoalListComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  format_precondition(cond: DomainPrecondition, indent: string = ''): string {
+  format_precondition(cond: GroundedFormula, indent: string = ''): string {
     let s = indent;
-    if (cond.kind === 'DomainPreconditionCompound') {
-      const compound = cond as DomainPreconditionCompound;
+    if (cond.kind === 'GroundedFormula') {
       if (! cond['is-satisfied']) {
         s += '! ';
       }
       s += '(';
-      switch (compound.type) {
+      switch (cond.type) {
         case 'conjunction':
           s += 'AND';
           break;
@@ -312,20 +312,19 @@ export class GoalListComponent implements OnInit, OnDestroy, AfterViewInit {
           break;
       }
       s += ' ';
-      for (const e of compound.elements) {
-        s += '\\l' + this.format_precondition(e, indent + '&nbsp;&nbsp;&nbsp;');
+      for (const c of cond.child) {
+        s += '\\l' + this.format_precondition(c, indent + '&nbsp;&nbsp;&nbsp;');
       }
       s += ')';
     } else {
-      const atom = cond as DomainPreconditionAtom;
       if (! cond['is-satisfied']) {
         s += '! ';
       }
       s += '(';
-      s += `${atom.predicate}`;
-      for (const p of atom['param-values']) {
-        s += ' ' + p;
-      }
+      s += `${cond.name}`;
+      // for (const p of cond['param-values']) {
+      //   s += ' ' + p;
+      // }
       s += ')';
     }
     return s;
@@ -444,8 +443,8 @@ export class GoalListComponent implements OnInit, OnDestroy, AfterViewInit {
           for (const a of p.plan.actions) {
             let bgcolor = '#ffffff';
             let prec_string = '';
-            if (a.preconditions && a.preconditions.length > 0) {
-              prec_string = this.format_precondition(a.preconditions[0]);
+            if (a.preconditions) {
+              prec_string = this.format_precondition(a.preconditions);
             }
             switch (a.state) {
               case 'WAITING':

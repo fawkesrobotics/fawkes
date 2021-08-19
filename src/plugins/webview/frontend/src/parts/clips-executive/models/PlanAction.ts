@@ -11,10 +11,9 @@
  ****************************************************************************/
 
 import { DomainOperator } from './DomainOperator';
-import { DomainPrecondition } from './DomainPrecondition';
-import { DomainPreconditionAtom } from './DomainPreconditionAtom';
-import { DomainPreconditionCompound } from './DomainPreconditionCompound';
+import { PDDLGrounding } from './PDDLGrounding';
 import { DomainEffect } from './DomainEffect';
+import { GroundedFormula } from './GroundedFormula';
 
 
 /** PlanAction representation for JSON transfer. */
@@ -29,8 +28,9 @@ export interface PlanAction {
   state: PlanAction.StateEnum;
   executable: boolean;
   _operator?: DomainOperator;
-  preconditions: Array<DomainPrecondition | DomainPreconditionAtom | DomainPreconditionCompound>;
+  precondition?: PDDLGrounding;
   effects: Array<DomainEffect>;
+  preconditions: GroundedFormula;
 }
 
 export namespace PlanAction {

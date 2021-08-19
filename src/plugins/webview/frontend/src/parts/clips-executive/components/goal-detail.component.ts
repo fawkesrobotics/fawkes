@@ -14,6 +14,7 @@ import { Plan } from '../models/Plan';
 import { PlanAction } from '../models/PlanAction';
 import { DomainPrecondition } from '../models/DomainPrecondition';
 import { DomainPreconditionCompound } from '../models/DomainPreconditionCompound';
+import { GroundedFormula } from '../models/GroundedFormula';
 
 
 @Component({
@@ -222,19 +223,19 @@ export class GoalDetailComponent implements OnInit, OnDestroy {
     };
   }
 
-  recursive_add_preconditions(l, conds: DomainPrecondition[], level: number = 0) {
+  recursive_add_preconditions(l, conds: GroundedFormula[], level: number = 1) {
     for (const c of conds) {
       l.push({cond: c, level: level, width: 16 * level});
-      if (c.kind === 'DomainPreconditionCompound') {
-        const compound = c as DomainPreconditionCompound;
-        this.recursive_add_preconditions(l, compound.elements, level + 1);
-      }
+      this.recursive_add_preconditions(l, c.child, level + 1);
     }
   }
 
   format_preconditions(action: PlanAction) {
     const rv = [];
-    this.recursive_add_preconditions(rv, action.preconditions);
+
+    rv.push({cond: action.preconditions, level: 0, width: 0});
+    this.recursive_add_preconditions(rv, action.preconditions.child);
+
     return rv;
   }
 

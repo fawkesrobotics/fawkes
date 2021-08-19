@@ -26,7 +26,6 @@
 
 /** DomainOperator representation for JSON transfer. */
 class DomainOperator
-
 {
 public:
 	/** Constructor. */
