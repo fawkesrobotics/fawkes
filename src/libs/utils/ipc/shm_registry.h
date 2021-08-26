@@ -27,7 +27,7 @@
 #include <list>
 #include <semaphore.h>
 
-#define MAGIC_TOKEN_SIZE 16
+#define MAGIC_TOKEN_SIZE 32
 #define MAXNUM_SHM_SEGMS 64
 #define DEFAULT_SHM_NAME "/fawkes-shmem-registry"
 #define USER_SHM_NAME "/fawkes-shmem-registry-%s"
