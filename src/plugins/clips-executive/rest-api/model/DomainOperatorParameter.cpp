@@ -17,8 +17,8 @@
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
-#include <numeric>
 
+#include <numeric>
 #include <sstream>
 
 DomainOperatorParameter::DomainOperatorParameter()
