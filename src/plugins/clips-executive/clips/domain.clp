@@ -133,7 +133,7 @@
   "A fact storing the grounding information of PDDL formulas/predicates. Used to model
   the relation between the source of the grounding information and the grounded instance
   explicitely."
-  (slot id (type SYMBOL)(default-dynamic (gensym*)))
+  (slot id (type SYMBOL) (default ?NONE))
 
   (multislot param-names (type SYMBOL))
   (multislot param-values (type SYMBOL))
@@ -156,7 +156,7 @@
 (deftemplate pddl-formula
   "A PDDL formula representation in CLIPS, sourced from the preconditions of
   the PDDL domain description."
-  (slot id (type SYMBOL) (default-dynamic (gensym*)))
+  (slot id (type SYMBOL) (default ?NONE))
   (slot part-of (type SYMBOL))
 
   (slot type (type SYMBOL) (allowed-values conjunction disjunction negation))
@@ -166,7 +166,7 @@
   "A grounded instance of a PDDL formula. Grounded instances are usually
   associated with one plan-action. Grounding itself only occurs on the
   predicate level."
-  (slot id (type SYMBOL))
+  (slot id (type SYMBOL) (default ?NONE))
   (slot formula-id (type SYMBOL)); reference to ungrounded base version
   (slot grounding (type SYMBOL))
 
@@ -176,7 +176,7 @@
 (deftemplate pddl-predicate
   "An instantiated predicate with possible constants that is part of
   a PDDL formula."
-  (slot id (type SYMBOL) (default-dynamic (gensym*)))
+  (slot id (type SYMBOL) (default ?NONE))
   (slot part-of (type SYMBOL)) ; reference to parent formula
 
   ; a PDDL predicate is either an equality or references a domain-predicate
@@ -190,7 +190,7 @@
 (deftemplate grounded-pddl-predicate
   "A grounded instance of a PDDL predicate. Grounded instances have a value for
   each parameter slot and are part of a grounded formula."
-  (slot id (type SYMBOL) (default-dynamic (gensym*)))
+  (slot id (type SYMBOL) (default ?NONE))
   (slot predicate-id (type SYMBOL)) ; reference to ungrounded base version
   (slot grounding (type SYMBOL))
 
@@ -206,7 +206,7 @@
         (eq ?parent-id ?predicate:part-of)
 
     (assert (grounded-pddl-predicate
-          (id (sym-cat "grounded-" ?predicate:id "-" (gensym*)))
+          (id (sym-cat "grounded-" ?predicate:id "-" ?grounding-id))
           (predicate-id ?predicate:id)
           (grounding ?grounding-id))
     )
