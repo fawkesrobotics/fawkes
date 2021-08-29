@@ -295,7 +295,6 @@
     (and (pddl-formula (part-of ?parent-base) (id ?child-base))
          (grounded-pddl-formula (formula-id ?child-base)
                                 (grounding ?grounding-id)
-                                (id ~nil)
                                 (is-satisfied FALSE))
     )
     (and (pddl-predicate (part-of ?parent-base) (id ?child-base))
