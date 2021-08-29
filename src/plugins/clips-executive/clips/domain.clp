@@ -218,7 +218,7 @@
   names and param values."
   (?parent-id ?param-names ?param-values ?grounding-id)
 
-  (bind ?grounding-id nil)
+  ;(bind ?grounding-id nil)
   (do-for-all-facts ((?formula pddl-formula)) (eq ?parent-id ?formula:part-of)
     ;if no grounding fact created yet, create one
     (if (eq ?grounding-id nil) then
