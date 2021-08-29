@@ -13,6 +13,9 @@
 #
 #*****************************************************************************
 
+#make restapi-models
+#make restapi-deploy-webview-api
+
 BASEDIR = ../../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/clips.mk

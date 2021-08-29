@@ -289,6 +289,8 @@
                                     (is-satisfied FALSE)
                                     (grounding ?grounding-id))
 
+  ; the formula has either a child formula or child predicate
+  ; it is satisfied when the child is not satisifed
   (or
     (and (pddl-formula (part-of ?parent-base) (id ?child-base))
          (grounded-pddl-formula (formula-id ?child-base)
@@ -316,7 +318,8 @@
                                     (formula-id ?parent-base)
                                     (is-satisfied TRUE)
                                     (grounding ?grounding-id))
-
+  ; the formula has either a child formula or child predicate
+  ; it is unsatisfied when the child is satisifed
   (or
     (and (pddl-formula (part-of ?parent-base) (id ?child-base))
          (grounded-pddl-formula (formula-id ?child-base)
@@ -344,7 +347,8 @@
                                     (formula-id ?parent-base)
                                     (is-satisfied FALSE)
                                     (grounding ?grounding-id))
-
+  ; the formula has one or several children that can be predicates or formulas
+  ; it is satisfied when there is no unsatisifed child
   (not (and
     (pddl-formula (part-of ?parent-base) (id ?child-base))
     (grounded-pddl-formula (formula-id ?child-base)
@@ -374,6 +378,8 @@
                                     (is-satisfied TRUE)
                                     (grounding ?grounding-id))
 
+  ; the formula has one or several children that can be predicates or formulas
+  ; it is unsatisfied when there is a unsatisifed child
   (or (and
         (pddl-formula (part-of ?parent-base) (id ?child-base))
         (grounded-pddl-formula (formula-id ?child-base)
@@ -404,6 +410,8 @@
                                     (is-satisfied FALSE)
                                     (grounding ?grounding-id))
 
+  ; the formula has one or several children that can be predicates or formulas
+  ; it is satisfied when there is a satisifed child
   (or (and
         (pddl-formula (part-of ?parent-base) (id ?child-base))
         (grounded-pddl-formula (formula-id ?child-base)
@@ -434,6 +442,8 @@
                                     (is-satisfied TRUE)
                                     (grounding ?grounding-id))
 
+  ; the formula has one or several children that can be predicates or formulas
+  ; it is unsatisfied when there is no satisifed child
   (not (or
     (and
       (pddl-formula (part-of ?parent-base) (id ?child-base))
@@ -455,6 +465,8 @@
 )
 
 (deffunction domain-build-ground-parameter-list
+  "For multislot of parameter names, build a corresponding multislot of grounded
+  parameter values and - if available - constants."
   (?names ?constants ?grounded-names ?grounded-values)
 
   (bind ?values (create$))
@@ -480,6 +492,8 @@
 )
 
 (deffunction domain-check-grounding-match
+  "check if a multislot of values matches a the expected values for a multislot
+  of parameter names"
   (?param-names ?domain-values ?predicate-constants ?grounded-params ?grounded-values)
 
   (bind ?values (domain-build-ground-parameter-list ?param-names
@@ -508,6 +522,8 @@
 )
 
 (defrule domain-check-grounded-predicate
+  "A predicate is satisfied if there is a corresponding fact with a
+  matching value regarding the grounding of the predicate."
   (declare (salience ?*SALIENCE-DOMAIN-CHECK*))
   (pddl-grounding (id ?grounding-id)
                   (param-names $?grounded-params)
@@ -637,11 +653,11 @@
 )
 
 (deffunction remove-precondition
-  "Remove a sub-formula from its parent and clean up the forumla tree.
+  "Remove a sub-formula from its parent and clean up the formula tree.
    If the parent is a disjunction with no other disjunct, simplify it to
    true by removing it recursively. If it is a negation, remove it recursively.
    If it's a conjunction, only remove the conjunct.
-   If the top-most forumla node is removed, replace it by a trivially true one
+   If the top-most formula node is removed, replace it by a trivially true one
    (empty conjunction)."
   (?precond-fact)
 
