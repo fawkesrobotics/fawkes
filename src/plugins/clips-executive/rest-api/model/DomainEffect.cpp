@@ -206,4 +206,3 @@ DomainEffect::validate(bool subcall) const
 		}
 	}
 }
-
