@@ -18,6 +18,7 @@
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
 
+#include <numeric>
 #include <sstream>
 
 DomainEffect::DomainEffect()
@@ -205,3 +206,4 @@ DomainEffect::validate(bool subcall) const
 		}
 	}
 }
+
