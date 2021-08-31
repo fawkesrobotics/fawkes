@@ -24,8 +24,6 @@
 #include "model/DomainFact.h"
 #include "model/DomainObject.h"
 #include "model/DomainOperator.h"
-#include "model/DomainPreconditionAtom.h"
-#include "model/DomainPreconditionCompound.h"
 #include "model/DomainPredicate.h"
 #include "model/Goal.h"
 #include "model/GroundedFormula.h"
@@ -113,14 +111,6 @@ private:
 	                                    GroundedPDDLFormulaMap &                 gpfm,
 	                                    GroundedPDDLPredicateMap &               gppm);
 	GroundedFormula gen_plan_compute_precons(PDDLFormulaTreeNode node, PDDLFormulaTreeMap tree);
-	std::shared_ptr<DomainPreconditionAtom>
-	gen_domain_precondition_atom(const CLIPS::Fact::pointer fact);
-
-	std::shared_ptr<DomainPreconditionCompound>
-	gen_domain_precondition_compound(const CLIPS::Fact::pointer fact,
-	                                 const PlanActionKey &      plan_action_key,
-	                                 PreCompoundMap &           prec,
-	                                 PreAtomMap &               prea);
 
 	Plan gen_plan(const PlanKey &            plan_key,
 	              const CLIPS::Fact::pointer fact,

@@ -422,63 +422,6 @@ ClipsExecutiveRestApi::cb_list_domain_facts()
 	return rv;
 }
 
-std::shared_ptr<DomainPreconditionAtom>
-ClipsExecutiveRestApi::gen_domain_precondition_atom(const CLIPS::Fact::pointer fact)
-{
-	auto pre_atom = std::make_shared<DomainPreconditionAtom>();
-	pre_atom->set_kind("DomainPreconditionAtom");
-	pre_atom->set_apiVersion(DomainPreconditionAtom::api_version());
-	pre_atom->set_name(get_value<std::string>(fact, "name"));
-	pre_atom->set_type("atom");
-	pre_atom->set_grounded(get_value<bool>(fact, "grounded"));
-	pre_atom->set_is_satisfied(get_value<bool>(fact, "is-satisfied"));
-	pre_atom->set_predicate(get_value<std::string>(fact, "predicate"));
-	for (const auto &s : get_values(fact, "param-names")) {
-		pre_atom->addto_param_names(std::move(s));
-	}
-	for (const auto &s : get_values(fact, "param-values")) {
-		pre_atom->addto_param_values(std::move(s));
-	}
-	for (const auto &s : get_values(fact, "param-constants")) {
-		pre_atom->addto_param_constants(std::move(s));
-	}
-	return pre_atom;
-}
-
-std::shared_ptr<DomainPreconditionCompound>
-ClipsExecutiveRestApi::gen_domain_precondition_compound(const CLIPS::Fact::pointer fact,
-                                                        const PlanActionKey &      plan_action_key,
-                                                        PreCompoundMap &           prec,
-                                                        PreAtomMap &               prea)
-{
-	std::string prec_name = get_value<std::string>(fact, "name");
-
-	auto pre_comp = std::make_shared<DomainPreconditionCompound>();
-	pre_comp->set_kind("DomainPreconditionCompound");
-	pre_comp->set_apiVersion(DomainPreconditionCompound::api_version());
-	pre_comp->set_name(prec_name);
-	pre_comp->set_type(get_value<std::string>(fact, "type"));
-	pre_comp->set_grounded(get_value<bool>(fact, "grounded"));
-	pre_comp->set_is_satisfied(get_value<bool>(fact, "is-satisfied"));
-
-	// elements of pre_compondition compound
-	for (const auto &prea_fact : prea[plan_action_key]) {
-		std::string part_of = get_value<std::string>(prea_fact, "part-of");
-		if (part_of == prec_name) {
-			pre_comp->addto_elements(gen_domain_precondition_atom(prea_fact));
-		}
-	}
-	for (const auto &prec_fact : prec[plan_action_key]) {
-		std::string part_of = get_value<std::string>(prec_fact, "part-of");
-		if (part_of == prec_name) {
-			pre_comp->addto_elements(
-			  gen_domain_precondition_compound(prec_fact, plan_action_key, prec, prea));
-		}
-	}
-
-	return pre_comp;
-}
-
 std::shared_ptr<PDDLGrounding>
 ClipsExecutiveRestApi::gen_pddl_grounding(const CLIPS::Fact::pointer fact)
 {
@@ -791,18 +734,6 @@ ClipsExecutiveRestApi::gen_plan_precompute(PlanMap &                 plans,
 			plan_actions[std::make_pair(get_value<std::string>(fact, "goal-id"),
 			                            get_value<std::string>(fact, "plan-id"))]
 			  .push_back(fact);
-		} else if (tmpl->name() == "domain-precondition"
-		           || tmpl->name() == "domain-atomic-precondition") {
-			std::string goal_id   = get_value<std::string>(fact, "goal-id");
-			std::string plan_id   = get_value<std::string>(fact, "plan-id");
-			int64_t     action_id = get_value<int64_t>(fact, "grounded-with");
-			if (action_id != 0) {
-				if (tmpl->name() == "domain-precondition") {
-					prec[std::make_tuple(goal_id, plan_id, action_id)].push_back(fact);
-				} else {
-					prea[std::make_tuple(goal_id, plan_id, action_id)].push_back(fact);
-				}
-			}
 		} else if (tmpl->name() == "pddl-grounding") {
 			pgm[get_value<std::string>(fact, "id")] = fact;
 		} else if (tmpl->name() == "pddl-formula") {

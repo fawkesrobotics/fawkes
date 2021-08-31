@@ -13,9 +13,6 @@ import { DotGraphComponent } from '../../../components/dotgraph/component';
 import { Goal } from '../models/Goal';
 import { Plan } from '../models/Plan';
 import { DomainOperator } from '../models/DomainOperator';
-import { DomainPrecondition } from '../models/DomainPrecondition';
-import { DomainPreconditionAtom } from '../models/DomainPreconditionAtom';
-import { DomainPreconditionCompound } from '../models/DomainPreconditionCompound';
 
 import { interval, forkJoin } from 'rxjs';
 import { GroundedFormula } from '../models/GroundedFormula';

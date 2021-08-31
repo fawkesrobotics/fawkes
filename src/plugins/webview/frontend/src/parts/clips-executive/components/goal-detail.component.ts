@@ -12,8 +12,6 @@ import { ClipsExecutiveApiService } from '../services/api.service';
 import { Goal } from '../models/Goal';
 import { Plan } from '../models/Plan';
 import { PlanAction } from '../models/PlanAction';
-import { DomainPrecondition } from '../models/DomainPrecondition';
-import { DomainPreconditionCompound } from '../models/DomainPreconditionCompound';
 import { GroundedFormula } from '../models/GroundedFormula';
 
 
