@@ -91,6 +91,30 @@ GroundedFormula::to_json_value(rapidjson::Document &d, rapidjson::Value &v) cons
 		v_is_satisfied.SetBool(*is_satisfied_);
 		v.AddMember("is-satisfied", v_is_satisfied, allocator);
 	}
+	rapidjson::Value v_param_names(rapidjson::kArrayType);
+	v_param_names.Reserve(param_names_.size(), allocator);
+	for (const auto &e : param_names_) {
+		rapidjson::Value v;
+		v.SetString(e, allocator);
+		v_param_names.PushBack(v, allocator);
+	}
+	v.AddMember("param-names", v_param_names, allocator);
+	rapidjson::Value v_param_values(rapidjson::kArrayType);
+	v_param_values.Reserve(param_values_.size(), allocator);
+	for (const auto &e : param_values_) {
+		rapidjson::Value v;
+		v.SetString(e, allocator);
+		v_param_values.PushBack(v, allocator);
+	}
+	v.AddMember("param-values", v_param_values, allocator);
+	rapidjson::Value v_param_constants(rapidjson::kArrayType);
+	v_param_constants.Reserve(param_constants_.size(), allocator);
+	for (const auto &e : param_constants_) {
+		rapidjson::Value v;
+		v.SetString(e, allocator);
+		v_param_constants.PushBack(v, allocator);
+	}
+	v.AddMember("param-constants", v_param_constants, allocator);
 	rapidjson::Value v_child(rapidjson::kArrayType);
 	v_child.Reserve(child_.size(), allocator);
 	for (const auto &e : child_) {
@@ -127,6 +151,33 @@ GroundedFormula::from_json_value(const rapidjson::Value &d)
 	}
 	if (d.HasMember("is-satisfied") && d["is-satisfied"].IsBool()) {
 		is_satisfied_ = d["is-satisfied"].GetBool();
+	}
+	if (d.HasMember("param-names") && d["param-names"].IsArray()) {
+		const rapidjson::Value &a = d["param-names"];
+		param_names_              = std::vector<std::string>{};
+
+		param_names_.reserve(a.Size());
+		for (auto &v : a.GetArray()) {
+			param_names_.push_back(v.GetString());
+		}
+	}
+	if (d.HasMember("param-values") && d["param-values"].IsArray()) {
+		const rapidjson::Value &a = d["param-values"];
+		param_values_             = std::vector<std::string>{};
+
+		param_values_.reserve(a.Size());
+		for (auto &v : a.GetArray()) {
+			param_values_.push_back(v.GetString());
+		}
+	}
+	if (d.HasMember("param-constants") && d["param-constants"].IsArray()) {
+		const rapidjson::Value &a = d["param-constants"];
+		param_constants_          = std::vector<std::string>{};
+
+		param_constants_.reserve(a.Size());
+		for (auto &v : a.GetArray()) {
+			param_constants_.push_back(v.GetString());
+		}
 	}
 	if (d.HasMember("child") && d["child"].IsArray()) {
 		const rapidjson::Value &a = d["child"];

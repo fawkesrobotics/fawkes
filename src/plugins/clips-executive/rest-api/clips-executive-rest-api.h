@@ -110,7 +110,9 @@ private:
 	                                    PDDLPredicateMap &                       ppm,
 	                                    GroundedPDDLFormulaMap &                 gpfm,
 	                                    GroundedPDDLPredicateMap &               gppm);
-	GroundedFormula gen_plan_compute_precons(PDDLFormulaTreeNode node, PDDLFormulaTreeMap tree);
+	GroundedFormula gen_plan_compute_precons(PDDLFormulaTreeNode node,
+	                                         PDDLFormulaTreeMap  tree,
+	                                         PDDLGroundingMap    groundings);
 
 	Plan gen_plan(const PlanKey &            plan_key,
 	              const CLIPS::Fact::pointer fact,

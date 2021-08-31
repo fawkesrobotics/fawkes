@@ -10,6 +10,7 @@
  *  API License: Apache 2.0
  ****************************************************************************/
 
+
 /** GroundedFormula representation for JSON transfer. */
 export interface GroundedFormula {
   kind: string;
@@ -17,6 +18,9 @@ export interface GroundedFormula {
   name: string;
   type: GroundedFormula.TypeEnum;
   is_satisfied: boolean;
+  param_names?: Array<string>;
+  param_values?: Array<string>;
+  param_constants?: Array<string>;
   child?: Array<GroundedFormula>;
 }
 

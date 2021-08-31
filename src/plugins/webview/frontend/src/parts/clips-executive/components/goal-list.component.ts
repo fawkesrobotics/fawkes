@@ -319,9 +319,9 @@ export class GoalListComponent implements OnInit, OnDestroy, AfterViewInit {
       }
       s += '(';
       s += `${cond.name}`;
-      // for (const p of cond['param-values']) {
-      //   s += ' ' + p;
-      // }
+      for (const p of cond['param-values']) {
+        s += ' ' + p;
+      }
       s += ')';
     }
     return s;

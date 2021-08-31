@@ -1027,6 +1027,19 @@ components:
           enum: ["conjunction", "disjunction", "negation", "atom"]
         is-satisfied:
           type: boolean
+        param-names:
+          type: array
+          items:
+            type: string
+            format: symbol
+        param-values:
+          type: array
+          items:
+            type: string
+        param-constants:
+          type: array
+          items:
+            type: string
         child:
           type: array
           items:

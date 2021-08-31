@@ -750,7 +750,9 @@ ClipsExecutiveRestApi::gen_plan_precompute(PlanMap &                 plans,
 }
 
 GroundedFormula
-ClipsExecutiveRestApi::gen_plan_compute_precons(PDDLFormulaTreeNode node, PDDLFormulaTreeMap tree)
+ClipsExecutiveRestApi::gen_plan_compute_precons(PDDLFormulaTreeNode node,
+                                                PDDLFormulaTreeMap  tree,
+                                                PDDLGroundingMap    groundings)
 {
 	CLIPS::Fact::pointer     node_fp   = std::get<0>(node);
 	CLIPS::Fact::pointer     node_g_fp = std::get<1>(node);
@@ -762,6 +764,21 @@ ClipsExecutiveRestApi::gen_plan_compute_precons(PDDLFormulaTreeNode node, PDDLFo
 		formula.set_kind("GroundedPredicate");
 		formula.set_name(get_value<std::string>(node_fp, "predicate"));
 		formula.set_type("atom");
+		std::vector<std::string> param_names =
+		  get_values(groundings[get_value<std::string>(node_g_fp, "grounding")], "param-names");
+		std::vector<std::string> param_values =
+		  get_values(groundings[get_value<std::string>(node_g_fp, "grounding")], "param-values");
+		std::vector<std::string> predicate_param_values;
+		for (const auto &param : get_values(node_g_fp, "param-names")) {
+			auto it = std::find(param_names.begin(), param_names.end(), param);
+			if (it != param_names.end()) {
+				auto index = std::distance(param_names.begin(), it);
+				predicate_param_values.push_back(param_values[index]);
+			}
+		}
+		formula.set_param_names(get_values(node_g_fp, "param-names"));
+		formula.set_param_values(predicate_param_values);
+		formula.set_param_constants(get_values(node_g_fp, "param-constants"));
 	} else if (tmpl->name() == "pddl-formula") {
 		formula.set_kind("GroundedFormula");
 		formula.set_name(get_value<std::string>(node_fp, "id"));
@@ -772,7 +789,7 @@ ClipsExecutiveRestApi::gen_plan_compute_precons(PDDLFormulaTreeNode node, PDDLFo
 
 	for (const auto &child_node : tree[get_value<std::string>(node_fp, "id")]) {
 		auto child = get_value<std::string>(std::get<0>(child_node), "id");
-		formula.addto_child(gen_plan_compute_precons(child_node, tree));
+		formula.addto_child(gen_plan_compute_precons(child_node, tree, groundings));
 	}
 
 	return formula;
@@ -847,8 +864,8 @@ ClipsExecutiveRestApi::gen_plan(const PlanKey &            plan_key,
 				std::string          root    = get_value<std::string>(root_fp, "id");
 
 				//recursively compute the tree and set the preconditions
-				pa->set_preconditions(
-				  std::make_shared<GroundedFormula>(gen_plan_compute_precons(rnode, grounded_parent_map)));
+				pa->set_preconditions(std::make_shared<GroundedFormula>(
+				  gen_plan_compute_precons(rnode, grounded_parent_map, pgm)));
 			}
 
 			actions.push_back(std::move(pa));
