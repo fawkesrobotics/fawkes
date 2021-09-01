@@ -210,7 +210,7 @@
 											</ng-container>
 										</ng-container>
 										<ng-container *ngIf="p.cond.kind === 'GroundedPredicate'">
-											({{ p.cond.name }} <ng-container *ngFor="let v of p.cond['param-values']">{{ v }}</ng-container>)
+											({{ p.cond.name }} <ng-container *ngFor="let v of p.cond['param-values']">{{ v }}&nbsp;</ng-container>)
 										</ng-container>
 									</div>
 								</mat-cell>

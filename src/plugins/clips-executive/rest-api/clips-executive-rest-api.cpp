@@ -769,7 +769,7 @@ ClipsExecutiveRestApi::gen_plan_compute_precons(PDDLFormulaTreeNode node,
 		std::vector<std::string> param_values =
 		  get_values(groundings[get_value<std::string>(node_g_fp, "grounding")], "param-values");
 		std::vector<std::string> predicate_param_values;
-		for (const auto &param : get_values(node_g_fp, "param-names")) {
+		for (const auto &param : get_values(node_fp, "param-names")) {
 			auto it = std::find(param_names.begin(), param_names.end(), param);
 			if (it != param_names.end()) {
 				auto index = std::distance(param_names.begin(), it);
