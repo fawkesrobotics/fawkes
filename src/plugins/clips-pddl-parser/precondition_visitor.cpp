@@ -154,9 +154,20 @@ PreconditionToCLIPSFactVisitor::operator()(Predicate &p) const
 		} else {
 			predicate_string = " (predicate " + p.function + ")";
 		}
+		// create parent atomic formula for predicate
+		res.push_back(string("(pddl-formula"
+								" (part-of "
+								+ new_parent
+								+ ")"
+								" (id "
+								+ name+"-atom"
+								+ ")"
+								" (type atom)"
+								")"));
+							
 		res.push_back(string("(pddl-predicate"
 		                     " (part-of "
-		                     + new_parent
+		                     + name+"-atom"
 		                     + ")"
 		                       " (id "
 		                     + name + ")" + predicate_string + " (param-names (create$" + params

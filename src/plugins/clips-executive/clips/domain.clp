@@ -159,7 +159,7 @@
   (slot id (type SYMBOL) (default ?NONE))
   (slot part-of (type SYMBOL))
 
-  (slot type (type SYMBOL) (allowed-values conjunction disjunction negation))
+  (slot type (type SYMBOL) (allowed-values conjunction disjunction negation atom))
 )
 
 (deftemplate grounded-pddl-formula
@@ -278,6 +278,26 @@
   (printout t "Action " ?id " is no longer executable" crlf)
 )
 
+(defrule domain-check-if-atomic-formula-is-satisfied
+  (declare (salience ?*SALIENCE-DOMAIN-CHECK*))
+  
+  (pddl-grounding (id ?grounding-id))
+  (pddl-formula (id ?parent-base) (type atom))
+  ?parent <- (grounded-pddl-formula (id ?id)
+                                    (formula-id ?parent-base)
+                                    (is-satisfied FALSE)
+                                    (grounding ?grounding-id))
+
+  (and (pddl-predicate (part-of ?parent-base) (id ?child-base))
+        (grounded-pddl-predicate (predicate-id ?child-base)
+                                (grounding ?grounding-id)
+                                (is-satisfied FALSE))
+  )
+  => 
+  (modify ?parent (is-satisfied TRUE))
+)
+
+
 (defrule domain-check-if-negated-formula-is-satisfied
   (declare (salience ?*SALIENCE-DOMAIN-CHECK*))
 
@@ -296,11 +316,6 @@
          (grounded-pddl-formula (formula-id ?child-base)
                                 (grounding ?grounding-id)
                                 (is-satisfied FALSE))
-    )
-    (and (pddl-predicate (part-of ?parent-base) (id ?child-base))
-         (grounded-pddl-predicate (predicate-id ?child-base)
-                                  (grounding ?grounding-id)
-                                  (is-satisfied FALSE))
     )
   )
 =>
@@ -326,11 +341,6 @@
                                 (id ~nil)
                                 (is-satisfied TRUE))
     )
-    (and (pddl-predicate (part-of ?parent-base) (id ?child-base))
-         (grounded-pddl-predicate (predicate-id ?child-base)
-                                  (grounding ?grounding-id)
-                                  (is-satisfied TRUE))
-    )
   )
 =>
   (modify ?parent (is-satisfied FALSE))
@@ -355,13 +365,6 @@
                              (is-satisfied FALSE)
     )
   ))
-  (not (and
-    (pddl-predicate (part-of ?parent-base) (id ?child-base))
-    (grounded-pddl-predicate (predicate-id ?child-base)
-                             (grounding ?grounding-id)
-                             (is-satisfied FALSE)
-    )
-  ))
 =>
   (modify ?parent (is-satisfied TRUE))
 )
@@ -382,13 +385,6 @@
   (or (and
         (pddl-formula (part-of ?parent-base) (id ?child-base))
         (grounded-pddl-formula (formula-id ?child-base)
-                                (grounding ?grounding-id)
-                                (is-satisfied FALSE)
-        )
-      )
-      (and
-        (pddl-predicate (part-of ?parent-base) (id ?child-base))
-        (grounded-pddl-predicate (predicate-id ?child-base)
                                 (grounding ?grounding-id)
                                 (is-satisfied FALSE)
         )
@@ -418,13 +414,6 @@
                                 (is-satisfied TRUE)
         )
       )
-      (and
-        (pddl-predicate (part-of ?parent-base) (id ?child-base))
-        (grounded-pddl-predicate (predicate-id ?child-base)
-                                (grounding ?grounding-id)
-                                (is-satisfied TRUE)
-        )
-      )
   )
  =>
   (modify ?parent (is-satisfied TRUE))
@@ -447,13 +436,6 @@
     (and
       (pddl-formula (part-of ?parent-base) (id ?child-base))
       (grounded-pddl-formula (formula-id ?child-base)
-                              (grounding ?grounding-id)
-                              (is-satisfied TRUE)
-      )
-    )
-    (and
-      (pddl-predicate (part-of ?parent-base) (id ?child-base))
-      (grounded-pddl-predicate (predicate-id ?child-base)
                               (grounding ?grounding-id)
                               (is-satisfied TRUE)
       )
@@ -667,7 +649,8 @@
   )
 
   (if ?parent then
-    (if (eq (fact-slot-value ?parent type) negation) then
+    (if (or (eq (fact-slot-value ?parent type) negation) 
+            (eq (fact-slot-value ?parent type) atomc))then
       (remove-precondition ?parent)
     )
     (if (and (eq (fact-slot-value ?parent type) disjunction)
