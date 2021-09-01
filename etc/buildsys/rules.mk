@@ -327,7 +327,7 @@ $(LIBDIR)/%.so: $$(OBJS_$$(call nametr,$$*))
 include $(BUILDSYSDIR)/stats.mk
 
 ### Include formatting targets
-ifneq ($(subst $(abspath $(TOP_BASEDIR)),,$(PWD)),)
+ifneq ($(subst $(abspath $(BASEDIR)),,$(PWD)),)
   include $(BUILDSYSDIR)/format.mk
 endif
 
