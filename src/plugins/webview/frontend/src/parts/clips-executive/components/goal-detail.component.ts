@@ -223,7 +223,11 @@ export class GoalDetailComponent implements OnInit, OnDestroy {
 
   recursive_add_preconditions(l, conds: GroundedFormula[], level: number = 1) {
     for (const c of conds) {
-      l.push({cond: c, level: level, width: 16 * level});
+      if(c.type == 'atom') {
+        l.push({cond: c, level: level, width: 16 * (level - 1)});
+      } else {
+        l.push({cond: c, level: level, width: 16 * level});
+      }
       this.recursive_add_preconditions(l, c.child, level + 1);
     }
   }

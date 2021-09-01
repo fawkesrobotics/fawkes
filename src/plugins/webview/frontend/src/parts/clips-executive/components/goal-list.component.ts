@@ -296,23 +296,29 @@ export class GoalListComponent implements OnInit, OnDestroy, AfterViewInit {
       if (! cond['is-satisfied']) {
         s += '! ';
       }
-      s += '(';
-      switch (cond.type) {
-        case 'conjunction':
-          s += 'AND';
-          break;
-        case 'disjunction':
-          s += 'OR';
-          break;
-        case 'negation':
-          s += 'NOT';
-          break;
+      if(cond.type != 'atom') {
+        s += '(';
+        switch (cond.type) {
+          case 'conjunction':
+            s += 'AND';
+            break;
+          case 'disjunction':
+            s += 'OR';
+            break;
+          case 'negation':
+            s += 'NOT';
+            break;
+        }
+        s += ' ';
+        for (const c of cond.child) {
+          s += '\\l' + this.format_precondition(c, indent + '&nbsp;&nbsp;&nbsp;');
+        }
+        s += ')';
+      } else {
+        for (const c of cond.child) {
+          s += this.format_precondition(c, indent);
+        }
       }
-      s += ' ';
-      for (const c of cond.child) {
-        s += '\\l' + this.format_precondition(c, indent + '&nbsp;&nbsp;&nbsp;');
-      }
-      s += ')';
     } else {
       if (! cond['is-satisfied']) {
         s += '! ';
