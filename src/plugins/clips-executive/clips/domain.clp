@@ -302,22 +302,17 @@
   (declare (salience ?*SALIENCE-DOMAIN-CHECK*))
 
   (pddl-grounding (id ?grounding-id))
-
   (pddl-formula (id ?parent-base) (type negation))
   ?parent <- (grounded-pddl-formula (id ?id)
                                     (formula-id ?parent-base)
                                     (is-satisfied FALSE)
                                     (grounding ?grounding-id))
 
-  ; the formula has either a child formula or child predicate
-  ; it is satisfied when the child is not satisifed
-  (or
-    (and (pddl-formula (part-of ?parent-base) (id ?child-base))
-         (grounded-pddl-formula (formula-id ?child-base)
-                                (grounding ?grounding-id)
-                                (is-satisfied FALSE))
-    )
-  )
+  ; the formula is satisfied when the child is not satisifed
+  (pddl-formula (part-of ?parent-base) (id ?child-base))
+  (grounded-pddl-formula (formula-id ?child-base)
+                         (grounding ?grounding-id)
+                         (is-satisfied FALSE))
 =>
   (modify ?parent (is-satisfied TRUE))
 )
@@ -326,22 +321,18 @@
   (declare (salience ?*SALIENCE-DOMAIN-CHECK*))
 
   (pddl-grounding (id ?grounding-id))
-
   (pddl-formula (id ?parent-base) (type negation))
   ?parent <- (grounded-pddl-formula (id ?id)
                                     (formula-id ?parent-base)
                                     (is-satisfied TRUE)
                                     (grounding ?grounding-id))
-  ; the formula has either a child formula or child predicate
-  ; it is unsatisfied when the child is satisifed
-  (or
-    (and (pddl-formula (part-of ?parent-base) (id ?child-base))
-         (grounded-pddl-formula (formula-id ?child-base)
-                                (grounding ?grounding-id)
-                                (id ~nil)
-                                (is-satisfied TRUE))
-    )
-  )
+
+  ; the formula is unsatisfied when the child is satisifed
+  (pddl-formula (part-of ?parent-base) (id ?child-base))
+  (grounded-pddl-formula (formula-id ?child-base)
+                         (grounding ?grounding-id)
+                         (id ~nil)
+                         (is-satisfied TRUE))
 =>
   (modify ?parent (is-satisfied FALSE))
 )
@@ -350,21 +341,21 @@
   (declare (salience ?*SALIENCE-DOMAIN-CHECK*))
 
   (pddl-grounding (id ?grounding-id))
-
   (pddl-formula (id ?parent-base) (type conjunction))
   ?parent <- (grounded-pddl-formula (id ?id)
                                     (formula-id ?parent-base)
                                     (is-satisfied FALSE)
                                     (grounding ?grounding-id))
-  ; the formula has one or several children that can be predicates or formulas
-  ; it is satisfied when there is no unsatisifed child
-  (not (and
-    (pddl-formula (part-of ?parent-base) (id ?child-base))
-    (grounded-pddl-formula (formula-id ?child-base)
+ ; the formula is satisfied when there is no unsatisifed child
+  (not 
+    (and
+      (pddl-formula (part-of ?parent-base) (id ?child-base))
+      (grounded-pddl-formula (formula-id ?child-base)
                              (grounding ?grounding-id)
                              (is-satisfied FALSE)
+      )
     )
-  ))
+  )
 =>
   (modify ?parent (is-satisfied TRUE))
 )
@@ -373,22 +364,17 @@
   (declare (salience ?*SALIENCE-DOMAIN-CHECK*))
 
   (pddl-grounding (id ?grounding-id))
-
   (pddl-formula (id ?parent-base) (type conjunction))
   ?parent <- (grounded-pddl-formula (id ?id)
                                     (formula-id ?parent-base)
                                     (is-satisfied TRUE)
                                     (grounding ?grounding-id))
 
-  ; the formula has one or several children that can be predicates or formulas
-  ; it is unsatisfied when there is a unsatisifed child
-  (or (and
-        (pddl-formula (part-of ?parent-base) (id ?child-base))
-        (grounded-pddl-formula (formula-id ?child-base)
-                                (grounding ?grounding-id)
-                                (is-satisfied FALSE)
-        )
-      )
+   ; the formula is unsatisfied when there is an unsatisifed child
+  (pddl-formula (part-of ?parent-base) (id ?child-base))
+  (grounded-pddl-formula (formula-id ?child-base)
+                         (grounding ?grounding-id)
+                         (is-satisfied FALSE)
   )
 =>
   (modify ?parent (is-satisfied FALSE))
@@ -405,15 +391,11 @@
                                     (is-satisfied FALSE)
                                     (grounding ?grounding-id))
 
-  ; the formula has one or several children that can be predicates or formulas
-  ; it is satisfied when there is a satisifed child
-  (or (and
-        (pddl-formula (part-of ?parent-base) (id ?child-base))
-        (grounded-pddl-formula (formula-id ?child-base)
-                                (grounding ?grounding-id)
-                                (is-satisfied TRUE)
-        )
-      )
+  ; the formula is satisfied when there is a satisifed child
+  (pddl-formula (part-of ?parent-base) (id ?child-base))
+  (grounded-pddl-formula (formula-id ?child-base)
+                         (grounding ?grounding-id)
+                         (is-satisfied TRUE)
   )
  =>
   (modify ?parent (is-satisfied TRUE))
@@ -423,16 +405,14 @@
   (declare (salience ?*SALIENCE-DOMAIN-CHECK*))
 
   (pddl-grounding (id ?grounding-id))
-
   (pddl-formula (id ?parent-base) (type disjunction))
   ?parent <- (grounded-pddl-formula (id ?id)
                                     (formula-id ?parent-base)
                                     (is-satisfied TRUE)
                                     (grounding ?grounding-id))
 
-  ; the formula has one or several children that can be predicates or formulas
-  ; it is unsatisfied when there is no satisifed child
-  (not (or
+  ; the formula is unsatisfied when there is no satisifed child
+  (not
     (and
       (pddl-formula (part-of ?parent-base) (id ?child-base))
       (grounded-pddl-formula (formula-id ?child-base)
@@ -440,7 +420,7 @@
                               (is-satisfied TRUE)
       )
     )
-  ))
+  )
 =>
   (modify ?parent (is-satisfied FALSE))
 )
@@ -650,7 +630,7 @@
 
   (if ?parent then
     (if (or (eq (fact-slot-value ?parent type) negation) 
-            (eq (fact-slot-value ?parent type) atomc))then
+            (eq (fact-slot-value ?parent type) atom))then
       (remove-precondition ?parent)
     )
     (if (and (eq (fact-slot-value ?parent type) disjunction)
@@ -733,6 +713,11 @@
 )
 
 (defrule domain-remove-precond-on-sensed-nonval-effect-of-exog-action
+  "If an exogenous action has a precondition for a non-value predicate that is
+  also a sensed effect of the operator, then remove the precondition on the
+  effect. This means that part of the exogenous action may already have
+  occurred before the action is selected."
+  
   (domain-operator (name ?op) (exogenous TRUE))
   (domain-predicate (name ?pred) (sensed TRUE) (value-predicate FALSE))
   (domain-effect (part-of ?op)
