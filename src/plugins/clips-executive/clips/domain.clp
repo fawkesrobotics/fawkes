@@ -622,14 +622,9 @@
    (empty conjunction)."
   (?precond-fact)
 
-  (bind ?parent FALSE)
-  (do-for-fact ((?p-fact pddl-formula))
-               (eq (fact-slot-value ?precond-fact part-of) ?p-fact:id)
-    (bind ?parent ?p-fact)
-  )
-
-  (if ?parent then
-    (if (or (eq (fact-slot-value ?parent type) negation) 
+  (if (not (do-for-fact ((?parent pddl-formula))
+               (eq (fact-slot-value ?precond-fact part-of) ?parent:id)
+    (if (or (eq (fact-slot-value ?parent type) negation)
             (eq (fact-slot-value ?parent type) atom))then
       (remove-precondition ?parent)
     )
@@ -644,7 +639,8 @@
       then
       (remove-precondition ?parent)
     )
-    else
+  ))
+  then
       (assert (pddl-formula (id (fact-slot-value ?precond-fact id))
                             (part-of (fact-slot-value ?precond-fact part-of))
                             (type conjunction)
