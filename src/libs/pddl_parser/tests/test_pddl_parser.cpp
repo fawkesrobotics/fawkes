@@ -30,123 +30,131 @@ using namespace pddl_parser;
 
 TEST(PddlParserTest, TypingTest)
 {
-	auto benchmarks = {"(define (domain action-arg-pred-missmatch)       \n\
-	(:requirements :strips :typing)             \n\
-	(:types                                     \n\
-	 	obj-a - object                            \n\
-	 	obj-b - object                            \n\
-	 )                                          \n\
-	(:predicates                                \n\
-	 	(pred ?r - obj-a)                         \n\
-	 )                                          \n\
-	(:action test-action                        \n\
-	 :parameters (?t - obj-b)                   \n\
-	 :precondition (pred ?t)                    \n\
-	 :effect (not (pred ?t))                    \n\
-	 )                                          \n\
-)",
-	                   "(define (domain typing-disabled-but-type-defined) \n\
-	(:requirements :strips)                     \n\
-	(:types                                     \n\
-	 	obj-a - object                            \n\
-	 )                                          \n\
-	(:predicates                                \n\
-	 	(pred ?r)                                 \n\
-	 )                                          \n\
-	(:action test-action                        \n\
-	 :parameters (?t)                           \n\
-	 :precondition (pred ?t)                    \n\
-	 :effect (not (pred ?t))                    \n\
-	 )                                          \n\
-)",
-	                   "(define (domain typing-disabled-but-type-constant) \n\
-	(:requirements :strips)                     \n\
-	(:constants                                 \n\
-	 	TEST_CONST - object                       \n\
-	 )                                          \n\
-	(:predicates                                \n\
-	 	(pred ?r)                                 \n\
-	 )                                          \n\
-	(:action test-action                        \n\
-	 :parameters (?t)                           \n\
-	 :precondition (pred ?t)                    \n\
-	 :effect (not (pred ?t))                    \n\
-	 )                                          \n\
-)",
-	                   "(define (domain typing-disabled-but-type-param) \n\
-	(:requirements :strips)                     \n\
-	(:predicates                                \n\
-	 	(pred ?r)                                 \n\
-	 )                                          \n\
-	(:action test-action                        \n\
-	 :parameters (?t - object)                  \n\
-	 :precondition (pred ?t)                    \n\
-	 :effect (not (pred ?t))                    \n\
-	 )                                          \n\
-)",
-	                   "(define (domain action-unknown-type-in-pred)     \n\
-	(:requirements :strips :typing)             \n\
-	(:types                                     \n\
-	 	obj-a - object                            \n\
-	 )                                          \n\
-	(:predicates                                \n\
-	 	(pred ?r - obj-b)                         \n\
-	 )                                          \n\
-	(:action test-action                        \n\
-	 :parameters (?t - obj-a)                   \n\
-	 :precondition (pred ?t)                    \n\
-	 :effect (not (pred ?t))                    \n\
-	 )                                          \n\
-)",
-	                   "(define (domain action-unknown-type-in-param)    \n\
-	(:requirements :strips :typing)             \n\
-	(:types                                     \n\
-	 	obj-a - object                            \n\
-	 )                                          \n\
-	(:predicates                                \n\
-	 	(pred ?r - obj-a)                         \n\
-	 )                                          \n\
-	(:action test-action                        \n\
-	 :parameters (?t - obj-b)                   \n\
-	 :precondition (pred ?t)                    \n\
-	 :effect (not (pred ?t))                    \n\
-	 )                                          \n\
-)",
-	                   "(define (domain action-unknown-type-in-constant) \n\
-	(:requirements :strips :typing)             \n\
-	(:types                                     \n\
-	 	obj-a - object                            \n\
-	 )                                          \n\
-	(:constants                                 \n\
-	 	TEST_CONST - obj-b                        \n\
-	 )                                          \n\
-	(:predicates                                \n\
-	 	(pred ?r - obj-a)                         \n\
-	 )                                          \n\
-	(:action test-action                        \n\
-	 :parameters (?t - obj-a)                   \n\
-	 :precondition (pred ?t)                    \n\
-	 :effect (not (pred ?t))                    \n\
-	 )                                          \n\
-)",
-	                   "(define (domain action-constant-missmatch)       \n\
-	(:requirements :strips :typing)             \n\
-	(:types                                     \n\
-	 	obj-a - object                            \n\
-	 	obj-b - object                            \n\
-	 )                                          \n\
-	(:constants                                 \n\
-	 	TEST_CONST - obj-b                        \n\
-	 )                                          \n\
-	(:predicates                                \n\
-	 	(pred ?r - obj-a)                         \n\
-	 )                                          \n\
-	(:action test-action                        \n\
-	 :parameters (?t - obj-a)                   \n\
-	 :precondition (pred TEST_CONST)            \n\
-	 :effect (not (pred ?t))                    \n\
-	 )                                          \n\
-)"};
+	auto benchmarks = {R"delim(
+(define (domain action-arg-pred-missmatch)
+	(:requirements :strips :typing)
+	(:types
+		obj-a - object
+		obj-b - object
+	 )
+	(:predicates
+		(pred ?r - obj-a)
+	 )
+	(:action test-action
+	 :parameters (?t - obj-b)
+	 :precondition (pred ?t)
+	 :effect (not (pred ?t))
+	)
+))delim",
+	                   R"delim(
+	(define (domain typing-disabled-but-type-defined)
+	(:requirements :strips)
+	(:types
+		obj-a - object
+	)
+	(:predicates
+		(pred ?r)
+	)
+	(:action test-action
+	 :parameters (?t)
+	 :precondition (pred ?t)
+	 :effect (not (pred ?t))
+	)
+))delim",
+	                   R"delim(
+(define (domain typing-disabled-but-type-constant)
+	(:requirements :strips)
+	(:constants
+		TEST_CONST - object
+	 )
+	(:predicates
+		(pred ?r)
+	 )
+	(:action test-action
+	 :parameters (?t)
+	 :precondition (pred ?t)
+	 :effect (not (pred ?t))
+	)
+))delim",
+	                   R"delim(
+(define (domain typing-disabled-but-type-param)
+	(:requirements :strips)
+	(:predicates
+		(pred ?r)
+	 )
+	(:action test-action
+	 :parameters (?t - object)
+	 :precondition (pred ?t)
+	 :effect (not (pred ?t))
+	)
+))delim",
+	                   R"delim(
+(define (domain action-unknown-type-in-pred)
+	(:requirements :strips :typing)
+	(:types
+		obj-a - object
+	 )
+	(:predicates
+		(pred ?r - obj-b)
+	 )
+	(:action test-action
+	 :parameters (?t - obj-a)
+	 :precondition (pred ?t)
+	 :effect (not (pred ?t))
+	)
+))delim",
+	                   R"delim(
+(define (domain action-unknown-type-in-param)
+	(:requirements :strips :typing)
+	(:types
+		obj-a - object
+	 )
+	(:predicates
+		(pred ?r - obj-a)
+	 )
+	(:action test-action
+	 :parameters (?t - obj-b)
+	 :precondition (pred ?t)
+	 :effect (not (pred ?t))
+	)
+))delim",
+	                   R"delim(
+(define (domain action-unknown-type-in-constant)
+	(:requirements :strips :typing)
+	(:types
+		obj-a - object
+	 )
+	(:constants
+		TEST_CONST - obj-b
+	 )
+	(:predicates
+		(pred ?r - obj-a)
+	 )
+	(:action test-action
+	 :parameters (?t - obj-a)
+	 :precondition (pred ?t)
+	 :effect (not (pred ?t))
+	)
+))delim",
+	                   R"delim(
+(define (domain action-constant-missmatch)
+	(:requirements :strips :typing)
+	(:types
+		obj-a - object
+		obj-b - object
+	 )
+	(:constants
+		TEST_CONST - obj-b
+	 )
+	(:predicates
+		(pred ?r - obj-a)
+	 )
+	(:action test-action
+	 :parameters (?t - obj-a)
+	 :precondition (pred TEST_CONST)
+	 :effect (not (pred ?t))
+	)
+))delim"};
 	for (const auto &s : benchmarks) {
 		try {
 			PddlParser p;
@@ -166,17 +174,18 @@ TEST(PddlParserTest, MinimalDomain)
 {
 	try {
 		PddlParser p;
-		p.parseDomain("(define (domain test-domain)              \n\
-	(:requirements)                  \n\
-	(:predicates                     \n\
-		(pred)                         \n\
-	 )                               \n\
-	(:action test-action             \n\
-	 :parameters (?t)                \n\
-	 :precondition (pred)            \n\
-	 :effect (not (pred))            \n\
-	 )                               \n\
-)");
+		p.parseDomain(R"delim(
+(define (domain test-domain)
+	(:requirements)
+	(:predicates
+		(pred)
+	 )
+	(:action test-action
+	 :parameters (?t)
+	 :precondition (pred)
+	 :effect (not (pred))
+	)
+))delim");
 		SUCCEED() << "Minimal domain parsed ";
 	} catch (PddlParserException const &e) {
 		FAIL() << " Unexpected Exception: " << e.what();
@@ -187,20 +196,21 @@ TEST(PddlParserTest, DurativeAction)
 {
 	try {
 		PddlParser p;
-		p.parseDomain("(define (domain test-durative-action)   \n\
-	(:requirements :strips :durative-actions)    \n\
-	(:predicates                                 \n\
-		(pred ?r)                                  \n\
-	 )                                           \n\
-	(:durative-action test-action                \n\
-	 :parameters (?t)                            \n\
-	 :duration (= ?duration 5.5)                 \n\
-	 :condition (and (at start (pred ?t))        \n\
-										(over all (pred ?t)))      \n\
-	 :effect (and (at end (not (pred ?t)))       \n\
-	             (at start (pred ?t)))           \n\
-	 )                                           \n\
-)");
+		p.parseDomain(R"delim(
+(define (domain test-durative-action)
+	(:requirements :strips :durative-actions)
+	(:predicates
+		(pred ?r)
+	)
+	(:durative-action test-action
+	 :parameters (?t)
+	 :duration (= ?duration 5.5)
+	 :condition (and (at start (pred ?t))
+		               (over all (pred ?t)))
+	 :effect (and (at end (not (pred ?t)))
+	              (at start (pred ?t)))
+	)
+))delim");
 		SUCCEED() << " Durative domain parsed ";
 	} catch (PddlParserException const &e) {
 		FAIL() << " Unexpected Exception: " << e.what();
@@ -211,21 +221,22 @@ TEST(PddlParserTest, Functionss)
 {
 	try {
 		PddlParser p;
-		p.parseDomain("(define (domain test-functions)   \n\
-	(:requirements :strips :numeric-fluents)     \n\
-	(:predicates                                 \n\
-		(pred ?r)                                  \n\
-	 )                                           \n\
-	(:functions                                  \n\
-	 (func ?r)                                   \n\
-	)                                            \n\
-	(:action test-action                         \n\
-	 :parameters (?t)                            \n\
-	 :precondition (and (pred ?t)                \n\
-									 (= (func ?t) 1.1))          \n\
-	 :effect (increase (pred ?t) (pred ?t))      \n\
-	 )                                           \n\
-)");
+		p.parseDomain(R"delim(
+(define (domain test-functions)
+	(:requirements :strips :numeric-fluents)
+	(:predicates
+		(pred ?r)
+	 )
+	(:functions
+	 (func ?r)
+	)
+	(:action test-action
+	 :parameters (?t)
+	 :precondition (and (pred ?t)
+	                    (= (func ?t) 1.1))
+	 :effect (increase (pred ?t) (pred ?t))
+	 )
+))delim");
 		SUCCEED() << " Function domain parsed ";
 	} catch (PddlParserException const &e) {
 		FAIL() << " Unexpected Exception: " << e.what();
