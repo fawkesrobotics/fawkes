@@ -156,25 +156,18 @@ TEST(PddlParserTest, TypingTest)
 	)
 ))delim"};
 	for (const auto &s : benchmarks) {
-		try {
-			PddlParser p;
-			p.parseDomain(s);
-			FAIL() << s << "\n expected type error";
-		} catch (PddlParserException &e) {
-			if (e.error_type != PddlErrorType::TYPE_ERROR) {
-				FAIL() << s << "\n failed with error " << e.what();
-			} else {
-			}
-		}
+		EXPECT_THROW(
+		  {
+			  PddlParser p;
+			  p.parseDomain(s);
+		  },
+		  PddlTypeException);
 	}
-	SUCCEED() << " got expected type errors ";
 }
 
 TEST(PddlParserTest, MinimalDomain)
 {
-	try {
-		PddlParser p;
-		p.parseDomain(R"delim(
+	EXPECT_NO_THROW(PddlParser p; p.parseDomain(R"delim(
 (define (domain test-domain)
 	(:requirements)
 	(:predicates
@@ -185,18 +178,12 @@ TEST(PddlParserTest, MinimalDomain)
 	 :precondition (pred)
 	 :effect (not (pred))
 	)
-))delim");
-		SUCCEED() << "Minimal domain parsed ";
-	} catch (PddlParserException const &e) {
-		FAIL() << " Unexpected Exception: " << e.what();
-	}
+))delim"););
 }
 
 TEST(PddlParserTest, DurativeAction)
 {
-	try {
-		PddlParser p;
-		p.parseDomain(R"delim(
+	EXPECT_NO_THROW(PddlParser p; p.parseDomain(R"delim(
 (define (domain test-durative-action)
 	(:requirements :strips :durative-actions)
 	(:predicates
@@ -210,18 +197,12 @@ TEST(PddlParserTest, DurativeAction)
 	 :effect (and (at end (not (pred ?t)))
 	              (at start (pred ?t)))
 	)
-))delim");
-		SUCCEED() << " Durative domain parsed ";
-	} catch (PddlParserException const &e) {
-		FAIL() << " Unexpected Exception: " << e.what();
-	}
+))delim"););
 }
 
 TEST(PddlParserTest, Functionss)
 {
-	try {
-		PddlParser p;
-		p.parseDomain(R"delim(
+	EXPECT_NO_THROW(PddlParser p; p.parseDomain(R"delim(
 (define (domain test-functions)
 	(:requirements :strips :numeric-fluents)
 	(:predicates
@@ -236,11 +217,7 @@ TEST(PddlParserTest, Functionss)
 	                    (= (func ?t) 1.1))
 	 :effect (increase (pred ?t) (pred ?t))
 	 )
-))delim");
-		SUCCEED() << " Function domain parsed ";
-	} catch (PddlParserException const &e) {
-		FAIL() << " Unexpected Exception: " << e.what();
-	}
+))delim"););
 }
 TEST(PddlParserTest, IPC2014)
 {
@@ -255,18 +232,11 @@ TEST(PddlParserTest, IPC2014)
 		}
 	}
 	for (const auto &s : domains) {
-		try {
-			std::ifstream t(s);
-			if (t.fail()) {
-				FAIL() << " Failed to read file: " << s;
-			}
-			std::stringstream buffer;
-			buffer << t.rdbuf();
-			PddlParser p;
-			p.parseDomain(buffer.str());
-		} catch (PddlParserException const &e) {
-			FAIL() << " Unexpected Exception in file:\n" << s << "\n" << e.what();
-		}
-		SUCCEED() << " All files parsed without failure.";
+		EXPECT_NO_THROW(std::ifstream t(s); if (t.fail()) {
+			FAIL() << " Failed to read file: " << s;
+		} std::stringstream buffer;
+		                buffer << t.rdbuf();
+		                PddlParser p;
+		                p.parseDomain(buffer.str()););
 	}
 }
