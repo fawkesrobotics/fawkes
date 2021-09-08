@@ -111,7 +111,7 @@ struct domain_parser : qi::grammar<Iterator, Domain(), Skipper>
 		               | qi::string("=") | string("increase") | string("decrease");
 
 		// no expectation parsing to allow proper backtracking
-		value_expression = attr(ExpressionType::VALUE) >> qi::as_string[qi::float_];
+		value_expression = attr(ExpressionType::VALUE) >> qi::as_string[qi::raw[qi::float_]];
 		numeric_expression =
 		  attr(ExpressionType::NUMERIC)
 		  >> qi::as<Predicate>()[atom >> *(hold[attr(ExpressionType::ATOM) >> atom])];
