@@ -90,17 +90,17 @@ PddlParser::parseDomain(const std::string &pddl_domain)
 		boost::spirit::simple_printer<std::stringstream>                    pr(expectation);
 		basic_info_walker<boost::spirit::simple_printer<std::stringstream>> walker(pr, e.what_.tag, 0);
 		boost::apply_visitor(walker, e.what_.value);
-		throw PddlParserException(std::string("Syntax Error: ") + e.what() + " expected "
+		throw PddlSyntaxException(std::string("Syntax Error: ") + e.what() + " expected "
 		                            + expectation.str() + " at " + getErrorContext(iter, end, e.first),
-		                          PddlErrorType::SYNTAX_ERROR);
-	} catch (PddlSemanticsException const &e) {
-		throw PddlParserException(std::string("Semantic Error: ") + e.what()
-		                            + getErrorContext(iter, end, e.pos),
-		                          e.error_type);
+		                          iter);
+	} catch (PddlSemanticsException &e) {
+		e.prepend("Semantic Error: ");
+		e.append(getErrorContext(iter, end, e.pos).c_str());
+		throw;
 	}
 
 	if (!r) {
-		throw PddlParserException("Parsing PDDL domain string failed!", PddlErrorType::UNKNOWN_ERROR);
+		throw PddlParserException("Parsing PDDL domain string failed!");
 	}
 	return dom;
 }
@@ -127,13 +127,13 @@ PddlParser::parseProblem(const std::string &pddl_problem)
 	try {
 		r = phrase_parse(iter, end, g, s, prob);
 	} catch (qi::expectation_failure<iterator_type> const &e) {
-		throw PddlParserException(std::string("Expectation failed: ") + e.what()
+		throw PddlSyntaxException(std::string("Expectation failed: ") + e.what()
 		                            + getErrorContext(iter, end, e.first),
-		                          PddlErrorType::SYNTAX_ERROR);
+		                          iter);
 	}
 
 	if (!r) {
-		throw PddlParserException("Parsing PDDL problem string failed!", PddlErrorType::UNKNOWN_ERROR);
+		throw PddlParserException("Parsing PDDL problem string failed!");
 	}
 	return prob;
 }

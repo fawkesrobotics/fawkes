@@ -43,12 +43,11 @@ void
 check_type_vs_requirement(const iterator_type &where, bool typing_required, const std::string &type)
 {
 	if ((type == "") && typing_required) {
-		throw PddlSemanticsException(std::string("Missing type."), PddlErrorType::TYPE_ERROR, where);
+		throw PddlTypeException(std::string("Missing type."), where);
 	}
 	if ((type != "") && !typing_required) {
-		throw PddlSemanticsException(std::string("Requirement typing disabled, unexpected type found."),
-		                             PddlErrorType::TYPE_ERROR,
-		                             where);
+		throw PddlTypeException(std::string("Requirement typing disabled, unexpected type found."),
+		                        where);
 	}
 }
 
@@ -60,9 +59,8 @@ TypeSemantics::operator()(const iterator_type &where,
                           const Domain &       domain) const
 {
 	if (!semantics_utils::typing_required(domain)) {
-		throw PddlSemanticsException(std::string("Requirement typing disabled, unexpected type found."),
-		                             PddlErrorType::TYPE_ERROR,
-		                             where);
+		throw PddlTypeException(std::string("Requirement typing disabled, unexpected type found."),
+		                        where);
 	}
 	return parsed;
 }
@@ -106,9 +104,7 @@ ConstantSemantics::operator()(const iterator_type &     where,
 			  return p.first == parsed.second || p.second == parsed.second;
 		  });
 		if (search == domain.types.end()) {
-			throw PddlSemanticsException(std::string("Unknown type: ") + parsed.second,
-			                             PddlErrorType::TYPE_ERROR,
-			                             where);
+			throw PddlTypeException(std::string("Unknown type: ") + parsed.second, where);
 		}
 	}
 	semantics_utils::check_type_vs_requirement(where, typing_enabled, parsed.second);
@@ -140,10 +136,9 @@ ActionSemantics::operator()(const iterator_type &where,
 				  return p.first == action_param.second || p.second == action_param.second;
 			  });
 			if (search == domain.types.end()) {
-				throw PddlSemanticsException(std::string("Unknown type: ") + action_param.first + " - "
-				                               + action_param.second,
-				                             PddlErrorType::TYPE_ERROR,
-				                             where);
+				throw PddlTypeException(std::string("Unknown type: ") + action_param.first + " - "
+				                          + action_param.second,
+				                        where);
 			}
 		}
 		semantics_utils::check_type_vs_requirement(where, typing_enabled, action_param.second);
@@ -186,10 +181,9 @@ ActionSemantics::check_action_condition(const iterator_type &where,
 	auto curr_obj_type = boost::apply_visitor(ExpressionTypeVisitor(), expr.expression);
 	// this function checks conditions, if the expression is an atom, then the action has an invalid structure
 	if (curr_obj_type == std::type_index(typeid(Atom))) {
-		throw PddlSemanticsException(std::string("Unexpected Atom in expression: ")
-		                               + boost::get<Atom>(expr.expression),
-		                             PddlErrorType::EXPRESSION_ERROR,
-		                             where);
+		throw PddlExpressionException(std::string("Unexpected Atom in expression: ")
+		                                + boost::get<Atom>(expr.expression),
+		                              where);
 	}
 	if (curr_obj_type == std::type_index(typeid(QuantifiedFormula))) {
 		QuantifiedFormula f = boost::get<QuantifiedFormula>(expr.expression);
@@ -228,25 +222,20 @@ ActionSemantics::check_action_predicate(const iterator_type & where,
 		               [pred](const predicate_type &p) { return pred.function == p.first; });
 		if (defined_pred == domain.predicates.end()) {
 			// ... if it is not, then this predicate is invalid
-			throw PddlSemanticsException(std::string("Unknown predicate: ") + pred.function,
-			                             PddlErrorType::PREDICATE_ERROR,
-			                             where);
+			throw PddlPredicateException(std::string("Unknown predicate: ") + pred.function, where);
 		} else {
 			// If the predicate is defined, the signature has to match
 			if (defined_pred->second.size() != pred.arguments.size()) {
-				throw PddlSemanticsException(std::string("Predicate argument length missmatch, expected ")
+				throw PddlPredicateException(std::string("Predicate argument length missmatch, expected ")
 				                               + std::to_string(defined_pred->second.size()) + " but got "
 				                               + std::to_string(pred.arguments.size()),
-				                             PddlErrorType::PREDICATE_ERROR,
 				                             where);
 			} else {
 				// and all arguments must be atomic expressions
 				for (size_t i = 0; i < pred.arguments.size(); i++) {
 					if (boost::apply_visitor(ExpressionTypeVisitor(), pred.arguments[i].expression)
 					    != std::type_index(typeid(Atom))) {
-						throw PddlSemanticsException(std::string("Unexpected nested predicate."),
-						                             PddlErrorType::PREDICATE_ERROR,
-						                             where);
+						throw PddlPredicateException(std::string("Unexpected nested predicate."), where);
 					} else {
 						Atom        curr_arg      = boost::get<Atom>(pred.arguments[i].expression);
 						bool        is_type_error = false;
@@ -270,9 +259,7 @@ ActionSemantics::check_action_predicate(const iterator_type & where,
 							if (constant_match == domain.constants.end()) {
 								is_type_error = true;
 								if (!constant_found) {
-									throw PddlSemanticsException(std::string("Unknown constant ") + curr_arg,
-									                             PddlErrorType::CONSTANT_ERROR,
-									                             where);
+									throw PddlConstantException(std::string("Unknown constant ") + curr_arg, where);
 								}
 							}
 						} else {
@@ -288,9 +275,7 @@ ActionSemantics::check_action_predicate(const iterator_type & where,
 									               return c.first == curr_arg.substr(1, std::string::npos);
 								               });
 								if (parameter_match == curr_action.action_params.end()) {
-									throw PddlSemanticsException(std::string("Unknown Parameter ") + curr_arg,
-									                             PddlErrorType::PARAMETER_ERROR,
-									                             where);
+									throw PddlParameterException(std::string("Unknown Parameter ") + curr_arg, where);
 								} else {
 									arg_type = parameter_match->second;
 								}
@@ -301,12 +286,10 @@ ActionSemantics::check_action_predicate(const iterator_type & where,
 						}
 						// and if typing is required, then the types should match the signature
 						if (typing_enabled && is_type_error) {
-							throw PddlSemanticsException(std::string("Type missmatch: Argument ")
-							                               + std::to_string(i) + " of " + defined_pred->first
-							                               + " expects " + defined_pred->second[i].second
-							                               + " but got " + arg_type,
-							                             PddlErrorType::TYPE_ERROR,
-							                             where);
+							throw PddlTypeException(std::string("Type missmatch: Argument ") + std::to_string(i)
+							                          + " of " + defined_pred->first + " expects "
+							                          + defined_pred->second[i].second + " but got " + arg_type,
+							                        where);
 						}
 					}
 				}
