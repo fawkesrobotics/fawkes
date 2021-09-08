@@ -200,7 +200,7 @@ TEST(PddlParserTest, DurativeAction)
 ))delim"););
 }
 
-TEST(PddlParserTest, Functionss)
+TEST(PddlParserTest, Functions)
 {
 	EXPECT_NO_THROW(PddlParser p; p.parseDomain(R"delim(
 (define (domain test-functions)
