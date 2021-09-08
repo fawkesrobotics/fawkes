@@ -167,7 +167,9 @@ TEST(PddlParserTest, TypingTest)
 
 TEST(PddlParserTest, MinimalDomain)
 {
-	EXPECT_NO_THROW(PddlParser p; p.parseDomain(R"delim(
+	PddlParser p;
+	Domain     d;
+	EXPECT_NO_THROW(d = p.parseDomain(R"delim(
 (define (domain test-domain)
 	(:requirements)
 	(:predicates
@@ -179,11 +181,40 @@ TEST(PddlParserTest, MinimalDomain)
 	 :effect (not (pred))
 	)
 ))delim"););
+
+	ASSERT_EQ(d.requirements.size(), 0);
+	ASSERT_EQ(d.types.size(), 0);
+	ASSERT_EQ(d.constants.size(), 0);
+	ASSERT_EQ(d.predicates.size(), 1);
+	ASSERT_EQ(d.functions.size(), 0);
+	ASSERT_EQ(d.actions.size(), 1);
+	ASSERT_EQ(d.actions[0].name, "test-action");
+	ASSERT_EQ(d.actions[0].action_params.size(), 1);
+	// action precondition correctly parsed?
+	ASSERT_EQ(d.actions[0].precondition.type, ExpressionType::PREDICATE);
+	ASSERT_EQ(boost::get<Predicate>(d.actions[0].precondition.expression).function, "pred");
+	ASSERT_EQ(boost::get<Predicate>(d.actions[0].precondition.expression).arguments.size(), 0);
+	// action effect correctly parsed?
+	ASSERT_EQ(d.actions[0].effect.type, ExpressionType::BOOL);
+	ASSERT_EQ(boost::get<Predicate>(d.actions[0].effect.expression).function, "not");
+	ASSERT_EQ(boost::get<Predicate>(d.actions[0].effect.expression).arguments.size(), 1);
+	ASSERT_EQ(boost::get<Predicate>(d.actions[0].effect.expression).arguments[0].type,
+	          ExpressionType::PREDICATE);
+	ASSERT_EQ(boost::get<Predicate>(
+	            boost::get<Predicate>(d.actions[0].effect.expression).arguments[0].expression)
+	            .function,
+	          "pred");
+	ASSERT_EQ(boost::get<Predicate>(
+	            boost::get<Predicate>(d.actions[0].effect.expression).arguments[0].expression)
+	            .arguments.size(),
+	          0);
 }
 
 TEST(PddlParserTest, DurativeAction)
 {
-	EXPECT_NO_THROW(PddlParser p; p.parseDomain(R"delim(
+	PddlParser p;
+	Domain     d;
+	EXPECT_NO_THROW(d = p.parseDomain(R"delim(
 (define (domain test-durative-action)
 	(:requirements :strips :durative-actions)
 	(:predicates
@@ -198,6 +229,194 @@ TEST(PddlParserTest, DurativeAction)
 	              (at start (pred ?t)))
 	)
 ))delim"););
+	ASSERT_EQ(d.requirements.size(), 2);
+	ASSERT_EQ(d.types.size(), 0);
+	ASSERT_EQ(d.constants.size(), 0);
+	ASSERT_EQ(d.predicates.size(), 1);
+	ASSERT_EQ(d.functions.size(), 0);
+	ASSERT_EQ(d.actions.size(), 1);
+	ASSERT_EQ(d.actions[0].name, "test-action");
+	ASSERT_EQ(d.actions[0].duration.type, ExpressionType::VALUE);
+	ASSERT_EQ(boost::get<Atom>(d.actions[0].duration.expression), "5.5");
+	ASSERT_EQ(d.actions[0].action_params.size(), 1);
+	// action precondition correctly parsed?
+	ASSERT_EQ(d.actions[0].precondition.type, ExpressionType::BOOL);
+	ASSERT_EQ(boost::get<Predicate>(d.actions[0].precondition.expression).function, "and");
+	ASSERT_EQ(boost::get<Predicate>(d.actions[0].precondition.expression).arguments.size(), 2);
+	ASSERT_EQ(boost::get<Predicate>(
+	            boost::get<Predicate>(d.actions[0].precondition.expression).arguments[0].expression)
+	            .function,
+	          "at start");
+	ASSERT_EQ(boost::get<Predicate>(
+	            boost::get<Predicate>(d.actions[0].precondition.expression).arguments[0].expression)
+	            .arguments.size(),
+	          1);
+	ASSERT_EQ(boost::get<Predicate>(
+	            boost::get<Predicate>(d.actions[0].precondition.expression).arguments[0].expression)
+	            .arguments[0]
+	            .type,
+	          ExpressionType::PREDICATE);
+	ASSERT_EQ(boost::get<Predicate>(
+	            boost::get<Predicate>(
+	              boost::get<Predicate>(d.actions[0].precondition.expression).arguments[0].expression)
+	              .arguments[0]
+	              .expression)
+	            .function,
+	          "pred");
+	ASSERT_EQ(boost::get<Predicate>(
+	            boost::get<Predicate>(
+	              boost::get<Predicate>(d.actions[0].precondition.expression).arguments[0].expression)
+	              .arguments[0]
+	              .expression)
+	            .arguments.size(),
+	          1);
+	ASSERT_EQ(boost::get<Predicate>(
+	            boost::get<Predicate>(
+	              boost::get<Predicate>(d.actions[0].precondition.expression).arguments[0].expression)
+	              .arguments[0]
+	              .expression)
+	            .arguments[0]
+	            .type,
+	          ExpressionType::ATOM);
+	ASSERT_EQ(boost::get<Predicate>(
+	            boost::get<Predicate>(d.actions[0].precondition.expression).arguments[1].expression)
+	            .function,
+	          "over all");
+	ASSERT_EQ(boost::get<Predicate>(
+	            boost::get<Predicate>(d.actions[0].precondition.expression).arguments[1].expression)
+	            .arguments.size(),
+	          1);
+	ASSERT_EQ(boost::get<Predicate>(
+	            boost::get<Predicate>(d.actions[0].precondition.expression).arguments[1].expression)
+	            .arguments[0]
+	            .type,
+	          ExpressionType::PREDICATE);
+	ASSERT_EQ(boost::get<Predicate>(
+	            boost::get<Predicate>(
+	              boost::get<Predicate>(d.actions[0].precondition.expression).arguments[1].expression)
+	              .arguments[0]
+	              .expression)
+	            .function,
+	          "pred");
+	ASSERT_EQ(boost::get<Predicate>(
+	            boost::get<Predicate>(
+	              boost::get<Predicate>(d.actions[0].precondition.expression).arguments[1].expression)
+	              .arguments[0]
+	              .expression)
+	            .arguments.size(),
+	          1);
+	ASSERT_EQ(boost::get<Predicate>(
+	            boost::get<Predicate>(
+	              boost::get<Predicate>(d.actions[0].precondition.expression).arguments[1].expression)
+	              .arguments[0]
+	              .expression)
+	            .arguments[0]
+	            .type,
+	          ExpressionType::ATOM);
+	// action effect correctly parsed?
+	ASSERT_EQ(boost::get<Predicate>(d.actions[0].effect.expression).function, "and");
+	ASSERT_EQ(boost::get<Predicate>(d.actions[0].effect.expression).arguments.size(), 2);
+	ASSERT_EQ(boost::get<Predicate>(
+	            boost::get<Predicate>(d.actions[0].effect.expression).arguments[0].expression)
+	            .function,
+	          "at end");
+	ASSERT_EQ(boost::get<Predicate>(
+	            boost::get<Predicate>(d.actions[0].effect.expression).arguments[0].expression)
+	            .arguments.size(),
+	          1);
+	ASSERT_EQ(boost::get<Predicate>(
+	            boost::get<Predicate>(d.actions[0].effect.expression).arguments[0].expression)
+	            .arguments[0]
+	            .type,
+	          ExpressionType::BOOL);
+	ASSERT_EQ(boost::get<Predicate>(
+	            boost::get<Predicate>(
+	              boost::get<Predicate>(d.actions[0].effect.expression).arguments[0].expression)
+	              .arguments[0]
+	              .expression)
+	            .function,
+	          "not");
+	ASSERT_EQ(boost::get<Predicate>(
+	            boost::get<Predicate>(
+	              boost::get<Predicate>(d.actions[0].effect.expression).arguments[0].expression)
+	              .arguments[0]
+	              .expression)
+	            .arguments.size(),
+	          1);
+	ASSERT_EQ(boost::get<Predicate>(
+	            boost::get<Predicate>(
+	              boost::get<Predicate>(d.actions[0].effect.expression).arguments[0].expression)
+	              .arguments[0]
+	              .expression)
+	            .arguments[0]
+	            .type,
+	          ExpressionType::PREDICATE);
+	ASSERT_EQ(boost::get<Predicate>(
+	            boost::get<Predicate>(
+	              boost::get<Predicate>(
+	                boost::get<Predicate>(d.actions[0].effect.expression).arguments[0].expression)
+	                .arguments[0]
+	                .expression)
+	              .arguments[0]
+	              .expression)
+	            .function,
+	          "pred");
+	ASSERT_EQ(boost::get<Predicate>(
+	            boost::get<Predicate>(
+	              boost::get<Predicate>(
+	                boost::get<Predicate>(d.actions[0].effect.expression).arguments[0].expression)
+	                .arguments[0]
+	                .expression)
+	              .arguments[0]
+	              .expression)
+	            .arguments.size(),
+	          1);
+	ASSERT_EQ(boost::get<Predicate>(
+	            boost::get<Predicate>(
+	              boost::get<Predicate>(
+	                boost::get<Predicate>(d.actions[0].effect.expression).arguments[0].expression)
+	                .arguments[0]
+	                .expression)
+	              .arguments[0]
+	              .expression)
+	            .arguments[0]
+	            .type,
+	          ExpressionType::ATOM);
+	ASSERT_EQ(boost::get<Predicate>(
+	            boost::get<Predicate>(d.actions[0].effect.expression).arguments[1].expression)
+	            .function,
+	          "at start");
+	ASSERT_EQ(boost::get<Predicate>(
+	            boost::get<Predicate>(d.actions[0].effect.expression).arguments[1].expression)
+	            .arguments.size(),
+	          1);
+	ASSERT_EQ(boost::get<Predicate>(
+	            boost::get<Predicate>(d.actions[0].effect.expression).arguments[1].expression)
+	            .arguments[0]
+	            .type,
+	          ExpressionType::PREDICATE);
+	ASSERT_EQ(boost::get<Predicate>(
+	            boost::get<Predicate>(
+	              boost::get<Predicate>(d.actions[0].effect.expression).arguments[1].expression)
+	              .arguments[0]
+	              .expression)
+	            .function,
+	          "pred");
+	ASSERT_EQ(boost::get<Predicate>(
+	            boost::get<Predicate>(
+	              boost::get<Predicate>(d.actions[0].effect.expression).arguments[1].expression)
+	              .arguments[0]
+	              .expression)
+	            .arguments.size(),
+	          1);
+	ASSERT_EQ(boost::get<Predicate>(
+	            boost::get<Predicate>(
+	              boost::get<Predicate>(d.actions[0].effect.expression).arguments[1].expression)
+	              .arguments[0]
+	              .expression)
+	            .arguments[0]
+	            .type,
+	          ExpressionType::ATOM);
 }
 
 TEST(PddlParserTest, Functions)
