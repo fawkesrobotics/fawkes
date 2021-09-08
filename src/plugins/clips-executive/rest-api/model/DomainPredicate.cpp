@@ -18,6 +18,7 @@
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
 
+#include <numeric>
 #include <sstream>
 
 DomainPredicate::DomainPredicate()
@@ -130,7 +131,7 @@ DomainPredicate::from_json_value(const rapidjson::Value &d)
 	if (d.HasMember("param-names") && d["param-names"].IsArray()) {
 		const rapidjson::Value &a = d["param-names"];
 		param_names_              = std::vector<std::string>{};
-		;
+
 		param_names_.reserve(a.Size());
 		for (auto &v : a.GetArray()) {
 			param_names_.push_back(v.GetString());
@@ -139,7 +140,7 @@ DomainPredicate::from_json_value(const rapidjson::Value &d)
 	if (d.HasMember("param-types") && d["param-types"].IsArray()) {
 		const rapidjson::Value &a = d["param-types"];
 		param_types_              = std::vector<std::string>{};
-		;
+
 		param_types_.reserve(a.Size());
 		for (auto &v : a.GetArray()) {
 			param_types_.push_back(v.GetString());
@@ -151,28 +152,29 @@ void
 DomainPredicate::validate(bool subcall) const
 {
 	std::vector<std::string> missing;
-	if (!kind_)
+	if (!kind_) {
 		missing.push_back("kind");
-	if (!apiVersion_)
+	}
+	if (!apiVersion_) {
 		missing.push_back("apiVersion");
-	if (!name_)
+	}
+	if (!name_) {
 		missing.push_back("name");
-	if (!sensed_)
+	}
+	if (!sensed_) {
 		missing.push_back("sensed");
+	}
 
 	if (!missing.empty()) {
 		if (subcall) {
 			throw missing;
 		} else {
-			std::ostringstream s;
-			s << "DomainPredicate is missing field" << ((missing.size() > 0) ? "s" : "") << ": ";
-			for (std::vector<std::string>::size_type i = 0; i < missing.size(); ++i) {
-				s << missing[i];
-				if (i < (missing.size() - 1)) {
-					s << ", ";
-				}
-			}
-			throw std::runtime_error(s.str());
+			std::string s =
+			  std::accumulate(std::next(missing.begin()),
+			                  missing.end(),
+			                  missing.front(),
+			                  [](std::string &s, const std::string &n) { return s + ", " + n; });
+			throw std::runtime_error("DomainPredicate is missing " + s);
 		}
 	}
 }

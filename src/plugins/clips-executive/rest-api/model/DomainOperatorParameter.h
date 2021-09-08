@@ -14,6 +14,7 @@
 #pragma once
 
 #define RAPIDJSON_HAS_STDSTRING 1
+
 #include <rapidjson/fwd.h>
 
 #include <cstdint>
@@ -24,7 +25,6 @@
 
 /** DomainOperatorParameter representation for JSON transfer. */
 class DomainOperatorParameter
-
 {
 public:
 	/** Constructor. */

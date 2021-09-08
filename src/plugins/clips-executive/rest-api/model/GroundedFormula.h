@@ -1,6 +1,6 @@
 
 /****************************************************************************
- *  ClipsExecutive -- Schema DomainPreconditionAtom
+ *  ClipsExecutive -- Schema GroundedFormula
  *  (auto-generated, do not modify directly)
  *
  *  CLIPS Executive REST API.
@@ -14,7 +14,7 @@
 #pragma once
 
 #define RAPIDJSON_HAS_STDSTRING 1
-#include "DomainPrecondition.h"
+#include "GroundedFormula.h"
 
 #include <rapidjson/fwd.h>
 
@@ -24,24 +24,23 @@
 #include <string>
 #include <vector>
 
-/** DomainPreconditionAtom representation for JSON transfer. */
-class DomainPreconditionAtom : public DomainPrecondition
-
+/** GroundedFormula representation for JSON transfer. */
+class GroundedFormula
 {
 public:
 	/** Constructor. */
-	DomainPreconditionAtom();
+	GroundedFormula();
 	/** Constructor from JSON.
 	 * @param json JSON string to initialize from
 	 */
-	DomainPreconditionAtom(const std::string &json);
+	GroundedFormula(const std::string &json);
 	/** Constructor from JSON.
 	 * @param v RapidJSON value object to initialize from.
 	 */
-	DomainPreconditionAtom(const rapidjson::Value &v);
+	GroundedFormula(const rapidjson::Value &v);
 
 	/** Destructor. */
-	virtual ~DomainPreconditionAtom();
+	virtual ~GroundedFormula();
 
 	/** Get version of implemented API.
 	 * @return string representation of version
@@ -85,25 +84,92 @@ public:
 	 */
 	virtual void validate(bool subcall = false) const;
 
-	// allOf
-	// Schema: DomainPreconditionAtom[2]
+	// Schema: GroundedFormula
 public:
-	/** Get predicate value.
-   * @return predicate value
+	/** Get kind value.
+   * @return kind value
    */
 	std::optional<std::string>
-	predicate() const
+	kind() const
 	{
-		return predicate_;
+		return kind_;
 	}
 
-	/** Set predicate value.
-	 * @param predicate new value
+	/** Set kind value.
+	 * @param kind new value
 	 */
 	void
-	set_predicate(const std::string &predicate)
+	set_kind(const std::string &kind)
 	{
-		predicate_ = predicate;
+		kind_ = kind;
+	}
+	/** Get apiVersion value.
+   * @return apiVersion value
+   */
+	std::optional<std::string>
+	apiVersion() const
+	{
+		return apiVersion_;
+	}
+
+	/** Set apiVersion value.
+	 * @param apiVersion new value
+	 */
+	void
+	set_apiVersion(const std::string &apiVersion)
+	{
+		apiVersion_ = apiVersion;
+	}
+	/** Get name value.
+   * @return name value
+   */
+	std::optional<std::string>
+	name() const
+	{
+		return name_;
+	}
+
+	/** Set name value.
+	 * @param name new value
+	 */
+	void
+	set_name(const std::string &name)
+	{
+		name_ = name;
+	}
+	/** Get type value.
+   * @return type value
+   */
+	std::optional<std::string>
+	type() const
+	{
+		return type_;
+	}
+
+	/** Set type value.
+	 * @param type new value
+	 */
+	void
+	set_type(const std::string &type)
+	{
+		type_ = type;
+	}
+	/** Get is-satisfied value.
+   * @return is-satisfied value
+   */
+	std::optional<bool>
+	is_satisfied() const
+	{
+		return is_satisfied_;
+	}
+
+	/** Set is-satisfied value.
+	 * @param is_satisfied new value
+	 */
+	void
+	set_is_satisfied(const bool &is_satisfied)
+	{
+		is_satisfied_ = is_satisfied;
 	}
 	/** Get param-names value.
    * @return param-names value
@@ -210,10 +276,58 @@ public:
 	{
 		param_constants_.push_back(param_constants);
 	}
+	/** Get child value.
+   * @return child value
+   */
+	std::vector<std::shared_ptr<GroundedFormula>>
+	child() const
+	{
+		return child_;
+	}
+
+	/** Set child value.
+	 * @param child new value
+	 */
+	void
+	set_child(const std::vector<std::shared_ptr<GroundedFormula>> &child)
+	{
+		child_ = child;
+	}
+	/** Add element to child array.
+	 * @param child new value
+	 */
+	void
+	addto_child(const std::shared_ptr<GroundedFormula> &&child)
+	{
+		child_.push_back(std::move(child));
+	}
+
+	/** Add element to child array.
+	 * The move-semantics version (std::move) should be preferred.
+	 * @param child new value
+	 */
+	void
+	addto_child(const std::shared_ptr<GroundedFormula> &child)
+	{
+		child_.push_back(child);
+	}
+	/** Add element to child array.
+	 * @param child new value
+	 */
+	void
+	addto_child(const GroundedFormula &&child)
+	{
+		child_.push_back(std::make_shared<GroundedFormula>(std::move(child)));
+	}
 
 private:
-	std::optional<std::string> predicate_;
-	std::vector<std::string>   param_names_;
-	std::vector<std::string>   param_values_;
-	std::vector<std::string>   param_constants_;
+	std::optional<std::string>                    kind_;
+	std::optional<std::string>                    apiVersion_;
+	std::optional<std::string>                    name_;
+	std::optional<std::string>                    type_;
+	std::optional<bool>                           is_satisfied_;
+	std::vector<std::string>                      param_names_;
+	std::vector<std::string>                      param_values_;
+	std::vector<std::string>                      param_constants_;
+	std::vector<std::shared_ptr<GroundedFormula>> child_;
 };

@@ -1,6 +1,6 @@
 
 /****************************************************************************
- *  DomainEffect
+ *  PDDLPredicate
  *  (auto-generated, do not modify directly)
  *
  *  CLIPS Executive REST API.
@@ -11,7 +11,7 @@
  *  API License: Apache 2.0
  ****************************************************************************/
 
-#include "DomainEffect.h"
+#include "PDDLPredicate.h"
 
 #include <rapidjson/document.h>
 #include <rapidjson/prettywriter.h>
@@ -21,26 +21,26 @@
 #include <numeric>
 #include <sstream>
 
-DomainEffect::DomainEffect()
+PDDLPredicate::PDDLPredicate()
 {
 }
 
-DomainEffect::DomainEffect(const std::string &json)
+PDDLPredicate::PDDLPredicate(const std::string &json)
 {
 	from_json(json);
 }
 
-DomainEffect::DomainEffect(const rapidjson::Value &v)
+PDDLPredicate::PDDLPredicate(const rapidjson::Value &v)
 {
 	from_json_value(v);
 }
 
-DomainEffect::~DomainEffect()
+PDDLPredicate::~PDDLPredicate()
 {
 }
 
 std::string
-DomainEffect::to_json(bool pretty) const
+PDDLPredicate::to_json(bool pretty) const
 {
 	rapidjson::Document d;
 
@@ -59,7 +59,7 @@ DomainEffect::to_json(bool pretty) const
 }
 
 void
-DomainEffect::to_json_value(rapidjson::Document &d, rapidjson::Value &v) const
+PDDLPredicate::to_json_value(rapidjson::Document &d, rapidjson::Value &v) const
 {
 	rapidjson::Document::AllocatorType &allocator = d.GetAllocator();
 	v.SetObject();
@@ -76,15 +76,15 @@ DomainEffect::to_json_value(rapidjson::Document &d, rapidjson::Value &v) const
 		v_apiVersion.SetString(*apiVersion_, allocator);
 		v.AddMember("apiVersion", v_apiVersion, allocator);
 	}
-	if (name_) {
-		rapidjson::Value v_name;
-		v_name.SetString(*name_, allocator);
-		v.AddMember("name", v_name, allocator);
+	if (id_) {
+		rapidjson::Value v_id;
+		v_id.SetString(*id_, allocator);
+		v.AddMember("id", v_id, allocator);
 	}
-	if (type_) {
-		rapidjson::Value v_type;
-		v_type.SetString(*type_, allocator);
-		v.AddMember("type", v_type, allocator);
+	if (part_of_) {
+		rapidjson::Value v_part_of;
+		v_part_of.SetString(*part_of_, allocator);
+		v.AddMember("part-of", v_part_of, allocator);
 	}
 	if (predicate_) {
 		rapidjson::Value v_predicate;
@@ -99,14 +99,6 @@ DomainEffect::to_json_value(rapidjson::Document &d, rapidjson::Value &v) const
 		v_param_names.PushBack(v, allocator);
 	}
 	v.AddMember("param-names", v_param_names, allocator);
-	rapidjson::Value v_param_values(rapidjson::kArrayType);
-	v_param_values.Reserve(param_values_.size(), allocator);
-	for (const auto &e : param_values_) {
-		rapidjson::Value v;
-		v.SetString(e, allocator);
-		v_param_values.PushBack(v, allocator);
-	}
-	v.AddMember("param-values", v_param_values, allocator);
 	rapidjson::Value v_param_constants(rapidjson::kArrayType);
 	v_param_constants.Reserve(param_constants_.size(), allocator);
 	for (const auto &e : param_constants_) {
@@ -118,7 +110,7 @@ DomainEffect::to_json_value(rapidjson::Document &d, rapidjson::Value &v) const
 }
 
 void
-DomainEffect::from_json(const std::string &json)
+PDDLPredicate::from_json(const std::string &json)
 {
 	rapidjson::Document d;
 	d.Parse(json);
@@ -127,7 +119,7 @@ DomainEffect::from_json(const std::string &json)
 }
 
 void
-DomainEffect::from_json_value(const rapidjson::Value &d)
+PDDLPredicate::from_json_value(const rapidjson::Value &d)
 {
 	if (d.HasMember("kind") && d["kind"].IsString()) {
 		kind_ = d["kind"].GetString();
@@ -135,11 +127,11 @@ DomainEffect::from_json_value(const rapidjson::Value &d)
 	if (d.HasMember("apiVersion") && d["apiVersion"].IsString()) {
 		apiVersion_ = d["apiVersion"].GetString();
 	}
-	if (d.HasMember("name") && d["name"].IsString()) {
-		name_ = d["name"].GetString();
+	if (d.HasMember("id") && d["id"].IsString()) {
+		id_ = d["id"].GetString();
 	}
-	if (d.HasMember("type") && d["type"].IsString()) {
-		type_ = d["type"].GetString();
+	if (d.HasMember("part-of") && d["part-of"].IsString()) {
+		part_of_ = d["part-of"].GetString();
 	}
 	if (d.HasMember("predicate") && d["predicate"].IsString()) {
 		predicate_ = d["predicate"].GetString();
@@ -151,15 +143,6 @@ DomainEffect::from_json_value(const rapidjson::Value &d)
 		param_names_.reserve(a.Size());
 		for (auto &v : a.GetArray()) {
 			param_names_.push_back(v.GetString());
-		}
-	}
-	if (d.HasMember("param-values") && d["param-values"].IsArray()) {
-		const rapidjson::Value &a = d["param-values"];
-		param_values_             = std::vector<std::string>{};
-
-		param_values_.reserve(a.Size());
-		for (auto &v : a.GetArray()) {
-			param_values_.push_back(v.GetString());
 		}
 	}
 	if (d.HasMember("param-constants") && d["param-constants"].IsArray()) {
@@ -174,7 +157,7 @@ DomainEffect::from_json_value(const rapidjson::Value &d)
 }
 
 void
-DomainEffect::validate(bool subcall) const
+PDDLPredicate::validate(bool subcall) const
 {
 	std::vector<std::string> missing;
 	if (!kind_) {
@@ -183,11 +166,11 @@ DomainEffect::validate(bool subcall) const
 	if (!apiVersion_) {
 		missing.push_back("apiVersion");
 	}
-	if (!name_) {
-		missing.push_back("name");
+	if (!id_) {
+		missing.push_back("id");
 	}
-	if (!type_) {
-		missing.push_back("type");
+	if (!part_of_) {
+		missing.push_back("part-of");
 	}
 	if (!predicate_) {
 		missing.push_back("predicate");
@@ -202,7 +185,7 @@ DomainEffect::validate(bool subcall) const
 			                  missing.end(),
 			                  missing.front(),
 			                  [](std::string &s, const std::string &n) { return s + ", " + n; });
-			throw std::runtime_error("DomainEffect is missing " + s);
+			throw std::runtime_error("PDDLPredicate is missing " + s);
 		}
 	}
 }

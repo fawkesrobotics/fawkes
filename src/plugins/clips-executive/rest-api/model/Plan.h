@@ -26,7 +26,6 @@
 
 /** Plan representation for JSON transfer. */
 class Plan
-
 {
 public:
 	/** Constructor. */

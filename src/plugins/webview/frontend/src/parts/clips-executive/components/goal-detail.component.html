@@ -37,7 +37,7 @@
 	</mat-card-title>
 	<mat-divider></mat-divider>
 	<mat-card-content class="ff-card-content">
-		<div *ngIf="goal; else nodata">		
+		<div *ngIf="goal; else nodata">
 			<div fxLayout="row wrap" fxLayoutWrap fxLayoutAlign="space-between">
 				<ff-property>
 					<div key>Class</div>
@@ -144,7 +144,7 @@
 				</ff-property>
 
 			</div>
-			
+
 		</div>
 		<ng-template #nodata>
 			<ff-list-zero-state [message]="zero_message_goal"></ff-list-zero-state>
@@ -175,7 +175,7 @@
 					<mat-tab *ngFor="let plan of plans">
 						<ng-template mat-tab-label>{{ plan.id }}</ng-template>
 						<mat-table #table [dataSource]="plan.actions">
-							
+
 							<!-- Action name -->
 							<ng-container matColumnDef="operator_name">
 								<mat-header-cell *matHeaderCellDef>Action</mat-header-cell>
@@ -199,17 +199,18 @@
 								<mat-header-cell *matHeaderCellDef>Preconditions</mat-header-cell>
 								<mat-cell *matCellDef="let action">
 									<div *ngFor="let p of format_preconditions(action)"
-											 [ngClass]="{'ff-success': p.cond['is-satisfied'], 'ff-error': !p.cond['is-satisfied']}">
+									        [ngClass]="{'ff-success': p.cond['is-satisfied'], 'ff-error': !p.cond['is-satisfied']}">
+
 										<ff-hspace [width]="p.width"></ff-hspace>
-										<ng-container *ngIf="p.cond.kind === 'DomainPreconditionCompound'">
+										<ng-container *ngIf="p.cond.kind === 'GroundedFormula'">
 											<ng-container [ngSwitch]="p.cond.type">
 												<ng-container *ngSwitchCase="'conjunction'">AND</ng-container>
 												<ng-container *ngSwitchCase="'disjunction'">OR</ng-container>
 												<ng-container *ngSwitchCase="'negation'">NOT</ng-container>
 											</ng-container>
 										</ng-container>
-										<ng-container *ngIf="p.cond.kind === 'DomainPreconditionAtom'">
-											({{ p.cond.predicate }} <ng-container *ngFor="let v of p.cond['param-values']">{{ v }}</ng-container>)
+										<ng-container *ngIf="p.cond.kind === 'GroundedPredicate'">
+											({{ p.cond.name }} <ng-container *ngFor="let v of p.cond['param-values']">{{ v }}&nbsp;</ng-container>)
 										</ng-container>
 									</div>
 								</mat-cell>

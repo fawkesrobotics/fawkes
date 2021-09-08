@@ -1,6 +1,6 @@
 
 /****************************************************************************
- *  DomainEffect
+ *  GroundedFormula
  *  (auto-generated, do not modify directly)
  *
  *  CLIPS Executive REST API.
@@ -11,7 +11,7 @@
  *  API License: Apache 2.0
  ****************************************************************************/
 
-#include "DomainEffect.h"
+#include "GroundedFormula.h"
 
 #include <rapidjson/document.h>
 #include <rapidjson/prettywriter.h>
@@ -21,26 +21,26 @@
 #include <numeric>
 #include <sstream>
 
-DomainEffect::DomainEffect()
+GroundedFormula::GroundedFormula()
 {
 }
 
-DomainEffect::DomainEffect(const std::string &json)
+GroundedFormula::GroundedFormula(const std::string &json)
 {
 	from_json(json);
 }
 
-DomainEffect::DomainEffect(const rapidjson::Value &v)
+GroundedFormula::GroundedFormula(const rapidjson::Value &v)
 {
 	from_json_value(v);
 }
 
-DomainEffect::~DomainEffect()
+GroundedFormula::~GroundedFormula()
 {
 }
 
 std::string
-DomainEffect::to_json(bool pretty) const
+GroundedFormula::to_json(bool pretty) const
 {
 	rapidjson::Document d;
 
@@ -59,7 +59,7 @@ DomainEffect::to_json(bool pretty) const
 }
 
 void
-DomainEffect::to_json_value(rapidjson::Document &d, rapidjson::Value &v) const
+GroundedFormula::to_json_value(rapidjson::Document &d, rapidjson::Value &v) const
 {
 	rapidjson::Document::AllocatorType &allocator = d.GetAllocator();
 	v.SetObject();
@@ -86,10 +86,10 @@ DomainEffect::to_json_value(rapidjson::Document &d, rapidjson::Value &v) const
 		v_type.SetString(*type_, allocator);
 		v.AddMember("type", v_type, allocator);
 	}
-	if (predicate_) {
-		rapidjson::Value v_predicate;
-		v_predicate.SetString(*predicate_, allocator);
-		v.AddMember("predicate", v_predicate, allocator);
+	if (is_satisfied_) {
+		rapidjson::Value v_is_satisfied;
+		v_is_satisfied.SetBool(*is_satisfied_);
+		v.AddMember("is-satisfied", v_is_satisfied, allocator);
 	}
 	rapidjson::Value v_param_names(rapidjson::kArrayType);
 	v_param_names.Reserve(param_names_.size(), allocator);
@@ -115,10 +115,18 @@ DomainEffect::to_json_value(rapidjson::Document &d, rapidjson::Value &v) const
 		v_param_constants.PushBack(v, allocator);
 	}
 	v.AddMember("param-constants", v_param_constants, allocator);
+	rapidjson::Value v_child(rapidjson::kArrayType);
+	v_child.Reserve(child_.size(), allocator);
+	for (const auto &e : child_) {
+		rapidjson::Value v(rapidjson::kObjectType);
+		e->to_json_value(d, v);
+		v_child.PushBack(v, allocator);
+	}
+	v.AddMember("child", v_child, allocator);
 }
 
 void
-DomainEffect::from_json(const std::string &json)
+GroundedFormula::from_json(const std::string &json)
 {
 	rapidjson::Document d;
 	d.Parse(json);
@@ -127,7 +135,7 @@ DomainEffect::from_json(const std::string &json)
 }
 
 void
-DomainEffect::from_json_value(const rapidjson::Value &d)
+GroundedFormula::from_json_value(const rapidjson::Value &d)
 {
 	if (d.HasMember("kind") && d["kind"].IsString()) {
 		kind_ = d["kind"].GetString();
@@ -141,8 +149,8 @@ DomainEffect::from_json_value(const rapidjson::Value &d)
 	if (d.HasMember("type") && d["type"].IsString()) {
 		type_ = d["type"].GetString();
 	}
-	if (d.HasMember("predicate") && d["predicate"].IsString()) {
-		predicate_ = d["predicate"].GetString();
+	if (d.HasMember("is-satisfied") && d["is-satisfied"].IsBool()) {
+		is_satisfied_ = d["is-satisfied"].GetBool();
 	}
 	if (d.HasMember("param-names") && d["param-names"].IsArray()) {
 		const rapidjson::Value &a = d["param-names"];
@@ -171,10 +179,21 @@ DomainEffect::from_json_value(const rapidjson::Value &d)
 			param_constants_.push_back(v.GetString());
 		}
 	}
+	if (d.HasMember("child") && d["child"].IsArray()) {
+		const rapidjson::Value &a = d["child"];
+		child_                    = std::vector<std::shared_ptr<GroundedFormula>>{};
+
+		child_.reserve(a.Size());
+		for (auto &v : a.GetArray()) {
+			std::shared_ptr<GroundedFormula> nv{new GroundedFormula()};
+			nv->from_json_value(v);
+			child_.push_back(std::move(nv));
+		}
+	}
 }
 
 void
-DomainEffect::validate(bool subcall) const
+GroundedFormula::validate(bool subcall) const
 {
 	std::vector<std::string> missing;
 	if (!kind_) {
@@ -189,8 +208,8 @@ DomainEffect::validate(bool subcall) const
 	if (!type_) {
 		missing.push_back("type");
 	}
-	if (!predicate_) {
-		missing.push_back("predicate");
+	if (!is_satisfied_) {
+		missing.push_back("is-satisfied");
 	}
 
 	if (!missing.empty()) {
@@ -202,7 +221,7 @@ DomainEffect::validate(bool subcall) const
 			                  missing.end(),
 			                  missing.front(),
 			                  [](std::string &s, const std::string &n) { return s + ", " + n; });
-			throw std::runtime_error("DomainEffect is missing " + s);
+			throw std::runtime_error("GroundedFormula is missing " + s);
 		}
 	}
 }

@@ -1,5 +1,5 @@
 /****************************************************************************
- *  ClipsExecutive -- Schema DomainPrecondition
+ *  ClipsExecutive -- Schema PDDLFormula
  *  (auto-generated, do not modify directly)
  *
  *  CLIPS Executive REST API.
@@ -12,17 +12,16 @@
 
 
 
-/** DomainPrecondition representation for JSON transfer. */
-export interface DomainPrecondition {
+/** PDDLFormula representation for JSON transfer. */
+export interface PDDLFormula {
   kind: string;
   apiVersion: string;
-  name: string;
-  type: DomainPrecondition.TypeEnum;
-  grounded: boolean;
-  is_satisfied: boolean;
+  id: string;
+  type: PDDLFormula.TypeEnum;
+  part_of: string;
 }
 
-export namespace DomainPrecondition {
+export namespace PDDLFormula {
   export const API_VERSION = 'v1beta1';
 
   // tslint:disable-next-line:max-line-length

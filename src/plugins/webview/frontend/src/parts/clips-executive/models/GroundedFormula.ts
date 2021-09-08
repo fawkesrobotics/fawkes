@@ -1,5 +1,5 @@
 /****************************************************************************
- *  ClipsExecutive -- Schema DomainPreconditionCompound
+ *  ClipsExecutive -- Schema GroundedFormula
  *  (auto-generated, do not modify directly)
  *
  *  CLIPS Executive REST API.
@@ -10,22 +10,21 @@
  *  API License: Apache 2.0
  ****************************************************************************/
 
-import { DomainPrecondition } from './DomainPrecondition';
-import { DomainPreconditionAtom } from './DomainPreconditionAtom';
 
-
-/** DomainPreconditionCompound representation for JSON transfer. */
-export interface DomainPreconditionCompound {
+/** GroundedFormula representation for JSON transfer. */
+export interface GroundedFormula {
   kind: string;
   apiVersion: string;
   name: string;
-  type: DomainPreconditionCompound.TypeEnum;
-  grounded: boolean;
+  type: GroundedFormula.TypeEnum;
   is_satisfied: boolean;
-  elements: Array<DomainPrecondition | DomainPreconditionAtom | DomainPreconditionCompound>;
+  param_names?: Array<string>;
+  param_values?: Array<string>;
+  param_constants?: Array<string>;
+  child?: Array<GroundedFormula>;
 }
 
-export namespace DomainPreconditionCompound {
+export namespace GroundedFormula {
   export const API_VERSION = 'v1beta1';
 
   // tslint:disable-next-line:max-line-length

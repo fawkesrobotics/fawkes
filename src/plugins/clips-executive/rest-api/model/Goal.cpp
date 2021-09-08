@@ -18,6 +18,7 @@
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
 
+#include <numeric>
 #include <sstream>
 
 Goal::Goal()
@@ -209,7 +210,7 @@ Goal::from_json_value(const rapidjson::Value &d)
 	if (d.HasMember("error") && d["error"].IsArray()) {
 		const rapidjson::Value &a = d["error"];
 		error_                    = std::vector<std::string>{};
-		;
+
 		error_.reserve(a.Size());
 		for (auto &v : a.GetArray()) {
 			error_.push_back(v.GetString());
@@ -227,7 +228,7 @@ Goal::from_json_value(const rapidjson::Value &d)
 	if (d.HasMember("parameters") && d["parameters"].IsArray()) {
 		const rapidjson::Value &a = d["parameters"];
 		parameters_               = std::vector<std::string>{};
-		;
+
 		parameters_.reserve(a.Size());
 		for (auto &v : a.GetArray()) {
 			parameters_.push_back(v.GetString());
@@ -236,7 +237,7 @@ Goal::from_json_value(const rapidjson::Value &d)
 	if (d.HasMember("meta") && d["meta"].IsArray()) {
 		const rapidjson::Value &a = d["meta"];
 		meta_                     = std::vector<std::string>{};
-		;
+
 		meta_.reserve(a.Size());
 		for (auto &v : a.GetArray()) {
 			meta_.push_back(v.GetString());
@@ -245,7 +246,7 @@ Goal::from_json_value(const rapidjson::Value &d)
 	if (d.HasMember("plans") && d["plans"].IsArray()) {
 		const rapidjson::Value &a = d["plans"];
 		plans_                    = std::vector<std::string>{};
-		;
+
 		plans_.reserve(a.Size());
 		for (auto &v : a.GetArray()) {
 			plans_.push_back(v.GetString());
@@ -254,7 +255,7 @@ Goal::from_json_value(const rapidjson::Value &d)
 	if (d.HasMember("required-resources") && d["required-resources"].IsArray()) {
 		const rapidjson::Value &a = d["required-resources"];
 		required_resources_       = std::vector<std::string>{};
-		;
+
 		required_resources_.reserve(a.Size());
 		for (auto &v : a.GetArray()) {
 			required_resources_.push_back(v.GetString());
@@ -263,7 +264,7 @@ Goal::from_json_value(const rapidjson::Value &d)
 	if (d.HasMember("acquired-resources") && d["acquired-resources"].IsArray()) {
 		const rapidjson::Value &a = d["acquired-resources"];
 		acquired_resources_       = std::vector<std::string>{};
-		;
+
 		acquired_resources_.reserve(a.Size());
 		for (auto &v : a.GetArray()) {
 			acquired_resources_.push_back(v.GetString());
@@ -275,32 +276,35 @@ void
 Goal::validate(bool subcall) const
 {
 	std::vector<std::string> missing;
-	if (!kind_)
+	if (!kind_) {
 		missing.push_back("kind");
-	if (!apiVersion_)
+	}
+	if (!apiVersion_) {
 		missing.push_back("apiVersion");
-	if (!id_)
+	}
+	if (!id_) {
 		missing.push_back("id");
-	if (!type_)
+	}
+	if (!type_) {
 		missing.push_back("type");
-	if (!_class_)
+	}
+	if (!_class_) {
 		missing.push_back("class");
-	if (!mode_)
+	}
+	if (!mode_) {
 		missing.push_back("mode");
+	}
 
 	if (!missing.empty()) {
 		if (subcall) {
 			throw missing;
 		} else {
-			std::ostringstream s;
-			s << "Goal is missing field" << ((missing.size() > 0) ? "s" : "") << ": ";
-			for (std::vector<std::string>::size_type i = 0; i < missing.size(); ++i) {
-				s << missing[i];
-				if (i < (missing.size() - 1)) {
-					s << ", ";
-				}
-			}
-			throw std::runtime_error(s.str());
+			std::string s =
+			  std::accumulate(std::next(missing.begin()),
+			                  missing.end(),
+			                  missing.front(),
+			                  [](std::string &s, const std::string &n) { return s + ", " + n; });
+			throw std::runtime_error("Goal is missing " + s);
 		}
 	}
 }

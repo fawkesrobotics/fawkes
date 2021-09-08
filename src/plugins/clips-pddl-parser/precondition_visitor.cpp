@@ -81,8 +81,9 @@ PreconditionToCLIPSFactVisitor::operator()(Predicate &p) const
 		} else if (p.function == "not") {
 			type = "negation";
 		}
-		res.push_back(string("(domain-precondition"
-		                     " (name "
+
+		res.push_back(string("(pddl-formula"
+		                     " (id "
 		                     + name
 		                     + ")"
 		                       " (part-of "
@@ -106,11 +107,11 @@ PreconditionToCLIPSFactVisitor::operator()(Predicate &p) const
 			// Special case: this is the main precondition, but it's an atomic
 			// condition. Add an additional condition so we never have an atomic
 			// precondition as the main precondition.
-			res.push_back(string("(domain-precondition"
+			res.push_back(string("(pddl-formula"
 			                     " (part-of "
 			                     + parent_
 			                     + ")"
-			                       " (name "
+			                       " (id "
 			                     + name
 			                     + ")"
 			                       " (type conjunction)"
@@ -146,18 +147,29 @@ PreconditionToCLIPSFactVisitor::operator()(Predicate &p) const
 			}
 		}
 		string predicate_string;
+		string predicate_string_new;
 		if (p.function == "=") {
 			// It's not a predicate but an equality.
-			predicate_string = " (equality TRUE)";
+			predicate_string = " (predicate EQUALITY)";
 		} else {
 			predicate_string = " (predicate " + p.function + ")";
 		}
-
-		res.push_back(string("(domain-atomic-precondition"
+		// create parent atomic formula for predicate
+		res.push_back(string("(pddl-formula"
 		                     " (part-of "
 		                     + new_parent
 		                     + ")"
-		                       " (name "
+		                       " (id "
+		                     + name + "-atom"
+		                     + ")"
+		                       " (type atom)"
+		                       ")"));
+
+		res.push_back(string("(pddl-predicate"
+		                     " (part-of "
+		                     + name + "-atom"
+		                     + ")"
+		                       " (id "
 		                     + name + ")" + predicate_string + " (param-names (create$" + params
 		                     + "))"
 		                       " (param-constants (create$"

@@ -18,6 +18,7 @@
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
 
+#include <numeric>
 #include <sstream>
 
 Plan::Plan()
@@ -130,7 +131,7 @@ Plan::from_json_value(const rapidjson::Value &d)
 	if (d.HasMember("actions") && d["actions"].IsArray()) {
 		const rapidjson::Value &a = d["actions"];
 		actions_                  = std::vector<std::shared_ptr<PlanAction>>{};
-		;
+
 		actions_.reserve(a.Size());
 		for (auto &v : a.GetArray()) {
 			std::shared_ptr<PlanAction> nv{new PlanAction()};
@@ -144,14 +145,18 @@ void
 Plan::validate(bool subcall) const
 {
 	std::vector<std::string> missing;
-	if (!kind_)
+	if (!kind_) {
 		missing.push_back("kind");
-	if (!apiVersion_)
+	}
+	if (!apiVersion_) {
 		missing.push_back("apiVersion");
-	if (!id_)
+	}
+	if (!id_) {
 		missing.push_back("id");
-	if (!goal_id_)
+	}
+	if (!goal_id_) {
 		missing.push_back("goal-id");
+	}
 	for (size_t i = 0; i < actions_.size(); ++i) {
 		if (!actions_[i]) {
 			missing.push_back("actions[" + std::to_string(i) + "]");
@@ -170,15 +175,12 @@ Plan::validate(bool subcall) const
 		if (subcall) {
 			throw missing;
 		} else {
-			std::ostringstream s;
-			s << "Plan is missing field" << ((missing.size() > 0) ? "s" : "") << ": ";
-			for (std::vector<std::string>::size_type i = 0; i < missing.size(); ++i) {
-				s << missing[i];
-				if (i < (missing.size() - 1)) {
-					s << ", ";
-				}
-			}
-			throw std::runtime_error(s.str());
+			std::string s =
+			  std::accumulate(std::next(missing.begin()),
+			                  missing.end(),
+			                  missing.front(),
+			                  [](std::string &s, const std::string &n) { return s + ", " + n; });
+			throw std::runtime_error("Plan is missing " + s);
 		}
 	}
 }

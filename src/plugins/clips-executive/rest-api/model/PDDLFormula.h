@@ -1,6 +1,6 @@
 
 /****************************************************************************
- *  ClipsExecutive -- Schema DomainPreconditionCompound
+ *  ClipsExecutive -- Schema PDDLFormula
  *  (auto-generated, do not modify directly)
  *
  *  CLIPS Executive REST API.
@@ -14,7 +14,6 @@
 #pragma once
 
 #define RAPIDJSON_HAS_STDSTRING 1
-#include "DomainPrecondition.h"
 
 #include <rapidjson/fwd.h>
 
@@ -24,24 +23,23 @@
 #include <string>
 #include <vector>
 
-/** DomainPreconditionCompound representation for JSON transfer. */
-class DomainPreconditionCompound : public DomainPrecondition
-
+/** PDDLFormula representation for JSON transfer. */
+class PDDLFormula
 {
 public:
 	/** Constructor. */
-	DomainPreconditionCompound();
+	PDDLFormula();
 	/** Constructor from JSON.
 	 * @param json JSON string to initialize from
 	 */
-	DomainPreconditionCompound(const std::string &json);
+	PDDLFormula(const std::string &json);
 	/** Constructor from JSON.
 	 * @param v RapidJSON value object to initialize from.
 	 */
-	DomainPreconditionCompound(const rapidjson::Value &v);
+	PDDLFormula(const rapidjson::Value &v);
 
 	/** Destructor. */
-	virtual ~DomainPreconditionCompound();
+	virtual ~PDDLFormula();
 
 	/** Get version of implemented API.
 	 * @return string representation of version
@@ -85,53 +83,98 @@ public:
 	 */
 	virtual void validate(bool subcall = false) const;
 
-	// allOf
-	// Schema: DomainPreconditionCompound[2]
+	// Schema: PDDLFormula
 public:
-	/** Get elements value.
-   * @return elements value
+	/** Get kind value.
+   * @return kind value
    */
-	std::vector<std::shared_ptr<DomainPrecondition>>
-	elements() const
+	std::optional<std::string>
+	kind() const
 	{
-		return elements_;
+		return kind_;
 	}
 
-	/** Set elements value.
-	 * @param elements new value
+	/** Set kind value.
+	 * @param kind new value
 	 */
 	void
-	set_elements(const std::vector<std::shared_ptr<DomainPrecondition>> &elements)
+	set_kind(const std::string &kind)
 	{
-		elements_ = elements;
+		kind_ = kind;
 	}
-	/** Add element to elements array.
-	 * @param elements new value
-	 */
-	void
-	addto_elements(const std::shared_ptr<DomainPrecondition> &&elements)
+	/** Get apiVersion value.
+   * @return apiVersion value
+   */
+	std::optional<std::string>
+	apiVersion() const
 	{
-		elements_.push_back(std::move(elements));
+		return apiVersion_;
 	}
 
-	/** Add element to elements array.
-	 * The move-semantics version (std::move) should be preferred.
-	 * @param elements new value
+	/** Set apiVersion value.
+	 * @param apiVersion new value
 	 */
 	void
-	addto_elements(const std::shared_ptr<DomainPrecondition> &elements)
+	set_apiVersion(const std::string &apiVersion)
 	{
-		elements_.push_back(elements);
+		apiVersion_ = apiVersion;
 	}
-	/** Add element to elements array.
-	 * @param elements new value
+	/** Get id value.
+   * @return id value
+   */
+	std::optional<std::string>
+	id() const
+	{
+		return id_;
+	}
+
+	/** Set id value.
+	 * @param id new value
 	 */
 	void
-	addto_elements(const DomainPrecondition &&elements)
+	set_id(const std::string &id)
 	{
-		elements_.push_back(std::make_shared<DomainPrecondition>(std::move(elements)));
+		id_ = id;
+	}
+	/** Get type value.
+   * @return type value
+   */
+	std::optional<std::string>
+	type() const
+	{
+		return type_;
+	}
+
+	/** Set type value.
+	 * @param type new value
+	 */
+	void
+	set_type(const std::string &type)
+	{
+		type_ = type;
+	}
+	/** Get part-of value.
+   * @return part-of value
+   */
+	std::optional<std::string>
+	part_of() const
+	{
+		return part_of_;
+	}
+
+	/** Set part-of value.
+	 * @param part_of new value
+	 */
+	void
+	set_part_of(const std::string &part_of)
+	{
+		part_of_ = part_of;
 	}
 
 private:
-	std::vector<std::shared_ptr<DomainPrecondition>> elements_;
+	std::optional<std::string> kind_;
+	std::optional<std::string> apiVersion_;
+	std::optional<std::string> id_;
+	std::optional<std::string> type_;
+	std::optional<std::string> part_of_;
 };

@@ -16,7 +16,8 @@
 #define RAPIDJSON_HAS_STDSTRING 1
 #include "DomainEffect.h"
 #include "DomainOperator.h"
-#include "DomainPrecondition.h"
+#include "GroundedFormula.h"
+#include "PDDLGrounding.h"
 
 #include <rapidjson/fwd.h>
 
@@ -28,7 +29,6 @@
 
 /** PlanAction representation for JSON transfer. */
 class PlanAction
-
 {
 public:
 	/** Constructor. */
@@ -277,48 +277,22 @@ public:
 	{
 		_operator_ = _operator;
 	}
-	/** Get preconditions value.
-   * @return preconditions value
+	/** Get precondition value.
+   * @return precondition value
    */
-	std::vector<std::shared_ptr<DomainPrecondition>>
-	preconditions() const
+	std::shared_ptr<PDDLGrounding>
+	precondition() const
 	{
-		return preconditions_;
+		return precondition_;
 	}
 
-	/** Set preconditions value.
-	 * @param preconditions new value
+	/** Set precondition value.
+	 * @param precondition new value
 	 */
 	void
-	set_preconditions(const std::vector<std::shared_ptr<DomainPrecondition>> &preconditions)
+	set_precondition(const std::shared_ptr<PDDLGrounding> &precondition)
 	{
-		preconditions_ = preconditions;
-	}
-	/** Add element to preconditions array.
-	 * @param preconditions new value
-	 */
-	void
-	addto_preconditions(const std::shared_ptr<DomainPrecondition> &&preconditions)
-	{
-		preconditions_.push_back(std::move(preconditions));
-	}
-
-	/** Add element to preconditions array.
-	 * The move-semantics version (std::move) should be preferred.
-	 * @param preconditions new value
-	 */
-	void
-	addto_preconditions(const std::shared_ptr<DomainPrecondition> &preconditions)
-	{
-		preconditions_.push_back(preconditions);
-	}
-	/** Add element to preconditions array.
-	 * @param preconditions new value
-	 */
-	void
-	addto_preconditions(const DomainPrecondition &&preconditions)
-	{
-		preconditions_.push_back(std::make_shared<DomainPrecondition>(std::move(preconditions)));
+		precondition_ = precondition;
 	}
 	/** Get effects value.
    * @return effects value
@@ -363,18 +337,36 @@ public:
 	{
 		effects_.push_back(std::make_shared<DomainEffect>(std::move(effects)));
 	}
+	/** Get preconditions value.
+   * @return preconditions value
+   */
+	std::shared_ptr<GroundedFormula>
+	preconditions() const
+	{
+		return preconditions_;
+	}
+
+	/** Set preconditions value.
+	 * @param preconditions new value
+	 */
+	void
+	set_preconditions(const std::shared_ptr<GroundedFormula> &preconditions)
+	{
+		preconditions_ = preconditions;
+	}
 
 private:
-	std::optional<std::string>                       kind_;
-	std::optional<std::string>                       apiVersion_;
-	std::optional<int64_t>                           id_;
-	std::optional<std::string>                       operator_name_;
-	std::vector<std::string>                         param_values_;
-	std::optional<float>                             duration_;
-	std::optional<float>                             dispatch_time_;
-	std::optional<std::string>                       state_;
-	std::optional<bool>                              executable_;
-	std::shared_ptr<DomainOperator>                  _operator_;
-	std::vector<std::shared_ptr<DomainPrecondition>> preconditions_;
-	std::vector<std::shared_ptr<DomainEffect>>       effects_;
+	std::optional<std::string>                 kind_;
+	std::optional<std::string>                 apiVersion_;
+	std::optional<int64_t>                     id_;
+	std::optional<std::string>                 operator_name_;
+	std::vector<std::string>                   param_values_;
+	std::optional<float>                       duration_;
+	std::optional<float>                       dispatch_time_;
+	std::optional<std::string>                 state_;
+	std::optional<bool>                        executable_;
+	std::shared_ptr<DomainOperator>            _operator_;
+	std::shared_ptr<PDDLGrounding>             precondition_;
+	std::vector<std::shared_ptr<DomainEffect>> effects_;
+	std::shared_ptr<GroundedFormula>           preconditions_;
 };

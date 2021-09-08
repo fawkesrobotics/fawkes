@@ -1,6 +1,6 @@
 
 /****************************************************************************
- *  ClipsExecutive -- Schema DomainObjectType
+ *  ClipsExecutive -- Schema PDDLGrounding
  *  (auto-generated, do not modify directly)
  *
  *  CLIPS Executive REST API.
@@ -23,23 +23,23 @@
 #include <string>
 #include <vector>
 
-/** DomainObjectType representation for JSON transfer. */
-class DomainObjectType
+/** PDDLGrounding representation for JSON transfer. */
+class PDDLGrounding
 {
 public:
 	/** Constructor. */
-	DomainObjectType();
+	PDDLGrounding();
 	/** Constructor from JSON.
 	 * @param json JSON string to initialize from
 	 */
-	DomainObjectType(const std::string &json);
+	PDDLGrounding(const std::string &json);
 	/** Constructor from JSON.
 	 * @param v RapidJSON value object to initialize from.
 	 */
-	DomainObjectType(const rapidjson::Value &v);
+	PDDLGrounding(const rapidjson::Value &v);
 
 	/** Destructor. */
-	virtual ~DomainObjectType();
+	virtual ~PDDLGrounding();
 
 	/** Get version of implemented API.
 	 * @return string representation of version
@@ -83,7 +83,7 @@ public:
 	 */
 	virtual void validate(bool subcall = false) const;
 
-	// Schema: DomainObjectType
+	// Schema: PDDLGrounding
 public:
 	/** Get kind value.
    * @return kind value
@@ -119,44 +119,98 @@ public:
 	{
 		apiVersion_ = apiVersion;
 	}
-	/** Get name value.
-   * @return name value
+	/** Get id value.
+   * @return id value
    */
 	std::optional<std::string>
-	name() const
+	id() const
 	{
-		return name_;
+		return id_;
 	}
 
-	/** Set name value.
-	 * @param name new value
+	/** Set id value.
+	 * @param id new value
 	 */
 	void
-	set_name(const std::string &name)
+	set_id(const std::string &id)
 	{
-		name_ = name;
+		id_ = id;
 	}
-	/** Get super-type value.
-   * @return super-type value
+	/** Get param-names value.
+   * @return param-names value
    */
-	std::optional<std::string>
-	super_type() const
+	std::vector<std::string>
+	param_names() const
 	{
-		return super_type_;
+		return param_names_;
 	}
 
-	/** Set super-type value.
-	 * @param super_type new value
+	/** Set param-names value.
+	 * @param param_names new value
 	 */
 	void
-	set_super_type(const std::string &super_type)
+	set_param_names(const std::vector<std::string> &param_names)
 	{
-		super_type_ = super_type;
+		param_names_ = param_names;
+	}
+	/** Add element to param-names array.
+	 * @param param_names new value
+	 */
+	void
+	addto_param_names(const std::string &&param_names)
+	{
+		param_names_.push_back(std::move(param_names));
+	}
+
+	/** Add element to param-names array.
+	 * The move-semantics version (std::move) should be preferred.
+	 * @param param_names new value
+	 */
+	void
+	addto_param_names(const std::string &param_names)
+	{
+		param_names_.push_back(param_names);
+	}
+	/** Get param-values value.
+   * @return param-values value
+   */
+	std::vector<std::string>
+	param_values() const
+	{
+		return param_values_;
+	}
+
+	/** Set param-values value.
+	 * @param param_values new value
+	 */
+	void
+	set_param_values(const std::vector<std::string> &param_values)
+	{
+		param_values_ = param_values;
+	}
+	/** Add element to param-values array.
+	 * @param param_values new value
+	 */
+	void
+	addto_param_values(const std::string &&param_values)
+	{
+		param_values_.push_back(std::move(param_values));
+	}
+
+	/** Add element to param-values array.
+	 * The move-semantics version (std::move) should be preferred.
+	 * @param param_values new value
+	 */
+	void
+	addto_param_values(const std::string &param_values)
+	{
+		param_values_.push_back(param_values);
 	}
 
 private:
 	std::optional<std::string> kind_;
 	std::optional<std::string> apiVersion_;
-	std::optional<std::string> name_;
-	std::optional<std::string> super_type_;
+	std::optional<std::string> id_;
+	std::vector<std::string>   param_names_;
+	std::vector<std::string>   param_values_;
 };

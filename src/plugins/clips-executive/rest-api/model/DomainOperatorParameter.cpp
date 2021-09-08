@@ -18,6 +18,7 @@
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
 
+#include <numeric>
 #include <sstream>
 
 DomainOperatorParameter::DomainOperatorParameter()
@@ -101,24 +102,23 @@ void
 DomainOperatorParameter::validate(bool subcall) const
 {
 	std::vector<std::string> missing;
-	if (!name_)
+	if (!name_) {
 		missing.push_back("name");
-	if (!type_)
+	}
+	if (!type_) {
 		missing.push_back("type");
+	}
 
 	if (!missing.empty()) {
 		if (subcall) {
 			throw missing;
 		} else {
-			std::ostringstream s;
-			s << "DomainOperatorParameter is missing field" << ((missing.size() > 0) ? "s" : "") << ": ";
-			for (std::vector<std::string>::size_type i = 0; i < missing.size(); ++i) {
-				s << missing[i];
-				if (i < (missing.size() - 1)) {
-					s << ", ";
-				}
-			}
-			throw std::runtime_error(s.str());
+			std::string s =
+			  std::accumulate(std::next(missing.begin()),
+			                  missing.end(),
+			                  missing.front(),
+			                  [](std::string &s, const std::string &n) { return s + ", " + n; });
+			throw std::runtime_error("DomainOperatorParameter is missing " + s);
 		}
 	}
 }

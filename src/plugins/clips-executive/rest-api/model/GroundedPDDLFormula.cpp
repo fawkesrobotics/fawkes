@@ -1,6 +1,6 @@
 
 /****************************************************************************
- *  DomainObjectType
+ *  GroundedPDDLFormula
  *  (auto-generated, do not modify directly)
  *
  *  CLIPS Executive REST API.
@@ -11,7 +11,7 @@
  *  API License: Apache 2.0
  ****************************************************************************/
 
-#include "DomainObjectType.h"
+#include "GroundedPDDLFormula.h"
 
 #include <rapidjson/document.h>
 #include <rapidjson/prettywriter.h>
@@ -21,26 +21,26 @@
 #include <numeric>
 #include <sstream>
 
-DomainObjectType::DomainObjectType()
+GroundedPDDLFormula::GroundedPDDLFormula()
 {
 }
 
-DomainObjectType::DomainObjectType(const std::string &json)
+GroundedPDDLFormula::GroundedPDDLFormula(const std::string &json)
 {
 	from_json(json);
 }
 
-DomainObjectType::DomainObjectType(const rapidjson::Value &v)
+GroundedPDDLFormula::GroundedPDDLFormula(const rapidjson::Value &v)
 {
 	from_json_value(v);
 }
 
-DomainObjectType::~DomainObjectType()
+GroundedPDDLFormula::~GroundedPDDLFormula()
 {
 }
 
 std::string
-DomainObjectType::to_json(bool pretty) const
+GroundedPDDLFormula::to_json(bool pretty) const
 {
 	rapidjson::Document d;
 
@@ -59,7 +59,7 @@ DomainObjectType::to_json(bool pretty) const
 }
 
 void
-DomainObjectType::to_json_value(rapidjson::Document &d, rapidjson::Value &v) const
+GroundedPDDLFormula::to_json_value(rapidjson::Document &d, rapidjson::Value &v) const
 {
 	rapidjson::Document::AllocatorType &allocator = d.GetAllocator();
 	v.SetObject();
@@ -76,20 +76,30 @@ DomainObjectType::to_json_value(rapidjson::Document &d, rapidjson::Value &v) con
 		v_apiVersion.SetString(*apiVersion_, allocator);
 		v.AddMember("apiVersion", v_apiVersion, allocator);
 	}
-	if (name_) {
-		rapidjson::Value v_name;
-		v_name.SetString(*name_, allocator);
-		v.AddMember("name", v_name, allocator);
+	if (id_) {
+		rapidjson::Value v_id;
+		v_id.SetString(*id_, allocator);
+		v.AddMember("id", v_id, allocator);
 	}
-	if (super_type_) {
-		rapidjson::Value v_super_type;
-		v_super_type.SetString(*super_type_, allocator);
-		v.AddMember("super-type", v_super_type, allocator);
+	if (formula_id_) {
+		rapidjson::Value v_formula_id;
+		v_formula_id.SetString(*formula_id_, allocator);
+		v.AddMember("formula-id", v_formula_id, allocator);
+	}
+	if (grounding_) {
+		rapidjson::Value v_grounding;
+		v_grounding.SetString(*grounding_, allocator);
+		v.AddMember("grounding", v_grounding, allocator);
+	}
+	if (is_satisfied_) {
+		rapidjson::Value v_is_satisfied;
+		v_is_satisfied.SetBool(*is_satisfied_);
+		v.AddMember("is-satisfied", v_is_satisfied, allocator);
 	}
 }
 
 void
-DomainObjectType::from_json(const std::string &json)
+GroundedPDDLFormula::from_json(const std::string &json)
 {
 	rapidjson::Document d;
 	d.Parse(json);
@@ -98,7 +108,7 @@ DomainObjectType::from_json(const std::string &json)
 }
 
 void
-DomainObjectType::from_json_value(const rapidjson::Value &d)
+GroundedPDDLFormula::from_json_value(const rapidjson::Value &d)
 {
 	if (d.HasMember("kind") && d["kind"].IsString()) {
 		kind_ = d["kind"].GetString();
@@ -106,16 +116,22 @@ DomainObjectType::from_json_value(const rapidjson::Value &d)
 	if (d.HasMember("apiVersion") && d["apiVersion"].IsString()) {
 		apiVersion_ = d["apiVersion"].GetString();
 	}
-	if (d.HasMember("name") && d["name"].IsString()) {
-		name_ = d["name"].GetString();
+	if (d.HasMember("id") && d["id"].IsString()) {
+		id_ = d["id"].GetString();
 	}
-	if (d.HasMember("super-type") && d["super-type"].IsString()) {
-		super_type_ = d["super-type"].GetString();
+	if (d.HasMember("formula-id") && d["formula-id"].IsString()) {
+		formula_id_ = d["formula-id"].GetString();
+	}
+	if (d.HasMember("grounding") && d["grounding"].IsString()) {
+		grounding_ = d["grounding"].GetString();
+	}
+	if (d.HasMember("is-satisfied") && d["is-satisfied"].IsBool()) {
+		is_satisfied_ = d["is-satisfied"].GetBool();
 	}
 }
 
 void
-DomainObjectType::validate(bool subcall) const
+GroundedPDDLFormula::validate(bool subcall) const
 {
 	std::vector<std::string> missing;
 	if (!kind_) {
@@ -124,11 +140,17 @@ DomainObjectType::validate(bool subcall) const
 	if (!apiVersion_) {
 		missing.push_back("apiVersion");
 	}
-	if (!name_) {
-		missing.push_back("name");
+	if (!id_) {
+		missing.push_back("id");
 	}
-	if (!super_type_) {
-		missing.push_back("super-type");
+	if (!formula_id_) {
+		missing.push_back("formula-id");
+	}
+	if (!grounding_) {
+		missing.push_back("grounding");
+	}
+	if (!is_satisfied_) {
+		missing.push_back("is-satisfied");
 	}
 
 	if (!missing.empty()) {
@@ -140,7 +162,7 @@ DomainObjectType::validate(bool subcall) const
 			                  missing.end(),
 			                  missing.front(),
 			                  [](std::string &s, const std::string &n) { return s + ", " + n; });
-			throw std::runtime_error("DomainObjectType is missing " + s);
+			throw std::runtime_error("GroundedPDDLFormula is missing " + s);
 		}
 	}
 }
