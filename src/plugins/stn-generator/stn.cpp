@@ -103,14 +103,17 @@ Stn::read_initial_state(const std::string &pddl_problem_string)
 	for (pddl_parser::Expression pred : prob.init) {
 		std::vector<std::string> attrs;
 		std::string              log_string = "Adding init-predicate "
-		                         + boost::get<pddl_parser::Predicate>(pred).function
+		                         + boost::get<pddl_parser::Predicate>(pred.expression).function
 		                         + " with arguments:";
-		for (pddl_parser::Expression a : boost::get<pddl_parser::Predicate>(pred).arguments) {
-			attrs.push_back(boost::get<pddl_parser::Atom>(a));
-			log_string += " " + boost::get<pddl_parser::Atom>(a);
+		for (pddl_parser::Expression a :
+		     boost::get<pddl_parser::Predicate>(pred.expression).arguments) {
+			attrs.push_back(boost::get<pddl_parser::Atom>(a.expression));
+			log_string += " " + boost::get<pddl_parser::Atom>(a.expression);
 		}
 		log_info(log_string);
-		stn::Predicate init_pred(boost::get<pddl_parser::Predicate>(pred).function, true, attrs);
+		stn::Predicate init_pred(boost::get<pddl_parser::Predicate>(pred.expression).function,
+		                         true,
+		                         attrs);
 		init_predicates.push_back(init_pred);
 	}
 	stn::StnAction init_action(prob.name, {}, init_predicates, std::string(""));
@@ -141,14 +144,14 @@ Stn::set_pddl_domain(const std::string &pddl_domain_string)
 		build_pred_list(action.precondition, &preconds, true);
 		std::vector<Predicate> effects;
 		build_pred_list(action.effect, &effects, true);
-		int                      duration = action.duration;
+		int duration = (int)std::stof(boost::get<pddl_parser::Atom>(action.duration.expression));
 		std::vector<std::string> cond_breakups;
-		log_info(std::to_string(action.cond_breakup.which()));
-		if (action.cond_breakup.which() == 1) { // only if type is Expression
+		log_info(std::to_string(action.cond_breakup.expression.which()));
+		if (action.cond_breakup.expression.which() == 1) { // only if type is Expression
 			build_breakup_list(action.cond_breakup, &cond_breakups);
 		}
 		std::vector<std::string> temp_breakups;
-		if (action.temp_breakup.which() == 1) { // only if type is Expression
+		if (action.temp_breakup.expression.which() == 1) { // only if type is Expression
 			build_breakup_list(action.temp_breakup, &temp_breakups);
 		}
 		DomainAction da(action.name, params, preconds, effects, duration, cond_breakups, temp_breakups);
@@ -169,36 +172,36 @@ Stn::set_pddl_domain(const std::string &pddl_domain_string)
 void
 Stn::build_pred_list(pddl_parser::Expression e, std::vector<Predicate> *preconds, bool condition)
 {
-	pddl_parser::Atom function = boost::get<pddl_parser::Predicate>(e).function;
+	pddl_parser::Atom function = boost::get<pddl_parser::Predicate>(e.expression).function;
 	if (function == "and" || function == "not") {
 		if (function == "not") {
 			condition = !condition;
 		}
-		for (auto &child : boost::get<pddl_parser::Predicate>(e).arguments) {
+		for (auto &child : boost::get<pddl_parser::Predicate>(e.expression).arguments) {
 			build_pred_list(child, preconds, condition);
 		}
 	} else {
 		std::vector<std::string> args;
-		for (auto &arg : boost::get<pddl_parser::Predicate>(e).arguments) {
-			args.push_back(boost::get<std::string>(arg));
+		for (auto &arg : boost::get<pddl_parser::Predicate>(e.expression).arguments) {
+			args.push_back(boost::get<std::string>(arg.expression));
 		}
-		Predicate p(boost::get<pddl_parser::Predicate>(e).function, condition, args);
+		Predicate p(boost::get<pddl_parser::Predicate>(e.expression).function, condition, args);
 		preconds->push_back(p);
-		log_info("Added " + boost::get<pddl_parser::Predicate>(e).function);
+		log_info("Added " + boost::get<pddl_parser::Predicate>(e.expression).function);
 	}
 }
 
 void
 Stn::build_breakup_list(pddl_parser::Expression e, std::vector<std::string> *breakups)
 {
-	pddl_parser::Atom function = boost::get<pddl_parser::Predicate>(e).function;
+	pddl_parser::Atom function = boost::get<pddl_parser::Predicate>(e.expression).function;
 	// ignore negations, we only take the name into account
 	if (function == "and" || function == "not") {
-		for (auto &child : boost::get<pddl_parser::Predicate>(e).arguments) {
+		for (auto &child : boost::get<pddl_parser::Predicate>(e.expression).arguments) {
 			build_breakup_list(child, breakups);
 		}
 	} else {
-		std::string pred_name = boost::get<pddl_parser::Predicate>(e).function;
+		std::string pred_name = boost::get<pddl_parser::Predicate>(e.expression).function;
 		std::cout << "Adding breakup " << pred_name << std::endl;
 		breakups->push_back(pred_name);
 	}
@@ -487,21 +490,21 @@ Stn::generate_classic_pddl_domain(pddl_parser::Domain *dom, const std::string &c
 void
 Stn::output_pred_list(pddl_parser::Expression e, std::ofstream &out)
 {
-	pddl_parser::Atom function = boost::get<pddl_parser::Predicate>(e).function;
+	pddl_parser::Atom function = boost::get<pddl_parser::Predicate>(e.expression).function;
 	if (function == "not" || function == "and") {
 		if (function == "not") {
 			out << "(not ";
 		} else if (function == "and") {
 			out << "(and ";
 		}
-		for (auto &child : boost::get<pddl_parser::Predicate>(e).arguments) {
+		for (auto &child : boost::get<pddl_parser::Predicate>(e.expression).arguments) {
 			output_pred_list(child, out);
 		}
 		out << ") ";
 	} else {
-		out << "(" << boost::get<pddl_parser::Predicate>(e).function;
-		for (auto &arg : boost::get<pddl_parser::Predicate>(e).arguments) {
-			out << " " << boost::get<std::string>(arg);
+		out << "(" << boost::get<pddl_parser::Predicate>(e.expression).function;
+		for (auto &arg : boost::get<pddl_parser::Predicate>(e.expression).arguments) {
+			out << " " << boost::get<std::string>(arg.expression);
 		}
 		out << ")";
 	}

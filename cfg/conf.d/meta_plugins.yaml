@@ -7,3 +7,24 @@ fawkes/meta_plugins:
 
   # Meta plugin with useful base plugins for the Robotino
   robotino_default: robotino,joystick,robotino-joystick,webview
+
+  # Meta plugin for the clips-executive without planner integration
+  clips-executive:
+    - flite
+    - clips
+    - clips-pddl-parser
+    - skiller
+    - clips-executive
+
+  # Meta plugin for the clips-executive with planner integration
+  clips-executive-pddl:
+    - flite
+    - mongodb
+    - clips
+    - robot-memory
+    - clips_robot_memory
+    - pddl-robot-memory
+    - pddl-planner
+    - clips-pddl-parser
+    - skiller
+    - clips-executive

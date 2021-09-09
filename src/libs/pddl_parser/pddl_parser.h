@@ -22,10 +22,10 @@
 #ifndef PLUGINS_PDDL_PARSER_H_
 #define PLUGINS_PDDL_PARSER_H_
 
+#include "pddl_exception.h"
 #include "pddl_grammar.h"
 
-#include <core/exception.h>
-
+#include <boost/spirit/include/support_line_pos_iterator.hpp>
 #include <string>
 
 namespace pddl_parser {
@@ -33,32 +33,12 @@ namespace pddl_parser {
 class PddlParser
 {
 public:
-	static Domain  parseDomain(const std::string pddl_domain);
-	static Problem parseProblem(const std::string pddl_problem);
+	static Domain  parseDomain(const std::string &pddl_domain);
+	static Problem parseProblem(const std::string &pddl_problem);
 
 private:
-};
-
-/** @class PddlParserException <pddl_parser/pddl_parser.h>
- * Exception thrown by the parser if an error occurs during parsing.
- */
-
-class PddlParserException : public fawkes::Exception
-{
-public:
-	/** Constructor.
-    * @param msg A message describing the error.
-    */
-	PddlParserException(const char *msg) : fawkes::Exception(msg)
-	{
-	}
-	/** Constructor with a string message.
-   * This wraps the constructor with a char* message for usage with std::string.
-   * @param msg A message describing the error.
-   */
-	PddlParserException(const std::string &msg) : fawkes::Exception(msg.c_str())
-	{
-	}
+	static std::string
+	getErrorContext(const iterator_type &, const iterator_type &, const iterator_type &);
 };
 
 } // namespace pddl_parser

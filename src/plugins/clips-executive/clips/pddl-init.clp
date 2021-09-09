@@ -8,12 +8,19 @@
 
 (defglobal
 	?*PDDL-INIT-CONTROL-RETRY-INTERVAL-SEC* = 1
+	?*PDDL-ROBMEM-COLLECTION* = "robmem.clipswm"
 )
 
 (deftemplate pddl-init-control
   (slot interface-id (type STRING))
   (slot has-writer (type SYMBOL) (allowed-values TRUE FALSE) (default FALSE))
   (multislot last-try (type INTEGER) (cardinality 2 2) (default (create$ 0 0)))
+)
+
+(deffunction pddl-robmem-flush ()
+	(bind ?query (bson-create))
+	(robmem-remove ?*PDDL-ROBMEM-COLLECTION* ?query)
+	(bson-destroy ?query)
 )
 
 (defrule pddl-init-open-interfaces
@@ -55,7 +62,6 @@
   =>
   (printout t "Registering robot memory trigger for new plans" crlf)
   (bind ?query (bson-create))
-  (bson-append ?query "plan" 1)
   (bind ?trigger (robmem-trigger-register "robmem.pddl-plan" ?query "new-plan"))
   (bson-destroy ?query)
   (assert (registered-trigger "robmem.pddl-plan" ?trigger))
@@ -70,4 +76,5 @@
   (retract ?pp)
   (path-load "pddl.clp")
   (assert (ff-feature-loaded pddl_planner))
+  (assert (executive-init-signal (id pddl-planner-initialized)))
 )

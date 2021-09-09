@@ -102,6 +102,14 @@
   (return ?i)
 )
 
+(defrule pddl-cleanup-trigger-no-plan
+  "clean up received triggers of failed plans"
+  ?t <- (robmem-trigger (name "new-plan") (ptr ?obj&
+          :(neq (bson-get (bson-get ?obj "fullDocument") "plan") 1)))
+  =>
+  (retract ?t)
+)
+
 (defrule pddl-expand-goal
   "Fetch the resulting plan from robot memory and expand the goal."
   ?g <- (goal (id ?goal-id) (mode SELECTED))
@@ -110,11 +118,12 @@
           (status PLANNED)
           (goal-id ?goal-id)
           (plan-id ?plan-id&
-            :(eq ?plan-id (bson-get (bson-get ?obj "o") "msg_id")))
+            :(eq ?plan-id (bson-get (bson-get ?obj "fullDocument") "msg_id")))
         )
+  (test (eq (bson-get (bson-get ?obj "fullDocument") "plan") 1))
   =>
   (printout t "Fetched a new plan!" crlf)
-  (progn$ (?action (bson-get-array (bson-get ?obj "o") "actions"))
+  (progn$ (?action (bson-get-array (bson-get ?obj "fullDocument") "actions"))
     (bind ?action-name (sym-cat (bson-get ?action "name")))
     ; FF sometimes returns the pseudo-action REACH-GOAL. Filter it out.
     (if (neq ?action-name REACH-GOAL) then

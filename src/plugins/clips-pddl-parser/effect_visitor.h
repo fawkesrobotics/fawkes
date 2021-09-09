@@ -33,6 +33,7 @@ public:
 	EffectToCLIPSFactVisitor(const std::string &pddl_operator, bool positive);
 	std::vector<std::string> operator()(pddl_parser::Atom &a) const;
 	std::vector<std::string> operator()(pddl_parser::Predicate &p) const;
+	std::vector<std::string> operator()(pddl_parser::QuantifiedFormula &q) const;
 
 private:
 	std::string pddl_operator_;
