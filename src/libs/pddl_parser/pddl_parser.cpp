@@ -96,6 +96,7 @@ PddlParser::parseDomain(const std::string &pddl_domain)
 	} catch (PddlSemanticsException &e) {
 		e.prepend("Semantic Error: ");
 		e.append(getErrorContext(iter, end, e.pos).c_str());
+		e.collapse_msg();
 		throw;
 	}
 
