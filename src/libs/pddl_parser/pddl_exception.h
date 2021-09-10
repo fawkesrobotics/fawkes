@@ -24,6 +24,7 @@
 #include "pddl_ast.h"
 
 #include <core/exception.h>
+#include <core/threading/mutex.h>
 
 #include <string>
 
@@ -41,6 +42,33 @@ public:
     */
 	PddlParserException(const char *msg) : fawkes::Exception(msg)
 	{
+	}
+
+	/** Merge all error messages to a single one.
+	  * Useful after calling append() or prepend().
+	  */
+	void
+	collapse_msg()
+	{
+		if (messages != NULL) {
+			std::string res(messages->msg);
+			auto        curr_msg = messages->next;
+			auto        old_msg  = messages;
+			messages_mutex->lock();
+			while (curr_msg != NULL) {
+				if (curr_msg->msg) {
+					res += curr_msg->msg;
+					free(curr_msg->msg);
+				}
+				old_msg  = curr_msg;
+				curr_msg = curr_msg->next;
+				free(old_msg);
+			}
+			messages_mutex->unlock();
+			messages->msg  = strdup(res.c_str());
+			messages->next = NULL;
+			messages_end   = NULL;
+		}
 	}
 
 	const char *
