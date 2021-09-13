@@ -48,7 +48,8 @@ void
 ClipsExecutiveRestApi::init()
 {
 	{
-		std::map<std::string, LockPtr<CLIPS::Environment>> envs = clips_env_mgr->environments();
+		std::map<std::string, RecursiveLockPtr<CLIPS::Environment>> envs =
+		  clips_env_mgr->environments();
 		if (envs.find("executive") == envs.end()) {
 			throw Exception("No CLIPS environment named 'executive' found");
 		}

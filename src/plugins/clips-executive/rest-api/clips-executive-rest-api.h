@@ -137,6 +137,6 @@ private:
 	gen_grounded_pddl_predicate(const CLIPS::Fact::pointer fact);
 
 private:
-	fawkes::WebviewRestApi *            rest_api_;
-	fawkes::LockPtr<CLIPS::Environment> clips_;
+	fawkes::WebviewRestApi *                     rest_api_;
+	fawkes::RecursiveLockPtr<CLIPS::Environment> clips_;
 };
