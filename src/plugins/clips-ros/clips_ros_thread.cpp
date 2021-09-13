@@ -65,7 +65,8 @@ ClipsROSThread::finalize()
 }
 
 void
-ClipsROSThread::clips_context_init(const std::string &env_name, LockPtr<CLIPS::Environment> &clips)
+ClipsROSThread::clips_context_init(const std::string &                   env_name,
+                                   RecursiveLockPtr<CLIPS::Environment> &clips)
 {
 	envs_[env_name] = clips;
 
@@ -109,7 +110,7 @@ ClipsROSThread::clips_ros_get_nodes(std::string env_name)
 		return;
 	}
 
-	LockPtr<CLIPS::Environment> &clips = envs_[env_name];
+	RecursiveLockPtr<CLIPS::Environment> &clips = envs_[env_name];
 
 	XmlRpc::XmlRpcValue args, result, payload;
 	args[0] = ros::this_node::getName();
@@ -194,7 +195,7 @@ ClipsROSThread::clips_ros_get_topics(std::string env_name)
 		return;
 	}
 
-	LockPtr<CLIPS::Environment> &clips = envs_[env_name];
+	RecursiveLockPtr<CLIPS::Environment> &clips = envs_[env_name];
 
 	ros::master::V_TopicInfo topics;
 	if (!ros::master::getTopics(topics)) {
@@ -227,8 +228,8 @@ ClipsROSThread::clips_ros_get_topic_connections(std::string env_name)
 		return;
 	}
 
-	LockPtr<CLIPS::Environment> &clips = envs_[env_name];
-	fawkes::MutexLocker          lock(clips.objmutex_ptr());
+	RecursiveLockPtr<CLIPS::Environment> &clips = envs_[env_name];
+	fawkes::MutexLocker                   lock(clips.objmutex_ptr());
 
 	CLIPS::Template::pointer temp = clips->get_template("ros-topic-connection");
 	if (!temp) {

@@ -49,8 +49,8 @@ public:
 	virtual void finalize();
 
 	// for CLIPSFeature
-	virtual void clips_context_init(const std::string &                  env_name,
-	                                fawkes::LockPtr<CLIPS::Environment> &clips);
+	virtual void clips_context_init(const std::string &                           env_name,
+	                                fawkes::RecursiveLockPtr<CLIPS::Environment> &clips);
 	virtual void clips_context_destroyed(const std::string &env_name);
 
 	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
@@ -62,7 +62,7 @@ protected:
 	}
 
 private: // members
-	std::map<std::string, fawkes::LockPtr<CLIPS::Environment>> envs_;
+	std::map<std::string, fawkes::RecursiveLockPtr<CLIPS::Environment>> envs_;
 
 private: // methods
 	class RosNodeInfo
