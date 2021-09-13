@@ -56,8 +56,8 @@ public:
 	virtual void finalize();
 
 	// for CLIPSFeature
-	virtual void clips_context_init(const std::string &                  env_name,
-	                                fawkes::LockPtr<CLIPS::Environment> &clips);
+	virtual void clips_context_init(const std::string &                           env_name,
+	                                fawkes::RecursiveLockPtr<CLIPS::Environment> &clips);
 	virtual void clips_context_destroyed(const std::string &env_name);
 
 	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
@@ -69,23 +69,23 @@ protected:
 	}
 
 private:
-	std::map<std::string, fawkes::LockPtr<CLIPS::Environment>> envs_;
+	std::map<std::string, fawkes::RecursiveLockPtr<CLIPS::Environment>> envs_;
 
 	std::vector<std::string> components_;
 
 	fawkes::HardwareModelsInterface *hm_if_;
 
-	void clips_add_terminal_state(fawkes::LockPtr<CLIPS::Environment> &clips,
-	                              const std::string &                  component,
-	                              const std::string &                  state);
-	void clips_add_component(fawkes::LockPtr<CLIPS::Environment> &clips,
-	                         const std::string &                  component,
-	                         const std::string &                  init_state);
-	void clips_add_edge(fawkes::LockPtr<CLIPS::Environment> &clips,
-	                    const std::string &                  component,
-	                    const std::string &                  from,
-	                    const std::string &                  to,
-	                    const std::string &                  trans);
+	void clips_add_terminal_state(fawkes::RecursiveLockPtr<CLIPS::Environment> &clips,
+	                              const std::string &                           component,
+	                              const std::string &                           state);
+	void clips_add_component(fawkes::RecursiveLockPtr<CLIPS::Environment> &clips,
+	                         const std::string &                           component,
+	                         const std::string &                           init_state);
+	void clips_add_edge(fawkes::RecursiveLockPtr<CLIPS::Environment> &clips,
+	                    const std::string &                           component,
+	                    const std::string &                           from,
+	                    const std::string &                           to,
+	                    const std::string &                           trans);
 	void clips_add_transition(const std::string &component, const std::string &transition) noexcept;
 };
 

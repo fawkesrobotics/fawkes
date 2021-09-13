@@ -84,8 +84,8 @@ HardwareModelsThread::init()
  * @param clips Pointer to clips environment
  */
 void
-HardwareModelsThread::clips_context_init(const std::string &          env_name,
-                                         LockPtr<CLIPS::Environment> &clips)
+HardwareModelsThread::clips_context_init(const std::string &                   env_name,
+                                         RecursiveLockPtr<CLIPS::Environment> &clips)
 {
 	envs_[env_name] = clips;
 
@@ -165,9 +165,9 @@ HardwareModelsThread::clips_context_destroyed(const std::string &env_name)
 }
 
 void
-HardwareModelsThread::clips_add_terminal_state(LockPtr<CLIPS::Environment> &clips,
-                                               const std::string &          component,
-                                               const std::string &          state)
+HardwareModelsThread::clips_add_terminal_state(RecursiveLockPtr<CLIPS::Environment> &clips,
+                                               const std::string &                   component,
+                                               const std::string &                   state)
 {
 	CLIPS::Template::pointer temp = clips->get_template("hm-terminal-state");
 	if (temp) {
@@ -195,9 +195,9 @@ HardwareModelsThread::clips_add_terminal_state(LockPtr<CLIPS::Environment> &clip
  * @param init_state Name of the initial state of the component
  */
 void
-HardwareModelsThread::clips_add_component(LockPtr<CLIPS::Environment> &clips,
-                                          const std::string &          component,
-                                          const std::string &          init_state)
+HardwareModelsThread::clips_add_component(RecursiveLockPtr<CLIPS::Environment> &clips,
+                                          const std::string &                   component,
+                                          const std::string &                   init_state)
 {
 	CLIPS::Template::pointer temp = clips->get_template("hm-component");
 	if (temp) {
@@ -227,11 +227,11 @@ HardwareModelsThread::clips_add_component(LockPtr<CLIPS::Environment> &clips,
  * @param prob Probability of the action if it is an exogenous action
  */
 void
-HardwareModelsThread::clips_add_edge(LockPtr<CLIPS::Environment> &clips,
-                                     const std::string &          component,
-                                     const std::string &          from,
-                                     const std::string &          to,
-                                     const std::string &          trans)
+HardwareModelsThread::clips_add_edge(RecursiveLockPtr<CLIPS::Environment> &clips,
+                                     const std::string &                   component,
+                                     const std::string &                   from,
+                                     const std::string &                   to,
+                                     const std::string &                   trans)
 {
 	double prob = 0.0;
 	prob = config->get_float(std::string(component + "/" + from + "/" + to + "/probability").c_str());
@@ -271,7 +271,7 @@ HardwareModelsThread::clips_add_transition(const std::string &component,
                                            const std::string &transition) noexcept
 {
 	for (const auto &e : envs_) {
-		fawkes::LockPtr<CLIPS::Environment> clips = e.second;
+		fawkes::RecursiveLockPtr<CLIPS::Environment> clips = e.second;
 		clips.lock();
 		CLIPS::Template::pointer temp = clips->get_template("hm-transition");
 		if (temp) {
