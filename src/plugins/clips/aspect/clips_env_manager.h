@@ -42,20 +42,20 @@ public:
 	CLIPSEnvManager(Logger *logger, Clock *clock, std::string &clips_dir);
 	virtual ~CLIPSEnvManager();
 
-	LockPtr<CLIPS::Environment> create_env(const std::string &env_name,
-	                                       const std::string &log_component_name);
-	void                        destroy_env(const std::string &env_name);
+	RecursiveLockPtr<CLIPS::Environment> create_env(const std::string &env_name,
+	                                                const std::string &log_component_name);
+	void                                 destroy_env(const std::string &env_name);
 
 	void add_features(const std::list<CLIPSFeature *> &features);
 	void remove_features(const std::list<CLIPSFeature *> &features);
 	void assert_can_remove_features(const std::list<CLIPSFeature *> &features);
 
-	std::map<std::string, LockPtr<CLIPS::Environment>> environments() const;
+	std::map<std::string, RecursiveLockPtr<CLIPS::Environment>> environments() const;
 
 private:
-	LockPtr<CLIPS::Environment> new_env(const std::string &log_component_name);
-	void          assert_features(LockPtr<CLIPS::Environment> &clips, bool immediate_assert);
-	void          add_functions(const std::string &env_name, LockPtr<CLIPS::Environment> &clips);
+	RecursiveLockPtr<CLIPS::Environment> new_env(const std::string &log_component_name);
+	void assert_features(RecursiveLockPtr<CLIPS::Environment> &clips, bool immediate_assert);
+	void add_functions(const std::string &env_name, RecursiveLockPtr<CLIPS::Environment> &clips);
 	CLIPS::Value  clips_request_feature(std::string env_name, std::string feature_name);
 	CLIPS::Values clips_now();
 	CLIPS::Values clips_now_systime();
@@ -71,8 +71,8 @@ private:
 	/// @cond INTERNAL
 	typedef struct
 	{
-		LockPtr<CLIPS::Environment> env;
-		std::list<std::string>      req_feat;
+		RecursiveLockPtr<CLIPS::Environment> env;
+		std::list<std::string>               req_feat;
 	} ClipsEnvData;
 	/// @endcond
 

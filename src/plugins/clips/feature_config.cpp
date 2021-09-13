@@ -54,8 +54,8 @@ ConfigCLIPSFeature::~ConfigCLIPSFeature()
 }
 
 void
-ConfigCLIPSFeature::clips_context_init(const std::string &                  env_name,
-                                       fawkes::LockPtr<CLIPS::Environment> &clips)
+ConfigCLIPSFeature::clips_context_init(const std::string &                           env_name,
+                                       fawkes::RecursiveLockPtr<CLIPS::Environment> &clips)
 {
 	envs_[env_name] = clips;
 	clips->evaluate("(path-load \"ff-config.clp\")");

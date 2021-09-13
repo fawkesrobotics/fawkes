@@ -41,7 +41,7 @@ public:
 	virtual ~CLIPSManagerAspect();
 
 protected:
-	LockPtr<CLIPSEnvManager> clips_env_mgr;
+	RecursiveLockPtr<CLIPSEnvManager> clips_env_mgr;
 };
 
 } // end namespace fawkes

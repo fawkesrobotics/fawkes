@@ -78,8 +78,8 @@ BlackboardCLIPSFeature::~BlackboardCLIPSFeature()
 }
 
 void
-BlackboardCLIPSFeature::clips_context_init(const std::string &                  env_name,
-                                           fawkes::LockPtr<CLIPS::Environment> &clips)
+BlackboardCLIPSFeature::clips_context_init(const std::string &                           env_name,
+                                           fawkes::RecursiveLockPtr<CLIPS::Environment> &clips)
 {
 	envs_[env_name] = clips;
 	clips->evaluate("(path-load \"blackboard.clp\")");
@@ -343,7 +343,7 @@ BlackboardCLIPSFeature::clips_blackboard_open_interface(const std::string &env_n
 		return;
 	}
 
-	fawkes::LockPtr<CLIPS::Environment> clips = envs_[env_name];
+	fawkes::RecursiveLockPtr<CLIPS::Environment> clips = envs_[env_name];
 
 	Interface *   iface     = NULL;
 	InterfaceMap &iface_map = writing ? interfaces_[env_name].writing : interfaces_[env_name].reading;
@@ -614,7 +614,7 @@ BlackboardCLIPSFeature::clips_blackboard_get_info(const std::string &env_name)
 		return;
 	}
 
-	fawkes::LockPtr<CLIPS::Environment> &clips = envs_[env_name];
+	fawkes::RecursiveLockPtr<CLIPS::Environment> &clips = envs_[env_name];
 
 	InterfaceInfoList *iil = blackboard_->list_all();
 

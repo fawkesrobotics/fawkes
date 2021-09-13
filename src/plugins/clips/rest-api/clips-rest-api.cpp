@@ -124,9 +124,9 @@ ClipsRestApi::loop()
 // }
 
 Fact
-ClipsRestApi::gen_fact(LockPtr<CLIPS::Environment> &clips,
-                       CLIPS::Fact::pointer &       fact,
-                       bool                         formatted)
+ClipsRestApi::gen_fact(RecursiveLockPtr<CLIPS::Environment> &clips,
+                       CLIPS::Fact::pointer &                fact,
+                       bool                                  formatted)
 {
 	Fact retf;
 	retf.set_kind("Fact");
@@ -178,8 +178,8 @@ ClipsRestApi::cb_get_facts(WebviewRestParams &params)
 
 	WebviewRestArray<Fact> rv;
 
-	MutexLocker                                        lock(clips_env_mgr.objmutex_ptr());
-	std::map<std::string, LockPtr<CLIPS::Environment>> envs = clips_env_mgr->environments();
+	MutexLocker                                                 lock(clips_env_mgr.objmutex_ptr());
+	std::map<std::string, RecursiveLockPtr<CLIPS::Environment>> envs = clips_env_mgr->environments();
 	if (envs.find(params.path_arg("env")) == envs.end()) {
 		throw WebviewRestException(WebReply::HTTP_NOT_FOUND,
 		                           "Environment '%s' is unknown",
@@ -204,8 +204,8 @@ ClipsRestApi::cb_list_environments()
 {
 	WebviewRestArray<Environment> rv;
 
-	MutexLocker                                        lock(clips_env_mgr.objmutex_ptr());
-	std::map<std::string, LockPtr<CLIPS::Environment>> envs = clips_env_mgr->environments();
+	MutexLocker                                                 lock(clips_env_mgr.objmutex_ptr());
+	std::map<std::string, RecursiveLockPtr<CLIPS::Environment>> envs = clips_env_mgr->environments();
 
 	for (const auto &e : envs) {
 		Environment env;

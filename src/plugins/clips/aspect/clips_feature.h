@@ -46,9 +46,9 @@ public:
 	CLIPSFeature(const char *feature_name);
 	virtual ~CLIPSFeature();
 
-	virtual void clips_context_init(const std::string &                  env_name,
-	                                fawkes::LockPtr<CLIPS::Environment> &clips) = 0;
-	virtual void clips_context_destroyed(const std::string &env_name)           = 0;
+	virtual void clips_context_init(const std::string &                           env_name,
+	                                fawkes::RecursiveLockPtr<CLIPS::Environment> &clips) = 0;
+	virtual void clips_context_destroyed(const std::string &env_name)                    = 0;
 
 protected:
 	const std::string clips_feature_name; ///< CLIPS feature name

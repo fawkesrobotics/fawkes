@@ -58,7 +58,7 @@ CLIPSAspectIniFin::init(Thread *thread)
 		                                      thread->name());
 	}
 
-	LockPtr<CLIPS::Environment> clips =
+	RecursiveLockPtr<CLIPS::Environment> clips =
 	  clips_env_mgr_->create_env(clips_thread->clips_env_name,
 	                             clips_thread->CLIPSAspect_log_component_name_);
 
@@ -85,7 +85,7 @@ CLIPSAspectIniFin::finalize(Thread *thread)
  * @param clips_env_mgr CLIPS environment manager
  */
 void
-CLIPSAspectIniFin::set_manager(LockPtr<CLIPSEnvManager> &clips_env_mgr)
+CLIPSAspectIniFin::set_manager(RecursiveLockPtr<CLIPSEnvManager> &clips_env_mgr)
 {
 	clips_env_mgr_ = clips_env_mgr;
 }

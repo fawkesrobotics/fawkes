@@ -46,11 +46,11 @@ public:
 	virtual ~CLIPSAspect();
 
 protected:
-	const std::string           clips_env_name;
-	LockPtr<CLIPS::Environment> clips;
+	const std::string                    clips_env_name;
+	RecursiveLockPtr<CLIPS::Environment> clips;
 
 private:
-	void init_CLIPSAspect(LockPtr<CLIPS::Environment> clips);
+	void init_CLIPSAspect(RecursiveLockPtr<CLIPS::Environment> clips);
 	void finalize_CLIPSAspect();
 
 private:

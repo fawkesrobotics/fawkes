@@ -20,6 +20,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
+#include "core/utils/lockptr.h"
+
 #include <baseapp/run.h>
 #include <logging/logger.h>
 #include <plugins/clips/aspect/clips_env_manager.h>
@@ -187,15 +189,14 @@ CLIPSEnvManager::~CLIPSEnvManager()
  * @param log_component_name prefix for log entries
  * @return readily initialized CLIPS environment
  */
-LockPtr<CLIPS::Environment>
+RecursiveLockPtr<CLIPS::Environment>
 CLIPSEnvManager::new_env(const std::string &log_component_name)
 {
 	// CLIPS overwrites the SIGINT handler, restore it after
 	// initializing the environment
 	struct sigaction oldact;
 	if (sigaction(SIGINT, NULL, &oldact) == 0) {
-		LockPtr<CLIPS::Environment> clips(new CLIPS::Environment(),
-		                                  /* recursive mutex */ true);
+		RecursiveLockPtr<CLIPS::Environment> clips(new CLIPS::Environment());
 
 		// by default be silent
 		clips->unwatch("all");
@@ -234,10 +235,10 @@ CLIPSEnvManager::new_env(const std::string &log_component_name)
  * @param log_component_name prefix for log entries
  * @return readily initialized CLIPS environment
  */
-LockPtr<CLIPS::Environment>
+RecursiveLockPtr<CLIPS::Environment>
 CLIPSEnvManager::create_env(const std::string &env_name, const std::string &log_component_name)
 {
-	LockPtr<CLIPS::Environment> clips;
+	RecursiveLockPtr<CLIPS::Environment> clips;
 	if (envs_.find(env_name) != envs_.end()) {
 		throw Exception("CLIPS environment '%s' already exists", env_name.c_str());
 	}
@@ -293,10 +294,10 @@ CLIPSEnvManager::destroy_env(const std::string &env_name)
 /** Get map of environments.
  * @return map from environment name to environment lock ptr
  */
-std::map<std::string, LockPtr<CLIPS::Environment>>
+std::map<std::string, RecursiveLockPtr<CLIPS::Environment>>
 CLIPSEnvManager::environments() const
 {
-	std::map<std::string, LockPtr<CLIPS::Environment>> rv;
+	std::map<std::string, RecursiveLockPtr<CLIPS::Environment>> rv;
 	for (auto envd : envs_) {
 		rv[envd.first] = envd.second.env;
 	}
@@ -386,7 +387,8 @@ CLIPSEnvManager::clips_now_systime()
 }
 
 void
-CLIPSEnvManager::add_functions(const std::string &env_name, LockPtr<CLIPS::Environment> &clips)
+CLIPSEnvManager::add_functions(const std::string &                   env_name,
+                               RecursiveLockPtr<CLIPS::Environment> &clips)
 {
 	clips->add_function("ff-feature-request",
 	                    sigc::slot<CLIPS::Value, std::string>(
@@ -401,7 +403,7 @@ CLIPSEnvManager::add_functions(const std::string &env_name, LockPtr<CLIPS::Envir
 }
 
 void
-CLIPSEnvManager::assert_features(LockPtr<CLIPS::Environment> &clips, bool immediate_assert)
+CLIPSEnvManager::assert_features(RecursiveLockPtr<CLIPS::Environment> &clips, bool immediate_assert)
 {
 	// deffact so it survives a reset
 	std::string deffacts = "(deffacts ff-features-available";
@@ -496,7 +498,7 @@ CLIPSEnvManager::guarded_load(const std::string &env_name, const std::string &fi
 		throw Exception("guarded_load: env %s has not been registered", env_name.c_str());
 	}
 
-	LockPtr<CLIPS::Environment> &clips = envs_[env_name].env;
+	RecursiveLockPtr<CLIPS::Environment> &clips = envs_[env_name].env;
 
 	int load_rv = 0;
 	if ((load_rv = clips->load(filename)) != 1) {

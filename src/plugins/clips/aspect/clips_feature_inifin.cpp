@@ -94,7 +94,7 @@ CLIPSFeatureAspectIniFin::finalize(Thread *thread)
  * @param clips_env_mgr CLIPS environment manager
  */
 void
-CLIPSFeatureAspectIniFin::set_manager(LockPtr<CLIPSEnvManager> &clips_env_mgr)
+CLIPSFeatureAspectIniFin::set_manager(RecursiveLockPtr<CLIPSEnvManager> &clips_env_mgr)
 {
 	clips_env_mgr_ = clips_env_mgr;
 }

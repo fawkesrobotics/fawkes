@@ -47,7 +47,7 @@ CLIPSFeature::~CLIPSFeature()
 {
 }
 
-/** @fn void CLIPSFeature::clips_context_init(const std::string &env_name, fawkes::LockPtr<CLIPS::Environment> &clips) = 0
+/** @fn void CLIPSFeature::clips_context_init(const std::string &env_name, fawkes::RecursiveLockPtr<CLIPS::Environment> &clips) = 0
  * Initialize a CLIPS context to use the provided feature.
  * This method must be implemented by threads with the
  * CLIPSFeatureAspect. It is called to initialize a particular CLIPS

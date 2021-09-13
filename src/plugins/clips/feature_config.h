@@ -44,15 +44,15 @@ public:
 	virtual ~ConfigCLIPSFeature();
 
 	// for CLIPSFeature
-	virtual void clips_context_init(const std::string &                  env_name,
-	                                fawkes::LockPtr<CLIPS::Environment> &clips);
+	virtual void clips_context_init(const std::string &                           env_name,
+	                                fawkes::RecursiveLockPtr<CLIPS::Environment> &clips);
 	virtual void clips_context_destroyed(const std::string &env_name);
 
 private: // members
 	fawkes::Logger *       logger_;
 	fawkes::Configuration *config_;
 
-	std::map<std::string, fawkes::LockPtr<CLIPS::Environment>> envs_;
+	std::map<std::string, fawkes::RecursiveLockPtr<CLIPS::Environment>> envs_;
 
 private: // methods
 	void clips_config_load(std::string env_name, std::string cfg_prefix);

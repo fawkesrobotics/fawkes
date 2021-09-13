@@ -164,8 +164,8 @@ RedefineWarningCLIPSFeature::~RedefineWarningCLIPSFeature()
 }
 
 void
-RedefineWarningCLIPSFeature::clips_context_init(const std::string &                  env_name,
-                                                fawkes::LockPtr<CLIPS::Environment> &clips)
+RedefineWarningCLIPSFeature::clips_context_init(const std::string &env_name,
+                                                fawkes::RecursiveLockPtr<CLIPS::Environment> &clips)
 {
 	envs_[env_name] = clips;
 
@@ -197,7 +197,7 @@ RedefineWarningCLIPSFeature::clips_context_destroyed(const std::string &env_name
 		return;
 	}
 
-	fawkes::LockPtr<CLIPS::Environment> &clips = envs_[env_name];
+	fawkes::RecursiveLockPtr<CLIPS::Environment> &clips = envs_[env_name];
 
 	CLIPSRedefineWarningLogger *logger = NULL;
 

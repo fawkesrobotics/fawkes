@@ -36,7 +36,7 @@ namespace fawkes {
  * @author Tim Niemueller
  */
 
-/** @var fawkes:LockPtr<CLIPS::Environment> CLIPSAspect::clips
+/** @var fawkes:RecursiveLockPtr<CLIPS::Environment> CLIPSAspect::clips
  * CLIPS environment for exclusive usage.
  */
 
@@ -71,7 +71,7 @@ CLIPSAspect::~CLIPSAspect()
  * @param clips CLIPS environment
  */
 void
-CLIPSAspect::init_CLIPSAspect(LockPtr<CLIPS::Environment> clips)
+CLIPSAspect::init_CLIPSAspect(RecursiveLockPtr<CLIPS::Environment> clips)
 {
 	this->clips = clips;
 }

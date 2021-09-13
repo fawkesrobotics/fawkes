@@ -70,10 +70,10 @@ private:
 	const std::list<fawkes::AspectIniFin *> inifin_list();
 
 private:
-	fawkes::CLIPSAspectIniFin                clips_aspect_inifin_;
-	fawkes::CLIPSFeatureAspectIniFin         clips_feature_aspect_inifin_;
-	fawkes::CLIPSManagerAspectIniFin         clips_manager_aspect_inifin_;
-	fawkes::LockPtr<fawkes::CLIPSEnvManager> clips_env_mgr_;
+	fawkes::CLIPSAspectIniFin                         clips_aspect_inifin_;
+	fawkes::CLIPSFeatureAspectIniFin                  clips_feature_aspect_inifin_;
+	fawkes::CLIPSManagerAspectIniFin                  clips_manager_aspect_inifin_;
+	fawkes::RecursiveLockPtr<fawkes::CLIPSEnvManager> clips_env_mgr_;
 
 	std::list<fawkes::CLIPSFeature *> features_;
 };

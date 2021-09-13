@@ -44,10 +44,10 @@ public:
 	virtual void finalize(Thread *thread);
 	virtual bool prepare_finalize(Thread *thread);
 
-	void set_manager(LockPtr<CLIPSEnvManager> &clips_env_mgr);
+	void set_manager(RecursiveLockPtr<CLIPSEnvManager> &clips_env_mgr);
 
 private:
-	LockPtr<CLIPSEnvManager> clips_env_mgr_;
+	RecursiveLockPtr<CLIPSEnvManager> clips_env_mgr_;
 };
 
 } // end namespace fawkes

@@ -54,8 +54,9 @@ private:
 	WebviewRestArray<Environment> cb_list_environments();
 	WebviewRestArray<Fact>        cb_get_facts(fawkes::WebviewRestParams &params);
 
-	Fact
-	gen_fact(fawkes::LockPtr<CLIPS::Environment> &clips, CLIPS::Fact::pointer &fact, bool formatted);
+	Fact gen_fact(fawkes::RecursiveLockPtr<CLIPS::Environment> &clips,
+	              CLIPS::Fact::pointer &                        fact,
+	              bool                                          formatted);
 
 private:
 	fawkes::WebviewRestApi *rest_api_;

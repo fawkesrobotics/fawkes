@@ -51,8 +51,8 @@ public:
 	virtual ~BlackboardCLIPSFeature();
 
 	// for CLIPSFeature
-	virtual void clips_context_init(const std::string &                  env_name,
-	                                fawkes::LockPtr<CLIPS::Environment> &clips);
+	virtual void clips_context_init(const std::string &                           env_name,
+	                                fawkes::RecursiveLockPtr<CLIPS::Environment> &clips);
 	virtual void clips_context_destroyed(const std::string &env_name);
 
 private: // members
@@ -66,8 +66,8 @@ private: // members
 		InterfaceMap reading;
 		InterfaceMap writing;
 	} Interfaces;
-	std::map<std::string, Interfaces>                          interfaces_;
-	std::map<std::string, fawkes::LockPtr<CLIPS::Environment>> envs_;
+	std::map<std::string, Interfaces>                                   interfaces_;
+	std::map<std::string, fawkes::RecursiveLockPtr<CLIPS::Environment>> envs_;
 	//which created message belongs to which interface
 	std::map<fawkes::Message *, fawkes::Interface *> interface_of_msg_;
 
