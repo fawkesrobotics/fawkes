@@ -33,15 +33,15 @@ namespace fawkes {
 class NavGraphEstimator : public ExecutionTimeEstimator
 {
 public:
-	NavGraphEstimator(LockPtr<NavGraph>  navgraph,
-	                  Configuration *    config,
-	                  const std::string &cfg_prefix);
+	NavGraphEstimator(RecursiveLockPtr<NavGraph> navgraph,
+	                  Configuration *            config,
+	                  const std::string &        cfg_prefix);
 	float get_execution_time(const Skill &skill) override;
 	bool  can_provide_exec_time(const Skill &skill) const override;
 	std::pair<SkillerInterface::SkillStatusEnum, std::string> execute(const Skill &skill) override;
 
 private:
-	LockPtr<NavGraph>           navgraph_;
+	RecursiveLockPtr<NavGraph>  navgraph_;
 	float                       last_pose_x_;
 	float                       last_pose_y_;
 	const Property<std::string> source_names_;

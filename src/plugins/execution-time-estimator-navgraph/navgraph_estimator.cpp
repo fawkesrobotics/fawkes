@@ -32,9 +32,9 @@ namespace fawkes {
  * @param config The config to read the initial position from
  * @param cfg_prefix The config prefix to use for config parameters
  */
-NavGraphEstimator::NavGraphEstimator(LockPtr<NavGraph>  navgraph,
-                                     Configuration *    config,
-                                     const std::string &cfg_prefix)
+NavGraphEstimator::NavGraphEstimator(RecursiveLockPtr<NavGraph> navgraph,
+                                     Configuration *            config,
+                                     const std::string &        cfg_prefix)
 : ExecutionTimeEstimator(config, cfg_prefix),
   navgraph_(navgraph),
   source_names_(config_, cfg_prefix_, "start", ""),
