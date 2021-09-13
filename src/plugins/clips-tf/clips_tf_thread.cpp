@@ -58,7 +58,8 @@ ClipsTFThread::finalize()
 }
 
 void
-ClipsTFThread::clips_context_init(const std::string &env_name, LockPtr<CLIPS::Environment> &clips)
+ClipsTFThread::clips_context_init(const std::string &                   env_name,
+                                  RecursiveLockPtr<CLIPS::Environment> &clips)
 {
 	envs_[env_name] = clips;
 	logger->log_debug(name(), "Called to initialize environment %s", env_name.c_str());
