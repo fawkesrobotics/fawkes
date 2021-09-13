@@ -58,8 +58,8 @@ PDDLCLIPSFeature::init_logger(fawkes::Logger *logger)
  * @param clips The CLIPS environment to add the parser functionality to.
  */
 void
-PDDLCLIPSFeature::clips_context_init(const string &                       env_name,
-                                     fawkes::LockPtr<CLIPS::Environment> &clips)
+PDDLCLIPSFeature::clips_context_init(const string &                                env_name,
+                                     fawkes::RecursiveLockPtr<CLIPS::Environment> &clips)
 {
 	envs_[env_name] = clips;
 	//clips->evaluate("(path-load \"pddl.clp\")");

@@ -40,16 +40,16 @@ public:
 	PDDLCLIPSFeature();
 	void init_logger(fawkes::Logger *logger);
 	//virtual ~PDDLCLIPSFeature();
-	virtual void clips_context_init(const std::string &                  env_name,
-	                                fawkes::LockPtr<CLIPS::Environment> &clips);
+	virtual void clips_context_init(const std::string &                           env_name,
+	                                fawkes::RecursiveLockPtr<CLIPS::Environment> &clips);
 	virtual void clips_context_destroyed(const std::string &env_name);
 
 private:
 	void parse_domain(std::string env_name, std::string domain_file);
 
 private:
-	fawkes::Logger *                                           logger_;
-	std::map<std::string, fawkes::LockPtr<CLIPS::Environment>> envs_;
+	fawkes::Logger *                                                    logger_;
+	std::map<std::string, fawkes::RecursiveLockPtr<CLIPS::Environment>> envs_;
 };
 
 #endif /* !PLUGINS_CLIPS_PDDL_PARSER_FEATURE_PDDL_H__ */
