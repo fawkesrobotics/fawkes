@@ -37,21 +37,21 @@
 class ClipsRmTrigger
 {
 public:
-	ClipsRmTrigger(std::string                          assert_name,
-	               RobotMemory *                        robot_memory,
-	               fawkes::LockPtr<CLIPS::Environment> &clips,
-	               fawkes::Logger *                     logger);
+	ClipsRmTrigger(std::string                                   assert_name,
+	               RobotMemory *                                 robot_memory,
+	               fawkes::RecursiveLockPtr<CLIPS::Environment> &clips,
+	               fawkes::Logger *                              logger);
 	virtual ~ClipsRmTrigger();
 
 	void callback(const bsoncxx::document::view &update);
 	void set_trigger(EventTrigger *trigger);
 
 private:
-	std::string                         assert_name;
-	EventTrigger *                      trigger;
-	RobotMemory *                       robot_memory;
-	fawkes::LockPtr<CLIPS::Environment> clips;
-	fawkes::Logger *                    logger;
+	std::string                                  assert_name;
+	EventTrigger *                               trigger;
+	RobotMemory *                                robot_memory;
+	fawkes::RecursiveLockPtr<CLIPS::Environment> clips;
+	fawkes::Logger *                             logger;
 };
 
 #endif /* FAWKES_SRC_PLUGINS_CLIPS_ROBOT_MEMORY_CLIPS_RM_TRIGGER_H_ */
