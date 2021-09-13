@@ -192,7 +192,7 @@ ClipsRestApi::cb_get_facts(WebviewRestParams &params)
 	CLIPS::Fact::pointer fact = clips->get_facts();
 	while (fact) {
 		CLIPS::Template::pointer tmpl = fact->get_template();
-		rv.push_back(std::move(gen_fact(clips, fact, formatted)));
+		rv.push_back(gen_fact(clips, fact, formatted));
 		fact = fact->next();
 	}
 
