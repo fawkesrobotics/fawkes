@@ -55,8 +55,8 @@ public:
 	virtual void finalize();
 
 	// for CLIPSFeature
-	virtual void clips_context_init(const std::string &                  env_name,
-	                                fawkes::LockPtr<CLIPS::Environment> &clips);
+	virtual void clips_context_init(const std::string &                           env_name,
+	                                fawkes::RecursiveLockPtr<CLIPS::Environment> &clips);
 	virtual void clips_context_destroyed(const std::string &env_name);
 
 	virtual void graph_changed() noexcept;
@@ -70,12 +70,12 @@ protected:
 	}
 
 private:
-	void clips_navgraph_load(fawkes::LockPtr<CLIPS::Environment> &clips);
+	void clips_navgraph_load(fawkes::RecursiveLockPtr<CLIPS::Environment> &clips);
 	void clips_navgraph_block_edge(std::string env_name, std::string from, std::string to);
 	void clips_navgraph_unblock_edge(std::string env_name, std::string from, std::string to);
 
 private:
-	std::map<std::string, fawkes::LockPtr<CLIPS::Environment>> envs_;
+	std::map<std::string, fawkes::RecursiveLockPtr<CLIPS::Environment>> envs_;
 
 	fawkes::NavGraphStaticListEdgeConstraint *edge_constraint_;
 };

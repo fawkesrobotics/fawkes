@@ -67,8 +67,8 @@ ClipsNavGraphThread::finalize()
 }
 
 void
-ClipsNavGraphThread::clips_context_init(const std::string &          env_name,
-                                        LockPtr<CLIPS::Environment> &clips)
+ClipsNavGraphThread::clips_context_init(const std::string &                   env_name,
+                                        RecursiveLockPtr<CLIPS::Environment> &clips)
 {
 	envs_[env_name] = clips;
 	logger->log_info(name(), "Called to initialize environment %s", env_name.c_str());
@@ -98,7 +98,7 @@ ClipsNavGraphThread::clips_context_destroyed(const std::string &env_name)
 }
 
 void
-ClipsNavGraphThread::clips_navgraph_load(LockPtr<CLIPS::Environment> &clips)
+ClipsNavGraphThread::clips_navgraph_load(RecursiveLockPtr<CLIPS::Environment> &clips)
 {
 	try {
 		const std::vector<NavGraphNode> &nodes = navgraph->nodes();
@@ -189,7 +189,7 @@ ClipsNavGraphThread::graph_changed() noexcept
 {
 	for (auto e : envs_) {
 		logger->log_debug(name(), "Graph changed, re-asserting in environment %s", e.first.c_str());
-		fawkes::LockPtr<CLIPS::Environment> &clips = e.second;
+		fawkes::RecursiveLockPtr<CLIPS::Environment> &clips = e.second;
 		clips.lock();
 		clips->evaluate("(navgraph-cleanup)");
 		clips_navgraph_load(clips);
