@@ -79,9 +79,6 @@ FvAcquisitionThread::FvAcquisitionThread(const char *id,
 	vision_threads        = new FvAqtVisionThreads(clock);
 	raw_subscriber_thread = NULL;
 
-	enabled_mutex_    = new Mutex(Mutex::RECURSIVE);
-	enabled_waitcond_ = new WaitCondition(enabled_mutex_);
-
 	camera_     = camera;
 	width_      = camera_->pixel_width();
 	height_     = camera_->pixel_height();
@@ -114,8 +111,6 @@ FvAcquisitionThread::~FvAcquisitionThread()
 	delete vision_threads;
 	delete camera_;
 	free(image_id_);
-	delete enabled_waitcond_;
-	delete enabled_mutex_;
 }
 
 void
@@ -257,7 +252,7 @@ FvAcquisitionThread::set_enabled(bool enabled)
 		enabled_if_->set_enabled(true);
 		enabled_if_->write();
 
-		enabled_waitcond_->wake_all();
+		enabled_waitcond_.notify_all();
 	} // else not state change
 
 	// we can safely do this every time...
@@ -389,7 +384,8 @@ FvAcquisitionThread::loop()
 
 	// in continuous mode wait for signal if disabled
 	while (mode_ == AqtContinuous && !enabled_) {
-		enabled_waitcond_->wait();
+		std::unique_lock lock{enabled_mutex_};
+		enabled_waitcond_.wait(lock);
 	}
 }
 

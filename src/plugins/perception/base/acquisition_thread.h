@@ -30,7 +30,9 @@
 #include <fvcams/shmem.h>
 #include <fvutils/color/colorspaces.h>
 
+#include <condition_variable>
 #include <map>
+#include <mutex>
 
 namespace fawkes {
 class Logger;
@@ -102,9 +104,9 @@ private:
 	                                           fawkes::Message *  message) noexcept;
 
 private:
-	bool                   enabled_;
-	fawkes::Mutex *        enabled_mutex_;
-	fawkes::WaitCondition *enabled_waitcond_;
+	bool                        enabled_;
+	std::recursive_mutex        enabled_mutex_;
+	std::condition_variable_any enabled_waitcond_;
 
 	firevision::Camera *camera_;
 	char *              image_id_;
