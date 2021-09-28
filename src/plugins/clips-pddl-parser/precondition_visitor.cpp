@@ -173,17 +173,17 @@ PreconditionToCLIPSFactVisitor::operator()(Predicate &p) const
 		                     + new_parent
 		                     + ")"
 		                       " (id "
-		                     + name + "-atom"
+		                     + name
 		                     + ")"
 		                       " (type atom)"
 		                       ")"));
 
 		res.push_back(string("(pddl-predicate"
 		                     " (part-of "
-		                     + name + "-atom"
+		                     + name
 		                     + ")"
 		                       " (id "
-		                     + name + ")" + predicate_string + " (param-names (create$" + params
+		                     + name + "-atom )" + predicate_string + " (param-names (create$" + params
 		                     + "))"
 		                       " (param-constants (create$"
 		                     + constants
