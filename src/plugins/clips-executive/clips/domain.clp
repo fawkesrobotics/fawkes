@@ -218,7 +218,6 @@
   names and param values."
   (?parent-id ?param-names ?param-values ?grounding-id)
 
-  ;(bind ?grounding-id nil)
   (do-for-all-facts ((?formula pddl-formula)) (eq ?parent-id ?formula:part-of)
     ;if no grounding fact created yet, create one
     (if (eq ?grounding-id nil) then
@@ -279,8 +278,9 @@
 )
 
 (defrule domain-check-if-atomic-formula-is-satisfied
+  "An atomic formula is satisfied when its associated predicate is satisfied."
   (declare (salience ?*SALIENCE-DOMAIN-CHECK*))
-  
+
   (pddl-grounding (id ?grounding-id))
   (pddl-formula (id ?parent-base) (type atom))
   ?parent <- (grounded-pddl-formula (id ?id)
@@ -291,10 +291,30 @@
   (and (pddl-predicate (part-of ?parent-base) (id ?child-base))
         (grounded-pddl-predicate (predicate-id ?child-base)
                                 (grounding ?grounding-id)
+                                (is-satisfied TRUE))
+  )
+  =>
+  (modify ?parent (is-satisfied TRUE))
+)
+
+(defrule domain-check-if-atomic-formula-is-unsatisfied
+  "An atomic formula is unsatisfied when its associated predicate is unsatisfied."
+  (declare (salience ?*SALIENCE-DOMAIN-CHECK*))
+
+  (pddl-grounding (id ?grounding-id))
+  (pddl-formula (id ?parent-base) (type atom))
+  ?parent <- (grounded-pddl-formula (id ?id)
+                                    (formula-id ?parent-base)
+                                    (is-satisfied TRUE)
+                                    (grounding ?grounding-id))
+
+  (and (pddl-predicate (part-of ?parent-base) (id ?child-base))
+        (grounded-pddl-predicate (predicate-id ?child-base)
+                                (grounding ?grounding-id)
                                 (is-satisfied FALSE))
   )
-  => 
-  (modify ?parent (is-satisfied TRUE))
+  =>
+  (modify ?parent (is-satisfied FALSE))
 )
 
 
@@ -347,7 +367,7 @@
                                     (is-satisfied FALSE)
                                     (grounding ?grounding-id))
  ; the formula is satisfied when there is no unsatisifed child
-  (not 
+  (not
     (and
       (pddl-formula (part-of ?parent-base) (id ?child-base))
       (grounded-pddl-formula (formula-id ?child-base)
@@ -713,7 +733,7 @@
   also a sensed effect of the operator, then remove the precondition on the
   effect. This means that part of the exogenous action may already have
   occurred before the action is selected."
-  
+
   (domain-operator (name ?op) (exogenous TRUE))
   (domain-predicate (name ?pred) (sensed TRUE) (value-predicate FALSE))
   (domain-effect (part-of ?op)
