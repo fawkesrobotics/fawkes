@@ -248,6 +248,7 @@
                      (param-names $?param-names) (param-values $?param-values)
                      (precondition nil))
   (domain-operator (name ?operator-id) (param-names $?op-param-names&:(= (length$ ?param-names) (length$ ?op-param-names))))
+	(pddl-formula (part-of ?operator-id))
   =>
   (bind ?grounding (ground-pddl-formula ?operator-id ?param-names ?param-values nil))
   (modify ?p (precondition ?grounding))
