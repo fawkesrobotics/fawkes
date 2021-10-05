@@ -305,8 +305,34 @@
   (return ?grounding-id)
 )
 
+(defrule domain-remove-formula-without-grounding
+  "Remove a formula if the linked grounding fact does not exist."
+  ?g <- (grounded-pddl-formula (grounding ?grounding-id))
+  (not (pddl-grounding (id ?grounding-id)))
+  =>
+  (retract ?g)
+)
+
+(defrule domain-remove-predicate-without-grounding
+  "Remove a predicate if the linked grounding fact does not exist."
+  ?g <- (grounded-pddl-predicate (grounding ?grounding-id))
+  (not (pddl-grounding (id ?grounding-id)))
+  =>
+  (retract ?g)
+)
+
+(defrule domain-add-formula-for-grounding
+  "Add a grounded formula for a grounding without formula."
+  (declare (salience ?*SALIENCE-DOMAIN-GROUND*))
+  (pddl-grounding (id ?grounding-id) (formula-root ?parent) (param-values $?param-values) (param-names $?param-names))
+  (pddl-formula (part-of ?parent) (id ?formula-id))
+  (not (grounded-pddl-formula (grounding ?grounding-id) (formula-id ?formula-id)))
+  =>
+  (ground-pddl-formula ?parent root ?param-names ?param-values ?grounding-id 1)
+)
+
 (defrule domain-ground-plan-action-precondition
-  "Create grounded pddl formulas for the precondition of a plan-action if it
+  "Create a grounding for the precondition of a plan-action if it
   has not been grounded yet and add a reference to the plan-action fact"
   (declare (salience ?*SALIENCE-DOMAIN-GROUND*))
   ?p <- (plan-action (id ?action-id) (action-name ?operator-id)
@@ -315,8 +341,15 @@
   (domain-operator (name ?operator-id) (param-names $?op-param-names&:(= (length$ ?param-names) (length$ ?op-param-names))))
 	(pddl-formula (part-of ?operator-id))
   =>
-  (bind ?grounding (ground-pddl-formula ?operator-id ?param-names ?param-values nil))
-  (modify ?p (precondition ?grounding))
+  ;(bind ?grounding (ground-pddl-formula ?operator-id root ?param-names ?param-values nil 1))
+  (bind ?grounding-id (sym-cat "grounding-" ?operator-id "-" (gensym*)))
+  (assert (pddl-grounding (param-names ?param-names)
+                          (param-values ?param-values)
+                          (formula-root ?operator-id)
+                          (id ?grounding-id)
+          )
+  )
+  (modify ?p (precondition ?grounding-id))
 )
 
 (defrule domain-retract-grounding-for-plan-action-if-precondition-mismatch
