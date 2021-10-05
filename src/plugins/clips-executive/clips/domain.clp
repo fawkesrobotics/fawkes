@@ -203,10 +203,37 @@
   (slot is-satisfied (type SYMBOL) (allowed-values TRUE FALSE) (default FALSE))
 )
 
+(deffunction domain-build-ground-parameter-list
+  "For multislot of parameter names, build a corresponding multislot of grounded
+  parameter values and - if available - constants."
+  (?names ?constants ?grounded-names ?grounded-values)
+
+  (bind ?values (create$))
+  (foreach ?param ?names
+    (if (neq (nth$ ?param-index ?constants) nil) then
+      (bind ?values
+        (insert$ ?values ?param-index (nth$ ?param-index ?constants)))
+    else
+      (bind ?index (member$ ?param ?grounded-names))
+      (if (not ?index) then
+        (assert (domain-error (error-type unknown-parameter) (error-msg
+          (str-cat "PDDL Predicate has unknown parameter " ?param)))
+        )
+        (return FALSE)
+      else
+        (bind ?values
+          (insert$ ?values ?param-index (nth$ ?index ?grounded-values)))
+      )
+    )
+  )
+
+  (return ?values)
+)
+
 (deffunction ground-pddl-predicate
   "Ground a PDDL predicate based on the given parameter values from a set of param names
   and param values."
-  (?parent-id ?param-names ?param-values ?grounding-id)
+  (?parent-id ?param-names ?param-values ?grounding-id ?parent-atomic-formula)
 
   (do-for-all-facts ((?predicate pddl-predicate))
         (eq ?parent-id ?predicate:part-of)
@@ -214,7 +241,14 @@
     (assert (grounded-pddl-predicate
           (id (sym-cat "grounded-" ?predicate:id "-" ?grounding-id))
           (predicate-id ?predicate:id)
-          (grounding ?grounding-id))
+          (grounding ?grounding-id)
+          (param-values (domain-build-ground-parameter-list ?predicate:param-names
+                                                            ?predicate:param-constants
+                                                            ?param-names
+                                                            ?param-values)
+          )
+          (parent-formula ?parent-atomic-formula)
+      )
     )
   )
 )
@@ -222,15 +256,37 @@
 (deffunction ground-pddl-formula
   "Ground a PDDL formula recursively based on the given values from a set of param
   names and param values."
-  (?parent-id ?param-names ?param-values ?grounding-id)
+  (?parent-id ?parent-type ?param-names ?param-values ?grounding-id ?quantifier-index)
 
+  ;if this is a quantified subformula, determine the quantified parameters
+  (bind ?param-quantified (create$))
+  (bind ?types-quantified (create$))
+  (if (or (eq ?parent-type forall) (eq ?parent-type exists))
+    then
+    (do-for-fact ((?parent pddl-formula)) (eq ?parent-id ?parent:id)
+      (bind ?param-quantified ?parent:quantified-names)
+      (bind ?types-quantified ?parent:quantified-types)
+    )
+  )
+
+  (if (>= (length$ ?param-quantified) ?quantifier-index)
+    then
+    ;recursively ground each of the quantified parameters and insert into values before continuing
+    (do-for-all-facts ((?object domain-object))
+          (eq ?object:type (nth$ ?quantifier-index ?types-quantified))
+      (bind ?index (member$ (nth$ ?quantifier-index ?param-quantified) ?param-names))
+      (bind ?param-values-new (replace$ ?param-values ?index ?index ?object:name))
+      (ground-pddl-formula ?parent-id ?parent-type ?param-names ?param-values-new ?grounding-id (+ 1 ?quantifier-index))
+    )
+    else
   (do-for-all-facts ((?formula pddl-formula)) (eq ?parent-id ?formula:part-of)
-    ;if no grounding fact created yet, create one
-    (if (eq ?grounding-id nil) then
-      (bind ?grounding (assert (pddl-grounding (id (sym-cat "grounding-" ?formula:id "-" (gensym*)))
-                                               (param-names ?param-names)
-                                               (param-values ?param-values))))
-      (bind ?grounding-id (fact-slot-value ?grounding id))
+      ;if we are quantified, get the quantified values
+      (bind ?values-quantified (create$))
+      (if (> (length$ ?param-quantified) 0)
+        then
+        (foreach ?param ?param-quantified
+          (bind ?values-quantified (create$ ?values-quantified (nth$ (member$ ?param ?param-names) ?param-values)))
+        )
     )
 
     ;recursively ground subformulas
@@ -238,11 +294,14 @@
 
     (assert (grounded-pddl-formula (formula-id ?formula:id)
                                    (id ?grounded-id)
-                                   (grounding ?grounding-id)))
+                                    (grounding ?grounding-id)
+                                    (quantified-values ?values-quantified)))
 
-    (ground-pddl-formula ?formula:id ?param-names ?param-values ?grounding-id)
-    (ground-pddl-predicate ?formula:id ?param-names ?param-values ?grounding-id)
+      (ground-pddl-formula ?formula:id ?formula:type ?param-names ?param-values ?grounding-id 1)
+      (ground-pddl-predicate ?formula:id ?param-names ?param-values ?grounding-id ?grounded-id)
   )
+  )
+
   (return ?grounding-id)
 )
 
@@ -317,7 +376,7 @@
   (grounded-pddl-predicate (predicate-id ?child-base)
                            (grounding ?grounding-id)
                            (is-satisfied TRUE)
-                           (parent ?id))
+                           (parent-formula ?id))
   =>
   (modify ?parent (is-satisfied TRUE))
 )
@@ -337,7 +396,7 @@
   (grounded-pddl-predicate (predicate-id ?child-base)
                            (grounding ?grounding-id)
                            (is-satisfied FALSE)
-                           (parent ?id))
+                           (parent-formula ?id))
   =>
   (modify ?parent (is-satisfied FALSE))
 )
@@ -470,61 +529,93 @@
   (modify ?parent (is-satisfied FALSE))
 )
 
-(deffunction domain-build-ground-parameter-list
-  "For multislot of parameter names, build a corresponding multislot of grounded
-  parameter values and - if available - constants."
-  (?names ?constants ?grounded-names ?grounded-values)
 
-  (bind ?values (create$))
-  (foreach ?param ?names
-    (if (neq (nth$ ?param-index ?constants) nil) then
-      (bind ?values
-        (insert$ ?values ?param-index (nth$ ?param-index ?constants)))
-    else
-      (bind ?index (member$ ?param ?grounded-names))
-      (if (not ?index) then
-        (assert (domain-error (error-type unknown-parameter) (error-msg
-          (str-cat "PDDL Predicate has unknown parameter " ?param)))
+(defrule domain-check-if-forall-is-satisfied
+  (declare (salience ?*SALIENCE-DOMAIN-CHECK*))
+
+  (pddl-grounding (id ?grounding-id))
+  (pddl-formula (id ?parent-base) (type forall))
+  ?parent <- (grounded-pddl-formula (id ?id)
+                                    (formula-id ?parent-base)
+                                    (is-satisfied FALSE)
+                                    (grounding ?grounding-id))
+ ; the formula is satisfied when there is no unsatisifed child
+  (not
+    (and
+      (pddl-formula (part-of ?parent-base) (id ?child-base))
+      (grounded-pddl-formula (formula-id ?child-base)
+                             (grounding ?grounding-id)
+                             (is-satisfied FALSE)
         )
-        (return FALSE)
-      else
-        (bind ?values
-          (insert$ ?values ?param-index (nth$ ?index ?grounded-values)))
       )
     )
+=>
+  (modify ?parent (is-satisfied TRUE))
   )
 
-  (return ?values)
+(defrule domain-check-if-forall-is-unsatisfied
+  (declare (salience ?*SALIENCE-DOMAIN-CHECK*))
+
+  (pddl-grounding (id ?grounding-id))
+  (pddl-formula (id ?parent-base) (type forall))
+  ?parent <- (grounded-pddl-formula (id ?id)
+                                    (formula-id ?parent-base)
+                                    (is-satisfied TRUE)
+                                    (grounding ?grounding-id))
+
+   ; the formula is unsatisfied when there is an unsatisifed child
+  (pddl-formula (part-of ?parent-base) (id ?child-base))
+  (grounded-pddl-formula (formula-id ?child-base)
+                         (grounding ?grounding-id)
+                         (is-satisfied FALSE)
+  )
+=>
+  (modify ?parent (is-satisfied FALSE))
 )
 
-(deffunction domain-check-grounding-match
-  "check if a multislot of values matches a the expected values for a multislot
-  of parameter names"
-  (?param-names ?domain-values ?predicate-constants ?grounded-params ?grounded-values)
+(defrule domain-check-if-exists-is-satisfied
+  (declare (salience ?*SALIENCE-DOMAIN-CHECK*))
 
-  (bind ?values (domain-build-ground-parameter-list ?param-names
-                                                   ?predicate-constants
-                                                   ?grounded-params
-                                                   ?grounded-values))
+  (pddl-grounding (id ?grounding-id))
 
-  (if (eq ?domain-values ?values) then
-    (return TRUE)
+  (pddl-formula (id ?parent-base) (type exists))
+  ?parent <- (grounded-pddl-formula (id ?id)
+                                    (formula-id ?parent-base)
+                                    (is-satisfied FALSE)
+                                    (grounding ?grounding-id))
+
+  ; the formula is satisfied when there is a satisifed child
+  (pddl-formula (part-of ?parent-base) (id ?child-base))
+  (grounded-pddl-formula (formula-id ?child-base)
+                         (grounding ?grounding-id)
+                         (is-satisfied TRUE)
   )
-  (return FALSE)
+ =>
+  (modify ?parent (is-satisfied TRUE))
 )
 
-(deffunction domain-check-grounded-equality
-  (?param-names ?predicate-constants ?grounded-params ?grounded-values)
+(defrule domain-check-if-exists-is-unsatisfied
+  (declare (salience ?*SALIENCE-DOMAIN-CHECK*))
 
-  (bind ?values (domain-build-ground-parameter-list ?param-names
-                                                   ?predicate-constants
-                                                   ?grounded-params
-                                                   ?grounded-values))
+  (pddl-grounding (id ?grounding-id))
+  (pddl-formula (id ?parent-base) (type exists))
+  ?parent <- (grounded-pddl-formula (id ?id)
+                                    (formula-id ?parent-base)
+                                    (is-satisfied TRUE)
+                                    (grounding ?grounding-id))
 
-  (if (eq (length ?values) 2) then
-    (return (eq (nth$ 1 ?values) (nth$ 2 ?values)))
+  ; the formula is unsatisfied when there is no satisifed child
+  (not
+    (and
+      (pddl-formula (part-of ?parent-base) (id ?child-base))
+      (grounded-pddl-formula (formula-id ?child-base)
+                              (grounding ?grounding-id)
+                              (is-satisfied TRUE)
   )
-  (return FALSE)
+    )
+  )
+=>
+  (modify ?parent (is-satisfied FALSE))
 )
 
 (defrule domain-check-grounded-predicate
@@ -538,17 +629,14 @@
   ?base-predicate <- (pddl-predicate (id ?id)
                                      (predicate ?pred&~EQUALITY)
                                      (param-names $?param-names)
-                                     (param-constants $?predicate-constants))
+                                     (param-constants $?predicate-constants)
+                     )
   ?predicate <- (grounded-pddl-predicate (predicate-id ?id)
                                          (grounding ?grounding-id)
-                                         (is-satisfied FALSE))
+                                         (is-satisfied FALSE)
+                                         (param-values $?param-values))
 
-  (domain-fact (name ?pred)
-               (param-values $?domain-values&:(domain-check-grounding-match ?param-names
-                                                                            ?domain-values
-                                                                            ?predicate-constants
-                                                                            ?grounded-params
-                                                                            ?grounded-values)))
+  (domain-fact (name ?pred) (param-values $?param-values))
 =>
   (modify ?predicate (is-satisfied TRUE))
 )
@@ -562,17 +650,14 @@
   ?base-predicate <- (pddl-predicate (id ?id)
                                      (predicate ?pred&~EQUALITY)
                                      (param-names $?param-names)
-                                     (param-constants $?predicate-constants))
+                                     (param-constants $?predicate-constants)
+                     )
   ?predicate <- (grounded-pddl-predicate (predicate-id ?id)
                                          (grounding ?grounding-id)
-                                         (is-satisfied TRUE))
+                                         (is-satisfied TRUE)
+                                         (param-values $?param-values))
 
-  (not (domain-fact (name ?pred)
-                    (param-values $?domain-values&:(domain-check-grounding-match ?param-names
-                                                                                 ?domain-values
-                                                                                 ?predicate-constants
-                                                                                 ?grounded-params
-                                                                                 ?grounded-values))))
+  (not (domain-fact (name ?pred) (param-values $?param-values)))
 =>
   (modify ?predicate (is-satisfied FALSE))
 )
@@ -581,20 +666,13 @@
 (defrule domain-check-if-predicate-equality-is-satisfied
   (declare (salience ?*SALIENCE-DOMAIN-CHECK*))
 
-  (pddl-grounding (id ?grounding-id)
-                  (param-names $?grounded-params)
-                  (param-values $?grounded-values))
   ?predicate <- (grounded-pddl-predicate (predicate-id ?id)
                                          (grounding ?grounding-id)
-                                         (is-satisfied FALSE))
+                                         (is-satisfied FALSE)
+                                         (param-values $?param-values&:(and (eq (length ?param-values) 2)
+                                                                            (eq (nth$ 1 ?param-values) (nth$ 2 ?param-values)))))
   ?base-predicate <- (pddl-predicate (id ?id)
-                                     (predicate EQUALITY)
-                                     (param-constants $?predicate-constants)
-                                     (param-names $?param-names&:
-                                                  (domain-check-grounded-equality ?param-names
-                                                                                  ?predicate-constants
-                                                                                  ?grounded-params
-                                                                                  ?grounded-values)))
+                                     (predicate EQUALITY))
 =>
   (modify ?predicate (is-satisfied TRUE))
 )
@@ -602,20 +680,13 @@
 (defrule domain-check-if-predicate-equality-is-unsatisfied
   (declare (salience ?*SALIENCE-DOMAIN-CHECK*))
 
-  (pddl-grounding (id ?grounding-id)
-                  (param-names $?grounded-params)
-                  (param-values $?grounded-values))
   ?predicate <- (grounded-pddl-predicate (predicate-id ?id)
                                          (grounding ?grounding-id)
-                                         (is-satisfied TRUE))
+                                         (is-satisfied TRUE)
+                                         (param-values $?param-values&:(not (and (eq (length ?param-values) 2)
+                                                                                 (eq (nth$ 1 ?param-values) (nth$ 2 ?param-values))))))
   ?base-predicate <- (pddl-predicate (id ?id)
-                                     (predicate EQUALITY)
-                                     (param-constants $?predicate-constants)
-                                     (param-names $?param-names&:
-                                                  (not (domain-check-grounded-equality ?param-names
-                                                                                  ?predicate-constants
-                                                                                  ?grounded-params
-                                                                                  ?grounded-values))))
+                                     (predicate EQUALITY))
 =>
   (modify ?predicate (is-satisfied FALSE))
  )
@@ -839,8 +910,15 @@
   (domain-effect (name ?effect-name) (part-of ?op))
   ?precond <- (pddl-formula (id ?precond-id) (part-of ?effect-name))
 =>
-  (bind ?grounding (ground-pddl-formula ?effect-name ?param-names ?param-values nil))
-  (modify ?pa (precondition ?grounding))
+  ;(bind ?grounding (ground-pddl-formula ?effect-name root ?param-names ?param-values nil 1))
+  (bind ?grounding-id (sym-cat "grounding-" ?effect-name "-" (gensym*)))
+  (assert (pddl-grounding (param-names ?param-names)
+                          (param-values ?param-values)
+                          (formula-root ?effect-name)
+                          (id ?grounding-id)
+          )
+  )
+  (modify ?pa (precondition ?grounding-id))
 )
 
 (deffunction intersect
