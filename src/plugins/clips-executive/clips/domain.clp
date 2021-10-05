@@ -134,6 +134,7 @@
   the relation between the source of the grounding information and the grounded instance
   explicitely."
   (slot id (type SYMBOL) (default ?NONE))
+  (slot formula-root (type SYMBOL))
 
   (multislot param-names (type SYMBOL))
   (multislot param-values (type SYMBOL))
@@ -159,7 +160,9 @@
   (slot id (type SYMBOL) (default ?NONE))
   (slot part-of (type SYMBOL))
 
-  (slot type (type SYMBOL) (allowed-values conjunction disjunction negation atom))
+  (slot type (type SYMBOL) (allowed-values conjunction disjunction negation atom forall exists))
+  (multislot quantified-names (type SYMBOL))
+  (multislot quantified-types (type SYMBOL))
 )
 
 (deftemplate grounded-pddl-formula
@@ -169,6 +172,7 @@
   (slot id (type SYMBOL) (default ?NONE))
   (slot formula-id (type SYMBOL)); reference to ungrounded base version
   (slot grounding (type SYMBOL))
+  (multislot quantified-values (type SYMBOL))
 
   (slot is-satisfied (type SYMBOL) (allowed-values TRUE FALSE) (default FALSE))
 )
@@ -184,7 +188,7 @@
   (slot predicate (type SYMBOL))
 
   (multislot param-names (type SYMBOL))
-  (multislot param-constants)
+  (multislot param-constants (type SYMBOL))
 )
 
 (deftemplate grounded-pddl-predicate
@@ -192,7 +196,9 @@
   each parameter slot and are part of a grounded formula."
   (slot id (type SYMBOL) (default ?NONE))
   (slot predicate-id (type SYMBOL)) ; reference to ungrounded base version
+  (slot parent-formula (type SYMBOL)) ; reference to the parent atomic formula
   (slot grounding (type SYMBOL))
+  (multislot param-values (type SYMBOL))
 
   (slot is-satisfied (type SYMBOL) (allowed-values TRUE FALSE) (default FALSE))
 )
