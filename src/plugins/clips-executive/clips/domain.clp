@@ -299,11 +299,11 @@
                                     (is-satisfied FALSE)
                                     (grounding ?grounding-id))
 
-  (and (pddl-predicate (part-of ?parent-base) (id ?child-base))
-        (grounded-pddl-predicate (predicate-id ?child-base)
-                                (grounding ?grounding-id)
-                                (is-satisfied TRUE))
-  )
+  (pddl-predicate (part-of ?parent-base) (id ?child-base))
+  (grounded-pddl-predicate (predicate-id ?child-base)
+                           (grounding ?grounding-id)
+                           (is-satisfied TRUE)
+                           (parent ?id))
   =>
   (modify ?parent (is-satisfied TRUE))
 )
@@ -319,11 +319,11 @@
                                     (is-satisfied TRUE)
                                     (grounding ?grounding-id))
 
-  (and (pddl-predicate (part-of ?parent-base) (id ?child-base))
-        (grounded-pddl-predicate (predicate-id ?child-base)
-                                (grounding ?grounding-id)
-                                (is-satisfied FALSE))
-  )
+  (pddl-predicate (part-of ?parent-base) (id ?child-base))
+  (grounded-pddl-predicate (predicate-id ?child-base)
+                           (grounding ?grounding-id)
+                           (is-satisfied FALSE)
+                           (parent ?id))
   =>
   (modify ?parent (is-satisfied FALSE))
 )
