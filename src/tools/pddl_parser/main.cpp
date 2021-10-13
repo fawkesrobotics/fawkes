@@ -19,6 +19,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
+#include <pddl_parser/pddl_exception.h>
 #include <pddl_parser/pddl_parser.h>
 
 #include <fstream>
@@ -40,7 +41,7 @@ main()
 	try {
 		dom = pddl_parser::PddlParser::parseDomain(str);
 	} catch (pddl_parser::PddlParserException &e) {
-		std::cout << "Error occurred during parsing: " << e.what_no_backtrace() << std::endl;
+		std::cout << "Error occurred during parsing: " << e.what() << std::endl;
 		return 1;
 	}
 
