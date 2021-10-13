@@ -20,6 +20,8 @@
 
 #include "effect_visitor.h"
 
+#include <pddl_parser/pddl_exception.h>
+
 using namespace std;
 using namespace pddl_parser;
 
