@@ -16,14 +16,16 @@
 BASEDIR = ../../..
 
 include $(BASEDIR)/etc/buildsys/config.mk
-include $(LIBSRCDIR)/pddl_parser/pddl_parser.mk
+include $(BUILDSYSDIR)/pddl_parser.mk
 
-LIBS_pddl_parser = stdc++ fawkescore fawkespddl_parser
+LIBS_pddl_parser = stdc++ fawkescore
 OBJS_pddl_parser = main.o
 OBJS_all = $(OBJS_pddl_parser)
 BINS_all = $(BINDIR)/pddl_parser
 
 ifeq ($(HAVE_PDDL_PARSER),1)
+  CFLAGS += $(CFLAGS_PDDL_PARSER)
+  LDFLAGS += $(LDFLAGS_PDDL_PARSER)
   BINS_build = $(BINS_all)
 else
 	WARN_TARGETS += warning_pddl_parser

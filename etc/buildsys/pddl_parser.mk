@@ -1,8 +1,8 @@
 #*****************************************************************************
-#                      Makefile Build System for Fawkes
+#               Makefile Build System for Fawkes: PDDL Parser
 #                            -------------------
-#   Created on Fri 13 Oct 2017 13:55:21 CEST
-#   Copyright (C) 2017 by Till Hofmann <hofmann@kbsg.rwth-aachen.de>
+#   Created on Mon Nov 07 01:06:16 2011
+#   Copyright (C) 2021 Till Hofmann <hofmann@kbsg.rwth-aachen.de>
 #
 #*****************************************************************************
 #
@@ -13,11 +13,15 @@
 #
 #*****************************************************************************
 
-include $(BASEDIR)/etc/buildsys/config.mk
-include $(BUILDSYSDIR)/boost.mk
+ifndef __buildsys_config_mk_
+$(error config.mk must be included before pddl_parser.mk)
+endif
 
-ifeq ($(HAVE_BOOST),1)
-  HAVE_PDDL_PARSER = 1
-else
-  HAVE_PDDL_PARSER = 0
+ifneq ($(PKGCONFIG),)
+  HAVE_PDDL_PARSER = $(if $(shell $(PKGCONFIG) --exists 'pddl_parser'; echo $${?/1/}),1,0)
+endif
+
+ifeq ($(HAVE_PDDL_PARSER),1)
+  CFLAGS_PDDL_PARSER = $(shell $(PKGCONFIG) --cflags 'pddl_parser')
+  LDFLAGS_PDDL_PARSER = $(shell $(PKGCONFIG) --libs 'pddl_parser')
 endif

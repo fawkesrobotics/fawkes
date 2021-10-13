@@ -14,11 +14,11 @@
 
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
-include $(LIBSRCDIR)/pddl_parser/pddl_parser.mk
+include $(BUILDSYSDIR)/pddl_parser.mk
 include $(FAWKES_BASEDIR)/src/plugins/mongodb/mongodb.mk
 
 LIBS_stn_generator = m fawkescore fawkesutils fawkesaspects fawkesbaseapp \
-                      fawkesblackboard fawkesinterface fawkespddl_parser
+                      fawkesblackboard fawkesinterface
 
 OBJS_stn_generator = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
@@ -32,8 +32,8 @@ ifneq ($(PKGCONFIG),)
 endif
 
 ifeq ($(HAVE_PDDL_PARSER)$(HAVE_MONGODB)$(HAVE_GRAPHVIZ),111)
-  CFLAGS  += $(CFLAGS_MONGODB)  $(CFLAGS_GRAPHVIZ)
-  LDFLAGS += $(LDFLAGS_MONGODB) $(LDFLAGS_GRAPHVIZ)
+  CFLAGS  += $(CFLAGS_MONGODB)  $(CFLAGS_GRAPHVIZ) $(CFLAGS_PDDL_PARSER)
+  LDFLAGS += $(LDFLAGS_MONGODB) $(LDFLAGS_GRAPHVIZ) $(LDFLAGS_PDDL_PARSER)
   PLUGINS_build = $(PLUGINS_all)
 else
   ifneq ($(HAVE_PDDL_PARSER),1)
