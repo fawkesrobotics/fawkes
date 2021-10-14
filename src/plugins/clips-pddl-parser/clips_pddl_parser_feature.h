@@ -46,6 +46,7 @@ public:
 
 private:
 	void parse_domain(std::string env_name, std::string domain_file);
+	void parse_formula(std::string env_name, std::string pddl_formula, std::string output_id);
 
 private:
 	fawkes::Logger *                                           logger_;
