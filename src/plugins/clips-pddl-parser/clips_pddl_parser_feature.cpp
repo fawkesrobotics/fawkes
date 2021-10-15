@@ -68,6 +68,10 @@ PDDLCLIPSFeature::clips_context_init(const string &                       env_na
 	                    sigc::slot<void, string>(
 	                      sigc::bind<0>(sigc::mem_fun(*this, &PDDLCLIPSFeature::parse_domain),
 	                                    env_name)));
+	clips->add_function("parse-pddl-formula",
+	                    sigc::slot<void, string, string>(
+	                      sigc::bind<0>(sigc::mem_fun(*this, &PDDLCLIPSFeature::parse_formula),
+	                                    env_name)));
 }
 
 /** Clean up a context.
@@ -160,5 +164,32 @@ PDDLCLIPSFeature::parse_domain(std::string env_name, std::string domain_file)
 		for (auto &fact : effect_facts) {
 			env.assert_fact(fact);
 		}
+	}
+}
+
+/** CLIPS function to parse a PDDL formula.
+ * This parses the given domain and asserts domain facts for all parts of the
+ * domain.
+ * @param env_name The name of the calling environment
+ * @param pddl_formula The formula as string
+ * @param output_id The id that the generated CLIPS fact should have
+ */
+void
+PDDLCLIPSFeature::parse_formula(std::string env_name,
+                                std::string pddl_formula,
+                                std::string output_id)
+{
+	fawkes::MutexLocker lock(envs_[env_name].objmutex_ptr());
+	CLIPS::Environment &env = **(envs_[env_name]);
+	Expression          formula;
+	try {
+		formula = PddlParser::parseFormula(pddl_formula);
+	} catch (PddlParserException &e) {
+		logger_->log_error(("PDDLCLIPS|" + env_name).c_str(), "Failed to parse formula: %s", e.what());
+	}
+	vector<string> formula_facts =
+	  boost::apply_visitor(PreconditionToCLIPSFactVisitor(output_id, 1, true), formula.expression);
+	for (const auto &fact : formula_facts) {
+		env.assert_fact(fact);
 	}
 }
