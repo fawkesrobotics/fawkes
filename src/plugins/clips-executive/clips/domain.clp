@@ -279,27 +279,27 @@
       (ground-pddl-formula ?parent-id ?parent-type ?param-names ?param-values-new ?grounding-id (+ 1 ?quantifier-index))
     )
     else
-  (do-for-all-facts ((?formula pddl-formula)) (eq ?parent-id ?formula:part-of)
-      ;if we are quantified, get the quantified values
-      (bind ?values-quantified (create$))
-      (if (> (length$ ?param-quantified) 0)
-        then
-        (foreach ?param ?param-quantified
-          (bind ?values-quantified (create$ ?values-quantified (nth$ (member$ ?param ?param-names) ?param-values)))
-        )
+    (do-for-all-facts ((?formula pddl-formula)) (eq ?parent-id ?formula:part-of)
+        ;if we are quantified, get the quantified values
+        (bind ?values-quantified (create$))
+        (if (> (length$ ?param-quantified) 0)
+          then
+          (foreach ?param ?param-quantified
+            (bind ?values-quantified (create$ ?values-quantified (nth$ (member$ ?param ?param-names) ?param-values)))
+          )
+      )
+
+      ;recursively ground subformulas
+      (bind ?grounded-id (sym-cat "grounded-" ?formula:id "-" (gensym*)))
+
+      (assert (grounded-pddl-formula (formula-id ?formula:id)
+                                    (id ?grounded-id)
+                                      (grounding ?grounding-id)
+                                      (quantified-values ?values-quantified)))
+
+        (ground-pddl-formula ?formula:id ?formula:type ?param-names ?param-values ?grounding-id 1)
+        (ground-pddl-predicate ?formula:id ?param-names ?param-values ?grounding-id ?grounded-id)
     )
-
-    ;recursively ground subformulas
-    (bind ?grounded-id (sym-cat "grounded-" ?formula:id "-" (gensym*)))
-
-    (assert (grounded-pddl-formula (formula-id ?formula:id)
-                                   (id ?grounded-id)
-                                    (grounding ?grounding-id)
-                                    (quantified-values ?values-quantified)))
-
-      (ground-pddl-formula ?formula:id ?formula:type ?param-names ?param-values ?grounding-id 1)
-      (ground-pddl-predicate ?formula:id ?param-names ?param-values ?grounding-id ?grounded-id)
-  )
   )
 
   (return ?grounding-id)
