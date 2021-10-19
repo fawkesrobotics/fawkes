@@ -321,12 +321,33 @@
   (retract ?g)
 )
 
+(deffunction domain-exists-objects-for-each-quantified-type
+  (?formula-id)
+
+  (do-for-fact ((?formula pddl-formula)) (eq ?formula:id ?formula-id)
+    (foreach ?type ?formula:quantified-types
+      (if (not (any-factp ((?object domain-object)) (eq ?object:type ?type)))
+        then
+        (return FALSE)
+      )
+    )
+    (do-for-all-facts ((?child pddl-formula)) (eq ?child:part-of ?formula:id)
+      (if (not (domain-exists-objects-for-each-quantified-type ?child:id))
+        then
+        (return FALSE)
+      )
+    )
+  )
+  (return TRUE)
+)
+
 (defrule domain-add-formula-for-grounding
   "Add a grounded formula for a grounding without formula."
   (declare (salience ?*SALIENCE-DOMAIN-GROUND*))
   (pddl-grounding (id ?grounding-id) (formula-root ?parent) (param-values $?param-values) (param-names $?param-names))
   (pddl-formula (part-of ?parent) (id ?formula-id))
   (not (grounded-pddl-formula (grounding ?grounding-id) (formula-id ?formula-id)))
+  (test (domain-exists-objects-for-each-quantified-type ?formula-id))
   =>
   (ground-pddl-formula ?parent root ?param-names ?param-values ?grounding-id 1)
 )
