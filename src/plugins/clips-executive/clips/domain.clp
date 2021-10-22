@@ -1161,19 +1161,23 @@
 (defrule domain-action-final
   "After the effects of an action have been applied, change it to FINAL."
   (declare (salience ?*SALIENCE-DOMAIN-APPLY*))
-  ?a <- (plan-action (id ?action-id) (state EFFECTS-APPLIED))
+  ?a <- (plan-action (id ?action-id) (state EFFECTS-APPLIED) (precondition ?grounding-id))
+  ?g <- (pddl-grounding (id ?grounding-id))
   =>
-  (modify ?a (state FINAL))
-  (domain-retract-grounding)
+  (modify ?a (state FINAL) (precondition nil))
+  ;(domain-retract-grounding)
+  (retract ?g)
 )
 
 (defrule domain-action-failed
   "An action has failed."
   (declare (salience ?*SALIENCE-DOMAIN-APPLY*))
-  ?a <- (plan-action (id ?action-id) (state EXECUTION-FAILED))
+  ?a <- (plan-action (id ?action-id) (state EXECUTION-FAILED) (precondition ?grounding-id))
+  ?g <- (pddl-grounding (id ?grounding-id))
   =>
-  (modify ?a (state FAILED))
-  (domain-retract-grounding)
+  (modify ?a (state FAILED) (precondition nil))
+  ;(domain-retract-grounding)
+  (retract ?g)
 )
 
 (defrule domain-check-if-action-is-executable-without-precondition
