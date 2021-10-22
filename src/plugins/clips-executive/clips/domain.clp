@@ -366,9 +366,11 @@
   (declare (salience ?*SALIENCE-DOMAIN-GROUND*))
   ?p <- (plan-action (id ?action-id) (action-name ?operator-id)
                      (param-names $?param-names) (param-values $?param-values)
-                     (precondition nil))
+                     (precondition nil)
+                     (goal-id ?goal-id))
   (domain-operator (name ?operator-id) (param-names $?op-param-names&:(= (length$ ?param-names) (length$ ?op-param-names))))
 	(pddl-formula (part-of ?operator-id))
+  (goal (id ?goal-id) (mode FORMULATED|SELECTED|EXPANDED|COMMITTED|DISPATCHED))
   =>
   ;(bind ?grounding (ground-pddl-formula ?operator-id root ?param-names ?param-values nil 1))
   (bind ?grounding-id (sym-cat "grounding-" ?operator-id "-" (gensym*)))
