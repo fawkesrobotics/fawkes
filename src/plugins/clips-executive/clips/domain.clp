@@ -1191,6 +1191,7 @@
                           (action-name ?action-name)
                           (executable FALSE)
                           (precondition nil))
+  (not (pddl-formula (part-of ?action-name)))
 =>
   (modify ?action (executable TRUE))
 )
