@@ -352,6 +352,38 @@
   (ground-pddl-formula ?parent root ?param-names ?param-values ?grounding-id 1)
 )
 
+(defrule domain-retract-quantified-subtree-if-object-is-removed
+  "If a formula is grounded with a certain value for a certain type but the corresponding
+  object does not exist (anymore), retract the formula to trigger a new grounding of it."
+  (pddl-formula (id ?parent) (quantified-types $?quantified-types&:( > (length$ ?quantified-types) 0)) (type forall|exists))
+  (pddl-formula (id ?formula) (part-of ?parent))
+  (grounded-pddl-formula (quantified-values $?quantified-values&:( > (length$ ?quantified-values) 0)) (formula-id ?formula) (grounding ?grounding-id))
+  (not (domain-object (type ?object-type) (name ?object-name&:(and (member$ ?object-name ?quantified-values) (eq (member$ ?object-name ?quantified-values) (member$ ?object-type ?quantified-types))))))
+  =>
+  (do-for-all-facts ((?formula grounded-pddl-formula)) (eq ?formula:grounding ?grounding-id)
+    (retract ?formula)
+  )
+  (do-for-all-facts ((?predicate grounded-pddl-predicate)) (eq ?predicate:grounding ?grounding-id)
+    (retract ?predicate)
+  )
+)
+
+(defrule domain-add-quantified-subtree-if-object-is-added
+  "If there is a domain object of a type that is quantified but it is not locally
+  grounded retract the formula to trigger a new grounding of it."
+  (domain-object (type ?object-type) (name ?object-name))
+  (pddl-grounding (id ?grounding-id))
+  (pddl-formula (id ?parent) (quantified-types $? ?object-type $?) (type forall|exists))
+  (grounded-pddl-formula (formula-id ?parent) (grounding ?grounding-id))
+  (pddl-formula (id ?formula) (part-of ?parent))
+  (not (grounded-pddl-formula (quantified-values $? ?object-name $?) (formula-id ?id) (grounding ?grounding-id)))
+  =>
+  (do-for-all-facts ((?formula-fact grounded-pddl-formula)) (eq ?formula-fact:grounding ?grounding-id)
+    (retract ?formula-fact)
+  )
+  (do-for-all-facts ((?predicate grounded-pddl-predicate)) (eq ?predicate:grounding ?grounding-id)
+    (retract ?predicate)
+  )
 (defrule domain-remove-grounding-for-plan-action-if-precondition-mismatch
   "sometimes it is useful to switch the params of a plan-action. Remove grounding to
   trigger the grounding process again in such a case."
