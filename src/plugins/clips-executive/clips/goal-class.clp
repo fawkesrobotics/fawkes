@@ -29,7 +29,6 @@
 (deffunction goal-class-create-grounding
     (?goal-class ?param-types ?param-names ?param-names-left ?param-constants ?param-quantified ?param-values)
 
-
     (if (> (length$ ?param-types) 0)
         then
         (if (neq (nth$ 1 ?param-constants) nil)
@@ -101,4 +100,22 @@
     )
     =>
     (goal-class-create-grounding ?class-id ?param-types ?param-names ?param-names ?param-constants ?param-quantified (create$ ))
+)
+
+(defrule goal-class-retract-unbased-grounding
+    "If there is a grounding of a goal class using a value that does not exist anymore,
+    retract the grounding to trigger the removal of the formula. "
+    (goal-class (class ?class-id)
+                (param-names $?param-names)
+                (param-constants $?param-constants)
+                (param-types $?param-types)
+                (param-quantified $?param-quantified)
+    )
+    (pddl-formula (part-of ?class-id) (id ?formula-id))
+    ?g <- (pddl-grounding (id ?grounding-id) (param-values $? ?value&~nil $?))
+    (grounded-pddl-formula (formula-id ?formula-id) (grounding ?grounding-id))
+    (not (domain-object (name ?value)))
+    =>
+    (printout t ?value crlf)
+    (retract ?g)
 )
