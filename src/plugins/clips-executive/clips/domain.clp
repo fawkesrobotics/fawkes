@@ -188,7 +188,7 @@
   (slot predicate (type SYMBOL))
 
   (multislot param-names (type SYMBOL))
-  (multislot param-constants (type SYMBOL))
+  (multislot param-constants )
 )
 
 (deftemplate grounded-pddl-predicate
@@ -384,6 +384,8 @@
   (do-for-all-facts ((?predicate grounded-pddl-predicate)) (eq ?predicate:grounding ?grounding-id)
     (retract ?predicate)
   )
+)
+
 (defrule domain-remove-grounding-for-plan-action-if-precondition-mismatch
   "sometimes it is useful to switch the params of a plan-action. Remove grounding to
   trigger the grounding process again in such a case."
@@ -392,6 +394,7 @@
   =>
   (retract ?g)
 )
+
 (defrule domain-ground-plan-action-precondition
   "Create a grounding for the precondition of a plan-action if it
   has not been grounded yet and add a reference to the plan-action fact"
