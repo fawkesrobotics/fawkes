@@ -63,6 +63,9 @@
 )
 
 (defrule goal-class-grounding
+    "If there is a domain-object matching the type of a parameter of a goal class, or if
+    no grounding exists for the goal class at all (e.g. for fully quantified formulas)
+    generate the possible groundings that do not exist yet. "
     (domain-facts-loaded)
     (goal-class (class ?class-id)
                 (param-names $?param-names)
