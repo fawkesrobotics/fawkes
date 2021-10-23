@@ -386,15 +386,6 @@
   )
 )
 
-(defrule domain-remove-grounding-for-plan-action-if-precondition-mismatch
-  "sometimes it is useful to switch the params of a plan-action. Remove grounding to
-  trigger the grounding process again in such a case."
-  ?g <- (pddl-grounding (param-values $?param-values) (id ?grounding))
-  (plan-action (precondition ?grounding) (param-values ~$?param-values))
-  =>
-  (retract ?g)
-)
-
 (defrule domain-ground-plan-action-precondition
   "Create a grounding for the precondition of a plan-action if it
   has not been grounded yet and add a reference to the plan-action fact"
