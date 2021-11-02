@@ -56,25 +56,34 @@ PreconditionToCLIPSFactVisitor::operator()(pddl_parser::QuantifiedFormula &q) co
 	std::stringstream        typestream;
 	std::stringstream        namestream;
 
-	std::stringstream        identifierstream;
+	std::stringstream identifierstream;
 	identifierstream << parent_ << sub_counter_;
 	std::string id = identifierstream.str();
 
-	for(const auto& value:q.args) {
+	for (const auto &value : q.args) {
 		typestream << value.second << " ";
 		namestream << value.first << " ";
 	}
 	res.push_back(std::string("(pddl-formula "
-								" (id " + id +") "
-								" (part-of " + parent_ +") "
-								" (type " + q.quantifier  + ") "
-								"(quantified-names "+namestream.str()+") "
-								"(quantified-types "+typestream.str()+"))"
+	                          " (id "
+	                          + id
+	                          + ") "
+	                            " (part-of "
+	                          + parent_
+	                          + ") "
+	                            " (type "
+	                          + q.quantifier
+	                          + ") "
+	                            "(quantified-names "
+	                          + namestream.str()
+	                          + ") "
+	                            "(quantified-types "
+	                          + typestream.str() + "))"
 
-	));
+	                          ));
 
 	std::vector<std::string> args =
-		boost::apply_visitor(PreconditionToCLIPSFactVisitor(id, 1), q.sub_expr.expression);
+	  boost::apply_visitor(PreconditionToCLIPSFactVisitor(id, 1), q.sub_expr.expression);
 	res.insert(res.end(), args.begin(), args.end());
 
 	return res;
