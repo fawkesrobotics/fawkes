@@ -455,6 +455,20 @@
 	)
 )
 
+(defrule wm-sync-domain-reference-updated
+	"If the wm-fact is newer than the reference in the sync-map entry, but no object
+	of the specified type exists, update the reference. This inconsistency is caused
+	by a robmem update to the wm-fact that does not change its contents. "
+	(declare (salience ?*SALIENCE-WM-SYNC-ADD*))
+	?wm <- (wm-sync-map-object-type (wm-fact-id ?id) (wm-fact-idx ?wf-idx)
+																	(domain-object-type ?type))
+	?wf <- (wm-fact (id ?id) (type SYMBOL) (is-list TRUE) (values ))
+	(not (domain-object (name ?name) (type ?type)))
+	(test (> (fact-index ?wf) ?wf-idx))
+	=>
+	(modify ?wm (wm-fact-idx (fact-index ?wf)))
+)
+
 (defrule wm-sync-domain-object-added
 	"For a recently added domain objects, add a wm-fact."
   (declare (salience ?*SALIENCE-WM-SYNC-ADD*))
