@@ -173,6 +173,7 @@
   (slot formula-id (type SYMBOL)); reference to ungrounded base version
   (slot grounding (type SYMBOL))
   (multislot quantified-values (type SYMBOL))
+  (slot grounded-parent (type SYMBOL))
 
   (slot is-satisfied (type SYMBOL) (allowed-values TRUE FALSE) (default FALSE))
 )
@@ -256,7 +257,7 @@
 (deffunction ground-pddl-formula
   "Ground a PDDL formula recursively based on the given values from a set of param
   names and param values."
-  (?parent-id ?parent-type ?param-names ?param-values ?grounding-id ?quantifier-index)
+  (?parent-id ?parent-type ?grounded-parent-id ?param-names ?param-values ?grounding-id ?quantifier-index)
 
   ;if this is a quantified subformula, determine the quantified parameters
   (bind ?param-quantified (create$))
@@ -276,28 +277,29 @@
           (eq ?object:type (nth$ ?quantifier-index ?types-quantified))
       (bind ?index (member$ (nth$ ?quantifier-index ?param-quantified) ?param-names))
       (bind ?param-values-new (replace$ ?param-values ?index ?index ?object:name))
-      (ground-pddl-formula ?parent-id ?parent-type ?param-names ?param-values-new ?grounding-id (+ 1 ?quantifier-index))
+      (ground-pddl-formula ?parent-id ?parent-type ?grounded-parent-id ?param-names ?param-values-new ?grounding-id (+ 1 ?quantifier-index))
     )
     else
     (do-for-all-facts ((?formula pddl-formula)) (eq ?parent-id ?formula:part-of)
-        ;if we are quantified, get the quantified values
-        (bind ?values-quantified (create$))
-        (if (> (length$ ?param-quantified) 0)
-          then
-          (foreach ?param ?param-quantified
-            (bind ?values-quantified (create$ ?values-quantified (nth$ (member$ ?param ?param-names) ?param-values)))
-          )
+      ;if we are quantified, get the quantified values
+      (bind ?values-quantified (create$))
+      (if (> (length$ ?param-quantified) 0)
+        then
+        (foreach ?param ?param-quantified
+          (bind ?values-quantified (create$ ?values-quantified (nth$ (member$ ?param ?param-names) ?param-values)))
+        )
       )
 
       ;recursively ground subformulas
       (bind ?grounded-id (sym-cat "grounded-" ?formula:id "-" (gensym*)))
 
       (assert (grounded-pddl-formula (formula-id ?formula:id)
-                                    (id ?grounded-id)
-                                      (grounding ?grounding-id)
-                                      (quantified-values ?values-quantified)))
+                                     (id ?grounded-id)
+                                     (grounded-parent ?grounded-parent-id)
+                                     (grounding ?grounding-id)
+                                     (quantified-values ?values-quantified)))
 
-        (ground-pddl-formula ?formula:id ?formula:type ?param-names ?param-values ?grounding-id 1)
+        (ground-pddl-formula ?formula:id ?formula:type ?grounded-id ?param-names ?param-values ?grounding-id 1)
         (ground-pddl-predicate ?formula:id ?param-names ?param-values ?grounding-id ?grounded-id)
     )
   )
@@ -349,7 +351,7 @@
   (not (grounded-pddl-formula (grounding ?grounding-id) (formula-id ?formula-id)))
   (test (domain-exists-objects-for-each-quantified-type ?formula-id))
   =>
-  (ground-pddl-formula ?parent root ?param-names ?param-values ?grounding-id 1)
+  (ground-pddl-formula ?parent root root ?param-names ?param-values ?grounding-id 1)
 )
 
 (defrule domain-retract-quantified-subtree-if-object-is-removed
