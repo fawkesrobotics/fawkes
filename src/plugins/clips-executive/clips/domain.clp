@@ -500,7 +500,8 @@
   (pddl-formula (part-of ?parent-base) (id ?child-base))
   (grounded-pddl-formula (formula-id ?child-base)
                          (grounding ?grounding-id)
-                         (is-satisfied FALSE))
+                         (is-satisfied FALSE)
+                         (grounded-parent ?id))
 =>
   (modify ?parent (is-satisfied TRUE))
 )
@@ -520,7 +521,8 @@
   (grounded-pddl-formula (formula-id ?child-base)
                          (grounding ?grounding-id)
                          (id ~nil)
-                         (is-satisfied TRUE))
+                         (is-satisfied TRUE)
+                         (grounded-parent ?id))
 =>
   (modify ?parent (is-satisfied FALSE))
 )
@@ -541,6 +543,7 @@
       (grounded-pddl-formula (formula-id ?child-base)
                              (grounding ?grounding-id)
                              (is-satisfied FALSE)
+                             (grounded-parent ?id)
       )
     )
   )
@@ -563,6 +566,7 @@
   (grounded-pddl-formula (formula-id ?child-base)
                          (grounding ?grounding-id)
                          (is-satisfied FALSE)
+                         (grounded-parent ?id)
   )
 =>
   (modify ?parent (is-satisfied FALSE))
@@ -584,6 +588,7 @@
   (grounded-pddl-formula (formula-id ?child-base)
                          (grounding ?grounding-id)
                          (is-satisfied TRUE)
+                         (grounded-parent ?id)
   )
  =>
   (modify ?parent (is-satisfied TRUE))
@@ -606,6 +611,7 @@
       (grounded-pddl-formula (formula-id ?child-base)
                               (grounding ?grounding-id)
                               (is-satisfied TRUE)
+                              (grounded-parent ?id)
       )
     )
   )
@@ -630,6 +636,7 @@
       (grounded-pddl-formula (formula-id ?child-base)
                              (grounding ?grounding-id)
                              (is-satisfied FALSE)
+                             (grounded-parent ?id)
         )
       )
     )
@@ -652,6 +659,7 @@
   (grounded-pddl-formula (formula-id ?child-base)
                          (grounding ?grounding-id)
                          (is-satisfied FALSE)
+                         (grounded-parent ?id)
   )
 =>
   (modify ?parent (is-satisfied FALSE))
@@ -673,6 +681,7 @@
   (grounded-pddl-formula (formula-id ?child-base)
                          (grounding ?grounding-id)
                          (is-satisfied TRUE)
+                         (grounded-parent ?id)
   )
  =>
   (modify ?parent (is-satisfied TRUE))
@@ -695,6 +704,7 @@
       (grounded-pddl-formula (formula-id ?child-base)
                               (grounding ?grounding-id)
                               (is-satisfied TRUE)
+                              (grounded-parent ?id)
   )
     )
   )
