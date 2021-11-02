@@ -18,6 +18,7 @@
     (slot class (type SYMBOL))
     (slot type (type SYMBOL) (allowed-values ACHIEVE MAINTAIN) (default ACHIEVE))
     (slot sub-type (type SYMBOL))
+    (multislot meta)
     (multislot param-names)
     (multislot param-constants)
     (multislot param-quantified)
