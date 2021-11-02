@@ -38,8 +38,14 @@
             else
             (if (not (member$ (nth$ 1 ?param-names) ?param-quantified))
                 then
+                ;ground by domain objects
                 (do-for-all-facts ((?object domain-object)) (eq ?object:type (nth$ 1 ?param-types))
                     (bind ?param-values-new (insert$ ?param-values (+ 1 (length$ ?param-values)) ?object:name))
+                    (goal-class-create-grounding ?goal-class (delete$ ?param-types 1 1) (delete$ ?param-names 1 1) ?param-names-left (delete$ ?param-constants 1 1) ?param-quantified ?param-values-new)
+                )
+                ;ground by domain constants
+                (do-for-all-facts ((?constant domain-constant)) (eq ?constant:type (nth$ 1 ?param-types))
+                    (bind ?param-values-new (insert$ ?param-values (+ 1 (length$ ?param-values)) ?constant:value))
                     (goal-class-create-grounding ?goal-class (delete$ ?param-types 1 1) (delete$ ?param-names 1 1) ?param-names-left (delete$ ?param-constants 1 1) ?param-quantified ?param-values-new)
                 )
                 else
@@ -50,6 +56,7 @@
         else
         (if (not (any-factp ((?grounding pddl-grounding)) (and (eq ?grounding:formula-root ?goal-class) (eq ?grounding:param-values ?param-values))))
             then
+            (printout t "Adding new Groundings: " ?param-values " for " ?goal-class crlf)
             (bind ?grounding-id (sym-cat "grounding-" ?goal-class "-" (gensym*)))
             (assert (pddl-grounding (param-names ?param-names-left)
                                     (param-values ?param-values)
@@ -112,10 +119,12 @@
                 (param-quantified $?param-quantified)
     )
     (pddl-formula (part-of ?class-id) (id ?formula-id))
-    ?g <- (pddl-grounding (id ?grounding-id) (param-values $? ?value&~nil $?))
-    (grounded-pddl-formula (formula-id ?formula-id) (grounding ?grounding-id))
-    (not (domain-object (name ?value)))
+    ?g <- (pddl-grounding (id ?grounding-id) (param-values $? ?value&~nil $?) (formula-root ?formula-id))
+    (not (and  (domain-object (name ?value))
+               (domain-constant (value ?value))
+        )
+    )
     =>
-    (printout t ?value crlf)
+    (printout t "Retracting grounding" ?grounding-id " because value " ?value " is " crlf)
     (retract ?g)
 )

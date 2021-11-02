@@ -19,6 +19,13 @@
   (slot type (type SYMBOL) (default object))
 )
 
+(deftemplate domain-constant
+  "A constant in the domain of the given type. The type must refer to
+   the name of an existing type and existing constant value."
+  (slot type (type SYMBOL))
+  (slot value (type SYMBOL))
+)
+
 (deftemplate domain-predicate
 	"Representation of a predicate specification."
   (slot name (type SYMBOL) (default ?NONE))
