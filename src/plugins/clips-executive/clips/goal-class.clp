@@ -93,15 +93,13 @@
 
             (not
                 (and
-                    (pddl-grounding (id ?grounding-id) (param-names $?param-names) (param-values $? ?object $?))
-                    (grounded-pddl-formula (formula-id ?formula-id) (grounding ?grounding-id))
+                    (pddl-grounding (id ?grounding-id) (formula-root ?formula-id) (param-names $?param-names) (param-values $? ?object $?))
                 )
             )
         )
         (not
             (and
-                (pddl-grounding (id ?grounding-id))
-                (grounded-pddl-formula (formula-id ?formula-id) (grounding ?grounding-id))
+                (pddl-grounding (id ?grounding-id) (formula-root ?formula-id))
             )
         )
     )
