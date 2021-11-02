@@ -133,12 +133,8 @@ PDDLCLIPSFeature::parse_domain(std::string env_name, std::string domain_file)
 		                  ")");
 	}
 	for (auto &constant : domain.constants) {
-		string type_string = "";
-		for (auto &param : constant.second) {
-			type_string += param;
-		}
 		for (auto &param : constant.first) {
-			env.assert_fact("(domain-constant (value " + param + ") (type " + type_string + "))");
+			env.assert_fact("(domain-constant (value " + param + ") (type " + constant.second + "))");
 		}
 	}
 
