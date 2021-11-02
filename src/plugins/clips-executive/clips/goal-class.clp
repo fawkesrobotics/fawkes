@@ -128,3 +128,12 @@
     (printout t "Retracting grounding" ?grounding-id " because value " ?value " is " crlf)
     (retract ?g)
 )
+
+(defrule goal-class-assert-precondition-formula-for-class
+    "If there is a goal class that doesn't have its precondition formula
+    translated to a set of PDDL formula facts yet, parse its formula string."
+    (goal-class (class ?cid) (preconditions ?prec))
+    (not (pddl-formula (part-of ?cid)))
+    =>
+    (parse-pddl-formula ?prec (str-cat ?cid))
+)
