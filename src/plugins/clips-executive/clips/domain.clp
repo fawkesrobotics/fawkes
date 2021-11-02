@@ -307,6 +307,14 @@
   (return ?grounding-id)
 )
 
+(defrule domain-remove-grounded-formula-without-parent
+  "Remove a grounded formula if it loses it's grounding parent. "
+  ?g <- (grounded-pddl-formula (grounded-parent ?parent-id&~root))
+  (not (grounded-pddl-formula (id ?parent-id)))
+  =>
+  (retract ?g)
+)
+
 (defrule domain-remove-formula-without-grounding
   "Remove a formula if the linked grounding fact does not exist."
   ?g <- (grounded-pddl-formula (grounding ?grounding-id))
@@ -359,32 +367,39 @@
   object does not exist (anymore), retract the formula to trigger a new grounding of it."
   (pddl-formula (id ?parent) (quantified-types $?quantified-types&:( > (length$ ?quantified-types) 0)) (type forall|exists))
   (pddl-formula (id ?formula) (part-of ?parent))
-  (grounded-pddl-formula (quantified-values $?quantified-values&:( > (length$ ?quantified-values) 0)) (formula-id ?formula) (grounding ?grounding-id))
+  ?g <- (grounded-pddl-formula (quantified-values $?quantified-values&:( > (length$ ?quantified-values) 0)) (formula-id ?formula) (grounding ?grounding-id))
   (not (domain-object (type ?object-type) (name ?object-name&:(and (member$ ?object-name ?quantified-values) (eq (member$ ?object-name ?quantified-values) (member$ ?object-type ?quantified-types))))))
   =>
-  (do-for-all-facts ((?formula grounded-pddl-formula)) (eq ?formula:grounding ?grounding-id)
-    (retract ?formula)
-  )
-  (do-for-all-facts ((?predicate grounded-pddl-predicate)) (eq ?predicate:grounding ?grounding-id)
-    (retract ?predicate)
-  )
+  (retract ?g)
 )
 
 (defrule domain-add-quantified-subtree-if-object-is-added
-  "If there is a domain object of a type that is quantified but it is not locally
-  grounded retract the formula to trigger a new grounding of it."
+  "If there is a domain object of a type that is quantified but it is not grounded under
+  a quantifier in a formula, add the quantified subformulas containing it as grounding. "
   (domain-object (type ?object-type) (name ?object-name))
-  (pddl-grounding (id ?grounding-id))
-  (pddl-formula (id ?parent) (quantified-types $? ?object-type $?) (type forall|exists))
-  (grounded-pddl-formula (formula-id ?parent) (grounding ?grounding-id))
+  (pddl-grounding (id ?grounding-id) (param-names $?param-names) (param-values $?param-values))
+  (pddl-formula (id ?parent) (quantified-types $?types&:(member$ ?object-type ?types)) (quantified-names $?names) (type ?parent-type&forall|exists))
+  (grounded-pddl-formula (formula-id ?parent) (grounding ?grounding-id) (id ?grounded-parent-id))
   (pddl-formula (id ?formula) (part-of ?parent))
-  (not (grounded-pddl-formula (quantified-values $? ?object-name $?) (formula-id ?id) (grounding ?grounding-id)))
+  (not (grounded-pddl-formula (quantified-values $?values&:(eq (member$ ?object-type ?types) (member$ ?object-name ?values))) (formula-id ?id) (grounding ?grounding-id)))
+
+  ;use existing grounding as basis
+  (domain-object (type ?object-type) (name ?ex-object-name))
+  (grounded-pddl-formula (quantified-values $?ex-objects&:(eq (member$ ?object-type ?types) (member$ ?ex-object-name ?ex-objects))) (formula-id ?id) (grounding ?grounding-id))
   =>
-  (do-for-all-facts ((?formula-fact grounded-pddl-formula)) (eq ?formula-fact:grounding ?grounding-id)
-    (retract ?formula-fact)
-  )
-  (do-for-all-facts ((?predicate grounded-pddl-predicate)) (eq ?predicate:grounding ?grounding-id)
-    (retract ?predicate)
+  (do-for-all-facts ((?q-sf grounded-pddl-formula)) (and (eq ?q-sf:formula-id ?id) (eq ?q-sf:grounding ?grounding-id) (eq (member$ ?object-type ?types) (member$ ?ex-object-name ?q-sf:quantified-values)))
+    (bind ?new-param-values ?param-values)
+    (loop-for-count (?cnt 1 (length$ ?param-names)) do
+      (bind ?index (member$ (nth$ ?cnt ?param-names) ?names))
+      (if ?index then
+        (if (eq (nth$ ?index ?ex-objects) ?ex-object-name) then
+          (bind ?new-param-values (replace$ ?new-param-values ?cnt ?cnt ?object-name))
+        else
+          (bind ?new-param-values (replace$ ?new-param-values ?cnt ?cnt (nth$ ?index ?ex-objects)))
+        )
+      )
+    )
+    (ground-pddl-formula ?parent ?parent-type ?grounded-parent-id ?param-names ?new-param-values ?grounding-id (+ (length$ ?param-names) 1))
   )
 )
 
