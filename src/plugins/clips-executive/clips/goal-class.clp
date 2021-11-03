@@ -16,6 +16,7 @@
     satisfcation.
     "
     (slot class (type SYMBOL))
+    (slot id (type SYMBOL))
     (slot type (type SYMBOL) (allowed-values ACHIEVE MAINTAIN) (default ACHIEVE))
     (slot sub-type (type SYMBOL))
     (multislot meta)
@@ -28,43 +29,43 @@
 )
 
 (deffunction goal-class-create-grounding
-    (?goal-class ?param-types ?param-names ?param-names-left ?param-constants ?param-quantified ?param-values)
+    (?goal-class-id ?param-types ?param-names ?param-names-left ?param-constants ?param-quantified ?param-values)
 
     (if (> (length$ ?param-types) 0)
         then
         (if (neq (nth$ 1 ?param-constants) nil)
             then
                 (bind ?param-values-new (insert$ ?param-values (+ 1 (length$ ?param-values)) (nth$ 1 ?param-constants)))
-                (goal-class-create-grounding ?goal-class (delete$ ?param-types 1 1) (delete$ ?param-names 1 1) ?param-names-left  (delete$ ?param-constants 1 1) ?param-quantified ?param-values-new)
+                (goal-class-create-grounding ?goal-class-id (delete$ ?param-types 1 1) (delete$ ?param-names 1 1) ?param-names-left  (delete$ ?param-constants 1 1) ?param-quantified ?param-values-new)
             else
             (if (not (member$ (nth$ 1 ?param-names) ?param-quantified))
                 then
-                ;ground by domain objects
-                (do-for-all-facts ((?object domain-object)) (eq ?object:type (nth$ 1 ?param-types))
-                    (bind ?param-values-new (insert$ ?param-values (+ 1 (length$ ?param-values)) ?object:name))
-                    (goal-class-create-grounding ?goal-class (delete$ ?param-types 1 1) (delete$ ?param-names 1 1) ?param-names-left (delete$ ?param-constants 1 1) ?param-quantified ?param-values-new)
-                )
-                ;ground by domain constants
-                (do-for-all-facts ((?constant domain-constant)) (eq ?constant:type (nth$ 1 ?param-types))
-                    (bind ?param-values-new (insert$ ?param-values (+ 1 (length$ ?param-values)) ?constant:value))
-                    (goal-class-create-grounding ?goal-class (delete$ ?param-types 1 1) (delete$ ?param-names 1 1) ?param-names-left (delete$ ?param-constants 1 1) ?param-quantified ?param-values-new)
-                )
+                    ;ground by domain objects
+                    (do-for-all-facts ((?object domain-object)) (eq ?object:type (nth$ 1 ?param-types))
+                        (bind ?param-values-new (insert$ ?param-values (+ 1 (length$ ?param-values)) ?object:name))
+                        (goal-class-create-grounding ?goal-class-id (delete$ ?param-types 1 1) (delete$ ?param-names 1 1) ?param-names-left (delete$ ?param-constants 1 1) ?param-quantified ?param-values-new)
+                    )
+                    ;ground by domain constants
+                    (do-for-all-facts ((?constant domain-constant)) (eq ?constant:type (nth$ 1 ?param-types))
+                        (bind ?param-values-new (insert$ ?param-values (+ 1 (length$ ?param-values)) ?constant:value))
+                        (goal-class-create-grounding ?goal-class-id (delete$ ?param-types 1 1) (delete$ ?param-names 1 1) ?param-names-left (delete$ ?param-constants 1 1) ?param-quantified ?param-values-new)
+                    )
                 else
-                (bind ?param-values-new (insert$ ?param-values (+ 1 (length$ ?param-values)) nil))
-                (goal-class-create-grounding ?goal-class (delete$ ?param-types 1 1) (delete$ ?param-names 1 1) ?param-names-left (delete$ ?param-constants 1 1) ?param-quantified ?param-values-new)
+                    (bind ?param-values-new (insert$ ?param-values (+ 1 (length$ ?param-values)) nil))
+                    (goal-class-create-grounding ?goal-class-id (delete$ ?param-types 1 1) (delete$ ?param-names 1 1) ?param-names-left (delete$ ?param-constants 1 1) ?param-quantified ?param-values-new)
             )
         )
         else
-        (if (not (any-factp ((?grounding pddl-grounding)) (and (eq ?grounding:formula-root ?goal-class) (eq ?grounding:param-values ?param-values))))
+        (if (not (any-factp ((?grounding pddl-grounding)) (and (eq ?grounding:formula-root ?goal-class-id) (eq ?grounding:param-values ?param-values))))
             then
-            (printout t "Adding new Groundings: " ?param-values " for " ?goal-class crlf)
-            (bind ?grounding-id (sym-cat "grounding-" ?goal-class "-" (gensym*)))
-            (assert (pddl-grounding (param-names ?param-names-left)
-                                    (param-values ?param-values)
-                                    (formula-root ?goal-class)
-                                    (id ?grounding-id)
-                    )
-            )
+                (printout t "Adding new Groundings: " ?param-values " for " ?goal-class-id crlf)
+                (bind ?grounding-id (sym-cat "grounding-" ?goal-class-id "-" (gensym*)))
+                (assert (pddl-grounding (param-names ?param-names-left)
+                                        (param-values ?param-values)
+                                        (formula-root ?goal-class-id)
+                                        (id ?grounding-id)
+                        )
+                )
         )
     )
 )
@@ -74,7 +75,8 @@
     no grounding exists for the goal class at all (e.g. for fully quantified formulas)
     generate the possible groundings that do not exist yet. "
     (domain-facts-loaded)
-    (goal-class (class ?class-id)
+    (goal-class (id ?class-id)
+                (class ?class)
                 (param-names $?param-names)
                 (param-constants $?param-constants)
                 (param-types $?param-types)
@@ -111,7 +113,8 @@
 (defrule goal-class-retract-unbased-grounding
     "If there is a grounding of a goal class using a value that does not exist anymore,
     retract the grounding to trigger the removal of the formula. "
-    (goal-class (class ?class-id)
+    (goal-class (id ?class-id)
+                (class ?class)
                 (param-names $?param-names)
                 (param-constants $?param-constants)
                 (param-types $?param-types)
@@ -131,8 +134,8 @@
 (defrule goal-class-assert-precondition-formula-for-class
     "If there is a goal class that doesn't have its precondition formula
     translated to a set of PDDL formula facts yet, parse its formula string."
-    (goal-class (class ?cid) (preconditions ?prec))
-    (not (pddl-formula (part-of ?cid)))
+    (goal-class (class ?class) (id ?cid) (preconditions ?prec))
+    (not (pddl-formula (part-of ?class)))
     =>
     (parse-pddl-formula ?prec (str-cat ?cid))
 )
