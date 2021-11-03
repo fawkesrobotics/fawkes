@@ -182,7 +182,7 @@
   (multislot quantified-values (type SYMBOL))
   (slot grounded-parent (type SYMBOL))
 
-  (slot is-satisfied (type SYMBOL) (allowed-values TRUE FALSE) (default FALSE))
+  (slot is-satisfied (type SYMBOL) (allowed-values TRUE FALSE UNKNOWN) (default UNKNOWN))
 )
 
 (deftemplate pddl-predicate
@@ -475,7 +475,7 @@
   (pddl-formula (id ?parent-base) (type atom))
   ?parent <- (grounded-pddl-formula (id ?id)
                                     (formula-id ?parent-base)
-                                    (is-satisfied FALSE)
+                                    (is-satisfied ~TRUE)
                                     (grounding ?grounding-id))
 
   (pddl-predicate (part-of ?parent-base) (id ?child-base))
@@ -495,7 +495,7 @@
   (pddl-formula (id ?parent-base) (type atom))
   ?parent <- (grounded-pddl-formula (id ?id)
                                     (formula-id ?parent-base)
-                                    (is-satisfied TRUE)
+                                    (is-satisfied ~FALSE)
                                     (grounding ?grounding-id))
 
   (pddl-predicate (part-of ?parent-base) (id ?child-base))
@@ -515,7 +515,7 @@
   (pddl-formula (id ?parent-base) (type negation))
   ?parent <- (grounded-pddl-formula (id ?id)
                                     (formula-id ?parent-base)
-                                    (is-satisfied FALSE)
+                                    (is-satisfied ~TRUE)
                                     (grounding ?grounding-id))
 
   ; the formula is satisfied when the child is not satisifed
@@ -535,7 +535,7 @@
   (pddl-formula (id ?parent-base) (type negation))
   ?parent <- (grounded-pddl-formula (id ?id)
                                     (formula-id ?parent-base)
-                                    (is-satisfied TRUE)
+                                    (is-satisfied ~FALSE)
                                     (grounding ?grounding-id))
 
   ; the formula is unsatisfied when the child is satisifed
@@ -556,15 +556,15 @@
   (pddl-formula (id ?parent-base) (type conjunction))
   ?parent <- (grounded-pddl-formula (id ?id)
                                     (formula-id ?parent-base)
-                                    (is-satisfied FALSE)
+                                    (is-satisfied ~TRUE)
                                     (grounding ?grounding-id))
- ; the formula is satisfied when there is no unsatisifed child
+ ; the formula is satisfied if all children are satisfied
   (not
     (and
       (pddl-formula (part-of ?parent-base) (id ?child-base))
       (grounded-pddl-formula (formula-id ?child-base)
                              (grounding ?grounding-id)
-                             (is-satisfied FALSE)
+                             (is-satisfied ~TRUE)
                              (grounded-parent ?id)
       )
     )
@@ -580,7 +580,7 @@
   (pddl-formula (id ?parent-base) (type conjunction))
   ?parent <- (grounded-pddl-formula (id ?id)
                                     (formula-id ?parent-base)
-                                    (is-satisfied TRUE)
+                                    (is-satisfied ~FALSE)
                                     (grounding ?grounding-id))
 
    ; the formula is unsatisfied when there is an unsatisifed child
@@ -602,7 +602,7 @@
   (pddl-formula (id ?parent-base) (type disjunction))
   ?parent <- (grounded-pddl-formula (id ?id)
                                     (formula-id ?parent-base)
-                                    (is-satisfied FALSE)
+                                    (is-satisfied ~TRUE)
                                     (grounding ?grounding-id))
 
   ; the formula is satisfied when there is a satisifed child
@@ -623,16 +623,16 @@
   (pddl-formula (id ?parent-base) (type disjunction))
   ?parent <- (grounded-pddl-formula (id ?id)
                                     (formula-id ?parent-base)
-                                    (is-satisfied TRUE)
+                                    (is-satisfied ~FALSE)
                                     (grounding ?grounding-id))
 
-  ; the formula is unsatisfied when there is no satisifed child
+  ; the formula is unsatisfied if all children are unsatisfied
   (not
     (and
       (pddl-formula (part-of ?parent-base) (id ?child-base))
       (grounded-pddl-formula (formula-id ?child-base)
                               (grounding ?grounding-id)
-                              (is-satisfied TRUE)
+                              (is-satisfied ~FALSE)
                               (grounded-parent ?id)
       )
     )
@@ -651,13 +651,13 @@
                                     (formula-id ?parent-base)
                                     (is-satisfied FALSE)
                                     (grounding ?grounding-id))
- ; the formula is satisfied when there is no unsatisifed child
+ ; the formula is satisfied if there is no unsatisfied child
   (not
     (and
       (pddl-formula (part-of ?parent-base) (id ?child-base))
       (grounded-pddl-formula (formula-id ?child-base)
                              (grounding ?grounding-id)
-                             (is-satisfied FALSE)
+                             (is-satisfied ~TRUE)
                              (grounded-parent ?id)
         )
       )
@@ -673,7 +673,7 @@
   (pddl-formula (id ?parent-base) (type forall))
   ?parent <- (grounded-pddl-formula (id ?id)
                                     (formula-id ?parent-base)
-                                    (is-satisfied TRUE)
+                                    (is-satisfied ~FALSE)
                                     (grounding ?grounding-id))
 
    ; the formula is unsatisfied when there is an unsatisifed child
@@ -695,7 +695,7 @@
   (pddl-formula (id ?parent-base) (type exists))
   ?parent <- (grounded-pddl-formula (id ?id)
                                     (formula-id ?parent-base)
-                                    (is-satisfied FALSE)
+                                    (is-satisfied ~TRUE)
                                     (grounding ?grounding-id))
 
   ; the formula is satisfied when there is a satisifed child
@@ -716,16 +716,16 @@
   (pddl-formula (id ?parent-base) (type exists))
   ?parent <- (grounded-pddl-formula (id ?id)
                                     (formula-id ?parent-base)
-                                    (is-satisfied TRUE)
+                                    (is-satisfied ~FALSE)
                                     (grounding ?grounding-id))
 
-  ; the formula is unsatisfied when there is no satisifed child
+  ; the formula is unsatisfied if there is no satisifed child
   (not
     (and
       (pddl-formula (part-of ?parent-base) (id ?child-base))
       (grounded-pddl-formula (formula-id ?child-base)
                               (grounding ?grounding-id)
-                              (is-satisfied TRUE)
+                              (is-satisfied ~FALSE)
                               (grounded-parent ?id)
   )
     )
