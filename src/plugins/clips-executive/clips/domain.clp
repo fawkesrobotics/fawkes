@@ -1222,22 +1222,22 @@
   "After the effects of an action have been applied, change it to FINAL."
   (declare (salience ?*SALIENCE-DOMAIN-APPLY*))
   ?a <- (plan-action (id ?action-id) (state EFFECTS-APPLIED) (precondition ?grounding-id))
-  ?g <- (pddl-grounding (id ?grounding-id))
   =>
   (modify ?a (state FINAL) (precondition nil))
-  ;(domain-retract-grounding)
-  (retract ?g)
+  (do-for-fact ((?g pddl-grounding)) (eq ?g:id ?grounding-id)
+    (retract ?g)
+  )
 )
 
 (defrule domain-action-failed
   "An action has failed."
   (declare (salience ?*SALIENCE-DOMAIN-APPLY*))
   ?a <- (plan-action (id ?action-id) (state EXECUTION-FAILED) (precondition ?grounding-id))
-  ?g <- (pddl-grounding (id ?grounding-id))
   =>
   (modify ?a (state FAILED) (precondition nil))
-  ;(domain-retract-grounding)
-  (retract ?g)
+  (do-for-fact ((?g pddl-grounding)) (eq ?g:id ?grounding-id)
+    (retract ?g)
+  )
 )
 
 (defrule domain-check-if-action-is-executable-without-precondition
