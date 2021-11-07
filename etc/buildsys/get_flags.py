@@ -132,7 +132,7 @@ int main(int argc, char *argv[])
             with open(f"{tmp_ws_dir}/build/dummy_for_{package_name}_flags/CMakeFiles/dummy_for_{package_name}_flags.dir/link.txt", 'r') as lf:
                 link_flags = ""
                 for line in lf.readlines():
-                    link_flags += ' '.join([flag for flag in line.split(',')[-1].replace('\n', '').split(' ') if f"dummy_for_{package_name}_flags" not in flag])
+                    link_flags += ' '.join([flag for flag in line.split(',')[-1].replace('\n', '').split(' ')[1:] if f"dummy_for_{package_name}_flags" not in flag])
             print(link_flags)
             sys.exit(0)
 
