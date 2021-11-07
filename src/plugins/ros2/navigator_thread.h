@@ -22,7 +22,6 @@
 #ifndef _ROS_NAVIGATOR_THREAD_H_
 #define _ROS_NAVIGATOR_THREAD_H_
 
-#include <actionlib/client/simple_action_client.h>
 #include <aspect/blackboard.h>
 #include <aspect/blocked_timing.h>
 #include <aspect/clock.h>
@@ -34,12 +33,12 @@
 #include <dynamic_reconfigure/DoubleParameter.h>
 #include <dynamic_reconfigure/Reconfigure.h>
 #include <interfaces/NavigatorInterface.h>
-#include <move_base_msgs/MoveBaseAction.h>
-#include <move_base_msgs/MoveBaseActionGoal.h>
-#include <move_base_msgs/MoveBaseGoal.h>
-#include <plugins/ros/aspect/ros.h>
-#include <ros/ros.h>
-#include <tf/types.h>
+#include <nav2_msgs/action/compute_path_to_pose.hpp>
+#include <geometry_msgs/msg/pose_stamped.hpp>
+#include <rclcpp_action/rclcpp_action.hpp>
+#include <plugins/ros2/aspect/ros2.h>
+#include <rclcpp/rclcpp.hpp>
+#include <tf2/types.h>
 #include <utils/math/angle.h>
 
 #include <math.h>
@@ -48,17 +47,17 @@ namespace fawkes {
 class NavigatorInterface;
 }
 
-class RosNavigatorThread : public fawkes::Thread,
+class ROS2NavigatorThread : public fawkes::Thread,
                            public fawkes::ClockAspect,
                            public fawkes::BlockedTimingAspect,
                            public fawkes::LoggingAspect,
                            public fawkes::BlackBoardAspect,
                            public fawkes::ConfigurableAspect,
-                           public fawkes::ROSAspect,
+                           public fawkes::ROS2Aspect,
                            public fawkes::TransformAspect
 {
 public:
-	RosNavigatorThread(std::string &cfg_prefix);
+	ROS2NavigatorThread(std::string &cfg_prefix);
 
 	virtual void init();
 	virtual void finalize();
@@ -80,18 +79,18 @@ private:
 	bool set_dynreconf_value(const std::string &path, const float value);
 
 private:
-	typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient;
 
-	void activeCb();
-	void feedbackCb(const move_base_msgs::MoveBaseFeedbackConstPtr &feedback);
-	void doneCb(const actionlib::SimpleClientGoalState &      state,
-	            const move_base_msgs::MoveBaseResultConstPtr &result);
+
+	void responseCb(std::shared_future<rclcpp_action::ClientGoalHandle<nav2_msgs::action::ComputePathToPose>::SharedPtr> future);
+	void feedbackCb(rclcpp_action::ClientGoalHandle<nav2_msgs::action::ComputePathToPose>::SharedPtr,
+				const std::shared_ptr<const nav2_msgs::action::ComputePathToPose::Feedback> feedback);
+	void resultCb(const rclcpp_action::ClientGoalHandle<nav2_msgs::action::ComputePathToPose>::WrappedResult &result);
 
 	void transform_to_fixed_frame();
 
 	fawkes::NavigatorInterface * nav_if_;
-	MoveBaseClient *             ac_;
-	move_base_msgs::MoveBaseGoal goal_;
+	rclcpp_action::Client<nav2_msgs::action::ComputePathToPose>::SharedPtr ac_;
+	rclcpp_action::ClientGoalHandle<nav2_msgs::action::ComputePathToPose>::SharedPtr cgh_;
 	bool                         cmd_sent_;
 	bool                         connected_history_;
 
@@ -113,10 +112,10 @@ private:
 	float       cfg_ori_tolerance_;
 	float       cfg_trans_tolerance_;
 
-	float param_max_vel;
-	float param_max_rot;
+	rclcpp::Parameter param_max_vel;
+	rclcpp::Parameter param_max_rot;
 
-	geometry_msgs::PoseStamped base_position;
+	geometry_msgs::msg::PoseStamped base_position;
 	float                      goal_position_x;
 	float                      goal_position_y;
 	float                      goal_position_yaw;
