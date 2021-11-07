@@ -156,5 +156,5 @@ ROS2Position3DThread::bb_interface_data_refreshed(Interface *interface) throw()
 	position.pose.orientation.z = iface->rotation()[2];
 	position.pose.orientation.w = iface->rotation()[3];
 	position.visibility_history = iface->visibility_history();
-	ros_pub_->publish(position);
+	ros2_pub_->publish(position);
 }
