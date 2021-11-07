@@ -19,8 +19,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef _PLUGINS_ROS_POSITION_3D_THREAD_H_
-#define _PLUGINS_ROS_POSITION_3D_THREAD_H_
+#ifndef _PLUGINS_ROS2_POSITION_3D_THREAD_H_
+#define _PLUGINS_ROS2_POSITION_3D_THREAD_H_
 
 // TODO check includes
 #include <aspect/blackboard.h>
@@ -38,7 +38,7 @@
 
 // from ROS
 #include <rclcpp/rclcpp.hpp>
-#include <fawkes_msgs/msg/position_3d.hpp>
+#include <fawkes_msgs/msg/position3_d.hpp>
 
 class ROS2Position3DThread : public fawkes::Thread,
                             public fawkes::ConfigurableAspect,
@@ -66,7 +66,7 @@ private:
 	void conditional_close(fawkes::Interface *interface) throw();
 
 private:
-	rclcpp::Publisher                           ros2_pub_;
+	rclcpp::Publisher<fawkes_msgs::msg::Position3D>::SharedPtr ros2_pub_;
 	std::list<fawkes::Position3DInterface *> ifs_;
 	std::string                              cfg_ros_topic_;
 };
