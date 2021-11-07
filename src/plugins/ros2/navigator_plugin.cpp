@@ -28,20 +28,20 @@ using namespace fawkes;
 /** Send locomotion commands to ROS.
  * @author Sebastian Reuter
  */
-class RosNavigatorPlugin : public fawkes::Plugin
+class ROS2NavigatorPlugin : public fawkes::Plugin
 {
 public:
 	/** Constructor.
    * @param config Fawkes configuration
    */
-	explicit RosNavigatorPlugin(Configuration *config) : Plugin(config)
+	explicit ROS2NavigatorPlugin(Configuration *config) : Plugin(config)
 	{
 		std::string prefix     = "/ros/navigator";
 		std::string cfg_prefix = prefix + "/";
 
-		thread_list.push_back(new RosNavigatorThread(cfg_prefix));
+		thread_list.push_back(new ROS2NavigatorThread(cfg_prefix));
 	}
 };
 
 PLUGIN_DESCRIPTION("Send locomotion commands to ROS")
-EXPORT_PLUGIN(RosNavigatorPlugin)
+EXPORT_PLUGIN(ROS2NavigatorPlugin)
