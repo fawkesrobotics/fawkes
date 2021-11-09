@@ -9,6 +9,7 @@ podman-plugin-base: &podman-plugin-base
   image: quay.io/fawkesrobotics/fawkes-builder:fedora33-noetic
   always-pull: true
   debug: true
+  privileged: true
   environment: ["BUILDKITE", "BUILDKITE_LABEL"]
 
 steps:
@@ -16,7 +17,7 @@ steps:
     command: .buildkite/lint
     plugins:
       - *merged-pr-plugin
-      - kennasecurity/podman#master:
+      - compono/podman#main:
           <<: *podman-plugin-base
           environment:
             - BUILDKITE
@@ -41,7 +42,7 @@ steps:
     timeout_in_minutes: 45
     plugins:
       - *merged-pr-plugin
-      - kennasecurity/podman#master:
+      - compono/podman#main:
           <<: *podman-plugin-base
           volumes:
             - /var/lib/buildkite-agent/ccache_fedora:/var/cache/ccache
