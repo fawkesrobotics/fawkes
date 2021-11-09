@@ -16,7 +16,7 @@ steps:
     command: .buildkite/lint
     plugins:
       - *merged-pr-plugin
-      - kennasecurity/podman#master:
+      - compono/podman#main:
           <<: *podman-plugin-base
           environment:
             - BUILDKITE
@@ -41,7 +41,7 @@ steps:
     timeout_in_minutes: 45
     plugins:
       - *merged-pr-plugin
-      - kennasecurity/podman#master:
+      - compono/podman#main:
           <<: *podman-plugin-base
           volumes:
             - /var/lib/buildkite-agent/ccache_fedora:/var/cache/ccache
