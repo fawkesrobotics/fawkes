@@ -214,7 +214,7 @@
 (deffunction domain-build-ground-parameter-list
   "For multislot of parameter names, build a corresponding multislot of grounded
   parameter values and - if available - constants."
-  (?names ?constants ?grounded-names ?grounded-values)
+  (?names ?constants ?grounded-names ?grounded-values ?predicate-id)
 
   (bind ?values (create$))
   (foreach ?param ?names
@@ -225,7 +225,7 @@
       (bind ?index (member$ ?param ?grounded-names))
       (if (not ?index) then
         (assert (domain-error (error-type unknown-parameter) (error-msg
-          (str-cat "PDDL Predicate has unknown parameter " ?param)))
+          (str-cat "PDDL predicate " ?predicate-id " has unknown parameter " ?param)))
         )
         (return FALSE)
       else
@@ -253,7 +253,8 @@
           (param-values (domain-build-ground-parameter-list ?predicate:param-names
                                                             ?predicate:param-constants
                                                             ?param-names
-                                                            ?param-values)
+                                                            ?param-values
+                                                            ?predicate:id)
           )
           (parent-formula ?parent-atomic-formula)
       )
@@ -1357,7 +1358,8 @@
                     (not (= (length$ (domain-build-ground-parameter-list ?param-names
                                                                          ?param-constants
                                                                          ?grounding-names
-                                                                         ?grounding-values))
+                                                                         ?grounding-values
+                                                                         ?pid))
                                       2)))
   )
   =>
