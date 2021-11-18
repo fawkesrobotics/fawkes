@@ -16,11 +16,14 @@
 	(slot domain-fact-idx (type INTEGER))
 )
 
-(deftemplate wm-sync-map-object-type
+(deftemplate wm-sync-map-object
 	(slot wm-fact-id (type STRING))
 	(multislot wm-fact-key (type SYMBOL))
+	(slot wm-fact-retract (type SYMBOL) (allowed-values TRUE FALSE) (default TRUE))
 	(slot wm-fact-idx (type INTEGER))
 	(slot domain-object-type (type SYMBOL))
+	(slot domain-object (type SYMBOL))
+	(slot domain-object-idx (type INTEGER))
 )
 
 (deftemplate wm-sync-remap-fact
@@ -39,7 +42,7 @@
 	(multislot wm-fact-key-path (type SYMBOL))
 )
 
-(deftemplate wm-sync-remap-object-type
+(deftemplate wm-sync-remap-object
 	"Template to inform sync code about a path remapping for objects.
 
    The synchronization allows to remap domain-fact sync targets to
@@ -52,7 +55,8 @@
    that is all arguments exist on both sides with the same names.
   "
 	(slot domain-object-type (type SYMBOL))
-	(multislot wm-fact-key (type SYMBOL))
+	(slot domain-object (type SYMBOL))
+	(multislot wm-fact-key-path (type SYMBOL))
 )
 
 (deffunction wm-sync-remap-fact-id-prefix ($?id-paths)
@@ -90,7 +94,7 @@
 	(foreach ?p ?id-paths
 		(bind ?key (wm-id-to-key ?p))
 		(bind ?type (nth$ (length$ ?key) ?key))
-		(assert (wm-sync-remap-object-type (domain-object-type ?type) (wm-fact-key ?key)))
+		(assert (wm-sync-remap-object (domain-object-type ?type) (wm-fact-key-path ?key)))
 	)
 )
 
@@ -189,7 +193,7 @@
 (deffunction wm-sync-remapped-pathargs-match (?key ?key-path ?param-names ?param-values)
 	"Check if the given key matches the passed arguments,"
 	(return (and (eq (wm-key-path ?key) ?key-path)
-							 (wm-sync-args-match ?key ?param-names ?param-values)))
+							 (wm-sync-args-match ?key (create$ ?param-names) (create$ ?param-values))))
 )
 
 (defrule wm-sync-config-remap-fact-id-prefix
@@ -233,7 +237,7 @@
 	(retract ?cf)
   (bind ?prefix (str-cat "/clips-executive/specs/" ?spec "/wm-remap/objects/name-id/"))
   (bind ?type (sym-cat (sub-string (+ (str-length ?prefix) 1) (str-length ?path) ?path)))
-	(assert (wm-sync-remap-object-type (domain-object-type ?type) (wm-fact-key (wm-id-to-key ?id))))
+	(assert (wm-sync-remap-object (domain-object-type ?type) (wm-fact-key-path (wm-id-to-key ?id))))
 )
 
 (defrule wm-sync-domain-fact-added
@@ -244,7 +248,7 @@
 	(not (wm-sync-remap-fact (domain-fact-name ?name)))
 	(not (wm-sync-map-fact (domain-fact-name ?name)
 												 (wm-fact-id ?id&:(eq ?id (wm-key-to-id domain fact
-																																(domain-fact-key ?name ?param-names ?param-values))))))
+																									(domain-fact-key ?name ?param-names ?param-values))))))
 	=>
 	(bind ?key (create$ domain fact (domain-fact-key ?name ?param-names ?param-values)))
 	(bind ?wf (assert (wm-fact (key ?key) (type BOOL) (value TRUE))))
@@ -415,104 +419,160 @@
 	(retract ?wm)
 )
 
-(defrule wm-sync-domain-object-type-added
-  (declare (salience ?*SALIENCE-WM-SYNC-ADD*))
-	(domain-object-type (name ?type-name))
-	(not (wm-sync-map-object-type (domain-object-type ?type-name)))
-	(not (wm-sync-remap-object-type (domain-object-type ?type-name)))
-	=>
-	(bind ?key (create$ domain objects-by-type ?type-name))
-	(assert (wm-sync-map-object-type (wm-fact-id (wm-key-to-id ?key)) (wm-fact-key ?key)
-																	 (wm-fact-idx 0) (domain-object-type ?type-name)))
-)
-
-(defrule wm-sync-domain-object-type-remapped-added
-  (declare (salience ?*SALIENCE-WM-SYNC-DEL*))
-	(domain-object-type (name ?type-name))
-	(not (wm-sync-map-object-type (domain-object-type ?type-name)))
-	(wm-sync-remap-object-type (domain-object-type ?type-name) (wm-fact-key $?key))
-	=>
-	(assert (wm-sync-map-object-type (wm-fact-id (wm-key-to-id ?key)) (wm-fact-key ?key)
-																	 (wm-fact-idx 0) (domain-object-type ?type-name)))
-)
-
-(defrule wm-sync-domain-object-mapping-added
-  (declare (salience ?*SALIENCE-WM-SYNC-ADD*))
-	?wm <- (wm-sync-map-object-type (wm-fact-id ?id) (wm-fact-key $?key) (wm-fact-idx ?idx)
-																	(domain-object-type ?type))
-	(not (wm-fact (key $?key) (type SYMBOL) (is-list TRUE)))
-	=>
-	(bind ?wf (assert (wm-fact (id ?id) (key ?key) (type SYMBOL) (is-list TRUE) (values))))
-	; If the fact idx is zero, or no domain-object of the given type exists, then
-	; this is the first time the mapping is added. Update the fact index as we do
-	; not expect any previous information.
-	; However, if the idx is not zero and there are domain-object of the respective
-	; type, do not (yet) update the wm-fact-idx since this means that the wm-fact
-  ; was retracted altogether, meaning that any still existing domain-object that
-	; were mentioned should now be deleted by the object-removed rule.
-	(if (or (= ?idx 0) (not (any-factp ((?df domain-object)) (eq ?df:type ?type))))
-		then (modify ?wm (wm-fact-idx (fact-index ?wf)))
-	)
-)
 
 (defrule wm-sync-domain-object-added
-	"For a recently added domain objects, add a wm-fact."
-  (declare (salience ?*SALIENCE-WM-SYNC-ADD*))
-	(domain-object (name ?name) (type ?type))
-	?wm <- (wm-sync-map-object-type (wm-fact-id ?id) (wm-fact-idx ?wf-idx)
-																	(domain-object-type ?type))
-	?wf <- (wm-fact (id ?id) (type SYMBOL) (is-list TRUE) (values $?objs&~:(member$ ?name ?objs)))
-	(test (<= (fact-index ?wf) ?wf-idx))
+	"For a recently added domain object, add a wm-fact."
+	(declare (salience ?*SALIENCE-WM-SYNC-ADD*))
+	?df <- (domain-object (name ?name) (type ?type))
+	(not (wm-sync-remap-object (domain-object ?name)))
+	(not (wm-sync-map-object (domain-object ?name)
+	                         (wm-fact-id ?id&:(eq ?id (wm-key-to-id domain object
+	                         (domain-object-key ?name ?type))))))
 	=>
-	(bind ?new-wf (modify ?wf (values (append$ ?objs ?name))))
-	(modify ?wm (wm-fact-idx (fact-index ?new-wf)))
+	(bind ?key (create$ domain object (domain-object-key ?name ?type)))
+	(bind ?wf (assert (wm-fact (key ?key) (type BOOL) (value TRUE))))
+	(assert (wm-sync-map-object (wm-fact-id (wm-key-to-id ?key))
+	                            (wm-fact-key ?key)
+	                            (wm-fact-idx (fact-index ?wf))
+	                            (domain-object ?name)
+	                            (domain-object-type ?type)
+	                            (domain-object-idx (fact-index ?df))))
+)
+
+(defrule wm-sync-domain-object-remapped-added
+	"For a recently added domain object, add a path-remapped wm-fact."
+	(declare (salience ?*SALIENCE-WM-SYNC-ADD*))
+	?df <- (domain-object (name ?name) (type ?type))
+	(wm-sync-remap-object (domain-object ?name) (wm-fact-key-path $?key-path))
+	(not (wm-sync-map-object (domain-object ?name)
+	                         (wm-fact-key $?key&:(wm-sync-remapped-pathargs-match ?key ?key-path name ?name))))
+	=>
+	(bind ?key (create$ ?key-path args? name ?name))
+	(bind ?wf (assert (wm-fact (key ?key) (type BOOL) (value TRUE))))
+	(assert (wm-sync-map-object (wm-fact-id (wm-key-to-id ?key))
+	                            (wm-fact-key ?key)
+	                            (wm-fact-idx (fact-index ?wf))
+	                            (domain-object ?name)
+	                            (domain-object-type ?type)
+	                            (domain-object-idx (fact-index ?df))))
+)
+
+(defrule wm-sync-domain-object-true
+	"A domain object has been added again, after being retracted before."
+	(declare (salience ?*SALIENCE-WM-SYNC-ADD*))
+	?sf <- (wm-sync-map-object (wm-fact-id ?id) (domain-object ?name) (domain-object-type ?type) (domain-object-idx ?idx))
+	?wf <- (wm-fact (id ?id) (key $?key) (value FALSE))
+	?df <- (domain-object (name ?name&:(wm-sync-args-match ?key (create$ name) (create$ ?name)))
+	                    (type ?type))
+	(test (< ?idx (fact-index ?df)))
+	=>
+	(modify ?wf (value TRUE))
+	(modify ?sf (domain-object-idx (fact-index ?df)))
 )
 
 (defrule wm-sync-domain-object-removed
-  (declare (salience ?*SALIENCE-WM-SYNC-DEL*))
-	?wm <- (wm-sync-map-object-type (wm-fact-id ?id) (wm-fact-idx ?wf-idx)
-																	(domain-object-type ?type))
-	?wf <- (wm-fact (id ?id) (type SYMBOL) (is-list TRUE) (values $? ?name $?))
-	(not (domain-object (name ?name) (type ?type)))
-	(test (<= (fact-index ?wf) ?wf-idx))
+	"A domain object has been removed, set wm fact to false or retract"
+	(declare (salience ?*SALIENCE-WM-SYNC-DEL*))
+	?wm <- (wm-sync-map-object (wm-fact-id ?id) (domain-object ?name) (domain-object-type ?type) (domain-object-idx ~0)
+	                           (wm-fact-retract ?retract))
+	?wf <- (wm-fact (id ?id) (key $?key) (value TRUE))
+	(not (domain-object (name ?name&:(wm-sync-args-match ?key (create$ name) (create$ ?name)))
+	                  (type ?type)))
 	=>
-	(bind ?objs (fact-slot-value ?wf values))
-	(bind ?obj-idx (member$ ?name ?objs))
-	(bind ?new-objs (delete$ ?objs ?obj-idx ?obj-idx))
-	(bind ?new-wf (modify ?wf (values ?new-objs)))
-	(modify ?wm (wm-fact-idx (fact-index ?new-wf)))
+	(if ?retract
+	 then
+		(retract ?wf)
+		(modify ?wm (wm-fact-idx 0) (domain-object-idx 0))
+	 else
+		(bind ?new-wf (modify ?wf (value FALSE)))
+		(modify ?wm (wm-fact-idx (fact-index ?new-wf)) (domain-object-idx 0))
+	)
 )
 
-(defrule wm-sync-worldmodel-object-added
-  (declare (salience ?*SALIENCE-WM-SYNC-ADD*))
-	?wm <- (wm-sync-map-object-type (wm-fact-id ?id) (wm-fact-idx ?wf-idx) (domain-object-type ?type))
-	?wf <- (wm-fact (id ?id) (type SYMBOL) (is-list TRUE) (values $? ?name $?))
-	(not (domain-object (name ?name) (type ?type)))
-	(test (> (fact-index ?wf) ?wf-idx))
+(defrule wm-sync-worldmodel-object-fact-added
+	"A wm-fact has been added for the first time."
+	(declare (salience ?*SALIENCE-WM-SYNC-ADD*))
+	(not (wm-sync-remap-object (domain-object ?name) (domain-object-type ?type)))
+	?wf <- (wm-fact (id ?id) (key domain object ?type args? name ?name))
+	(wm-fact (id ?id) (key ?key))
+	(not (wm-sync-map-object (domain-object ?name)
+	                         (wm-fact-id ?id&:(eq ?id (wm-key-to-id ?key)))))
 	=>
-	; While the rule checks if there is any object that is missing, the update might
-	; actually have added multiple objects with one update. Hence, check them all.
-	(bind ?objs (fact-slot-value ?wf values))
-	(foreach ?o ?objs
-		(if (not (any-factp ((?df domain-object))	(and (eq ?df:name ?o) (eq ?df:type ?type))))
-		 then
-			(assert (domain-object (name ?o) (type ?type)))
-
-		)
-	)
-	(modify ?wm (wm-fact-idx (fact-index ?wf)))
+	(bind ?df (assert (domain-object (name ?name) (type ?type))))
+	(assert (wm-sync-map-object (domain-object ?name)
+	                            (domain-object-type ?type)
+	                            (domain-object-idx (fact-index ?df))
+	                            (wm-fact-id (wm-key-to-id ?key))
+	                            (wm-fact-key ?key)
+	                            (wm-fact-idx (fact-index ?wf))))
 )
 
-(defrule wm-sync-worldmodel-object-removed
-  (declare (salience ?*SALIENCE-WM-SYNC-DEL*))
-	?wm <- (wm-sync-map-object-type (wm-fact-id ?id) (wm-fact-idx ?wf-idx) (domain-object-type ?type))
-	(domain-object (name ?name) (type ?type))
-	?wf <- (wm-fact (id ?id) (type SYMBOL) (is-list TRUE) (values $?objs&~:(member$ ?name ?objs)))
-	(test (> (fact-index ?wf) ?wf-idx))
+(defrule wm-sync-worldmodel-object-fact-remapped-added
+	"A wm-fact has been added for the first time."
+	(declare (salience ?*SALIENCE-WM-SYNC-ADD*))
+	(wm-sync-remap-object (domain-object ?name) (domain-object-type ?type) (wm-fact-key-path $?key-path))
+	?wf <- (wm-fact (id ?id) (key $?key&:(wm-sync-remapped-path-match ?key ?key-path)))
+	(not (wm-sync-map-object (domain-object ?name)
+	                         (wm-fact-key $?key&:(wm-sync-remapped-pathargs-match ?key ?key-path ?name (wm-sync-key-arg-values ?key)))))
 	=>
-	(delayed-do-for-all-facts ((?df domain-object))
-    (and (eq ?df:type ?type) (not (member$ ?df:name ?objs)))
-		(retract ?df)
+	(bind ?df (assert (domain-object (name ?name) (type ?type))))
+	(assert (wm-sync-map-object (domain-object ?name)
+	                            (domain-object-type ?type)
+	                            (domain-object-idx (fact-index ?df))
+	                            (wm-fact-id (wm-key-to-id ?key))
+	                            (wm-fact-key ?key)
+	                            (wm-fact-idx (fact-index ?wf))))
+)
+
+(defrule wm-sync-worldmodel-object-fact-true
+	"The value of a wm fact is modified to TRUE."
+	(declare (salience ?*SALIENCE-WM-SYNC-ADD*))
+	?wf <- (wm-fact (id ?id) (key $?key) (type BOOL) (value TRUE))
+	?wm <- (wm-sync-map-object (domain-object ?name) (domain-object-type ?type) (domain-object-idx 0)
+	                           (wm-fact-id ?id) (wm-fact-idx ?idx&:(< ?idx (fact-index ?wf))))
+	=>
+	(if (not (any-factp ((?df domain-object))
+	         (and (eq ?df:name ?name)
+	              (eq ?type ?df:type))))
+	 then
+		; The domain object does not exist, create it
+		(bind ?df (assert (domain-object (name ?name) (type ?type))))
+		(modify ?wm (wm-fact-idx (fact-index ?wf)) (domain-object-idx (fact-index ?df)))
+	 else
+		(modify ?wm (wm-fact-idx (fact-index ?wf)))
 	)
-	(modify ?wm (wm-fact-idx (fact-index ?wf)))
+)
+
+(defrule wm-sync-worldmodel-object-fact-false
+	"The value of a wm fact is modified to FALSE."
+	(declare (salience ?*SALIENCE-WM-SYNC-DEL*))
+	?wf <- (wm-fact (id ?id) (key $?key) (type BOOL) (value FALSE))
+	?wm <- (wm-sync-map-object (domain-object ?name) (domain-object-type ?type) (domain-object-idx ~0)
+	                           (wm-fact-id ?id) (wm-fact-idx ?idx&:(< ?idx (fact-index ?wf))))
+	?df <- (domain-object (name ?name) (type ?type))
+	=>
+	(retract ?df)
+	(modify ?wm (wm-fact-idx (fact-index ?wf)) (domain-object-idx 0))
+)
+
+(defrule wm-sync-worldmodel-object-fact-removed
+	"The value of a wm fact has been removed."
+	(declare (salience ?*SALIENCE-WM-SYNC-DEL*))
+	?df <- (domain-object (name ?name) (type ?type))
+	?wm <- (wm-sync-map-object (domain-object ?name) (domain-object-type ?type) (domain-object-idx ~0)
+	                           (wm-fact-id ?id) (wm-fact-key $?key) (wm-fact-idx ~0))
+	(not (wm-fact (id ?id)))
+	=>
+	(retract ?df)
+	(modify ?wm (wm-fact-idx 0) (domain-object-idx 0))
+)
+
+(defrule wm-sync-object-fact-cleanup
+	(declare (salience ?*SALIENCE-WM-SYNC-ADD*))
+	?wm <- (wm-sync-map-object (domain-object ?name) (domain-object-type ?type) (domain-object-idx 0)
+	                           (wm-fact-id ?id) (wm-fact-key $?key) (wm-fact-idx 0))
+	(not (wm-fact (id ?id)))
+	(not (domain-object (name ?name) (type ?type)))
+	=>
+	(retract ?wm)
 )

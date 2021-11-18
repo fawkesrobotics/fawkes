@@ -64,6 +64,10 @@
 	(return ?rv)
 )
 
+(deffunction domain-object-key (?name ?type)
+	(return (create$ ?type args? name ?name))
+)
+
 (deffunction domain-fact-args (?param-names ?param-values)
 	(if (<> (length$ ?param-names) (length$ ?param-values)) then
 		(printout error "Cannot generate domain fact args with non-equal length names and values" crlf)
