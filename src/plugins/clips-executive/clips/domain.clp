@@ -264,7 +264,8 @@
 
 (deffunction ground-pddl-formula
   "Ground a PDDL formula recursively based on the given values from a set of param
-  names and param values."
+  names and param values. Ground quantified values by recursively going through the
+  quantified values and assigning each possible combination of fitting values from the domain."
   (?parent-id ?parent-type ?grounded-parent-id ?param-names ?param-values ?grounding-id ?quantifier-index)
 
   ;if this is a quantified subformula, determine the quantified parameters
@@ -340,6 +341,8 @@
 )
 
 (deffunction domain-exists-objects-for-each-quantified-type
+  "Check if an object exists for each quantified type in a formula. Otherwise the formula
+  can not be fulfilled and should not be grounded."
   (?formula-id)
 
   (do-for-fact ((?formula pddl-formula)) (eq ?formula:id ?formula-id)
