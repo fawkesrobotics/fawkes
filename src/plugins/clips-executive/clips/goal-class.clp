@@ -29,6 +29,12 @@
 )
 
 (deffunction goal-class-create-grounding
+    "Go through the list of parameters and build up a grounding. For values that have an
+    entry that is not nil in param-constants, assign that value. For values that are quantified
+    leave them empty, as they will be quantified in the formula. For values that are neither
+    quantified nor constnats, assign the value based on the entry in the type field by
+    creating one grounding for each possible value or constant of that type in the current
+    world. "
     (?goal-class-id ?param-types ?param-names ?param-names-left ?param-constants ?param-quantified ?param-values)
 
     (if (> (length$ ?param-types) 0)
