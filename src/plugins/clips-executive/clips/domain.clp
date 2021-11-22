@@ -495,6 +495,18 @@
   (modify ?a (precondition nil))
 )
 
+(defrule domain-remove-promises-for-finished-goal
+  "If a promise has a goal-id of a goal that doesn't exist, or if the goal is finished,
+  evaluated, or retracted, then remove the promise"
+  ?d <- (domain-promise (promising-goal ?goal-id))
+  (or
+    (not (goal (id ?goal-id)))
+    (goal (id ?goal-id) (mode FINISHED|EVALUATED|RETRACTED))
+  )
+  =>
+  (retract ?d)
+)
+
 (defrule domain-check-if-action-precondition-is-satisfied
   "Check if there is a referenced precondition formula that is satisfied,
   if yes make the action executable."
