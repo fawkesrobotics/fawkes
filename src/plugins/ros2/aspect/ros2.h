@@ -27,6 +27,7 @@
 #include <aspect/aspect.h>
 #include <core/utils/lockptr.h>
 #include <rclcpp/rclcpp.hpp>
+
 namespace fawkes {
 
 class ROS2AspectIniFin;
