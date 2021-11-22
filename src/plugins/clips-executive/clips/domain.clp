@@ -49,6 +49,15 @@
   (multislot param-values)
 )
 
+(deftemplate domain-promise
+  "A promise is like a domain-fact with the exception that it is not true yet."
+  (slot name (type SYMBOL) (default ?NONE))
+  (multislot param-values)
+  (slot promising-goal (type SYMBOL))
+  (slot valid-at)
+  (slot negated (type SYMBOL) (allowed-values TRUE FALSE))
+)
+
 (deffunction domain-wipe ()
 	(foreach ?t (create$ domain-object-type domain-object domain-predicate domain-fact
 											 pddl-formula pddl-predicate pddl-grounding
