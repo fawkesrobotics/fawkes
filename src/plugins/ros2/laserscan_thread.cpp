@@ -53,8 +53,8 @@ ROS2LaserScanThread::~ROS2LaserScanThread()
 std::string
 ROS2LaserScanThread::topic_name(const char *if_id, const char *suffix)
 {
-	std::string topic_name = std::string("fawkes_scans/") + if_id + "_" + suffix;
-	std::string::size_type pos = 0;
+	std::string            topic_name = std::string("fawkes_scans/") + if_id + "_" + suffix;
+	std::string::size_type pos        = 0;
 	while ((pos = topic_name.find("-", pos)) != std::string::npos) {
 		topic_name.replace(pos, 1, "_");
 	}
@@ -75,7 +75,15 @@ ROS2LaserScanThread::init()
 	// get events right away
 	rclcpp::SubscriptionOptionsBase subopts;
 	subopts.ignore_local_publications = true;
-	sub_ls_ = node_handle->create_subscription("scan", 100, std::bind(&ROS2LaserScanThread::laser_scan_message_cb, this, _1), rclcpp::SubscriptionOptionsWithAllocator<std::allocator<void>>(subopts));
+	auto callback                     = [this]( std::shared_ptr<const sensor_msgs::msg::LaserScan> msg, const rclcpp::MessageInfo & msg_info) -> void {
+		MutexLocker lock(ls_msg_queue_mutex_);
+		ls_msg_queues_[active_queue_].push({msg, msg_info});
+	};
+
+	auto qos = rclcpp::QoS(rclcpp::KeepLast(10));
+	
+	sub_ls_  = node_handle->create_subscription<sensor_msgs::msg::LaserScan>(
+    "scan", qos, callback, rclcpp::SubscriptionOptionsWithAllocator<std::allocator<void>>(subopts));
 
 	ls360_ifs_  = blackboard->open_multiple_for_reading<Laser360Interface>("*");
 	ls720_ifs_  = blackboard->open_multiple_for_reading<Laser720Interface>("*");
@@ -170,8 +178,7 @@ ROS2LaserScanThread::finalize()
 	blackboard->unregister_observer(this);
 
 	std::map<std::string, PublisherInfo>::iterator p;
-	for (p = pubs_.begin(); p != pubs_.end(); ++p) {
-	}
+	for (p = pubs_.begin(); p != pubs_.end(); ++p) {}
 
 	std::list<Laser360Interface *>::iterator i360;
 	for (i360 = ls360_ifs_.begin(); i360 != ls360_ifs_.end(); ++i360) {
@@ -199,13 +206,15 @@ ROS2LaserScanThread::loop()
 	ls_msg_queue_mutex_->unlock();
 
 	while (!ls_msg_queues_[queue].empty()) {
-		std::pair<std::shared_ptr<const sensor_msgs::msg::LaserScan>, const rclcpp::MessageInfo> tmp = ls_msg_queues_[queue].front();
+		std::pair<std::shared_ptr<const sensor_msgs::msg::LaserScan>, const rclcpp::MessageInfo> tmp =
+		  ls_msg_queues_[queue].front();
 
 		std::shared_ptr<const sensor_msgs::msg::LaserScan> msg = tmp.first;
 
 		const rclcpp::MessageInfo minfo = tmp.second;
 		// Check if interface exists, open if it does not
-		const std::string callerid = minfo.get_rmw_message_info().publisher_gid.implementation_identifier;
+		const std::string callerid =
+		  minfo.get_rmw_message_info().publisher_gid.implementation_identifier;
 		bool have_interface = true;
 		if (ls360_wifs_.find(callerid) == ls360_wifs_.end()) {
 			try {
@@ -214,9 +223,9 @@ ROS2LaserScanThread::loop()
 				ls360_wifs_[callerid]      = ls360if;
 			} catch (Exception &e) {
 				logger->log_warn(name(),
-									"Failed to open ROS laser interface for "
-									"message from node %s, exception follows",
-									callerid.c_str());
+				                 "Failed to open ROS laser interface for "
+				                 "message from node %s, exception follows",
+				                 callerid.c_str());
 				logger->log_warn(name(), e);
 				have_interface = false;
 			}
@@ -251,7 +260,7 @@ ROS2LaserScanThread::bb_interface_data_refreshed(fawkes::Interface *interface) t
 	Laser720Interface * ls720if  = dynamic_cast<Laser720Interface *>(interface);
 	Laser1080Interface *ls1080if = dynamic_cast<Laser1080Interface *>(interface);
 
-	PublisherInfo &         pi  = pubs_[interface->uid()];
+	PublisherInfo &              pi  = pubs_[interface->uid()];
 	sensor_msgs::msg::LaserScan &msg = pi.msg;
 
 	if (ls360if) {
@@ -450,14 +459,14 @@ ROS2LaserScanThread::bb_interface_created(const char *type, const char *id) thro
 
 void
 ROS2LaserScanThread::bb_interface_writer_removed(fawkes::Interface *interface,
-                                                unsigned int       instance_serial) throw()
+                                                 unsigned int       instance_serial) throw()
 {
 	conditional_close(interface);
 }
 
 void
 ROS2LaserScanThread::bb_interface_reader_removed(fawkes::Interface *interface,
-                                                unsigned int       instance_serial) throw()
+                                                 unsigned int       instance_serial) throw()
 {
 	conditional_close(interface);
 }
@@ -525,12 +534,3 @@ ROS2LaserScanThread::conditional_close(Interface *interface) throw()
 	}
 }
 
-/** Callback function for ROS laser scan message subscription.
- * @param msg incoming message
- */
-void
-ROS2LaserScanThread::laser_scan_message_cb(std::shared_ptr<const sensor_msgs::msg::LaserScan> msg, const rclcpp::MessageInfo &msg_info)
-{
-	MutexLocker lock(ls_msg_queue_mutex_);
-	ls_msg_queues_[active_queue_].push(std::shared_ptr<const sensor_msgs::msg::LaserScan>, const rclcpp::MessageInfo>(msg, msg_info));
-}
