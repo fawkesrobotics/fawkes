@@ -333,13 +333,14 @@
 	(declare (salience ?*SALIENCE-HIGH*))
 	?g <- (goal (id ?id) (meta-fact 0) (verbosity ?v)
 	            (meta-template ?t&:(member$ ?t (get-deftemplate-list)))
-	            (mode ~RETRACTED))
-	(test (not (any-factp ((?fact ?t)) (eq ?fact:goal-id ?id))))
+	            (mode FORMULATED))
 	=>
-	(modify ?g (meta-fact (fact-index (assert-string (str-cat "(" ?t
-	        " (goal-id " ?id"))")))))
-	(if (eq ?v NOISY) then
-		(printout t "Goal " ?id " attached default meta fact from template " ?t crlf)
+	(if (not (any-factp ((?fact ?t)) (eq ?fact:goal-id ?id))) then
+		(modify ?g (meta-fact (fact-index (assert-string (str-cat "(" ?t
+		        " (goal-id " ?id"))")))))
+		(if (eq ?v NOISY) then
+			(printout t "Goal " ?id " attached default meta fact from template " ?t crlf)
+		)
 	)
 )
 
