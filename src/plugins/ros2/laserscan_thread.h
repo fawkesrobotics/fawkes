@@ -74,7 +74,6 @@ public:
 	                                         unsigned int       instance_serial) throw();
 
 private:
-	void        laser_scan_message_cb(std::shared_ptr<const sensor_msgs::msg::LaserScan> msg, const rclcpp::MessageInfo &msg_info);
 	void        conditional_close(fawkes::Interface *interface) throw();
 	std::string topic_name(const char *if_id, const char *suffix);
 
