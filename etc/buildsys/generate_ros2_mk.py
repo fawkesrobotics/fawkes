@@ -14,7 +14,7 @@ def find(name, path):
 def main(argv):
     parser = argparse.ArgumentParser()
     parser.add_argument("--required_package_list", nargs="+", default=["rclcpp", "rclcpp_action", "std_msgs", "geometry_msgs", "tf2", "tf2_msgs", "rosgraph_msgs", "sensor_msgs", "image_transport", \
-        "nav2_msgs", "nav_msgs", "pcl_conversions", "fawkes_msgs", "nav2_msgs", "visualization_msgs"])
+        "nav2_msgs", "nav_msgs", "pcl_conversions", "pcl_msgs", "fawkes_msgs", "visualization_msgs"])
     value = parser.parse_args(argv)
     required_package_list = value.required_package_list
     print(required_package_list)
@@ -25,14 +25,14 @@ def main(argv):
     if not os.environ.get('COLCON_PREFIX_PATH'):
         print("environment variable COLCON_PREFIX_PATH not set -> maybe source the ROS2 workspace")
         return
-    ros2_ws_path = os.environ.get('COLCON_PREFIX_PATH') + "/.."
+    setup_bashs = ','.join([setup + "/setup.bash" for setup in os.environ.get('COLCON_PREFIX_PATH').split(":")])
     
 
     get_flags_py_path = find("get_flags.py", os.environ.get('FAWKES_DIR'))
     if os.path.exists("/tmp/tmp_ws_for_flags"):
         shutil.rmtree("/tmp/tmp_ws_for_flags")
-    print(ros2_mk_path)
-    print(ros2_ws_path)
+    print("path of ros2.mk:", ros2_mk_path)
+    print("setup.bash's being sourced", setup_bashs)
     with open(ros2_mk_path, 'w') as f:
         mk = '''
 #*****************************************************************************
@@ -62,8 +62,9 @@ __buildsys_ros2_mk_ := 1
   # GENERATED STATIC FLAGS BEGIN'''
         for package in required_package_list:
             print(f'getting flags for package {package}...')
-            cflags = subprocess.check_output(f'/usr/bin/python3 {get_flags_py_path} -w {ros2_ws_path} -p {package} -b -c', shell=True)[:-2].decode('ascii')
-            lflags = subprocess.check_output(f'/usr/bin/python3 {get_flags_py_path} -w {ros2_ws_path} -p {package} -b -l', shell=True)[:-2].decode('ascii')
+            cflags = ""
+            cflags = subprocess.check_output(f'/usr/bin/python3 {get_flags_py_path} -s {setup_bashs} -p {package} -b -c', shell=True)[:-2].decode('ascii')
+            lflags = subprocess.check_output(f'/usr/bin/python3 {get_flags_py_path} -s {setup_bashs} -p {package} -b -l', shell=True)[:-2].decode('ascii')
             mk += f'''
   {package.upper()}_cflags={cflags}
   {package.upper()}_lflags= {lflags}'''
@@ -77,11 +78,11 @@ __buildsys_ros2_mk_ := 1
   ros2-pkgs-lflags  = $(foreach p,$1,$(call ros2-pkg-lflags,$p) )
   ros2-missing-pkgs = $(strip $(foreach p,$1,$(if $(subst 1,,$(call ros2-have-pkg,$p)),$p )))
 
-  ros2-have-pkg     = $(if $(shell python3 {get_flags_py_path} -p $(1) -e; echo $${{?/1/}}),1,0)
-  ros2-pkg-cflags   = $(shell python3 {get_flags_py_path}  -p $(1) -b --cflags)
-  ros2-pkg-lflags   = $(subst -l:,,$(shell python3 {get_flags_py_path}  -p $(1) --lflags))
-  ros2-pkg-version  = $(shell python3 {get_flags_py_path} -p $(1) -v)
-  ros2-pkg-version-atleast = $(if $(shell python {get_flags_py_path} -p $(1) -v; echo $${{?/1/}}),1,0)
+  ros2-have-pkg     = $(if $(shell /usr/bin/python3 {get_flags_py_path} -s {setup_bashs} -p $(1) -e; echo $${{?/1/}}),1,0)
+  ros2-pkg-cflags   = $(shell /usr/bin/python3 {get_flags_py_path} -s {setup_bashs} -p $(1) -b --cflags)
+  ros2-pkg-lflags   = $(subst -l:,,$(shell /usr/bin/python3 {get_flags_py_path} -s {setup_bashs} -p $(1) --lflags))
+  ros2-pkg-version  = $(shell /usr/bin/python3 {get_flags_py_path} -s {setup_bashs} -p $(1) -v)
+  ros2-pkg-version-atleast = $(if $(shell /usr/bin/python3 {get_flags_py_path} -p $(1) -v; echo $${{?/1/}}),1,0)
 
   HAVE_ROS2 = $(call ros2-have-pkg,rclcpp)
 
