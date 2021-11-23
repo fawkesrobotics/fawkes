@@ -125,7 +125,7 @@ int main(int argc, char *argv[])
                 compile_flags = ""
                 for line in cf.readlines():
                     if any(var in line for var in ["CXX_DEFINES", "CXX_INCLUDES", "CXX_FLAGS"]):
-                        compile_flags += ' '.join([flag for flag in line.split("=")[-1].replace('\n', '').split(' ') if f"dummy_for_{package_name}_flags" not in flag])
+                        compile_flags += ' '.join([flag for flag in line.split("=", 1)[-1].replace('\n', '').split(' ') if f"dummy_for_{package_name}_flags" not in flag])
                 print(compile_flags)
             sys.exit(0)
         elif opt in ("-l", "--lflags"):
