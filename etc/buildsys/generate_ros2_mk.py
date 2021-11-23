@@ -29,7 +29,8 @@ def main(argv):
     
 
     get_flags_py_path = find("get_flags.py", os.environ.get('FAWKES_DIR'))
-    shutil.rmtree("/tmp/tmp_ws_for_flags")
+    if os.path.exists("/tmp/tmp_ws_for_flags"):
+        shutil.rmtree("/tmp/tmp_ws_for_flags")
     print(ros2_mk_path)
     print(ros2_ws_path)
     with open(ros2_mk_path, 'w') as f:
