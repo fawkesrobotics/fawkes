@@ -22,6 +22,11 @@
 
 #include "amcl_thread.h"
 
+#ifndef HAVE_ROS
+# error "ROS integration missing"
+#endif
+
+
 #include <core/plugin.h>
 #ifdef HAVE_ROS
 #	include "amcl_utils.h"
@@ -42,14 +47,14 @@ public:
 	explicit AmclPlugin(Configuration *config) : Plugin(config)
 	{
 #ifdef HAVE_ROS
-		AmclROSThread *rt          = NULL;
+		AmclROS2Thread *rt          = NULL;
 		bool           ros_enabled = true;
 		try {
 			ros_enabled = config->get_bool(AMCL_CFG_PREFIX "ros/enable");
 		} catch (Exception &e) {
 		} // ignore, use default
 		if (ros_enabled) {
-			rt = new AmclROSThread();
+			rt = new AmclROS2Thread();
 			thread_list.push_back(rt);
 		}
 		thread_list.push_back(new AmclThread(rt));

@@ -37,21 +37,20 @@
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl_utils/pcl_adapter.h>
 #include <plugins/ros2/aspect/ros2.h>
+#include <rclcpp/rclcpp.hpp>
+#include <sensor_msgs/msg/point_cloud2.hpp>
 #include <utils/time/time.h>
 
 #include <list>
 #include <queue>
-#include <rclcpp/rclcpp.hpp>
-#include <sensor_msgs/msg/point_cloud2.hpp>
-using std::placeholders::_1;
 
 class ROS2PointCloudThread : public fawkes::Thread,
-                             public fawkes::ClockAspect,
-                             public fawkes::LoggingAspect,
-                             public fawkes::ConfigurableAspect,
-                             public fawkes::BlockedTimingAspect,
-                             public fawkes::PointCloudAspect,
-                             public fawkes::ROS2Aspect
+                            public fawkes::ClockAspect,
+                            public fawkes::LoggingAspect,
+                            public fawkes::ConfigurableAspect,
+                            public fawkes::BlockedTimingAspect,
+                            public fawkes::PointCloudAspect,
+                            public fawkes::ROSAspect
 {
 public:
 	ROS2PointCloudThread();
@@ -74,18 +73,16 @@ private:
 	void ros_pointcloud_check_for_listener_in_fawkes();
 	void fawkes_pointcloud_publish_to_ros();
 	void fawkes_pointcloud_search();
-	//void ros_pointcloud_on_data_msg(const sensor_msgs::msg::PointCloud2::SharedPtr &msg,
-	//                                const rclcpp::MessageInfo &                     message_info);
-
+	void ros_pointcloud_on_data_msg(const sensor_msgs::msg::PointCloud2ConstPtr &msg,
+	                                const std::string &                     topic_name);
 
 	template <typename PointT>
 	void
-	add_pointcloud(const sensor_msgs::msg::PointCloud2 &msg,
-				   const std::string &topic_name)
+	add_pointcloud(const sensor_msgs::msg::PointCloud2ConstPtr &msg, const std::string topic_name)
 	{
 		fawkes::RefPtr<pcl::PointCloud<PointT>> pcl;
 		pcl = new pcl::PointCloud<PointT>();
-		pcl::fromROSMsg(msg, **pcl);
+		pcl::fromROSMsg(*msg, **pcl);
 		pcl_manager->add_pointcloud(topic_name.c_str(), pcl);
 		ros_pointcloud_available_ref_[topic_name] =
 		  new fawkes::pcl_utils::PointCloudStorageAdapter<PointT>(pcl);
@@ -93,14 +90,13 @@ private:
 
 	template <typename PointT>
 	void
-	update_pointcloud(const sensor_msgs::msg::PointCloud2 &msg,
-	                  const std::string &topic_name)
+	update_pointcloud(const sensor_msgs::msg::PointCloud2ConstPtr &msg, const std::string topic_name)
 	{
 		fawkes::RefPtr<pcl::PointCloud<PointT>> pcl;
 		pcl = dynamic_cast<fawkes::pcl_utils::PointCloudStorageAdapter<PointT> *>(
 		        ros_pointcloud_available_ref_[topic_name])
 		        ->cloud;
-		pcl::fromROSMsg(msg, **pcl);
+		pcl::fromROSMsg(*msg, **pcl);
 	}
 
 	PointCloudAdapter *adapter_;
@@ -109,11 +105,10 @@ private:
 	typedef struct
 	{
 		rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pub;
-		sensor_msgs::msg::PointCloud2                               msg;
-		fawkes::Time                                                last_sent;
+		sensor_msgs::msg::PointCloud2 msg;
+		fawkes::Time             last_sent;
 	} PublisherInfo;
 	/// @endcond
-
 	std::map<std::string, PublisherInfo> fawkes_pubs_; // the list and ref of topics from fawkes->ros
 	std::list<std::string> ros_pointcloud_available_;  // the list of topics from ros->fawkes
 	std::map<std::string, fawkes::pcl_utils::StorageAdapter *>

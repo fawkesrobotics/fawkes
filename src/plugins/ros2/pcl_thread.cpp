@@ -62,13 +62,13 @@ ROS2PointCloudThread::finalize()
 	for (const std::string &item : ros_pointcloud_available_) {
 		pcl_manager->remove_pointcloud(item.c_str());
 	}
-	std::map<std::string, fawkes::pcl_utils::StorageAdapter *>::iterator it;
-	for (it = ros_pointcloud_available_ref_.begin(); it != ros_pointcloud_available_ref_.end(); it++) {
-		delete it->second;
+	for (const std::pair<std::string, fawkes::pcl_utils::StorageAdapter *> &item :
+	     ros_pointcloud_available_ref_) {
+		delete item.second;
 	}
-	//for (std::pair<std::string, rclcpp::Subscription::SharedPtr> item : ros_pointcloud_subs_) {
-	//	item.second.shutdown();
-	//}
+	for (std::pair<std::string, ros::Subscriber> item : ros_pointcloud_subs_) {
+		item.second.shutdown();
+	}
 	delete adapter_;
 }
 
@@ -98,9 +98,9 @@ ROS2PointCloudThread::ros_pointcloud_search()
 
 	// get all ROS topics
 	std::map<std::string, std::vector<std::string>> ros_topics;
-
-	ros_topics = node_handle->get_topic_names_and_types();
-	if (ros_topics.begin() == ros_topics.end()) {
+	
+	ros_topics = node_handle->get_topc_names_and_types();
+	if (!ros_topics) {
 		logger->log_info(name(), "Coulnd't get available ROS topics");
 		return;
 	}
@@ -109,17 +109,16 @@ ROS2PointCloudThread::ros_pointcloud_search()
 	std::map<std::string, std::vector<std::string>>::iterator it;
 	for (it = ros_topics.begin(); it != ros_topics.end(); it++) {
 		// only topics of type sensor_msgs/PointCloud2 are important
-		if (0 == it->second[0].compare("sensor_msgs/PointCloud2")) {
+		if (0 == it.second[0].compare("sensor_msgs/PointCloud2")) {
 			// check if this is a topic comming from fawkes
 			bool topic_not_from_fawkes = true;
-			std::map<std::string, PublisherInfo>::iterator it_inner;
-			for (it_inner = fawkes_pubs_.begin(); it_inner != fawkes_pubs_.end(); it_inner++) {
-				if (0 == it->first.compare(it_inner->second.pub->get_topic_name())) {
+			for (const std::pair<std::string, PublisherInfo> &fawkes_cloud : fawkes_pubs_) {
+				if (0 == it.first.compare(fawkes_cloud.second.pub.getTopic())) {
 					topic_not_from_fawkes = false;
 				}
 			}
 			if (topic_not_from_fawkes) {
-				ros_pointclouds_new.push_back(it->first);
+				ros_pointclouds_new.push_back(it.first);
 			}
 		}
 	}
@@ -153,59 +152,12 @@ ROS2PointCloudThread::ros_pointcloud_search()
 			}
 		}
 		if (!exists) {
-			auto ros_pointcloud_on_data_msg = [this](const sensor_msgs::msg::PointCloud2 &msg,
-			                                         const rclcpp::MessageInfo &message_info) -> void {
-				std::string topic_name =
-				  message_info.get_rmw_message_info().publisher_gid.implementation_identifier;
-
-				if (!pcl_manager->exists_pointcloud(topic_name.c_str())) {
-					bool r = false, i = false;
-					for (const sensor_msgs::msg::PointField &field : msg.fields) {
-						//      logger->log_info(name(), "%s: %s", topic_name.c_str(), field.name.c_str());
-						if (0 == field.name.compare("r")) {
-							r = true;
-						}
-						if (0 == field.name.compare("i")) {
-							i = true;
-						}
-					}
-					if (!r && !i) {
-						logger->log_info(name(), "Adding %s with type XYZ ROS -> FAWKES", topic_name.c_str());
-						add_pointcloud<pcl::PointXYZ>(msg, topic_name);
-					} else if (r && !i) {
-						logger->log_info(name(),
-						                 "Adding %s with type XYZRGB ROS -> FAWKES",
-						                 topic_name.c_str());
-						add_pointcloud<pcl::PointXYZRGB>(msg, topic_name);
-					} else if (!r && i) {
-						logger->log_info(name(), "Adding %s with type XYRI ROS -> FAWKES", topic_name.c_str());
-						add_pointcloud<pcl::PointXYZI>(msg, topic_name);
-					} else {
-						logger->log_error(name(), "%s: can't detect point type, using XYZ", topic_name.c_str());
-						add_pointcloud<pcl::PointXYZ>(msg, topic_name);
-					}
-				}
-
-				// copy data
-				const pcl_utils::StorageAdapter *sa = pcl_manager->get_storage_adapter(topic_name.c_str());
-				if (sa->is_pointtype<pcl::PointXYZ>()) {
-					update_pointcloud<pcl::PointXYZ>(msg, topic_name);
-				} else if (sa->is_pointtype<pcl::PointXYZRGB>()) {
-					update_pointcloud<pcl::PointXYZRGB>(msg, topic_name);
-				} else if (sa->is_pointtype<pcl::PointXYZI>()) {
-					update_pointcloud<pcl::PointXYZI>(msg, topic_name);
-				} else {
-					logger->log_error(name(), "Can't detect cloud type");
-				}
-
-				ros_pointcloud_check_for_listener_in_fawkes();
-			};
 			logger->log_info(name(), "Pointcloud %s is now available from ROS", ros_topic.c_str());
 			ros_pointcloud_available_.push_back(ros_topic);
-			ros_pointcloud_subs_[ros_topic] =
-			  node_handle->create_subscription<sensor_msgs::msg::PointCloud2>(ros_topic,
-			                                                                  1,
-			                                                                  ros_pointcloud_on_data_msg);
+			ros_pointcloud_subs_[ros_topic] = node_handle->create_subscription<sensor_msgs::msg::PointCloud2>(
+			  ros_topic,
+			  1,
+			  boost::bind(&ROS2PointCloudThread::ros_pointcloud_on_data_msg, this, _1, ros_topic));
 		}
 	}
 }
@@ -213,65 +165,20 @@ ROS2PointCloudThread::ros_pointcloud_search()
 void
 ROS2PointCloudThread::ros_pointcloud_check_for_listener_in_fawkes()
 {
-	auto ros_pointcloud_on_data_msg = [this](const sensor_msgs::msg::PointCloud2 &msg,
-	                                         const rclcpp::MessageInfo &message_info) -> void {
-		std::string topic_name =
-		  message_info.get_rmw_message_info().publisher_gid.implementation_identifier;
-
-		if (!pcl_manager->exists_pointcloud(topic_name.c_str())) {
-			bool r = false, i = false;
-			for (const sensor_msgs::msg::PointField &field : msg.fields) {
-				//      logger->log_info(name(), "%s: %s", topic_name.c_str(), field.name.c_str());
-				if (0 == field.name.compare("r")) {
-					r = true;
-				}
-				if (0 == field.name.compare("i")) {
-					i = true;
-				}
-			}
-			if (!r && !i) {
-				logger->log_info(name(), "Adding %s with type XYZ ROS -> FAWKES", topic_name.c_str());
-				add_pointcloud<pcl::PointXYZ>(msg, topic_name);
-			} else if (r && !i) {
-				logger->log_info(name(), "Adding %s with type XYZRGB ROS -> FAWKES", topic_name.c_str());
-				add_pointcloud<pcl::PointXYZRGB>(msg, topic_name);
-			} else if (!r && i) {
-				logger->log_info(name(), "Adding %s with type XYRI ROS -> FAWKES", topic_name.c_str());
-				add_pointcloud<pcl::PointXYZI>(msg, topic_name);
-			} else {
-				logger->log_error(name(), "%s: can't detect point type, using XYZ", topic_name.c_str());
-				add_pointcloud<pcl::PointXYZ>(msg, topic_name);
-			}
-		}
-
-		// copy data
-		const pcl_utils::StorageAdapter *sa = pcl_manager->get_storage_adapter(topic_name.c_str());
-		if (sa->is_pointtype<pcl::PointXYZ>()) {
-			update_pointcloud<pcl::PointXYZ>(msg, topic_name);
-		} else if (sa->is_pointtype<pcl::PointXYZRGB>()) {
-			update_pointcloud<pcl::PointXYZRGB>(msg, topic_name);
-		} else if (sa->is_pointtype<pcl::PointXYZI>()) {
-			update_pointcloud<pcl::PointXYZI>(msg, topic_name);
-		} else {
-			logger->log_error(name(), "Can't detect cloud type");
-		}
-
-		ros_pointcloud_check_for_listener_in_fawkes();
-	};
-	std::map<std::string, fawkes::pcl_utils::StorageAdapter *>::iterator it;
-	for (it = ros_pointcloud_available_ref_.begin(); it != ros_pointcloud_available_ref_.end(); it++) {
+	for (const std::pair<std::string, fawkes::pcl_utils::StorageAdapter *> &item :
+	     ros_pointcloud_available_ref_) {
 		unsigned int use_count = 0;
-		if (it->second->is_pointtype<pcl::PointXYZ>()) {
+		if (item.second->is_pointtype<pcl::PointXYZ>()) {
 			use_count =
-			  dynamic_cast<fawkes::pcl_utils::PointCloudStorageAdapter<pcl::PointXYZ> *>(it->second)
+			  dynamic_cast<fawkes::pcl_utils::PointCloudStorageAdapter<pcl::PointXYZ> *>(item.second)
 			    ->cloud.use_count();
-		} else if (it->second->is_pointtype<pcl::PointXYZRGB>()) {
+		} else if (item.second->is_pointtype<pcl::PointXYZRGB>()) {
 			use_count =
-			  dynamic_cast<fawkes::pcl_utils::PointCloudStorageAdapter<pcl::PointXYZRGB> *>(it->second)
+			  dynamic_cast<fawkes::pcl_utils::PointCloudStorageAdapter<pcl::PointXYZRGB> *>(item.second)
 			    ->cloud.use_count();
-		} else if (it->second->is_pointtype<pcl::PointXYZI>()) {
+		} else if (item.second->is_pointtype<pcl::PointXYZI>()) {
 			use_count =
-			  dynamic_cast<fawkes::pcl_utils::PointCloudStorageAdapter<pcl::PointXYZI> *>(it->second)
+			  dynamic_cast<fawkes::pcl_utils::PointCloudStorageAdapter<pcl::PointXYZI> *>(item.second)
 			    ->cloud.use_count();
 		} else {
 			logger->log_error(name(), "Can't detect cloud type");
@@ -280,15 +187,16 @@ ROS2PointCloudThread::ros_pointcloud_check_for_listener_in_fawkes()
 		if (
 		  use_count
 		  <= 2) { // my internal list, this ref and the pcl_manager have copys of this pointer, if more are used, otheres are listening too
-			std::map<std::string,
-			         rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr>::iterator element =
-			  ros_pointcloud_subs_.find(it->first);
+			std::map<std::string, ros::Subscriber>::iterator element =
+			  ros_pointcloud_subs_.find(item.first);
 			if (element != ros_pointcloud_subs_.end()) {
-				ros_pointcloud_subs_.erase(it->first);
+				ros_pointcloud_subs_.erase(item.first);
 			}
 		} else {
-			ros_pointcloud_subs_[it->first] = node_handle->create_subscription<sensor_msgs::msg::PointCloud2>(
-			  it->first, 1, ros_pointcloud_on_data_msg);
+			ros_pointcloud_subs_[item.first] = rosnode->subscribe<sensor_msgs::PointCloud2>(
+			  item.first,
+			  1,
+			  boost::bind(&ROS2PointCloudThread::ros_pointcloud_on_data_msg, this, _1, item.first));
 		}
 	}
 }
@@ -338,8 +246,8 @@ ROS2PointCloudThread::fawkes_pointcloud_publish_to_ros()
 {
 	std::map<std::string, PublisherInfo>::iterator p;
 	for (p = fawkes_pubs_.begin(); p != fawkes_pubs_.end(); ++p) {
-		PublisherInfo &pi = p->second; //pi.pub.getNumSubscribers() > 0 &&
-		if (pcl_manager->exists_pointcloud(p->first.c_str())) {
+		PublisherInfo &pi = p->second;
+		if (pi.pub.getNumSubscribers() > 0 && pcl_manager->exists_pointcloud(p->first.c_str())) {
 			unsigned int width, height;
 			void *       point_data;
 			size_t       point_size, num_points;
@@ -356,13 +264,13 @@ ROS2PointCloudThread::fawkes_pointcloud_publish_to_ros()
 				pi.msg.data.resize(data_size);
 				memcpy(&pi.msg.data[0], point_data, data_size);
 
-				pi.msg.width                = width;
-				pi.msg.height               = height;
-				pi.msg.header.frame_id      = frame_id;
-				pi.msg.header.stamp.sec     = time.get_sec();
-				pi.msg.header.stamp.nanosec = time.get_nsec();
-				pi.msg.point_step           = point_size;
-				pi.msg.row_step             = point_size * pi.msg.width;
+				pi.msg.width             = width;
+				pi.msg.height            = height;
+				pi.msg.header.frame_id   = frame_id;
+				pi.msg.header.stamp.sec  = time.get_sec();
+				pi.msg.header.stamp.nsec = time.get_nsec();
+				pi.msg.point_step        = point_size;
+				pi.msg.row_step          = point_size * pi.msg.width;
 
 				pi.pub->publish(pi.msg);
 				//} else {
@@ -376,16 +284,14 @@ ROS2PointCloudThread::fawkes_pointcloud_publish_to_ros()
 	}
 }
 
-/*void
-ROS2PointCloudThread::ros_pointcloud_on_data_msg(const sensor_msgs::msg::PointCloud2::SharedPtr &msg,
-                                                 const rclcpp::MessageInfo &message_info)
+void
+ROS2PointCloudThread::ros_pointcloud_on_data_msg(const sensor_msgs::msg::PointCloud2ConstPtr &msg,
+                                                const std::string &                     topic_name)
 {
 	// if this is the first time, I need the meta infos, what point-type is send
-	std::string topic_name = message_info.get_rmw_message_info().publisher_gid.implementation_identifier;
-	
 	if (!pcl_manager->exists_pointcloud(topic_name.c_str())) {
 		bool r = false, i = false;
-		for (const sensor_msgs::msg::PointField &field : msg->fields) {
+		for (const sensor_msgs::PointField &field : msg->fields) {
 			//      logger->log_info(name(), "%s: %s", topic_name.c_str(), field.name.c_str());
 			if (0 == field.name.compare("r")) {
 				r = true;
@@ -422,4 +328,4 @@ ROS2PointCloudThread::ros_pointcloud_on_data_msg(const sensor_msgs::msg::PointCl
 	}
 
 	ros_pointcloud_check_for_listener_in_fawkes();
-}*/
+}

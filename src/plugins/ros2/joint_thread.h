@@ -53,15 +53,15 @@ public:
 	virtual void init();
 	virtual void finalize();
 
-	virtual void bb_interface_created(const char *type, const char *id) throw();
-	virtual void bb_interface_writer_removed(fawkes::Interface *interface,
-	                                         unsigned int       instance_serial) throw();
-	virtual void bb_interface_reader_removed(fawkes::Interface *interface,
-	                                         unsigned int       instance_serial) throw();
-	virtual void bb_interface_data_refreshed(fawkes::Interface *interface) throw();
+	void bb_interface_created(const char *type, const char *id) noexcept override;
+	void bb_interface_writer_removed(fawkes::Interface *interface,
+	                                 fawkes::Uuid       instance_serial) noexcept override;
+	void bb_interface_reader_removed(fawkes::Interface *interface,
+	                                 fawkes::Uuid       instance_serial) noexcept override;
+	void bb_interface_data_refreshed(fawkes::Interface *interface) noexcept override;
 
 private:
-	void conditional_close(fawkes::Interface *interface) throw();
+	void conditional_close(fawkes::Interface *interface) noexcept;
 
 private:
 	rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr ros2_pub_;

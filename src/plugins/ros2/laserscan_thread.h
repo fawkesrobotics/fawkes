@@ -64,17 +64,18 @@ public:
 	virtual void finalize();
 
 	// for BlackBoardInterfaceObserver
-	virtual void bb_interface_created(const char *type, const char *id) throw();
+	void bb_interface_created(const char *type, const char *id) noexcept override;
 
 	// for BlackBoardInterfaceListener
-	virtual void bb_interface_data_refreshed(fawkes::Interface *interface) throw();
-	virtual void bb_interface_writer_removed(fawkes::Interface *interface,
-	                                         unsigned int       instance_serial) throw();
-	virtual void bb_interface_reader_removed(fawkes::Interface *interface,
-	                                         unsigned int       instance_serial) throw();
+	void bb_interface_data_refreshed(fawkes::Interface *interface) noexcept override;
+	void bb_interface_writer_removed(fawkes::Interface *interface,
+	                                 fawkes::Uuid       instance_serial) noexcept override;
+	void bb_interface_reader_removed(fawkes::Interface *interface,
+	                                 fawkes::Uuid       instance_serial) noexcept override;
 
 private:
-	void        conditional_close(fawkes::Interface *interface) throw();
+	void        laser_scan_message_cb(std::shared_ptr<const sensor_msgs::msg::LaserScan> msg, const rclcpp::MessageInfo &msg_info);
+	void        conditional_close(fawkes::Interface *interface) noexcept;
 	std::string topic_name(const char *if_id, const char *suffix);
 
 	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
@@ -101,14 +102,17 @@ private:
 	/// @endcond
 	std::map<std::string, PublisherInfo> pubs_;
 
+        std::string     cfg_tf_prefix_;
+
 	fawkes::Mutex *                                             ls_msg_queue_mutex_;
 	unsigned int                                                active_queue_;
-	std::queue<std::pair<std::shared_ptr<const sensor_msgs::msg::LaserScan>, const rclcpp::MessageInfo>> ls_msg_queues_[2];
+	std::queue<std::pair<std::shared_ptr<const sensor_msgs::msg::LaserScan>, const rclcpp::MessageInfo> > ls_msg_queues_[2];
 
 	std::map<std::string, fawkes::Laser360Interface *> ls360_wifs_;
 
 	fawkes::Mutex *seq_num_mutex_;
 	unsigned int   seq_num_;
+
 };
 
 #endif

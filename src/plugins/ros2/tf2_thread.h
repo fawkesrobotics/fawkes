@@ -70,11 +70,11 @@ public:
 	virtual void bb_interface_created(const char *type, const char *id) throw();
 
 	// for BlackBoardInterfaceListener
-	virtual void bb_interface_data_refreshed(fawkes::Interface *interface) throw();
+	virtual void bb_interface_data_refreshed(fawkes::Interface *interface) noexcept;
 	virtual void bb_interface_writer_removed(fawkes::Interface *interface,
-	                                         unsigned int       instance_serial) throw();
+	                                         fawkes::Uuid       instance_serial) noexcept;
 	virtual void bb_interface_reader_removed(fawkes::Interface *interface,
-	                                         unsigned int       instance_serial) throw();
+	                                         fawkes::Uuid       instance_serial) noexcept;
 
 private:
 	void tf_message_cb_dynamic(const tf2_msgs::msg::TFMessage::SharedPtr msg);
@@ -97,8 +97,13 @@ protected:
 	}
 
 private:
-	bool  cfg_use_tf2_;
-	float cfg_update_interval_;
+	bool		cfg_use_tf2_;
+	bool		cfg_use_namespace_;
+	std::string	cfg_tf_prefix_;
+	std::vector<std::string>	cfg_tf_prefix_exclusions_;
+	float		cfg_update_interval_;
+
+	bool		tf_prefix_enabled_;
 
 	std::list<std::string>                  ros2_frames_;
 	std::list<fawkes::TransformInterface *> tfifs_;
