@@ -78,6 +78,10 @@ LIBS_ros2_skiller = fawkescore fawkesutils fawkesaspects fawkesblackboard \
 	      fawkesinterface fawkesros2aspect SkillerInterface
 OBJS_ros2_skiller = skiller_plugin.o skiller_thread.o
 
+LIBS_ros2_navigator = m pthread fawkescore fawkesutils fawkesaspects fawkesblackboard \
+		     fawkesinterface fawkesros2aspect NavigatorInterface
+OBJS_ros2_navigator = navigator_plugin.o navigator_thread.o
+
 OBJS_all = $(OBJS_ros2)  \
            $(OBJS_ros2_cmdvel) \
            $(OBJS_ros2_talkerpub) \
@@ -91,7 +95,8 @@ OBJS_all = $(OBJS_ros2)  \
            $(OBJS_ros2_position_3d) \
            $(OBJS_ros2_laserscan) \
            $(OBJS_ros2_pcl) \
-           $(OBJS_ros2_skiller)
+           $(OBJS_ros2_skiller) \
+           $(OBJS_ros2_navigator)
 
 PLUGINS_all = $(PLUGINDIR)/ros2.so \
               $(PLUGINDIR)/ros2-cmdvel.so \
@@ -106,7 +111,8 @@ PLUGINS_all = $(PLUGINDIR)/ros2.so \
               $(PLUGINDIR)/ros2-position-3d.so \
               $(PLUGINDIR)/ros2-laserscan.so \
               $(PLUGINDIR)/ros2-pcl.so \
-              $(PLUGINDIR)/ros2-skiller.so
+              $(PLUGINDIR)/ros2-skiller.so \
+              $(PLUGINDIR)/ros2-navigator.so
               
 CFLAGS  += $(CFLAGS_ROS2) -Wno-unknown-pragmas -Wno-deprecated-declarations
 LDFLAGS += $(LDFLAGS_ROS2)
@@ -164,6 +170,11 @@ CFLAGS_skiller_thread += $(CFLAGS) $(FAWKES_MSGS_cflags) $(RCLCPP_ACTION_cflags)
 CFLAGS_skiller_plugin += $(CFLAGS_skiller_thread)
 LDFLAGS_ros2_skiller += $(LDFLAGS) $(FAWKES_MSGS_lflags) $(RCLCPP_ACTION_lflags) $(call boost-lib-ldflags,thread) $(call boost-lib-ldflags,system) -lpthread
 
+CFLAGS_navigator_thread += $(CFLAGS) $(RCLCPP_ACTION_cflags) $(NAV2_MSGS_cflags) $(TF2_cflags) $(TF2_MSGS_cflags) $(GEOMETRY_MSGS_cflags) $(call boost-lib-cflags,thread) $(CFLAGS_TF)
+CFLAGS_navigator_plugin = $(CFLAGS_navigator_thread)
+LDFLAGS_ros2_navigator += $(LDFLAGS) $(RCLCPP_ACTION_lflags) $(NAV2_MSGS_lflags) $(TF2_lflags) $(TF2_MSGS_lflags) $(GEOMETRY_MSGS_lflags) $(call boost-libs-ldflags,thread system) $(LDFLAGS_TF)
+                        
+
 PLUGINS_build += $(PLUGINDIR)/ros2.so \
                  $(PLUGINDIR)/ros2-cmdvel.so \
                  $(PLUGINDIR)/ros2-talkerpub.so \
@@ -177,7 +188,9 @@ PLUGINS_build += $(PLUGINDIR)/ros2.so \
                  $(PLUGINDIR)/ros2-position-3d.so \
                  $(PLUGINDIR)/ros2-laserscan.so \
                  $(PLUGINDIR)/ros2-pcl.so \
-                 $(PLUGINDIR)/ros2-skiller.so            
+                 $(PLUGINDIR)/ros2-skiller.so \
+                 $(PLUGINDIR)/ros2-navigator.so
+
 
 include $(BUILDSYSDIR)/base.mk
 
