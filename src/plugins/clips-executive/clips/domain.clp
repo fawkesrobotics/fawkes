@@ -268,26 +268,32 @@
   "Check if there is a referenced precondition formula that is satisfied,
   if yes make the action executable."
   (declare (salience ?*SALIENCE-DOMAIN-CHECK*))
-  ?p <- (plan-action (executable FALSE) (id ?id) (precondition ?grounding-id) (action-name ?operator-id))
+  ?p <- (plan-action (executable FALSE) (id ?id) (precondition ?grounding-id)
+                     (action-name ?operator-id) (state ?state))
   (pddl-formula (part-of ?operator-id) (id ?formula-id))
   (grounded-pddl-formula (is-satisfied TRUE) (formula-id ?formula-id) (grounding ?grounding-id))
   (pddl-grounding (id ?grounding-id))
   =>
   (modify ?p (executable TRUE))
-  (printout t "Action " ?id " is executable based on " ?formula-id crlf)
+  (if (eq ?state PENDING) then
+    (printout t "Action " ?id " is executable based on " ?formula-id crlf)
+  )
 )
 
 (defrule domain-check-if-action-precondition-is-unsatisfied
   "Check if all referenced precondition formulas are not satisfied,
   if yes make the action not executable."
   (declare (salience ?*SALIENCE-DOMAIN-CHECK*))
-  ?p <- (plan-action (executable TRUE) (id ?id) (precondition ?grounding-id) (action-name ?operator-id))
+  ?p <- (plan-action (executable TRUE) (id ?id) (precondition ?grounding-id)
+                     (action-name ?operator-id) (state ?state))
   (pddl-formula (part-of ?operator-id) (id ?formula-id))
   (not (grounded-pddl-formula (is-satisfied TRUE) (formula-id ?formula-id) (grounding ?grounding-id)))
   (pddl-grounding (id ?grounding-id))
   =>
   (modify ?p (executable FALSE))
-  (printout t "Action " ?id " is no longer executable" crlf)
+  (if (eq ?state PENDING) then
+    (printout t "Action " ?id " is no longer executable" crlf)
+  )
 )
 
 (defrule domain-check-if-atomic-formula-is-satisfied
