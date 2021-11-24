@@ -837,36 +837,40 @@ ClipsExecutiveRestApi::gen_plan(const PlanKey &            plan_key,
 			pa->set_executable(get_value<bool>(pai, "executable"));
 			pa->set_duration(get_value<double>(pai, "duration"));
 			pa->set_dispatch_time(get_value<double>(pai, "dispatch-time"));
-			pa->set_precondition(gen_pddl_grounding(pgm[get_value<std::string>(pai, "precondition")]));
 
 			// preconditions
-			std::string        grnd_name = *(pa->precondition()->id());
-			std::string        op_name   = *(pa->operator_name());
-			PDDLFormulaTreeMap grounded_parent_map;
+			if(get_value<std::string>(pai, "precondition") != "")  {
+				pa->set_precondition(gen_pddl_grounding(pgm[get_value<std::string>(pai, "precondition")]));
 
-			for (const auto &p : gpfm[grnd_name]) {
-				PDDLFormulaTreeNode node = std::make_tuple(pfm[get_value<std::string>(p, "formula-id")], p);
-				grounded_parent_map[get_value<std::string>(pfm[get_value<std::string>(p, "formula-id")],
-				                                           "part-of")]
-				  .push_back(node);
-			}
-			for (const auto &p : gppm[grnd_name]) {
-				PDDLFormulaTreeNode node =
-				  std::make_tuple(ppm[get_value<std::string>(p, "predicate-id")], p);
-				grounded_parent_map[get_value<std::string>(ppm[get_value<std::string>(p, "predicate-id")],
-				                                           "part-of")]
-				  .push_back(node);
+				std::string        grnd_name = *(pa->precondition()->id());
+				std::string        op_name   = *(pa->operator_name());
+				PDDLFormulaTreeMap grounded_parent_map;
+
+				for (const auto &p : gpfm[grnd_name]) {
+					PDDLFormulaTreeNode node = std::make_tuple(pfm[get_value<std::string>(p, "formula-id")], p);
+					grounded_parent_map[get_value<std::string>(pfm[get_value<std::string>(p, "formula-id")],
+															"part-of")]
+					.push_back(node);
+				}
+				for (const auto &p : gppm[grnd_name]) {
+					PDDLFormulaTreeNode node =
+					std::make_tuple(ppm[get_value<std::string>(p, "predicate-id")], p);
+					grounded_parent_map[get_value<std::string>(ppm[get_value<std::string>(p, "predicate-id")],
+															"part-of")]
+					.push_back(node);
+				}
+
+				//get root node
+				for (const auto &rnode : grounded_parent_map[op_name]) {
+					CLIPS::Fact::pointer root_fp = std::get<0>(rnode);
+					std::string          root    = get_value<std::string>(root_fp, "id");
+
+					//recursively compute the tree and set the preconditions
+					pa->set_preconditions(std::make_shared<GroundedFormula>(
+					gen_plan_compute_precons(rnode, grounded_parent_map, pgm)));
+				}
 			}
 
-			//get root node
-			for (const auto &rnode : grounded_parent_map[op_name]) {
-				CLIPS::Fact::pointer root_fp = std::get<0>(rnode);
-				std::string          root    = get_value<std::string>(root_fp, "id");
-
-				//recursively compute the tree and set the preconditions
-				pa->set_preconditions(std::make_shared<GroundedFormula>(
-				  gen_plan_compute_precons(rnode, grounded_parent_map, pgm)));
-			}
 
 			actions.push_back(std::move(pa));
 		}
