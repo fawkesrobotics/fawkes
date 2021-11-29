@@ -49,15 +49,6 @@
   (multislot param-values)
 )
 
-(deftemplate domain-promise
-  "A promise is like a domain-fact with the exception that it is not true yet."
-  (slot name (type SYMBOL) (default ?NONE))
-  (multislot param-values)
-  (slot promising-goal (type SYMBOL))
-  (slot valid-at)
-  (slot negated (type SYMBOL) (allowed-values TRUE FALSE))
-)
-
 (deffunction domain-wipe ()
 	(foreach ?t (create$ domain-object-type domain-object domain-predicate domain-fact
 											 pddl-formula pddl-predicate pddl-grounding
@@ -192,6 +183,8 @@
   (slot grounded-parent (type SYMBOL))
 
   (slot is-satisfied (type SYMBOL) (allowed-values TRUE FALSE) (default FALSE))
+  (slot promised-from (type INTEGER) (default -1))
+  (slot promised-until (type INTEGER) (default -1))
 )
 
 (deftemplate pddl-predicate
@@ -218,6 +211,8 @@
   (multislot param-values (type SYMBOL))
 
   (slot is-satisfied (type SYMBOL) (allowed-values TRUE FALSE) (default FALSE))
+  (slot promised-from (type INTEGER) (default -1))
+  (slot promised-until (type INTEGER) (default -1))
 )
 
 (deffunction domain-build-ground-parameter-list
@@ -493,18 +488,6 @@
   =>
   (retract ?g)
   (modify ?a (precondition nil))
-)
-
-(defrule domain-remove-promises-for-finished-goal
-  "If a promise has a goal-id of a goal that doesn't exist, or if the goal is finished,
-  evaluated, or retracted, then remove the promise"
-  ?d <- (domain-promise (promising-goal ?goal-id))
-  (or
-    (not (goal (id ?goal-id)))
-    (goal (id ?goal-id) (mode FINISHED|EVALUATED|RETRACTED))
-  )
-  =>
-  (retract ?d)
 )
 
 (defrule domain-check-if-action-precondition-is-satisfied
