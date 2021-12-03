@@ -28,3 +28,13 @@ fawkes/meta_plugins:
     - clips-pddl-parser
     - skiller
     - clips-executive
+
+  m-promises-test:
+    - flite
+    - clips
+    - clips-rest-api
+    - clips-pddl-parser
+    - skiller
+    - clips-executive
+    - clips-executive-rest-api
+    - webview

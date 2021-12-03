@@ -245,3 +245,33 @@ clips-executive:
       action-mapping:
         say-hello: say{text="Hello ?(name)y", wait=true}
         say-goodbye: say{text="Good bye", wait=true}
+
+    promises-test:
+      init:
+        stage-1:
+          - name: pddl-parser
+        stage-3:
+          - name: domain
+            file: promises-test/domain.clp
+          - name: goal-reasoner
+            files:
+              - goals/retry.clp
+              - goals/run-all.clp
+              - goals/run-one.clp
+              - goals/timeout.clp
+              - goals/try-all.clp
+              - goal-tree.clp
+              - promises-test/goals/run-endless.clp
+              - promises-test/goals/simple.clp
+              - promises-test/goal-reasoner.clp
+              - promises-test/goal-class.clp
+          - name: goal-expander
+            file: promises-test/fixed-sequence.clp
+          - name: action-selection
+            file: promises-test/action-selection.clp
+          - name: action-execution
+            files:
+              - skills-actions.clp
+              - promises-test/noop-actions.clp
+          - name: debug-info
+            file: promises-test/debug.clp
