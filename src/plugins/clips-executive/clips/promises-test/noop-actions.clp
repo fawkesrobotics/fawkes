@@ -41,7 +41,7 @@
 )
 
 (defrule action-timer-noop-run-move
-  ?p <- (plan-action (plan-id ?plan-id) (id ?id) (goal-id ?goal-id) (action-name ?op&move|move-plaza) (state PENDING) (param-values ?r ?start ?end))
+  ?p <- (plan-action (plan-id ?plan-id) (id ?id) (goal-id ?goal-id) (action-name ?op&move|move-plaza) (state PENDING) (param-values ?r ?start ?end) (executable TRUE))
   (not (plan-action (action-name move) (plan-id ~?plan-id) (goal-id ~?goal-id) (param-values ? ? ?end) (state PENDING)))
   (not (action-timer (plan-id ?plan-id) (action-id ?id)))
   (time ?now ?mills)
@@ -54,7 +54,7 @@
 )
 
 (defrule action-timer-noop-run
-  ?p <- (plan-action (plan-id ?plan-id) (id ?id) (goal-id ?goal-id) (action-name ?op&~move) (state PENDING))
+  ?p <- (plan-action (plan-id ?plan-id) (id ?id) (goal-id ?goal-id) (action-name ?op&~move) (state PENDING) (executable TRUE))
   (not (action-timer (plan-id ?plan-id) (action-id ?id)))
   (time ?now ?mills)
   =>
