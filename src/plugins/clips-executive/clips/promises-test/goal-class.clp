@@ -193,15 +193,7 @@
     (not (goal (class ?class) (params robot ~?r $? mine ?mine $?)))
 
     (time ?now ?mills)
-    (test
-        (or
-            (eq ?sat TRUE)
-            (and
-                (< (- ?from ?now) ?lt)
-                (neq ?from -1)
-            )
-        )
-    )
+    (test (sat-or-promised ?sat ?now ?from ?lt))
     =>
     (printout t "Goal " ?class " formulated from PDDL" crlf)
     (if (neq ?sat TRUE) then
@@ -239,15 +231,7 @@
     (not (goal (class ?class) (params robot ~?r side ?side machine ?machine $?)))
 
     (time ?now ?mills)
-    (test
-        (or
-            (eq ?sat TRUE)
-            (and
-                (< (- ?from ?now) ?lt)
-                (neq ?from -1)
-            )
-        )
-    )
+    (test (sat-or-promised ?sat ?now ?from ?lt))
     =>
     (printout t "Goal " ?class " formulated from PDDL" crlf)
     (if (neq ?sat TRUE) then
@@ -286,15 +270,7 @@
     (not (goal (class ?class) (params robot ~?r side ?side machine ?machine)))
 
     (time ?now ?mills)
-    (test
-        (or
-            (eq ?sat TRUE)
-            (and
-                (< (- ?from ?now) ?lt)
-                (neq ?from -1)
-            )
-        )
-    )
+    (test (sat-or-promised ?sat ?now ?from ?lt))
     =>
     (printout t "Goal " ?class " formulated from PDDL" crlf)
     (if (neq ?sat TRUE) then
@@ -333,15 +309,7 @@
     (not (goal (class ?class) (params robot ~?r side ?side machine ?machine $?)))
 
     (time ?now ?mills)
-    (test
-        (or
-            (eq ?sat TRUE)
-            (and
-                (< (- ?from ?now) ?lt)
-                (neq ?from -1)
-            )
-        )
-    )
+    (test (sat-or-promised ?sat ?now ?from ?lt))
     =>
     (printout t "Goal " ?class " formulated from PDDL" crlf)
     (if (neq ?sat TRUE) then
@@ -380,15 +348,7 @@
     (not (goal (class ?class) (params robot ~?r $?)))
 
     (time ?now ?mills)
-    (test
-        (or
-            (eq ?sat TRUE)
-            (and
-                (< (- ?from ?now) ?lt)
-                (neq ?from -1)
-            )
-        )
-    )
+    (test (sat-or-promised ?sat ?now ?from ?lt))
     =>
     (printout t "Goal " ?class " formulated from PDDL" crlf)
     (if (neq ?sat TRUE) then
