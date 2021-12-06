@@ -89,6 +89,12 @@
 	(:action move-plaza
 		:parameters (?r - robot ?l1 - location ?l2 - location)
 		:precondition (and (robot-at ?r ?l1))
+		:effect (and (not (robot-at ?r ?l1)) (robot-at ?r ?l2) (location-is-free ?l1))
+	)
+
+	(:action move-plaza-plaza
+		:parameters (?r - robot ?l1 - location ?l2 - location)
+		:precondition (and (robot-at ?r ?l1))
 		:effect (and (not (robot-at ?r ?l1)) (robot-at ?r ?l2))
 	)
 

@@ -39,6 +39,7 @@
                     (param-constants nil   BASE     ?mine    nil)
                     (param-types     robot location location container)
                     (param-quantified)
+                    (lookahead-time 0)
                     (preconditions "
                         (and
                             (robot-at ?r ?base)
@@ -57,7 +58,7 @@
 (defrule goal-class-create-deliver-to-machine
     (domain-constant (type machine) (value ?machine))
     (domain-constant (type location) (value ?side))
-    (domain-fact (name location-is-part-of-machine) (param-values ?side ?machine))
+    (domain-fact (name location-part-of-machine) (param-values ?side ?machine))
     (domain-fact (name location-is-machine-input) (param-values ?side))
 
     (not (goal-class (class DELIVER) (sub-type SIMPLE) (meta machine ?machine)))
@@ -72,13 +73,14 @@
                     (param-constants nil   ?side    ?machine nil       nil)
                     (param-types     robot location machine  container material)
                     (param-quantified)
+                    (lookahead-time 0)
                     (preconditions "
                         (and
                             (robot-carries ?r ?c)
                             (container-filled ?c ?material)
                             (location-is-free ?side)
                             (location-is-machine-input ?side)
-                            (location-is-part-of-machine ?side ?machine)
+                            (location-part-of-machine ?side ?machine)
                             (machine-in-state ?machine IDLE)
                             (machine-for-material ?machine ?material)
                             (not (storage-is-full))
@@ -103,10 +105,11 @@
                     (param-constants nil   nil      ?machine)
                     (param-types     robot location machine)
                     (param-quantified)
+                    (lookahead-time 0)
                     (preconditions "
                         (and
                             (location-is-machine-input ?side)
-                            (location-is-part-of-machine ?side ?machine)
+                            (location-part-of-machine ?side ?machine)
                             (machine-in-state ?machine FILLED)
                             (not (storage-is-full))
                         )
@@ -119,7 +122,7 @@
 (defrule goal-class-create-clean-machine
     (domain-constant (type machine) (value ?machine))
     (domain-constant (type location) (value ?side))
-    (domain-fact (name location-is-part-of-machine) (param-values ?side ?machine))
+    (domain-fact (name location-part-of-machine) (param-values ?side ?machine))
     (domain-fact (name location-is-machine-output) (param-values ?side))
     (not (goal-class (class CLEAN-MACHINE) (meta machine ?machine)))
     =>
@@ -133,13 +136,14 @@
                     (param-constants nil   ?side    ?machine nil       nil)
                     (param-types     robot location machine  container material)
                     (param-quantified)
+                    (lookahead-time 30)
                     (preconditions "
                         (and
                             (robot-carries ?r ?c)
                             (container-can-be-filled ?c)
                             (location-is-free ?side)
                             (location-is-machine-output ?side)
-                            (location-is-part-of-machine ?side ?machine)
+                            (location-part-of-machine ?side ?machine)
                             (machine-in-state ?machine READY)
                             (machine-makes-material ?machine ?mat)
                             (not (storage-is-full))
@@ -162,6 +166,7 @@
                     (param-constants nil   nil)
                     (param-types     robot container)
                     (param-quantified)
+                    (lookahead-time 0)
                     (preconditions "
                         (and
                             (robot-carries ?r ?c)
@@ -179,15 +184,29 @@
 (defrule goal-class-assert-get-container-and-fill
     (declare (salience ?*SALIENCE-GOAL-FORMULATE*))
     (goal (class PRODUCTION-RUN-ONE) (id ?parent) (meta $? host ?r))
-    (goal-class (class ?class&FILL-CONTAINER) (id ?cid) (sub-type ?subtype))
+    (goal-class (class ?class&FILL-CONTAINER) (id ?cid) (sub-type ?subtype) (lookahead-time ?lt))
     (pddl-formula (part-of ?cid) (id ?formula-id))
-    (grounded-pddl-formula (formula-id ?formula-id) (is-satisfied TRUE) (grounding ?grounding-id))
+    (grounded-pddl-formula (formula-id ?formula-id) (is-satisfied ?sat) (promised-from ?from) (grounding ?grounding-id))
     (pddl-grounding (id ?grounding-id) (param-values ?r ?base ?mine ?c))
 
     (not (goal (sub-type ?subtype) (parent ?parent) (mode ~FORMULATED)))
     (not (goal (class ?class) (params robot ~?r $? mine ?mine $?)))
+
+    (time ?now ?mills)
+    (test
+        (or
+            (eq ?sat TRUE)
+            (and
+                (< (- ?from ?now) ?lt)
+                (neq ?from -1)
+            )
+        )
+    )
     =>
     (printout t "Goal " ?class " formulated from PDDL" crlf)
+    (if (neq ?sat TRUE) then
+        (printout t "Debug: Goal formulated from promise" crlf)
+    )
 
     (bind ?goal-id (sym-cat ?class - (gensym*)))
     (assert (goal (id ?goal-id)
@@ -211,15 +230,29 @@
 (defrule goal-class-assert-deliver-to-machine
     (declare (salience ?*SALIENCE-GOAL-FORMULATE*))
     (goal (class PRODUCTION-RUN-ONE) (id ?parent) (meta $? host ?r))
-    (goal-class (class ?class&DELIVER) (id ?cid) (sub-type ?subtype))
+    (goal-class (class ?class&DELIVER) (id ?cid) (sub-type ?subtype) (lookahead-time ?lt))
     (pddl-formula (part-of ?cid) (id ?formula-id))
-    (grounded-pddl-formula (formula-id ?formula-id) (is-satisfied TRUE) (grounding ?grounding-id))
+    (grounded-pddl-formula (formula-id ?formula-id) (is-satisfied ?sat) (promised-from ?from) (grounding ?grounding-id))
     (pddl-grounding (id ?grounding-id) (param-values ?r ?side ?machine ?c ?mat))
 
     (not (goal (sub-type ?subtype) (parent ?parent) (mode ~FORMULATED)))
     (not (goal (class ?class) (params robot ~?r side ?side machine ?machine $?)))
+
+    (time ?now ?mills)
+    (test
+        (or
+            (eq ?sat TRUE)
+            (and
+                (< (- ?from ?now) ?lt)
+                (neq ?from -1)
+            )
+        )
+    )
     =>
     (printout t "Goal " ?class " formulated from PDDL" crlf)
+    (if (neq ?sat TRUE) then
+        (printout t "Debug: Goal formulated from promise" crlf)
+    )
 
     (bind ?goal-id (sym-cat ?class - (gensym*)))
     (assert (goal (id ?goal-id)
@@ -244,15 +277,29 @@
 (defrule goal-class-assert-start-machine
     (declare (salience ?*SALIENCE-GOAL-FORMULATE*))
     (goal (class PRODUCTION-RUN-ONE) (id ?parent) (meta $? host ?r))
-    (goal-class (class ?class&START-MACHINE) (id ?cid) (sub-type ?subtype))
+    (goal-class (class ?class&START-MACHINE) (id ?cid) (sub-type ?subtype) (lookahead-time ?lt))
     (pddl-formula (part-of ?cid) (id ?formula-id))
-    (grounded-pddl-formula (formula-id ?formula-id) (is-satisfied TRUE) (grounding ?grounding-id))
+    (grounded-pddl-formula (formula-id ?formula-id) (is-satisfied ?sat) (promised-from ?from) (grounding ?grounding-id))
     (pddl-grounding (id ?grounding-id) (param-values ?r ?side ?machine))
 
     (not (goal (sub-type ?subtype) (parent ?parent) (mode ~FORMULATED)))
     (not (goal (class ?class) (params robot ~?r side ?side machine ?machine)))
+
+    (time ?now ?mills)
+    (test
+        (or
+            (eq ?sat TRUE)
+            (and
+                (< (- ?from ?now) ?lt)
+                (neq ?from -1)
+            )
+        )
+    )
     =>
     (printout t "Goal " ?class " formulated from PDDL" crlf)
+    (if (neq ?sat TRUE) then
+        (printout t "Debug: Goal formulated from promise" crlf)
+    )
 
     (bind ?goal-id (sym-cat ?class - (gensym*)))
     (assert (goal (id ?goal-id)
@@ -267,23 +314,39 @@
     ))
 
     ;assert promises resulting from the plan-action of this goal
-    ; (assert
-
-    ; )
+    (assert
+        (domain-promise (name machine-in-state) (param-values ?machine READY) (promising-goal ?goal-id) (valid-at (+ 20 ?now)) (negated FALSE))
+        (domain-promise (name machine-in-state) (param-values ?machine FILLED) (promising-goal ?goal-id) (valid-at (+ 5 ?now)) (negated TRUE))
+        (domain-promise (name machine-in-state) (param-values ?machine OPERATING) (promising-goal ?goal-id) (valid-at (+ 5 ?now)) (negated TRUE))
+    )
 )
 
 (defrule goal-class-assert-clean-machine
     (declare (salience ?*SALIENCE-GOAL-FORMULATE*))
     (goal (class PRODUCTION-RUN-ONE) (id ?parent) (meta $? host ?r))
-    (goal-class (class ?class&CLEAN-MACHINE) (id ?cid) (sub-type ?subtype))
+    (goal-class (class ?class&CLEAN-MACHINE) (id ?cid) (sub-type ?subtype) (lookahead-time ?lt))
     (pddl-formula (part-of ?cid) (id ?formula-id))
-    (grounded-pddl-formula (formula-id ?formula-id) (is-satisfied TRUE) (grounding ?grounding-id))
+    (grounded-pddl-formula (formula-id ?formula-id) (is-satisfied ?sat) (promised-from ?from) (grounding ?grounding-id))
     (pddl-grounding (id ?grounding-id) (param-values ?r ?side ?machine ?c ?mat))
 
     (not (goal (sub-type ?subtype) (parent ?parent) (mode ~FORMULATED)))
     (not (goal (class ?class) (params robot ~?r side ?side machine ?machine $?)))
+
+    (time ?now ?mills)
+    (test
+        (or
+            (eq ?sat TRUE)
+            (and
+                (< (- ?from ?now) ?lt)
+                (neq ?from -1)
+            )
+        )
+    )
     =>
     (printout t "Goal " ?class " formulated from PDDL" crlf)
+    (if (neq ?sat TRUE) then
+        (printout t "Debug: Goal formulated from promise" crlf)
+    )
 
     (bind ?goal-id (sym-cat ?class - (gensym*)))
     (assert (goal (id ?goal-id)
@@ -308,15 +371,29 @@
 (defrule goal-class-assert-deliver-xenonite
     (declare (salience ?*SALIENCE-GOAL-FORMULATE*))
     (goal (class PRODUCTION-RUN-ONE) (id ?parent) (meta $? host ?r))
-    (goal-class (class ?class&DELIVER-XENONITE) (id ?cid) (sub-type ?subtype))
+    (goal-class (class ?class&DELIVER-XENONITE) (id ?cid) (sub-type ?subtype) (lookahead-time ?lt))
     (pddl-formula (part-of ?cid) (id ?formula-id))
-    (grounded-pddl-formula (formula-id ?formula-id) (is-satisfied TRUE) (grounding ?grounding-id))
+    (grounded-pddl-formula (formula-id ?formula-id) (is-satisfied ?sat) (promised-from ?from) (grounding ?grounding-id))
     (pddl-grounding (id ?grounding-id) (param-values ?r ?c))
 
     (not (goal (sub-type ?subtype) (parent ?parent) (mode ~FORMULATED)))
     (not (goal (class ?class) (params robot ~?r $?)))
+
+    (time ?now ?mills)
+    (test
+        (or
+            (eq ?sat TRUE)
+            (and
+                (< (- ?from ?now) ?lt)
+                (neq ?from -1)
+            )
+        )
+    )
     =>
     (printout t "Goal " ?class " formulated from PDDL" crlf)
+    (if (neq ?sat TRUE) then
+        (printout t "Debug: Goal formulated from promise" crlf)
+    )
 
     (bind ?goal-id (sym-cat ?class - (gensym*)))
     (assert (goal (id ?goal-id)

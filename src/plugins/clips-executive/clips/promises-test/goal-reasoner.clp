@@ -77,63 +77,6 @@
                 (goal-tree-update-child ?f ?id (+ 1 (- (length$ ?fact-addresses) ?f-index))))
 )
 
-(defrule goal-reasoner-create-waiting-robot
-  (domain-object (name ?r) (type robot))
-  (not
-      (goal (class PRODUCTION-RUN-ONE) (meta $? host ?r))
-  )
-  (not (waiting robot ?r))
-  =>
-  (assert
-    (waiting robot ?r)
-  )
-)
-
-(defrule goal-reasoner-retract-waiting-robot
-  (domain-object (name ?r) (type robot))
-  (goal (class PRODUCTION-RUN-ONE) (mode DISPATCHED) (meta $? host ?r))
-  ?w <- (waiting robot ?r)
-  =>
-  (retract ?w)
-)
-
-(defrule goal-reasoner-assert-selecting-robot
-  (domain-object (name ?r) (type robot))
-  (waiting robot ?r)
-  (goal-class (class ?class) (id ?cid) (sub-type ?subtype))
-  (pddl-formula (part-of ?cid) (id ?formula-id))
-  (grounded-pddl-formula (formula-id ?formula-id) (is-satisfied TRUE) (grounding ?grounding-id))
-  (pddl-grounding (id ?grounding-id) (param-values $? ?r $?))
-  (not (selecting robot ?))
-  (not
-    (and (goal (id ?parent) (class PRODUCTION-RUN-ONE) (mode DISPATCHED) (meta host ?r))
-          (goal (parent ?parent) (mode ~FORMULATED)))
-  )
-  =>
-  (assert (selecting robot ?r))
-)
-
-(defrule goal-reasoner-retract-selecting-robot
-  (domain-object (name ?r) (type robot))
-  (or
-    (and
-      (goal (id ?parent) (class PRODUCTION-RUN-ONE) (mode DISPATCHED) (meta host ?r))
-      (goal (parent ?parent) (mode ~FORMULATED))
-    )
-    (not
-      (and
-        (goal-class (class ?class) (id ?cid) (sub-type ?subtype))
-        (pddl-formula (part-of ?cid) (id ?formula-id))
-        (grounded-pddl-formula (formula-id ?formula-id) (is-satisfied TRUE) (grounding ?grounding-id))
-        (pddl-grounding (id ?grounding-id) (param-values $? ?r $?))
-      )
-    )
-  )
-  ?s <- (selecting robot ?r)
-  =>
-  (retract ?s)
-)
-
 (defrule goal-reasoner-create-production-maintain
 " The parent production goal. Allows formulation of
   production goals only if the proper game state selected
@@ -149,24 +92,103 @@
   (goal-tree-assert-run-endless PRODUCTION-MAINTAIN PRODUCTION-MAINTAIN-Arnie Arnie)
 )
 
-(defrule goal-reasoner-reassert-reformulated-maintain-subtree
+(defrule goal-reasoner-select-root
+"  Select all root goals (having no parent) in order to expand them."
+  (declare (salience ?*SALIENCE-GOAL-SELECT*))
+  ?g <- (goal (parent nil) (type ACHIEVE|MAINTAIN) (sub-type ~nil) (id ?goal-id) (mode FORMULATED))
+=>
+  (modify ?g (mode SELECTED))
+)
+
+(defrule goal-reasoner-selection-assert-waiting
+  ;there is a robot that is not yet waiting
+  (domain-object (name ?r) (type robot))
+  (not (waiting ?r))
+
+  ;there is an executable goal for the robot
+  (goal-class (class ?class) (id ?cid) (sub-type ?subtype) (lookahead-time ?lt))
+  (pddl-formula (part-of ?cid) (id ?formula-id))
+  (grounded-pddl-formula (formula-id ?formula-id) (is-satisfied ?sat) (promised-from ?from) (grounding ?grounding-id))
+  (pddl-grounding (id ?grounding-id) (param-values $? ?r $?))
+
+  (time ?now ?mills)
+  (test (sat-or-promised ?sat ?now ?from ?lt))
+
+  ;there is not a production goal strand
+  (not (goal (class PRODUCTION-RUN-ONE) (meta $? host ?r $?)))
+  =>
+  (assert (waiting ?r))
+)
+
+(defrule goal-reasoner-selection-assert-select
+  (waiting ?r)
+  (not (selecting ? ?))
+  (not (tried ?r))
+  (time ?now ?mills)
+  =>
+  (assert (selecting ?r ?now))
+)
+
+(defrule goal-reasoner-selection-retract-select
+  ?s <- (selecting ?r ?time)
+  (time ?now ?mills)
+  (test (> ?now ?time))
+  =>
+  (retract ?s)
+  (assert (tried ?r))
+)
+
+(defrule goal-reasoner-selection-retract-waiting-subgoal-selected
+  ?w <- (waiting ?r)
+  (goal (class PRODUCTION-RUN-ONE) (mode DISPATCHED) (meta $? host ?r $?))
+  =>
+  (retract ?w)
+)
+
+(defrule goal-rasoner-selection-retract-select-subgoal-selected
+  ?s <- (selecting ?r ?)
+  (goal (class PRODUCTION-RUN-ONE) (mode DISPATCHED) (meta $? host ?r $?))
+  =>
+  (retract ?s)
+)
+
+(defrule goal-reasoner-selection-restart-selection
+  (not
+    (and
+      (waiting ?r)
+      (not (tried ?r))
+    )
+  )
+  (not (selecting ?r ?))
+  =>
+  (do-for-all-facts ((?t tried)) TRUE
+    (retract ?t)
+  )
+  (do-for-all-facts ((?w waiting)) TRUE
+    (retract ?w)
+  )
+)
+
+(defrule goal-reasoner-selection-assert-run-one-subetree
   (goal (class PRODUCTION-MAINTAIN) (mode SELECTED) (meta $? host ?host) (id ?id))
   (not (goal (parent ?id) (mode FORMULATED|SELECTED|EXPANDED|DISPATCHED)))
-  (selecting robot ?host)
+  (selecting ?host ?)
   =>
   (bind ?g (goal-tree-assert-run-one-test PRODUCTION-RUN-ONE ?host))
   (modify ?g (parent ?id))
 )
 
-
-(defrule goal-reasoner-select-root
-"  Select all root goals (having no parent) in order to expand them."
-  (declare (salience ?*SALIENCE-GOAL-SELECT*))
-  ?g <- (goal (parent nil) (type ACHIEVE|MAINTAIN) (sub-type ~nil) (id ?goal-id) (mode FORMULATED))
-  ;(not (goal (parent ?goal-id)))
-=>
-  (modify ?g (mode SELECTED))
+(defrule goal-reasoner-selection-retract-run-one-subtree-no-child
+  (domain-object (name ?host) (type robot))
+  ?p <- (goal (id ?grandparent) (class PRODUCTION-MAINTAIN))
+  ?g <- (goal (id ?parent) (parent ?grandparent) (class PRODUCTION-RUN-ONE) (meta host ?host))
+  (not (goal (parent ?parent)))
+  (not (selecting ?host ?))
+  =>
+  (retract ?g)
+  (modify ?p (mode FORMULATED))
 )
+
 
 (defrule goal-reasoner-expand-goal-with-sub-type
 " Expand a goal with sub-type, if it has a child."
