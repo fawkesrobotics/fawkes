@@ -66,7 +66,7 @@
       (plan-action (id 2) (plan-id ?plan-id) (goal-id ?goal-id)
                   (action-name put-processite) (param-values ?r ?side ?machine ?c))
       (plan-action (id 3) (plan-id ?plan-id) (goal-id ?goal-id)
-                  (action-name move) (param-values ?r ?side BASE))
+                  (action-name move-plaza) (param-values ?r ?side BASE))
     )
   )
   (modify ?g (mode EXPANDED))
@@ -103,7 +103,7 @@
       (plan-action (id 2) (plan-id ?plan-id) (goal-id ?goal-id)
                   (action-name collect-processite) (param-values ?r ?m ?s ?c))
       (plan-action (id 3) (plan-id ?plan-id) (goal-id ?goal-id)
-                  (action-name move) (param-values ?r ?s BASE))
+                  (action-name move-plaza) (param-values ?r ?s BASE))
     )
     else
     (assert
@@ -113,7 +113,7 @@
       (plan-action (id 2) (plan-id ?plan-id) (goal-id ?goal-id)
                   (action-name collect-xenonite) (param-values ?r ?m ?s ?c))
       (plan-action (id 3) (plan-id ?plan-id) (goal-id ?goal-id)
-                  (action-name move) (param-values ?r ?s BASE))
+                  (action-name move-plaza) (param-values ?r ?s BASE))
     )
   )
   (modify ?g (mode EXPANDED))
@@ -134,7 +134,7 @@
     (plan-action (id 2) (plan-id ?plan-id) (goal-id ?goal-id)
                 (action-name put-container) (param-values ?r ?c STORAGE-INPUT))
     (plan-action (id 3) (plan-id ?plan-id) (goal-id ?goal-id)
-                (action-name move) (param-values ?r STORAGE-INPUT BASE))
+                (action-name move-plaza) (param-values ?r STORAGE-INPUT BASE))
   )
 
   (modify ?g (mode EXPANDED))

@@ -40,6 +40,7 @@
 
 (defrule debug-assert-stop-condition-storage-full
     (domain-fact (name container-at) (param-values ?c STORAGE-INPUT))
+    (not (domain-fact (name storage-is-full)))
     (time ?now ?mills)
     ?st <- (scenario-timer ?start)
     =>
