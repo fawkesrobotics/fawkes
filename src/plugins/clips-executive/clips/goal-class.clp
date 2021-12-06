@@ -24,6 +24,7 @@
     (multislot param-constants)
     (multislot param-quantified)
     (multislot param-types)
+    (slot lookahead-time (type INTEGER) (default 0))
     (slot preconditions (type STRING))
     (slot effects (type STRING))
 )
