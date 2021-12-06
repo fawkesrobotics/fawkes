@@ -16,6 +16,17 @@
   (slot active (type SYMBOL) (default FALSE) (allowed-values TRUE FALSE))
 )
 
+(deffunction sat-or-promised (?sat ?now ?from ?lt)
+  (return (or
+      (eq ?sat TRUE)
+      (and
+        (< (- ?from ?now) ?lt)
+        (neq ?from -1)
+      )
+    )
+  )
+)
+
 (defrule domain-activate-promises-on-active-goal
   (goal (id ?goal-id) (mode COMMITTED|DISPATCHED))
   ?p <- (domain-promise (promising-goal ?goal-id) (active FALSE))
@@ -447,16 +458,18 @@
 (defrule promises-show-promised-for
     (goal-class (class ?class) (id ?cid) (sub-type ?subtype))
     (pddl-formula (part-of ?cid) (id ?formula-id))
-    (grounded-pddl-formula (formula-id ?formula-id) (is-satisfied TRUE) (grounding ?grounding-id) (promised-from ?from-time&~-1))
+    (grounded-pddl-formula (formula-id ?formula-id) (grounding ?grounding-id) (promised-from ?from-time&~-1))
     (pddl-grounding (id ?grounding-id))
+    (time ?now ?)
   =>
-  (printout t crlf crlf "Goal " ?class " (" ?cid ") is promised for " ?from-time crlf crlf)
+  (printout t crlf crlf "Goal " ?class " (" ?cid ") is promised for " (- ?from-time ?now) "s at " ?from-time crlf crlf)
 )
 (defrule promises-show-promised-until
     (goal-class (class ?class) (id ?cid) (sub-type ?subtype))
     (pddl-formula (part-of ?cid) (id ?formula-id))
-    (grounded-pddl-formula (formula-id ?formula-id) (is-satisfied TRUE) (grounding ?grounding-id) (promised-until ?until-time&~-1))
+    (grounded-pddl-formula (formula-id ?formula-id) (grounding ?grounding-id) (promised-until ?until-time&~-1))
     (pddl-grounding (id ?grounding-id))
+    (time ?now ?)
   =>
-  (printout t crlf crlf "Goal " ?class " (" ?cid ") is promised for " ?until-time crlf crlf)
+  (printout t crlf crlf "Goal " ?class " (" ?cid ") is promised until " (- ?until-time ?now ) "s at " ?until-time crlf crlf)
 )
