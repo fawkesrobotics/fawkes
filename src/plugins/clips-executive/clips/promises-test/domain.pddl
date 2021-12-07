@@ -121,37 +121,4 @@
 		:precondition (and (location-is-machine-output ?output) (machine-in-state ?machine READY) (robot-at ?r ?output) (robot-carries ?r ?c) (container-can-be-filled ?c) (machine-makes-material ?machine XENONITE))
 		:effect (and (not (container-can-be-filled ?c)) (container-filled ?c XENONITE) (not (machine-in-state ?machine READY)) (machine-in-state ?machine IDLE))
 	)
-
-
-
-	; (:action
-	; 	:parameters ()
-	; 	:precondition (and )
-	; 	:effect ()
-	; )
-
-	; (:action
-	; 	:parameters ()
-	; 	:precondition (and )
-	; 	:effect ()
-	; )
-
-	; (:action
-	; 	:parameters ()
-	; 	:precondition (and )
-	; 	:effect ()
-	; )
-
-	; (:action
-	; 	:parameters ()
-	; 	:precondition (and )
-	; 	:effect ()
-	; )
-
-	; (:action
-	; 	:parameters ()
-	; 	:precondition (and )
-	; 	:effect ()
-	; )
-
 )
