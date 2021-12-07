@@ -16,6 +16,10 @@
   (slot active (type SYMBOL) (default FALSE) (allowed-values TRUE FALSE))
 )
 
+(deftemplate promise-time
+  (slot usecs (type INTEGER))
+)
+
 (deffunction sat-or-promised (?sat ?now ?from ?lt)
   (return (or
       (eq ?sat TRUE)
@@ -46,7 +50,15 @@
   (retract ?d)
 )
 
-; ------------------------- PROMISE PROPAGATION -------------------------
+(defrule domain-promise-remove-promises-for-overtime
+  ?d <- (domain-promise (valid-at ?time))
+  (promise-time (usecs ?now))
+  (test (> ?now ?time))
+  =>
+  (retract ?d)
+)
+
+;------------------------------------- APPLY PROMISE -------------------------------------
 
 ;whenever we get a new promise, modify the times
 (defrule  promises-update-predicate-positive-promise
