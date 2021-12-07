@@ -14,6 +14,7 @@
   (slot valid-at (type INTEGER))
   (slot negated (type SYMBOL) (allowed-values TRUE FALSE))
   (slot active (type SYMBOL) (default FALSE) (allowed-values TRUE FALSE))
+  (slot do-not-invalidate (type SYMBOL) (default FALSE))
 )
 
 (deftemplate promise-time
@@ -31,17 +32,17 @@
   )
 )
 
-(defrule domain-activate-promises-on-active-goal
+(defrule domain-promise-activate-promises-on-active-goal
   (goal (id ?goal-id) (mode COMMITTED|DISPATCHED))
   ?p <- (domain-promise (promising-goal ?goal-id) (active FALSE))
   =>
   (modify ?p (active TRUE))
 )
 
-(defrule domain-remove-promises-for-finished-goal
+(defrule domain-promise-remove-promises-for-finished-goal
   "If a promise has a goal-id of a goal that doesn't exist, or if the goal is finished,
   evaluated, or retracted, then remove the promise"
-  ?d <- (domain-promise (promising-goal ?goal-id))
+  ?d <- (domain-promise (promising-goal ?goal-id) (do-not-invalidate FALSE))
   (or
     (not (goal (id ?goal-id)))
     (goal (id ?goal-id) (mode FINISHED|EVALUATED|RETRACTED))
