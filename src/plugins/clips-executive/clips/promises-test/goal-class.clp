@@ -192,7 +192,7 @@
     (not (goal (sub-type ?subtype) (parent ?parent) (mode ~FORMULATED)))
     (not (goal (class ?class) (params robot ~?r $? mine ?mine $?)))
 
-    (time ?now ?mills)
+    (promise-time (usecs ?now))
     (test (sat-or-promised ?sat ?now ?from ?lt))
     =>
     (printout t "Goal " ?class " formulated from PDDL" crlf)
@@ -230,7 +230,8 @@
     (not (goal (sub-type ?subtype) (parent ?parent) (mode ~FORMULATED)))
     (not (goal (class ?class) (params robot ~?r side ?side machine ?machine $?)))
 
-    (time ?now ?mills)
+
+    (promise-time (usecs ?now))
     (test (sat-or-promised ?sat ?now ?from ?lt))
     =>
     (printout t "Goal " ?class " formulated from PDDL" crlf)
@@ -269,7 +270,7 @@
     (not (goal (sub-type ?subtype) (parent ?parent) (mode ~FORMULATED)))
     (not (goal (class ?class) (params robot ~?r side ?side machine ?machine)))
 
-    (time ?now ?mills)
+    (promise-time (usecs ?now))
     (test (sat-or-promised ?sat ?now ?from ?lt))
     =>
     (printout t "Goal " ?class " formulated from PDDL" crlf)
@@ -308,7 +309,7 @@
     (not (goal (sub-type ?subtype) (parent ?parent) (mode ~FORMULATED)))
     (not (goal (class ?class) (params robot ~?r side ?side machine ?machine $?)))
 
-    (time ?now ?mills)
+    (promise-time (usecs ?now))
     (test (sat-or-promised ?sat ?now ?from ?lt))
     =>
     (printout t "Goal " ?class " formulated from PDDL" crlf)
@@ -347,7 +348,7 @@
     (not (goal (sub-type ?subtype) (parent ?parent) (mode ~FORMULATED)))
     (not (goal (class ?class) (params robot ~?r $?)))
 
-    (time ?now ?mills)
+    (promise-time (usecs ?now))
     (test (sat-or-promised ?sat ?now ?from ?lt))
     =>
     (printout t "Goal " ?class " formulated from PDDL" crlf)
