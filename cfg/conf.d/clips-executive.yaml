@@ -275,3 +275,5 @@ clips-executive:
               - promises-test/noop-actions.clp
           - name: debug-info
             file: promises-test/debug.clp
+          - name: local-promises
+            file: promises-test/promises.clp
