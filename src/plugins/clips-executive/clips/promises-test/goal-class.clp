@@ -214,9 +214,9 @@
     ))
 
     ;assert promises resulting from the plan-action of this goal
-    ; (assert
-
-    ; )
+    (assert
+        (domain-promise (name location-is-free) (param-values ?mine) (promising-goal ?goal-id) (valid-at (+ 22 ?now)) (negated TRUE))
+    )
 )
 
 (defrule goal-class-assert-deliver-to-machine
@@ -230,6 +230,7 @@
     (not (goal (sub-type ?subtype) (parent ?parent) (mode ~FORMULATED)))
     (not (goal (class ?class) (params robot ~?r side ?side machine ?machine $?)))
 
+    (domain-fact (name robot-at) (param-values ?r ?start))
 
     (promise-time (usecs ?now))
     (test (sat-or-promised ?sat ?now ?from ?lt))
@@ -254,9 +255,11 @@
     ))
 
     ;assert promises resulting from the plan-action of this goal
-    ; (assert
-
-    ; )
+    (assert
+        (domain-promise (name location-is-free) (param-values ?start) (promising-goal ?goal-id) (valid-at (+ 10 ?now)) (negated FALSE))
+        (domain-promise (name machine-in-state) (param-values ?machine FILLED) (promising-goal ?goal-id) (valid-at (+ 12 ?now)) (negated FALSE))
+        (domain-promise (name machine-in-state) (param-values ?machine IDLE) (promising-goal ?goal-id) (valid-at (+ 12 ?now)) (negated TRUE))
+    )
 )
 
 (defrule goal-class-assert-start-machine
@@ -292,9 +295,9 @@
 
     ;assert promises resulting from the plan-action of this goal
     (assert
-        (domain-promise (name machine-in-state) (param-values ?machine READY) (promising-goal ?goal-id) (valid-at (+ 20 ?now)) (negated FALSE))
-        (domain-promise (name machine-in-state) (param-values ?machine FILLED) (promising-goal ?goal-id) (valid-at (+ 5 ?now)) (negated TRUE))
-        (domain-promise (name machine-in-state) (param-values ?machine OPERATING) (promising-goal ?goal-id) (valid-at (+ 5 ?now)) (negated TRUE))
+        (domain-promise (name machine-in-state) (param-values ?machine READY) (promising-goal ?goal-id) (valid-at (+ 20 ?now)) (negated FALSE) (do-not-invalidate TRUE))
+        (domain-promise (name machine-in-state) (param-values ?machine FILLED) (promising-goal ?goal-id) (valid-at (+ 5 ?now)) (negated TRUE) (do-not-invalidate TRUE))
+        (domain-promise (name machine-in-state) (param-values ?machine OPERATING) (promising-goal ?goal-id) (valid-at (+ 5 ?now)) (negated TRUE) (do-not-invalidate TRUE))
     )
 )
 
@@ -308,6 +311,8 @@
 
     (not (goal (sub-type ?subtype) (parent ?parent) (mode ~FORMULATED)))
     (not (goal (class ?class) (params robot ~?r side ?side machine ?machine $?)))
+
+    (domain-fact (name robot-at) (param-values ?r ?start))
 
     (promise-time (usecs ?now))
     (test (sat-or-promised ?sat ?now ?from ?lt))
@@ -332,9 +337,11 @@
     ))
 
     ;assert promises resulting from the plan-action of this goal
-    ; (assert
-
-    ; )
+    (assert
+        (domain-promise (name location-is-free) (param-values ?start) (promising-goal ?goal-id) (valid-at (+ 10 ?now)) (negated FALSE))
+        (domain-promise (name machine-in-state) (param-values ?machine READY) (promising-goal ?goal-id) (valid-at (+ 12 ?now)) (negated TRUE))
+        (domain-promise (name machine-in-state) (param-values ?machine IDLE) (promising-goal ?goal-id) (valid-at (+ 12 ?now)) (negated FALSE))
+    )
 )
 
 (defrule goal-class-assert-deliver-xenonite
@@ -367,8 +374,5 @@
                     (required-resources )
     ))
 
-    ;assert promises resulting from the plan-action of this goal
-    ; (assert
-
-    ; )
+    ;no promises for this goal
 )
