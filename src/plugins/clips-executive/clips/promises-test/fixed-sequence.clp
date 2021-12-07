@@ -56,7 +56,7 @@
       (plan-action (id 2) (plan-id ?plan-id) (goal-id ?goal-id)
                   (action-name put-regolith) (param-values ?r ?side ?machine ?c))
       (plan-action (id 3) (plan-id ?plan-id) (goal-id ?goal-id)
-                  (action-name move) (param-values ?r ?side BASE))
+                  (action-name move-plaza) (param-values ?r ?side BASE))
     )
     else
     (assert
