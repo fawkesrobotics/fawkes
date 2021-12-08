@@ -10,11 +10,12 @@
   "A promise is like a domain-fact with the exception that it is not true yet."
   (slot name (type SYMBOL) (default ?NONE))
   (multislot param-values)
-  (slot promising-goal (type SYMBOL))
-  (slot valid-at (type INTEGER))
   (slot negated (type SYMBOL) (allowed-values TRUE FALSE))
+  (slot promising-goal (type SYMBOL))
+  (slot promising-agent (type SYMBOL) (default nil))
   (slot active (type SYMBOL) (default FALSE) (allowed-values TRUE FALSE))
-  (slot do-not-invalidate (type SYMBOL) (default FALSE))
+  (slot valid-at (type INTEGER))
+  (slot do-not-invalidate (type SYMBOL) (default FALSE));indicate if the promise should be retracted with its source goal
 )
 
 (deftemplate promise-time
@@ -32,6 +33,13 @@
   )
 )
 
+(defrule domain-promise-add-promising-agent
+  ?dp <- (domain-promise (promising-agent nil))
+  (domain-fact (name self) (param-values ?agent))
+  =>
+  (modify ?dp (promising-agent ?agent))
+)
+
 (defrule domain-promise-activate-promises-on-active-goal
   (goal (id ?goal-id) (mode COMMITTED|DISPATCHED))
   ?p <- (domain-promise (promising-goal ?goal-id) (active FALSE))
@@ -42,7 +50,8 @@
 (defrule domain-promise-remove-promises-for-finished-goal
   "If a promise has a goal-id of a goal that doesn't exist, or if the goal is finished,
   evaluated, or retracted, then remove the promise"
-  ?d <- (domain-promise (promising-goal ?goal-id) (do-not-invalidate FALSE))
+  ?d <- (domain-promise (promising-goal ?goal-id) (promising-agent ?agent) (do-not-invalidate FALSE))
+  (domain-fact (name self) (param-values ?agent))
   (or
     (not (goal (id ?goal-id)))
     (goal (id ?goal-id) (mode FINISHED|EVALUATED|RETRACTED))
@@ -52,7 +61,8 @@
 )
 
 (defrule domain-promise-remove-promises-for-overtime
-  ?d <- (domain-promise (valid-at ?time))
+  ?d <- (domain-promise (valid-at ?time) (promising-agent ?agent))
+  (domain-fact (name self) (param-values ?agent))
   (promise-time (usecs ?now))
   (test (> ?now ?time))
   =>
