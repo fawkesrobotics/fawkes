@@ -78,6 +78,7 @@ private:
 	void                     ff_planner();
 	void                     fd_planner();
 	void                     dbmp_planner();
+	void                     popf_planner();
 	bsoncxx::document::value BSONFromActionList();
 	static size_t            find_nth_space(const std::string &s, size_t nth);
 	void                     print_action_list();

@@ -29,6 +29,7 @@
 #include <bsoncxx/json.hpp>
 #include <fstream>
 #include <iostream>
+#include <regex>
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
@@ -74,6 +75,9 @@ PddlPlannerThread::init()
 	} else if (planner_string == "dbmp") {
 		planner_ = std::bind(&PddlPlannerThread::dbmp_planner, this);
 		logger->log_info(name(), "DBMP selected.");
+	} else if (planner_string == "popf") {
+		planner_ = std::bind(&PddlPlannerThread::popf_planner, this);
+		logger->log_info(name(), "POPF selected.");
 	} else {
 		planner_ = std::bind(&PddlPlannerThread::ff_planner, this);
 		logger->log_warn(name(), "No planner configured.\nDefaulting to ff.");
@@ -291,6 +295,56 @@ PddlPlannerThread::fd_planner()
 			}
 		}
 		action_list_.push_back(a);
+	}
+}
+
+void
+PddlPlannerThread::popf_planner()
+{
+	logger->log_info(name(), "Starting PDDL Planning with POPF...");
+	const std::string command = "popf " + cfg_domain_path_ + std::string(" ") + cfg_problem_path_;
+
+	const std::string result = run_planner(command);
+
+	std::size_t cur_pos = result.find("Solution Found");
+	if (cur_pos == std::string::npos) {
+		logger->log_error(name(), "Planning failed: %s", result.c_str());
+		throw Exception("No solution found");
+	}
+	cur_pos                = result.find("\n", cur_pos);
+	const std::string plan = result.substr(cur_pos);
+
+	std::istringstream iss(plan);
+	logger->log_info(name(), "Planner found solution.");
+	logger->log_info(name(), "Result:\n%s", plan.c_str());
+	std::string      line;
+	const std::regex skip_line("\\s*(;.*)?");
+	const std::regex action_regex("\\d*\\.\\d*:\\s\\((.*)\\)\\s*\\[\\d*.\\d*\\]");
+	const std::regex action_split_regex("\\S+");
+
+	while (getline(iss, line)) {
+		logger->log_debug(name(), "Parsing line %s", line.c_str());
+		std::smatch regex_match;
+		if (std::regex_match(line, skip_line)) {
+			logger->log_debug(name(), "Skipping line '%s'", line.c_str());
+		} else if (std::regex_match(line, regex_match, action_regex)) {
+			action            a;
+			const std::string action_string = regex_match[1];
+			const auto        action_args_begin =
+			  std::sregex_iterator(action_string.begin(), action_string.end(), action_split_regex);
+			const auto action_args_end = std::sregex_iterator();
+			if (action_args_begin == action_args_end) {
+				throw Exception("Unexpected action string, could not find action name in '%s'",
+				                action_string.c_str());
+			}
+			a.name = action_args_begin->str();
+			for (auto i = std::next(action_args_begin); i != action_args_end; ++i) {
+				a.args.push_back(i->str());
+			}
+			action_list_.push_back(a);
+		} else {
+			throw Exception("Unexpected planner output line: %s", line.c_str());
+		}
 	}
 }
 
