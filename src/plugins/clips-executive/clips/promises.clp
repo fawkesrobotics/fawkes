@@ -490,3 +490,24 @@
   =>
   (modify ?parent (promised-until -1))
 )
+
+;----------------------------------------- DEBUG -----------------------------------------
+
+; (defrule promises-show-promised-for
+;   (goal-class (class ?class) (id ?cid) (sub-type ?subtype))
+;   (pddl-formula (part-of ?cid) (id ?formula-id))
+;   (grounded-pddl-formula (formula-id ?formula-id) (grounding ?grounding-id) (promised-from ?from-time&~-1))
+;   (pddl-grounding (id ?grounding-id))
+;   (promise-time (usecs ?now))
+;   =>
+;   (printout t crlf crlf "Goal " ?class " (" ?cid ") is promised for " (- ?from-time ?now) "s at " ?from-time crlf crlf)
+; )
+; (defrule promises-show-promised-until
+;   (goal-class (class ?class) (id ?cid) (sub-type ?subtype))
+;   (pddl-formula (part-of ?cid) (id ?formula-id))
+;   (grounded-pddl-formula (formula-id ?formula-id) (grounding ?grounding-id) (promised-until ?until-time&~-1))
+;   (pddl-grounding (id ?grounding-id))
+;   (promise-time (usecs ?now))
+;   =>
+;   (printout t crlf crlf "Goal " ?class " (" ?cid ") is promised until " (- ?until-time ?now ) "s at " ?until-time crlf crlf)
+; )
