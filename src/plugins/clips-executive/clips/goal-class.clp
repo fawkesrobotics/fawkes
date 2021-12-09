@@ -90,7 +90,6 @@
         (if (not (any-factp ((?grounding pddl-grounding)) (and (eq ?grounding:formula-root ?goal-class-id)
                                                                (eq ?grounding:param-values ?param-values))))
             then
-                (printout t "Adding new Groundings: " ?param-values " for " ?goal-class-id crlf)
                 (bind ?grounding-id (sym-cat "grounding-" ?goal-class-id "-" (gensym*)))
                 (assert (pddl-grounding (param-names ?param-names-left)
                                         (param-values ?param-values)
@@ -168,7 +167,6 @@
         )
     )
     =>
-    (printout t "Retracting grounding" ?grounding-id " because value " ?value " is " crlf)
     (retract ?g)
 )
 
