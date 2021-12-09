@@ -20,6 +20,8 @@
 
 #include "precondition_visitor.h"
 
+#include "core/exception.h"
+
 #include <pddl_parser/pddl_exception.h>
 
 /** @class PreconditionToCLIPSFactVisitor "precondition_visitor.h"
@@ -144,6 +146,18 @@ PreconditionToCLIPSFactVisitor::operator()(pddl_parser::Predicate &p) const
 			res.insert(res.end(), args.begin(), args.end());
 		}
 		return res;
+	} else if (p.function == "at start" || p.function == "over all" || p.function == "at end") {
+		// This is a temporal condition. We ignore the temporal aspect for now and just use the sub-expression.
+		if (p.arguments.size() != 1) {
+			throw fawkes::Exception(
+			  "Unexpected number of sub-formulas (%zu) of temporal formula, expected exactly 1",
+			  p.arguments.size());
+		}
+
+		auto sub_expr = boost::apply_visitor(PreconditionToCLIPSFactVisitor(parent_, sub_counter_),
+		                                     p.arguments[0].expression);
+		res.insert(res.end(), sub_expr.begin(), sub_expr.end());
+		return res;
 	} else {
 		// We expect p.function to be a predicate name.
 		std::string new_parent;
@@ -171,11 +185,16 @@ PreconditionToCLIPSFactVisitor::operator()(pddl_parser::Predicate &p) const
 		}
 		std::string params    = "";
 		std::string constants = "";
-		for (auto &p : p.arguments) {
+		for (auto &arg : p.arguments) {
 			std::vector<std::string> p_strings =
-			  boost::apply_visitor(PreconditionToCLIPSFactVisitor(name, 0), p.expression);
+			  boost::apply_visitor(PreconditionToCLIPSFactVisitor(name, 0), arg.expression);
 			if (p_strings.size() != 1) {
-				throw pddl_parser::PddlParserException("Unexpected parameter length, expected exactly one");
+				throw fawkes::Exception(
+				  "Parser error: Unexpected parameter length (%zu) while parsing predicate parameter in "
+				  "precondition %s, expected exactly one parameter. Is '%s' really a domain predicate?",
+				  p_strings.size(),
+				  name.c_str(),
+				  p.function.c_str());
 			}
 			std::string p_string = p_strings[0];
 			if (p_string[0] == '?') {
