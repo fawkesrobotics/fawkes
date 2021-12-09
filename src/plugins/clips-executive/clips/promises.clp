@@ -37,7 +37,7 @@
   ?dp <- (domain-promise (promising-agent nil))
   (domain-fact (name self) (param-values ?agent))
   =>
-  (modify ?dp (promising-agent ?agent))
+  (modify ?dp (promising-agent (sym-cat ?agent)))
 )
 
 (defrule domain-promise-activate-promises-on-active-goal
@@ -51,7 +51,7 @@
   "If a promise has a goal-id of a goal that doesn't exist, or if the goal is finished,
   evaluated, or retracted, then remove the promise"
   ?d <- (domain-promise (promising-goal ?goal-id) (promising-agent ?agent) (do-not-invalidate FALSE))
-  (domain-fact (name self) (param-values ?agent))
+  (domain-fact (name self) (param-values ?agent-str&:(eq (sym-cat ?agent-str) ?agent)))
   (or
     (not (goal (id ?goal-id)))
     (goal (id ?goal-id) (mode FINISHED|EVALUATED|RETRACTED))
@@ -62,7 +62,7 @@
 
 (defrule domain-promise-remove-promises-for-overtime
   ?d <- (domain-promise (valid-at ?time) (promising-agent ?agent))
-  (domain-fact (name self) (param-values ?agent))
+  (domain-fact (name self) (param-values ?agent-str&:(eq (sym-cat ?agent-str) ?agent)))
   (promise-time (usecs ?now))
   (test (> ?now ?time))
   =>
