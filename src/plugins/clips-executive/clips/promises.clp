@@ -41,7 +41,7 @@
 )
 
 (defrule domain-promise-activate-promises-on-active-goal
-  (goal (id ?goal-id) (mode COMMITTED|DISPATCHED))
+  (goal (id ?goal-id) (mode DISPATCHED))
   ?p <- (domain-promise (promising-goal ?goal-id) (active FALSE))
   =>
   (modify ?p (active TRUE))
