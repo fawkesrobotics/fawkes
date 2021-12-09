@@ -13,7 +13,7 @@
 	?*INIT-STAGES* = (create$ STAGE-1 STAGE-2 STAGE-3)
 	?*CX-STAGE2-FILES* = (create$ "plan.clp" "goal.clp" "domain.clp" "goal-class.clp" "promises.clp"
 	                              "worldmodel.clp" "cx-identity.clp"  "wm-domain-sync.clp"
-	                              "wm-config.clp" "BATCH|skills.clp")
+	                              "wm-promise-sync.clp" "wm-config.clp" "BATCH|skills.clp")
 	?*CX-USER-INIT-OFFSET* = 10
 )
 
