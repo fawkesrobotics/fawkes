@@ -42,7 +42,7 @@
 
 (defrule domain-promise-activate-promises-on-active-goal
   (goal (id ?goal-id) (mode DISPATCHED))
-  ?p <- (domain-promise (promising-goal ?goal-id) (active FALSE))
+  ?p <- (domain-promise (promising-goal ?goal-id) (active FALSE) (promising-agent ~nil))
   =>
   (modify ?p (active TRUE))
 )
