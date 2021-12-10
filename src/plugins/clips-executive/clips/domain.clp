@@ -286,7 +286,13 @@
           (eq ?object:type (nth$ ?quantifier-index ?types-quantified))
       (bind ?index (member$ (nth$ ?quantifier-index ?param-quantified) ?param-names))
       (bind ?param-values-new (replace$ ?param-values ?index ?index ?object:name))
-      (ground-pddl-formula ?parent-id ?parent-type ?grounded-parent-id ?param-names ?param-values-new ?grounding-id (+ 1 ?quantifier-index))
+      (ground-pddl-formula ?parent-id
+                           ?parent-type
+                           ?grounded-parent-id
+                           ?param-names
+                           ?param-values-new
+                           ?grounding-id
+                           (+ 1 ?quantifier-index))
     )
     else
     (do-for-all-facts ((?formula pddl-formula)) (eq ?parent-id ?formula:part-of)
@@ -295,7 +301,8 @@
       (if (> (length$ ?param-quantified) 0)
         then
         (foreach ?param ?param-quantified
-          (bind ?values-quantified (create$ ?values-quantified (nth$ (member$ ?param ?param-names) ?param-values)))
+          (bind ?values-quantified (create$ ?values-quantified
+                                            (nth$ (member$ ?param ?param-names) ?param-values)))
         )
       )
 
@@ -365,7 +372,10 @@
 (defrule domain-add-formula-for-grounding
   "Add a grounded formula for a grounding without formula."
   (declare (salience ?*SALIENCE-DOMAIN-GROUND*))
-  (pddl-grounding (id ?grounding-id) (formula-root ?parent) (param-values $?param-values) (param-names $?param-names))
+  (pddl-grounding (id ?grounding-id)
+                  (formula-root ?parent)
+                  (param-values $?param-values)
+                  (param-names $?param-names))
   (pddl-formula (part-of ?parent) (id ?formula-id))
   (not (grounded-pddl-formula (grounding ?grounding-id) (formula-id ?formula-id)))
   (test (domain-exists-objects-for-each-quantified-type ?formula-id))
@@ -376,10 +386,18 @@
 (defrule domain-retract-quantified-subtree-if-object-is-removed
   "If a formula is grounded with a certain value for a certain type but the corresponding
   object does not exist (anymore), retract the formula to trigger a new grounding of it."
-  (pddl-formula (id ?parent) (quantified-types $?quantified-types&:( > (length$ ?quantified-types) 0)) (type forall|exists))
+  (pddl-formula (id ?parent)
+                (quantified-types $?quantified-types&:(> (length$ ?quantified-types) 0))
+                (type forall|exists))
   (pddl-formula (id ?formula) (part-of ?parent))
-  ?g <- (grounded-pddl-formula (quantified-values $?quantified-values&:( > (length$ ?quantified-values) 0)) (formula-id ?formula) (grounding ?grounding-id))
-  (not (domain-object (type ?object-type) (name ?object-name&:(and (member$ ?object-name ?quantified-values) (eq (member$ ?object-name ?quantified-values) (member$ ?object-type ?quantified-types))))))
+  ?g <- (grounded-pddl-formula (quantified-values $?quantified-values&:
+                               (> (length$ ?quantified-values) 0))
+                               (formula-id ?formula)
+                               (grounding ?grounding-id))
+  (not (domain-object (type ?object-type)
+                      (name ?object-name&:(and (member$ ?object-name ?quantified-values)
+                                               (eq (member$ ?object-name ?quantified-values)
+                                                   (member$ ?object-type ?quantified-types))))))
   =>
   (retract ?g)
 )
@@ -389,16 +407,30 @@
   a quantifier in a formula, add the quantified subformulas containing it as grounding. "
   (domain-object (type ?object-type) (name ?object-name))
   (pddl-grounding (id ?grounding-id) (param-names $?param-names) (param-values $?param-values))
-  (pddl-formula (id ?parent) (quantified-types $?types&:(member$ ?object-type ?types)) (quantified-names $?names) (type ?parent-type&forall|exists))
-  (grounded-pddl-formula (formula-id ?parent) (grounding ?grounding-id) (id ?grounded-parent-id))
+  (pddl-formula (id ?parent)
+                (quantified-types $?types&:(member$ ?object-type ?types))
+                (quantified-names $?names)
+                (type ?parent-type&forall|exists))
+  (grounded-pddl-formula (formula-id ?parent)
+                         (grounding ?grounding-id)
+                         (id ?grounded-parent-id))
   (pddl-formula (id ?formula) (part-of ?parent))
-  (not (grounded-pddl-formula (quantified-values $?values&:(eq (member$ ?object-type ?types) (member$ ?object-name ?values))) (formula-id ?id) (grounding ?grounding-id)))
+  (not (grounded-pddl-formula (quantified-values $?values&:(eq (member$ ?object-type ?types)
+                                                               (member$ ?object-name ?values)))
+                               (formula-id ?id)
+                               (grounding ?grounding-id)))
 
   ;use existing grounding as basis
   (domain-object (type ?object-type) (name ?ex-object-name))
-  (grounded-pddl-formula (quantified-values $?ex-objects&:(eq (member$ ?object-type ?types) (member$ ?ex-object-name ?ex-objects))) (formula-id ?id) (grounding ?grounding-id))
+  (grounded-pddl-formula (quantified-values $?ex-objects&:(eq (member$ ?object-type ?types)
+                                                              (member$ ?ex-object-name ?ex-objects)))
+                         (formula-id ?id)
+                         (grounding ?grounding-id))
   =>
-  (do-for-all-facts ((?q-sf grounded-pddl-formula)) (and (eq ?q-sf:formula-id ?id) (eq ?q-sf:grounding ?grounding-id) (eq (member$ ?object-type ?types) (member$ ?ex-object-name ?q-sf:quantified-values)))
+  (do-for-all-facts ((?q-sf grounded-pddl-formula)) (and (eq ?q-sf:formula-id ?id)
+                                                         (eq ?q-sf:grounding ?grounding-id)
+                                                         (eq (member$ ?object-type ?types)
+                                                             (member$ ?ex-object-name ?q-sf:quantified-values)))
     (bind ?new-param-values ?param-values)
     (loop-for-count (?cnt 1 (length$ ?param-names)) do
       (bind ?index (member$ (nth$ ?cnt ?param-names) ?names))
@@ -410,7 +442,13 @@
         )
       )
     )
-    (ground-pddl-formula ?parent ?parent-type ?grounded-parent-id ?param-names ?new-param-values ?grounding-id (+ (length$ ?param-names) 1))
+    (ground-pddl-formula ?parent
+                         ?parent-type
+                         ?grounded-parent-id
+                         ?param-names
+                         ?new-param-values
+                         ?grounding-id
+                         (+ (length$ ?param-names) 1))
   )
 )
 
@@ -422,7 +460,8 @@
                      (param-names $?param-names) (param-values $?param-values)
                      (precondition nil)
                      (goal-id ?goal-id))
-  (domain-operator (name ?operator-id) (param-names $?op-param-names&:(= (length$ ?param-names) (length$ ?op-param-names))))
+  (domain-operator (name ?operator-id)
+                   (param-names $?op-param-names&:(= (length$ ?param-names) (length$ ?op-param-names))))
 	(pddl-formula (part-of ?operator-id))
   (goal (id ?goal-id) (mode FORMULATED|SELECTED|EXPANDED|COMMITTED|DISPATCHED))
   =>
@@ -798,7 +837,8 @@
                                          (grounding ?grounding-id)
                                          (is-satisfied FALSE)
                                          (param-values $?param-values&:(and (eq (length ?param-values) 2)
-                                                                            (eq (nth$ 1 ?param-values) (nth$ 2 ?param-values)))))
+                                                                            (eq (nth$ 1 ?param-values)
+                                                                                (nth$ 2 ?param-values)))))
   ?base-predicate <- (pddl-predicate (id ?id)
                                      (predicate EQUALITY))
 =>
@@ -812,7 +852,8 @@
                                          (grounding ?grounding-id)
                                          (is-satisfied TRUE)
                                          (param-values $?param-values&:(not (and (eq (length ?param-values) 2)
-                                                                                 (eq (nth$ 1 ?param-values) (nth$ 2 ?param-values))))))
+                                                                                 (eq (nth$ 1 ?param-values)
+                                                                                     (nth$ 2 ?param-values))))))
   ?base-predicate <- (pddl-predicate (id ?id)
                                      (predicate EQUALITY))
 =>

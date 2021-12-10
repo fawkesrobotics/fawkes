@@ -42,27 +42,52 @@
         (if (neq (nth$ 1 ?param-constants) nil)
             then
                 (bind ?param-values-new (insert$ ?param-values (+ 1 (length$ ?param-values)) (nth$ 1 ?param-constants)))
-                (goal-class-create-grounding ?goal-class-id (delete$ ?param-types 1 1) (delete$ ?param-names 1 1) ?param-names-left  (delete$ ?param-constants 1 1) ?param-quantified ?param-values-new)
+                (goal-class-create-grounding ?goal-class-id
+                                             (delete$ ?param-types 1 1)
+                                             (delete$ ?param-names 1 1)
+                                             ?param-names-left
+                                             (delete$ ?param-constants 1 1)
+                                             ?param-quantified
+                                             ?param-values-new)
             else
             (if (not (member$ (nth$ 1 ?param-names) ?param-quantified))
                 then
                     ;ground by domain objects
                     (do-for-all-facts ((?object domain-object)) (eq ?object:type (nth$ 1 ?param-types))
                         (bind ?param-values-new (insert$ ?param-values (+ 1 (length$ ?param-values)) ?object:name))
-                        (goal-class-create-grounding ?goal-class-id (delete$ ?param-types 1 1) (delete$ ?param-names 1 1) ?param-names-left (delete$ ?param-constants 1 1) ?param-quantified ?param-values-new)
+                        (goal-class-create-grounding ?goal-class-id
+                                                     (delete$ ?param-types 1 1)
+                                                     (delete$ ?param-names 1 1)
+                                                     ?param-names-left
+                                                     (delete$ ?param-constants 1 1)
+                                                     ?param-quantified
+                                                      ?param-values-new)
                     )
                     ;ground by domain constants
                     (do-for-all-facts ((?constant domain-constant)) (eq ?constant:type (nth$ 1 ?param-types))
                         (bind ?param-values-new (insert$ ?param-values (+ 1 (length$ ?param-values)) ?constant:value))
-                        (goal-class-create-grounding ?goal-class-id (delete$ ?param-types 1 1) (delete$ ?param-names 1 1) ?param-names-left (delete$ ?param-constants 1 1) ?param-quantified ?param-values-new)
+                        (goal-class-create-grounding ?goal-class-id
+                                                     (delete$ ?param-types 1 1)
+                                                     (delete$ ?param-names 1 1)
+                                                     ?param-names-left
+                                                     (delete$ ?param-constants 1 1)
+                                                     ?param-quantified
+                                                     ?param-values-new)
                     )
                 else
                     (bind ?param-values-new (insert$ ?param-values (+ 1 (length$ ?param-values)) nil))
-                    (goal-class-create-grounding ?goal-class-id (delete$ ?param-types 1 1) (delete$ ?param-names 1 1) ?param-names-left (delete$ ?param-constants 1 1) ?param-quantified ?param-values-new)
+                    (goal-class-create-grounding ?goal-class-id
+                                                 (delete$ ?param-types 1 1)
+                                                 (delete$ ?param-names 1 1)
+                                                 ?param-names-left
+                                                 (delete$ ?param-constants 1 1)
+                                                 ?param-quantified
+                                                 ?param-values-new)
             )
         )
         else
-        (if (not (any-factp ((?grounding pddl-grounding)) (and (eq ?grounding:formula-root ?goal-class-id) (eq ?grounding:param-values ?param-values))))
+        (if (not (any-factp ((?grounding pddl-grounding)) (and (eq ?grounding:formula-root ?goal-class-id)
+                                                               (eq ?grounding:param-values ?param-values))))
             then
                 (printout t "Adding new Groundings: " ?param-values " for " ?goal-class-id crlf)
                 (bind ?grounding-id (sym-cat "grounding-" ?goal-class-id "-" (gensym*)))
@@ -102,7 +127,10 @@
 
             (not
                 (and
-                    (pddl-grounding (id ?grounding-id) (formula-root ?formula-id) (param-names $?param-names) (param-values $? ?object $?))
+                    (pddl-grounding (id ?grounding-id)
+                                    (formula-root ?formula-id)
+                                    (param-names $?param-names)
+                                    (param-values $? ?object $?))
                 )
             )
         )
@@ -113,7 +141,13 @@
         )
     )
     =>
-    (goal-class-create-grounding ?class-id ?param-types ?param-names ?param-names ?param-constants ?param-quantified (create$ ))
+    (goal-class-create-grounding ?class-id
+                                 ?param-types
+                                 ?param-names
+                                 ?param-names
+                                 ?param-constants
+                                 ?param-quantified
+                                 (create$ ))
 )
 
 (defrule goal-class-retract-unbased-grounding
