@@ -26,6 +26,7 @@
   (return (or
       (eq ?sat TRUE)
       (and
+        (<= ?now ?from)
         (< (- ?from ?now) ?lt)
         (neq ?from -1)
       )
