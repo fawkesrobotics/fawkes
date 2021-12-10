@@ -268,7 +268,7 @@ clips-executive:
           - name: goal-expander
             file: promises-test/fixed-sequence.clp
           - name: action-selection
-            file: promises-test/action-selection.clp
+            file: action-selection/sequential.clp
           - name: action-execution
             files:
               - skills-actions.clp
