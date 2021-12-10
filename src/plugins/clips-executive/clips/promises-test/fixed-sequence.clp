@@ -37,7 +37,7 @@
     (plan-action (id 4) (plan-id ?plan-id) (goal-id ?goal-id)
                  (action-name collect-regolith) (param-values ?r ?mine ?c))
   )
-  (modify ?g (mode EXPANDED))
+  (modify ?g (mode EXPANDED) (committed-to ?plan-id))
 )
 
 
@@ -69,7 +69,7 @@
                   (action-name move-plaza) (param-values ?r ?side BASE))
     )
   )
-  (modify ?g (mode EXPANDED))
+  (modify ?g (mode EXPANDED) (committed-to ?plan-id))
 )
 
 
@@ -84,7 +84,7 @@
     (plan-action (id 1) (plan-id ?plan-id) (goal-id ?goal-id)
                  (action-name start-machine) (param-values ?m))
   )
-  (modify ?g (mode EXPANDED))
+  (modify ?g (mode EXPANDED) (committed-to ?plan-id))
 )
 
 
@@ -116,7 +116,7 @@
                   (action-name move-plaza) (param-values ?r ?s BASE))
     )
   )
-  (modify ?g (mode EXPANDED))
+  (modify ?g (mode EXPANDED) (committed-to ?plan-id))
 )
 
 (defrule goal-expander-deliver-xenonite
@@ -137,5 +137,5 @@
                 (action-name move-plaza) (param-values ?r STORAGE-INPUT BASE))
   )
 
-  (modify ?g (mode EXPANDED))
+  (modify ?g (mode EXPANDED) (committed-to ?plan-id))
 )
