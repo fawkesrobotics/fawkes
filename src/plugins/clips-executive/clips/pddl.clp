@@ -15,25 +15,29 @@
   (slot plan-id (type INTEGER))
   ; The current status of this plan.
   (slot status (type SYMBOL)
-    (allowed-values
-      GEN-PENDING GEN-RUNNING GENERATED PENDING RUNNING PLANNED PLAN-FETCHED
-    )
+    (allowed-values QUEUED GEN-PENDING GEN-RUNNING GENERATED PENDING RUNNING PLANNED PLAN-FETCHED)
   )
   ; The PDDL formula to plan for.
   (slot goal (type STRING))
 )
 
 (deffunction pddl-call (?goal-id ?goal)
-  "Call the PDDL planner for the given goal-id with the goal given as string."
+  "Queue a new call to the PDDL planner"
+  (assert (pddl-plan (goal-id ?goal-id) (goal ?goal) (status QUEUED)))
+)
+
+(defrule pddl-start-gen
+  "Start the PDDL problem generator"
+  ?plan <- (pddl-plan (goal ?goal) (status QUEUED))
+  (not (pddl-plan (status ~QUEUED)))
+  =>
   (bind ?m
     (blackboard-create-msg "PddlGenInterface::pddl-gen" "GenerateMessage")
   )
   (blackboard-set-msg-field ?m "goal" ?goal)
   (printout info "Calling PDDL planner for goal '" ?goal "'" crlf)
   (bind ?gen-id (blackboard-send-msg ?m))
-  (assert (pddl-plan
-    (goal-id ?goal-id) (goal ?goal) (status GEN-PENDING) (gen-id ?gen-id))
-  )
+  (modify ?plan (status GEN-PENDING) (gen-id ?gen-id))
 )
 
 (defrule pddl-check-if-generation-running
@@ -139,7 +143,7 @@
         )
       )
       (assert
-        (plan (id ?plan-id) (goal-id ?goal-id))
+        (plan (id ?plan-id) (type SEQUENTIAL) (goal-id ?goal-id))
         (plan-action
           (id ?action-index)
           (goal-id ?goal-id)
