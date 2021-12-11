@@ -322,6 +322,7 @@ PddlPlannerThread::popf_planner()
 	const std::regex action_regex("\\d*\\.\\d*:\\s\\((.*)\\)\\s*\\[\\d*.\\d*\\]");
 	const std::regex action_split_regex("\\S+");
 
+	action_list_.clear();
 	while (getline(iss, line)) {
 		logger->log_debug(name(), "Parsing line %s", line.c_str());
 		std::smatch regex_match;
