@@ -6,6 +6,10 @@
 ;  Licensed under GPLv2+ license, cf. LICENSE file
 ;---------------------------------------------------------------------------
 
+(deftemplate promise-config
+  (slot enabled (type SYMBOL) (allowed-values TRUE FALSE) (default FALSE))
+)
+
 (deftemplate domain-promise
   "A promise is like a domain-fact with the exception that it is not true yet."
   (slot name (type SYMBOL) (default ?NONE))
@@ -26,12 +30,36 @@
   (return (or
       (eq ?sat TRUE)
       (and
+        (any-factp ((?pconfig promise-config)) ?pconfig:enabled)
         (<= ?now ?from)
         (< (- ?from ?now) ?lt)
         (neq ?from -1)
       )
     )
   )
+)
+
+(defrule promises-check-if-enabled
+  (confval (path "/clips-executive/spec") (value ?spec))
+  (confval
+    (path ?path&:(eq ?path (str-cat "/clips-executive/specs/" ?spec
+                                    "/parameters/use-promises")))
+    (type BOOL)
+    (value ?val))
+  =>
+  (printout t "Promises are " (if ?val then "enabled" else "disabled") crlf)
+  (assert (promise-config (enabled ?val)))
+)
+
+(defrule promises-check-if-not-defined-in-config
+  (confval (path "/clips-executive/spec") (value ?spec))
+  (not (confval
+    (path ?path&:(eq ?path (str-cat "/clips-executive/specs/" ?spec
+                                    "/parameters/use-promises")))
+    (type BOOL)))
+  =>
+  (printout t "Promises are disabled" crlf)
+  (assert (promise-config (enabled FALSE)))
 )
 
 (defrule domain-promise-add-promising-agent
