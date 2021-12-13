@@ -302,7 +302,7 @@ void
 PddlPlannerThread::popf_planner()
 {
 	logger->log_info(name(), "Starting PDDL Planning with POPF...");
-	const std::string command = "popf " + cfg_domain_path_ + std::string(" ") + cfg_problem_path_;
+	const std::string command = "popf -n " + cfg_domain_path_ + std::string(" ") + cfg_problem_path_;
 
 	const std::string result = run_planner(command);
 
