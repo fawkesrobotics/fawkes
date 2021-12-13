@@ -309,7 +309,8 @@ PddlPlannerThread::popf_planner()
 	std::size_t cur_pos = result.find("Solution Found");
 	if (cur_pos == std::string::npos) {
 		logger->log_error(name(), "Planning failed: %s", result.c_str());
-		throw Exception("No solution found");
+		action_list_.clear();
+		return;
 	}
 	cur_pos                = result.find("\n", cur_pos);
 	const std::string plan = result.substr(cur_pos);
@@ -344,7 +345,9 @@ PddlPlannerThread::popf_planner()
 			}
 			action_list_.push_back(a);
 		} else {
-			throw Exception("Unexpected planner output line: %s", line.c_str());
+			action_list_.clear();
+			logger->log_error(name(), "Unexpected planner output line: %s", line.c_str());
+			return;
 		}
 	}
 }
