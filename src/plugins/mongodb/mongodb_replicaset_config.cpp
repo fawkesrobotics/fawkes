@@ -151,7 +151,6 @@ MongoDBReplicaSetConfig::init()
 
 		auto leader_elec_query_builder = basic::document{};
 		leader_elec_query_builder.append(basic::kvp("host", local_hostport_));
-		leader_elec_query_builder.append(basic::kvp("master", false));
 		leader_elec_query_ = leader_elec_query_builder.extract();
 
 		auto leader_elec_query_force_builder = basic::document{};
