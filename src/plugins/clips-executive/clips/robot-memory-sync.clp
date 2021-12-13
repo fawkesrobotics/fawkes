@@ -24,7 +24,12 @@
 ; facts are removed from robot memory.  We may or may not use this in the
 ; future, but it serves its purpose for now.
 
-(deftemplate robot-memory-sync-mapped
+(deftemplate robot-memory-sync-mapped-fact
+	(slot name (type SYMBOL))
+	(multislot param-values)
+)
+
+(deftemplate robot-memory-sync-mapped-promise
 	(slot name (type SYMBOL))
 	(multislot param-values)
 )
@@ -51,9 +56,9 @@
   "Add new facts to robot memory."
   (declare (salience 100))
   ?f <- (domain-fact (name ?name) (param-values $?param-values))
-	(not (robot-memory-sync-mapped (name ?name) (param-values $?param-values)))
+	(not (robot-memory-sync-mapped-fact (name ?name) (param-values $?param-values)))
   =>
-	(assert (robot-memory-sync-mapped (name ?name) (param-values ?param-values)))
+	(assert (robot-memory-sync-mapped-fact (name ?name) (param-values ?param-values)))
   (bind ?bson (rm-structured-fact-to-bson ?f))
   (robmem-upsert "robmem.clipswm" ?bson ?bson)
 )
@@ -61,9 +66,30 @@
 (defrule robot-memory-sync-retract-fact
   "Remove deleted facts from robot memory."
   (declare (salience 100))
-	?mf <- (robot-memory-sync-mapped (name ?name) (param-values $?param-values))
+	?mf <- (robot-memory-sync-mapped-fact (name ?name) (param-values $?param-values))
   (not (domain-fact (name ?name) (param-values $?param-values)))
   =>
   (robmem-remove "robmem.clipswm" (rm-structured-fact-to-bson ?mf "domain-fact"))
+	(retract ?mf)
+)
+
+(defrule robot-memory-sync-add-promise
+  "Add new promises to robot memory."
+  (declare (salience 100))
+  ?f <- (domain-promise (name ?name) (param-values $?param-values) (active TRUE))
+	(not (robot-memory-sync-mapped-promise (name ?name) (param-values $?param-values)))
+  =>
+	(assert (robot-memory-sync-mapped-promise (name ?name) (param-values ?param-values)))
+  (bind ?bson (rm-structured-fact-to-bson ?f))
+  (robmem-upsert "robmem.clipswm" ?bson ?bson)
+)
+
+(defrule robot-memory-sync-retract-promise
+  "Remove deleted promises from robot memory."
+  (declare (salience 100))
+	?mf <- (robot-memory-sync-mapped-promise (name ?name) (param-values $?param-values))
+  (not (domain-promise (name ?name) (active TRUE) (param-values $?param-values)))
+  =>
+  (robmem-remove "robmem.clipswm" (rm-structured-fact-to-bson ?mf "domain-promise"))
 	(retract ?mf)
 )
