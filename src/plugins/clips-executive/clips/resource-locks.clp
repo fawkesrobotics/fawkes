@@ -132,6 +132,8 @@
               (required-resources $?req)
               (acquired-resources $?acq
                 &:(member$ (mutex-to-resource ?n) (set-diff ?req ?acq))))
+  (resource-request (resource ?resource&:(eq ?resource (mutex-to-resource ?n)))
+                    (goal ?goal-id))
   ; We cannot abort a pending request. Thus, we first need to wait to get
   ; responses for all requested locks.
   (not (mutex (name ?on&:(member$ (mutex-to-resource ?on) ?req))
