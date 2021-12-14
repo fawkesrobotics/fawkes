@@ -26,6 +26,7 @@
 #include <utils/misc/string_conversions.h>
 
 #include <bsoncxx/exception/exception.hpp>
+#include <bsoncxx/json.hpp>
 #include <fstream>
 
 using namespace fawkes;
@@ -120,15 +121,30 @@ PddlRobotMemoryThread::loop()
 	size_t                             cur_pos = 0;
 	std::map<std::string, std::string> templates;
 	while (input.find("<<#", cur_pos) != std::string::npos) {
-		cur_pos            = input.find("<<#", cur_pos) + 3;
-		size_t tpl_end_pos = input.find(">>", cur_pos);
+		// Example string with positions
+		// <<#FACTS|{"relation": "domain-fact"}>> (<<name>> <<params>><</FACTS>>
+		//         ^^                          ^ tpl_end_pos
+		//         ||
+		//         |\ q_start_pos
+		//         \ q_del_pos
+		// <<#FACTS||{ "$match": {"relation": "domain-fact"} }>> (<<name>> <<params>><</FACTS>>
+		//         ^ ^                                        ^ tpl_end_pos
+		//         | |
+		//         | \ q_start_pos
+		//         \ q_del_pos
+		//
+		//
+		cur_pos                  = input.find("<<#", cur_pos) + 3;
+		const size_t tpl_end_pos = input.find(">>", cur_pos);
 		//is a query in the template? (indicated by '|')
-		size_t q_del_pos = input.find("|", cur_pos);
+		const size_t q_del_pos = input.find("|", cur_pos);
 		if (q_del_pos == std::string::npos || q_del_pos > tpl_end_pos)
 			continue; //no query to execute
-		//parse: template name | query
-		std::string template_name = input.substr(cur_pos, q_del_pos - cur_pos);
-		std::string query_str     = input.substr(q_del_pos + 1, tpl_end_pos - (q_del_pos + 1));
+			          //parse: template name | query
+		const bool        is_simple_query = input[q_del_pos + 1] != '|';
+		const size_t      q_start_pos     = q_del_pos + (is_simple_query ? 1 : 2);
+		const std::string template_name   = input.substr(cur_pos, q_del_pos - cur_pos);
+		const std::string query_str       = input.substr(q_start_pos, tpl_end_pos - q_start_pos);
 		if (templates.find(template_name) != templates.end()) {
 			if (templates[template_name] != query_str) {
 				logger->log_error(name(),
@@ -141,27 +157,35 @@ PddlRobotMemoryThread::loop()
 				continue;
 			}
 		}
+		if (is_simple_query) {
+			logger->log_info(name(),
+			                 "Using '%s' as simple query for template '%s'",
+			                 query_str.c_str(),
+			                 template_name.c_str());
+		} else {
+			logger->log_info(name(),
+			                 "Using '%s' as custom aggregate pipeline for template '%s'",
+			                 query_str.c_str(),
+			                 template_name.c_str());
+		}
 		templates[template_name] = query_str;
 		//remove query stuff from input (its not part of the ctemplate features)
 		input.erase(q_del_pos, tpl_end_pos - q_del_pos);
 
 		try {
-			//fill dictionary to expand query template:
-			/*
-	    QResCursor cursor = robot_memory->query(fromjson(query_str), collection);
-      while(cursor->more())
-      {
-        BSONObj obj = cursor->next();
-        //dictionary for one entry
-        ctemplate::TemplateDictionary *entry_dict = dict.AddSectionDictionary(template_name);
-        fill_dict_from_document(entry_dict, obj);
-      }
-	    */
-			facets.append(basic::kvp(template_name, [query_str](basic::sub_array array) {
-				basic::document query;
-				query.append(basic::kvp("$match", from_json(query_str)));
-				array.append(query.view());
-			}));
+			if (is_simple_query) {
+				facets.append(basic::kvp(template_name, [query_str](basic::sub_array array) {
+					basic::document query;
+					query.append(basic::kvp("$match", from_json(query_str)));
+					array.append(query.view());
+				}));
+			} else {
+				// We expect the query to be a complete aggregate pipeline.
+				facets.append(basic::kvp(template_name, [&query_str](basic::sub_array array) {
+					array.append(concatenate(from_json(query_str)));
+				}));
+				;
+			}
 		} catch (bsoncxx::exception &e) {
 			logger->log_error("PddlRobotMemory",
 			                  "Template query failed: %s\n%s",
@@ -170,9 +194,11 @@ PddlRobotMemoryThread::loop()
 		}
 	}
 
-	basic::document    aggregate_query;
 	mongocxx::pipeline aggregate_pipeline{};
 	aggregate_pipeline.facet(facets.view());
+	logger->log_info(name(),
+	                 "Aggregate pipeline: %s",
+	                 to_json(aggregate_pipeline.view_deprecated()).c_str());
 	auto res = robot_memory->aggregate(aggregate_pipeline, collection);
 	for (auto doc : res) {
 		for (document::element ele : doc) {
