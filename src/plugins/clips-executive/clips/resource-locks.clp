@@ -57,7 +57,7 @@
       (printout warn "Locking resource " ?res crlf)
     )
     (mutex-try-lock-async (resource-to-mutex ?res))
-		(assert (resource-request (goal ?goal-id) (resource ?res)))
+    (assert (resource-request (goal ?goal-id) (resource ?res)))
   )
 )
 
@@ -110,7 +110,7 @@
 )
 
 (defrule resource-locks-lock-acquired
-	(resource-request (resource ?res) (goal ?goal-id))
+  (resource-request (resource ?res) (goal ?goal-id))
   ?m <- (mutex (name ?n&:(eq ?n (resource-to-mutex ?res)))
                (request LOCK) (response ACQUIRED))
   ?g <- (goal (mode COMMITTED) (id ?goal-id)
@@ -172,7 +172,7 @@
          (eq ?request:goal ?goal-id)
          (eq ?request:resource (mutex-to-resource ?om:name)))
     (modify ?om (request NONE) (response NONE) (error-msg ""))
-		(retract ?request)
+    (retract ?request)
   )
 )
 
