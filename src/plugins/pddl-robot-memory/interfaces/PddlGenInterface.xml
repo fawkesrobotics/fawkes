@@ -20,5 +20,8 @@
     <field type="string" length="1024" name="goal">
     	Optional goal to insert into the template dictionary.
     </field>
+    <field type="uint32" name="start_time">
+      Optional global start time, used to compute relative times for absolute times in the problem.
+    </field>
   </message>
 </interface>
