@@ -169,6 +169,7 @@
   (delayed-do-for-all-facts
     ((?om mutex) (?request resource-request))
     (and (or (eq ?om:response REJECTED) (eq ?om:response ERROR))
+         (eq ?request:goal ?goal-id)
          (eq ?request:resource (mutex-to-resource ?om:name)))
     (modify ?om (request NONE) (response NONE) (error-msg ""))
 		(retract ?request)
