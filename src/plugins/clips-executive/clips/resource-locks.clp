@@ -75,8 +75,12 @@
   ; it was either locked by someone else or for a different goal.
   (mutex (name ?n&:(member$ (mutex-to-resource ?n) ?req))
          (state LOCKED) (request NONE) (locked-by ?locker&~?identity))
-  (not (mutex (name ?n1&:(member$ (mutex-to-resource ?n1) ?req))
-              (request ~NONE)))
+  (not (and (mutex (name ?n1&:(member$ (mutex-to-resource ?n1) ?req))
+              (request ~NONE))
+            (resource-request (goal ?goal-id) (resource ?resource&:
+                              (eq ?resource (mutex-to-resource ?n1))))
+       )
+  )
   =>
   (if (neq ?verbosity QUIET) then
     (printout warn "Rejecting goal " ?goal-id ", " (mutex-to-resource ?n)
