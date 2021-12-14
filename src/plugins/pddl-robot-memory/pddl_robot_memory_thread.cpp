@@ -157,34 +157,32 @@ PddlRobotMemoryThread::loop()
 				continue;
 			}
 		}
-		if (is_simple_query) {
-			logger->log_info(name(),
-			                 "Using '%s' as simple query for template '%s'",
-			                 query_str.c_str(),
-			                 template_name.c_str());
-		} else {
-			logger->log_info(name(),
-			                 "Using '%s' as custom aggregate pipeline for template '%s'",
-			                 query_str.c_str(),
-			                 template_name.c_str());
-		}
 		templates[template_name] = query_str;
 		//remove query stuff from input (its not part of the ctemplate features)
 		input.erase(q_del_pos, tpl_end_pos - q_del_pos);
 
 		try {
 			if (is_simple_query) {
+				logger->log_info(name(),
+				                 "Using '%s' as simple query for template '%s'",
+				                 query_str.c_str(),
+				                 template_name.c_str());
 				facets.append(basic::kvp(template_name, [query_str](basic::sub_array array) {
 					basic::document query;
 					query.append(basic::kvp("$match", from_json(query_str)));
 					array.append(query.view());
 				}));
 			} else {
-				// We expect the query to be a complete aggregate pipeline.
-				facets.append(basic::kvp(template_name, [&query_str](basic::sub_array array) {
-					array.append(concatenate(from_json(query_str)));
-				}));
-				;
+				// We expect the query to be a complete aggregate pipeline, i.e., an array of stages.
+				// mongocxx does not allow creating arrays from json, so we build a
+				// document using the template_name as key, which also matches the
+				// other pipelines from the simple queries.
+				const std::string pipeline_str = "{ \"" + template_name + "\": " + query_str + "}";
+				logger->log_info(name(),
+				                 "Using '%s' as custom aggregate pipeline for template '%s'",
+				                 pipeline_str.c_str(),
+				                 template_name.c_str());
+				facets.append(concatenate(from_json(pipeline_str)));
 			}
 		} catch (bsoncxx::exception &e) {
 			logger->log_error("PddlRobotMemory",
