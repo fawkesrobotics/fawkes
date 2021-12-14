@@ -34,6 +34,9 @@
   (bind ?m
     (blackboard-create-msg "PddlGenInterface::pddl-gen" "GenerateMessage")
   )
+  (do-for-fact ((?promise-time promise-time)) TRUE
+    (blackboard-set-msg-field ?m "start_time" ?promise-time:usecs)
+  )
   (blackboard-set-msg-field ?m "goal" ?goal)
   (printout info "Calling PDDL planner for goal '" ?goal "'" crlf)
   (bind ?gen-id (blackboard-send-msg ?m))
