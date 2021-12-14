@@ -69,6 +69,7 @@ private:
 	std::string input_path;
 	std::string output_path;
 	std::string goal;
+	uint32_t    start_time;
 
 	void fill_dict_from_document(ctemplate::TemplateDictionary *dict,
 	                             const bsoncxx::document::view &obj,

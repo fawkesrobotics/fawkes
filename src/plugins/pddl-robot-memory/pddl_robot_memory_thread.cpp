@@ -28,6 +28,8 @@
 #include <bsoncxx/exception/exception.hpp>
 #include <bsoncxx/json.hpp>
 #include <fstream>
+#include <regex>
+#include <string>
 
 using namespace fawkes;
 using namespace mongocxx;
@@ -144,7 +146,9 @@ PddlRobotMemoryThread::loop()
 		const bool        is_simple_query = input[q_del_pos + 1] != '|';
 		const size_t      q_start_pos     = q_del_pos + (is_simple_query ? 1 : 2);
 		const std::string template_name   = input.substr(cur_pos, q_del_pos - cur_pos);
-		const std::string query_str       = input.substr(q_start_pos, tpl_end_pos - q_start_pos);
+		const std::string query_str_raw   = input.substr(q_start_pos, tpl_end_pos - q_start_pos);
+		const std::string query_str =
+		  std::regex_replace(query_str_raw, std::regex("%START_TIME%"), std::to_string(start_time));
 		if (templates.find(template_name) != templates.end()) {
 			if (templates[template_name] != query_str) {
 				logger->log_error(name(),
@@ -273,8 +277,11 @@ PddlRobotMemoryThread::bb_interface_message_received(Interface *      interface,
 		gen_if->set_msg_id(msg->id());
 		gen_if->set_final(false);
 		gen_if->write();
-		if (std::string(msg->goal()) != "")
-			goal = msg->goal();
+		if (std::string(msg->goal()) != "") {
+			goal       = msg->goal();
+			start_time = msg->start_time();
+		}
+
 		wakeup(); //activates loop where the generation is done
 	} else {
 		logger->log_error(name(), "Received unknown message of type %s, ignoring", message->type());
