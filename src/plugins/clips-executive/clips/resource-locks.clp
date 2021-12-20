@@ -57,7 +57,7 @@
       (printout warn "Locking resource " ?res crlf)
     )
     (mutex-try-lock-async (resource-to-mutex ?res))
-		(assert (resource-request (goal ?goal-id) (resource ?res)))
+    (assert (resource-request (goal ?goal-id) (resource ?res)))
   )
 )
 
@@ -75,8 +75,12 @@
   ; it was either locked by someone else or for a different goal.
   (mutex (name ?n&:(member$ (mutex-to-resource ?n) ?req))
          (state LOCKED) (request NONE) (locked-by ?locker&~?identity))
-  (not (mutex (name ?n1&:(member$ (mutex-to-resource ?n1) ?req))
-              (request ~NONE)))
+  (not (and (mutex (name ?n1&:(member$ (mutex-to-resource ?n1) ?req))
+              (request ~NONE))
+            (resource-request (goal ?goal-id) (resource ?resource&:
+                              (eq ?resource (mutex-to-resource ?n1))))
+       )
+  )
   =>
   (if (neq ?verbosity QUIET) then
     (printout warn "Rejecting goal " ?goal-id ", " (mutex-to-resource ?n)
@@ -106,7 +110,7 @@
 )
 
 (defrule resource-locks-lock-acquired
-	(resource-request (resource ?res) (goal ?goal-id))
+  (resource-request (resource ?res) (goal ?goal-id))
   ?m <- (mutex (name ?n&:(eq ?n (resource-to-mutex ?res)))
                (request LOCK) (response ACQUIRED))
   ?g <- (goal (mode COMMITTED) (id ?goal-id)
@@ -128,6 +132,8 @@
               (required-resources $?req)
               (acquired-resources $?acq
                 &:(member$ (mutex-to-resource ?n) (set-diff ?req ?acq))))
+  (resource-request (resource ?resource&:(eq ?resource (mutex-to-resource ?n)))
+                    (goal ?goal-id))
   ; We cannot abort a pending request. Thus, we first need to wait to get
   ; responses for all requested locks.
   (not (mutex (name ?on&:(member$ (mutex-to-resource ?on) ?req))
@@ -163,9 +169,10 @@
   (delayed-do-for-all-facts
     ((?om mutex) (?request resource-request))
     (and (or (eq ?om:response REJECTED) (eq ?om:response ERROR))
+         (eq ?request:goal ?goal-id)
          (eq ?request:resource (mutex-to-resource ?om:name)))
     (modify ?om (request NONE) (response NONE) (error-msg ""))
-		(retract ?request)
+    (retract ?request)
   )
 )
 
