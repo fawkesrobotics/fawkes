@@ -20,6 +20,8 @@
 
 #include "effect_visitor.h"
 
+#include "core/exception.h"
+
 #include <pddl_parser/pddl_exception.h>
 
 /** @class EffectToCLIPSFactVisitor "effect_visitor.h"
@@ -90,18 +92,38 @@ EffectToCLIPSFactVisitor::operator()(pddl_parser::Predicate &p) const
 		  boost::apply_visitor(EffectToCLIPSFactVisitor(pddl_operator_, !positive_effect_),
 		                       p.arguments[0].expression);
 		res.insert(res.end(), sub_effects.begin(), sub_effects.end());
+	} else if (p.function == "at start" || p.function == "over all" || p.function == "at end") {
+		// This is a temporal effect. We ignore the temporal aspect and for now just use the sub-expression.
+		if (p.arguments.size() != 1) {
+			throw fawkes::Exception(
+			  "Unexpected number of sub-formulas (%zu) of temporal formula, expected exactly 1",
+			  p.arguments.size());
+		}
+
+		auto sub_expr = boost::apply_visitor(EffectToCLIPSFactVisitor(pddl_operator_, positive_effect_),
+		                                     p.arguments[0].expression);
+		res.insert(res.end(), sub_expr.begin(), sub_expr.end());
+		return res;
 	} else {
 		// We expect p.function to be a predicate name.
 		std::string params    = "";
 		std::string constants = "";
-		for (auto &p : p.arguments) {
+		for (auto &arg : p.arguments) {
 			std::vector<std::string> p_strings =
 			  boost::apply_visitor(EffectToCLIPSFactVisitor(pddl_operator_, positive_effect_),
-			                       p.expression);
+			                       arg.expression);
+			if (p.function.find(" ") != std::string::npos) {
+				throw fawkes::Exception("Parser error: Expected '%s' to be a predicate name, but it "
+				                        "contains a space. Is it really a domain predicate?",
+				                        p.function.c_str());
+			}
 			if (p_strings.size() != 1) {
-				throw pddl_parser::PddlParserException(
-				  "Unexpected parameter length for a predicate parameter, "
-				  "expected exactly one");
+				throw fawkes::Exception(
+				  "Parser error: Unexpected parameter length (%zu) while parsing predicate parameter in "
+				  "effect of %s, expected exactly one paramter. Is '%s' really a domain predicate?",
+				  p_strings.size(),
+				  pddl_operator_.c_str(),
+				  p.function.c_str());
 			}
 			std::string p_string = p_strings[0];
 			if (p_string[0] == '?') {
