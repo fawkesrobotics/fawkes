@@ -56,6 +56,14 @@ Realsense2Thread::init()
 
 	cfg_use_switch_ = config->get_bool_or_default((cfg_prefix + "use_switch").c_str(), true);
 
+	//rgb image path
+	rgb_path_ = config->get_string_or_default((cfg_prefix + "rgb_path").c_str(),
+	                                          "/home/robotino/realsense_images/");
+	//rgb camera resolution/frame rate
+	//rgb_width_      = config->get_int_or_default((cfg_prefix + "rgb_width").c_str(), 1920);
+	//rgb_height_     = config->get_int_or_default((cfg_prefix + "rgb_height").c_str(), 1080);
+	rgb_frame_rate_ = config->get_int_or_default((cfg_prefix + "rgb_frame_rate").c_str(), 10);
+
 	if (cfg_use_switch_) {
 		logger->log_info(name(), "Switch enabled");
 	} else {
@@ -76,8 +84,11 @@ Realsense2Thread::init()
 	realsense_depth_->resize(0);
 	pcl_manager->add_pointcloud(pcl_id_.c_str(), realsense_depth_refptr_);
 
-	rs_pipe_    = new rs2::pipeline();
-	rs_context_ = new rs2::context();
+	rs_pipe_     = new rs2::pipeline();
+	rs_context_  = new rs2::context();
+	rs_rgb_pipe_ = new rs2::pipeline();
+
+	name_it_ = 0;
 }
 
 void
@@ -86,6 +97,31 @@ Realsense2Thread::loop()
 	if (!camera_running_) {
 		camera_running_ = start_camera();
 		return;
+	}
+
+	// take picture
+	if (enable_camera_) {
+		if (rs_rgb_pipe_->poll_for_frames(&rs_rgb_data_)) {
+			error_counter_               = 0;
+			rs2::video_frame color_frame = rs_rgb_data_.first(RS2_STREAM_COLOR, RS2_FORMAT_RGB8);
+			image_name_ =
+			  rgb_path_ + std::to_string(name_it_) + color_frame.get_profile().stream_name() + ".png";
+			png_writer_.set_filename(image_name_.c_str());
+			png_writer_.set_dimensions(color_frame.get_width(), color_frame.get_height());
+			png_writer_.set_buffer(firevision::RGB, (unsigned char *)color_frame.get_data());
+			png_writer_.write();
+			logger->log_info(name(), "Saving image to %s", image_name_.c_str());
+			name_it_++;
+		} else {
+			error_counter_++;
+			logger->log_warn(name(), "Poll for rgb frames not successful ()");
+			if (error_counter_ >= restart_after_num_errors_) {
+				logger->log_warn(name(), "Polling failed, restarting device");
+				error_counter_ = 0;
+				stop_camera();
+				start_camera();
+			}
+		}
 	}
 
 	if (cfg_use_switch_) {
@@ -101,7 +137,7 @@ Realsense2Thread::loop()
 	} else if (!depth_enabled_) {
 		return;
 	}
-	if (rs_pipe_->poll_for_frames(&rs_data_)) {
+	if (rs_pipe_->poll_for_frames(&rs_data_)) { //TODO: comment out
 		rs2::frame depth_frame = rs_data_.first(RS2_STREAM_DEPTH);
 		error_counter_         = 0;
 		const uint16_t *image  = reinterpret_cast<const uint16_t *>(depth_frame.get_data());
@@ -138,6 +174,7 @@ Realsense2Thread::finalize()
 	stop_camera();
 	delete rs_pipe_;
 	delete rs_context_;
+	delete rs_rgb_pipe_;
 	realsense_depth_refptr_.reset();
 	pcl_manager->remove_pointcloud(pcl_id_.c_str());
 	blackboard->close(switch_if_);
@@ -151,6 +188,10 @@ Realsense2Thread::start_camera()
 {
 	try {
 		rs_pipe_->stop();
+	} catch (const std::exception &e) {
+	}
+	try {
+		rs_rgb_pipe_->stop();
 	} catch (const std::exception &e) {
 	}
 
@@ -175,6 +216,23 @@ Realsense2Thread::start_camera()
 		                 intrinsics_.width,
 		                 camera_scale_,
 		                 frame_rate_);
+
+		//rgb config
+		rs2::config rgb_config;
+		rgb_width_  = intrinsics_.width;
+		rgb_height_ = intrinsics_.height;
+		rgb_config.enable_stream(
+		  RS2_STREAM_COLOR, rgb_width_, rgb_height_, RS2_FORMAT_RGB8, rgb_frame_rate_);
+		rs2::pipeline_profile rs_pipeline_profile_rgb_ = rs_rgb_pipe_->start(rgb_config);
+		auto                  rgb_stream =
+		  rs_pipeline_profile_rgb_.get_stream(RS2_STREAM_COLOR).as<rs2::video_stream_profile>();
+		rgb_intrinsics_              = rgb_stream.get_intrinsics();
+		rs2::color_sensor rgb_sensor = rs_device_.first<rs2::color_sensor>();
+		logger->log_info(name(),
+		                 "RGB Height: %d RGB Width: %d FPS: %d",
+		                 rgb_intrinsics_.height,
+		                 rgb_intrinsics_.width,
+		                 rgb_frame_rate_);
 
 		return true;
 
@@ -323,6 +381,10 @@ Realsense2Thread::stop_camera()
 	depth_enabled_  = false;
 	try {
 		rs_pipe_->stop();
+	} catch (const std::exception &e) {
+	}
+	try {
+		rs_rgb_pipe_->stop();
 	} catch (const std::exception &e) {
 	}
 }
