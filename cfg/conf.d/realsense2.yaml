@@ -10,6 +10,9 @@ realsense2:
   # ID of the PointCloud
   pcl_id: "/camera/depth/points"
 
+  # Shared Image Buffer ID
+  shm_image_id: "rgb_id"
+
   # If true, the camera will be enabled/disabled on incoming Enable/Disable
   # messages. If false, switch messages will be ignored.
   use_switch: true

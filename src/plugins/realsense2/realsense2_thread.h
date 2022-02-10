@@ -35,6 +35,9 @@
 #include <librealsense2/rsutil.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
+#include <fvutils/ipc/shm_image.h>
+#include <fvutils/color/conversions.h>
+
 
 #include <librealsense2/rs.hpp>
 #include <librealsense2/rs_advanced_mode.hpp>
@@ -101,6 +104,12 @@ private:
 	rs2::frameset  rs_rgb_data_;
 	rs2_intrinsics intrinsics_;
 	rs2_intrinsics rgb_intrinsics_;
+
+  /// firevision image buffer
+  firevision::SharedMemoryImageBuffer *shm_buffer_;
+  unsigned char *                      image_buffer_;
+  /// Image Buffer Id
+  std::string shm_id_;
 
 	float       camera_scale_;
 	std::string frame_id_;
