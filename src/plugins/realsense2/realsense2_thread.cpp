@@ -100,14 +100,17 @@ Realsense2Thread::loop()
 		camera_running_ = start_camera();
 		return;
 	}
+	if (cfg_use_switch_) {
+		read_switch();
+	}
 
 	// take picture
 	if (enable_camera_) {
 		if (rs_rgb_pipe_->poll_for_frames(&rs_rgb_data_)) {
 			error_counter_               = 0;
 			rs2::video_frame color_frame = rs_rgb_data_.first(RS2_STREAM_COLOR, RS2_FORMAT_RGB8);
-			image_name_ =
-			  rgb_path_ + std::to_string(name_it_) + color_frame.get_profile().stream_name() + ".png";
+//			image_name_ =
+//			  rgb_path_ + std::to_string(name_it_) + color_frame.get_profile().stream_name() + ".png";
 //			png_writer_.set_filename(image_name_.c_str());
 //			png_writer_.set_dimensions(color_frame.get_width(), color_frame.get_height());
 //			png_writer_.set_buffer(firevision::RGB, (unsigned char *)color_frame.get_data());

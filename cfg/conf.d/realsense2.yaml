@@ -11,7 +11,7 @@ realsense2:
   pcl_id: "/camera/depth/points"
 
   # Shared Image Buffer ID
-  shm_image_id: "rgb_id"
+  shm_image_id: "realsense_rgb"
 
   # If true, the camera will be enabled/disabled on incoming Enable/Disable
   # messages. If false, switch messages will be ignored.
