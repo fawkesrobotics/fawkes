@@ -158,10 +158,19 @@ class MongoInterface:
             self.dst_mongodb_uri = dst_mongodb_uri
             self.lookup_col = self.client[dst_database][dst_collection]
 
-    def upload(self, durations, skill_name, skill_args):
-        """ Upload skill exec time entries, randomly sample from skill arg choices. """
+    def upload(self, durations, skill_name, skill_args, failures):
+        """ Upload skill exec time entries, randomly sample from skill arg
+            choices and possible failures. """
+        print(failures)
         for dur in durations:
-            doc = {"outcome": 1, "error": "", "name": skill_name, "duration": dur}
+            outcome = 1
+            error = ""
+            for fail_rate, error_msg in failures:
+                if np.random.random_sample() < float(fail_rate):
+                    outcome = 3
+                    error = error_msg
+                    break
+            doc = {"outcome": outcome, "error": error, "name": skill_name, "duration": dur}
             args_dict = dict()
             if skill_args != None:
                 for arg in skill_args:
@@ -374,6 +383,13 @@ def main():
         required=True,
     )
     skill.add_argument(
+        "--inject-failure",
+        type=str,
+        help="Percentage of failed skills and reason",
+        nargs=2,
+        action="append",
+    )
+    skill.add_argument(
         "--skill-name",
         "-s",
         type=str,
@@ -474,7 +490,7 @@ example call: ./mongodb_skillsim_lookup.py generate -d -n \
         )
         if not args.non_interactive:
             sampler.display(args.bin_size)
-        mongoIf.upload(sampler.samples, args.skill_name, args.skill_args)
+        mongoIf.upload(sampler.samples, args.skill_name, args.skill_args,args.inject_failure)
     else:
         print("unrecognized mode")
 
