@@ -152,10 +152,11 @@ class MongoInterface:
 
     def __init__(self, dst_mongodb_uri, dst_database, dst_collection, dry_run):
         """ Set up a connection to a mongodb collection. """
-        self.client = pymongo.MongoClient(dst_mongodb_uri)
-        self.dst_mongodb_uri = dst_mongodb_uri
-        self.lookup_col = self.client[dst_database][dst_collection]
         self.dry_run = dry_run
+        if not self.dry_run:
+            self.client = pymongo.MongoClient(dst_mongodb_uri)
+            self.dst_mongodb_uri = dst_mongodb_uri
+            self.lookup_col = self.client[dst_database][dst_collection]
 
     def upload(self, durations, skill_name, skill_args):
         """ Upload skill exec time entries, randomly sample from skill arg choices. """
