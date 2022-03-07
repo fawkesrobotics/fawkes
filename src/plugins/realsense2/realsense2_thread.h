@@ -31,13 +31,12 @@
 #include <aspect/logging.h>
 #include <aspect/pointcloud.h>
 #include <core/threading/thread.h>
+#include <fvutils/color/conversions.h>
+#include <fvutils/ipc/shm_image.h>
 #include <fvutils/writers/png.h>
 #include <librealsense2/rsutil.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
-#include <fvutils/ipc/shm_image.h>
-#include <fvutils/color/conversions.h>
-
 
 #include <librealsense2/rs.hpp>
 #include <librealsense2/rs_advanced_mode.hpp>
@@ -105,11 +104,11 @@ private:
 	rs2_intrinsics intrinsics_;
 	rs2_intrinsics rgb_intrinsics_;
 
-  /// firevision image buffer
-  firevision::SharedMemoryImageBuffer *shm_buffer_;
-  unsigned char *                      image_buffer_;
-  /// Image Buffer Id
-  std::string shm_id_;
+	/// firevision image buffer
+	firevision::SharedMemoryImageBuffer *shm_buffer_;
+	unsigned char *                      image_buffer_;
+	/// Image Buffer Id
+	std::string shm_id_;
 
 	float       camera_scale_;
 	std::string frame_id_;
@@ -121,7 +120,7 @@ private:
 	int         rgb_frame_rate_;
 	int         rgb_width_;
 	int         rgb_height_;
-	int         name_it_;
+	size_t      name_it_;
 	float       laser_power_;
 	bool        camera_running_ = false;
 	bool        enable_camera_  = true;

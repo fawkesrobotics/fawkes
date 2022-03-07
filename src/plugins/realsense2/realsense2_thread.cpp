@@ -57,8 +57,8 @@ Realsense2Thread::init()
 	cfg_use_switch_ = config->get_bool_or_default((cfg_prefix + "use_switch").c_str(), true);
 
 	//rgb image path
-	rgb_path_ = config->get_string_or_default((cfg_prefix + "rgb_path").c_str(),
-	                                          "/tmp/realsense_images/");
+	rgb_path_ =
+	  config->get_string_or_default((cfg_prefix + "rgb_path").c_str(), "/tmp/realsense_images/");
 	//rgb camera resolution/frame rate
 	//rgb_width_      = config->get_int_or_default((cfg_prefix + "rgb_width").c_str(), 1920);
 	//rgb_height_     = config->get_int_or_default((cfg_prefix + "rgb_height").c_str(), 1080);
@@ -109,35 +109,34 @@ Realsense2Thread::loop()
 		if (rs_rgb_pipe_->poll_for_frames(&rs_rgb_data_)) {
 			error_counter_               = 0;
 			rs2::video_frame color_frame = rs_rgb_data_.first(RS2_STREAM_COLOR, RS2_FORMAT_RGB8);
-//			image_name_ =
-//			  rgb_path_ + std::to_string(name_it_) + color_frame.get_profile().stream_name() + ".png";
-//			png_writer_.set_filename(image_name_.c_str());
-//			png_writer_.set_dimensions(color_frame.get_width(), color_frame.get_height());
-//			png_writer_.set_buffer(firevision::RGB, (unsigned char *)color_frame.get_data());
-//			png_writer_.write();
+			//			image_name_ =
+			//			  rgb_path_ + std::to_string(name_it_) + color_frame.get_profile().stream_name() + ".png";
+			//			png_writer_.set_filename(image_name_.c_str());
+			//			png_writer_.set_dimensions(color_frame.get_width(), color_frame.get_height());
+			//			png_writer_.set_buffer(firevision::RGB, (unsigned char *)color_frame.get_data());
+			//			png_writer_.write();
 
-      //firevision::convert(fv_cam_->colorspace(),
-      //                    firevision::YUV422_PLANAR,
-      //                    fv_cam_->buffer(),
-      //                    image_buffer_,
-      //                    this->img_width_,
-      //                    this->img_height_);
-      //fv_cam_->dispose_buffer();
-      // convert img
-      firevision::convert(firevision::BGR,
-                          firevision::BGR,
-                          (unsigned char *)color_frame.get_data(),
-                          shm_buffer_->buffer(),
-                          rgb_width_,
-                          rgb_height_);
+			//firevision::convert(fv_cam_->colorspace(),
+			//                    firevision::YUV422_PLANAR,
+			//                    fv_cam_->buffer(),
+			//                    image_buffer_,
+			//                    this->img_width_,
+			//                    this->img_height_);
+			//fv_cam_->dispose_buffer();
+			// convert img
+			firevision::convert(firevision::RGB,
+			                    firevision::BGR,
+			                    (unsigned char *)color_frame.get_data(),
+			                    shm_buffer_->buffer(),
+			                    rgb_width_,
+			                    rgb_height_);
 
-//      firevision::CvMatAdapter::convert_image_bgr((unsigned char *)color_frame.get_data(), ipl_image_);
+			//      firevision::CvMatAdapter::convert_image_bgr((unsigned char *)color_frame.get_data(), ipl_image_);
 
-//			logger->log_info(name(), "Saving image to %s", image_name_.c_str());
+			//			logger->log_info(name(), "Saving image to %s", image_name_.c_str());
 			name_it_++;
 		} else {
 			error_counter_++;
-			logger->log_warn(name(), "Poll for rgb frames not successful ()");
 			if (error_counter_ >= restart_after_num_errors_) {
 				logger->log_warn(name(), "Polling failed, restarting device");
 				error_counter_ = 0;
@@ -252,10 +251,11 @@ Realsense2Thread::start_camera()
 		rgb_intrinsics_              = rgb_stream.get_intrinsics();
 		rs2::color_sensor rgb_sensor = rs_device_.first<rs2::color_sensor>();
 		logger->log_info(name(),
-		                 "RGB Height: %d RGB Width: %d FPS: %d PPX: %f PPY: %f FX: %f FY: %f MODEL: %i COEFFS: %f %f %f %f %f",
+		                 "RGB Height: %d RGB Width: %d FPS: %d PPX: %f PPY: %f FX: %f FY: %f MODEL: %i "
+		                 "COEFFS: %f %f %f %f %f",
 		                 rgb_intrinsics_.height,
 		                 rgb_intrinsics_.width,
-                     rgb_frame_rate_,
+		                 rgb_frame_rate_,
 		                 rgb_intrinsics_.ppx,
 		                 rgb_intrinsics_.ppy,
 		                 rgb_intrinsics_.fx,
@@ -266,10 +266,10 @@ Realsense2Thread::start_camera()
 		                 rgb_intrinsics_.coeffs[2],
 		                 rgb_intrinsics_.coeffs[3],
 		                 rgb_intrinsics_.coeffs[4]);
-    shm_buffer_ = new firevision::SharedMemoryImageBuffer(shm_id_.c_str(),
-                                                          firevision::RGB,
-                                                          rgb_width_,
-                                                          rgb_height_);
+		shm_buffer_ = new firevision::SharedMemoryImageBuffer(shm_id_.c_str(),
+		                                                      firevision::BGR,
+		                                                      rgb_width_,
+		                                                      rgb_height_);
 
 		return true;
 
