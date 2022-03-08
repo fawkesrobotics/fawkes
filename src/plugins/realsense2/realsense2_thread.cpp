@@ -60,9 +60,10 @@ Realsense2Thread::init()
 	rgb_path_ =
 	  config->get_string_or_default((cfg_prefix + "rgb_path").c_str(), "/tmp/realsense_images/");
 	//rgb camera resolution/frame rate
-	//rgb_width_      = config->get_int_or_default((cfg_prefix + "rgb_width").c_str(), 1920);
-	//rgb_height_     = config->get_int_or_default((cfg_prefix + "rgb_height").c_str(), 1080);
-	rgb_frame_rate_ = config->get_int_or_default((cfg_prefix + "rgb_frame_rate").c_str(), 10);
+	image_width_  = config->get_int_or_default((cfg_prefix + "rgb_width").c_str(), 640);
+	image_height_ = config->get_int_or_default((cfg_prefix + "rgb_height").c_str(), 480);
+	frame_rate_   = config->get_int_or_default((cfg_prefix + "frame_rate").c_str(), 30);
+	save_images_  = config->get_bool_or_default((cfg_prefix + "save_images").c_str(), false);
 
 	if (cfg_use_switch_) {
 		logger->log_info(name(), "Switch enabled");
@@ -77,18 +78,8 @@ Realsense2Thread::init()
 	shm_id_ = config->get_string((cfg_prefix + "shm_image_id").c_str());
 
 	camera_scale_ = 1;
-	// initalize pointcloud
-	realsense_depth_refptr_           = new Cloud();
-	realsense_depth_                  = pcl_utils::cloudptr_from_refptr(realsense_depth_refptr_);
-	realsense_depth_->header.frame_id = frame_id_;
-	realsense_depth_->width           = 0;
-	realsense_depth_->height          = 0;
-	realsense_depth_->resize(0);
-	pcl_manager->add_pointcloud(pcl_id_.c_str(), realsense_depth_refptr_);
-
-	rs_pipe_     = new rs2::pipeline();
-	rs_context_  = new rs2::context();
-	rs_rgb_pipe_ = new rs2::pipeline();
+	rs_context_   = new rs2::context();
+	rs_pipe_      = new rs2::pipeline();
 
 	name_it_ = 0;
 }
@@ -106,35 +97,27 @@ Realsense2Thread::loop()
 
 	// take picture
 	if (enable_camera_) {
-		if (rs_rgb_pipe_->poll_for_frames(&rs_rgb_data_)) {
+		if (rs_pipe_->poll_for_frames(&rs_data_)) {
 			error_counter_               = 0;
-			rs2::video_frame color_frame = rs_rgb_data_.first(RS2_STREAM_COLOR, RS2_FORMAT_RGB8);
-			//			image_name_ =
-			//			  rgb_path_ + std::to_string(name_it_) + color_frame.get_profile().stream_name() + ".png";
-			//			png_writer_.set_filename(image_name_.c_str());
-			//			png_writer_.set_dimensions(color_frame.get_width(), color_frame.get_height());
-			//			png_writer_.set_buffer(firevision::RGB, (unsigned char *)color_frame.get_data());
-			//			png_writer_.write();
+			rs2::video_frame color_frame = rs_data_.first(RS2_STREAM_COLOR, RS2_FORMAT_RGB8);
 
-			//firevision::convert(fv_cam_->colorspace(),
-			//                    firevision::YUV422_PLANAR,
-			//                    fv_cam_->buffer(),
-			//                    image_buffer_,
-			//                    this->img_width_,
-			//                    this->img_height_);
-			//fv_cam_->dispose_buffer();
-			// convert img
+			if (save_images_) {
+				image_name_ =
+				  rgb_path_ + std::to_string(name_it_) + color_frame.get_profile().stream_name() + ".png";
+				png_writer_.set_filename(image_name_.c_str());
+				png_writer_.set_dimensions(color_frame.get_width(), color_frame.get_height());
+				png_writer_.set_buffer(firevision::RGB, (unsigned char *)color_frame.get_data());
+				png_writer_.write();
+				name_it_++;
+			}
+
+			// set image in shared memory
 			firevision::convert(firevision::RGB,
 			                    firevision::BGR,
 			                    (unsigned char *)color_frame.get_data(),
 			                    shm_buffer_->buffer(),
-			                    rgb_width_,
-			                    rgb_height_);
-
-			//      firevision::CvMatAdapter::convert_image_bgr((unsigned char *)color_frame.get_data(), ipl_image_);
-
-			//			logger->log_info(name(), "Saving image to %s", image_name_.c_str());
-			name_it_++;
+			                    image_width_,
+			                    image_height_);
 		} else {
 			error_counter_++;
 			if (error_counter_ >= restart_after_num_errors_) {
@@ -145,60 +128,14 @@ Realsense2Thread::loop()
 			}
 		}
 	}
-
-	// if (cfg_use_switch_) {
-	// 	read_switch();
-	// }
-
-	// if (enable_camera_ && !depth_enabled_) {
-	// 	enable_depth_stream();
-	// 	return;
-	// } else if (!enable_camera_ && depth_enabled_) {
-	// 	disable_depth_stream();
-	// 	return;
-	// } else if (!depth_enabled_) {
-	// 	return;
-	// }
-	// if (rs_pipe_->poll_for_frames(&rs_data_)) { //TODO: comment out
-	// 	rs2::frame depth_frame = rs_data_.first(RS2_STREAM_DEPTH);
-	// 	error_counter_         = 0;
-	// 	const uint16_t *image  = reinterpret_cast<const uint16_t *>(depth_frame.get_data());
-	// 	Cloud::iterator it     = realsense_depth_->begin();
-	// 	for (int y = 0; y < intrinsics_.height; y++) {
-	// 		for (int x = 0; x < intrinsics_.width; x++) {
-	// 			float scaled_depth = camera_scale_ * (static_cast<float>(*image));
-	// 			float depth_point[3];
-	// 			float depth_pixel[2] = {static_cast<float>(x), static_cast<float>(y)};
-	// 			rs2_deproject_pixel_to_point(depth_point, &intrinsics_, depth_pixel, scaled_depth);
-	// 			it->x = depth_point[0];
-	// 			it->y = depth_point[1];
-	// 			it->z = depth_point[2];
-	// 			++image;
-	// 			++it;
-	// 		}
-	// 	}
-	// 	pcl_utils::set_time(realsense_depth_refptr_, fawkes::Time(clock));
-	// } else {
-	// 	error_counter_++;
-	// 	logger->log_warn(name(), "Poll for frames not successful ()");
-	// 	if (error_counter_ >= restart_after_num_errors_) {
-	// 		logger->log_warn(name(), "Polling failed, restarting device");
-	// 		error_counter_ = 0;
-	// 		stop_camera();
-	// 		start_camera();
-	// 	}
-	// }
 }
 
 void
 Realsense2Thread::finalize()
 {
 	stop_camera();
-	delete rs_pipe_;
 	delete rs_context_;
-	delete rs_rgb_pipe_;
-	realsense_depth_refptr_.reset();
-	pcl_manager->remove_pointcloud(pcl_id_.c_str());
+	delete rs_pipe_;
 	blackboard->close(switch_if_);
 }
 
@@ -212,64 +149,40 @@ Realsense2Thread::start_camera()
 		rs_pipe_->stop();
 	} catch (const std::exception &e) {
 	}
-	try {
-		rs_rgb_pipe_->stop();
-	} catch (const std::exception &e) {
-	}
 
 	try {
 		if (!get_camera(rs_device_)) {
 			return false;
 		}
-		rs2::config config;
-		config.enable_stream(RS2_STREAM_DEPTH, RS2_FORMAT_Z16, frame_rate_);
-		rs2::pipeline_profile rs_pipeline_profile_ = rs_pipe_->start(config);
-		auto                  depth_stream =
-		  rs_pipeline_profile_.get_stream(RS2_STREAM_DEPTH).as<rs2::video_stream_profile>();
-		intrinsics_              = depth_stream.get_intrinsics();
-		realsense_depth_->width  = intrinsics_.width;
-		realsense_depth_->height = intrinsics_.height;
-		realsense_depth_->resize(intrinsics_.width * intrinsics_.height);
-		rs2::depth_sensor sensor = rs_device_.first<rs2::depth_sensor>();
-		camera_scale_            = sensor.get_depth_scale();
-		logger->log_info(name(),
-		                 "Height: %d Width: %d Scale: %f FPS: %d",
-		                 intrinsics_.height,
-		                 intrinsics_.width,
-		                 camera_scale_,
-		                 frame_rate_);
 
-		//rgb config
-		rs2::config rgb_config;
-		rgb_width_  = intrinsics_.width;
-		rgb_height_ = intrinsics_.height;
-		rgb_config.enable_stream(
-		  RS2_STREAM_COLOR, rgb_width_, rgb_height_, RS2_FORMAT_RGB8, rgb_frame_rate_);
-		rs2::pipeline_profile rs_pipeline_profile_rgb_ = rs_rgb_pipe_->start(rgb_config);
+		rs2::config rs_config;
+		rs_config.enable_stream(
+		  RS2_STREAM_COLOR, image_width_, image_height_, RS2_FORMAT_RGB8, frame_rate_);
+		rs2::pipeline_profile rs_pipeline_profile_ = rs_pipe_->start(rs_config);
 		auto                  rgb_stream =
-		  rs_pipeline_profile_rgb_.get_stream(RS2_STREAM_COLOR).as<rs2::video_stream_profile>();
-		rgb_intrinsics_              = rgb_stream.get_intrinsics();
+		  rs_pipeline_profile_.get_stream(RS2_STREAM_COLOR).as<rs2::video_stream_profile>();
+		intrinsics_                  = rgb_stream.get_intrinsics();
 		rs2::color_sensor rgb_sensor = rs_device_.first<rs2::color_sensor>();
 		logger->log_info(name(),
 		                 "RGB Height: %d RGB Width: %d FPS: %d PPX: %f PPY: %f FX: %f FY: %f MODEL: %i "
 		                 "COEFFS: %f %f %f %f %f",
-		                 rgb_intrinsics_.height,
-		                 rgb_intrinsics_.width,
-		                 rgb_frame_rate_,
-		                 rgb_intrinsics_.ppx,
-		                 rgb_intrinsics_.ppy,
-		                 rgb_intrinsics_.fx,
-		                 rgb_intrinsics_.fy,
-		                 rgb_intrinsics_.model,
-		                 rgb_intrinsics_.coeffs[0],
-		                 rgb_intrinsics_.coeffs[1],
-		                 rgb_intrinsics_.coeffs[2],
-		                 rgb_intrinsics_.coeffs[3],
-		                 rgb_intrinsics_.coeffs[4]);
+		                 intrinsics_.height,
+		                 intrinsics_.width,
+		                 frame_rate_,
+		                 intrinsics_.ppx,
+		                 intrinsics_.ppy,
+		                 intrinsics_.fx,
+		                 intrinsics_.fy,
+		                 intrinsics_.model,
+		                 intrinsics_.coeffs[0],
+		                 intrinsics_.coeffs[1],
+		                 intrinsics_.coeffs[2],
+		                 intrinsics_.coeffs[3],
+		                 intrinsics_.coeffs[4]);
 		shm_buffer_ = new firevision::SharedMemoryImageBuffer(shm_id_.c_str(),
 		                                                      firevision::BGR,
-		                                                      rgb_width_,
-		                                                      rgb_height_);
+		                                                      image_width_,
+		                                                      image_height_);
 
 		return true;
 
@@ -336,92 +249,14 @@ Realsense2Thread::get_camera(rs2::device &dev)
 }
 
 /*
- * Enable the depth stream from rs_device
- */
-void
-Realsense2Thread::enable_depth_stream()
-{
-	logger->log_info(name(), "Enable depth Stream");
-
-	try {
-		rs2::depth_sensor depth_sensor = rs_device_.first<rs2::depth_sensor>();
-		if (depth_sensor.supports(RS2_OPTION_EMITTER_ENABLED)) {
-			depth_sensor.set_option(RS2_OPTION_EMITTER_ENABLED,
-			                        1.f); // Enable emitter
-			depth_enabled_ = true;
-		} else if (depth_sensor.supports(RS2_OPTION_LASER_POWER)) {
-			if (laser_power_ == -1) {
-				rs2::option_range range = depth_sensor.get_option_range(RS2_OPTION_LASER_POWER);
-				laser_power_            = range.max;
-			}
-			logger->log_info(name(), "Enable depth stream with Laser Power: %f", laser_power_);
-			depth_sensor.set_option(RS2_OPTION_LASER_POWER, laser_power_); // Set max power
-			depth_enabled_ = true;
-		} else {
-			logger->log_warn(name(), "Enable depth stream not supported on device");
-		}
-
-	} catch (const rs2::error &e) {
-		logger->log_error(name(),
-		                  "RealSense error calling %s ( %s ):\n    %s",
-		                  e.get_failed_function().c_str(),
-		                  e.get_failed_args().c_str(),
-		                  e.what());
-		return;
-	} catch (const std::exception &e) {
-		logger->log_error(name(), "%s", e.what());
-		return;
-	}
-}
-
-/*
- * Disable the depth stream from rs_device
- */
-void
-Realsense2Thread::disable_depth_stream()
-{
-	logger->log_info(name(), "Disable Depth Stream");
-
-	try {
-		rs2::depth_sensor depth_sensor = rs_device_.first<rs2::depth_sensor>();
-		if (depth_sensor.supports(RS2_OPTION_EMITTER_ENABLED)) {
-			depth_sensor.set_option(RS2_OPTION_EMITTER_ENABLED,
-			                        0.f); // Disable emitter
-			depth_enabled_ = false;
-		} else if (depth_sensor.supports(RS2_OPTION_LASER_POWER)) {
-			rs2::option_range range = depth_sensor.get_option_range(RS2_OPTION_LASER_POWER);
-			depth_sensor.set_option(RS2_OPTION_LASER_POWER, range.min); // Set max power
-			depth_enabled_ = false;
-		} else {
-			logger->log_warn(name(), "Disable depth stream not supported on device");
-		}
-	} catch (const rs2::error &e) {
-		logger->log_error(name(),
-		                  "RealSense error calling %s ( %s ):\n    %s",
-		                  e.get_failed_function().c_str(),
-		                  e.get_failed_args().c_str(),
-		                  e.what());
-		return;
-	} catch (const std::exception &e) {
-		logger->log_error(name(), "%s", e.what());
-		return;
-	}
-}
-
-/*
  * Stop the device and delete the context properly
  */
 void
 Realsense2Thread::stop_camera()
 {
 	camera_running_ = false;
-	depth_enabled_  = false;
 	try {
 		rs_pipe_->stop();
-	} catch (const std::exception &e) {
-	}
-	try {
-		rs_rgb_pipe_->stop();
 	} catch (const std::exception &e) {
 	}
 }
