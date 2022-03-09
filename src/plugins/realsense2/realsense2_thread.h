@@ -105,7 +105,7 @@ private:
 	int         frame_rate_;
 	int         image_width_;
 	int         image_height_;
-	bool        save_images;
+	bool        save_images_;
 	size_t      name_it_;
 	float       laser_power_;
 	bool        camera_running_ = false;

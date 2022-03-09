@@ -113,7 +113,7 @@ Realsense2Thread::loop()
 
 			// set image in shared memory
 			firevision::convert(firevision::RGB,
-			                    firevision::BGR,
+			                    firevision::RGB,
 			                    (unsigned char *)color_frame.get_data(),
 			                    shm_buffer_->buffer(),
 			                    image_width_,
@@ -180,7 +180,7 @@ Realsense2Thread::start_camera()
 		                 intrinsics_.coeffs[3],
 		                 intrinsics_.coeffs[4]);
 		shm_buffer_ = new firevision::SharedMemoryImageBuffer(shm_id_.c_str(),
-		                                                      firevision::BGR,
+		                                                      firevision::RGB,
 		                                                      image_width_,
 		                                                      image_height_);
 
