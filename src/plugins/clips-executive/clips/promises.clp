@@ -22,6 +22,10 @@
   (slot do-not-invalidate (type SYMBOL) (default FALSE));indicate if the promise should be retracted with its source goal
 )
 
+(deffunction goal-agent (?goal ?agent)
+  (return (sym-cat ?goal @ ?agent))
+)
+
 (deftemplate promise-time
   (slot usecs (type INTEGER))
 )
@@ -104,7 +108,8 @@
 (defrule  promises-update-predicate-positive-promise
   (declare (salience ?*SALIENCE-DOMAIN-CHECK*))
 
-  (domain-promise (negated FALSE) (name ?pred) (param-values $?param-values) (active TRUE) (valid-at ?time))
+  (domain-promise (negated FALSE) (name ?pred) (param-values $?param-values) (active TRUE)
+                  (promising-goal ?goal) (promising-agent ?agent) (valid-at ?time))
 
   (pddl-grounding (id ?grounding-id))
   ?base-predicate <- (pddl-predicate (id ?id) (predicate ?pred))
@@ -114,7 +119,7 @@
                                          (promised-from ?p-time))
   (test (or (eq ?p-time -1) (> ?p-time ?time)))
 =>
-  (modify ?predicate (promised-from ?time))
+  (modify ?predicate (promised-from ?time) (promised-from-goal (goal-agent ?goal ?agent)))
 )
 
 (defrule promises-update-predicate-negative-promise
@@ -123,7 +128,8 @@
                   (param-names $?grounded-params)
                   (param-values $?grounded-values))
 
-  (domain-promise (negated TRUE) (name ?pred) (param-values $?param-values) (active TRUE) (valid-at ?time))
+  (domain-promise (negated TRUE) (name ?pred) (param-values $?param-values) (active TRUE)
+                  (promising-goal ?goal) (promising-agent ?agent) (valid-at ?time))
 
   ?base-predicate <- (pddl-predicate (id ?id) (predicate ?pred))
   ?predicate <- (grounded-pddl-predicate (predicate-id ?id)
@@ -132,7 +138,7 @@
                                          (promised-until ?p-time))
   (test (or (eq ?p-time -1) (> ?p-time ?time)))
 =>
-  (modify ?predicate (promised-until ?time))
+  (modify ?predicate (promised-until ?time) (promised-until-goal (goal-agent ?goal ?agent)))
 )
 
 (defrule  promises-update-predicate-remove-positive-promise
@@ -146,7 +152,7 @@
 
   (not (domain-promise (negated FALSE) (name ?pred) (param-values $?param-values) (active TRUE) (valid-at ?base-time)))
 =>
-  (modify ?predicate (promised-from -1))
+  (modify ?predicate (promised-from -1) (promised-from-goal nil))
 )
 
 (defrule promises-update-predicate-remove-negative-promise
@@ -160,7 +166,7 @@
 
   (not (domain-promise (negated TRUE) (name ?pred) (param-values $?param-values) (active TRUE) (valid-at ?base-time)))
 =>
-  (modify ?predicate (promised-until -1))
+  (modify ?predicate (promised-until -1) (promised-until-goal nil))
 )
 
 ;---------------------------------------- ATOMIC -----------------------------------------
@@ -182,7 +188,10 @@
                            (grounding ?grounding-id)
                            (parent-formula ?id)
                            (promised-from ?time-from)
-                           (promised-until ?time-until))
+                           (promised-until ?time-until)
+                           (promised-from-goal ?from-goal)
+                           (promised-until-goal ?until-goal)
+  )
   (test
     (or
       (neq ?base-time-from ?time-from)
@@ -190,7 +199,13 @@
     )
   )
   =>
-  (modify ?parent (promised-from ?time-from) (promised-until ?time-until))
+  (if  (neq ?base-time-from ?time-from) then
+    (modify ?parent (promised-from ?time-from)
+                    (promised-from-goals ?from-goal))
+    else
+    (modify ?parent (promised-until ?time-until)
+                    (promised-until-goals ?until-goal))
+  )
 )
 
 ;--------------------------------------- NEGATION ----------------------------------------
@@ -204,12 +219,17 @@
                                     (formula-id ?parent-base)
                                     (grounding ?grounding-id)
                                     (promised-from ?base-time-from)
-                                    (promised-until ?base-time-until))
+                                    (promised-until ?base-time-until)
+                                    (promised-from-goals $?base-promised-from-goals)
+                                    (promised-until-goals $?base-promised-until-goals)
+  )
 
   (pddl-formula (part-of ?parent-base) (id ?child-base))
   (grounded-pddl-formula (formula-id ?child-base)
                          (grounding ?grounding-id)
                          (grounded-parent ?id)
+                         (promised-from-goals $?promised-from-goals)
+                         (promised-until-goals $?promised-until-goals)
                          (promised-from ?time-from)
                          (promised-until ?time-until))
 
@@ -218,10 +238,14 @@
     (or
       (neq ?time-from ?base-time-until)
       (neq ?time-until ?base-time-from)
+      (neq ?promised-from-goals ?base-promised-until-goals)
+      (neq ?promised-until-goals ?base-promised-from-goals)
     )
   )
 =>
-  (modify ?parent (promised-from ?time-until) (promised-until ?time-from))
+  (modify ?parent (promised-from ?time-until) (promised-until ?time-from)
+                  (promised-from-goals ?promised-until-goals)
+                  (promised-until-goals ?promised-from-goals))
 )
 
 ;--------------------------------- CONJUNCTIVE FORMULAS ----------------------------------
@@ -262,7 +286,15 @@
   )
   (test (neq ?base-from ?from-time))
   =>
-  (modify ?parent (promised-from ?from-time))
+  (bind ?promised-goals (create$))
+  (delayed-do-for-all-facts ((?gf grounded-pddl-formula))
+    (and (eq ?gf:grounding ?grounding-id)
+         (eq ?gf:grounded-parent ?id)
+         (eq ?gf:is-satisfied FALSE)
+         (neq ?gf:promised-from -1))
+    (bind ?promised-goals (append$ ?promised-goals ?gf:promised-from-goals))
+  )
+  (modify ?parent (promised-from ?from-time) (promised-from-goals $?promised-goals))
 )
 
 (defrule promises-update-conjunctive-formula-positive-invalidate-unsat-child
@@ -283,7 +315,7 @@
                           (grounded-parent ?id)
                           (promised-from -1))
   =>
-  (modify ?parent (promised-from -1))
+  (modify ?parent (promised-from -1) (promised-from-goals))
 )
 
 (defrule promises-update-conjunctive-formula-positive-invalidate-time-mismatch
@@ -302,7 +334,7 @@
                               (promised-from ?base-from))
   )
   =>
-  (modify ?parent (promised-from -1))
+  (modify ?parent (promised-from -1) (promised-from-goals))
 )
 
 (defrule promises-update-conjunctive-formula-negative
@@ -319,7 +351,8 @@
   ;the min promise time is taken
   (grounded-pddl-formula  (grounding ?grounding-id)
                           (grounded-parent ?id)
-                          (promised-until ?until-time&~-1))
+                          (promised-until ?until-time&~-1)
+                          (promised-until-goals $?promised-until-goals))
   (not
       (grounded-pddl-formula  (grounding ?grounding-id)
                               (grounded-parent ?id)
@@ -327,7 +360,7 @@
   )
   (test (neq ?base-until ?until-time))
   =>
-  (modify ?parent (promised-until ?until-time))
+  (modify ?parent (promised-until ?until-time) (promised-until-goals ?promised-until-goals))
 )
 
 (defrule promises-update-conjunctive-formula-negative-invalidate
@@ -352,7 +385,7 @@
     )
   )
   =>
-  (modify ?parent (promised-until -1))
+  (modify ?parent (promised-until -1) (promised-until-goals))
 )
 
 (defrule promises-update-conjunctive-formula-negative-invalidate-time-mismatch
@@ -370,7 +403,7 @@
                               (promised-until ?base-until))
   )
   =>
-  (modify ?parent (promised-until -1))
+  (modify ?parent (promised-until -1) (promised-until-goals))
 )
 
 ;--------------------------------- DISJUNCTIVE FORMULAS ----------------------------------
@@ -390,6 +423,7 @@
   (grounded-pddl-formula  (grounding ?grounding-id)
                           (grounded-parent ?id)
                           (is-satisfied FALSE)
+                          (promised-from-goals $?promised-from-goals)
                           (promised-from ?from-time&~-1))
   (not
       (grounded-pddl-formula  (grounding ?grounding-id)
@@ -399,7 +433,7 @@
   )
   (test (neq ?base-from ?from-time))
   =>
-  (modify ?parent (promised-from ?from-time))
+  (modify ?parent (promised-from ?from-time) (promised-from-goals ?promised-from-goals))
 )
 
 (defrule promises-update-disjunctive-formula-positive-invalidate
@@ -413,7 +447,7 @@
                                     (is-satisfied TRUE)
                                     (promised-from ?base-from&~-1))
   =>
-  (modify ?parent (promised-from -1))
+  (modify ?parent (promised-from -1) (promised-from-goals))
 )
 
 (defrule promises-update-disjunctive-formula-positive-invalidate-time-mismatch
@@ -431,7 +465,7 @@
                               (promised-from ?base-from))
   )
   =>
-  (modify ?parent (promised-from -1))
+  (modify ?parent (promised-from -1) (promised-from-goals))
 )
 
 (defrule promises-update-disjunctive-formula-negative
@@ -466,7 +500,16 @@
   )
   (test (neq ?base-until ?until-time))
   =>
-  (modify ?parent (promised-until ?until-time))
+  (bind ?promised-until-goals (create$))
+  (delayed-do-for-all-facts ((?gf grounded-pddl-formula))
+    (and (eq ?gf:grounding ?grounding-id)
+         (eq ?gf:grounded-parent ?id)
+         (eq ?gf:is-satisfied FALSE)
+         (neq ?gf:promised-until -1))
+    (bind ?promised-until-goals (append$ ?promised-until-goals ?gf:promised-until-goals))
+  )
+
+  (modify ?parent (promised-until ?until-time) (promised-until-goals ?promised-until-goals))
 )
 
 (defrule promises-update-disjunctive-formula-negative-invalidate-unsatisfied
@@ -480,7 +523,7 @@
                                     (is-satisfied FALSE)
                                     (promised-until ~-1))
   =>
-  (modify ?parent (promised-until -1))
+  (modify ?parent (promised-until -1) (promised-until-goals))
 )
 
 (defrule promises-update-disjunctive-formula-negative-invalidate-satisfied-child
@@ -498,7 +541,7 @@
                           (is-satisfied TRUE)
                           (promised-until -1))
   =>
-  (modify ?parent (promised-until -1))
+  (modify ?parent (promised-until -1) (promised-until-goals))
 )
 
 (defrule promises-update-disjunctive-formula-negative-invalidate-time-mismatch
@@ -517,7 +560,7 @@
                           (promised-until ?base-until))
   )
   =>
-  (modify ?parent (promised-until -1))
+  (modify ?parent (promised-until -1) (promised-until-goals))
 )
 
 ;----------------------------------------- DEBUG -----------------------------------------
