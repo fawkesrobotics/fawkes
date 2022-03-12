@@ -185,6 +185,8 @@
   (slot is-satisfied (type SYMBOL) (allowed-values TRUE FALSE) (default FALSE))
   (slot promised-from (type INTEGER) (default -1))
   (slot promised-until (type INTEGER) (default -1))
+  (multislot promised-from-goals (type SYMBOL))
+  (multislot promised-until-goals (type SYMBOL))
 )
 
 (deftemplate pddl-predicate
@@ -213,6 +215,8 @@
   (slot is-satisfied (type SYMBOL) (allowed-values TRUE FALSE) (default FALSE))
   (slot promised-from (type INTEGER) (default -1))
   (slot promised-until (type INTEGER) (default -1))
+  (slot promised-from-goal (type SYMBOL) (default mil))
+  (slot promised-until-goal (type SYMBOL) (default nil))
 )
 
 (deffunction domain-build-ground-parameter-list
