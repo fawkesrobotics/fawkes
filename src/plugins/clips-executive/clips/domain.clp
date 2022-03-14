@@ -494,8 +494,9 @@
   "Check if there is a referenced precondition formula that is satisfied,
   if yes make the action executable."
   (declare (salience ?*SALIENCE-DOMAIN-CHECK*))
-  ?p <- (plan-action (executable FALSE) (id ?id) (precondition ?grounding-id)
-                     (action-name ?operator-id) (state ?state))
+  ?p <- (plan-action (executable FALSE) (id ?id) (goal-id ?goal-id) (precondition ?grounding-id)
+                     (action-name ?operator-id) (state ?state) (required-resources $?req-resources))
+  (goal (id ?goal-id) (acquired-resources $?acq-resources&:(subsetp ?req-resources ?acq-resources)))
   (pddl-formula (part-of ?operator-id) (id ?formula-id))
   (grounded-pddl-formula (is-satisfied TRUE) (formula-id ?formula-id) (grounding ?grounding-id))
   (pddl-grounding (id ?grounding-id))
@@ -1383,6 +1384,21 @@
             (error-msg (str-cat "Effect " ?n " of operator " ?op " on " ?pred
               " (" (implode$ ?args) ") "
               "is not matched with a complementary effect"))))
+)
+
+(defrule domain-check-action-only-requires-goal-resources
+  "A plan-action must not require a resource that is not required by the
+   respective goal."
+  (goal (id ?goal-id) (required-resources $?req-goal))
+  (plan-action (id ?id) (action-name ?name) (goal-id ?goal-id)
+    (required-resources $?req-action&:(not (subsetp ?req-action ?req-goal))))
+  =>
+  (assert (domain-error (error-type plan-action-requires-non-goal-resource)
+            (error-msg
+              (str-cat "Action " ?id " " ?name " of goal " ?goal-id " requires resources ("
+                (implode$ ?req-action) "), which is not a subset of the required goal "
+                "resources (" (implode$ ?req-goal)
+                ") (invalid resources: (" (implode$ (set-diff ?req-action ?req-goal)) "))"))))
 )
 
 (defrule domain-print-error
