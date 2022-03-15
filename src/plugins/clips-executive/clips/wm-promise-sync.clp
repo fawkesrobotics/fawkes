@@ -98,7 +98,6 @@
   (declare (salience ?*SALIENCE-WM-SYNC-DEL*))
 	?wm <- (wm-promise-sync-map (wm-fact-id ?id) (domain-promise-idx ~0)
 	                            (wm-fact-retract ?retract))
-	(domain-predicate (name ?name) (param-names $?param-names))
 	?wf <- (wm-fact (id ?id) (key domain promise ?name $?promise-args from ?goal
 	                          args? promising-agent ?promising-agent
 	                                valid-at ?valid-at
@@ -128,7 +127,6 @@
 (defrule wm-promise-sync-worldmodel-fact-added
 	"A wm-fact for a promise has been added without existing domain promise."
   (declare (salience ?*SALIENCE-WM-SYNC-ADD*))
-	(domain-predicate (name ?name) (param-names $?param-names))
 	?wf <- (wm-fact (id ?id) (key domain promise ?name $?promise-args from ?goal
 	                          args? promising-agent ?promising-agent
 	                                valid-at ?valid-at
@@ -157,7 +155,6 @@
 (defrule wm-promise-sync-worldmodel-fact-true
 	"The value of a wm fact is modified to TRUE."
   (declare (salience ?*SALIENCE-WM-SYNC-ADD*))
-	(domain-predicate (name ?name) (param-names $?param-names))
 	?wf <- (wm-fact (id ?id) (key domain promise ?name $?promise-args from ?goal
 	                          args? promising-agent ?promising-agent
 	                                valid-at ?valid-at
@@ -221,7 +218,6 @@
 (defrule wm-promise-sync-worldmodel-fact-removed
 	"The value of a wm fact has been removed."
 	(declare (salience ?*SALIENCE-WM-SYNC-DEL*))
-	(domain-predicate (name ?name) (param-names $?param-names))
 	?wm <- (wm-promise-sync-map (domain-promise-idx ~0) (wm-fact-id ?id)
 	                            (wm-fact-key $?key) (wm-fact-idx ~0))
 	?df <- (domain-promise (name ?name) (param-values $?promise-args)
