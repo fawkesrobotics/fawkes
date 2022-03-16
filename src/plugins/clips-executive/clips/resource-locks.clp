@@ -61,6 +61,64 @@
   )
 )
 
+(deffunction remove-promise-prefix-resource-symbol
+  (?sym)
+  (return (sym-cat (sub-string 9 (length$ (str-cat ?sym)) (str-cat ?sym))))
+)
+
+(defrule resource-locks-request-lock-promised-resource-available
+  "When a promised resource becomes available, request it."
+  (goal (mode COMMITTED|DISPATCHED)
+        (id ?goal-id)
+        (verbosity ?verbosity)
+        (required-resources $? ?req&:(eq (sub-string 1 8 (str-cat ?req)) "PROMISE-") $?)
+        (acquired-resources $?acq&:(not (member$ (remove-promise-prefix-resource-symbol ?req) ?acq)))
+  )
+  ?g <- (goal (id ?goal-id)
+        (required-resources $?resources&:(not (member$ (remove-promise-prefix-resource-symbol ?req) ?resources)))
+  )
+  (or
+    (mutex (name ?n&:(eq ?n (resource-to-mutex (remove-promise-prefix-resource-symbol ?req)))) (state OPEN) (request UNLOCK))
+    (not (mutex (name ?n&:(eq ?n (resource-to-mutex (remove-promise-prefix-resource-symbol ?req))))))
+  )
+  =>
+  (bind ?res (remove-promise-prefix-resource-symbol ?req))
+  (if (neq ?verbosity QUIET) then
+    (printout warn "Locking promised resource " ?res crlf)
+  )
+  (mutex-try-lock-async (resource-to-mutex ?res))
+  (assert (resource-request (goal ?goal-id) (resource ?res)))
+  (modify ?g (required-resources (append$ ?resources ?res)))
+)
+
+(defrule resource-locks-fast-reject-promised-resource-held-by-other-agent
+  "If a promised resource is already locked by another agent, and a goal
+  wants to request the base version of the same resource, fast reject the goal"
+  (wm-fact (key cx identity) (value ?identity))
+  ?g <- (goal (mode COMMITTED)
+              (id ?goal-id)
+              (verbosity ?verbosity)
+              (acquired-resources)
+              (required-resources $?req))
+  ; The mutex is locked and there is no unprocessed request, which means that
+  ; it was either locked by someone else or for a different goal.
+  (mutex (name ?n&:(member$ (remove-promise-prefix-resource-symbol (mutex-to-resource ?n)) ?req))
+         (state LOCKED) (request NONE) (locked-by ?locker&~?identity))
+  (not (and (mutex (name ?n1&:(member$ (remove-promise-prefix-resource-symbol (mutex-to-resource ?n1)) ?req))
+              (request ~NONE))
+            (resource-request (goal ?goal-id) (resource ?resource&:
+                              (eq ?resource (remove-promise-prefix-resource-symbol (mutex-to-resource ?n1)))))
+       )
+  )
+  =>
+  (if (neq ?verbosity QUIET) then
+    (printout warn "Rejecting goal " ?goal-id ", claims " (remove-promise-prefix-resource-symbol (mutex-to-resource ?n)) 
+                   " but " (mutex-to-resource ?n)
+                   " is already locked by " ?locker crlf)
+  )
+  (modify ?g (mode FINISHED) (outcome REJECTED))
+)
+
 (defrule resource-locks-fast-reject-goal-locked-by-other-agent
   "If a resource already locked by someone else, we have not acquired any
    resources, and we have no pending requests, then we can directly reject the
@@ -202,4 +260,23 @@
               (delete-member$ ?acq ?res)))
   (modify ?m (request NONE) (response NONE))
   (retract ?request)
+)
+
+(defrule resource-locks-unlock-promise-resources-acquired-base-resource
+  (goal (id ?goal-id)
+        (required-resources $? ?res $?)
+        (acquired-resources $? ?res $?)
+        (mode COMMITTED|DISPATCHED)
+        (verbosity ?verbosity)
+  )
+  (goal (id ?goal-id)
+        (required-resources $? ?res-base&:(eq ?res-base (remove-promise-prefix-resource-symbol ?res)) $?)
+        (acquired-resources $? ?res-base&:(eq ?res-base (remove-promise-prefix-resource-symbol ?res)) $?)
+  )
+  =>
+  (mutex-unlock-async (resource-to-mutex ?res))
+      (if (neq ?verbosity QUIET) then
+        (printout warn "Unlocking promise resource " ?res 
+                        " because both it and the base resource have been acquired" crlf)
+      )
 )
