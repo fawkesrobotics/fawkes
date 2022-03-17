@@ -66,9 +66,9 @@
   (return (sym-cat (sub-string 9 (length$ (str-cat ?sym)) (str-cat ?sym))))
 )
 
-(defrule resource-locks-request-lock-promised-resource-available
-  "When a promised resource becomes available, request it."
-  (goal (mode COMMITTED|DISPATCHED)
+(defrule resource-locks-request-resource-delayed
+  "Mark a resource as required, when only the promise resource is locked."
+  (goal (mode DISPATCHED)
         (id ?goal-id)
         (verbosity ?verbosity)
         (required-resources $? ?req&:(eq (sub-string 1 8 (str-cat ?req)) "PROMISE-") $?)
@@ -77,18 +77,27 @@
   ?g <- (goal (id ?goal-id)
         (required-resources $?resources&:(not (member$ (remove-promise-prefix-resource-symbol ?req) ?resources)))
   )
+  =>
+  (modify ?g (required-resources (append$ ?resources (remove-promise-prefix-resource-symbol ?req))))
+)
+
+(defrule resource-locks-request-delayed-resource-available
+  (goal (mode DISPATCHED)
+        (id ?goal-id)
+        (verbosity ?verbosity)
+        (required-resources $? ?req $?)
+        (acquired-resources $?acq&:(not (member$ ?req ?acq)))
+  )
   (or
-    (mutex (name ?n&:(eq ?n (resource-to-mutex (remove-promise-prefix-resource-symbol ?req)))) (state OPEN) (request UNLOCK))
-    (not (mutex (name ?n&:(eq ?n (resource-to-mutex (remove-promise-prefix-resource-symbol ?req))))))
+    (mutex (name ?n&:(eq ?n (resource-to-mutex  ?req))) (state OPEN) (request NONE))
+    (not (mutex (name ?n&:(eq ?n (resource-to-mutex ?req)))))
   )
   =>
-  (bind ?res (remove-promise-prefix-resource-symbol ?req))
   (if (neq ?verbosity QUIET) then
-    (printout warn "Locking promised resource " ?res crlf)
+    (printout warn "Locking promised resource " ?req crlf)
   )
-  (mutex-try-lock-async (resource-to-mutex ?res))
-  (assert (resource-request (goal ?goal-id) (resource ?res)))
-  (modify ?g (required-resources (append$ ?resources ?res)))
+  (mutex-try-lock-async (resource-to-mutex ?req))
+  (assert (resource-request (goal ?goal-id) (resource ?req)))
 )
 
 (defrule resource-locks-fast-reject-promised-resource-held-by-other-agent
@@ -112,7 +121,7 @@
   )
   =>
   (if (neq ?verbosity QUIET) then
-    (printout warn "Rejecting goal " ?goal-id ", claims " (remove-promise-prefix-resource-symbol (mutex-to-resource ?n)) 
+    (printout warn "Rejecting goal " ?goal-id ", claims " (remove-promise-prefix-resource-symbol (mutex-to-resource ?n))
                    " but " (mutex-to-resource ?n)
                    " is already locked by " ?locker crlf)
   )
@@ -171,7 +180,7 @@
   (resource-request (resource ?res) (goal ?goal-id))
   ?m <- (mutex (name ?n&:(eq ?n (resource-to-mutex ?res)))
                (request LOCK) (response ACQUIRED))
-  ?g <- (goal (mode COMMITTED) (id ?goal-id)
+  ?g <- (goal (mode COMMITTED|DISPATCHED) (id ?goal-id)
               (required-resources $?req)
               (acquired-resources $?acq
                 &:(member$ ?res (set-diff ?req ?acq))))
@@ -203,6 +212,24 @@
     (mutex-unlock-async ?om:name)
   )
 )
+
+(defrule resource-locks-delayed-lock-rejected-ignore
+  "A lock was rejected, therefore release all acquired resources."
+  ?m <- (mutex (name ?n)
+               (request LOCK)
+               (response REJECTED|ERROR)
+               (error-msg ?err))
+  ?g <- (goal (mode DISPATCHED) (id ?goal-id)
+              (required-resources $?req)
+              (acquired-resources $?acq
+                &:(member$ (mutex-to-resource ?n) (set-diff ?req ?acq))))
+  ?r <- (resource-request (resource ?resource&:(eq ?resource (mutex-to-resource ?n)))
+                          (goal ?goal-id))
+  =>
+  (modify ?m (request NONE) (response NONE) (error-msg ""))
+  (retract ?r)
+)
+
 
 (defrule resource-locks-reject-goal-on-rejected-lock
   "A lock was rejected and no resource is acquired anymore. Reject the goal."
@@ -251,6 +278,13 @@
   )
 )
 
+(defrule resource-locks-unlock-non-required-start
+  ?g <- (goal (mode DISPATCHED) (verbosity ?verbosity)
+              (acquired-resources $? ?acq $?) (required-resources $?req&:(not (member$ ?acq ?req))))
+  =>
+  (mutex-unlock-async (resource-to-mutex ?acq))
+)
+
 (defrule resource-locks-unlock-done
   ?request <- (resource-request (resource ?res) (goal ?goal-id))
   ?m <- (mutex (name ?n&:(eq ?n (resource-to-mutex ?res))) (state OPEN) (request UNLOCK))
@@ -276,8 +310,8 @@
   =>
   (mutex-unlock-async (resource-to-mutex ?res))
   (if (neq ?verbosity QUIET) then
-    (printout warn "Unlocking promise resource " ?res 
+    (printout warn "Unlocking promise resource " ?res
                     " because both it and the base resource have been acquired" crlf)
   )
-  (modify ?g (acquired-resources (delete-member$ ?acq-resources ?res)) (required-resources (delete-member$ ?req-resources ?res)))
+  (modify ?g (required-resources (delete-member$ ?req-resources ?res)))
 )
