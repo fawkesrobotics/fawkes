@@ -269,14 +269,15 @@
         (mode COMMITTED|DISPATCHED)
         (verbosity ?verbosity)
   )
-  (goal (id ?goal-id)
-        (required-resources $? ?res-base&:(eq ?res-base (remove-promise-prefix-resource-symbol ?res)) $?)
-        (acquired-resources $? ?res-base&:(eq ?res-base (remove-promise-prefix-resource-symbol ?res)) $?)
+  ?g <- (goal (id ?goal-id)
+        (required-resources $?req-resources&:(member$ (remove-promise-prefix-resource-symbol ?res) ?req-resources))
+        (acquired-resources $?acq-resources&:(member$ (remove-promise-prefix-resource-symbol ?res) ?acq-resources))
   )
   =>
   (mutex-unlock-async (resource-to-mutex ?res))
-      (if (neq ?verbosity QUIET) then
-        (printout warn "Unlocking promise resource " ?res 
-                        " because both it and the base resource have been acquired" crlf)
-      )
+  (if (neq ?verbosity QUIET) then
+    (printout warn "Unlocking promise resource " ?res 
+                    " because both it and the base resource have been acquired" crlf)
+  )
+  (modify ?g (acquired-resources (delete-member$ ?acq-resources ?res)) (required-resources (delete-member$ ?req-resources ?res)))
 )
