@@ -92,13 +92,9 @@ private:
 
 	/// firevision image buffer
 	firevision::SharedMemoryImageBuffer *shm_buffer_;
-	unsigned char *                      image_buffer_;
 	/// Image Buffer Id
 	std::string shm_id_;
 
-	float       camera_scale_;
-	std::string frame_id_;
-	std::string pcl_id_;
 	std::string switch_if_name_;
 	std::string rgb_path_;
 	std::string image_name_;
@@ -107,7 +103,6 @@ private:
 	int         image_height_;
 	bool        save_images_;
 	size_t      name_it_;
-	float       laser_power_;
 	bool        camera_running_ = false;
 	bool        enable_camera_  = true;
 	uint        restart_after_num_errors_;

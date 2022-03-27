@@ -45,14 +45,11 @@ Realsense2Thread::init()
 {
 	// set config values
 	const std::string cfg_prefix = "/realsense2/";
-	frame_id_ = config->get_string_or_default((cfg_prefix + "frame_id").c_str(), "cam_conveyor");
-	pcl_id_ = config->get_string_or_default((cfg_prefix + "pcl_id").c_str(), "/camera/depth/points");
 	switch_if_name_ =
 	  config->get_string_or_default((cfg_prefix + "switch_if_name").c_str(), "realsense2");
 	restart_after_num_errors_ =
 	  config->get_uint_or_default((cfg_prefix + "restart_after_num_errors").c_str(), 50);
 	frame_rate_  = config->get_uint_or_default((cfg_prefix + "frame_rate").c_str(), 30);
-	laser_power_ = config->get_float_or_default((cfg_prefix + "laser_power").c_str(), -1);
 
 	cfg_use_switch_ = config->get_bool_or_default((cfg_prefix + "use_switch").c_str(), true);
 
@@ -77,7 +74,6 @@ Realsense2Thread::init()
 
 	shm_id_ = config->get_string((cfg_prefix + "shm_image_id").c_str());
 
-	camera_scale_ = 1;
 	rs_context_   = new rs2::context();
 	rs_pipe_      = new rs2::pipeline();
 
@@ -118,6 +114,8 @@ Realsense2Thread::loop()
 			                    shm_buffer_->buffer(),
 			                    image_width_,
 			                    image_height_);
+			fawkes::Time now(0,0);
+			shm_buffer_->set_capture_time(&now);
 		} else {
 			error_counter_++;
 			if (error_counter_ >= restart_after_num_errors_) {
