@@ -160,6 +160,8 @@
   ; We also need to release all acquired mutexes before rejecting the goal.
   (not (mutex (name ?ores&:(member$ (mutex-to-resource ?ores) ?req))
               (response PENDING|ACQUIRED)))
+  (not (mutex (name ?ores&:(member$ (mutex-to-resource ?ores) ?req))
+              (request LOCK)))
   =>
   (if (neq ?verbosity QUIET) then
     (printout warn "Rejecting goal " ?goal-id ", resource lock "
