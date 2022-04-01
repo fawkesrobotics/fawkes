@@ -269,8 +269,7 @@
   =>
   (delayed-do-for-all-facts
     ((?om mutex))
-    (and (eq ?request:goal ?goal-id)
-         (eq ?request:resource (mutex-to-resource ?om:name)))
+    (eq ?resource (mutex-to-resource ?om:name))
     (if (eq ?om:response ACQUIRED) 
       then
         (mutex-unlock-async ?om:name)
