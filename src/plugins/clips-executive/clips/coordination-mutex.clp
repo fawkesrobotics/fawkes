@@ -266,6 +266,7 @@
 (defrule mutex-lock-rejected
 	?mf <- (mutex (name ?name) (request LOCK) (response PENDING)
 								(state LOCKED) (locked-by ?lb&:(neq ?lb (cx-identity))))
+	(mutex-op-feedback try-lock-async ? ?name)
 	=>
 	(modify ?mf (response REJECTED) (error-msg (str-cat "Lock held by " ?lb)))
 )

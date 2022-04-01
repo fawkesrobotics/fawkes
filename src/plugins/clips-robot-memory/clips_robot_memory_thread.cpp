@@ -32,7 +32,7 @@
 
 using namespace fawkes;
 
-/** @class ClipsRobotMemoryThread 'clips_robot_memory_thread.h' 
+/** @class ClipsRobotMemoryThread 'clips_robot_memory_thread.h'
  * CLIPS feature to access the robot memory.
  * MongoDB access through CLIPS first appeared in the RCLL referee box.
  * @author Tim Niemueller
@@ -1033,10 +1033,12 @@ ClipsRobotMemoryThread::clips_robotmemory_mutex_try_lock_async(std::string env_n
 	}
 
 	auto fut = std::async(std::launch::async, [this, env_name, name, identity] {
-		bool ok = robot_memory->mutex_try_lock(name, identity);
+		bool        ok = robot_memory->mutex_try_lock(name, identity);
+		MutexLocker lock(envs_[env_name].objmutex_ptr());
 		if (!ok) {
-			MutexLocker lock(envs_[env_name].objmutex_ptr());
 			envs_[env_name]->assert_fact_f("(mutex-op-feedback try-lock-async FAIL %s)", name.c_str());
+		} else {
+			envs_[env_name]->assert_fact_f("(mutex-op-feedback try-lock-async OK %s)", name.c_str());
 		}
 		return ok;
 	});
