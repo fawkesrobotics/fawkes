@@ -253,12 +253,32 @@
   (modify ?g (mode FINISHED) (outcome REJECTED) (message ?err))
   (delayed-do-for-all-facts
     ((?om mutex) (?request resource-request))
-    (and (or (eq ?om:response REJECTED) (eq ?om:response ERROR))
+    (and (or (eq ?om:response REJECTED) (eq ?om:response ERROR) (eq ?om:response NONE))
          (eq ?request:goal ?goal-id)
          (eq ?request:resource (mutex-to-resource ?om:name)))
     (modify ?om (request NONE) (response NONE) (error-msg ""))
     (retract ?request)
   )
+)
+
+(defrule resource-locks-remove-locks-on-missing-goal
+  ?req <- (resource-request (goal ?id) (resource ?resource))
+  (not (goal (id ?id)))
+  (not (mutex (name ?mres&:(eq (mutex-to-resource ?mres) ?resource))
+              (response PENDING)))
+  =>
+  (delayed-do-for-all-facts
+    ((?om mutex))
+    (and (eq ?request:goal ?goal-id)
+         (eq ?request:resource (mutex-to-resource ?om:name)))
+    (if (eq ?om:response ACQUIRED) 
+      then
+        (mutex-unlock-async ?om:name)
+      else
+        (modify ?om (request NONE) (response NONE) (error-msg ""))
+    )
+  )
+  (retract ?req)
 )
 
 (defrule resource-locks-unlock-start
