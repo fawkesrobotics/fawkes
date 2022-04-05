@@ -307,10 +307,5 @@
         (acquired-resources $?acq-resources&:(member$ (remove-promise-prefix-resource-symbol ?res) ?acq-resources))
   )
   =>
-  (mutex-unlock-async (resource-to-mutex ?res))
-  (if (neq ?verbosity QUIET) then
-    (printout warn "Unlocking promise resource " ?res
-                    " because both it and the base resource have been acquired" crlf)
-  )
   (modify ?g (required-resources (delete-member$ ?req-resources ?res)))
 )
