@@ -280,6 +280,7 @@
 (defrule resource-locks-unlock-non-required-start
   ?g <- (goal (mode DISPATCHED) (verbosity ?verbosity)
               (acquired-resources $? ?acq $?) (required-resources $?req&:(not (member$ ?acq ?req))))
+  (mutex (name ?n&:(eq ?n (resource-to-mutex ?acq))) (request ~UNLOCK) (pending-requests $?pending&:(not (member$ UNLOCK ?pending))))
   =>
   (mutex-unlock-async (resource-to-mutex ?acq))
 )
