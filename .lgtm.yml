@@ -3,6 +3,7 @@ extraction:
     prepare:
       packages:
       - libpcl-dev
+      - libopencv-dev
     index:
       build_command:
       - make -j2 uncolored-all
