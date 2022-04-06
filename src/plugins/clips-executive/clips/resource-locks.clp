@@ -287,7 +287,7 @@
 
 (defrule resource-locks-unlock-done
   ?request <- (resource-request (resource ?res) (goal ?goal-id))
-  ?m <- (mutex (name ?n&:(eq ?n (resource-to-mutex ?res))) (state OPEN) (request UNLOCK))
+  ?m <- (mutex (name ?n&:(eq ?n (resource-to-mutex ?res))) (response UNLOCKED) (request UNLOCK))
   ?g <- (goal (id ?goal-id) (acquired-resources $?acq))
   =>
   (modify ?g (acquired-resources
