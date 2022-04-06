@@ -236,8 +236,13 @@ protected: // methods
    * @param database database from which to read the file
    * @param file_id The bucket ID of the file to read
    */
+
 	void
+#if MONGOCXX_VERSION_MAJOR > 3 || (MONGOCXX_VERSION_MAJOR == 3 && MONGOCXX_VERSION_MINOR >= 6)
+	read_gridfs_file(void *dataptr, std::string &database, bsoncxx::types::bson_value::view file_id)
+#else
 	read_gridfs_file(void *dataptr, std::string &database, bsoncxx::types::value file_id)
+#endif
 	{
 		auto gridfs = mongodb_client_->database(database).gridfs_bucket();
 		try {
