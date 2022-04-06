@@ -31,6 +31,7 @@
 #include <aspect/tf.h>
 #include <core/threading/thread.h>
 #include <pcl/ModelCoefficients.h>
+#include <pcl/common/common.h>
 #include <pcl/features/normal_3d.h>
 #include <pcl/filters/extract_indices.h>
 #include <pcl/filters/passthrough.h>
