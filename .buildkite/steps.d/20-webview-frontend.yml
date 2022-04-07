@@ -6,7 +6,7 @@
       - .buildkite/build-webview-frontend
     plugins:
       - *merged-pr-plugin
-      - kennasecurity/podman#master:
+      - compono/podman#main:
           <<: *podman-plugin-base
           volumes:
             - /var/lib/buildkite-agent/npm_cache:/root/.npm
