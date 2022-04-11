@@ -49,7 +49,7 @@ Realsense2Thread::init()
 	  config->get_string_or_default((cfg_prefix + "switch_if_name").c_str(), "realsense2");
 	restart_after_num_errors_ =
 	  config->get_uint_or_default((cfg_prefix + "restart_after_num_errors").c_str(), 50);
-	frame_rate_  = config->get_uint_or_default((cfg_prefix + "frame_rate").c_str(), 30);
+	frame_rate_ = config->get_uint_or_default((cfg_prefix + "frame_rate").c_str(), 30);
 
 	cfg_use_switch_ = config->get_bool_or_default((cfg_prefix + "use_switch").c_str(), true);
 
@@ -74,8 +74,8 @@ Realsense2Thread::init()
 
 	shm_id_ = config->get_string((cfg_prefix + "shm_image_id").c_str());
 
-	rs_context_   = new rs2::context();
-	rs_pipe_      = new rs2::pipeline();
+	rs_context_ = new rs2::context();
+	rs_pipe_    = new rs2::pipeline();
 
 	name_it_ = 0;
 }
@@ -96,6 +96,16 @@ Realsense2Thread::loop()
 		if (rs_pipe_->poll_for_frames(&rs_data_)) {
 			error_counter_               = 0;
 			rs2::video_frame color_frame = rs_data_.first(RS2_STREAM_COLOR, RS2_FORMAT_RGB8);
+			fawkes::Time     now(clock);
+
+			// set image in shared memory
+			firevision::convert(firevision::RGB,
+			                    firevision::RGB,
+			                    (unsigned char *)color_frame.get_data(),
+			                    shm_buffer_->buffer(),
+			                    image_width_,
+			                    image_height_);
+			shm_buffer_->set_capture_time(&now);
 
 			if (save_images_) {
 				image_name_ =
@@ -106,16 +116,6 @@ Realsense2Thread::loop()
 				png_writer_.write();
 				name_it_++;
 			}
-
-			// set image in shared memory
-			firevision::convert(firevision::RGB,
-			                    firevision::RGB,
-			                    (unsigned char *)color_frame.get_data(),
-			                    shm_buffer_->buffer(),
-			                    image_width_,
-			                    image_height_);
-			fawkes::Time now(0,0);
-			shm_buffer_->set_capture_time(&now);
 		} else {
 			error_counter_++;
 			if (error_counter_ >= restart_after_num_errors_) {
