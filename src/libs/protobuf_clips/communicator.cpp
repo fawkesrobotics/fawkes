@@ -323,7 +323,7 @@ ClipsProtobufCommunicator::clips_pb_peer_destroy(long int peer_id)
 	}
 }
 
-/** Setup crypto for peer. 
+/** Setup crypto for peer.
  * @param peer_id ID of the peer to destroy
  * @param crypto_key encryption key
  * @param cipher cipher suite, see BufferEncryptor for supported types
@@ -456,21 +456,19 @@ ClipsProtobufCommunicator::clips_pb_has_field(void *msgptr, std::string field_na
 	std::shared_ptr<google::protobuf::Message> *m =
 	  static_cast<std::shared_ptr<google::protobuf::Message> *>(msgptr);
 	if (!*m)
-		return false;
+		return CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL);
 
 	const Descriptor *     desc  = (*m)->GetDescriptor();
 	const FieldDescriptor *field = desc->FindFieldByName(field_name);
 	if (!field)
-		return false;
+		return CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL);
 
 	const Reflection *refl = (*m)->GetReflection();
 
 	if (field->is_repeated()) {
 		return CLIPS::Value((refl->FieldSize(**m, field) > 0) ? "TRUE" : "FALSE", CLIPS::TYPE_SYMBOL);
-	} else if (field->is_optional()) {
-		return CLIPS::Value(refl->HasField(**m, field) ? "TRUE" : "FALSE", CLIPS::TYPE_SYMBOL);
 	} else {
-		return CLIPS::Value("TRUE", CLIPS::TYPE_SYMBOL);
+		return CLIPS::Value(refl->HasField(**m, field) ? "TRUE" : "FALSE", CLIPS::TYPE_SYMBOL);
 	}
 }
 
