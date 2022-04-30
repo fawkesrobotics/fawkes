@@ -77,7 +77,7 @@
 )
 
 (deffunction slots-to-multifield (?fact-id ?slots)
-" Concert a list of slots of a template to a multifield of SYMBOLS that can
+" Concatenate a list of slots of a template to a multifield of SYMBOLS that can
   be part of a wm-fact key
 "
 	(bind ?template (fact-relation ?fact-id))
