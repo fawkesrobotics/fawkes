@@ -115,7 +115,7 @@ clips-executive:
             file: test-scenario/state-estimation.clp
           - name: worldmodel
             # files: [wm-robmem-sync.clp, test-scenario/worldmodel-facts.clp]
-            files: [test-scenario/worldmodel-facts.clp]
+            files: [wm-template-facts.clp, test-scenario/worldmodel-facts.clp]
           # - name: coordination
           #   file: coordination-mutex.clp
           - name: goal-reasoner

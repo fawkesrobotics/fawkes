@@ -55,6 +55,22 @@
 	;)
 )
 
+(defrule goal-update-wm-fact
+" Automatically sync all updates to a goal to the world model.
+  This is useful when information should be shared to others, but only one
+  writer update the information.
+  If multiple writers exist, then the same technique as the one used in
+  the synchronization procedure between domain facts and world model facts.
+"
+  ?g <- (goal (id ?id))
+=>
+  (do-for-fact ((?goal-wm wm-fact)) (wm-key-prefix ?goal-wm:key (create$ template fact goal id ?id))
+    (retract ?goal-wm)
+  )
+  (assert (wm-fact (key (template-fact-to-wm-key ?g
+                                               id
+                                               (deftemplate-remaining-slots goal id)))))
+)
 
 (defrule state-robot-location
 	;(wm-fact (key "/domain/fact/location?R-1&C-BS") (value TRUE))
