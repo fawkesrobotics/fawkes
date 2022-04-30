@@ -9,7 +9,7 @@ fawkes/meta_plugins:
   robotino_default: robotino,joystick,robotino-joystick,webview
 
   # Meta plugin for the clips-executive without planner integration
-  clips-executive:
+  m-clips-executive-test:
     - flite
     - clips
     - clips-pddl-parser
@@ -17,7 +17,7 @@ fawkes/meta_plugins:
     - clips-executive
 
   # Meta plugin for the clips-executive with planner integration
-  clips-executive-pddl:
+  m-clips-executive-pddl:
     - flite
     - mongodb
     - clips
