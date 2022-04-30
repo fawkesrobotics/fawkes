@@ -166,7 +166,7 @@
 				(switch ?mode
 					; if a slot name is expected, add it to the fact string
 					(case SLOT then
-						 (bind ?is-list FALSE)
+						(bind ?is-list FALSE)
 						(bind ?res (str-cat ?res " (" ?e ))
 						(bind ?slot ?e)
 						(if (deftemplate-slot-multip ?template ?slot)
