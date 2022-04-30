@@ -229,9 +229,13 @@
 			(if (and (eq ?value [) (<= (+ ?l 2) ?L)) then
 				; it's a list, process until end
 				(bind ?arg-end (wm-key-multifield-arg-end ?key ?l))
-				(bind ?rv (str-cat ?rv ?arg "=" (nth$ (+ ?l 2) ?key)))
-				(loop-for-count (?i (+ ?l 3) (- ?arg-end 1))
-					(bind ?rv (str-cat ?rv "," (nth$ ?i ?key)))
+				(if (> ?arg-end (+ ?l 2)) then
+					(bind ?rv (str-cat ?rv ?arg "=" (nth$ (+ ?l 2) ?key)))
+					(loop-for-count (?i (+ ?l 3) (- ?arg-end 1))
+						(bind ?rv (str-cat ?rv "," (nth$ ?i ?key)))
+					)
+				 else
+					(bind ?rv (str-cat ?rv ?arg "="))
 				)
 				(bind ?l (+ ?arg-end 1))
 				(if (< ?l ?L) then (bind ?rv (str-cat ?rv "&")))
