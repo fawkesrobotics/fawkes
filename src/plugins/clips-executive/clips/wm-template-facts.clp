@@ -33,7 +33,7 @@
 	 then
 		(bind ?slots (create$ ?slots))
 	)
-	(bind ?res (deftemplate-slot-names goal))
+	(bind ?res (deftemplate-slot-names ?template))
 	(progn$ (?slot ?slots)
 		(bind ?pos (member$ ?slot ?res))
 		(bind ?res (delete$ ?res ?pos ?pos))
