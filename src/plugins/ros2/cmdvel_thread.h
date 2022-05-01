@@ -59,8 +59,8 @@ protected:
 
 private:
 	void stop();                                         //stops all Motors
-	void send_transrot(float vx, float vy, float omega); //sends Controls to the Motors
-	void twist_msg_cb(const geometry_msgs::msg::Twist::SharedPtr msg);
+	void send_transrot(float vx, float vy, float omega) const; //sends Controls to the Motors
+	void twist_msg_cb(const geometry_msgs::msg::Twist::SharedPtr msg) const;
 
 private:
 	fawkes::MotorInterface *motor_if_;

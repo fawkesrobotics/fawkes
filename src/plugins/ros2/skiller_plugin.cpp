@@ -28,17 +28,17 @@ using namespace fawkes;
 /** Accept skiller commands from ROS.
  * @author Till Hofmann
  */
-class ROS2SkillerPlugin : public fawkes::Plugin
+class RosSkillerPlugin : public fawkes::Plugin
 {
 public:
 	/** Constructor.
    * @param config Fawkes configuration
    */
-	explicit ROS2SkillerPlugin(Configuration *config) : Plugin(config)
+	explicit RosSkillerPlugin(Configuration *config) : Plugin(config)
 	{
-		thread_list.push_back(new ROS2SkillerThread());
+		thread_list.push_back(new RosSkillerThread());
 	}
 };
 
 PLUGIN_DESCRIPTION("Accept skiller commands from ROS")
-EXPORT_PLUGIN(ROS2SkillerPlugin)
+EXPORT_PLUGIN(RosSkillerPlugin)

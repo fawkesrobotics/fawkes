@@ -78,7 +78,7 @@ std::vector<std::pair<int, int>> AmclThread::free_space_indices;
 
 /** Constructor. */
 #ifdef HAVE_ROS
-AmclThread::AmclThread(AmclROSThread *ros_thread)
+AmclThread::AmclThread(AmclROS2Thread *ros_thread)
 #else
 AmclThread::AmclThread()
 #endif
@@ -403,10 +403,9 @@ AmclThread::init()
 	loc_if_->set_map(map_name.c_str());
 	loc_if_->write();
 
-#ifdef HAVE_ROS
 	if (rt_)
+    logger->log_info(name(), "publish map from main thread");
 		rt_->publish_map(global_frame_id_, map_);
-#endif
 
 	apply_initial_pose();
 }

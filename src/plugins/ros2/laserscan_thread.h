@@ -74,6 +74,7 @@ public:
 	                                         unsigned int       instance_serial) throw();
 
 private:
+	void        laser_scan_message_cb(std::shared_ptr<const sensor_msgs::msg::LaserScan> msg, const rclcpp::MessageInfo &msg_info);
 	void        conditional_close(fawkes::Interface *interface) throw();
 	std::string topic_name(const char *if_id, const char *suffix);
 
@@ -101,14 +102,17 @@ private:
 	/// @endcond
 	std::map<std::string, PublisherInfo> pubs_;
 
+        std::string     cfg_tf_prefix_;
+
 	fawkes::Mutex *                                             ls_msg_queue_mutex_;
 	unsigned int                                                active_queue_;
-	std::queue<std::pair<std::shared_ptr<const sensor_msgs::msg::LaserScan>, const rclcpp::MessageInfo>> ls_msg_queues_[2];
+	std::queue<std::pair<std::shared_ptr<const sensor_msgs::msg::LaserScan>, const rclcpp::MessageInfo> > ls_msg_queues_[2];
 
 	std::map<std::string, fawkes::Laser360Interface *> ls360_wifs_;
 
 	fawkes::Mutex *seq_num_mutex_;
 	unsigned int   seq_num_;
+
 };
 
 #endif

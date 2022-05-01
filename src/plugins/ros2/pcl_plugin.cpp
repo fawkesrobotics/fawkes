@@ -29,17 +29,17 @@ using namespace fawkes;
 /** Plugin exchange transforms between Fawkes and ROS.
  * @author Tim Niemueller
  */
-class ROS2PointCloudPlugin : public fawkes::Plugin
+class RosPointCloudPlugin : public fawkes::Plugin
 {
 public:
 	/** Constructor.
    * @param config Fawkes configuration
    */
-	explicit ROS2PointCloudPlugin(Configuration *config) : Plugin(config)
+	explicit RosPointCloudPlugin(Configuration *config) : Plugin(config)
 	{
-		thread_list.push_back(new ROS2PointCloudThread());
+		thread_list.push_back(new RosPointCloudThread());
 	}
 };
 
 PLUGIN_DESCRIPTION("ROS point cloud exchange plugin")
-EXPORT_PLUGIN(ROS2PointCloudPlugin)
+EXPORT_PLUGIN(RosPointCloudPlugin)

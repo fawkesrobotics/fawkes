@@ -43,6 +43,7 @@ public:
 
 private:
 	rclcpp::Node::SharedPtr node_handle_;
+	std::string tf_prefix_;
 };
 
 } // end namespace fawkes

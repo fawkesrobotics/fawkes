@@ -21,9 +21,9 @@
 #ifndef _PLUGINS_AMCL_ROS_THREAD_H_
 #define _PLUGINS_AMCL_ROS_THREAD_H_
 
-#ifndef HAVE_ROS
-#	error "ROS integration requires ROS support of system"
-#endif
+//#ifndef HAVE_ROS
+//#	error "ROS integration requires ROS support of system"
+//#endif
 
 #include "amcl_thread.h"
 #include "map/map.h"
@@ -33,11 +33,12 @@
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
 #include <core/threading/thread.h>
-#include <geometry_msgs/PoseWithCovarianceStamped.h>
+#include <geometry_msgs/msg/pose_with_covariance_stamped.hpp>
+#include <geometry_msgs/msg/pose_array.hpp>
+#include <nav_msgs/msg/occupancy_grid.hpp>
+
 #include <interfaces/LocalizationInterface.h>
-#include <plugins/ros/aspect/ros.h>
-#include <ros/publisher.h>
-#include <ros/subscriber.h>
+#include <plugins/ros2/aspect/ros2.h>
 
 namespace fawkes {
 class Mutex;
@@ -45,15 +46,15 @@ class Mutex;
 
 class AmclThread;
 
-class AmclROSThread : public fawkes::Thread,
+class AmclROS2Thread : public fawkes::Thread,
                       public fawkes::LoggingAspect,
                       public fawkes::ConfigurableAspect,
                       public fawkes::BlackBoardAspect,
-                      public fawkes::ROSAspect
+                      public fawkes::ROS2Aspect
 {
 public:
-	AmclROSThread();
-	virtual ~AmclROSThread();
+	AmclROS2Thread();
+	virtual ~AmclROS2Thread();
 
 	virtual void init();
 	virtual void loop();
@@ -74,17 +75,17 @@ protected:
 	}
 
 private:
-	void initial_pose_received(const geometry_msgs::PoseWithCovarianceStampedConstPtr &msg);
+	void initial_pose_received(const geometry_msgs::msg::PoseWithCovarianceStamped &msg);
 
 private:
 	std::string cfg_pose_ifname_;
 
 	fawkes::LocalizationInterface *loc_if_;
 
-	ros::Publisher  pose_pub_;
-	ros::Publisher  particlecloud_pub_;
-	ros::Subscriber initial_pose_sub_;
-	ros::Publisher  map_pub_;
+	rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr  pose_pub_;
+	rclcpp::Publisher<geometry_msgs::msg::PoseArray>::SharedPtr  particlecloud_pub_;
+	rclcpp::Subscription<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr  initial_pose_sub_;
+	rclcpp::Publisher<nav_msgs::msg::OccupancyGrid>::SharedPtr  map_pub_;
 };
 
 #endif

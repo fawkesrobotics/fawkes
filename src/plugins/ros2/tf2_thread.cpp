@@ -61,20 +61,45 @@ ROS2TF2Thread::init()
 	last_update_->set_clock(clock);
 	last_update_->set_time(0, 0);
 
-	cfg_update_interval_ = 1.0;
-	try {
-		cfg_update_interval_ = config->get_float("/ros/tf/static-update-interval");
-	} catch (Exception &e) {
-	} // ignored, use default
+	cfg_update_interval_ = config->get_float_or_default("/ros2/tf/static-update-interval", 1.0);
+	cfg_tf_prefix_ = config->get_string_or_default("/ros2/tf/tf_prefix", "");
+	cfg_tf_prefix_exclusions_ = config->get_strings_or_defaults("/ros2/tf/tf_prefix_exclusions", std::vector<std::string>());
+	cfg_use_namespace_ = config->get_bool_or_default("/ros2/tf/use_namespace", false);
+	tf_prefix_enabled_ = false;	
 
+        if (cfg_tf_prefix_ == "$HOSTNAME") {
+                HostInfo hinfo;
+                // namespace must not contain characters other than alphanumerics, '_', or '/'
+                cfg_tf_prefix_ = hinfo.short_name();
+                std::regex tf_prefix_pattern("[^A-Za-z0-9_]");
+
+                // write the results to an output iterator
+                cfg_tf_prefix_ = std::regex_replace(cfg_tf_prefix_,
+                                                    tf_prefix_pattern, "") + std::string("_");
+        }
+        if (cfg_tf_prefix_ != "") {
+		tf_prefix_enabled_ = true;	
+        }
+
+//	tf_prefix_ = cfg_tf_prefix_;
+//        std::cout << "set prefix: " << tf_prefix_.c_str() << std::endl;
 	// Must do that before registering listener because we might already
 	// get events right away
 	rclcpp::SubscriptionOptionsBase subopts;
 	subopts.ignore_local_publications = true;
-	sub_tf_        = node_handle->create_subscription<tf2_msgs::msg::TFMessage>("tf", 100, std::bind(&ROS2TF2Thread::tf_message_cb_dynamic, this, _1), rclcpp::SubscriptionOptionsWithAllocator<std::allocator<void>>(subopts));
-	sub_static_tf_ = node_handle->create_subscription<tf2_msgs::msg::TFMessage>("tf_static", 100, std::bind(&ROS2TF2Thread::tf_message_cb_static, this, _1), rclcpp::SubscriptionOptionsWithAllocator<std::allocator<void>>(subopts));
-	pub_tf_        = node_handle->create_publisher<tf2_msgs::msg::TFMessage>("tf", 100);
-	pub_static_tf_ = node_handle->create_publisher<tf2_msgs::msg::TFMessage>("tf_static", 100);
+
+        std::string tf_topic = "tf";
+        std::string tf_static_topic = "tf_static";
+
+	if (cfg_use_namespace_ == false) {
+		tf_topic.insert(0, 1, '/');
+		tf_static_topic.insert(0, 1, '/');
+	}
+
+	sub_tf_        = node_handle->create_subscription<tf2_msgs::msg::TFMessage>(tf_topic, 100, std::bind(&ROS2TF2Thread::tf_message_cb_dynamic, this, _1), rclcpp::SubscriptionOptionsWithAllocator<std::allocator<void>>(subopts));
+	sub_static_tf_ = node_handle->create_subscription<tf2_msgs::msg::TFMessage>(tf_static_topic, rclcpp::QoS(100).transient_local(), std::bind(&ROS2TF2Thread::tf_message_cb_static, this, _1), rclcpp::SubscriptionOptionsWithAllocator<std::allocator<void>>(subopts));
+	pub_tf_        = node_handle->create_publisher<tf2_msgs::msg::TFMessage>(tf_topic, 100);
+	pub_static_tf_ = node_handle->create_publisher<tf2_msgs::msg::TFMessage>(tf_static_topic, rclcpp::QoS(100).transient_local());
 
 	tfifs_ = blackboard->open_multiple_for_reading<TransformInterface>("/tf*");
 	std::list<TransformInterface *>::iterator i;
@@ -249,6 +274,17 @@ ROS2TF2Thread::create_transform_stamped(TransformInterface *tfif, const Time *ti
 	ts.header.stamp    = rclcpp::Time(time->get_sec(), time->get_nsec());
 	ts.header.frame_id = tfif->frame();
 	ts.child_frame_id  = tfif->child_frame();
+
+	if (tf_prefix_enabled_ == true) {
+		if (std::find(cfg_tf_prefix_exclusions_.begin(), cfg_tf_prefix_exclusions_.end(), ts.header.frame_id) == cfg_tf_prefix_exclusions_.end()) {
+		// cfg_tf_prefix_exclusions_ does not contain ts.header.frame_id so we can add the prefix.
+			ts.header.frame_id.insert(0, cfg_tf_prefix_);
+		}
+		if (std::find(cfg_tf_prefix_exclusions_.begin(), cfg_tf_prefix_exclusions_.end(), ts.child_frame_id) == cfg_tf_prefix_exclusions_.end()) {
+		// cfg_tf_prefix_exclusions_ does not contain ts.header.frame_id so we can add the prefix.
+			ts.child_frame_id.insert(0, cfg_tf_prefix_);
+		}
+	}
 	ts.transform       = tr;
 
 	return ts;
@@ -277,26 +313,40 @@ ROS2TF2Thread::publish_transform_to_fawkes(const geometry_msgs::msg::TransformSt
 	const geometry_msgs::msg::Vector3 &   t = ts.transform.translation;
 	const geometry_msgs::msg::Quaternion &r = ts.transform.rotation;
 
+	std::string frame_id = ts.header.frame_id;
+	std::string child_frame_id = ts.child_frame_id;
+
+	// We need to ignore transforms that were published with the tf_prefix prepended by this instance.
+	// I.e. if Fawkes maintains a transform map -> odom and adds the prefix map -> robot1_odom
+	// the latter should not be considered as an additional transform to be published to Fawkes.
+	// If Fawkes publishes this particular transform as map -> robot1_odom it would recognize this as a
+	// transform available on the ROS side and hence consider it as a new transform for Fawkes.
+	if (tf_prefix_enabled_ == true) {
+		frame_id = std::regex_replace(frame_id, std::regex(cfg_tf_prefix_), "");
+		child_frame_id = std::regex_replace(child_frame_id, std::regex(cfg_tf_prefix_), "");
+	}
+
+
 	fawkes::Time time(ts.header.stamp.sec, ts.header.stamp.nanosec / 1000);
 
 	fawkes::tf::Transform        tr(fawkes::tf::Quaternion(r.x, r.y, r.z, r.w),
                            fawkes::tf::Vector3(t.x, t.y, t.z));
-	fawkes::tf::StampedTransform st(tr, time, ts.header.frame_id, ts.child_frame_id);
+	fawkes::tf::StampedTransform st(tr, time, frame_id, child_frame_id);
 
-	if (tf_publishers.find(ts.child_frame_id) == tf_publishers.end()) {
+	if (tf_publishers.find(child_frame_id) == tf_publishers.end()) {
 		try {
-			ros2_frames_.push_back(std::string("/tf/") + ts.child_frame_id);
-			tf_add_publisher("%s", ts.child_frame_id.c_str());
+			ros2_frames_.push_back(std::string("/tf/") + child_frame_id);
+			tf_add_publisher("%s", child_frame_id.c_str());
 			tf_publishers[ts.child_frame_id]->send_transform(st, static_tf);
 		} catch (Exception &e) {
 			ros2_frames_.pop_back();
 			logger->log_warn(name(),
 			                 "Failed to create Fawkes transform publisher for frame %s from ROS",
-			                 ts.child_frame_id.c_str());
+			                 child_frame_id.c_str());
 			logger->log_warn(name(), e);
 		}
 	} else {
-		tf_publishers[ts.child_frame_id]->send_transform(st, static_tf);
+		tf_publishers[child_frame_id]->send_transform(st, static_tf);
 	}
 }
 

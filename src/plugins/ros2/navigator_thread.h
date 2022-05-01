@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  navigator_thread.h - Robotino ROS Navigator Thread
+ *  navigator_thread.h - Robotino ROS2 Navigator Thread
  *
  *  Created: Sat June 09 15:13:27 2012
  *  Copyright  2012  Sebastian Reuter
@@ -19,8 +19,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef _ROS_NAVIGATOR_THREAD_H_
-#define _ROS_NAVIGATOR_THREAD_H_
+#ifndef _ROS2_NAVIGATOR_THREAD_H_
+#define _ROS2_NAVIGATOR_THREAD_H_
 
 #include <aspect/blackboard.h>
 #include <aspect/blocked_timing.h>
@@ -29,17 +29,17 @@
 #include <aspect/logging.h>
 #include <aspect/tf.h>
 #include <core/threading/thread.h>
-#include <dynamic_reconfigure/Config.h>
-#include <dynamic_reconfigure/DoubleParameter.h>
-#include <dynamic_reconfigure/Reconfigure.h>
 #include <interfaces/NavigatorInterface.h>
-#include <nav2_msgs/action/compute_path_to_pose.hpp>
+#include <interfaces/Position3DInterface.h>
+#include <nav2_msgs/action/navigate_to_pose.hpp>
 #include <geometry_msgs/msg/pose_stamped.hpp>
-#include <rclcpp_action/rclcpp_action.hpp>
 #include <plugins/ros2/aspect/ros2.h>
 #include <rclcpp/rclcpp.hpp>
-#include <tf2/types.h>
+#include <rclcpp_action/rclcpp_action.hpp>
+//#include <tf2/types.h>
+#include <tf/types.h>
 #include <utils/math/angle.h>
+#include <unistd.h>
 
 #include <math.h>
 
@@ -49,7 +49,7 @@ class NavigatorInterface;
 
 class ROS2NavigatorThread : public fawkes::Thread,
                            public fawkes::ClockAspect,
-                           public fawkes::BlockedTimingAspect,
+//                           public fawkes::BlockedTimingAspect,
                            public fawkes::LoggingAspect,
                            public fawkes::BlackBoardAspect,
                            public fawkes::ConfigurableAspect,
@@ -76,37 +76,44 @@ private:
 	void send_goal();
 	void stop_goals();
 	void load_config();
-	bool set_dynreconf_value(const std::string &path, const float value);
+//	bool set_dynreconf_value(const std::string &path, const float value);
 
 private:
+	using NavigateToPose = nav2_msgs::action::NavigateToPose;
+	using GoalHandleNav2 = rclcpp_action::ClientGoalHandle<NavigateToPose>;
+	typedef rclcpp_action::Client<NavigateToPose>::SharedPtr Nav2Client;
 
+//	rclcpp_action::Client<NavigateToPose>::SharedPtr client_ptr_;
 
-	void responseCb(std::shared_future<rclcpp_action::ClientGoalHandle<nav2_msgs::action::ComputePathToPose>::SharedPtr> future);
-	void feedbackCb(rclcpp_action::ClientGoalHandle<nav2_msgs::action::ComputePathToPose>::SharedPtr,
-				const std::shared_ptr<const nav2_msgs::action::ComputePathToPose::Feedback> feedback);
-	void resultCb(const rclcpp_action::ClientGoalHandle<nav2_msgs::action::ComputePathToPose>::WrappedResult &result);
+	void responseCb(std::shared_future<rclcpp_action::ClientGoalHandle<NavigateToPose>::SharedPtr> future);
+	void feedbackCb(rclcpp_action::ClientGoalHandle<NavigateToPose>::SharedPtr,
+				const std::shared_ptr<const NavigateToPose::Feedback> feedback);
+	void resultCb(const rclcpp_action::ClientGoalHandle<NavigateToPose>::WrappedResult &result);
 
 	void transform_to_fixed_frame();
 
-	fawkes::NavigatorInterface * nav_if_;
-	rclcpp_action::Client<nav2_msgs::action::ComputePathToPose>::SharedPtr ac_;
-	rclcpp_action::ClientGoalHandle<nav2_msgs::action::ComputePathToPose>::SharedPtr cgh_;
-	bool                         cmd_sent_;
-	bool                         connected_history_;
+	fawkes::NavigatorInterface *	nav_if_;
+	fawkes::Position3DInterface *	pose_if_;
+	Nav2Client			ac_;
+	NavigateToPose::Goal		goal_;
+	GoalHandleNav2::SharedPtr	goal_handle_;
+	bool				cmd_sent_;
+	bool				connected_history_;
+	rclcpp::Clock			ros_clock_;
 
 	fawkes::Time *ac_init_checktime_;
 
 	std::string cfg_prefix_;
 
-	// ROS dynamic reconfigure parts
-	dynamic_reconfigure::ReconfigureRequest  dynreconf_srv_req;
-	dynamic_reconfigure::ReconfigureResponse dynreconf_srv_resp;
-	dynamic_reconfigure::DoubleParameter     dynreconf_double_param;
-	dynamic_reconfigure::Config              dynreconf_conf;
+//	// ROS2 dynamic reconfigure parts
+//	dynamic_reconfigure::ReconfigureRequest  dynreconf_srv_req;
+//	dynamic_reconfigure::ReconfigureResponse dynreconf_srv_resp;
+//	dynamic_reconfigure::DoubleParameter     dynreconf_double_param;
+//	dynamic_reconfigure::Config              dynreconf_conf;
 
-	std::string cfg_dynreconf_path_;
-	std::string cfg_dynreconf_trans_vel_name_;
-	std::string cfg_dynreconf_rot_vel_name_;
+//	std::string cfg_dynreconf_path_;
+//	std::string cfg_dynreconf_trans_vel_name_;
+//	std::string cfg_dynreconf_rot_vel_name_;
 
 	std::string cfg_fixed_frame_;
 	float       cfg_ori_tolerance_;
@@ -124,4 +131,4 @@ private:
 	float goal_tolerance_yaw;
 };
 
-#endif /* ROS_NAVIGATOR_THREAD_H__ */
+#endif /* ROS2_NAVIGATOR_THREAD_H__ */
