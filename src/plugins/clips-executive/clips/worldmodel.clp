@@ -143,8 +143,13 @@
 		(foreach ?p ?ps
 			(bind ?kv (wm-split-string-sym ?p "="))
 			(if (<> (length$ ?kv) 2) then
-				(printout w "Param '" ?p "' not of format name=value, ignoring" crlf)
-				(bind ?rv (append$ ?rv INVALID (sym-cat ?p)))
+				(if (eq (length$ ?kv) 1)
+				 then
+					(bind ?rv (append$ ?rv (create$ ?kv [ ])))
+				 else
+					(printout warn "Param '" ?p "' not of format name=value, ignoring" crlf)
+					(bind ?rv (append$ ?rv INVALID (sym-cat ?p)))
+				)
 			 else
 				(if (str-index "," (nth$ 2 ?kv)) then
 				 then
