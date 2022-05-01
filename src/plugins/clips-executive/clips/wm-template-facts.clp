@@ -63,7 +63,10 @@
 	; However, if the target type is a STRING, whitespaces may become a problem.
 	(if (and (neq ?type STRING) (eq (type ?value) SYMBOL))  then
 		(bind ?value (string-to-field ?value))
-		(return ?value)
+		(if (eq (type ?value) ?type)
+		 then
+			(return ?value)
+		)
 	)
 
 	(switch ?type
