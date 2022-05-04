@@ -1,5 +1,5 @@
 /***************************************************************************
- *  WorkpieceAddition.proto - Control gripper
+ *  GripperCommand.proto - Control gripper
  *
  *  Created: Mon Dec 20 17:48:07 2021
  *  Copyright  2021  Matteo Tschesche
