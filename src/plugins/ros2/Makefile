@@ -55,11 +55,12 @@ LIBS_ros2_joint = fawkescore fawkesutils fawkesaspects fawkesblackboard \
 OBJS_ros2_joint = joint_plugin.o joint_thread.o
 
 LIBS_ros2_odometry = m fawkescore fawkesutils fawkesaspects fawkesblackboard \
-		    fawkesinterface fawkestf fawkesros2aspect MotorInterface
+			fawkesinterface fawkestf fawkesros2aspect MotorInterface
 OBJS_ros2_odometry = odometry_plugin.o odometry_thread.o
 
 LIBS_ros2_navigator = m pthread fawkescore fawkesutils fawkesaspects fawkesblackboard \
-		                          fawkesinterface fawkesros2aspect NavigatorInterface
+			fawkesinterface fawkesros2aspect Position3DInterface \
+			NavigatorInterface
 OBJS_ros2_navigator = navigator_plugin.o navigator_thread.o
 
 LIBS_ros2_robot_description = fawkescore fawkesutils fawkesaspects fawkesros2aspect
@@ -71,8 +72,8 @@ OBJS_ros2_position_3d = position_3d_thread.o position_3d_plugin.o
 
 OBJS_ros2_laserscan = laserscan_thread.o laserscan_plugin.o
 LIBS_ros2_laserscan = m fawkescore fawkesutils fawkesaspects fawkesblackboard \
-                      fawkesinterface fawkesros2aspect fvutils Laser360Interface \
-                      Laser720Interface Laser1080Interface
+			fawkesinterface fawkesros2aspect fvutils Laser360Interface \
+			Laser720Interface Laser1080Interface
 
 #LIBS_ros2_pcl = fawkescore fawkesutils fawkesaspects fawkesblackboard \
 #	      fawkesinterface fawkesros2aspect fawkestf fawkespcl_utils
@@ -81,11 +82,11 @@ LIBS_ros2_laserscan = m fawkescore fawkesutils fawkesaspects fawkesblackboard \
 OBJS_ros2_laserscan = laserscan_plugin.o laserscan_thread.o
 
 LIBS_ros2_pcl = fawkescore fawkesutils fawkesaspects fawkesblackboard \
-	      fawkesinterface fawkesros2aspect fawkestf fawkespcl_utils
+		fawkesinterface fawkesros2aspect fawkestf fawkespcl_utils
 OBJS_ros2_pcl = pcl_plugin.o pcl_thread.o
 
 LIBS_ros2_skiller = fawkescore fawkesutils fawkesaspects fawkesblackboard \
-	      fawkesinterface fawkesros2aspect SkillerInterface
+			fawkesinterface fawkesros2aspect SkillerInterface
 OBJS_ros2_skiller = skiller_plugin.o skiller_thread.o
 
 OBJS_all = $(OBJS_ros2)  \
