@@ -65,6 +65,8 @@ public:
 private:
 	bool start_camera();
 	bool get_camera(rs2::device &dev);
+	void enable_depth_stream();
+	void disable_depth_stream();
 	void stop_camera();
 
 	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
@@ -82,7 +84,20 @@ private:
 	fawkes::SwitchInterface *switch_if_;
 	bool                     cfg_use_switch_;
 
+	typedef pcl::PointXYZ              PointType;
+	typedef pcl::PointCloud<PointType> Cloud;
+
+	typedef Cloud::Ptr      CloudPtr;
+	typedef Cloud::ConstPtr CloudConstPtr;
+
+	fawkes::RefPtr<Cloud> realsense_depth_refptr_;
+	CloudPtr              realsense_depth_;
+
 	firevision::PNGWriter png_writer_;
+
+	rs2::pipeline *rgb_rs_pipe_;
+	rs2::frameset  rgb_rs_data_;
+	rs2_intrinsics rgb_intrinsics_;
 
 	rs2::pipeline *rs_pipe_;
 	rs2::context * rs_context_;
@@ -90,23 +105,31 @@ private:
 	rs2::frameset  rs_data_;
 	rs2_intrinsics intrinsics_;
 
+	float       camera_scale_;
+	std::string frame_id_;
+	std::string pcl_id_;
+	std::string switch_if_name_;
+	uint        frame_rate_;
+	float       laser_power_;
+	bool        camera_running_ = false;
+	bool        enable_camera_  = true;
+	bool        depth_enabled_  = false;
+	uint        restart_after_num_errors_;
+	uint        error_counter_ = 0;
+
 	/// firevision image buffer
 	firevision::SharedMemoryImageBuffer *shm_buffer_;
 	/// Image Buffer Id
 	std::string shm_id_;
 
-	std::string switch_if_name_;
+	uint        rgb_frame_rate_;
 	std::string rgb_path_;
 	std::string image_name_;
-	int         frame_rate_;
 	int         image_width_;
 	int         image_height_;
 	bool        save_images_;
 	size_t      name_it_;
-	bool        camera_running_ = false;
-	bool        enable_camera_  = true;
-	uint        restart_after_num_errors_;
-	uint        error_counter_ = 0;
+	uint        rgb_error_counter_ = 0;
 };
 
 #endif
