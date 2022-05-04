@@ -38,10 +38,12 @@ syntax = "proto2";
 package gazsim_msgs;
 
 message GripperCommand {
-  required int32 command = 1;
-  //0 : close
-  //1 : open
-  //2 : move (requires x,y,z values)
+  enum CommandType {
+    CLOSE = 0;
+    OPEN = 1;
+    MOVE = 2; //(requires x,y,z values)
+  }
+  required CommandType command = 1;
 
   //target position in gripper_home frame
   optional float x = 2;
