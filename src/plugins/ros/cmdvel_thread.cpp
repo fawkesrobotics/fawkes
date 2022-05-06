@@ -42,7 +42,7 @@ ROSCmdVelThread::init()
 {
 	std::string motor_if_id = config->get_string("/ros/cmdvel/motor_interface_id");
 	motor_if_               = blackboard->open_for_reading<MotorInterface>(motor_if_id.c_str());
-	sub_                    = rosnode->subscribe("cmd_vel", 10, &ROSCmdVelThread::twist_msg_cb, this);
+	sub_                    = rosnode->subscribe("cmd_vel", 1, &ROSCmdVelThread::twist_msg_cb, this);
 }
 
 void
