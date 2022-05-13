@@ -127,8 +127,8 @@ private:
 	                   fawkes::LaserLineInterface *iface,
 	                   bool                        moving_average,
 	                   bool                        transformed,
-	                   const TrackedLineInfo &     tinfo,
-	                   const std::string &         frame_id = "");
+	                   const TrackedLineInfo      &tinfo,
+	                   const std::string          &frame_id = "");
 
 	void set_empty_interface(fawkes::LaserLineInterface *iface) const;
 

@@ -40,9 +40,9 @@ using namespace std;
  * @param plugin_name component for informational messages
  */
 TrackedLineInfo::TrackedLineInfo(fawkes::tf::Transformer *tfer,
-                                 const string &           input_frame_id,
-                                 const string &           tracking_frame_id,
-                                 const string &           fixed_frame_id,
+                                 const string            &input_frame_id,
+                                 const string            &tracking_frame_id,
+                                 const string            &fixed_frame_id,
                                  bool                     transform_to_fixed_frame,
                                  float                    cfg_switch_tolerance,
                                  unsigned int             cfg_moving_avg_len,
@@ -152,14 +152,24 @@ TrackedLineInfo::update(LineInfo &linfo)
 	this->smooth.line_direction = line_direction_sum / sz;
 	this->smooth.point_on_line  = point_on_line_sum / sz;
 
-
-  if (transform_to_fixed_frame == true)
-  {
-    transform_point_to_frame(linfo.base_point, this->transformed.base_point, input_frame_id, fixed_frame_id);
-    transform_point_to_frame(linfo.line_direction, this->transformed.line_direction, input_frame_id, fixed_frame_id);
-    transform_point_to_frame(linfo.end_point_1, this->transformed.end_point_1, input_frame_id, fixed_frame_id);
-    transform_point_to_frame(linfo.end_point_2, this->transformed.end_point_2, input_frame_id, fixed_frame_id);
-  }
+	if (transform_to_fixed_frame == true) {
+		transform_point_to_frame(linfo.base_point,
+		                         this->transformed.base_point,
+		                         input_frame_id,
+		                         fixed_frame_id);
+		transform_point_to_frame(linfo.line_direction,
+		                         this->transformed.line_direction,
+		                         input_frame_id,
+		                         fixed_frame_id);
+		transform_point_to_frame(linfo.end_point_1,
+		                         this->transformed.end_point_1,
+		                         input_frame_id,
+		                         fixed_frame_id);
+		transform_point_to_frame(linfo.end_point_2,
+		                         this->transformed.end_point_2,
+		                         input_frame_id,
+		                         fixed_frame_id);
+	}
 
 	Eigen::Vector3f x_axis(1, 0, 0);
 
@@ -186,26 +196,24 @@ TrackedLineInfo::update(LineInfo &linfo)
  * @return whether the point was successfully transformed
  */
 bool
-TrackedLineInfo::transform_point_to_frame(const Eigen::Vector3f& in_point, Eigen::Vector3f& out_point, const std::string from_frame, const std::string to_frame)
+TrackedLineInfo::transform_point_to_frame(const Eigen::Vector3f &in_point,
+                                          Eigen::Vector3f       &out_point,
+                                          const std::string      from_frame,
+                                          const std::string      to_frame)
 {
-	fawkes::tf::Stamped<fawkes::tf::Point> transformed_point(fawkes::tf::Point(in_point[0],
-	                                                                           in_point[1],
-	                                                                           in_point[2]),
-	                                                         fawkes::Time(0, 0),
-	                                                         from_frame);
+	fawkes::tf::Stamped<fawkes::tf::Point> transformed_point(
+	  fawkes::tf::Point(in_point[0], in_point[1], in_point[2]), fawkes::Time(0, 0), from_frame);
 
 	try {
 		transformer->transform_point(fixed_frame_id, transformed_point, transformed_point);
 
-    out_point[0] = transformed_point[0];
-    out_point[1] = transformed_point[1];
-    out_point[2] = transformed_point[2];
+		out_point[0] = transformed_point[0];
+		out_point[1] = transformed_point[1];
+		out_point[2] = transformed_point[2];
 
 	} catch (fawkes::tf::TransformException &e) {
-		logger->log_warn(plugin_name.c_str(),
-		                 "Can't transform to %s.",
-		                 fixed_frame_id.c_str());
-    return false;
+		logger->log_warn(plugin_name.c_str(), "Can't transform to %s.", fixed_frame_id.c_str());
+		return false;
 	}
-  return true;
+	return true;
 }

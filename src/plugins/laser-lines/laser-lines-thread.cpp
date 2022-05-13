@@ -105,8 +105,8 @@ LaserLinesThread::init()
 					  blackboard->open_for_writing<LaserLineInterface>((id + "/moving_avg").c_str());
 				}
 				if (cfg_transform_to_frame_enabled_) {
-					line_transformed_ifs_[i] =
-					  blackboard->open_for_writing<LaserLineInterface>((id + "/to_" + cfg_transform_to_frame_id_).c_str());
+					line_transformed_ifs_[i] = blackboard->open_for_writing<LaserLineInterface>(
+					  (id + "/to_" + cfg_transform_to_frame_id_).c_str());
 				}
 			}
 		}
@@ -263,16 +263,16 @@ LaserLinesThread::read_config()
 	cfg_segm_max_iterations_ = config->get_uint(CFG_PREFIX "line_segmentation_max_iterations");
 	cfg_segm_distance_threshold_ =
 	  config->get_float(CFG_PREFIX "line_segmentation_distance_threshold");
-	cfg_segm_sample_max_dist_       = config->get_float(CFG_PREFIX "line_segmentation_sample_max_dist");
-	cfg_segm_min_inliers_           = config->get_uint(CFG_PREFIX "line_segmentation_min_inliers");
-	cfg_min_length_                 = config->get_float(CFG_PREFIX "line_min_length");
-	cfg_max_length_                 = config->get_float(CFG_PREFIX "line_max_length");
-	cfg_min_dist_                   = config->get_float(CFG_PREFIX "line_min_distance");
-	cfg_max_dist_                   = config->get_float(CFG_PREFIX "line_max_distance");
-	cfg_cluster_tolerance_          = config->get_float(CFG_PREFIX "line_cluster_tolerance");
-	cfg_cluster_quota_              = config->get_float(CFG_PREFIX "line_cluster_quota");
-	cfg_moving_avg_enabled_         = config->get_bool(CFG_PREFIX "moving_avg_enabled");
-	cfg_moving_avg_window_size_     = config->get_uint(CFG_PREFIX "moving_avg_window_size");
+	cfg_segm_sample_max_dist_   = config->get_float(CFG_PREFIX "line_segmentation_sample_max_dist");
+	cfg_segm_min_inliers_       = config->get_uint(CFG_PREFIX "line_segmentation_min_inliers");
+	cfg_min_length_             = config->get_float(CFG_PREFIX "line_min_length");
+	cfg_max_length_             = config->get_float(CFG_PREFIX "line_max_length");
+	cfg_min_dist_               = config->get_float(CFG_PREFIX "line_min_distance");
+	cfg_max_dist_               = config->get_float(CFG_PREFIX "line_max_distance");
+	cfg_cluster_tolerance_      = config->get_float(CFG_PREFIX "line_cluster_tolerance");
+	cfg_cluster_quota_          = config->get_float(CFG_PREFIX "line_cluster_quota");
+	cfg_moving_avg_enabled_     = config->get_bool(CFG_PREFIX "moving_avg_enabled");
+	cfg_moving_avg_window_size_ = config->get_uint(CFG_PREFIX "moving_avg_window_size");
 	cfg_transform_to_frame_enabled_ = config->get_bool(CFG_PREFIX "transform_to_frame_enabled");
 	cfg_transform_to_frame_id_      = config->get_string(CFG_PREFIX "transform_to_frame_id");
 
@@ -410,14 +410,19 @@ LaserLinesThread::publish_known_lines()
 		} else {
 			known_lines_[known_line_idx].interface_idx = line_if_idx;
 			const TrackedLineInfo &info                = known_lines_[known_line_idx];
-			set_interface(line_if_idx, line_ifs_[line_if_idx], false, false, info, finput_->header.frame_id);
+			set_interface(
+			  line_if_idx, line_ifs_[line_if_idx], false, false, info, finput_->header.frame_id);
 			if (cfg_moving_avg_enabled_) {
 				set_interface(
 				  line_if_idx, line_avg_ifs_[line_if_idx], true, false, info, finput_->header.frame_id);
 			}
 			if (cfg_transform_to_frame_enabled_) {
-				set_interface(
-				  line_if_idx, line_transformed_ifs_[line_if_idx], false, true, info, cfg_transform_to_frame_id_.c_str());
+				set_interface(line_if_idx,
+				              line_transformed_ifs_[line_if_idx],
+				              false,
+				              true,
+				              info,
+				              cfg_transform_to_frame_id_.c_str());
 			}
 		}
 	}
@@ -449,10 +454,10 @@ LaserLinesThread::set_interface(unsigned int                idx,
                                 fawkes::LaserLineInterface *iface,
                                 bool                        moving_average,
                                 bool                        to_frame,
-                                const TrackedLineInfo &     tinfo,
-                                const std::string &         frame_id)
+                                const TrackedLineInfo      &tinfo,
+                                const std::string          &frame_id)
 {
-  const LineInfo &info = moving_average ? tinfo.smooth : to_frame ? tinfo.transformed : tinfo.raw;
+	const LineInfo &info = moving_average ? tinfo.smooth : to_frame ? tinfo.transformed : tinfo.raw;
 
 	iface->set_visibility_history(tinfo.visibility_history);
 
@@ -476,7 +481,7 @@ LaserLinesThread::set_interface(unsigned int                idx,
 	fawkes::Time now(clock);
 	std::string  frame_name_1, frame_name_2;
 	char        *tmp;
-	std::string  avg = moving_average ? "avg_" : "";
+	std::string  avg         = moving_average ? "avg_" : "";
 	std::string  transformed = to_frame ? "transformed_" : "";
 	if (asprintf(&tmp, "laser_line_%s%s%u_e1", avg.c_str(), transformed.c_str(), idx + 1) != -1) {
 		frame_name_1 = tmp;
