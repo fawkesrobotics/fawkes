@@ -15,6 +15,7 @@
 
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
+PRESUBDIRS = interfaces
 
 LIBS_bbsync = fawkescore fawkesutils fawkesaspects fawkesinterface \
 	      fawkesblackboard
