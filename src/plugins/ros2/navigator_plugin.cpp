@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  navigator_plugin.cpp - Robotino ROS Navigator Plugin
+ *  navigator_plugin.cpp - Robotino ROS2 Navigator Plugin
  *
  *  Created: Sat June 09 15:13:27 2012
  *  Copyright  2012  Sebastian Reuter
@@ -25,7 +25,7 @@
 
 using namespace fawkes;
 
-/** Send locomotion commands to ROS.
+/** Send locomotion commands to ROS2.
  * @author Sebastian Reuter
  */
 class ROS2NavigatorPlugin : public fawkes::Plugin
@@ -36,12 +36,12 @@ public:
    */
 	explicit ROS2NavigatorPlugin(Configuration *config) : Plugin(config)
 	{
-		std::string prefix     = "/ros/navigator";
+		std::string prefix     = "/ros2/navigator";
 		std::string cfg_prefix = prefix + "/";
 
 		thread_list.push_back(new ROS2NavigatorThread(cfg_prefix));
 	}
 };
 
-PLUGIN_DESCRIPTION("Send locomotion commands to ROS")
+PLUGIN_DESCRIPTION("Send locomotion commands to ROS2")
 EXPORT_PLUGIN(ROS2NavigatorPlugin)

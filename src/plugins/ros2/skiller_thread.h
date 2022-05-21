@@ -19,22 +19,22 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef _ROS2_SKILLER_THREAD_H_
-#define _ROS2_SKILLER_THREAD_H_
+#ifndef _ROS_SKILLER_THREAD_H_
+#define _ROS_SKILLER_THREAD_H_
 
+#include <actionlib/server/simple_action_server.h>
 #include <aspect/blackboard.h>
 #include <aspect/blocked_timing.h>
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
 #include <core/threading/thread.h>
-#include <fawkes_msgs/action/exec_skill.hpp>
-#include <fawkes_msgs/msg/skill_status.hpp>
+#include <fawkes_msgs/ExecSkillAction.h>
+#include <fawkes_msgs/ExecSkillActionGoal.h>
+#include <fawkes_msgs/ExecSkillGoal.h>
 #include <interfaces/SkillerInterface.h>
-#include <plugins/ros2/aspect/ros2.h>
-#include <rclcpp/rclcpp.hpp>
-#include <std_msgs/msg/string.hpp>
-#include <rclcpp_action/rclcpp_action.hpp>
-
+#include <plugins/ros/aspect/ros.h>
+#include <ros/ros.h>
+#include <std_msgs/String.h>
 
 #include <string>
 
@@ -42,15 +42,15 @@ namespace fawkes {
 class SkillerInterface;
 }
 
-class ROS2SkillerThread : public fawkes::Thread,
+class RosSkillerThread : public fawkes::Thread,
                          public fawkes::BlockedTimingAspect,
                          public fawkes::LoggingAspect,
                          public fawkes::BlackBoardAspect,
                          public fawkes::ConfigurableAspect,
-                         public fawkes::ROS2Aspect
+                         public fawkes::ROSAspect
 {
 public:
-	ROS2SkillerThread();
+	RosSkillerThread();
 
 	/* thread */
 	virtual void init();
@@ -58,16 +58,16 @@ public:
 	virtual void once();
 	virtual void loop();
 
-private:	
-	rclcpp_action::GoalResponse handle_goal(const rclcpp_action::GoalUUID & uuid, std::shared_ptr<const fawkes_msgs::action::ExecSkill::Goal> goal);
-	rclcpp_action::CancelResponse handle_cancel(const std::shared_ptr<rclcpp_action::ServerGoalHandle<fawkes_msgs::action::ExecSkill>> goal_handle);
-	void handle_accepted(const std::shared_ptr<rclcpp_action::ServerGoalHandle<fawkes_msgs::action::ExecSkill>> goal_handle);
+private:
+	typedef actionlib::ActionServer<fawkes_msgs::ExecSkillAction> SkillerServer;
 
-	void message_cb(const std_msgs::msg::String::SharedPtr goal);
+	void action_goal_cb(SkillerServer::GoalHandle goal);
+	void action_cancel_cb(SkillerServer::GoalHandle goal);
+	void message_cb(const std_msgs::String::ConstPtr &goal);
 
 	void                           stop();
-	std::shared_ptr<fawkes_msgs::action::ExecSkill::Result>   create_result(const std::string &errmsg);
-	std::shared_ptr<fawkes_msgs::action::ExecSkill::Feedback> create_feedback();
+	fawkes_msgs::ExecSkillResult   create_result(const std::string &errmsg);
+	fawkes_msgs::ExecSkillFeedback create_feedback();
 
 	bool assure_control();
 	void release_control();
@@ -75,15 +75,11 @@ private:
 private:
 	fawkes::SkillerInterface *skiller_if_;
 
-	rclcpp_action::Server<fawkes_msgs::action::ExecSkill>::SharedPtr server_;
-	std::shared_ptr<rclcpp_action::ServerGoalHandle<fawkes_msgs::action::ExecSkill>> as_goal_;
+	SkillerServer * server_;
+	ros::Subscriber sub_cmd_;
+	ros::Publisher  pub_status_;
 
-	rclcpp::Subscription<std_msgs::msg::String>::SharedPtr sub_cmd_;
-	rclcpp::Publisher<fawkes_msgs::msg::SkillStatus>::SharedPtr  pub_status_;
-
-	
-
-
+	SkillerServer::GoalHandle as_goal_;
 	std::string               goal_;
 
 	bool         exec_as_;

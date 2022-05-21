@@ -24,52 +24,51 @@
 
 #include "ros_thread.h"
 
-#include <geometry_msgs/PoseArray.h>
-#include <nav_msgs/OccupancyGrid.h>
-#include <ros/node_handle.h>
+#include <rclcpp/rclcpp.hpp>
 
 using namespace fawkes;
 
-/** @class AmclROSThread "ros_thread.h"
+/** @class AmclROS2Thread "ros_thread.h"
  * Thread for ROS integration of the Adaptive Monte Carlo Localization.
  * @author Tim Niemueller
  */
 
 /** Constructor. */
-AmclROSThread::AmclROSThread() : Thread("AmclROSThread", Thread::OPMODE_WAITFORWAKEUP)
+AmclROS2Thread::AmclROS2Thread() : Thread("AmclROS2Thread", Thread::OPMODE_WAITFORWAKEUP)
 {
 }
 
 /** Destructor. */
-AmclROSThread::~AmclROSThread()
+AmclROS2Thread::~AmclROS2Thread()
 {
 }
 
 void
-AmclROSThread::init()
+AmclROS2Thread::init()
 {
-	pose_pub_          = rosnode->advertise<geometry_msgs::PoseWithCovarianceStamped>("amcl_pose", 2);
-	particlecloud_pub_ = rosnode->advertise<geometry_msgs::PoseArray>("particlecloud", 2);
+	pose_pub_          = node_handle->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>("amcl_pose", 2);
+	particlecloud_pub_ = node_handle->create_publisher<geometry_msgs::msg::PoseArray>("particlecloud", 2);
 	initial_pose_sub_ =
-	  rosnode->subscribe("initialpose", 2, &AmclROSThread::initial_pose_received, this);
-	map_pub_ = rosnode->advertise<nav_msgs::OccupancyGrid>("map", 1, true);
+	  node_handle->create_subscription<geometry_msgs::msg::PoseWithCovarianceStamped>("initialpose", 2, std::bind(&AmclROS2Thread::initial_pose_received, this, std::placeholders::_1));
+	map_pub_ = node_handle->create_publisher<nav_msgs::msg::OccupancyGrid>("map", rclcpp::QoS(rclcpp::KeepLast(1)).transient_local().reliable());
 
 	loc_if_ = blackboard->open_for_reading<LocalizationInterface>("AMCL");
 }
 
 void
-AmclROSThread::finalize()
+AmclROS2Thread::finalize()
 {
 	blackboard->close(loc_if_);
 
-	pose_pub_.shutdown();
-	particlecloud_pub_.shutdown();
-	initial_pose_sub_.shutdown();
-	map_pub_.shutdown();
+// TODO: implement proper shutdown accordingly
+//	pose_pub_.shutdown();
+//	particlecloud_pub_.shutdown();
+//	initial_pose_sub_.shutdown();
+//	map_pub_.shutdown();
 }
 
 void
-AmclROSThread::loop()
+AmclROS2Thread::loop()
 {
 }
 
@@ -78,10 +77,10 @@ AmclROSThread::loop()
  * @param set sample set to publish
  */
 void
-AmclROSThread::publish_pose_array(const std::string &global_frame_id, const pf_sample_set_t *set)
+AmclROS2Thread::publish_pose_array(const std::string &global_frame_id, const pf_sample_set_t *set)
 {
-	geometry_msgs::PoseArray cloud_msg;
-	cloud_msg.header.stamp    = ros::Time::now();
+	geometry_msgs::msg::PoseArray cloud_msg;
+	cloud_msg.header.stamp    = node_handle->get_clock()->now();
 	cloud_msg.header.frame_id = global_frame_id;
 	cloud_msg.poses.resize(set->sample_count);
 	for (int i = 0; i < set->sample_count; i++) {
@@ -95,7 +94,7 @@ AmclROSThread::publish_pose_array(const std::string &global_frame_id, const pf_s
 		cloud_msg.poses[i].orientation.w = q.w();
 	}
 
-	particlecloud_pub_.publish(cloud_msg);
+	particlecloud_pub_->publish(cloud_msg);
 }
 
 /** Publish pose with covariance to ROS.
@@ -104,14 +103,15 @@ AmclROSThread::publish_pose_array(const std::string &global_frame_id, const pf_s
  * @param covariance covariance associated with the pose
  */
 void
-AmclROSThread::publish_pose(const std::string &global_frame_id,
-                            const amcl_hyp_t  &amcl_hyp,
-                            const double       covariance[36])
+AmclROS2Thread::publish_pose(const std::string &global_frame_id,
+                             const amcl_hyp_t  &amcl_hyp,
+                             const double       covariance[36])
 {
-	geometry_msgs::PoseWithCovarianceStamped p;
+	geometry_msgs::msg::PoseWithCovarianceStamped p;
 	// Fill in the header
 	p.header.frame_id = global_frame_id;
-	p.header.stamp    = ros::Time();
+//	p.header.stamp    = ros::Time();
+	p.header.stamp    = node_handle->get_clock()->now();
 	// Copy in the pose
 	p.pose.pose.position.x = amcl_hyp.pf_pose_mean.v[0];
 	p.pose.pose.position.y = amcl_hyp.pf_pose_mean.v[1];
@@ -131,7 +131,7 @@ AmclROSThread::publish_pose(const std::string &global_frame_id,
 	}
 	p.pose.covariance[6 * 5 + 5] = covariance[6 * 5 + 5];
 
-	pose_pub_.publish(p);
+	pose_pub_->publish(p);
 }
 
 /** Publish map to ROS.
@@ -139,11 +139,11 @@ AmclROSThread::publish_pose(const std::string &global_frame_id,
  * @param map map to publish
  */
 void
-AmclROSThread::publish_map(const std::string &global_frame_id, const map_t *map)
+AmclROS2Thread::publish_map(const std::string &global_frame_id, const map_t *map)
 {
-	nav_msgs::OccupancyGrid msg;
-	msg.info.map_load_time = ros::Time::now();
-	msg.header.stamp       = ros::Time::now();
+	nav_msgs::msg::OccupancyGrid msg;
+	msg.info.map_load_time = node_handle->get_clock()->now();
+	msg.header.stamp       = node_handle->get_clock()->now();
 	msg.header.frame_id    = global_frame_id;
 
 	msg.info.width             = map->size_x;
@@ -171,24 +171,26 @@ AmclROSThread::publish_map(const std::string &global_frame_id, const map_t *map)
 		}
 	}
 
-	map_pub_.publish(msg);
+  logger->log_info(name(), "publish map");
+	map_pub_->publish(msg);
 }
 
 void
-AmclROSThread::initial_pose_received(const geometry_msgs::PoseWithCovarianceStampedConstPtr &msg)
+AmclROS2Thread::initial_pose_received(const geometry_msgs::msg::PoseWithCovarianceStamped &msg)
 {
-	fawkes::Time msg_time(msg->header.stamp.sec, msg->header.stamp.nsec / 1000);
+	fawkes::Time msg_time(msg.header.stamp.sec, msg.header.stamp.nanosec / 1000);
 
-	const double *covariance    = msg->pose.covariance.data();
-	const double  rotation[]    = {msg->pose.pose.orientation.x,
-                             msg->pose.pose.orientation.y,
-                             msg->pose.pose.orientation.z,
-                             msg->pose.pose.orientation.w};
-	const double  translation[] = {msg->pose.pose.position.x,
-                                msg->pose.pose.position.y,
-                                msg->pose.pose.position.z};
+  logger->log_info(name(), "pose received");
+	const double *covariance    = msg.pose.covariance.data();
+	const double  rotation[]    = {msg.pose.pose.orientation.x,
+                             msg.pose.pose.orientation.y,
+                             msg.pose.pose.orientation.z,
+                             msg.pose.pose.orientation.w};
+	const double  translation[] = {msg.pose.pose.position.x,
+                                msg.pose.pose.position.y,
+                                msg.pose.pose.position.z};
 
-	std::string frame = msg->header.frame_id;
+	std::string frame = msg.header.frame_id;
 	if (!frame.empty() && frame[0] == '/')
 		frame = frame.substr(1);
 

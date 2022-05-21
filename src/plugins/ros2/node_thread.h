@@ -33,10 +33,13 @@
 #include <plugins/ros2/aspect/ros2_inifin.h>
 #include <sys/types.h>
 #include <utils/time/time.h>
+#include <chrono>
+#include <unistd.h>
+#include <regex>
 #include <rclcpp/rclcpp.hpp>
 
 class ROS2NodeThread : public fawkes::Thread,
-                      public fawkes::BlockedTimingAspect,
+//                      public fawkes::BlockedTimingAspect,
                       public fawkes::LoggingAspect,
                       public fawkes::ConfigurableAspect,
                       public fawkes::ClockAspect,
@@ -62,10 +65,14 @@ private:
 	bool cfg_async_spinning_;
 	unsigned int cfg_async_num_threads_;
 
+	// TODO: the following probably needs to be a fawkes::LockPtr to use the one given by the aspect
 	rclcpp::Node::SharedPtr node_handle;
 	fawkes::ROS2AspectIniFin ros2_aspect_inifin_;
 
-	rclcpp::executors::MultiThreadedExecutor mult_executor;
+//	rclcpp::executors::MultiThreadedExecutor executor;
+//	rclcpp::executors::SingleThreadedExecutor executor;
+	rclcpp::executors::MultiThreadedExecutor * mult_executor;
+  std::chrono::duration<double> period = std::chrono::milliseconds(10);
 };
 
 #endif

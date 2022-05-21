@@ -40,13 +40,13 @@ ROS2CmdVelThread::ROS2CmdVelThread() : Thread("ROS2CmdVelThread", Thread::OPMODE
 void
 ROS2CmdVelThread::init()
 {
-	std::string motor_if_id = config->get_string("/ros/cmdvel/motor_interface_id");
+	std::string motor_if_id = config->get_string("/ros2/cmdvel/motor_interface_id");
 	motor_if_               = blackboard->open_for_reading<MotorInterface>(motor_if_id.c_str());
-	sub_                    = node_handle->create_subscription<geometry_msgs::msg::Twist>("cmd_vel", 10, std::bind(&ROS2CmdVelThread::twist_msg_cb, this, _1));
+	sub_                    = node_handle->create_subscription<geometry_msgs::msg::Twist>("cmd_vel", 1, std::bind(&ROS2CmdVelThread::twist_msg_cb, this, _1));
 }
 
 void
-ROS2CmdVelThread::twist_msg_cb(const geometry_msgs::msg::Twist::SharedPtr msg)
+ROS2CmdVelThread::twist_msg_cb(const geometry_msgs::msg::Twist::SharedPtr msg) const
 {
 	this->send_transrot(msg->linear.x, msg->linear.y, msg->angular.z);
 }
@@ -65,7 +65,7 @@ ROS2CmdVelThread::finalize()
 }
 
 void
-ROS2CmdVelThread::send_transrot(float vx, float vy, float omega)
+ROS2CmdVelThread::send_transrot(float vx, float vy, float omega) const
 {
 	if (motor_if_->has_writer()) {
 		MotorInterface::TransRotMessage *msg = new MotorInterface::TransRotMessage(vx, vy, omega);
