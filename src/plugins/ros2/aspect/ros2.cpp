@@ -61,7 +61,37 @@ void
 ROS2Aspect::init_ROS2Aspect(rclcpp::Node::SharedPtr node_handle)
 {
 	this->node_handle = node_handle;
+//        cfg_tf_prefix_ = config->get_string_or_default("/ros2/tf/tf_prefix", "");
+//        cfg_tf_prefix_exclusions_ = config->get_strings_or_defaults("/ros2/tf/tf_prefix_exclusions", std::vector<std::string>());
+//
+//        tf_prefix_enabled_ = false;
+//        if (cfg_tf_prefix_ != "") {
+//                tf_prefix_enabled_ = true;
+//        }
+//
+//        if (cfg_tf_prefix_ == "$HOSTNAME") {
+//                HostInfo hinfo;
+//                // namespace must not contain characters other than alphanumerics, '_', or '/'
+//                cfg_tf_prefix_ = hinfo.short_name();
+//                std::regex tf_prefix_pattern("[^A-Za-z0-9_]");
+//
+//                // write the results to an output iterator
+//                cfg_tf_prefix_ = std::regex_replace(cfg_tf_prefix_,
+//                                                    tf_prefix_pattern, "") + std::string("_");
+//        }
 }
+
+///** Add the tf_prefix in case it is not to be excluded
+// * @param frame_id the frame_id to add the prefix to
+// */
+//void
+//ROS2Aspect::add_tf_prefix(std::string &frame_id)
+//{
+//        if (tf_prefix_enabled_ == true && std::find(cfg_tf_prefix_exclusions_.begin(), cfg_tf_prefix_exclusions_.end(), frame_id) == cfg_tf_prefix_exclusions_.end()) {
+//                // cfg_tf_prefix_exclusions_ does not contain ts.header.frame_id so we can add the prefix.
+//		frame_id.insert(0, cfg_tf_prefix_);
+//	}
+//}
 
 /** Finalize ROS2 aspect.
  * This clears the ROS2 node handle.

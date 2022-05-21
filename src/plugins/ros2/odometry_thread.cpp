@@ -41,12 +41,12 @@ ROS2OdometryThread::ROS2OdometryThread()
 void
 ROS2OdometryThread::init()
 {
-	std::string motor_if_id = config->get_string("/ros/odometry/motor_interface_id");
-	cfg_odom_frame_id_      = config->get_string("/ros/odometry/odom_frame_id");
-	cfg_base_frame_id_      = config->get_string("/ros/odometry/base_frame_id");
-	if (config->exists("/ros/odometry/odom/covariance")) {
+	std::string motor_if_id = config->get_string("/ros2/odometry/motor_interface_id");
+	cfg_odom_frame_id_      = config->get_string("/ros2/odometry/odom_frame_id");
+	cfg_base_frame_id_      = config->get_string("/ros2/odometry/base_frame_id");
+	if (config->exists("/ros2/odometry/odom/covariance")) {
 		odom_covariance_.assign(0.);
-		std::vector<float> cfg_odom_covariance = config->get_floats("/ros/odometry/odom/covariance");
+		std::vector<float> cfg_odom_covariance = config->get_floats("/ros2/odometry/odom/covariance");
 		for (uint i = 0; i < cfg_odom_covariance.size() && i < odom_covariance_.size(); i++) {
 			odom_covariance_[i] = cfg_odom_covariance.size();
 		}
@@ -57,6 +57,7 @@ ROS2OdometryThread::init()
 	}
 	motor_if_ = blackboard->open_for_reading<MotorInterface>(motor_if_id.c_str());
 	pub_      = node_handle->create_publisher<nav_msgs::msg::Odometry>("odom", 10);
+  logger->log_info(name(), "done");
 }
 
 void

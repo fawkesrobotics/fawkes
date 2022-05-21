@@ -29,17 +29,17 @@ using namespace fawkes;
 /** Plugin exchange laser scans between Fawkes and ROS.
  * @author Tim Niemueller
  */
-class ROS2LaserScanPlugin : public fawkes::Plugin
+class Ros2LaserScanPlugin : public fawkes::Plugin
 {
 public:
 	/** Constructor.
    * @param config Fawkes configuration
    */
-	explicit ROS2LaserScanPlugin(Configuration *config) : Plugin(config)
+	explicit Ros2LaserScanPlugin(Configuration *config) : Plugin(config)
 	{
 		thread_list.push_back(new ROS2LaserScanThread());
 	}
 };
 
 PLUGIN_DESCRIPTION("ROS laser scan exchange plugin")
-EXPORT_PLUGIN(ROS2LaserScanPlugin)
+EXPORT_PLUGIN(Ros2LaserScanPlugin)

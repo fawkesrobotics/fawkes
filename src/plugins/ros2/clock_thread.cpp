@@ -39,7 +39,8 @@ void
 ROS2ClockThread::init()
 {
 	cfg_freq_ = config->get_uint("/ros/clock/frequency");
-	pub_      = node_handle->create_publisher<rosgraph_msgs::msg::Clock>("clock", 1);
+	pub_      = node_handle->create_publisher<rosgraph_msgs::msg::Clock>("/clock", 1);
+	node_handle->declare_parameter("/use_sim_time");
 	node_handle->set_parameter(rclcpp::Parameter("/use_sim_time", rclcpp::ParameterValue(true)));
 
 	set_local_ = node_handle->get_clock()->get_clock_type() == rcl_clock_type_t::RCL_SYSTEM_TIME;

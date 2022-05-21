@@ -15,7 +15,7 @@
 
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
-include $(BUILDSYSDIR)/ros.mk
+include $(BUILDSYSDIR)/ros2.mk
 include $(BUILDCONFDIR)/tf/tf.mk
 
 LIBS_libfawkes_amcl_pf = m
@@ -70,19 +70,19 @@ ifeq ($(HAVE_TF),1)
   LDFLAGS_map_lasergen      += $(LDFLAGS_TF)
   LIBS_map_lasergen         += fawkestf
 
-  ifeq ($(HAVE_ROS),1)
-    ifeq ($(call ros-have-pkg,geometry_msgs),1)
-      ifeq ($(call ros-have-pkg,nav_msgs),1)
-        CFLAGS_amcl_thread += $(CFLAGS_ROS) \
-          $(call ros-pkg-cflags,geometry_msgs) \
-          $(call ros-pkg-cflags,nav_msgs)
+  ifeq ($(HAVE_ROS2),1)
+    ifeq ($(call ros2-have-pkg,geometry_msgs),1)
+      ifeq ($(call ros2-have-pkg,nav_msgs),1)
+        CFLAGS_amcl_thread += $(CFLAGS_ROS2) \
+          $(call ros2-pkg-cflags,geometry_msgs) \
+          $(call ros2-pkg-cflags,nav_msgs)
         CFLAGS_amcl_plugin += $(CFLAGS_ros_thread)
-        LDFLAGS_amcl += $(LDFLAGS_ROS) \
-          $(call ros-pkg-lflags,geometry_msgs) \
-          $(call ros-pkg-lflags,nav_msgs)
-        LIBS_amcl += fawkesrosaspect
+        LDFLAGS_amcl += $(LDFLAGS_ROS2) \
+          $(call ros2-pkg-lflags,geometry_msgs) \
+          $(call ros2-pkg-lflags,nav_msgs)
+        LIBS_amcl += fawkesros2aspect
         OBJS_amcl += ros_thread.o
-        CFLAGS_ros_thread = $(CFLAGS_amcl_thread)
+        CFLAGS_ros_thread = $(CFLAGS_amcl_thread) $(CFLAGS_ROS2)
       else
         WARN_TARGET += warning_nav_msgs
       endif

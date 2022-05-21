@@ -1,8 +1,8 @@
 #*****************************************************************************
-#               Makefile Build System for Fawkes: ROS Plugin
+#               Makefile Build System for Fawkes: ROS 2 Plugins
 #                            -------------------
 #   Created on Thu May 05 18:23:31 2011
-#   Copyright (C) 2006-2012 by Tim Niemueller, AllemaniACs RoboCup Team
+#   Copyright (C) 2006-2012 by Gjorgji Nikolovski
 #
 #*****************************************************************************
 #
@@ -55,8 +55,13 @@ LIBS_ros2_joint = fawkescore fawkesutils fawkesaspects fawkesblackboard \
 OBJS_ros2_joint = joint_plugin.o joint_thread.o
 
 LIBS_ros2_odometry = m fawkescore fawkesutils fawkesaspects fawkesblackboard \
-		    fawkesinterface fawkestf fawkesros2aspect MotorInterface
+			fawkesinterface fawkestf fawkesros2aspect MotorInterface
 OBJS_ros2_odometry = odometry_plugin.o odometry_thread.o
+
+LIBS_ros2_navigator = m pthread fawkescore fawkesutils fawkesaspects fawkesblackboard \
+			fawkesinterface fawkesros2aspect Position3DInterface \
+			NavigatorInterface
+OBJS_ros2_navigator = navigator_plugin.o navigator_thread.o
 
 LIBS_ros2_robot_description = fawkescore fawkesutils fawkesaspects fawkesros2aspect
 OBJS_ros2_robot_description = robot_description_plugin.o robot_description_thread.o
@@ -65,22 +70,24 @@ LIBS_ros2_position_3d = fawkescore fawkesutils fawkesaspects fawkesblackboard \
 	      fawkesinterface fawkesros2aspect Position3DInterface
 OBJS_ros2_position_3d = position_3d_thread.o position_3d_plugin.o
 
+OBJS_ros2_laserscan = laserscan_thread.o laserscan_plugin.o
 LIBS_ros2_laserscan = m fawkescore fawkesutils fawkesaspects fawkesblackboard \
-	        fawkesinterface fawkesros2aspect fvutils Laser360Interface \
-		    Laser720Interface Laser1080Interface
+			fawkesinterface fawkesros2aspect fvutils Laser360Interface \
+			Laser720Interface Laser1080Interface
+
+#LIBS_ros2_pcl = fawkescore fawkesutils fawkesaspects fawkesblackboard \
+#	      fawkesinterface fawkesros2aspect fawkestf fawkespcl_utils
+#OBJS_ros2_pcl = pcl_plugin.o pcl_thread.o
+
 OBJS_ros2_laserscan = laserscan_plugin.o laserscan_thread.o
 
 LIBS_ros2_pcl = fawkescore fawkesutils fawkesaspects fawkesblackboard \
-	      fawkesinterface fawkesros2aspect fawkestf fawkespcl_utils
+		fawkesinterface fawkesros2aspect fawkestf fawkespcl_utils
 OBJS_ros2_pcl = pcl_plugin.o pcl_thread.o
 
 LIBS_ros2_skiller = fawkescore fawkesutils fawkesaspects fawkesblackboard \
-	      fawkesinterface fawkesros2aspect SkillerInterface
+			fawkesinterface fawkesros2aspect SkillerInterface
 OBJS_ros2_skiller = skiller_plugin.o skiller_thread.o
-
-LIBS_ros2_navigator = m pthread fawkescore fawkesutils fawkesaspects fawkesblackboard \
-		     fawkesinterface fawkesros2aspect NavigatorInterface
-OBJS_ros2_navigator = navigator_plugin.o navigator_thread.o
 
 OBJS_all = $(OBJS_ros2)  \
            $(OBJS_ros2_cmdvel) \
@@ -93,9 +100,8 @@ OBJS_all = $(OBJS_ros2)  \
            $(OBJS_ros2_odometry) \
            $(OBJS_ros2_robot_description) \
            $(OBJS_ros2_position_3d) \
-           $(OBJS_ros2_laserscan) \
-           $(OBJS_ros2_pcl) \
            $(OBJS_ros2_skiller) \
+           $(OBJS_ros2_laserscan) \
            $(OBJS_ros2_navigator)
 
 PLUGINS_all = $(PLUGINDIR)/ros2.so \
@@ -110,70 +116,66 @@ PLUGINS_all = $(PLUGINDIR)/ros2.so \
               $(PLUGINDIR)/ros2-robot-description.so \
               $(PLUGINDIR)/ros2-position-3d.so \
               $(PLUGINDIR)/ros2-laserscan.so \
+              $(PLUGINDIR)/ros2-navigator.so \
               $(PLUGINDIR)/ros2-pcl.so \
-              $(PLUGINDIR)/ros2-skiller.so \
-              $(PLUGINDIR)/ros2-navigator.so
-              
+              $(PLUGINDIR)/ros2-skiller.so
+
 CFLAGS  += $(CFLAGS_ROS2) -Wno-unknown-pragmas -Wno-deprecated-declarations
 LDFLAGS += $(LDFLAGS_ROS2)
 
-CFLAGS_cmdvel_thread += $(CFLAGS) $(GEOMETRY_MSGS_cflags)
+CFLAGS_cmdvel_thread += $(CFLAGS) $(call ros2-pkg-cflags,geometry_msgs)
 CFLAGS_cmdvel_plugin = $(CFLAGS_cmdvel_thread)
-LDFLAGS_ros2_cmdvel += $(LDFLAGS) $(GEOMETRY_MSGS_lflags)
+LDFLAGS_ros2_cmdvel += $(LDFLAGS) $(call ros2-pkg-lflags,geometry_msgs)
 
-CFLAGS_talkerpub_thread += $(CFLAGS) $(STD_MSGS_cflags)
+CFLAGS_talkerpub_thread += $(CFLAGS) $(call ros2-pkg-cflags,std_msgs)
 CFLAGS_talkerpub_plugin += $(CFLAGS_talkerpub_thread)
-LDFLAGS_ros2_talkerpub += $(LDFLAGS) $(STD_MSGS_lflags)
+LDFLAGS_ros2_talkerpub += $(LDFLAGS) $(call ros2-pkg-lflags,std_msgs)
 
-CFLAGS_tf2_thread += $(CFLAGS) $(CFLAGS_TF) $(TF2_cflags) $(TF2_MSGS_cflags)
+CFLAGS_tf2_thread += $(CFLAGS) $(CFLAGS_TF) $(call ros2-pkg-cflags,tf2) $(call ros2-pkg-cflags,tf2_msgs)
 CFLAGS_tf2_plugin = $(CFLAGS_tf2_thread)
-LDFLAGS_ros2_tf += $(LDFLAGS) $(TF2_lflags) $(TF2_MSGS_lflags)
+LDFLAGS_ros2_tf2 += $(LDFLAGS) $(call ros2-pkg-lflags,tf2) $(call ros2-pkg-lflags,tf2_msgs)
 
-CFLAGS_clock_thread += $(CFLAGS) $(ROSGRAPH_MSGS_cflags)
+
+CFLAGS_clock_thread += $(CFLAGS) $(call ros2-pkg-cflags,rosgraph_msgs)
 CFLAGS_clock_plugin = $(CFLAGS_clock_thread)
-LDFLAGS_ros2_clock += $(LDFLAGS) $(ROSGRAPH_MSGS_lflags)
+LDFLAGS_ros2_clock += $(LDFLAGS) $(call ros2-pkg-lflags,rosgraph_msgs)
 
-CFLAGS_image_thread += $(CFLAGS) $(IMAGE_TRANSPORT_cflags) $(SENSOR_MSGS_cflags)
+CFLAGS_image_thread += $(CFLAGS) $(call ros2-pkg-cflags,image_transport) $(call ros2-pkg-cflags,sensor_msgs)
 CFLAGS_image_plugin = $(CFLAGS_image_thread)
-LDFLAGS_ros2_images += $(LDFLAGS) $(IMAGE_TRANSPORT_lflags) $(SENSOR_MSGS_lflags)
+LDFLAGS_ros2_images += $(LDFLAGS) $(call ros2-pkg-lflags,image_transport) $(call ros2-pkg-lflags,sensor_msgs)
 
-CFLAGS_imu_thread += $(CFLAGS) $(SENSOR_MSGS_cflags)
+CFLAGS_imu_thread += $(CFLAGS) $(call ros2-pkg-cflags,sensor_msgs)
 CFLAGS_imu_plugin = $(CFLAGS_imu_thread)
-LDFLAGS_ros2_imu += $(LDFLAGS) $(SENSOR_MSGS_lflags)
+LDFLAGS_ros2_imu += $(LDFLAGS) $(call ros2-pkg-lflags,sensor_msgs)
 
-CFLAGS_joint_thread = $(CFLAGS) $(SENSOR_MSGS_cflags)
+CFLAGS_joint_thread = $(CFLAGS) $(call ros2-pkg-cflags,sensor_msgs)
 CFLAGS_joint_plugin = $(CFLAGS_joint_thread)
-LDFLAGS_ros2_joint += $(LDFLAGS) $(SENSOR_MSGS_lflags)
+LDFLAGS_ros2_joint += $(LDFLAGS) $(call ros2-pkg-lflags,sensor_msgs)
 
-CFLAGS_odometry_thread += $(CFLAGS) $(NAV_MSGS_cflags) $(CFLAGS_TF)
+CFLAGS_odometry_thread += $(CFLAGS) $(call ros2-pkg-cflags,nav_msgs) $(CFLAGS_TF)
 CFLAGS_odometry_plugin = $(CFLAGS_odometry_thread)
-LDFLAGS_ros_odometry += $(LDFLAGS) $(NAV_MSGS_lflags) $(LDFLAGS_TF) -lboost
+LDFLAGS_ros2_odometry += $(LDFLAGS) $(call ros2-pkg-lflags,nav_msgs) $(LDFLAGS_TF)
 
 CFLAGS_robot_description_thread += $(CFLAGS)
 CFLAGS_robot_description_plugin = $(CFLAGS_robot_description_thread)
 LDFLAGS_ros2_robot_description += $(LDFLAGS)
 
-CFLAGS_position_3d_thread += $(CFLAGS) $(FAWKES_MSGS_cflags)
-CFLAGS_position_3d_plugin = $(CFLAGS_position_3d_thread)
-LDFLAGS_ros_position_3d += $(LDFLAGS) $(FAWKES_MSGS_lflags)
-
-CFLAGS_laserscan_thread += $(CFLAGS) $(SENSOR_MSGS_cflags)
-CFLAGS_laserscan_plugin = $(CFLAGS_laserscan_thread)
-LDFLAGS_ros_laserscan += $(LDFLAGS) $(SENSOR_MSGS_lflags)
-
-CFLAGS_pcl_adapter += $(CFLAGS) $(CFLAGS_TF) $(CFLAGS_PCL) $(SENSOR_MSGS_cflags) $(PCL_CONVERSIONS_cflags)
-CFLAGS_pcl_thread += $(CFLAGS) $(CFLAGS_TF) $(CFLAGS_PCL) $(SENSOR_MSGS_cflags) $(PCL_CONVERSIONS_cflags)
-CFLAGS_pcl_plugin = $(CFLAGS_pcl_thread)
-LDFLAGS_ros2_pcl += $(LDFLAGS) $(LDFLAGS_TF) $(LDFLAGS_PCL) $(SENSOR_MSGS_lflags) $(PCL_CONVERSIONS_lflags)
-
-CFLAGS_skiller_thread += $(CFLAGS) $(FAWKES_MSGS_cflags) $(RCLCPP_ACTION_cflags) $(call boost-lib-cflags,thread) $(call boost-lib-cflags,system) 
-CFLAGS_skiller_plugin += $(CFLAGS_skiller_thread)
-LDFLAGS_ros2_skiller += $(LDFLAGS) $(FAWKES_MSGS_lflags) $(RCLCPP_ACTION_lflags) $(call boost-lib-ldflags,thread) $(call boost-lib-ldflags,system) -lpthread
-
-CFLAGS_navigator_thread += $(CFLAGS) $(RCLCPP_ACTION_cflags) $(NAV2_MSGS_cflags) $(TF2_cflags) $(TF2_MSGS_cflags) $(GEOMETRY_MSGS_cflags) $(call boost-lib-cflags,thread) $(CFLAGS_TF)
+CFLAGS_navigator_thread += $(CFLAGS) $(call ros2-pkg-cflags,nav2_msgs) $(call ros2-pkg-cflags,rclcpp_action) ${CFLAGS_TF}
 CFLAGS_navigator_plugin = $(CFLAGS_navigator_thread)
-LDFLAGS_ros2_navigator += $(LDFLAGS) $(RCLCPP_ACTION_lflags) $(NAV2_MSGS_lflags) $(TF2_lflags) $(TF2_MSGS_lflags) $(GEOMETRY_MSGS_lflags) $(call boost-libs-ldflags,thread system) $(LDFLAGS_TF)
-                        
+LDFLAGS_ros2_navigator += $(LDFLAGS) $(call ros2-pkg-lflags,nav2_msgs) $(call ros2-pkg-lflags,rclcpp_action)
+
+#CFLAGS_pcl_adapter += $(CFLAGS) $(CFLAGS_TF) $(CFLAGS_PCL) $(SENSOR_MSGS_cflags) $(PCL_CONVERSIONS_cflags)
+#CFLAGS_pcl_thread += $(CFLAGS) $(CFLAGS_TF) $(CFLAGS_PCL) $(SENSOR_MSGS_cflags) $(PCL_CONVERSIONS_cflags)
+#CFLAGS_pcl_plugin = $(CFLAGS_pcl_thread)
+#LDFLAGS_ros2_pcl += $(LDFLAGS) $(LDFLAGS_TF) $(LDFLAGS_PCL) $(SENSOR_MSGS_lflags) $(PCL_CONVERSIONS_lflags)
+
+CFLAGS_laserscan_thread += $(CFLAGS) $(call ros2-pkg-cflags,sensor_msgs)
+CFLAGS_laserscan_plugin = $(CFLAGS_laserscan_thread)
+LDFLAGS_ros2_laserscan += $(LDFLAGS) $(call ros2-pkg-lflags,sensor_msgs)
+
+CFLAGS_position_3d_thread += $(CFLAGS) $(call ros2-pkg-cflags,fawkes_msgs)
+CFLAGS_position_3d_plugin = $(CFLAGS_position_3d_thread)
+LDFLAGS_ros_position_3d += $(LDFLAGS) $(call ros2-pkg-lflags,fawkes_msgs)
 
 PLUGINS_build += $(PLUGINDIR)/ros2.so \
                  $(PLUGINDIR)/ros2-cmdvel.so \
@@ -185,12 +187,10 @@ PLUGINS_build += $(PLUGINDIR)/ros2.so \
                  $(PLUGINDIR)/ros2-joint.so \
                  $(PLUGINDIR)/ros2-odometry.so \
                  $(PLUGINDIR)/ros2-robot-description.so \
-                 $(PLUGINDIR)/ros2-position-3d.so \
                  $(PLUGINDIR)/ros2-laserscan.so \
-                 $(PLUGINDIR)/ros2-pcl.so \
-                 $(PLUGINDIR)/ros2-skiller.so \
                  $(PLUGINDIR)/ros2-navigator.so
-
+#                 $(PLUGINDIR)/ros2-pcl.so
+#                 #$(PLUGINDIR)/ros2-position-3d.so
 
 include $(BUILDSYSDIR)/base.mk
 

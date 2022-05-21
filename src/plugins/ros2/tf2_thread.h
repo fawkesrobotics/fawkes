@@ -97,8 +97,13 @@ protected:
 	}
 
 private:
-	bool  cfg_use_tf2_;
-	float cfg_update_interval_;
+	bool		cfg_use_tf2_;
+	bool		cfg_use_namespace_;
+	std::string	cfg_tf_prefix_;
+	std::vector<std::string>	cfg_tf_prefix_exclusions_;
+	float		cfg_update_interval_;
+
+	bool		tf_prefix_enabled_;
 
 	std::list<std::string>                  ros2_frames_;
 	std::list<fawkes::TransformInterface *> tfifs_;
