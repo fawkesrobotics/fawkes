@@ -142,15 +142,13 @@ BlackBoardSynchronizationThread::loop()
 	if(connect_failed_since_ == 4){
 		delete timewait_;
 		timewait_ = new TimeWait(clock, check_interval_* 1000 * 5);
+		rb_if_->set_alive(false);
+		rb_if_->write();
 	}
 	timewait_->mark_start();
 	check_connection();
 	bool connected = check_connection();
-	if (!connected){
-		rb_if_->set_alive(connected);
-		rb_if_->write();
-		connect_failed_since_++;
-	}
+	connect_failed_since_ = connected ? 0 : connect_failed_since_ + 1;
 	timewait_->wait_systime();
 }
 
