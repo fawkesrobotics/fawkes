@@ -45,8 +45,7 @@ using namespace fawkes;
 BlackBoardSynchronizationThread::BlackBoardSynchronizationThread(std::string &bbsync_cfg_prefix,
                                                                  std::string &peer_cfg_prefix,
                                                                  std::string &peer)
-: Thread("", Thread::OPMODE_CONTINUOUS),
-	BlackBoardInterfaceListener("BBSyncThread")
+: Thread("", Thread::OPMODE_CONTINUOUS), BlackBoardInterfaceListener("BBSyncThread")
 {
 	set_name("BBSyncThread[%s]", peer.c_str());
 	set_prepfin_conc_loop(true);
@@ -67,20 +66,20 @@ void
 BlackBoardSynchronizationThread::init()
 {
 	logger->log_debug(name(), "Initializing");
-	check_interval_= 0;
+	check_interval_       = 0;
 	connect_failed_since_ = 0;
 	try {
 		host_ = config->get_string((peer_cfg_prefix_ + "host").c_str());
 		port_ = config->get_uint((peer_cfg_prefix_ + "port").c_str());
 
-		check_interval_= config->get_uint((bbsync_cfg_prefix_ + "check_interval").c_str());
+		check_interval_ = config->get_uint((bbsync_cfg_prefix_ + "check_interval").c_str());
 	} catch (Exception &e) {
 		e.append("Host or port not specified for peer");
 		throw;
 	}
 
 	try {
-		check_interval_= config->get_uint((peer_cfg_prefix_ + "check_interval").c_str());
+		check_interval_ = config->get_uint((peer_cfg_prefix_ + "check_interval").c_str());
 		logger->log_debug(name(), "Peer check interval set, overriding default.");
 	} catch (Exception &e) {
 		logger->log_debug(name(), "No per-peer check interval set, using default");
@@ -109,12 +108,12 @@ BlackBoardSynchronizationThread::init()
 	}
 
 	logger->log_debug(name(), "Checking for remote aliveness every %u ms", check_interval_);
-	timewait_ = new TimeWait(clock, check_interval_* 1000);
+	timewait_ = new TimeWait(clock, check_interval_ * 1000);
 }
 
 void
-BlackBoardSynchronizationThread::init_rb_sync(){
-
+BlackBoardSynchronizationThread::init_rb_sync()
+{
 	rb_if_ = blackboard->open_for_writing<HeartbeatInterface>(("/heartbeat/" + peer_).c_str());
 	rb_if_->set_msg_id(0);
 	rb_if_->set_alive(true);
@@ -139,20 +138,21 @@ BlackBoardSynchronizationThread::finalize()
 void
 BlackBoardSynchronizationThread::loop()
 {
-	if(connect_failed_since_ == 4){
+	if (connect_failed_since_ == 4) {
 		delete timewait_;
-		timewait_ = new TimeWait(clock, check_interval_* 1000 * 5);
+		timewait_ = new TimeWait(clock, check_interval_ * 1000 * 5);
 		rb_if_->set_alive(false);
 		rb_if_->write();
 	}
 	timewait_->mark_start();
 	check_connection();
-	bool connected = check_connection();
+	bool connected        = check_connection();
 	connect_failed_since_ = connected ? 0 : connect_failed_since_ + 1;
 	timewait_->wait_systime();
 }
 
-bool BlackBoardSynchronizationThread::check_connection()
+bool
+BlackBoardSynchronizationThread::check_connection()
 {
 	if (!remote_bb_ || !remote_bb_->is_alive()) {
 		if (remote_bb_) {
