@@ -68,11 +68,14 @@ BlackBoardSynchronizationThread::init()
 	logger->log_debug(name(), "Initializing");
 	check_interval_       = 0;
 	connect_failed_since_ = 0;
+	missing_heartbeat_report_ = 0;
+	timewait_ = 0;
 	try {
 		host_ = config->get_string((peer_cfg_prefix_ + "host").c_str());
 		port_ = config->get_uint((peer_cfg_prefix_ + "port").c_str());
 
 		check_interval_ = config->get_uint((bbsync_cfg_prefix_ + "check_interval").c_str());
+		missing_heartbeat_report_ = config->get_uint((bbsync_cfg_prefix_ + "missing_heartbeat_report").c_str());
 	} catch (Exception &e) {
 		e.append("Host or port not specified for peer");
 		throw;
@@ -101,26 +104,25 @@ BlackBoardSynchronizationThread::init()
 	wsl_local_  = new SyncWriterInterfaceListener(this, logger, (peer_ + "/local").c_str());
 	wsl_remote_ = new SyncWriterInterfaceListener(this, logger, (peer_ + "/remote").c_str());
 
-	init_rb_sync();
+	init_hb_if();
 
 	if (!check_connection()) {
 		logger->log_warn(name(), "Remote peer not reachable, will keep trying");
 	}
 
 	logger->log_debug(name(), "Checking for remote aliveness every %u ms", check_interval_);
-	timewait_ = new TimeWait(clock, check_interval_ * 1000);
+	set_time_wait();
 }
 
 void
-BlackBoardSynchronizationThread::init_rb_sync()
+BlackBoardSynchronizationThread::init_hb_if()
 {
-	rb_if_ = blackboard->open_for_writing<HeartbeatInterface>(("/heartbeat/" + peer_).c_str());
-	rb_if_->set_msg_id(0);
-	rb_if_->set_alive(true);
-	rb_if_->write();
+	hb_if_ = blackboard->open_for_writing<HeartbeatInterface>(("/heartbeat/" + peer_).c_str());
+	hb_if_->set_alive(true);
+	hb_if_->write();
 
 	//setup interface listener
-	bbil_add_message_interface(rb_if_);
+	bbil_add_message_interface(hb_if_);
 	blackboard->register_listener(this, BlackBoard::BBIL_FLAG_WRITER);
 }
 
@@ -135,19 +137,25 @@ BlackBoardSynchronizationThread::finalize()
 	remote_bb_ = NULL;
 }
 
+void BlackBoardSynchronizationThread::set_time_wait(int multiplier ){
+	if(timewait_)
+		delete timewait_;
+	timewait_ = new TimeWait(clock, check_interval_ * 1000 * multiplier);
+}
+
 void
 BlackBoardSynchronizationThread::loop()
 {
-	if (connect_failed_since_ == 4) {
-		delete timewait_;
-		timewait_ = new TimeWait(clock, check_interval_ * 1000 * 5);
-		rb_if_->set_alive(false);
-		rb_if_->write();
-	}
 	timewait_->mark_start();
 	check_connection();
 	bool connected        = check_connection();
+	if (connect_failed_since_ >= missing_heartbeat_report_ && connected)
+		set_time_wait();
 	connect_failed_since_ = connected ? 0 : connect_failed_since_ + 1;
+	if (connect_failed_since_ == missing_heartbeat_report_ )
+		set_time_wait(missing_heartbeat_report_);
+	hb_if_->set_alive(connected);
+	hb_if_->write();
 	timewait_->wait_systime();
 }
 

@@ -143,17 +143,18 @@ private:
 	bool check_connection();
 	void read_config_combos(std::string prefix, bool writing);
 	void open_interfaces();
-	void init_rb_sync();
-
+	void init_hb_if();
+	void set_time_wait(int multiplier = 1);
 	void close_interfaces();
 
 private:
 	unsigned int                check_interval_;
+	unsigned int								missing_heartbeat_report_;
 	unsigned int                connect_failed_since_;
 	std::string                 bbsync_cfg_prefix_;
 	std::string                 peer_cfg_prefix_;
 	std::string                 peer_;
-	fawkes::HeartbeatInterface *rb_if_;
+	fawkes::HeartbeatInterface *hb_if_;
 	std::string                 host_;
 	unsigned int                port_;
 
