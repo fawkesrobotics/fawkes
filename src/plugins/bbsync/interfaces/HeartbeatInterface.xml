@@ -3,13 +3,10 @@
 <interface name="HeartbeatInterface" author="Mike Henning" year="2022">
   <data>
     <comment>
-      Interface to check on the availablity of the robotino
+      Interface to check on the connected clients availablity
     </comment>
-    <field type="uint32" name="msg_id">
-      The ID of the message that was processed last
-    </field>
     <field type="bool" name="alive">
-      Is the robotino alive?
+      Field to send the current liveliness state
     </field>
   </data>
 
