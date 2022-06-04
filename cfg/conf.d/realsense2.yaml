@@ -7,8 +7,11 @@ realsense2:
   # Frame ID of the PointCloud
   frame_id: "cam_conveyor"
 
-  # ID of the PointCloud
-  pcl_id: "/camera/depth/points"
+  # Path to save images to
+  rgb_path: "/tmp/realsense_images/"
+
+  # Shared Image Buffer ID
+  shm_image_id: "realsense_rgb"
 
   # If true, the camera will be enabled/disabled on incoming Enable/Disable
   # messages. If false, switch messages will be ignored.
@@ -17,6 +20,8 @@ realsense2:
   # Desired Frame rate. Device will try deliver new frames in time.
   # 0 for don't care
   frame_rate: 30
+  rgb_width: 640
+  rgb_height: 480
 
   # Number of retries after unsuccessful polling before restarting the camera
   restart_after_num_errors: 50

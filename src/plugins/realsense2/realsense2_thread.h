@@ -31,6 +31,9 @@
 #include <aspect/logging.h>
 #include <aspect/pointcloud.h>
 #include <core/threading/thread.h>
+#include <fvutils/color/conversions.h>
+#include <fvutils/ipc/shm_image.h>
+#include <fvutils/writers/png.h>
 #include <librealsense2/rsutil.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
@@ -90,6 +93,12 @@ private:
 	fawkes::RefPtr<Cloud> realsense_depth_refptr_;
 	CloudPtr              realsense_depth_;
 
+	firevision::PNGWriter png_writer_;
+
+	rs2::pipeline *rgb_rs_pipe_;
+	rs2::frameset  rgb_rs_data_;
+	rs2_intrinsics rgb_intrinsics_;
+
 	rs2::pipeline *rs_pipe_;
 	rs2::context * rs_context_;
 	rs2::device    rs_device_;
@@ -107,6 +116,20 @@ private:
 	bool        depth_enabled_  = false;
 	uint        restart_after_num_errors_;
 	uint        error_counter_ = 0;
+
+	/// firevision image buffer
+	firevision::SharedMemoryImageBuffer *shm_buffer_;
+	/// Image Buffer Id
+	std::string shm_id_;
+
+	uint        rgb_frame_rate_;
+	std::string rgb_path_;
+	std::string image_name_;
+	int         image_width_;
+	int         image_height_;
+	bool        save_images_;
+	size_t      name_it_;
+	uint        rgb_error_counter_ = 0;
 };
 
 #endif

@@ -5,6 +5,7 @@
  *  Plugin created: Wed May 22 10:09:22 2019
  *
  *  Copyright  2019 Christoph Gollok
+ *             2022 Matteo Tschesche
  *
  ****************************************************************************/
 
@@ -56,6 +57,15 @@ Realsense2Thread::init()
 
 	cfg_use_switch_ = config->get_bool_or_default((cfg_prefix + "use_switch").c_str(), true);
 
+	//rgb image path
+	rgb_path_ =
+	  config->get_string_or_default((cfg_prefix + "rgb_path").c_str(), "/tmp/realsense_images/");
+	//rgb camera resolution/frame rate
+	image_width_    = config->get_int_or_default((cfg_prefix + "rgb_width").c_str(), 640);
+	image_height_   = config->get_int_or_default((cfg_prefix + "rgb_height").c_str(), 480);
+	rgb_frame_rate_ = config->get_int_or_default((cfg_prefix + "frame_rate").c_str(), 30);
+	save_images_    = config->get_bool_or_default((cfg_prefix + "save_images").c_str(), false);
+
 	if (cfg_use_switch_) {
 		logger->log_info(name(), "Switch enabled");
 	} else {
@@ -78,6 +88,12 @@ Realsense2Thread::init()
 
 	rs_pipe_    = new rs2::pipeline();
 	rs_context_ = new rs2::context();
+
+	shm_id_ = config->get_string((cfg_prefix + "shm_image_id").c_str());
+
+	rgb_rs_pipe_ = new rs2::pipeline();
+
+	name_it_ = 0;
 }
 
 void
@@ -86,6 +102,45 @@ Realsense2Thread::loop()
 	if (!camera_running_) {
 		camera_running_ = start_camera();
 		return;
+	}
+	if (cfg_use_switch_) {
+		read_switch();
+	}
+
+	// take picture
+	if (enable_camera_) {
+		if (rgb_rs_pipe_->poll_for_frames(&rgb_rs_data_)) {
+			rgb_error_counter_           = 0;
+			rs2::video_frame color_frame = rgb_rs_data_.first(RS2_STREAM_COLOR, RS2_FORMAT_RGB8);
+			fawkes::Time     now(clock);
+
+			// set image in shared memory
+			firevision::convert(firevision::RGB,
+			                    firevision::RGB,
+			                    (unsigned char *)color_frame.get_data(),
+			                    shm_buffer_->buffer(),
+			                    image_width_,
+			                    image_height_);
+			shm_buffer_->set_capture_time(&now);
+
+			if (save_images_) {
+				image_name_ =
+				  rgb_path_ + std::to_string(name_it_) + color_frame.get_profile().stream_name() + ".png";
+				png_writer_.set_filename(image_name_.c_str());
+				png_writer_.set_dimensions(color_frame.get_width(), color_frame.get_height());
+				png_writer_.set_buffer(firevision::RGB, (unsigned char *)color_frame.get_data());
+				png_writer_.write();
+				name_it_++;
+			}
+		} else {
+			rgb_error_counter_++;
+			if (rgb_error_counter_ >= restart_after_num_errors_) {
+				logger->log_warn(name(), "Polling failed, restarting device");
+				rgb_error_counter_ = 0;
+				stop_camera();
+				start_camera();
+			}
+		}
 	}
 
 	if (cfg_use_switch_) {
@@ -136,6 +191,7 @@ void
 Realsense2Thread::finalize()
 {
 	stop_camera();
+	delete rgb_rs_pipe_;
 	delete rs_pipe_;
 	delete rs_context_;
 	realsense_depth_refptr_.reset();
@@ -151,6 +207,10 @@ Realsense2Thread::start_camera()
 {
 	try {
 		rs_pipe_->stop();
+	} catch (const std::exception &e) {
+	}
+	try {
+		rgb_rs_pipe_->stop();
 	} catch (const std::exception &e) {
 	}
 
@@ -175,6 +235,35 @@ Realsense2Thread::start_camera()
 		                 intrinsics_.width,
 		                 camera_scale_,
 		                 frame_rate_);
+
+		rs2::config rgb_rs_config;
+		rgb_rs_config.enable_stream(
+		  RS2_STREAM_COLOR, image_width_, image_height_, RS2_FORMAT_RGB8, rgb_frame_rate_);
+		rs2::pipeline_profile rgb_rs_pipeline_profile_ = rgb_rs_pipe_->start(rgb_rs_config);
+		auto                  rgb_stream =
+		  rgb_rs_pipeline_profile_.get_stream(RS2_STREAM_COLOR).as<rs2::video_stream_profile>();
+		rgb_intrinsics_              = rgb_stream.get_intrinsics();
+		rs2::color_sensor rgb_sensor = rs_device_.first<rs2::color_sensor>();
+		logger->log_info(name(),
+		                 "RGB Height: %d RGB Width: %d FPS: %d PPX: %f PPY: %f FX: %f FY: %f MODEL: %i "
+		                 "COEFFS: %f %f %f %f %f",
+		                 intrinsics_.height,
+		                 intrinsics_.width,
+		                 frame_rate_,
+		                 intrinsics_.ppx,
+		                 intrinsics_.ppy,
+		                 intrinsics_.fx,
+		                 intrinsics_.fy,
+		                 intrinsics_.model,
+		                 intrinsics_.coeffs[0],
+		                 intrinsics_.coeffs[1],
+		                 intrinsics_.coeffs[2],
+		                 intrinsics_.coeffs[3],
+		                 intrinsics_.coeffs[4]);
+		shm_buffer_ = new firevision::SharedMemoryImageBuffer(shm_id_.c_str(),
+		                                                      firevision::RGB,
+		                                                      image_width_,
+		                                                      image_height_);
 
 		return true;
 
