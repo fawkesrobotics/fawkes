@@ -66,16 +66,17 @@ void
 BlackBoardSynchronizationThread::init()
 {
 	logger->log_debug(name(), "Initializing");
-	check_interval_       = 0;
-	connect_failed_since_ = 0;
+	check_interval_           = 0;
+	connect_failed_since_     = 0;
 	missing_heartbeat_report_ = 0;
-	timewait_ = 0;
+	timewait_                 = 0;
 	try {
 		host_ = config->get_string((peer_cfg_prefix_ + "host").c_str());
 		port_ = config->get_uint((peer_cfg_prefix_ + "port").c_str());
 
 		check_interval_ = config->get_uint((bbsync_cfg_prefix_ + "check_interval").c_str());
-		missing_heartbeat_report_ = config->get_uint((bbsync_cfg_prefix_ + "missing_heartbeat_report").c_str());
+		missing_heartbeat_report_ =
+		  config->get_uint((bbsync_cfg_prefix_ + "missing_heartbeat_report").c_str());
 	} catch (Exception &e) {
 		e.append("Host or port not specified for peer");
 		throw;
@@ -137,8 +138,10 @@ BlackBoardSynchronizationThread::finalize()
 	remote_bb_ = NULL;
 }
 
-void BlackBoardSynchronizationThread::set_time_wait(int multiplier ){
-	if(timewait_)
+void
+BlackBoardSynchronizationThread::set_time_wait(int multiplier)
+{
+	if (timewait_)
 		delete timewait_;
 	timewait_ = new TimeWait(clock, check_interval_ * 1000 * multiplier);
 }
@@ -148,11 +151,11 @@ BlackBoardSynchronizationThread::loop()
 {
 	timewait_->mark_start();
 	check_connection();
-	bool connected        = check_connection();
+	bool connected = check_connection();
 	if (connect_failed_since_ >= missing_heartbeat_report_ && connected)
 		set_time_wait();
 	connect_failed_since_ = connected ? 0 : connect_failed_since_ + 1;
-	if (connect_failed_since_ == missing_heartbeat_report_ )
+	if (connect_failed_since_ == missing_heartbeat_report_)
 		set_time_wait(missing_heartbeat_report_);
 	hb_if_->set_alive(connected);
 	hb_if_->write();

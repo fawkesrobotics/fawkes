@@ -149,7 +149,7 @@ private:
 
 private:
 	unsigned int                check_interval_;
-	unsigned int								missing_heartbeat_report_;
+	unsigned int                missing_heartbeat_report_;
 	unsigned int                connect_failed_since_;
 	std::string                 bbsync_cfg_prefix_;
 	std::string                 peer_cfg_prefix_;
