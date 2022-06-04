@@ -1,8 +1,8 @@
 #*****************************************************************************
-#              Makefile Build System for Fawkes: RobotMemoryInterface
+#              Makefile Build System for Fawkes: HeartbeatInterface
 #                            -------------------
-#   Created on Sun May 01 20:25:42 2016
-#   Copyright (C) 2016 Frederik Zwilling
+#   Created on Sat jun 04 13:30:4
+#   Copyright (C) 2022 Mike Henning
 #
 #*****************************************************************************
 #
