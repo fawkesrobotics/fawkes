@@ -9,10 +9,4 @@
       Field to send the current liveliness state
     </field>
   </data>
-
-  <message name="Heartbeat">
-    <comment>
-
-    </comment>
-  </message>
 </interface>
