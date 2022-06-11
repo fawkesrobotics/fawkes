@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "interface.dtd">
+<interface name="HeartbeatInterface" author="Mike Henning" year="2022">
+  <data>
+    <comment>
+      Interface to check on the connected clients availablity
+    </comment>
+    <field type="bool" name="alive">
+      Field to send the current liveliness state
+    </field>
+  </data>
+</interface>

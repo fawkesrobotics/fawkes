@@ -45,7 +45,7 @@ using namespace fawkes;
 BlackBoardSynchronizationThread::BlackBoardSynchronizationThread(std::string &bbsync_cfg_prefix,
                                                                  std::string &peer_cfg_prefix,
                                                                  std::string &peer)
-: Thread("", Thread::OPMODE_CONTINUOUS)
+: Thread("", Thread::OPMODE_CONTINUOUS), BlackBoardInterfaceListener("BBSyncThread")
 {
 	set_name("BBSyncThread[%s]", peer.c_str());
 	set_prepfin_conc_loop(true);
@@ -66,19 +66,29 @@ void
 BlackBoardSynchronizationThread::init()
 {
 	logger->log_debug(name(), "Initializing");
-	unsigned int check_interval = 0;
+	check_interval_           = 0;
+	connect_failed_since_     = 0;
+	missing_heartbeat_report_ = 0;
+	timewait_                 = 0;
 	try {
 		host_ = config->get_string((peer_cfg_prefix_ + "host").c_str());
 		port_ = config->get_uint((peer_cfg_prefix_ + "port").c_str());
-
-		check_interval = config->get_uint((bbsync_cfg_prefix_ + "check_interval").c_str());
 	} catch (Exception &e) {
 		e.append("Host or port not specified for peer");
 		throw;
 	}
 
 	try {
-		check_interval = config->get_uint((peer_cfg_prefix_ + "check_interval").c_str());
+		check_interval_ = config->get_uint((bbsync_cfg_prefix_ + "check_interval").c_str());
+		missing_heartbeat_report_ =
+		  config->get_uint((bbsync_cfg_prefix_ + "missing_heartbeat_report").c_str());
+	} catch (Exception &e) {
+		e.append("No check interval or missing heartbeat report set");
+		throw;
+	}
+
+	try {
+		check_interval_ = config->get_uint((peer_cfg_prefix_ + "check_interval").c_str());
 		logger->log_debug(name(), "Peer check interval set, overriding default.");
 	} catch (Exception &e) {
 		logger->log_debug(name(), "No per-peer check interval set, using default");
@@ -100,21 +110,33 @@ BlackBoardSynchronizationThread::init()
 	wsl_local_  = new SyncWriterInterfaceListener(this, logger, (peer_ + "/local").c_str());
 	wsl_remote_ = new SyncWriterInterfaceListener(this, logger, (peer_ + "/remote").c_str());
 
+	init_hb_if();
+
 	if (!check_connection()) {
 		logger->log_warn(name(), "Remote peer not reachable, will keep trying");
 	}
 
-	logger->log_debug(name(), "Checking for remote aliveness every %u ms", check_interval);
-	timewait_ = new TimeWait(clock, check_interval * 1000);
+	logger->log_debug(name(), "Checking for remote aliveness every %u ms", check_interval_);
+	set_time_wait();
+}
+
+void
+BlackBoardSynchronizationThread::init_hb_if()
+{
+	hb_if_ = blackboard->open_for_writing<HeartbeatInterface>(("/heartbeat/" + peer_).c_str());
+	hb_if_->set_alive(true);
+	hb_if_->write();
+
+	//setup interface listener
+	bbil_add_message_interface(hb_if_);
+	blackboard->register_listener(this, BlackBoard::BBIL_FLAG_WRITER);
 }
 
 void
 BlackBoardSynchronizationThread::finalize()
 {
 	delete timewait_;
-
 	close_interfaces();
-
 	delete wsl_local_;
 	delete wsl_remote_;
 	delete remote_bb_;
@@ -122,10 +144,26 @@ BlackBoardSynchronizationThread::finalize()
 }
 
 void
+BlackBoardSynchronizationThread::set_time_wait(int multiplier)
+{
+	if (timewait_)
+		delete timewait_;
+	timewait_ = new TimeWait(clock, check_interval_ * 1000 * multiplier);
+}
+
+void
 BlackBoardSynchronizationThread::loop()
 {
 	timewait_->mark_start();
 	check_connection();
+	bool connected = check_connection();
+	if (connect_failed_since_ >= missing_heartbeat_report_ && connected)
+		set_time_wait();
+	connect_failed_since_ = connected ? 0 : connect_failed_since_ + 1;
+	if (connect_failed_since_ == missing_heartbeat_report_)
+		set_time_wait(missing_heartbeat_report_);
+	hb_if_->set_alive(connected);
+	hb_if_->write();
 	timewait_->wait_systime();
 }
 

@@ -30,9 +30,12 @@
 #include <aspect/clock.h>
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
+#include <blackboard/interface_listener.h>
 #include <core/threading/thread.h>
 #include <core/utils/lock_map.h>
+#include <interfaces/HeartbeatInterface.h>
 
+#include <chrono>
 #include <map>
 #include <string>
 #include <utility>
@@ -45,7 +48,8 @@ class BlackBoardSynchronizationThread : public fawkes::Thread,
                                         public fawkes::LoggingAspect,
                                         public fawkes::ConfigurableAspect,
                                         public fawkes::BlackBoardAspect,
-                                        public fawkes::ClockAspect
+                                        public fawkes::ClockAspect,
+                                        public fawkes::BlackBoardInterfaceListener
 {
 public:
 	BlackBoardSynchronizationThread(std::string &bbsync_cfg_prefix,
@@ -139,15 +143,20 @@ private:
 	bool check_connection();
 	void read_config_combos(std::string prefix, bool writing);
 	void open_interfaces();
+	void init_hb_if();
+	void set_time_wait(int multiplier = 1);
 	void close_interfaces();
 
 private:
-	std::string bbsync_cfg_prefix_;
-	std::string peer_cfg_prefix_;
-	std::string peer_;
-
-	std::string  host_;
-	unsigned int port_;
+	unsigned int                check_interval_;
+	unsigned int                missing_heartbeat_report_;
+	unsigned int                connect_failed_since_;
+	std::string                 bbsync_cfg_prefix_;
+	std::string                 peer_cfg_prefix_;
+	std::string                 peer_;
+	fawkes::HeartbeatInterface *hb_if_;
+	std::string                 host_;
+	unsigned int                port_;
 
 	fawkes::TimeWait *timewait_;
 
