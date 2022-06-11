@@ -81,8 +81,8 @@ BlackBoardSynchronizationThread::init()
 	try {
 		check_interval_ = config->get_uint((bbsync_cfg_prefix_ + "check_interval").c_str());
 		missing_heartbeat_report_ =
-		 config->get_uint((bbsync_cfg_prefix_ + "missing_heartbeat_report").c_str());
-	} catch(Exception &e){
+		  config->get_uint((bbsync_cfg_prefix_ + "missing_heartbeat_report").c_str());
+	} catch (Exception &e) {
 		e.append("No check interval or missing heartbeat report set");
 		throw;
 	}
