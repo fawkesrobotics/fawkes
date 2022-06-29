@@ -1,6 +1,6 @@
 /***************************************************************************
  *  clips_rm_trigger.cpp - Class holding information and callback for trigger in CLIPS
- *    
+ *
  *
  *  Created: 11:57:31 AM 2016
  *  Copyright  2016  Frederik Zwilling
@@ -78,17 +78,20 @@ ClipsRmTrigger::callback(const bsoncxx::document::view &update)
 	if (temp) {
 		struct timeval tv;
 		gettimeofday(&tv, 0);
-		CLIPS::Fact::pointer fact = CLIPS::Fact::create(**clips, temp);
-		fact->set_slot("name", assert_name.c_str());
-		CLIPS::Values rcvd_at(2, CLIPS::Value(CLIPS::TYPE_INTEGER));
+		CLIPS::Fact::pointer fact    = CLIPS::Fact::create(**clips, temp);
+		bool                 success = fact->set_slot("name", assert_name.c_str());
+		CLIPS::Values        rcvd_at(2, CLIPS::Value(CLIPS::TYPE_INTEGER));
 		rcvd_at[0] = tv.tv_sec;
 		rcvd_at[1] = tv.tv_usec;
-		fact->set_slot("rcvd-at", rcvd_at);
+		success    = success && fact->set_slot("rcvd-at", rcvd_at);
 		using namespace bsoncxx::builder;
 		basic::document *b = new basic::document();
 		b->append(bsoncxx::builder::concatenate(update));
 		void *ptr = b;
-		fact->set_slot("ptr", CLIPS::Value(ptr));
+		success   = success && fact->set_slot("ptr", CLIPS::Value(ptr));
+		if (!success) {
+			logger->log_error("CLIPS-RobotMemory", "Setting robmem-trigger fact slots failed");
+		}
 		CLIPS::Fact::pointer new_fact = clips->assert_fact(fact);
 
 		if (!new_fact) {
