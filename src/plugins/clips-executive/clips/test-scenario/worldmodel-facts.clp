@@ -63,13 +63,22 @@
   the synchronization procedure between domain facts and world model facts.
 "
   ?g <- (goal (id ?id))
-=>
-  (do-for-fact ((?goal-wm wm-fact)) (wm-key-prefix ?goal-wm:key (create$ template fact goal id ?id))
+  =>
+  (do-for-fact ((?goal-wm wm-fact)) (wm-key-prefix ?goal-wm:key (create$ template fact goal args? id ?id))
     (retract ?goal-wm)
   )
-  (assert (wm-fact (key (template-fact-to-wm-key ?g
-                                               id
-                                               (deftemplate-remaining-slots goal id)))))
+  (assert-template-wm-fact ?g
+                           id
+                           (deftemplate-remaining-slots goal id)
+  )
+)
+
+(defrule goal-remove-wm-fact
+" A goal got deleted, but the wm-fact is still around, delete it. "
+  ?wm <- (wm-fact (key template fact goal args? id ?id))
+  (not (goal (id ?id)))
+  =>
+  (retract ?wm)
 )
 
 (defrule state-robot-location

@@ -20,11 +20,12 @@
 ;
 ; (defrule goal-to-wm-fact
 ;   ?g <- (goal (id ?id))
-;   (not (wm-fact (key template fact goal id ?id $?)))
+;   (not (wm-fact (key template fact goal args? id ?id)))
 ; =>
-;   (assert (wm-fact (key (template-fact-to-wm-key ?g
-;                                                  id
-;                                                  (deftemplate-remaining-slots goal id)))))
+;   (assert-template-wm-fact ?g
+;                            id
+;                            (deftemplate-remaining-slots goal id)
+;   )
 ; )
 
 (deffunction deftemplate-remaining-slots (?template ?slots)
@@ -33,7 +34,7 @@
 	 then
 		(bind ?slots (create$ ?slots))
 	)
-	(bind ?res (deftemplate-slot-names goal))
+	(bind ?res (deftemplate-slot-names ?template))
 	(progn$ (?slot ?slots)
 		(bind ?pos (member$ ?slot ?res))
 		(bind ?res (delete$ ?res ?pos ?pos))
@@ -63,7 +64,10 @@
 	; However, if the target type is a STRING, whitespaces may become a problem.
 	(if (and (neq ?type STRING) (eq (type ?value) SYMBOL))  then
 		(bind ?value (string-to-field ?value))
-		(return ?value)
+		(if (eq (type ?value) ?type)
+		 then
+			(return ?value)
+		)
 	)
 
 	(switch ?type
@@ -103,33 +107,35 @@
 	(return ?res)
 )
 
-(deffunction template-fact-to-wm-key (?fact-id ?id-slots ?arg-slots)
-" Encode a fact to a wm-fact key.
+(deffunction template-fact-slots-to-key-vals (?fact-id ?arg-slots)
+" Encode fact slots to key value pairs.
 
   Slots are encoded by <slot-name> <slot-value> and slots are required to have
   a single allowed type.
   Multislots are encoded by <slot-name> [ <slot-value-type> <slot-value> ... ]
   to ensure type safety when converting back via template-fact-str-from-wm-key.
-
-  @param ?fact-id:   id of fact to encode as wm-fact key
-  @param ?id-slots:  slot names that uniquely identify facts of the template
-                     Those will be part of the base ID.
-  @param ?arg-slots: other slot names that should be captured by the wm-fact key
 "
-	(bind ?template (fact-relation ?fact-id))
-	(bind ?key (create$ template fact ?template))
-	(if (neq (type ?id-slots) MULTIFIELD) then (bind ?id-slots (create$ ?id-slots)))
-	(bind ?key (append$ ?key (slots-to-multifield ?fact-id ?id-slots)))
+	(bind ?values (create$ ))
 	(if (neq (type ?arg-slots) MULTIFIELD) then (bind ?arg-slots (create$ ?arg-slots)))
-
 	(if (> (length$ ?arg-slots) 0) then
-		(bind ?key (append$ ?key args?))
-		(bind ?key (append$ ?key (slots-to-multifield ?fact-id ?arg-slots)))
+		(bind ?values (append$ ?values (slots-to-multifield ?fact-id ?arg-slots)))
 	)
-	(return ?key)
+	(return ?values)
 )
 
-(deffunction template-fact-str-from-wm-key (?key)
+(deffunction assert-template-wm-fact (?fact-id ?id-slots ?other-slots)
+" Helper to create a wm-fact from a template fact"
+	(assert (wm-fact (key template fact (fact-relation ?fact-id)
+	                  args? (template-fact-slots-to-key-vals ?fact-id ?id-slots))
+	                 (type SYMBOL)
+	                 (is-list TRUE)
+	                 (values (template-fact-slots-to-key-vals ?fact-id ?other-slots)))
+	)
+)
+
+
+
+(deffunction template-fact-str-from-wm (?key ?values)
 " Build a fact string from a template fact wm-fact key.
 "
 	(if (eq (subseq$ ?key 1 2) (create$ template fact))
@@ -142,6 +148,7 @@
 		(if ?args-pos then
 			(bind ?key (delete$ ?key ?args-pos ?args-pos))
 		)
+		(bind ?key (append$ ?key ?values))
 		; start with the template name ...
 		(bind ?res (str-cat "(" ?template))
 		(bind ?mode SLOT)
