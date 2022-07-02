@@ -29,7 +29,7 @@ using namespace fawkes;
 extern "C" void finalize();
 
 // Global State
-BlackBoard *      blackboard;
+BlackBoard       *blackboard;
 SkillerInterface *skiller_if;
 
 std::string             g_skill_string;
@@ -40,7 +40,7 @@ std::string
 gen_skill_string(TermList terms)
 {
 	int         terms_len    = sl_slist_length(terms);
-	Term *      name         = (Term *)get_list_pos(terms, 1);
+	Term	     *name         = (Term *)get_list_pos(terms, 1);
 	std::string skill_string = std::string(name->u.string) + "{";
 	for (int i = 2; i < terms_len; i += 2) {
 		Term *key_t = (Term *)get_list_pos(terms, i);

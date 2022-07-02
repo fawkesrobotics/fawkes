@@ -122,8 +122,8 @@ public:
 	Term *oprs_pb_field_list(void *msgptr, std::string field_name);
 	bool  oprs_pb_field_is_list(void *msgptr, std::string field_name);
 	std::shared_ptr<google::protobuf::Message> *oprs_create_msg(std::string full_name);
-	Term *                                      oprs_pb_ref(void *msgptr);
-	Term *                                      oprs_pb_destroy(void *msgptr);
+	Term                                       *oprs_pb_ref(void *msgptr);
+	Term                                       *oprs_pb_destroy(void *msgptr);
 	void  oprs_pb_set_field(void *msgptr, std::string field_name, Term *value);
 	void  oprs_pb_add_list(void *msgptr, std::string field_name, Term *value);
 	void  oprs_pb_send(long int client_id, void *msgptr);
@@ -154,16 +154,16 @@ public:
 
 private:
 	typedef enum { CT_SERVER, CT_CLIENT, CT_PEER } ClientType;
-	void clips_assert_message(std::pair<std::string, unsigned short> &    endpoint,
+	void clips_assert_message(std::pair<std::string, unsigned short>     &endpoint,
 	                          uint16_t                                    comp_id,
 	                          uint16_t                                    msg_type,
 	                          std::shared_ptr<google::protobuf::Message> &msg,
 	                          ClientType                                  ct,
 	                          unsigned int                                client_id = 0);
 	void handle_server_client_connected(protobuf_comm::ProtobufStreamServer::ClientID client,
-	                                    boost::asio::ip::tcp::endpoint &              endpoint);
+	                                    boost::asio::ip::tcp::endpoint               &endpoint);
 	void handle_server_client_disconnected(protobuf_comm::ProtobufStreamServer::ClientID client,
-	                                       const boost::system::error_code &             error);
+	                                       const boost::system::error_code              &error);
 
 	void handle_server_client_msg(protobuf_comm::ProtobufStreamServer::ClientID client,
 	                              uint16_t                                      component_id,
@@ -176,7 +176,7 @@ private:
 	                               std::string                                   msg);
 
 	void handle_peer_msg(long int                                   peer_id,
-	                     boost::asio::ip::udp::endpoint &           endpoint,
+	                     boost::asio::ip::udp::endpoint            &endpoint,
 	                     uint16_t                                   component_id,
 	                     uint16_t                                   msg_type,
 	                     std::shared_ptr<google::protobuf::Message> msg);
@@ -195,7 +195,7 @@ private:
 	                                uint16_t           comp_id,
 	                                uint16_t           msg_type,
 	                                const std::string &msg);
-	void oprs_assert_message(std::string &                               endpoint_host,
+	void oprs_assert_message(std::string                                &endpoint_host,
 	                         unsigned short                              endpoint_port,
 	                         uint16_t                                    comp_id,
 	                         uint16_t                                    msg_type,
@@ -203,14 +203,14 @@ private:
 	                         OpenPRSProtobuf::ClientType                 ct,
 	                         unsigned int                                client_id);
 	void oprs_assert_server_client_event(long int       client_id,
-	                                     std::string &  host,
+	                                     std::string   &host,
 	                                     unsigned short port,
 	                                     bool           connect);
 	void oprs_assert_client_event(long int client_id, bool connect);
 
 private:
 	std::shared_ptr<protobuf_comm::MessageRegister> message_register_;
-	protobuf_comm::ProtobufStreamServer *           server_;
+	protobuf_comm::ProtobufStreamServer            *server_;
 
 	boost::signals2::signal<void(protobuf_comm::ProtobufStreamServer::ClientID,
 	                             std::shared_ptr<google::protobuf::Message>)>
