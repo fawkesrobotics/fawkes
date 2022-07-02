@@ -230,7 +230,7 @@ RRDThread::add_data(const char *rrd_name, const char *format, ...)
 	for (d = rrds_.begin(); d != rrds_.end(); ++d) {
 		RRDDefinition *rrd_def = *d;
 		if (strcmp(rrd_name, rrd_def->get_name()) == 0) {
-			char *  data;
+			char   *data;
 			va_list arg;
 			va_start(arg, format);
 			if (vasprintf(&data, format, arg) == -1) {
