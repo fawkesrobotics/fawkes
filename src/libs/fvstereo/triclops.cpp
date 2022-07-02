@@ -115,7 +115,7 @@ TriclopsStereoProcessor::TriclopsStereoProcessor(Camera *camera)
  */
 TriclopsStereoProcessor::TriclopsStereoProcessor(unsigned int width,
                                                  unsigned int height,
-                                                 const char * context_file)
+                                                 const char  *context_file)
 {
 	_width               = width;
 	_height              = height;
@@ -757,9 +757,9 @@ TriclopsStereoProcessor::get_xyz(unsigned int px, unsigned int py, float *x, flo
 bool
 TriclopsStereoProcessor::get_world_xyz(unsigned int px,
                                        unsigned int py,
-                                       float *      x,
-                                       float *      y,
-                                       float *      z)
+                                       float       *x,
+                                       float       *y,
+                                       float       *z)
 {
 	float cam_angle = deg2rad(57);
 	float trans_x   = -0.1;
@@ -979,7 +979,7 @@ TriclopsStereoProcessor::getall_world_xyz(float ***buffer,
                                           int      voff,
                                           int      width,
                                           int      height,
-                                          float *  settings)
+                                          float   *settings)
 {
 	float fx, fy, fz, fed, rho;
 	int   displine, /*zline,*/ px, py;

@@ -98,7 +98,7 @@ private:
 	void setup_triclops();
 
 private:
-	Bumblebee2Camera *           bb2;
+	Bumblebee2Camera            *bb2;
 	TriclopsStereoProcessorData *data;
 
 	unsigned char *buffer_rgb;
