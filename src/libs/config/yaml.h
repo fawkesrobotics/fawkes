@@ -71,7 +71,7 @@ public:
 	virtual std::vector<int>          get_ints(const char *path);
 	virtual std::vector<bool>         get_bools(const char *path);
 	virtual std::vector<std::string>  get_strings(const char *path);
-	virtual ValueIterator *           get_value(const char *path);
+	virtual ValueIterator            *get_value(const char *path);
 	virtual std::string               get_comment(const char *path);
 	virtual std::string               get_default_comment(const char *path);
 
@@ -183,13 +183,13 @@ private:
 	std::shared_ptr<YamlConfigurationNode> read_yaml_file(std::string                 filename,
 	                                                      bool                        ignore_missing,
 	                                                      std::queue<LoadQueueEntry> &load_queue,
-	                                                      std::string &               host_file);
+	                                                      std::string                &host_file);
 	void                                   read_yaml_config(std::string                             filename,
-	                                                        std::string &                           host_file,
+	                                                        std::string                            &host_file,
 	                                                        std::shared_ptr<YamlConfigurationNode> &root,
 	                                                        std::shared_ptr<YamlConfigurationNode> &host_root,
-	                                                        std::list<std::string> &                files,
-	                                                        std::list<std::string> &                dirs);
+	                                                        std::list<std::string>                 &files,
+	                                                        std::list<std::string>                 &dirs);
 	void                                   write_host_file();
 
 	std::string config_file_;

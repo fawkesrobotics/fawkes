@@ -38,7 +38,7 @@ public:
 	ConfigListContent();
 	ConfigListContent(unsigned int component_id,
 	                  unsigned int msg_id,
-	                  void *       payload,
+	                  void        *payload,
 	                  size_t       payload_size);
 	virtual ~ConfigListContent();
 
@@ -51,7 +51,7 @@ public:
 	config_list_entity_header_t *next(size_t *size);
 
 private:
-	DynamicBuffer *   config_list;
+	DynamicBuffer    *config_list;
 	config_list_msg_t msg;
 };
 

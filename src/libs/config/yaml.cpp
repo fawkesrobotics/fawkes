@@ -428,7 +428,7 @@ std::shared_ptr<YamlConfigurationNode>
 YamlConfiguration::read_yaml_file(std::string                 filename,
                                   bool                        ignore_missing,
                                   std::queue<LoadQueueEntry> &load_queue,
-                                  std::string &               host_file)
+                                  std::string                &host_file)
 {
 	if (access(filename.c_str(), R_OK) == -1) {
 		if (ignore_missing) {
@@ -472,11 +472,11 @@ YamlConfiguration::read_yaml_file(std::string                 filename,
 
 void
 YamlConfiguration::read_yaml_config(std::string                             filename,
-                                    std::string &                           host_file,
+                                    std::string                            &host_file,
                                     std::shared_ptr<YamlConfigurationNode> &root,
                                     std::shared_ptr<YamlConfigurationNode> &host_root,
-                                    std::list<std::string> &                files,
-                                    std::list<std::string> &                dirs)
+                                    std::list<std::string>                 &files,
+                                    std::list<std::string>                 &dirs)
 {
 	root = std::make_shared<YamlConfigurationNode>();
 
@@ -592,7 +592,7 @@ static std::string
 insert_hostname(std::string prelim)
 {
 	const std::string to_replace = "$host";
-	static char *     hostname   = NULL;
+	static char      *hostname   = NULL;
 	if (hostname == NULL) {
 		hostname = new char[256];
 		gethostname(hostname, 256);
@@ -606,9 +606,9 @@ insert_hostname(std::string prelim)
 }
 
 void
-YamlConfiguration::read_meta_doc(YAML::Node &                doc,
+YamlConfiguration::read_meta_doc(YAML::Node                 &doc,
                                  std::queue<LoadQueueEntry> &load_queue,
-                                 std::string &               host_file)
+                                 std::string                &host_file)
 {
 	try {
 		const YAML::Node &includes = doc["include"];

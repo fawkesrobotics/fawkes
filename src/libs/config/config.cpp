@@ -673,7 +673,7 @@ Configuration::find_handlers(const char *path)
 void
 Configuration::notify_handlers(const char *path, bool comment_changed)
 {
-	ChangeHandlerList *           h     = find_handlers(path);
+	ChangeHandlerList            *h     = find_handlers(path);
 	Configuration::ValueIterator *value = get_value(path);
 	if (value->next()) {
 		for (ChangeHandlerList::const_iterator i = h->begin(); i != h->end(); ++i) {
@@ -783,7 +783,7 @@ Configuration::get_bools_or_defaults(const char *path, const std::vector<bool> &
 }
 
 std::vector<std::string>
-Configuration::get_strings_or_defaults(const char *                    path,
+Configuration::get_strings_or_defaults(const char                     *path,
                                        const std::vector<std::string> &default_val)
 {
 	try {

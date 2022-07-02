@@ -55,14 +55,14 @@ ConfigListContent::ConfigListContent()
  */
 ConfigListContent::ConfigListContent(unsigned int component_id,
                                      unsigned int msg_id,
-                                     void *       payload,
+                                     void        *payload,
                                      size_t       payload_size)
 {
 	if (component_id != FAWKES_CID_CONFIGMANAGER) {
 		throw TypeMismatchException("ConfigListContent: invalid component ID");
 	}
 	config_list_msg_t *tmsg                = (config_list_msg_t *)payload;
-	void *             config_list_payload = (void *)((size_t)payload + sizeof(msg));
+	void              *config_list_payload = (void *)((size_t)payload + sizeof(msg));
 	config_list =
 	  new DynamicBuffer(&(tmsg->config_list), config_list_payload, payload_size - sizeof(msg));
 }
@@ -98,7 +98,7 @@ ConfigListContent::append(Configuration::ValueIterator *i)
 {
 	unsigned int num_values = (i->is_list() ? i->get_list_size() : 1);
 	size_t       data_size  = 0;
-	char *       data;
+	char        *data;
 
 	config_list_entity_header_t cle;
 	memset(&cle, 0, sizeof(cle));
@@ -151,7 +151,7 @@ ConfigListContent::append(Configuration::ValueIterator *i)
 	} else if (i->is_bool()) {
 		if (i->is_list()) {
 			std::vector<bool> values     = i->get_bools();
-			int32_t *         msg_values = (int32_t *)(data + sizeof(cle));
+			int32_t          *msg_values = (int32_t *)(data + sizeof(cle));
 			for (unsigned int j = 0; j < values.size(); ++j) {
 				msg_values[j] = values[j] ? 1 : 0;
 			}
@@ -168,7 +168,7 @@ ConfigListContent::append(Configuration::ValueIterator *i)
 	} else if (i->is_string()) {
 		if (i->is_list()) {
 			std::vector<std::string> values  = i->get_strings();
-			char *                   tmpdata = (char *)data + sizeof(cle);
+			char                    *tmpdata = (char *)data + sizeof(cle);
 			for (unsigned int j = 0; j < values.size(); ++j) {
 				config_string_value_t *csv = (config_string_value_t *)tmpdata;
 				csv->s_length              = values[j].length();
