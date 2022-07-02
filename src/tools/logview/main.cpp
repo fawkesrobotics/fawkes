@@ -44,7 +44,7 @@ public:
 		logger = new ConsoleLogger();
 		quit   = false;
 
-		char *      hp       = strdup(hostport);
+		char       *hp       = strdup(hostport);
 		const char *hostname = strtok(hp, ":");
 		const char *portstr  = strtok(NULL, "");
 		int         port     = 1910;
@@ -118,7 +118,7 @@ public:
 
 private:
 	FawkesNetworkClient *client;
-	ConsoleLogger *      logger;
+	ConsoleLogger       *logger;
 	bool                 quit;
 };
 /// @endcond
@@ -139,7 +139,7 @@ main(int argc, char **argv)
 		exit(0);
 	}
 
-	const char *         hostport = (argp.num_items() > 0) ? argp.items()[0] : "localhost:1910";
+	const char          *hostport = (argp.num_items() > 0) ? argp.items()[0] : "localhost:1910";
 	NetLogConsolePrinter printer(hostport);
 
 	SignalManager::register_handler(SIGINT, &printer);
