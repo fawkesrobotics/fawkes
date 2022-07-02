@@ -116,7 +116,7 @@ private:
 
 	fawkes::NavigatorInterface *nav_if_;
 	fawkes::NavigatorInterface *pp_nav_if_;
-	fawkes::NavPathInterface *  path_if_;
+	fawkes::NavPathInterface   *path_if_;
 
 	fawkes::LockPtr<fawkes::NavGraph> graph_;
 
@@ -126,7 +126,7 @@ private:
 	bool                                  target_ori_reached_;
 	bool                                  target_rotating_;
 	float                                 target_time_;
-	fawkes::Time *                        target_reached_at_;
+	fawkes::Time                         *target_reached_at_;
 	std::string                           last_node_;
 	fawkes::NavGraphPath                  path_;
 	fawkes::NavGraphPath::Traversal       traversal_;
@@ -144,7 +144,7 @@ private:
 	fawkes::FileAlterationMonitor *fam_;
 
 #ifdef HAVE_VISUALIZATION
-	fawkes::Time *               visualized_at_;
+	fawkes::Time                *visualized_at_;
 	NavGraphVisualizationThread *vt_;
 #endif
 };

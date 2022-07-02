@@ -58,11 +58,11 @@ protected:
 	}
 
 private:
-	fawkes::NavGraphStaticListNodeConstraint *    node_constraint_;
-	fawkes::NavGraphStaticListEdgeConstraint *    edge_constraint_;
+	fawkes::NavGraphStaticListNodeConstraint     *node_constraint_;
+	fawkes::NavGraphStaticListEdgeConstraint     *edge_constraint_;
 	fawkes::NavGraphStaticListEdgeCostConstraint *edge_cost_constraint_;
-	fawkes::NavGraphPolygonNodeConstraint *       node_poly_constraint_;
-	fawkes::NavGraphPolygonEdgeConstraint *       edge_poly_constraint_;
+	fawkes::NavGraphPolygonNodeConstraint        *node_poly_constraint_;
+	fawkes::NavGraphPolygonEdgeConstraint        *edge_poly_constraint_;
 };
 
 #endif

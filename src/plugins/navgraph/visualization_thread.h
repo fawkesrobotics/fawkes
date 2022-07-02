@@ -62,7 +62,7 @@ private:
 	void  publish();
 	void  regenerate();
 	void  add_circle_markers(visualization_msgs::MarkerArray &m,
-	                         size_t &                         id_num,
+	                         size_t                          &id_num,
 	                         float                            center_x,
 	                         float                            center_y,
 	                         float                            radius,
@@ -73,8 +73,8 @@ private:
 	                         float                            alpha,
 	                         float                            line_width = 0.03);
 	float edge_cost_factor(std::list<std::tuple<std::string, std::string, std::string, float>> &costs,
-	                       const std::string &                                                  from,
-	                       const std::string &                                                  to,
+	                       const std::string                                                   &from,
+	                       const std::string                                                   &to,
 	                       std::string &constraint_name);
 
 private:

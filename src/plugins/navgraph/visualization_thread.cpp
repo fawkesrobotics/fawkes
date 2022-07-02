@@ -180,9 +180,9 @@ NavGraphVisualizationThread::loop()
 float
 NavGraphVisualizationThread::edge_cost_factor(
   std::list<std::tuple<std::string, std::string, std::string, float>> &costs,
-  const std::string &                                                  from,
-  const std::string &                                                  to,
-  std::string &                                                        constraint_name)
+  const std::string                                                   &from,
+  const std::string                                                   &to,
+  std::string                                                         &constraint_name)
 {
 	for (const std::tuple<std::string, std::string, std::string, float> &c : costs) {
 		if ((std::get<0>(c) == from && std::get<1>(c) == to)
@@ -197,7 +197,7 @@ NavGraphVisualizationThread::edge_cost_factor(
 
 void
 NavGraphVisualizationThread::add_circle_markers(visualization_msgs::MarkerArray &m,
-                                                size_t &                         id_num,
+                                                size_t                          &id_num,
                                                 float                            center_x,
                                                 float                            center_y,
                                                 float                            radius,
