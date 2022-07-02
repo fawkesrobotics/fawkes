@@ -99,8 +99,8 @@ public:
 	void     not_visible_update();
 	bool     transform_point_to_frame(const Eigen::Vector3f &in_point,
 	                                  Eigen::Vector3f       &out_point,
-	                                  const std::string      from_frame,
-	                                  const std::string      to_frame);
+	                                  const std::string     &from_frame,
+	                                  const std::string     &to_frame);
 };
 
 #endif

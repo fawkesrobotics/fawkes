@@ -422,7 +422,7 @@ LaserLinesThread::publish_known_lines()
 				              false,
 				              true,
 				              info,
-				              cfg_transform_to_frame_id_.c_str());
+				              cfg_transform_to_frame_id_);
 			}
 		}
 	}

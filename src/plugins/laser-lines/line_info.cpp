@@ -198,8 +198,8 @@ TrackedLineInfo::update(LineInfo &linfo)
 bool
 TrackedLineInfo::transform_point_to_frame(const Eigen::Vector3f &in_point,
                                           Eigen::Vector3f       &out_point,
-                                          const std::string      from_frame,
-                                          const std::string      to_frame)
+                                          const std::string     &from_frame,
+                                          const std::string     &to_frame)
 {
 	fawkes::tf::Stamped<fawkes::tf::Point> transformed_point(
 	  fawkes::tf::Point(in_point[0], in_point[1], in_point[2]), fawkes::Time(0, 0), from_frame);
