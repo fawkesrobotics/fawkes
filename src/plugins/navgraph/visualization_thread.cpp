@@ -27,10 +27,13 @@
 #include <navgraph/constraints/polygon_edge_constraint.h>
 #include <navgraph/constraints/polygon_node_constraint.h>
 #include <navgraph/navgraph.h>
-#include <ros/ros.h>
 #include <tf/types.h>
 #include <utils/math/angle.h>
 #include <utils/math/coord.h>
+
+#ifndef ROS_VERSION_MINIMUM
+#define ROS_VERSION_MINIMUM
+#endif
 
 using namespace fawkes;
 
@@ -53,9 +56,7 @@ NavGraphVisualizationThread::NavGraphVisualizationThread()
 void
 NavGraphVisualizationThread::init()
 {
-	vispub_ = rosnode->advertise<visualization_msgs::MarkerArray>("visualization_marker_array",
-	                                                              100,
-	                                                              /* latching */ true);
+	vispub_ = node_handle->create_publisher<visualization_msgs::msg::MarkerArray>("visualization_marker_array", 10);
 
 	cfg_global_frame_ = config->get_string("/frames/fixed");
 
@@ -75,39 +76,38 @@ NavGraphVisualizationThread::init()
 void
 NavGraphVisualizationThread::finalize()
 {
-	visualization_msgs::MarkerArray m;
+	visualization_msgs::msg::MarkerArray m;
 
 #if ROS_VERSION_MINIMUM(1, 10, 0)
-	visualization_msgs::Marker delop;
+	visualization_msgs::msg::Marker delop;
 	delop.header.frame_id = cfg_global_frame_;
-	delop.header.stamp    = ros::Time::now();
+	delop.header.stamp    = node_handle->get_clock()->now();
 	delop.ns              = "navgraph-constraints";
 	delop.id              = 0;
-	delop.action          = 3; // visualization_msgs::Marker::DELETEALL;
+	delop.action          = 3; // visualization_msgs::msg::Marker::DELETEALL;
 	m.markers.push_back(delop);
 #else
 	for (size_t i = 0; i < last_id_num_; ++i) {
-		visualization_msgs::Marker delop;
+		visualization_msgs::msg::Marker delop;
 		delop.header.frame_id = cfg_global_frame_;
-		delop.header.stamp    = ros::Time::now();
+		delop.header.stamp    = node_handle->get_clock()->now();
 		delop.ns              = "navgraph";
 		delop.id              = i;
-		delop.action          = visualization_msgs::Marker::DELETE;
+		delop.action          = visualization_msgs::msg::Marker::DELETE;
 		m.markers.push_back(delop);
 	}
 	for (size_t i = 0; i < constraints_last_id_num_; ++i) {
-		visualization_msgs::Marker delop;
+		visualization_msgs::msg::Marker delop;
 		delop.header.frame_id = cfg_global_frame_;
-		delop.header.stamp    = ros::Time::now();
+		delop.header.stamp    = node_handle->get_clock()->now();
 		delop.ns              = "navgraph-constraints";
 		delop.id              = i;
-		delop.action          = visualization_msgs::Marker::DELETE;
+		delop.action          = visualization_msgs::msg::Marker::DELETE;
 		m.markers.push_back(delop);
 	}
 #endif
-	vispub_.publish(m);
+	vispub_->publish(m);
 	usleep(500000); // needs some time to actually send
-	vispub_.shutdown();
 }
 
 /** Set the graph.
@@ -196,7 +196,7 @@ NavGraphVisualizationThread::edge_cost_factor(
 }
 
 void
-NavGraphVisualizationThread::add_circle_markers(visualization_msgs::MarkerArray &m,
+NavGraphVisualizationThread::add_circle_markers(visualization_msgs::msg::MarkerArray &m,
                                                 size_t &                         id_num,
                                                 float                            center_x,
                                                 float                            center_y,
@@ -209,19 +209,19 @@ NavGraphVisualizationThread::add_circle_markers(visualization_msgs::MarkerArray 
                                                 float                            line_width)
 {
 	for (unsigned int a = 0; a < 360; a += 2 * arc_length) {
-		visualization_msgs::Marker arc;
+		visualization_msgs::msg::Marker arc;
 		arc.header.frame_id = cfg_global_frame_;
-		arc.header.stamp    = ros::Time::now();
+		arc.header.stamp    = node_handle->get_clock()->now();
 		arc.ns              = "navgraph";
 		arc.id              = id_num++;
-		arc.type            = visualization_msgs::Marker::LINE_STRIP;
-		arc.action          = visualization_msgs::Marker::ADD;
+		arc.type            = visualization_msgs::msg::Marker::LINE_STRIP;
+		arc.action          = visualization_msgs::msg::Marker::ADD;
 		arc.scale.x = arc.scale.y = arc.scale.z = line_width;
 		arc.color.r                             = r;
 		arc.color.g                             = g;
 		arc.color.b                             = b;
 		arc.color.a                             = alpha;
-		arc.lifetime                            = ros::Duration(0, 0);
+		arc.lifetime                            = rclcpp::Duration(0, 0);
 		arc.points.resize(arc_length);
 		for (unsigned int j = 0; j < arc_length; ++j) {
 			float circ_x = 0, circ_y = 0;
@@ -261,70 +261,70 @@ NavGraphVisualizationThread::regenerate()
 	size_t id_num             = 0;
 	size_t constraints_id_num = 0;
 
-	visualization_msgs::MarkerArray m;
+	visualization_msgs::msg::MarkerArray m;
 
 #if ROS_VERSION_MINIMUM(1, 10, 0)
 	{
-		visualization_msgs::Marker delop;
+		visualization_msgs::msg::Marker delop;
 		delop.header.frame_id = cfg_global_frame_;
-		delop.header.stamp    = ros::Time::now();
+		delop.header.stamp    = node_handle->get_clock()->now();
 		delop.ns              = "navgraph-constraints";
 		delop.id              = 0;
-		delop.action          = 3; // visualization_msgs::Marker::DELETEALL;
+		delop.action          = 3; // visualization_msgs::msg::Marker::DELETEALL;
 		m.markers.push_back(delop);
 	}
 #endif
 
-	visualization_msgs::Marker lines;
+	visualization_msgs::msg::Marker lines;
 	lines.header.frame_id = cfg_global_frame_;
-	lines.header.stamp    = ros::Time::now();
+	lines.header.stamp    = node_handle->get_clock()->now();
 	lines.ns              = "navgraph";
 	lines.id              = id_num++;
-	lines.type            = visualization_msgs::Marker::LINE_LIST;
-	lines.action          = visualization_msgs::Marker::ADD;
+	lines.type            = visualization_msgs::msg::Marker::LINE_LIST;
+	lines.action          = visualization_msgs::msg::Marker::ADD;
 	lines.color.r         = 0.5;
 	lines.color.g = lines.color.b = 0.f;
 	lines.color.a                 = 1.0;
 	lines.scale.x                 = 0.02;
-	lines.lifetime                = ros::Duration(0, 0);
+	lines.lifetime                = rclcpp::Duration(0, 0);
 
-	visualization_msgs::Marker plan_lines;
+	visualization_msgs::msg::Marker plan_lines;
 	plan_lines.header.frame_id = cfg_global_frame_;
-	plan_lines.header.stamp    = ros::Time::now();
+	plan_lines.header.stamp    = node_handle->get_clock()->now();
 	plan_lines.ns              = "navgraph";
 	plan_lines.id              = id_num++;
-	plan_lines.type            = visualization_msgs::Marker::LINE_LIST;
-	plan_lines.action          = visualization_msgs::Marker::ADD;
+	plan_lines.type            = visualization_msgs::msg::Marker::LINE_LIST;
+	plan_lines.action          = visualization_msgs::msg::Marker::ADD;
 	plan_lines.color.r         = 1.0;
 	plan_lines.color.g = plan_lines.color.b = 0.f;
 	plan_lines.color.a                      = 1.0;
 	plan_lines.scale.x                      = 0.035;
-	plan_lines.lifetime                     = ros::Duration(0, 0);
+	plan_lines.lifetime                     = rclcpp::Duration(0, 0);
 
-	visualization_msgs::Marker blocked_lines;
+	visualization_msgs::msg::Marker blocked_lines;
 	blocked_lines.header.frame_id = cfg_global_frame_;
-	blocked_lines.header.stamp    = ros::Time::now();
+	blocked_lines.header.stamp    = node_handle->get_clock()->now();
 	blocked_lines.ns              = "navgraph";
 	blocked_lines.id              = id_num++;
-	blocked_lines.type            = visualization_msgs::Marker::LINE_LIST;
-	blocked_lines.action          = visualization_msgs::Marker::ADD;
+	blocked_lines.type            = visualization_msgs::msg::Marker::LINE_LIST;
+	blocked_lines.action          = visualization_msgs::msg::Marker::ADD;
 	blocked_lines.color.r = blocked_lines.color.g = blocked_lines.color.b = 0.5;
 	blocked_lines.color.a                                                 = 1.0;
 	blocked_lines.scale.x                                                 = 0.02;
-	blocked_lines.lifetime                                                = ros::Duration(0, 0);
+	blocked_lines.lifetime                                                = rclcpp::Duration(0, 0);
 
-	visualization_msgs::Marker cur_line;
+	visualization_msgs::msg::Marker cur_line;
 	cur_line.header.frame_id = cfg_global_frame_;
-	cur_line.header.stamp    = ros::Time::now();
+	cur_line.header.stamp    = node_handle->get_clock()->now();
 	cur_line.ns              = "navgraph";
 	cur_line.id              = id_num++;
-	cur_line.type            = visualization_msgs::Marker::LINE_LIST;
-	cur_line.action          = visualization_msgs::Marker::ADD;
+	cur_line.type            = visualization_msgs::msg::Marker::LINE_LIST;
+	cur_line.action          = visualization_msgs::msg::Marker::ADD;
 	cur_line.color.g         = 1.f;
 	cur_line.color.r = cur_line.color.b = 0.f;
 	cur_line.color.a                    = 1.0;
 	cur_line.scale.x                    = 0.05;
-	cur_line.lifetime                   = ros::Duration(0, 0);
+	cur_line.lifetime                   = rclcpp::Duration(0, 0);
 
 	for (size_t i = 0; i < nodes.size(); ++i) {
 		bool is_in_plan = traversal_ && traversal_.path().contains(nodes[i]);
@@ -338,13 +338,13 @@ NavGraphVisualizationThread::regenerate()
 			ns += "-" + nodes[i].property("group");
 		}
 
-		visualization_msgs::Marker sphere;
+		visualization_msgs::msg::Marker sphere;
 		sphere.header.frame_id    = cfg_global_frame_;
-		sphere.header.stamp       = ros::Time::now();
+		sphere.header.stamp       = node_handle->get_clock()->now();
 		sphere.ns                 = ns;
 		sphere.id                 = id_num++;
-		sphere.type               = visualization_msgs::Marker::SPHERE;
-		sphere.action             = visualization_msgs::Marker::ADD;
+		sphere.type               = visualization_msgs::msg::Marker::SPHERE;
+		sphere.action             = visualization_msgs::msg::Marker::ADD;
 		sphere.pose.position.x    = nodes[i].x();
 		sphere.pose.position.y    = nodes[i].y();
 		sphere.pose.position.z    = 0.;
@@ -365,13 +365,13 @@ NavGraphVisualizationThread::regenerate()
 			sphere.scale.x = sphere.scale.y = sphere.scale.z = 0.05;
 			sphere.color.r = sphere.color.g = sphere.color.b = 0.5;
 
-			visualization_msgs::Marker text;
+			visualization_msgs::msg::Marker text;
 			text.header.frame_id    = cfg_global_frame_;
-			text.header.stamp       = ros::Time::now();
+			text.header.stamp       = node_handle->get_clock()->now();
 			text.ns                 = "navgraph-constraints";
 			text.id                 = constraints_id_num++;
-			text.type               = visualization_msgs::Marker::TEXT_VIEW_FACING;
-			text.action             = visualization_msgs::Marker::ADD;
+			text.type               = visualization_msgs::msg::Marker::TEXT_VIEW_FACING;
+			text.action             = visualization_msgs::msg::Marker::ADD;
 			text.pose.position.x    = nodes[i].x();
 			text.pose.position.y    = nodes[i].y();
 			text.pose.position.z    = 0.3;
@@ -380,7 +380,7 @@ NavGraphVisualizationThread::regenerate()
 			text.color.r            = 1.0;
 			text.color.g = text.color.b = 0.f;
 			text.color.a                = 1.0;
-			text.lifetime               = ros::Duration(0, 0);
+			text.lifetime               = rclcpp::Duration(0, 0);
 			text.text                   = bl_nodes[nodes[i].name()];
 			m.markers.push_back(text);
 
@@ -390,7 +390,7 @@ NavGraphVisualizationThread::regenerate()
 			sphere.color.b                                   = 0.f;
 		}
 		sphere.color.a  = 1.0;
-		sphere.lifetime = ros::Duration(0, 0);
+		sphere.lifetime = rclcpp::Duration(0, 0);
 		m.markers.push_back(sphere);
 
 		if (is_last) {
@@ -457,13 +457,13 @@ NavGraphVisualizationThread::regenerate()
 		if (nodes[i].has_property("orientation")) {
 			float ori = nodes[i].property_as_float("orientation");
 			//logger->log_debug(name(), "Node %s has orientation %f", nodes[i].name().c_str(), ori);
-			visualization_msgs::Marker arrow;
+			visualization_msgs::msg::Marker arrow;
 			arrow.header.frame_id    = cfg_global_frame_;
-			arrow.header.stamp       = ros::Time::now();
+			arrow.header.stamp       = node_handle->get_clock()->now();
 			arrow.ns                 = ns;
 			arrow.id                 = id_num++;
-			arrow.type               = visualization_msgs::Marker::ARROW;
-			arrow.action             = visualization_msgs::Marker::ADD;
+			arrow.type               = visualization_msgs::msg::Marker::ARROW;
+			arrow.action             = visualization_msgs::msg::Marker::ADD;
 			arrow.pose.position.x    = nodes[i].x();
 			arrow.pose.position.y    = nodes[i].y();
 			arrow.pose.position.z    = 0.;
@@ -487,17 +487,17 @@ NavGraphVisualizationThread::regenerate()
 			}
 			arrow.color.b  = 0.f;
 			arrow.color.a  = 1.0;
-			arrow.lifetime = ros::Duration(0, 0);
+			arrow.lifetime = rclcpp::Duration(0, 0);
 			m.markers.push_back(arrow);
 		}
 
-		visualization_msgs::Marker text;
+		visualization_msgs::msg::Marker text;
 		text.header.frame_id    = cfg_global_frame_;
-		text.header.stamp       = ros::Time::now();
+		text.header.stamp       = node_handle->get_clock()->now();
 		text.ns                 = ns;
 		text.id                 = id_num++;
-		text.type               = visualization_msgs::Marker::TEXT_VIEW_FACING;
-		text.action             = visualization_msgs::Marker::ADD;
+		text.type               = visualization_msgs::msg::Marker::TEXT_VIEW_FACING;
+		text.action             = visualization_msgs::msg::Marker::ADD;
 		text.pose.position.x    = nodes[i].x();
 		text.pose.position.y    = nodes[i].y();
 		text.pose.position.z    = 0.08;
@@ -505,7 +505,7 @@ NavGraphVisualizationThread::regenerate()
 		text.scale.z            = 0.15; // 15cm high
 		text.color.r = text.color.g = text.color.b = 1.0f;
 		text.color.a                               = 1.0;
-		text.lifetime                              = ros::Duration(0, 0);
+		text.lifetime                              = rclcpp::Duration(0, 0);
 		text.text                                  = nodes[i].name();
 		m.markers.push_back(text);
 	}
@@ -515,13 +515,13 @@ NavGraphVisualizationThread::regenerate()
 		const NavGraphNode &target_node = traversal_.path().goal();
 
 		// we are traveling to a free target
-		visualization_msgs::Marker sphere;
+		visualization_msgs::msg::Marker sphere;
 		sphere.header.frame_id    = cfg_global_frame_;
-		sphere.header.stamp       = ros::Time::now();
+		sphere.header.stamp       = node_handle->get_clock()->now();
 		sphere.ns                 = "navgraph";
 		sphere.id                 = id_num++;
-		sphere.type               = visualization_msgs::Marker::SPHERE;
-		sphere.action             = visualization_msgs::Marker::ADD;
+		sphere.type               = visualization_msgs::msg::Marker::SPHERE;
+		sphere.action             = visualization_msgs::msg::Marker::ADD;
 		sphere.pose.position.x    = target_node.x();
 		sphere.pose.position.y    = target_node.y();
 		sphere.pose.position.z    = 0.;
@@ -533,16 +533,16 @@ NavGraphVisualizationThread::regenerate()
 		sphere.color.g                                   = 0.5f;
 		sphere.color.b                                   = 0.f;
 		sphere.color.a                                   = 1.0;
-		sphere.lifetime                                  = ros::Duration(0, 0);
+		sphere.lifetime                                  = rclcpp::Duration(0, 0);
 		m.markers.push_back(sphere);
 
-		visualization_msgs::Marker text;
+		visualization_msgs::msg::Marker text;
 		text.header.frame_id    = cfg_global_frame_;
-		text.header.stamp       = ros::Time::now();
+		text.header.stamp       = node_handle->get_clock()->now();
 		text.ns                 = "navgraph";
 		text.id                 = id_num++;
-		text.type               = visualization_msgs::Marker::TEXT_VIEW_FACING;
-		text.action             = visualization_msgs::Marker::ADD;
+		text.type               = visualization_msgs::msg::Marker::TEXT_VIEW_FACING;
+		text.action             = visualization_msgs::msg::Marker::ADD;
 		text.pose.position.x    = target_node.x();
 		text.pose.position.y    = target_node.y();
 		text.pose.position.z    = 0.08;
@@ -550,19 +550,19 @@ NavGraphVisualizationThread::regenerate()
 		text.scale.z            = 0.15; // 15cm high
 		text.color.r = text.color.g = text.color.b = 1.0f;
 		text.color.a                               = 1.0;
-		text.lifetime                              = ros::Duration(0, 0);
+		text.lifetime                              = rclcpp::Duration(0, 0);
 		text.text                                  = "Free Target";
 		m.markers.push_back(text);
 
 		if (target_node.has_property("orientation")) {
 			float                      ori = target_node.property_as_float("orientation");
-			visualization_msgs::Marker ori_arrow;
+			visualization_msgs::msg::Marker ori_arrow;
 			ori_arrow.header.frame_id    = cfg_global_frame_;
-			ori_arrow.header.stamp       = ros::Time::now();
+			ori_arrow.header.stamp       = node_handle->get_clock()->now();
 			ori_arrow.ns                 = "navgraph";
 			ori_arrow.id                 = id_num++;
-			ori_arrow.type               = visualization_msgs::Marker::ARROW;
-			ori_arrow.action             = visualization_msgs::Marker::ADD;
+			ori_arrow.type               = visualization_msgs::msg::Marker::ARROW;
+			ori_arrow.action             = visualization_msgs::msg::Marker::ADD;
 			ori_arrow.pose.position.x    = target_node.x();
 			ori_arrow.pose.position.y    = target_node.y();
 			ori_arrow.pose.position.z    = 0.;
@@ -578,7 +578,7 @@ NavGraphVisualizationThread::regenerate()
 			ori_arrow.color.g            = 0.5f;
 			ori_arrow.color.b            = 0.f;
 			ori_arrow.color.a            = 1.0;
-			ori_arrow.lifetime           = ros::Duration(0, 0);
+			ori_arrow.lifetime           = rclcpp::Duration(0, 0);
 			m.markers.push_back(ori_arrow);
 		}
 
@@ -623,25 +623,25 @@ NavGraphVisualizationThread::regenerate()
 		if (traversal_.remaining() >= 2) {
 			const NavGraphNode &last_graph_node = traversal_.path().nodes()[traversal_.path().size() - 2];
 
-			geometry_msgs::Point p1;
+			geometry_msgs::msg::Point p1;
 			p1.x = last_graph_node.x();
 			p1.y = last_graph_node.y();
 			p1.z = 0.;
 
-			geometry_msgs::Point p2;
+			geometry_msgs::msg::Point p2;
 			p2.x = target_node.x();
 			p2.y = target_node.y();
 			p2.z = 0.;
 
-			visualization_msgs::Marker arrow;
+			visualization_msgs::msg::Marker arrow;
 			arrow.header.frame_id = cfg_global_frame_;
-			arrow.header.stamp    = ros::Time::now();
+			arrow.header.stamp    = node_handle->get_clock()->now();
 			arrow.ns              = "navgraph";
 			arrow.id              = id_num++;
-			arrow.type            = visualization_msgs::Marker::ARROW;
-			arrow.action          = visualization_msgs::Marker::ADD;
+			arrow.type            = visualization_msgs::msg::Marker::ARROW;
+			arrow.action          = visualization_msgs::msg::Marker::ADD;
 			arrow.color.a         = 1.0;
-			arrow.lifetime        = ros::Duration(0, 0);
+			arrow.lifetime        = rclcpp::Duration(0, 0);
 			arrow.points.push_back(p1);
 			arrow.points.push_back(p2);
 
@@ -670,12 +670,12 @@ NavGraphVisualizationThread::regenerate()
 			NavGraphNode from = nodes_map[edge.from()];
 			NavGraphNode to   = nodes_map[edge.to()];
 
-			geometry_msgs::Point p1;
+			geometry_msgs::msg::Point p1;
 			p1.x = from.x();
 			p1.y = from.y();
 			p1.z = 0.;
 
-			geometry_msgs::Point p2;
+			geometry_msgs::msg::Point p2;
 			p2.x = to.x();
 			p2.y = to.y();
 			p2.z = 0.;
@@ -684,15 +684,15 @@ NavGraphVisualizationThread::regenerate()
 			float       cost_factor = edge_cost_factor(edge_cfs, from.name(), to.name(), cost_cstr_name);
 
 			if (edge.is_directed()) {
-				visualization_msgs::Marker arrow;
+				visualization_msgs::msg::Marker arrow;
 				arrow.header.frame_id = cfg_global_frame_;
-				arrow.header.stamp    = ros::Time::now();
+				arrow.header.stamp    = node_handle->get_clock()->now();
 				arrow.ns              = "navgraph";
 				arrow.id              = id_num++;
-				arrow.type            = visualization_msgs::Marker::ARROW;
-				arrow.action          = visualization_msgs::Marker::ADD;
+				arrow.type            = visualization_msgs::msg::Marker::ARROW;
+				arrow.action          = visualization_msgs::msg::Marker::ADD;
 				arrow.color.a         = 1.0;
-				arrow.lifetime        = ros::Duration(0, 0);
+				arrow.lifetime        = rclcpp::Duration(0, 0);
 				arrow.points.push_back(p1);
 				arrow.points.push_back(p2);
 
@@ -752,13 +752,13 @@ NavGraphVisualizationThread::regenerate()
 							}
 						}
 
-						visualization_msgs::Marker text;
+						visualization_msgs::msg::Marker text;
 						text.header.frame_id    = cfg_global_frame_;
-						text.header.stamp       = ros::Time::now();
+						text.header.stamp       = node_handle->get_clock()->now();
 						text.ns                 = "navgraph-constraints";
 						text.id                 = constraints_id_num++;
-						text.type               = visualization_msgs::Marker::TEXT_VIEW_FACING;
-						text.action             = visualization_msgs::Marker::ADD;
+						text.type               = visualization_msgs::msg::Marker::TEXT_VIEW_FACING;
+						text.action             = visualization_msgs::msg::Marker::ADD;
 						text.pose.position.x    = p[0];
 						text.pose.position.y    = p[1];
 						text.pose.position.z    = 0.3;
@@ -767,7 +767,7 @@ NavGraphVisualizationThread::regenerate()
 						text.color.r            = 1.0;
 						text.color.g = text.color.b = 0.f;
 						text.color.a                = 1.0;
-						text.lifetime               = ros::Duration(0, 0);
+						text.lifetime               = rclcpp::Duration(0, 0);
 						text.text                   = text_s;
 						m.markers.push_back(text);
 
@@ -808,15 +808,15 @@ NavGraphVisualizationThread::regenerate()
 					if (in_plan) {
 						// it's in the current plan
 						if (cost_factor >= 1.00001) {
-							visualization_msgs::Marker line;
+							visualization_msgs::msg::Marker line;
 							line.header.frame_id = cfg_global_frame_;
-							line.header.stamp    = ros::Time::now();
+							line.header.stamp    = node_handle->get_clock()->now();
 							line.ns              = "navgraph";
 							line.id              = id_num++;
-							line.type            = visualization_msgs::Marker::LINE_STRIP;
-							line.action          = visualization_msgs::Marker::ADD;
+							line.type            = visualization_msgs::msg::Marker::LINE_STRIP;
+							line.action          = visualization_msgs::msg::Marker::ADD;
 							line.color.a         = 1.0;
-							line.lifetime        = ros::Duration(0, 0);
+							line.lifetime        = rclcpp::Duration(0, 0);
 							line.points.push_back(p1);
 							line.points.push_back(p2);
 							line.color.r = 1.f;
@@ -856,13 +856,13 @@ NavGraphVisualizationThread::regenerate()
 							}
 						}
 
-						visualization_msgs::Marker text;
+						visualization_msgs::msg::Marker text;
 						text.header.frame_id    = cfg_global_frame_;
-						text.header.stamp       = ros::Time::now();
+						text.header.stamp       = node_handle->get_clock()->now();
 						text.ns                 = "navgraph-constraints";
 						text.id                 = constraints_id_num++;
-						text.type               = visualization_msgs::Marker::TEXT_VIEW_FACING;
-						text.action             = visualization_msgs::Marker::ADD;
+						text.type               = visualization_msgs::msg::Marker::TEXT_VIEW_FACING;
+						text.action             = visualization_msgs::msg::Marker::ADD;
 						text.pose.position.x    = p[0];
 						text.pose.position.y    = p[1];
 						text.pose.position.z    = 0.3;
@@ -871,21 +871,21 @@ NavGraphVisualizationThread::regenerate()
 						text.color.r            = 1.0;
 						text.color.g = text.color.b = 0.f;
 						text.color.a                = 1.0;
-						text.lifetime               = ros::Duration(0, 0);
+						text.lifetime               = rclcpp::Duration(0, 0);
 						text.text                   = text_s;
 						m.markers.push_back(text);
 
 					} else {
 						if (cost_factor >= 1.00001) {
-							visualization_msgs::Marker line;
+							visualization_msgs::msg::Marker line;
 							line.header.frame_id = cfg_global_frame_;
-							line.header.stamp    = ros::Time::now();
+							line.header.stamp    = node_handle->get_clock()->now();
 							line.ns              = "navgraph";
 							line.id              = id_num++;
-							line.type            = visualization_msgs::Marker::LINE_STRIP;
-							line.action          = visualization_msgs::Marker::ADD;
+							line.type            = visualization_msgs::msg::Marker::LINE_STRIP;
+							line.action          = visualization_msgs::msg::Marker::ADD;
 							line.color.a         = 1.0;
-							line.lifetime        = ros::Duration(0, 0);
+							line.lifetime        = rclcpp::Duration(0, 0);
 							line.points.push_back(p1);
 							line.points.push_back(p2);
 							line.color.r = 0.66666;
@@ -936,18 +936,18 @@ NavGraphVisualizationThread::regenerate()
 	for (const NavGraphPolygonConstraint *pc : poly_constraints) {
 		const NavGraphPolygonConstraint::PolygonMap &polygons = pc->polygons();
 		for (auto const &p : polygons) {
-			visualization_msgs::Marker polc_lines;
+			visualization_msgs::msg::Marker polc_lines;
 			polc_lines.header.frame_id = cfg_global_frame_;
-			polc_lines.header.stamp    = ros::Time::now();
+			polc_lines.header.stamp    = node_handle->get_clock()->now();
 			polc_lines.ns              = "navgraph-constraints";
 			polc_lines.id              = constraints_id_num++;
-			polc_lines.type            = visualization_msgs::Marker::LINE_STRIP;
-			polc_lines.action          = visualization_msgs::Marker::ADD;
+			polc_lines.type            = visualization_msgs::msg::Marker::LINE_STRIP;
+			polc_lines.action          = visualization_msgs::msg::Marker::ADD;
 			polc_lines.color.r = polc_lines.color.g = 1.0;
 			polc_lines.color.b                      = 0.f;
 			polc_lines.color.a                      = 1.0;
 			polc_lines.scale.x                      = 0.02;
-			polc_lines.lifetime                     = ros::Duration(0, 0);
+			polc_lines.lifetime                     = rclcpp::Duration(0, 0);
 
 			polc_lines.points.resize(p.second.size());
 			for (size_t i = 0; i < p.second.size(); ++i) {
@@ -963,22 +963,22 @@ NavGraphVisualizationThread::regenerate()
 
 #if !ROS_VERSION_MINIMUM(1, 10, 0)
 	for (size_t i = id_num; i < last_id_num_; ++i) {
-		visualization_msgs::Marker delop;
+		visualization_msgs::msg::Marker delop;
 		delop.header.frame_id = cfg_global_frame_;
-		delop.header.stamp    = ros::Time::now();
+		delop.header.stamp    = node_handle->get_clock()->now();
 		delop.ns              = "navgraph";
 		delop.id              = i;
-		delop.action          = visualization_msgs::Marker::DELETE;
+		delop.action          = visualization_msgs::msg::Marker::DELETE;
 		m.markers.push_back(delop);
 	}
 
 	for (size_t i = constraints_id_num; i < constraints_last_id_num_; ++i) {
-		visualization_msgs::Marker delop;
+		visualization_msgs::msg::Marker delop;
 		delop.header.frame_id = cfg_global_frame_;
-		delop.header.stamp    = ros::Time::now();
+		delop.header.stamp    = node_handle->get_clock()->now();
 		delop.ns              = "navgraph-constraints";
 		delop.id              = i;
-		delop.action          = visualization_msgs::Marker::DELETE;
+		delop.action          = visualization_msgs::msg::Marker::DELETE;
 		m.markers.push_back(delop);
 	}
 #endif
@@ -992,5 +992,5 @@ NavGraphVisualizationThread::regenerate()
 void
 NavGraphVisualizationThread::publish()
 {
-	vispub_.publish(markers_);
+	vispub_->publish(markers_);
 }

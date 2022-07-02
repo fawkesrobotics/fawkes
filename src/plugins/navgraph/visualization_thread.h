@@ -31,15 +31,16 @@
 #include <core/utils/lockptr.h>
 #include <navgraph/navgraph.h>
 #include <navgraph/navgraph_path.h>
-#include <plugins/ros/aspect/ros.h>
-#include <ros/publisher.h>
-#include <visualization_msgs/MarkerArray.h>
+#include <plugins/ros2/aspect/ros2.h>
+#include <rclcpp/publisher.hpp>
+#include <visualization_msgs/msg/marker_array.hpp>
+#include <geometry_msgs/msg/point.hpp>
 
 class NavGraphVisualizationThread : public fawkes::Thread,
                                     public fawkes::BlockedTimingAspect,
                                     public fawkes::ConfigurableAspect,
                                     public fawkes::LoggingAspect,
-                                    public fawkes::ROSAspect,
+                                    public fawkes::ROS2Aspect,
                                     public fawkes::NavGraph::ChangeListener
 {
 public:
@@ -61,7 +62,7 @@ public:
 private:
 	void  publish();
 	void  regenerate();
-	void  add_circle_markers(visualization_msgs::MarkerArray &m,
+	void  add_circle_markers(visualization_msgs::msg::MarkerArray &m,
 	                         size_t &                         id_num,
 	                         float                            center_x,
 	                         float                            center_y,
@@ -80,7 +81,7 @@ private:
 private:
 	size_t         last_id_num_;
 	size_t         constraints_last_id_num_;
-	ros::Publisher vispub_;
+  rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr vispub_;
 
 	float cfg_cost_scale_max_;
 
@@ -93,7 +94,7 @@ private:
 
 	std::string cfg_global_frame_;
 
-	visualization_msgs::MarkerArray markers_;
+	visualization_msgs::msg::MarkerArray markers_;
 };
 
 #endif

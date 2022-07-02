@@ -16,7 +16,7 @@
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDCONFDIR)/tf/tf.mk
-include $(BUILDSYSDIR)/ros.mk
+include $(BUILDSYSDIR)/ros2.mk
 include $(BUILDCONFDIR)/navgraph/navgraph.mk
 
 ENABLE_VISUALIZATION = 1
@@ -40,16 +40,16 @@ ifeq ($(HAVE_CPP11)$(HAVE_TF)$(HAVE_NAVGRAPH),111)
 
   SUBDIRS = static-constraints
 
-  ifeq ($(HAVE_ROS),1)
+  ifeq ($(HAVE_ROS2),1)
 
     LIBS_navgraph += fawkesrosaspect
-    CFLAGS += $(CFLAGS_ROS) $(CFLAGS_TF)
-    LDFLAGS += $(LDFLAGS_ROS) $(LDFLAGS_TF)
+    CFLAGS += $(CFLAGS_ROS2) $(CFLAGS_TF)
+    LDFLAGS += $(LDFLAGS_ROS2) $(LDFLAGS_TF)
 
     ifeq ($(ENABLE_VISUALIZATION),1)
-      ifeq ($(call ros-have-pkg,visualization_msgs),1)
-        CFLAGS  += -DHAVE_VISUALIZATION $(call ros-pkg-cflags,visualization_msgs)
-        LDFLAGS += $(call ros-pkg-lflags,visualization_msgs)
+      ifeq ($(call ros2-have-pkg,visualization_msgs),1)
+        CFLAGS  += -DHAVE_VISUALIZATION $(call ros2-pkg-cflags,visualization_msgs)
+        LDFLAGS += $(call ros2-pkg-lflags,visualization_msgs)
 
         OBJS_navgraph += visualization_thread.o
       else
@@ -58,9 +58,9 @@ ifeq ($(HAVE_CPP11)$(HAVE_TF)$(HAVE_NAVGRAPH),111)
       endif
     endif
 
-    ifeq ($(call ros-have-pkg,fawkes_msgs),1)
-      CFLAGS  += -DHAVE_FAWKES_MSGS $(call ros-pkg-cflags,fawkes_msgs)
-      LDFLAGS += $(call ros-pkg-lflags,fawkes_msgs)
+    ifeq ($(call ros2-have-pkg,fawkes_msgs),1)
+      CFLAGS  += -DHAVE_FAWKES_MSGS $(call ros2-pkg-cflags,fawkes_msgs)
+      LDFLAGS += $(call ros2-pkg-lflags,fawkes_msgs)
 
       OBJS_navgraph += rospub_thread.o
     else
