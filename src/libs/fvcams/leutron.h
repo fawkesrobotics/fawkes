@@ -68,8 +68,8 @@ private:
 	// should be HGRABBER, set to unsigned short to get rid of all the warnings
 	// by the broken-like-shit dsylib.
 	unsigned short int camera_handle;
-	LvCameraNode *     camera;
-	LvGrabberNode *    grabber;
+	LvCameraNode      *camera;
+	LvGrabberNode     *grabber;
 
 	unsigned int width;
 	unsigned int height;

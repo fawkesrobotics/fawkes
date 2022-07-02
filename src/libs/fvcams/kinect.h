@@ -42,11 +42,11 @@ public:
 	void DepthCallback(void *depth, uint32_t timestamp);
 
 	unsigned char *rgb_buffer();
-	uint16_t *     depth_buffer();
+	uint16_t      *depth_buffer();
 
 private:
 	unsigned char *m_rgb_buffer;
-	uint16_t *     m_depth_buffer;
+	uint16_t      *m_depth_buffer;
 
 	uint32_t m_rgb_timestamp;
 	uint32_t m_depth_timestamp;
@@ -85,7 +85,7 @@ public:
 
 private:
 	Freenect::Freenect<FvFreenectDevice> *m_freenect_ctx;
-	FvFreenectDevice *                    m_freenect_dev;
+	FvFreenectDevice                     *m_freenect_dev;
 
 	bool m_opened;
 	bool m_started;

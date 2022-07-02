@@ -116,7 +116,7 @@ public:
 
 private:
 	ViscaControl *visca;
-	char *        tty_port;
+	char         *tty_port;
 	bool          opened;
 
 	int pan_target;

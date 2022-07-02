@@ -505,8 +505,8 @@ Bumblebee2Camera::deinterlace_stereo(unsigned char *raw16,
  * This depends on the used camera.
  */
 void
-Bumblebee2Camera::decode_bayer(unsigned char * deinterlaced,
-                               unsigned char * rgb,
+Bumblebee2Camera::decode_bayer(unsigned char  *deinterlaced,
+                               unsigned char  *rgb,
                                unsigned int    width,
                                unsigned int    height,
                                bayer_pattern_t bayer_pattern)

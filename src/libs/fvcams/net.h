@@ -84,18 +84,18 @@ private:
 	unsigned int local_version_;
 	unsigned int remote_version_;
 
-	char *         host_;
+	char          *host_;
 	unsigned short port_;
-	char *         image_id_;
+	char          *image_id_;
 
 	bool                   get_jpeg_;
 	JpegImageDecompressor *decompressor_;
-	unsigned char *        decompressed_buffer_;
+	unsigned char         *decompressed_buffer_;
 	unsigned int           last_width_;
 	unsigned int           last_height_;
 
-	FuseClient *        fusec_;
-	FuseImageContent *  fuse_image_;
+	FuseClient         *fusec_;
+	FuseImageContent   *fuse_image_;
 	FuseNetworkMessage *fuse_message_;
 
 	FUSE_imageinfo_t *fuse_imageinfo_;

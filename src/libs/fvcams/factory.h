@@ -58,7 +58,7 @@ C *
 CameraFactory::instance(const char *as)
 {
 	Camera *c  = CameraFactory::instance(as);
-	C *     tc = dynamic_cast<C *>(c);
+	C      *tc = dynamic_cast<C *>(c);
 	if (tc == NULL) {
 		throw fawkes::TypeMismatchException("Returned camera is not of expected type");
 	}

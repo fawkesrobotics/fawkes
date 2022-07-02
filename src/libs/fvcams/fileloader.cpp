@@ -159,7 +159,7 @@ FileLoader::FileLoader(const CameraArgumentParser *cap)
  * @param height height of image
  */
 FileLoader::FileLoader(colorspace_t cspace,
-                       const char * filename,
+                       const char  *filename,
                        unsigned int width,
                        unsigned int height)
 {

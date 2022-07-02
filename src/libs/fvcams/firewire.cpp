@@ -718,7 +718,7 @@ FirewireCamera::parse_set_focus(const char *focus)
 	} else if (f == "manual") {
 		_auto_focus = false;
 	} else {
-		char *   endptr      = NULL;
+		char    *endptr      = NULL;
 		long int focus_value = strtol(f.c_str(), &endptr, 10);
 		if (endptr[0] != 0) {
 			throw TypeMismatchException("Focus value is invalid. String to int conversion failed");
@@ -749,7 +749,7 @@ FirewireCamera::parse_set_white_balance(const char *white_balance)
 		}
 		string   ub = w.substr(0, commapos);
 		string   vr = w.substr(commapos + 1);
-		char *   endptr;
+		char    *endptr;
 		long int ub_i = strtol(ub.c_str(), &endptr, 10);
 		if (endptr[0] != 0) {
 			throw TypeMismatchException("White balance value for U/B is invalid. "
@@ -783,7 +783,7 @@ FirewireCamera::parse_set_shutter(const char *shutter)
 	if (s == "auto") {
 		_auto_shutter = true;
 	} else {
-		char *   endptr;
+		char    *endptr;
 		long int tmp = strtol(s.c_str(), &endptr, 10);
 		if (endptr[0] != '\0') {
 			throw TypeMismatchException("Shutter value is invalid. "
@@ -983,7 +983,7 @@ FirewireCamera::FirewireCamera(const CameraArgumentParser *cap)
 void
 FirewireCamera::print_available_fwcams()
 {
-	dc1394_t *           dc1394 = dc1394_new();
+	dc1394_t            *dc1394 = dc1394_new();
 	dc1394camera_list_t *list;
 	dc1394error_t        err;
 	if ((err = dc1394_camera_enumerate(dc1394, &list)) != DC1394_SUCCESS) {

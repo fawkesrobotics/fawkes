@@ -34,7 +34,7 @@ class CameraControlImage : virtual public CameraControl
 public:
 	virtual ~CameraControlImage();
 
-	virtual const char * format();
+	virtual const char  *format();
 	virtual void         set_format(const char *format);
 	virtual unsigned int width()  = 0;
 	virtual unsigned int height() = 0;

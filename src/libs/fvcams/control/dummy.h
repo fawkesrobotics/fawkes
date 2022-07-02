@@ -78,7 +78,7 @@ public:
 	virtual void         set_gain(unsigned int gain);
 
 	// From CameraControlImage
-	virtual const char * format();
+	virtual const char  *format();
 	virtual void         set_format(const char *format);
 	virtual unsigned int width();
 	virtual unsigned int height();

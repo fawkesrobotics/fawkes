@@ -80,14 +80,14 @@ private:
 
 	bool            started;
 	bool            opened;
-	unsigned char * file_buffer;
+	unsigned char  *file_buffer;
 	int             _buffer_size;
 	unsigned int    width;
 	unsigned int    height;
 	colorspace_t    cspace;
-	char *          filename;
-	char *          dirname;
-	static char *   extension;
+	char           *filename;
+	char           *dirname;
+	static char    *extension;
 	int             num_files;
 	int             cur_file;
 	struct dirent **file_list;
