@@ -49,22 +49,22 @@ class TransformListener;
 
 namespace runtime {
 
-extern ArgumentParser *       argument_parser;
-extern FawkesMainThread *     main_thread;
-extern MultiLogger *          logger;
-extern NetworkLogger *        network_logger;
-extern BlackBoard *           blackboard;
-extern Configuration *        config;
-extern Clock *                clock;
-extern PluginManager *        plugin_manager;
-extern AspectManager *        aspect_manager;
-extern ThreadManager *        thread_manager;
-extern FawkesNetworkManager * network_manager;
-extern ConfigNetworkHandler * nethandler_config;
-extern PluginNetworkHandler * nethandler_plugin;
-extern tf::Transformer *      tf_transformer;
+extern ArgumentParser        *argument_parser;
+extern FawkesMainThread      *main_thread;
+extern MultiLogger           *logger;
+extern NetworkLogger         *network_logger;
+extern BlackBoard            *blackboard;
+extern Configuration         *config;
+extern Clock                 *clock;
+extern PluginManager         *plugin_manager;
+extern AspectManager         *aspect_manager;
+extern ThreadManager         *thread_manager;
+extern FawkesNetworkManager  *network_manager;
+extern ConfigNetworkHandler  *nethandler_config;
+extern PluginNetworkHandler  *nethandler_plugin;
+extern tf::Transformer       *tf_transformer;
 extern tf::TransformListener *tf_listener;
-extern Time *                 start_time;
+extern Time                  *start_time;
 
 bool  init(int argc, char **argv, int &retval);
 bool  init(const InitOptions &options, int &retval);

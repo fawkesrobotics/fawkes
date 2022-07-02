@@ -113,7 +113,7 @@ private:
 
 private:
 	ThreadInitializer *initializer_;
-	ThreadFinalizer *  finalizer_;
+	ThreadFinalizer   *finalizer_;
 
 	LockMap<BlockedTimingAspect::WakeupHook, ThreadList>           threads_;
 	LockMap<BlockedTimingAspect::WakeupHook, ThreadList>::iterator tit_;

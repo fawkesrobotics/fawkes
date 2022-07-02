@@ -45,8 +45,8 @@ public:
 
 private:
 	Clock *clock_;
-	Time * loop_start_;
-	Time * loop_end_;
+	Time  *loop_start_;
+	Time  *loop_end_;
 	float  desired_loop_time_sec_;
 	uint   desired_loop_time_usec_;
 	float  min_loop_time_sec_;

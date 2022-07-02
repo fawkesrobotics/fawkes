@@ -82,25 +82,25 @@ class FawkesNetworkManager;
 
 namespace runtime {
 
-ArgumentParser *       argument_parser   = NULL;
-FawkesMainThread *     main_thread       = NULL;
-MultiLogger *          logger            = NULL;
-NetworkLogger *        network_logger    = NULL;
-BlackBoard *           blackboard        = NULL;
-Configuration *        config            = NULL;
-PluginManager *        plugin_manager    = NULL;
-AspectManager *        aspect_manager    = NULL;
-ThreadManager *        thread_manager    = NULL;
-FawkesNetworkManager * network_manager   = NULL;
-ConfigNetworkHandler * nethandler_config = NULL;
-PluginNetworkHandler * nethandler_plugin = NULL;
-Clock *                clock             = NULL;
-SharedMemoryRegistry * shm_registry;
-InitOptions *          init_options      = NULL;
-tf::Transformer *      tf_transformer    = NULL;
+ArgumentParser        *argument_parser   = NULL;
+FawkesMainThread      *main_thread       = NULL;
+MultiLogger           *logger            = NULL;
+NetworkLogger         *network_logger    = NULL;
+BlackBoard            *blackboard        = NULL;
+Configuration         *config            = NULL;
+PluginManager         *plugin_manager    = NULL;
+AspectManager         *aspect_manager    = NULL;
+ThreadManager         *thread_manager    = NULL;
+FawkesNetworkManager  *network_manager   = NULL;
+ConfigNetworkHandler  *nethandler_config = NULL;
+PluginNetworkHandler  *nethandler_plugin = NULL;
+Clock                 *clock             = NULL;
+SharedMemoryRegistry  *shm_registry;
+InitOptions           *init_options      = NULL;
+tf::Transformer       *tf_transformer    = NULL;
 tf::TransformListener *tf_listener       = NULL;
-Time *                 start_time        = NULL;
-SyncPointManager *     syncpoint_manager = NULL;
+Time                  *start_time        = NULL;
+SyncPointManager      *syncpoint_manager = NULL;
 #ifdef HAVE_LOGGING_FD_REDIRECT
 LogFileDescriptorToLog *log_fd_redirect_stderr_ = NULL;
 LogFileDescriptorToLog *log_fd_redirect_stdout_ = NULL;

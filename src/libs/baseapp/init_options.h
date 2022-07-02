@@ -62,14 +62,14 @@ public:
 	bool               has_net_tcp_port() const;
 	unsigned short int net_tcp_port() const;
 	bool               has_net_service_name() const;
-	const char *       net_service_name() const;
+	const char        *net_service_name() const;
 
 	bool        has_load_plugin_list() const;
 	const char *load_plugin_list() const;
 	const char *default_plugin() const;
 
 	bool             has_loggers() const;
-	const char *     loggers() const;
+	const char      *loggers() const;
 	Logger::LogLevel log_level() const;
 
 	bool show_help() const;
@@ -103,7 +103,7 @@ private:
 	char *default_plugin_;
 
 	bool             has_loggers_;
-	char *           loggers_;
+	char            *loggers_;
 	Logger::LogLevel log_level_;
 
 	bool  has_net_service_name_;
