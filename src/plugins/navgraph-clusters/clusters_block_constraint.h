@@ -38,7 +38,7 @@ public:
 	virtual bool blocks(const fawkes::NavGraphNode &from, const fawkes::NavGraphNode &to) noexcept;
 
 private:
-	NavGraphClustersThread *                       parent_;
+	NavGraphClustersThread                        *parent_;
 	std::list<std::pair<std::string, std::string>> blocked_;
 };
 

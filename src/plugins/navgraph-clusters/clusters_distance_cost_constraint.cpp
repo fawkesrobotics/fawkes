@@ -43,7 +43,7 @@ using namespace fawkes;
  * assigned 1.0.
  */
 NavGraphClustersDistanceCostConstraint::NavGraphClustersDistanceCostConstraint(
-  const char *            name,
+  const char             *name,
   NavGraphClustersThread *parent,
   float                   cost_min,
   float                   cost_max,

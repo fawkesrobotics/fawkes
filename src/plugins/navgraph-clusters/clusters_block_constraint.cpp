@@ -31,7 +31,7 @@
  * @param name constraint name
  * @param parent parent to call for blocked edges
  */
-NavGraphClustersBlockConstraint::NavGraphClustersBlockConstraint(const char *            name,
+NavGraphClustersBlockConstraint::NavGraphClustersBlockConstraint(const char             *name,
                                                                  NavGraphClustersThread *parent)
 : NavGraphEdgeConstraint(name)
 {

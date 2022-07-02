@@ -33,7 +33,7 @@
  * @param cost_factor cost factor to return for blocked edges
  */
 NavGraphClustersStaticCostConstraint::NavGraphClustersStaticCostConstraint(
-  const char *            name,
+  const char             *name,
   NavGraphClustersThread *parent,
   float                   cost_factor)
 : NavGraphEdgeCostConstraint(name)

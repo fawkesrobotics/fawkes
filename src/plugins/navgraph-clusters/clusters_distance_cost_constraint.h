@@ -34,7 +34,7 @@ class NavGraphClustersThread;
 class NavGraphClustersDistanceCostConstraint : public fawkes::NavGraphEdgeCostConstraint
 {
 public:
-	NavGraphClustersDistanceCostConstraint(const char *            name,
+	NavGraphClustersDistanceCostConstraint(const char             *name,
 	                                       NavGraphClustersThread *parent,
 	                                       float                   cost_min,
 	                                       float                   cost_max,
@@ -47,7 +47,7 @@ public:
 	                          const fawkes::NavGraphNode &to) noexcept;
 
 private:
-	NavGraphClustersThread *                                         parent_;
+	NavGraphClustersThread                                          *parent_;
 	float                                                            cost_min_;
 	float                                                            cost_max_;
 	float                                                            cost_span_;

@@ -31,7 +31,7 @@ class NavGraphClustersThread;
 class NavGraphClustersStaticCostConstraint : public fawkes::NavGraphEdgeCostConstraint
 {
 public:
-	NavGraphClustersStaticCostConstraint(const char *            name,
+	NavGraphClustersStaticCostConstraint(const char             *name,
 	                                     NavGraphClustersThread *parent,
 	                                     float                   cost_factor);
 	virtual ~NavGraphClustersStaticCostConstraint();
@@ -41,7 +41,7 @@ public:
 	                          const fawkes::NavGraphNode &to) noexcept;
 
 private:
-	NavGraphClustersThread *                       parent_;
+	NavGraphClustersThread                        *parent_;
 	float                                          cost_factor_;
 	std::list<std::pair<std::string, std::string>> blocked_;
 };
