@@ -41,9 +41,9 @@ using namespace std;
  *  @param config The network config to read from and write the time offset to
  *  @param config_path The config path to read from and write the time offset to
  */
-YawCalibration::YawCalibration(LaserInterface *      laser,
-                               LaserInterface *      front_laser,
-                               tf::Transformer *     tf_transformer,
+YawCalibration::YawCalibration(LaserInterface       *laser,
+                               LaserInterface       *front_laser,
+                               tf::Transformer      *tf_transformer,
                                NetworkConfiguration *config,
                                string                config_path)
 : LaserCalibration(laser, tf_transformer, config, config_path),

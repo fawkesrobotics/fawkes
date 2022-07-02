@@ -28,9 +28,9 @@
 class YawCalibration : public LaserCalibration
 {
 public:
-	YawCalibration(LaserInterface *              laser,
-	               LaserInterface *              front_laser,
-	               fawkes::tf::Transformer *     tf_transformer,
+	YawCalibration(LaserInterface               *laser,
+	               LaserInterface               *front_laser,
+	               fawkes::tf::Transformer      *tf_transformer,
 	               fawkes::NetworkConfiguration *config,
 	               std::string                   config_path);
 	virtual void calibrate();

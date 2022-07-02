@@ -49,8 +49,8 @@ using namespace std;
  *  @param config The network config to read from and write updates to
  *  @param config_path The config path to read from and write updates to
  */
-LaserCalibration::LaserCalibration(LaserInterface *      laser,
-                                   tf::Transformer *     tf_transformer,
+LaserCalibration::LaserCalibration(LaserInterface       *laser,
+                                   tf::Transformer      *tf_transformer,
                                    NetworkConfiguration *config,
                                    string                config_path)
 : laser_(laser), tf_transformer_(tf_transformer), config_(config), config_path_(config_path)

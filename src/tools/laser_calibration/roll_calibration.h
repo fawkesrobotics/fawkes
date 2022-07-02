@@ -26,8 +26,8 @@
 class RollCalibration : public LaserCalibration
 {
 public:
-	RollCalibration(LaserInterface *              laser,
-	                fawkes::tf::Transformer *     tf_transformer,
+	RollCalibration(LaserInterface               *laser,
+	                fawkes::tf::Transformer      *tf_transformer,
 	                fawkes::NetworkConfiguration *config,
 	                std::string                   config_path);
 

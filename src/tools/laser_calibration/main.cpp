@@ -70,10 +70,10 @@ main(int argc, char **argv)
 		return 0;
 	}
 
-	FawkesNetworkClient * client      = NULL;
-	BlackBoard *          blackboard  = NULL;
+	FawkesNetworkClient  *client      = NULL;
+	BlackBoard           *blackboard  = NULL;
 	NetworkConfiguration *netconf     = NULL;
-	tf::Transformer *     transformer = NULL;
+	tf::Transformer      *transformer = NULL;
 	// Mark the tf listener as unused, we only use its callbacks.
 	tf::TransformListener *tf_listener __attribute__((unused)) = NULL;
 
