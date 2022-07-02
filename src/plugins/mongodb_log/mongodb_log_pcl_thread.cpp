@@ -191,7 +191,7 @@ MongoLogPointCloudThread::loop()
 		PointCloudInfo &pi = p->second;
 		std::string     frame_id;
 		unsigned int    width, height;
-		void *          point_data;
+		void           *point_data;
 		size_t          point_size, num_points;
 		fawkes::Time    time;
 		adapter_->get_data(

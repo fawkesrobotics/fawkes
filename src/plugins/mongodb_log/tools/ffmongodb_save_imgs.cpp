@@ -152,7 +152,7 @@ main(int argc, char **argv)
 				std::string image_id = imgdoc["image_id"].get_utf8().value.to_string();
 
 				std::string out_filename;
-				char *      fntmp;
+				char       *fntmp;
 				if (filename_indexed) {
 					if (asprintf(&fntmp, "%s%s-%08d.png", output_dir.c_str(), image_id.c_str(), image_n++)
 					    != -1) {

@@ -90,14 +90,14 @@ private:
 	/// @endcond
 	std::map<std::string, ImageInfo> imgs_;
 
-	fawkes::Time *           last_update_;
-	fawkes::Time *           now_;
-	mongocxx::client *       mongodb_;
+	fawkes::Time            *last_update_;
+	fawkes::Time            *now_;
+	mongocxx::client        *mongodb_;
 	mongocxx::gridfs::bucket gridfs_;
 	std::string              collection_;
 	std::string              database_;
 
-	fawkes::Mutex *   mutex_;
+	fawkes::Mutex    *mutex_;
 	fawkes::TimeWait *wait_;
 
 	std::vector<std::string> includes_;

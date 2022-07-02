@@ -68,14 +68,14 @@ private:
 	class InterfaceListener : public fawkes::BlackBoardInterfaceListener
 	{
 	public:
-		InterfaceListener(fawkes::BlackBoard *          blackboard,
-		                  fawkes::Interface *           interface,
-		                  mongocxx::client *            mongodb,
-		                  std::string &                 database,
+		InterfaceListener(fawkes::BlackBoard           *blackboard,
+		                  fawkes::Interface            *interface,
+		                  mongocxx::client             *mongodb,
+		                  std::string                  &database,
 		                  fawkes::LockSet<std::string> &colls,
-		                  const std::string &           agent_name,
-		                  fawkes::Logger *              logger,
-		                  fawkes::Time *                now);
+		                  const std::string            &agent_name,
+		                  fawkes::Logger               *logger,
+		                  fawkes::Time                 *now);
 		~InterfaceListener();
 
 		/** Get MongoDB Client.
@@ -90,21 +90,21 @@ private:
 		virtual void bb_interface_data_refreshed(fawkes::Interface *interface) noexcept;
 
 	private:
-		fawkes::BlackBoard *          blackboard_;
-		fawkes::Interface *           interface_;
-		mongocxx::client *            mongodb_;
-		fawkes::Logger *              logger_;
+		fawkes::BlackBoard           *blackboard_;
+		fawkes::Interface            *interface_;
+		mongocxx::client             *mongodb_;
+		fawkes::Logger               *logger_;
 		std::string                   collection_;
-		std::string &                 database_;
+		std::string                  &database_;
 		fawkes::LockSet<std::string> &collections_;
 		const std::string             agent_name_;
-		fawkes::Time *                now_;
+		fawkes::Time		             *now_;
 	};
 
 	fawkes::LockMap<std::string, InterfaceListener *> listeners_;
 	fawkes::LockSet<std::string>                      collections_;
 	std::string                                       database_;
-	fawkes::Time *                                    now_;
+	fawkes::Time                                     *now_;
 
 	std::vector<std::string> excludes_;
 };

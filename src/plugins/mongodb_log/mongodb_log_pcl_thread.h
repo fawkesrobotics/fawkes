@@ -91,12 +91,12 @@ private:
 	/// @endcond
 	std::map<std::string, PointCloudInfo> pcls_;
 
-	mongocxx::client *       mongodb_;
+	mongocxx::client        *mongodb_;
 	mongocxx::gridfs::bucket gridfs_;
 	std::string              collection_;
 	std::string              database_;
 
-	fawkes::Mutex *   mutex_;
+	fawkes::Mutex    *mutex_;
 	fawkes::TimeWait *wait_;
 
 	bool         cfg_flush_after_write_;

@@ -100,7 +100,7 @@ MongoLogBlackboardThread::init()
 				continue;
 
 			logger->log_debug(name(), "Adding %s", (*i)->uid());
-			client *    mc          = mongodb_connmgr->create_client();
+			client     *mc          = mongodb_connmgr->create_client();
 			std::string agent_name  = config->get_string_or_default("/fawkes/agent/name", "");
 			listeners_[(*i)->uid()] = new InterfaceListener(
 			  blackboard, *i, mc, database_, collections_, agent_name, logger, now_);
@@ -147,7 +147,7 @@ MongoLogBlackboardThread::bb_interface_created(const char *type, const char *id)
 		Interface *interface = blackboard->open_for_reading(type, id);
 		if (listeners_.find(interface->uid()) == listeners_.end()) {
 			logger->log_debug(name(), "Opening new %s", interface->uid());
-			client *    mc               = mongodb_connmgr->create_client();
+			client     *mc               = mongodb_connmgr->create_client();
 			std::string agent_name       = config->get_string_or_default("/fawkes/agent/name", "");
 			listeners_[interface->uid()] = new InterfaceListener(
 			  blackboard, interface, mc, database_, collections_, agent_name, logger, now_);
@@ -171,14 +171,14 @@ MongoLogBlackboardThread::bb_interface_created(const char *type, const char *id)
  * @param logger logger
  * @param now Time
  */
-MongoLogBlackboardThread::InterfaceListener::InterfaceListener(BlackBoard *          blackboard,
-                                                               Interface *           interface,
-                                                               client *              mongodb,
-                                                               std::string &         database,
+MongoLogBlackboardThread::InterfaceListener::InterfaceListener(BlackBoard           *blackboard,
+                                                               Interface            *interface,
+                                                               client               *mongodb,
+                                                               std::string          &database,
                                                                LockSet<std::string> &colls,
-                                                               const std::string &   agent_name,
-                                                               Logger *              logger,
-                                                               Time *                now)
+                                                               const std::string    &agent_name,
+                                                               Logger               *logger,
+                                                               Time                 *now)
 : BlackBoardInterfaceListener("MongoLogListener-%s", interface->uid()),
   database_(database),
   collections_(colls),
