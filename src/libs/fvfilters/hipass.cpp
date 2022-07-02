@@ -87,7 +87,7 @@ FilterHipass::apply()
 	             dst_roi->line_step);
 
 	cv::Mat kernel(3, 3, CV_32F);
-	float * kernel_f = (float *)kernel.ptr();
+	float  *kernel_f = (float *)kernel.ptr();
 	kernel_f[0]      = -1;
 	kernel_f[1]      = -1;
 	kernel_f[2]      = -1;

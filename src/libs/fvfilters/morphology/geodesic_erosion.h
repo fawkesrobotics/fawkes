@@ -52,7 +52,7 @@ private:
 	unsigned int   se_size;
 
 	FilterErosion *erode;
-	FilterMax *    max;
+	FilterMax     *max;
 
 	ImageDiff *diff;
 

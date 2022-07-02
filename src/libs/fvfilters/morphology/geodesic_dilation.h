@@ -52,7 +52,7 @@ private:
 	unsigned int   se_size;
 
 	FilterDilation *dilate;
-	FilterMin *     min;
+	FilterMin      *min;
 
 	ImageDiff *diff;
 

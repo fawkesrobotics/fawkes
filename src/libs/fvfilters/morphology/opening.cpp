@@ -51,7 +51,7 @@ FilterOpening::~FilterOpening()
 
 void
 FilterOpening::set_src_buffer(unsigned char *buf,
-                              ROI *          roi,
+                              ROI           *roi,
                               orientation_t  ori,
                               unsigned int   buffer_num)
 {

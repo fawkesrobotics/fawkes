@@ -55,7 +55,7 @@ private:
 	void draw_roi(const ROI *roi);
 
 	const std::list<ROI> *rois_;
-	Drawer *              drawer_;
+	Drawer               *drawer_;
 	border_style_t        border_style_;
 };
 

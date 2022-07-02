@@ -85,7 +85,7 @@ FilterSharpen::apply()
 	             dst_roi->line_step);
 
 	cv::Mat kernel(3, 3, CV_32F);
-	float * kernel_f = (float *)kernel.ptr();
+	float  *kernel_f = (float *)kernel.ptr();
 	kernel_f[0]      = -0.125;
 	kernel_f[1]      = -0.125;
 	kernel_f[2]      = -0.125;
