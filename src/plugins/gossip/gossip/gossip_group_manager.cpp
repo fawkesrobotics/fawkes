@@ -40,8 +40,8 @@ GossipGroupConfiguration::GossipGroupConfiguration() : send_port(0), recv_port(0
  * @param broadcast_address IPv4 address to broadcast to
  * @param broadcast_port UDP port to listen on for the group
  */
-GossipGroupConfiguration::GossipGroupConfiguration(std::string &  name,
-                                                   std::string &  broadcast_address,
+GossipGroupConfiguration::GossipGroupConfiguration(std::string   &name,
+                                                   std::string   &broadcast_address,
                                                    unsigned short broadcast_port)
 : name(name),
   broadcast_addr(broadcast_address),
@@ -56,8 +56,8 @@ GossipGroupConfiguration::GossipGroupConfiguration(std::string &  name,
  * @param send_port UDP port to send messages to
  * @param recv_port UDP port to listen on for the group
  */
-GossipGroupConfiguration::GossipGroupConfiguration(std::string &  name,
-                                                   std::string &  broadcast_address,
+GossipGroupConfiguration::GossipGroupConfiguration(std::string   &name,
+                                                   std::string   &broadcast_address,
                                                    unsigned short send_port,
                                                    unsigned short recv_port)
 : name(name), broadcast_addr(broadcast_address), send_port(send_port), recv_port(recv_port)
@@ -106,8 +106,8 @@ GossipGroupConfiguration::operator=(const GossipGroupConfiguration &c)
  * @param initial_groups initial group configurations to join
  */
 GossipGroupManager::GossipGroupManager(
-  std::string &                                    service_name,
-  ServicePublisher *                               service_publisher,
+  std::string                                     &service_name,
+  ServicePublisher                                *service_publisher,
   std::map<std::string, GossipGroupConfiguration> &initial_groups)
 : service_name_(service_name), service_publisher_(service_publisher)
 {

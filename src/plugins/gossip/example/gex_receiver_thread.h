@@ -52,7 +52,7 @@ protected:
 	}
 
 private:
-	void handle_peer_msg(boost::asio::ip::udp::endpoint &           endpoint,
+	void handle_peer_msg(boost::asio::ip::udp::endpoint            &endpoint,
 	                     uint16_t                                   component_id,
 	                     uint16_t                                   msg_type,
 	                     std::shared_ptr<google::protobuf::Message> msg);
