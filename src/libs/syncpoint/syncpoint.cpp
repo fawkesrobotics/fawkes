@@ -245,12 +245,12 @@ SyncPoint::wait(const std::string &component,
 {
 	MutexLocker ml(mutex_);
 
-	std::set<std::string> *        watchers;
-	WaitCondition *                cond;
+	std::set<std::string>         *watchers;
+	WaitCondition                 *cond;
 	CircularBuffer<SyncPointCall> *calls;
-	Mutex *                        mutex_cond;
-	bool *                         timer_running;
-	string *                       timer_owner;
+	Mutex                         *mutex_cond;
+	bool                          *timer_running;
+	string                        *timer_owner;
 	// set watchers, cond and calls depending of the Wakeup type
 	if (type == WAIT_FOR_ONE) {
 		watchers      = &watchers_wait_for_one_;
