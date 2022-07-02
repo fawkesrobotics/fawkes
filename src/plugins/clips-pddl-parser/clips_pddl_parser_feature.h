@@ -40,7 +40,7 @@ public:
 	PDDLCLIPSFeature();
 	void init_logger(fawkes::Logger *logger);
 	//virtual ~PDDLCLIPSFeature();
-	virtual void clips_context_init(const std::string &                  env_name,
+	virtual void clips_context_init(const std::string                   &env_name,
 	                                fawkes::LockPtr<CLIPS::Environment> &clips);
 	virtual void clips_context_destroyed(const std::string &env_name);
 
@@ -49,7 +49,7 @@ private:
 	void parse_formula(std::string env_name, std::string pddl_formula, std::string output_id);
 
 private:
-	fawkes::Logger *                                           logger_;
+	fawkes::Logger                                            *logger_;
 	std::map<std::string, fawkes::LockPtr<CLIPS::Environment>> envs_;
 };
 
