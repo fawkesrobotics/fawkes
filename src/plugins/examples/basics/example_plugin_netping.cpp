@@ -103,7 +103,7 @@ main(int argc, char **argv)
 	ExamplePluginClientNetworkReceiver r;
 	c->register_handler(&r, FAWKES_CID_EXAMPLE_PLUGIN);
 
-	const char *  tmp;
+	const char   *tmp;
 	unsigned int *u = (unsigned int *)malloc(sizeof(unsigned int));
 	;
 	unsigned int id = 1;
