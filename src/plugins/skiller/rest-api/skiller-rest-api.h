@@ -64,7 +64,7 @@ private:
 	void set_and_wait_graph(const char *graph);
 
 private:
-	fawkes::WebviewRestApi *       rest_api_;
+	fawkes::WebviewRestApi        *rest_api_;
 	fawkes::SkillerDebugInterface *skdb_if_;
-	fawkes::SkillerInterface *     skiller_if_;
+	fawkes::SkillerInterface      *skiller_if_;
 };

@@ -79,7 +79,7 @@ public:
 		// this is needed to get rl_done working
 		rl_event_hook = event_hook;
 
-		char *             host      = (char *)"localhost";
+		char              *host      = (char *)"localhost";
 		unsigned short int port      = 1910;
 		bool               free_host = argp->parse_hostport("r", &host, &port);
 
@@ -223,11 +223,11 @@ public:
 	}
 
 private:
-	ArgumentParser *     argp;
+	ArgumentParser      *argp;
 	FawkesNetworkClient *c;
-	BlackBoard *         rbb;
-	SkillerInterface *   sif;
-	const char *         prompt;
+	BlackBoard          *rbb;
+	SkillerInterface    *sif;
+	const char          *prompt;
 	bool                 just_connected;
 	bool                 connection_died_recently;
 };

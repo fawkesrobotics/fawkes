@@ -93,7 +93,7 @@ protected:
 	}
 
 private: /* members */
-	fawkes::ComponentLogger *        clog_;
+	fawkes::ComponentLogger         *clog_;
 	fawkes::BlackBoardWithOwnership *bbo_;
 
 	// config values
