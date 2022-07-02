@@ -87,7 +87,7 @@ public:
    * @param fingers target finger positions
    */
 	virtual void goto_trajec(std::vector<std::vector<float>> *trajec,
-	                         std::vector<float> &             fingers) = 0;
+	                         std::vector<float>              &fingers) = 0;
 
 	/** Move the arm to given configuration.
    * @param joints target joint angles

@@ -50,9 +50,9 @@ JacoPlugin::JacoPlugin(Configuration *config) : Plugin(config)
 		jaco_arm_t *arm = new jaco_arm_t();
 		arm->config     = CONFIG_SINGLE;
 
-		JacoActThread *     act_thread      = new JacoActThread("JacoActThread", arm);
-		JacoInfoThread *    info_thread     = new JacoInfoThread("JacoInfoThread", arm);
-		JacoGotoThread *    goto_thread     = new JacoGotoThread("JacoGotoThread", arm);
+		JacoActThread      *act_thread      = new JacoActThread("JacoActThread", arm);
+		JacoInfoThread     *info_thread     = new JacoInfoThread("JacoInfoThread", arm);
+		JacoGotoThread     *goto_thread     = new JacoGotoThread("JacoGotoThread", arm);
 		JacoOpenraveThread *openrave_thread = NULL;
 #ifdef HAVE_OPENRAVE
 		openrave_thread = new JacoOpenraveThread("JacoOpenraveThread", arm);
@@ -75,11 +75,11 @@ JacoPlugin::JacoPlugin(Configuration *config) : Plugin(config)
 		arm_r->config     = CONFIG_RIGHT;
 
 		// each arm gets a separate set of threads for independent manipulation.
-		JacoActThread * act_thread_l  = new JacoActThread("JacoActThreadLeft", arm_l);
+		JacoActThread  *act_thread_l  = new JacoActThread("JacoActThreadLeft", arm_l);
 		JacoInfoThread *info_thread_l = new JacoInfoThread("JacoInfoThreadLeft", arm_l);
 		JacoGotoThread *goto_thread_l = new JacoGotoThread("JacoGotoThreadLeft", arm_l);
 
-		JacoActThread * act_thread_r  = new JacoActThread("JacoActThreadRight", arm_r);
+		JacoActThread  *act_thread_r  = new JacoActThread("JacoActThreadRight", arm_r);
 		JacoInfoThread *info_thread_r = new JacoInfoThread("JacoInfoThreadRight", arm_r);
 		JacoGotoThread *goto_thread_r = new JacoGotoThread("JacoGotoThreadRight", arm_r);
 
@@ -116,7 +116,7 @@ JacoPlugin::JacoPlugin(Configuration *config) : Plugin(config)
 		arms->left            = arm_l;
 		arms->right           = arm_r;
 
-		JacoBimanualActThread * act_thread  = new JacoBimanualActThread(arms);
+		JacoBimanualActThread  *act_thread  = new JacoBimanualActThread(arms);
 		JacoBimanualGotoThread *goto_thread = new JacoBimanualGotoThread(arms);
 
 		JacoBimanualOpenraveThread *openrave_thread = NULL;

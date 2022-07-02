@@ -90,7 +90,7 @@ private:
 	void _exec_trajec(fawkes::jaco_trajec_t *trajec);
 
 	fawkes::jaco_arm_t *arm_;
-	fawkes::Mutex *     final_mutex_;
+	fawkes::Mutex      *final_mutex_;
 
 	fawkes::RefPtr<fawkes::jaco_target_t> target_;
 	float                                 finger_last_[4]; // 3 positions + 1 counter
