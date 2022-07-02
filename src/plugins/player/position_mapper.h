@@ -36,16 +36,16 @@ class Position2dProxy;
 class PlayerPositionMapper : public PlayerProxyFawkesInterfaceMapper
 {
 public:
-	PlayerPositionMapper(const std::string &              varname,
+	PlayerPositionMapper(const std::string               &varname,
 	                     fawkes::ObjectPositionInterface *interface,
-	                     PlayerCc::Position2dProxy *      proxy);
+	                     PlayerCc::Position2dProxy       *proxy);
 
 	virtual void sync_fawkes_to_player();
 	virtual void sync_player_to_fawkes();
 
 private:
 	fawkes::ObjectPositionInterface *interface_;
-	PlayerCc::Position2dProxy *      proxy_;
+	PlayerCc::Position2dProxy       *proxy_;
 };
 
 #endif
