@@ -301,8 +301,8 @@ Logger::vlog(LogLevel level, const char *component, const char *format, va_list 
 void
 Logger::vtlog(LogLevel        level,
               struct timeval *t,
-              const char *    component,
-              const char *    format,
+              const char     *component,
+              const char     *format,
               va_list         va)
 {
 	if (log_level <= level) {

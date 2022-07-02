@@ -75,7 +75,7 @@ public:
 private:
 	struct ::tm *now_s;
 
-	FILE * log_file;
+	FILE  *log_file;
 	Mutex *mutex;
 };
 

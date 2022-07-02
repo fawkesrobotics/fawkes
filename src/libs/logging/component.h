@@ -57,7 +57,7 @@ public:
 
 private:
 	Logger *logger_;
-	char *  component_;
+	char   *component_;
 };
 
 } // end namespace fawkes
