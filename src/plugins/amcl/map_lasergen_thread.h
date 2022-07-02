@@ -104,7 +104,7 @@ private:
 	std::normal_distribution<float> noise_nd_;
 #endif
 
-	fawkes::Laser360Interface *  laser_if_;
+	fawkes::Laser360Interface   *laser_if_;
 	fawkes::Position3DInterface *gt_pose_if_;
 	fawkes::Position3DInterface *cur_pose_if_;
 };

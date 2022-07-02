@@ -39,7 +39,7 @@
 class CellData
 {
 public:
-	map_t *      map_;
+	map_t       *map_;
 	unsigned int i_, j_;
 	unsigned int src_i_, src_j_;
 };
@@ -147,14 +147,14 @@ delta(const unsigned int x, const unsigned int y)
 }
 
 void
-enqueue(map_t *                        map,
+enqueue(map_t                         *map,
         unsigned int                   i,
         unsigned int                   j,
         unsigned int                   src_i,
         unsigned int                   src_j,
         std::priority_queue<CellData> &Q,
-        CachedDistanceMap *            cdm,
-        unsigned char *                marked)
+        CachedDistanceMap             *cdm,
+        unsigned char                 *marked)
 {
 	if (marked[MAP_INDEX(map, i, j)])
 		return;
@@ -184,7 +184,7 @@ enqueue(map_t *                        map,
 void
 map_update_cspace(map_t *map, double max_occ_dist)
 {
-	unsigned char *               marked;
+	unsigned char	              *marked;
 	std::priority_queue<CellData> Q;
 
 	marked = new unsigned char[map->size_x * map->size_y];

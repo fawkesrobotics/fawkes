@@ -105,7 +105,7 @@ AmclROSThread::publish_pose_array(const std::string &global_frame_id, const pf_s
  */
 void
 AmclROSThread::publish_pose(const std::string &global_frame_id,
-                            const amcl_hyp_t & amcl_hyp,
+                            const amcl_hyp_t  &amcl_hyp,
                             const double       covariance[36])
 {
 	geometry_msgs::PoseWithCovarianceStamped p;

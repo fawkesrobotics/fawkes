@@ -97,19 +97,19 @@ protected:
 private:
 	bool               set_laser_pose();
 	bool               get_odom_pose(fawkes::tf::Stamped<fawkes::tf::Pose> &odom_pose,
-	                                 double &                               x,
-	                                 double &                               y,
-	                                 double &                               yaw,
-	                                 const fawkes::Time *                   t,
-	                                 const std::string &                    f);
+	                                 double                                &x,
+	                                 double                                &y,
+	                                 double                                &yaw,
+	                                 const fawkes::Time                    *t,
+	                                 const std::string                     &f);
 	void               apply_initial_pose();
 	static pf_vector_t uniform_pose_generator(void *arg);
-	void               set_initial_pose(const std::string &     frame_id,
-	                                    const fawkes::Time &    msg_time,
+	void               set_initial_pose(const std::string      &frame_id,
+	                                    const fawkes::Time     &msg_time,
 	                                    const fawkes::tf::Pose &pose,
-	                                    const double *          covariance);
+	                                    const double           *covariance);
 	virtual bool       bb_interface_message_received(fawkes::Interface *interface,
-	                                                 fawkes::Message *  message) noexcept;
+	                                                 fawkes::Message   *message) noexcept;
 
 private:
 	fawkes::Mutex *conf_mutex_;
@@ -143,15 +143,15 @@ private:
 	bool   sent_first_transform_;
 	bool   latest_tf_valid_;
 	map_t *map_;
-	pf_t * pf_;
+	pf_t  *pf_;
 	int    resample_count_;
 
 	double       save_pose_period_;
 	double       transform_tolerance_;
 	fawkes::Time save_pose_last_time;
 
-	fawkes::Laser360Interface *    laser_if_;
-	fawkes::Position3DInterface *  pos3d_if_;
+	fawkes::Laser360Interface     *laser_if_;
+	fawkes::Position3DInterface   *pos3d_if_;
 	fawkes::LocalizationInterface *loc_if_;
 
 	amcl_hyp_t *initial_pose_hyp_;
@@ -165,7 +165,7 @@ private:
 	double      laser_min_range_;
 	double      laser_max_range_;
 
-	amcl::AMCLOdom * odom_;
+	amcl::AMCLOdom  *odom_;
 	amcl::AMCLLaser *laser_;
 	bool             laser_update_;
 	bool             laser_buffered_;

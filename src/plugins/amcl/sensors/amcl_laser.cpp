@@ -191,7 +191,7 @@ AMCLLaser::BeamModel(AMCLLaserData *data, pf_sample_set_t *set)
 double
 AMCLLaser::LikelihoodFieldModel(AMCLLaserData *data, pf_sample_set_t *set)
 {
-	AMCLLaser *  self;
+	AMCLLaser   *self;
 	int          i, j;
 	double       z, pz;
 	double       obs_range, obs_bearing;

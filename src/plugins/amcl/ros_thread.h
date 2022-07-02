@@ -61,7 +61,7 @@ public:
 
 	void publish_pose_array(const std::string &global_frame_id, const pf_sample_set_t *set);
 	void publish_pose(const std::string &global_frame_id,
-	                  const amcl_hyp_t & amcl_hyp,
+	                  const amcl_hyp_t  &amcl_hyp,
 	                  const double       last_covariance[36]);
 	void publish_map(const std::string &global_frame_id, const map_t *map);
 

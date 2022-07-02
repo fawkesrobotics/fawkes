@@ -44,7 +44,7 @@ namespace amcl {
  * @return loaded map
  */
 map_t *
-read_map(const char *                      map_file,
+read_map(const char                       *map_file,
          float                             origin_x,
          float                             origin_y,
          float                             resolution,
@@ -105,14 +105,14 @@ read_map(const char *                      map_file,
  * @param cfg_prefix optional config path prefix
  */
 void
-read_map_config(Configuration *    config,
-                std::string &      cfg_map_file,
-                float &            cfg_resolution,
-                float &            cfg_origin_x,
-                float &            cfg_origin_y,
-                float &            cfg_origin_theta,
-                float &            cfg_occupied_thresh,
-                float &            cfg_free_thresh,
+read_map_config(Configuration     *config,
+                std::string       &cfg_map_file,
+                float             &cfg_resolution,
+                float             &cfg_origin_x,
+                float             &cfg_origin_y,
+                float             &cfg_origin_theta,
+                float             &cfg_occupied_thresh,
+                float             &cfg_free_thresh,
                 const std::string &cfg_prefix)
 {
 	cfg_map_file = std::string(CONFDIR) + "/" + config->get_string((cfg_prefix + "map_file").c_str());
