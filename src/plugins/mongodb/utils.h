@@ -28,7 +28,7 @@
 
 bool                                check_mongodb_ok(const bsoncxx::document::view &reply);
 bsoncxx::document::element          get_dotted_field(const bsoncxx::document::view &doc,
-                                                     const std::string &            key);
+                                                     const std::string             &key);
 std::pair<std::string, std::string> split_db_collection_string(const std::string &dbcollection);
 
 #endif /* !_PLUGINS_MONGODB_UTILS_H_ */

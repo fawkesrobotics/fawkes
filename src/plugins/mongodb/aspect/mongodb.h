@@ -51,7 +51,7 @@ public:
 	}
 
 protected:
-	mongocxx::client *  mongodb_client;
+	mongocxx::client   *mongodb_client;
 	MongoDBConnCreator *mongodb_connmgr;
 
 private:

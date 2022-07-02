@@ -86,7 +86,7 @@ private:
 		std::string                 db_name;
 		std::string                 rrd_name;
 		std::string                 conf_path;
-		fawkes::RRDDefinition *     rrd;
+		fawkes::RRDDefinition      *rrd;
 		fawkes::RRDGraphDefinition *graph1;
 		fawkes::RRDGraphDefinition *graph2;
 		fawkes::RRDGraphDefinition *graph3;
