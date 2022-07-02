@@ -96,10 +96,10 @@ private:
 	std::map<std::string, plexil_interface_config>
 	     read_plexil_interface_configs(const std::string &config_prefix);
 	void add_plexil_interface_configs(
-	  pugi::xml_node &                                                             parent,
+	  pugi::xml_node                                                              &parent,
 	  const std::map<std::string, PlexilExecutiveThread::plexil_interface_config> &configs,
-	  const char *                                                                 tag_name,
-	  const char *                                                                 type_attr_name);
+	  const char                                                                  *tag_name,
+	  const char                                                                  *type_attr_name);
 	void plexil_compile(const std::string &ple_file);
 
 private:
@@ -112,7 +112,7 @@ private:
 	std::unique_ptr<PLEXIL::ExecApplication> plexil_;
 
 #ifdef HAVE_NAVGRAPH
-	PlexilNavgraphAccessThread *      navgraph_access_thread_;
+	PlexilNavgraphAccessThread       *navgraph_access_thread_;
 	fawkes::LockPtr<fawkes::NavGraph> navgraph_;
 #endif
 

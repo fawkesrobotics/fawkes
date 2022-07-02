@@ -73,7 +73,7 @@ public:
 private:
 	std::string cfg_navgraph_filename_;
 
-	fawkes::Clock *                                clock_;
+	fawkes::Clock                                 *clock_;
 	std::unique_ptr<fawkes::FawkesNetworkClient>   client_;
 	std::unique_ptr<fawkes::Logger>                logger_;
 	std::unique_ptr<fawkes::BlackBoard>            blackboard_;

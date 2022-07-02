@@ -64,6 +64,6 @@ public:
 	}
 
 private:
-	fawkes::Logger *  logger_;
+	fawkes::Logger   *logger_;
 	std::stringstream ss_;
 };

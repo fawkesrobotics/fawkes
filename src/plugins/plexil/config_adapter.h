@@ -61,7 +61,7 @@ private:
 
 private:
 	fawkes::Configuration *config_;
-	fawkes::Logger *       logger_;
+	fawkes::Logger        *logger_;
 
 	std::map<std::string, std::function<void(PLEXIL::Command *)>> commands_;
 };

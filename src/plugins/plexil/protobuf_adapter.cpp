@@ -358,7 +358,7 @@ void
 ProtobufCommPlexilAdapter::add_recipient(const std::string &msg_type, PLEXIL::Command *cmd)
 {
 	std::lock_guard<std::mutex> lock(queue_mutex_);
-	queue_entry &               q = get_queue(msg_type);
+	queue_entry                &q = get_queue(msg_type);
 	q.recipients.push_back(cmd);
 }
 
@@ -366,7 +366,7 @@ void
 ProtobufCommPlexilAdapter::remove_recipient(const std::string &msg_type, PLEXIL::Command *cmd)
 {
 	std::lock_guard<std::mutex> lock(queue_mutex_);
-	queue_entry &               q = get_queue(msg_type);
+	queue_entry                &q = get_queue(msg_type);
 	q.recipients.erase(std::remove(q.recipients.begin(), q.recipients.end(), cmd),
 	                   q.recipients.end());
 }
@@ -375,7 +375,7 @@ void
 ProtobufCommPlexilAdapter::add_message(const std::string &msg_type, message_meta &&msg)
 {
 	std::lock_guard<std::mutex> lock(queue_mutex_);
-	queue_entry &               q      = get_queue(msg_type);
+	queue_entry                &q      = get_queue(msg_type);
 	std::string                 msg_id = gen_msgid(msg_type);
 
 	messages_[msg_id] = std::move(msg);
@@ -422,7 +422,7 @@ void
 ProtobufCommPlexilAdapter::proc_queue(const std::string &msg_type)
 {
 	std::lock_guard<std::mutex> lock(queue_mutex_);
-	queue_entry &               q      = get_queue(msg_type);
+	queue_entry                &q      = get_queue(msg_type);
 	auto                        mi     = q.messages.begin();
 	auto                        ri     = q.recipients.begin();
 	bool                        notify = !q.messages.empty() && !q.recipients.empty();
@@ -537,11 +537,11 @@ parse_field_name(const std::string &field_name, const std::string &func)
 
 static bool
 traverse_field(google::protobuf::Message *&msg,
-               const std::string &         field_name,
-               const FieldDescriptor *&    field,
-               std::string &               partial_name,
-               long int &                  partial_index,
-               const std::string &         func)
+               const std::string          &field_name,
+               const FieldDescriptor     *&field,
+               std::string                &partial_name,
+               long int                   &partial_index,
+               const std::string          &func)
 
 {
 	std::vector<std::string> field_path = str_split(field_name, '.');
@@ -646,7 +646,7 @@ ProtobufCommPlexilAdapter::pb_set_value(PLEXIL::Command *cmd)
 		return;
 	}
 
-	const FieldDescriptor *    field = nullptr;
+	const FieldDescriptor     *field = nullptr;
 	google::protobuf::Message *msg   = m.get();
 
 	std::string partial_name;
@@ -892,7 +892,7 @@ ProtobufCommPlexilAdapter::pb_set_value(PLEXIL::Command *cmd)
 				std::string v;
 				value.getValue(v);
 
-				const EnumDescriptor *     enumdesc = field->enum_type();
+				const EnumDescriptor      *enumdesc = field->enum_type();
 				const EnumValueDescriptor *enumval  = enumdesc->FindValueByName(v);
 				if (enumval) {
 					if (field->is_repeated()) {
@@ -954,7 +954,7 @@ ProtobufCommPlexilAdapter::pb_get_value(PLEXIL::Command *cmd, PLEXIL::ValueType 
 		return;
 	}
 
-	const FieldDescriptor *    field = nullptr;
+	const FieldDescriptor     *field = nullptr;
 	google::protobuf::Message *msg   = m.get();
 
 	std::string partial_name;
@@ -1199,7 +1199,7 @@ ProtobufCommPlexilAdapter::pb_get_length(PLEXIL::Command *cmd)
 		return;
 	}
 
-	const FieldDescriptor *    field = nullptr;
+	const FieldDescriptor     *field = nullptr;
 	google::protobuf::Message *msg   = m.get();
 
 	std::string partial_name;
@@ -1259,7 +1259,7 @@ ProtobufCommPlexilAdapter::pb_has_field(PLEXIL::Command *cmd)
 		return;
 	}
 
-	const FieldDescriptor *    field = nullptr;
+	const FieldDescriptor     *field = nullptr;
 	google::protobuf::Message *msg   = m.get();
 
 	std::string partial_name;
@@ -1391,7 +1391,7 @@ ProtobufCommPlexilAdapter::pb_broadcast(PLEXIL::Command *cmd)
  */
 void
 ProtobufCommPlexilAdapter::pb_peer_create_local_crypto(
-  PLEXIL::Command *                 cmd,
+  PLEXIL::Command                  *cmd,
   const std::vector<PLEXIL::Value> *override_args)
 {
 	std::vector<PLEXIL::Value> const &args = override_args ? *override_args : cmd->getArgValues();
@@ -1596,7 +1596,7 @@ ProtobufCommPlexilAdapter::pb_peer_setup_crypto(PLEXIL::Command *cmd)
  */
 void
 ProtobufCommPlexilAdapter::handle_peer_msg(int                                        peer_id,
-                                           boost::asio::ip::udp::endpoint &           endpoint,
+                                           boost::asio::ip::udp::endpoint            &endpoint,
                                            uint16_t                                   component_id,
                                            uint16_t                                   msg_type,
                                            std::shared_ptr<google::protobuf::Message> msg)
