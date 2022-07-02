@@ -48,8 +48,8 @@ public:
 
 private:
 	struct ::utsname *utsname;
-	char *            shortname_;
-	char *            domain_name;
+	char             *shortname_;
+	char             *domain_name;
 };
 
 } // end namespace fawkes

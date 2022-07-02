@@ -79,7 +79,7 @@ public:
 	                        int                       shm_id,
 	                        int                       semaphore,
 	                        unsigned int              mem_size,
-	                        const void *              memptr) = 0;
+	                        const void               *memptr) = 0;
 };
 
 } // end namespace fawkes

@@ -33,9 +33,9 @@ public:
 	void add_mapping(const std::string &action_name, const std::string &skill_string_template);
 	bool has_mapping(const std::string &action_name) const;
 
-	std::string map_skill(const std::string &                       name,
+	std::string map_skill(const std::string                        &name,
 	                      const std::map<std::string, std::string> &params,
-	                      std::multimap<std::string, std::string> & messages) const;
+	                      std::multimap<std::string, std::string>  &messages) const;
 
 private:
 	std::map<std::string, std::string> mappings_;

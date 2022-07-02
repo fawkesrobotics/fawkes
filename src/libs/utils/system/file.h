@@ -52,7 +52,7 @@ public:
 	File(const char *filename, FileOpenMethod method = APPEND);
 	~File();
 
-	FILE *      stream() const;
+	FILE	     *stream() const;
 	const char *filename() const;
 
 	static bool exists(const char *filename);

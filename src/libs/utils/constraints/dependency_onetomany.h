@@ -63,11 +63,11 @@ public:
 	virtual bool can_remove(Provider *p);
 	virtual bool can_remove(Dependant *d);
 
-	virtual Provider *              provider();
+	virtual Provider               *provider();
 	virtual std::list<Dependant *> &dependants();
 
 private:
-	Provider *             _provider;
+	Provider              *_provider;
 	std::list<Dependant *> _dependants;
 };
 

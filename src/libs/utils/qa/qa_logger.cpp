@@ -53,7 +53,7 @@ public:
 
 private:
 	unsigned int i;
-	Logger *     logger;
+	Logger      *logger;
 };
 
 class LoggerQAMain : public SignalHandler
@@ -118,8 +118,8 @@ public:
 	}
 
 private:
-	Logger *        cl;
-	Logger *        ml;
+	Logger	       *cl;
+	Logger	       *ml;
 	LoggerQAThread *t1;
 	LoggerQAThread *t2;
 	LoggerQAThread *t3;

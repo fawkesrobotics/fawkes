@@ -37,7 +37,7 @@ class Mutex;
 class ModuleManager
 {
 public:
-	ModuleManager(const char *        module_base_dir,
+	ModuleManager(const char         *module_base_dir,
 	              Module::ModuleFlags open_flags = Module::MODULE_FLAGS_DEFAULT);
 	virtual ~ModuleManager();
 
@@ -54,8 +54,8 @@ public:
 private:
 	std::map<std::string, Module *> modules_;
 
-	const char *        module_base_dir_;
-	Mutex *             mutex_;
+	const char         *module_base_dir_;
+	Mutex              *mutex_;
 	Module::ModuleFlags open_flags_;
 };
 

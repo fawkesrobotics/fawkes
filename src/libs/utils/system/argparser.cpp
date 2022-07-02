@@ -315,7 +315,7 @@ ArgumentParser::parse_hostport(const char *argn, std::string &host, unsigned sho
 	if ((opts_.count(argn) == 0) || (opts_[argn] == NULL))
 		return false;
 
-	char *             tmp_host = NULL;
+	char              *tmp_host = NULL;
 	unsigned short int tmp_port = port;
 	if (parse_hostport(argn, &tmp_host, &tmp_port)) {
 		host = tmp_host;
@@ -340,7 +340,7 @@ ArgumentParser::parse_hostport(const char *argn, std::string &host, unsigned sho
 void
 ArgumentParser::parse_hostport_s(const char *s, std::string &host, unsigned short int &port)
 {
-	char *             tmp_host = NULL;
+	char              *tmp_host = NULL;
 	unsigned short int tmp_port = port;
 	parse_hostport_s(s, &tmp_host, &tmp_port);
 	host = tmp_host;
@@ -359,7 +359,7 @@ long int
 ArgumentParser::parse_int(const char *argn)
 {
 	if ((opts_.count(argn) > 0) && (opts_[argn] != NULL)) {
-		char *   endptr;
+		char    *endptr;
 		long int rv = strtol(opts_[argn], &endptr, 10);
 		if (endptr[0] != 0) {
 			throw IllegalArgumentException("Supplied argument is not of type int");
@@ -382,7 +382,7 @@ double
 ArgumentParser::parse_float(const char *argn)
 {
 	if ((opts_.count(argn) > 0) && (opts_[argn] != NULL)) {
-		char * endptr;
+		char  *endptr;
 		double rv = strtod(opts_[argn], &endptr);
 		if (endptr[0] != 0) {
 			throw IllegalArgumentException("Supplied argument is not of type double");
@@ -405,7 +405,7 @@ long int
 ArgumentParser::parse_item_int(unsigned int index)
 {
 	if (index < items_.size()) {
-		char *   endptr;
+		char    *endptr;
 		long int rv = strtol(items_[index], &endptr, 10);
 		if (endptr[0] != 0) {
 			throw IllegalArgumentException("Supplied argument is not of type int");
@@ -428,7 +428,7 @@ double
 ArgumentParser::parse_item_float(unsigned int index)
 {
 	if (index < items_.size()) {
-		char * endptr;
+		char  *endptr;
 		double rv = strtod(items_[index], &endptr);
 		if (endptr[0] != 0) {
 			throw IllegalArgumentException("Supplied argument is not of type double");

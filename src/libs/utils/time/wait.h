@@ -43,10 +43,10 @@ public:
 	static void wait_systime(long int usec);
 
 private:
-	Clock *  clock_;
-	Time *   until_;
-	Time *   until_systime_;
-	Time *   now_;
+	Clock   *clock_;
+	Time    *until_;
+	Time    *until_systime_;
+	Time    *now_;
 	long int desired_loop_time_;
 };
 

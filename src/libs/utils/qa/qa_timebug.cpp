@@ -68,7 +68,7 @@ public:
 	}
 
 	Clock *clock_;
-	Time * until_;
+	Time  *until_;
 };
 
 class QaSignalHandler : public SignalHandler
@@ -108,7 +108,7 @@ public:
 	}
 
 	QaTestWait *testwait;
-	TimeWait *  timewait;
+	TimeWait   *timewait;
 };
 
 int

@@ -37,20 +37,20 @@ class SubProcess
 {
 public:
 	SubProcess(const char *progname, const char *file, const char *argv[], const char *envp[]);
-	SubProcess(const char *    progname,
-	           const char *    file,
-	           const char *    argv[],
-	           const char *    envp[],
+	SubProcess(const char     *progname,
+	           const char     *file,
+	           const char     *argv[],
+	           const char     *envp[],
 	           fawkes::Logger *logger);
-	SubProcess(const std::string &             progname,
-	           const std::string &             file,
+	SubProcess(const std::string              &progname,
+	           const std::string              &file,
 	           const std::vector<std::string> &argv,
 	           const std::vector<std::string> &envp);
-	SubProcess(const std::string &             progname,
-	           const std::string &             file,
+	SubProcess(const std::string              &progname,
+	           const std::string              &file,
 	           const std::vector<std::string> &argv,
 	           const std::vector<std::string> &envp,
-	           fawkes::Logger *                logger);
+	           fawkes::Logger                 *logger);
 	~SubProcess();
 
 	/** Get PID of sub-process.
@@ -119,20 +119,20 @@ private:
 	pid_t run_proc(const char *file,
 	               const char *argv[],
 	               const char *envp[],
-	               int &       pipe_stdin_w,
-	               int &       pipe_stdout_r,
-	               int &       pipe_stderr_r);
+	               int        &pipe_stdin_w,
+	               int        &pipe_stdout_r,
+	               int        &pipe_stderr_r);
 
 	void run_proc(const char *file, const char *argv[], const char *envp[]);
 
-	void start_log(const char *                           logname,
+	void start_log(const char	                          *logname,
 	               fawkes::Logger::LogLevel               log_level,
 	               boost::asio::posix::stream_descriptor &sd,
-	               boost::asio::streambuf &               buf);
-	void handle_log_line(const char *                           logname,
+	               boost::asio::streambuf                &buf);
+	void handle_log_line(const char                            *logname,
 	                     fawkes::Logger::LogLevel               log_level,
 	                     boost::asio::posix::stream_descriptor &sd,
-	                     boost::asio::streambuf &               buf,
+	                     boost::asio::streambuf                &buf,
 	                     boost::system::error_code              ec,
 	                     size_t                                 bytes_read);
 

@@ -94,7 +94,7 @@ AStar::solve(AStarState *initialState)
 AStarState *
 AStar::search()
 {
-	AStarState *              best = 0;
+	AStarState               *best = 0;
 	long                      key  = 0;
 	std::vector<AStarState *> children;
 

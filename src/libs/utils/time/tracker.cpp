@@ -278,10 +278,10 @@ TimeTracker::ping_abort(unsigned int cls)
 
 void
 TimeTracker::average_and_deviation(vector<struct timeval *> &values,
-                                   double &                  average_sec,
-                                   double &                  average_ms,
-                                   double &                  deviation_sec,
-                                   double &                  deviation_ms)
+                                   double                   &average_sec,
+                                   double                   &average_ms,
+                                   double                   &deviation_sec,
+                                   double                   &deviation_ms)
 {
 	vector<struct timeval *>::iterator tit;
 

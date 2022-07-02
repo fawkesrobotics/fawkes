@@ -58,10 +58,10 @@ public:
 
 private:
 	void average_and_deviation(std::vector<struct timeval *> &values,
-	                           double &                       average_sec,
-	                           double &                       average_ms,
-	                           double &                       deviation_sec,
-	                           double &                       deviation_ms);
+	                           double                        &average_sec,
+	                           double                        &average_ms,
+	                           double                        &deviation_sec,
+	                           double                        &deviation_ms);
 
 private:
 	timeval                                       start_time;
@@ -75,7 +75,7 @@ private:
 	std::string                                   tracker_comment_;
 
 	unsigned int write_cycle_;
-	FILE *       timelog_;
+	FILE        *timelog_;
 };
 
 class ScopedClassItemTracker

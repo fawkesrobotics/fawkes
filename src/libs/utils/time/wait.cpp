@@ -140,7 +140,7 @@ TimeWait::wait(long int usec)
 {
 	if (usec < 0)
 		return;
-	Clock *        clock = Clock::instance();
+	Clock         *clock = Clock::instance();
 	struct timeval start, now;
 	long int       remaining_usec = usec;
 	clock->get_time(&start);
