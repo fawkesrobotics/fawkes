@@ -128,7 +128,7 @@ RosTfThread::loop()
 #ifdef HAVE_TF2_MSGS
 		while (!tf2_msg_queues_[queue].empty()) {
 			const std::pair<bool, tf2_msgs::TFMessage::ConstPtr> &q     = tf2_msg_queues_[queue].front();
-			const tf2_msgs::TFMessage::ConstPtr &                 msg   = q.second;
+			const tf2_msgs::TFMessage::ConstPtr                  &msg   = q.second;
 			const size_t                                          tsize = msg->transforms.size();
 			for (size_t i = 0; i < tsize; ++i) {
 				publish_transform_to_fawkes(msg->transforms[i], q.first);
@@ -342,7 +342,7 @@ RosTfThread::publish_static_transforms_to_ros()
 void
 RosTfThread::publish_transform_to_fawkes(const geometry_msgs::TransformStamped &ts, bool static_tf)
 {
-	const geometry_msgs::Vector3 &   t = ts.transform.translation;
+	const geometry_msgs::Vector3    &t = ts.transform.translation;
 	const geometry_msgs::Quaternion &r = ts.transform.rotation;
 
 	fawkes::Time time(ts.header.stamp.sec, ts.header.stamp.nsec / 1000);

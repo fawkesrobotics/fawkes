@@ -84,13 +84,13 @@ private:
 
 	void activeCb();
 	void feedbackCb(const move_base_msgs::MoveBaseFeedbackConstPtr &feedback);
-	void doneCb(const actionlib::SimpleClientGoalState &      state,
+	void doneCb(const actionlib::SimpleClientGoalState       &state,
 	            const move_base_msgs::MoveBaseResultConstPtr &result);
 
 	void transform_to_fixed_frame();
 
-	fawkes::NavigatorInterface * nav_if_;
-	MoveBaseClient *             ac_;
+	fawkes::NavigatorInterface  *nav_if_;
+	MoveBaseClient              *ac_;
 	move_base_msgs::MoveBaseGoal goal_;
 	bool                         cmd_sent_;
 	bool                         connected_history_;

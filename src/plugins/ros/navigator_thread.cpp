@@ -174,7 +174,7 @@ RosNavigatorThread::feedbackCb(const move_base_msgs::MoveBaseFeedbackConstPtr &f
 }
 
 void
-RosNavigatorThread::doneCb(const actionlib::SimpleClientGoalState &      state,
+RosNavigatorThread::doneCb(const actionlib::SimpleClientGoalState       &state,
                            const move_base_msgs::MoveBaseResultConstPtr &result)
 {
 	logger->log_info(name(), "Finished in state [%s]", state.toString().c_str());

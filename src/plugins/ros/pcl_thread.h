@@ -74,7 +74,7 @@ private:
 	void fawkes_pointcloud_publish_to_ros();
 	void fawkes_pointcloud_search();
 	void ros_pointcloud_on_data_msg(const sensor_msgs::PointCloud2ConstPtr &msg,
-	                                const std::string &                     topic_name);
+	                                const std::string                      &topic_name);
 
 	template <typename PointT>
 	void

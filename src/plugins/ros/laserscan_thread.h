@@ -97,7 +97,7 @@ private:
 	/// @endcond
 	std::map<std::string, PublisherInfo> pubs_;
 
-	fawkes::Mutex *                                             ls_msg_queue_mutex_;
+	fawkes::Mutex                                              *ls_msg_queue_mutex_;
 	unsigned int                                                active_queue_;
 	std::queue<ros::MessageEvent<sensor_msgs::LaserScan const>> ls_msg_queues_[2];
 
