@@ -911,7 +911,7 @@ Bumblebee2Thread::loop()
 	  (uses_triclops) ? &img_right_rect_color : &img_left_rect_color;
 
 	// Calculate 3D point cloud from data
-	pcl::PointCloud<pcl::PointXYZ> &   pcl_xyz    = **pcl_xyz_;
+	pcl::PointCloud<pcl::PointXYZ>    &pcl_xyz    = **pcl_xyz_;
 	pcl::PointCloud<pcl::PointXYZRGB> &pcl_xyzrgb = **pcl_xyzrgb_;
 
 	if (want_xyz && want_xyzrgb) {
@@ -975,9 +975,9 @@ Bumblebee2Thread::loop()
 // no-unit-ratio = m/m.
 
 void
-Bumblebee2Thread::fill_xyz_xyzrgb(const short int *                  dispdata,
-                                  const TriclopsColorImage *         img_rect_color,
-                                  pcl::PointCloud<pcl::PointXYZ> &   pcl_xyz,
+Bumblebee2Thread::fill_xyz_xyzrgb(const short int                   *dispdata,
+                                  const TriclopsColorImage          *img_rect_color,
+                                  pcl::PointCloud<pcl::PointXYZ>    &pcl_xyz,
                                   pcl::PointCloud<pcl::PointXYZRGB> &pcl_xyzrgb)
 {
 	float bad_point = std::numeric_limits<float>::quiet_NaN();
@@ -985,7 +985,7 @@ Bumblebee2Thread::fill_xyz_xyzrgb(const short int *                  dispdata,
 	unsigned int idx = 0;
 	for (unsigned int h = 0; h < height_; ++h) {
 		for (unsigned int w = 0; w < width_; ++w, ++idx, ++dispdata) {
-			pcl::PointXYZ &   xyz    = pcl_xyz.points[idx];
+			pcl::PointXYZ    &xyz    = pcl_xyz.points[idx];
 			pcl::PointXYZRGB &xyzrgb = pcl_xyzrgb.points[idx];
 
 			float d = *dispdata * disparity_scale_factor_;
@@ -1007,8 +1007,8 @@ Bumblebee2Thread::fill_xyz_xyzrgb(const short int *                  dispdata,
 }
 
 void
-Bumblebee2Thread::fill_xyzrgb(const short int *                  dispdata,
-                              const TriclopsColorImage *         img_rect_color,
+Bumblebee2Thread::fill_xyzrgb(const short int                   *dispdata,
+                              const TriclopsColorImage          *img_rect_color,
                               pcl::PointCloud<pcl::PointXYZRGB> &pcl_xyzrgb)
 {
 	TIMETRACK_START(ttc_pcl_xyzrgb_);

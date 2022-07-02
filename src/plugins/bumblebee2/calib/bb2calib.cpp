@@ -52,7 +52,7 @@ using namespace fawkes;
  * @param cobject C base object
  * @param builder Gtk builder to get widgets from
  */
-Bumblebee2CalibGtkWindow::Bumblebee2CalibGtkWindow(BaseObjectType *                  cobject,
+Bumblebee2CalibGtkWindow::Bumblebee2CalibGtkWindow(BaseObjectType                   *cobject,
                                                    const Glib::RefPtr<Gtk::Builder> &builder)
 : Gtk::Window(cobject)
 {
