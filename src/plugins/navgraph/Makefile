@@ -42,7 +42,7 @@ ifeq ($(HAVE_CPP11)$(HAVE_TF)$(HAVE_NAVGRAPH),111)
 
   ifeq ($(HAVE_ROS2),1)
 
-    LIBS_navgraph += fawkesrosaspect
+    LIBS_navgraph += fawkesros2aspect
     CFLAGS += $(CFLAGS_ROS2) $(CFLAGS_TF)
     LDFLAGS += $(LDFLAGS_ROS2) $(LDFLAGS_TF)
 
