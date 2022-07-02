@@ -69,8 +69,8 @@ BlackBoardNetHandlerInterfaceObserver::~BlackBoardNetHandlerInterfaceObserver()
  */
 void
 BlackBoardNetHandlerInterfaceObserver::send_event(unsigned int msg_id,
-                                                  const char * type,
-                                                  const char * id)
+                                                  const char  *type,
+                                                  const char  *id)
 {
 	bb_ievent_msg_t *esm = (bb_ievent_msg_t *)malloc(sizeof(bb_ievent_msg_t));
 	strncpy(esm->type, type, INTERFACE_TYPE_SIZE_ - 1);

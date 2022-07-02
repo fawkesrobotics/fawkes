@@ -56,7 +56,7 @@ public:
 	{
 		QueueEntryType type;      ///< What type this entry concerns
 		bool           op;        ///< true to add, false to remove
-		Interface *    interface; ///< interface this entry concerns
+		Interface     *interface; ///< interface this entry concerns
 	} QueueEntry;
 
 	/** Queue of additions/removal of interfaces. */
@@ -106,9 +106,9 @@ protected:
 private:
 	void       bbil_queue_add(QueueEntryType type,
 	                          bool           op,
-	                          InterfaceMap & not_in_map,
-	                          Interface *    interface,
-	                          const char *   hint);
+	                          InterfaceMap  &not_in_map,
+	                          Interface     *interface,
+	                          const char    *hint);
 	Interface *bbil_find_interface(const char *iuid, InterfaceMap &map);
 
 	const InterfaceQueue &bbil_acquire_queue() noexcept;

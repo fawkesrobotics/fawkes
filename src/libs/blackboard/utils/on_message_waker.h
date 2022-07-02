@@ -42,7 +42,7 @@ public:
 
 private:
 	BlackBoard *bb_;
-	Thread *    thread_;
+	Thread     *thread_;
 };
 
 } // end namespace fawkes

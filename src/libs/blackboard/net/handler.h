@@ -64,7 +64,7 @@ private:
 	void send_opensuccess(unsigned int clid, Interface *interface);
 	void send_openfailure(unsigned int clid, unsigned int error_code);
 
-	BlackBoard *                      bb_;
+	BlackBoard                       *bb_;
 	LockQueue<FawkesNetworkMessage *> inbound_queue_;
 
 	// All interfaces, key is the instance serial, value the interface

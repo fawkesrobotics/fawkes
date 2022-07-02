@@ -42,8 +42,8 @@ namespace fawkes {
  * @param thread thread to wake
  */
 BlackBoardOnUpdateWaker::BlackBoardOnUpdateWaker(BlackBoard *bb,
-                                                 Interface * interface,
-                                                 Thread *    thread)
+                                                 Interface  *interface,
+                                                 Thread     *thread)
 : BlackBoardInterfaceListener("OnUpdateWaker[%s]", interface->uid()), bb_(bb), thread_(thread)
 {
 	bbil_add_data_interface(interface);

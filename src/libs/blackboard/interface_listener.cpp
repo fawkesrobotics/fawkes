@@ -159,7 +159,7 @@ BlackBoardInterfaceListener::bb_interface_data_changed(Interface *interface) noe
  */
 bool
 BlackBoardInterfaceListener::bb_interface_message_received(Interface *interface,
-                                                           Message *  message) noexcept
+                                                           Message   *message) noexcept
 {
 	return true;
 }
@@ -219,9 +219,9 @@ BlackBoardInterfaceListener::bb_interface_writer_removed(Interface *interface,
 void
 BlackBoardInterfaceListener::bbil_queue_add(QueueEntryType type,
                                             bool           op,
-                                            InterfaceMap & not_in_map,
-                                            Interface *    interface,
-                                            const char *   hint)
+                                            InterfaceMap  &not_in_map,
+                                            Interface     *interface,
+                                            const char    *hint)
 {
 	MutexLocker lock(bbil_queue_mutex_);
 

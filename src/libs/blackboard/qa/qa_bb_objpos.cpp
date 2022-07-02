@@ -56,8 +56,8 @@ main(int argc, char **argv)
 
 	LibLogger::init();
 	//BlackBoard *bb = new RemoteBlackBoard("localhost", 1910);
-	LocalBlackBoard *          lbb       = new LocalBlackBoard(BLACKBOARD_MEMSIZE);
-	BlackBoard *               bb        = lbb;
+	LocalBlackBoard           *lbb       = new LocalBlackBoard(BLACKBOARD_MEMSIZE);
+	BlackBoard                *bb        = lbb;
 	FawkesNetworkServerThread *netthread = new FawkesNetworkServerThread(1910);
 	netthread->start();
 	lbb->start_nethandler(netthread);

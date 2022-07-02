@@ -42,8 +42,8 @@ namespace fawkes {
  * @param thread thread to wake
  */
 BlackBoardOnMessageWaker::BlackBoardOnMessageWaker(BlackBoard *bb,
-                                                   Interface * interface,
-                                                   Thread *    thread)
+                                                   Interface  *interface,
+                                                   Thread     *thread)
 : BlackBoardInterfaceListener("OnMessageWaker[%s]", interface->uid()), bb_(bb), thread_(thread)
 {
 	bbil_add_message_interface(interface);
@@ -60,7 +60,7 @@ BlackBoardOnMessageWaker::~BlackBoardOnMessageWaker()
 
 bool
 BlackBoardOnMessageWaker::bb_interface_message_received(Interface *interface,
-                                                        Message *  message) noexcept
+                                                        Message   *message) noexcept
 {
 	try {
 		interface->msgq_append(message);

@@ -56,7 +56,7 @@ main(int argc, char **argv)
 
 	LocalBlackBoard *lbb = new LocalBlackBoard(BLACKBOARD_MEMSIZE);
 
-	BlackBoard *                   bb = lbb;
+	BlackBoard                    *bb = lbb;
 	const BlackBoardMemoryManager *mm = lbb->memory_manager();
 
 	TestInterface *ti_writer;

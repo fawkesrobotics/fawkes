@@ -44,7 +44,7 @@ private:
 	void send_event(unsigned int msg_id, const char *type, const char *id);
 
 private:
-	BlackBoard *      blackboard_;
+	BlackBoard       *blackboard_;
 	FawkesNetworkHub *fnh_;
 };
 

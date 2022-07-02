@@ -112,7 +112,7 @@ BlackBoardSharedMemoryLister::print_info(const SharedMemoryHeader *header,
                                          int                       shm_id,
                                          int                       semaphore,
                                          unsigned int              mem_size,
-                                         const void *              memptr)
+                                         const void               *memptr)
 {
 	unsigned int nattch    = SharedMemory::num_attached(shm_id);
 	bool         swapable  = SharedMemory::is_swapable(shm_id);

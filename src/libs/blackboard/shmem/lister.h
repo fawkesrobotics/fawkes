@@ -45,7 +45,7 @@ public:
 	                        int                       shm_id,
 	                        int                       semaphore,
 	                        unsigned int              mem_size,
-	                        const void *              memptr);
+	                        const void               *memptr);
 
 private:
 	unsigned int num;

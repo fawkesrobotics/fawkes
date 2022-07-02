@@ -131,7 +131,7 @@ InterfaceType *
 BlackBoard::open_for_reading(const char *identifier, const char *owner)
 {
 	std::string type_name = demangle_fawkes_interface_name(typeid(InterfaceType).name());
-	Interface * interface = open_for_reading(type_name.c_str(), identifier, owner);
+	Interface  *interface = open_for_reading(type_name.c_str(), identifier, owner);
 	return static_cast<InterfaceType *>(interface);
 }
 
@@ -208,7 +208,7 @@ InterfaceType *
 BlackBoard::open_for_writing(const char *identifier, const char *owner)
 {
 	std::string type_name = demangle_fawkes_interface_name(typeid(InterfaceType).name());
-	Interface * interface = open_for_writing(type_name.c_str(), identifier, owner);
+	Interface  *interface = open_for_writing(type_name.c_str(), identifier, owner);
 	return static_cast<InterfaceType *>(interface);
 	;
 }

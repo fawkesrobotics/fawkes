@@ -44,7 +44,7 @@ class SemaphoreSet;
 struct chunk_list_t
 {
 	chunk_list_t *next;     /**< offset to next element in list */
-	void *        ptr;      /**< pointer to data memory */
+	void         *ptr;      /**< pointer to data memory */
 	unsigned int  size;     /**< total size of chunk, including overhanging bytes,
 				 * excluding header */
 	unsigned int  overhang; /**< number of overhanging bytes in this chunk */
@@ -64,7 +64,7 @@ public:
 	BlackBoardMemoryManager(size_t       memsize,
 	                        unsigned int version,
 	                        bool         use_shmem,
-	                        const char * shmem_token = "FawkesBlackBoard");
+	                        const char  *shmem_token = "FawkesBlackBoard");
 	~BlackBoardMemoryManager();
 
 	void *alloc(unsigned int num_bytes);
@@ -118,7 +118,7 @@ public:
 		ChunkIterator &operator+=(unsigned int i);
 		bool           operator==(const ChunkIterator &c) const;
 		bool           operator!=(const ChunkIterator &c) const;
-		void *         operator*() const;
+		void          *operator*() const;
 		ChunkIterator &operator=(const ChunkIterator &c);
 
 		unsigned int size() const;
@@ -156,10 +156,10 @@ private:
 
 	// used for shmem
 	BlackBoardSharedMemoryHeader *shmem_header_;
-	SharedMemory *                shmem_;
+	SharedMemory                 *shmem_;
 
 	// Used for heap memory
-	void *        memory_;
+	void         *memory_;
 	chunk_list_t *free_list_head_;  /**< offset of the free chunks list head */
 	chunk_list_t *alloc_list_head_; /**< offset of the allocated chunks list head */
 };

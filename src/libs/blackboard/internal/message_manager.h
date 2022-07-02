@@ -45,7 +45,7 @@ public:
 
 private:
 	BlackBoardInterfaceManager *im_;
-	BlackBoardNotifier *        notifier_;
+	BlackBoardNotifier         *notifier_;
 
 	void set_interface_manager(BlackBoardInterfaceManager *im);
 };

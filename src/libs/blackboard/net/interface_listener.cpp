@@ -51,7 +51,7 @@ namespace fawkes {
  * @param clid client ID of the client which opened this interface
  */
 BlackBoardNetHandlerInterfaceListener::BlackBoardNetHandlerInterfaceListener(BlackBoard *blackboard,
-                                                                             Interface * interface,
+                                                                             Interface  *interface,
                                                                              FawkesNetworkHub *hub,
                                                                              unsigned int      clid)
 : BlackBoardInterfaceListener("NetIL/%s", interface->uid())
@@ -84,7 +84,7 @@ BlackBoardNetHandlerInterfaceListener::bb_interface_data_refreshed(Interface *in
 	interface->read();
 
 	size_t          payload_size = sizeof(bb_idata_msg_t) + interface->datasize();
-	void *          payload      = malloc(payload_size);
+	void           *payload      = malloc(payload_size);
 	bb_idata_msg_t *dm           = (bb_idata_msg_t *)payload;
 	dm->serial                   = interface->serial();
 	dm->data_size                = htonl(interface->datasize());
@@ -105,7 +105,7 @@ BlackBoardNetHandlerInterfaceListener::bb_interface_data_changed(Interface *inte
 	interface->read();
 
 	size_t          payload_size = sizeof(bb_idata_msg_t) + interface->datasize();
-	void *          payload      = malloc(payload_size);
+	void           *payload      = malloc(payload_size);
 	bb_idata_msg_t *dm           = (bb_idata_msg_t *)payload;
 	dm->serial                   = interface->serial();
 	dm->data_size                = htonl(interface->datasize());
@@ -121,11 +121,11 @@ BlackBoardNetHandlerInterfaceListener::bb_interface_data_changed(Interface *inte
 
 bool
 BlackBoardNetHandlerInterfaceListener::bb_interface_message_received(Interface *interface,
-                                                                     Message *  message) noexcept
+                                                                     Message   *message) noexcept
 {
 	// send out interface message
 	size_t             payload_size = sizeof(bb_imessage_msg_t) + message->datasize();
-	void *             payload      = calloc(1, payload_size);
+	void              *payload      = calloc(1, payload_size);
 	bb_imessage_msg_t *dm           = (bb_imessage_msg_t *)payload;
 	dm->serial                      = interface->serial();
 	dm->source                      = message->source_id();
@@ -147,7 +147,7 @@ BlackBoardNetHandlerInterfaceListener::bb_interface_message_received(Interface *
 }
 
 void
-BlackBoardNetHandlerInterfaceListener::send_event_serial(Interface *  interface,
+BlackBoardNetHandlerInterfaceListener::send_event_serial(Interface   *interface,
                                                          unsigned int msg_id,
                                                          Uuid         event_serial)
 {

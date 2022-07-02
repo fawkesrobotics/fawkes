@@ -57,14 +57,14 @@ BlackBoardInterfaceListContent::BlackBoardInterfaceListContent()
  */
 BlackBoardInterfaceListContent::BlackBoardInterfaceListContent(unsigned int component_id,
                                                                unsigned int msg_id,
-                                                               void *       payload,
+                                                               void        *payload,
                                                                size_t       payload_size)
 {
 	if (component_id != FAWKES_CID_BLACKBOARD) {
 		throw TypeMismatchException("BlackBoardInterfaceListContent: invalid component ID");
 	}
 	bb_ilist_msg_t *tmsg          = (bb_ilist_msg_t *)payload;
-	void *          ilist_payload = (void *)((size_t)payload + sizeof(msg));
+	void           *ilist_payload = (void *)((size_t)payload + sizeof(msg));
 	interface_list =
 	  new DynamicBuffer(&(tmsg->interface_list), ilist_payload, payload_size - sizeof(msg));
 }
@@ -90,13 +90,13 @@ BlackBoardInterfaceListContent::~BlackBoardInterfaceListContent()
  * @param timestamp interface timestamp (time of last write or data timestamp)
  */
 void
-BlackBoardInterfaceListContent::append_interface(const char *         type,
-                                                 const char *         id,
+BlackBoardInterfaceListContent::append_interface(const char          *type,
+                                                 const char          *id,
                                                  const unsigned char *hash,
                                                  unsigned int         serial,
                                                  bool                 has_writer,
                                                  unsigned int         num_readers,
-                                                 const fawkes::Time & timestamp)
+                                                 const fawkes::Time  &timestamp)
 {
 	bb_iinfo_msg_t info;
 	memset(&info, 0, sizeof(info));

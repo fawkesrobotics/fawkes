@@ -48,9 +48,9 @@ class BlackBoardInterfaceManager : public InterfaceMediator
 	friend BlackBoardMessageManager;
 
 public:
-	BlackBoardInterfaceManager(BlackBoardMemoryManager * bb_memmgr,
+	BlackBoardInterfaceManager(BlackBoardMemoryManager  *bb_memmgr,
 	                           BlackBoardMessageManager *bb_msgmgr,
-	                           BlackBoardNotifier *      bb_notifier);
+	                           BlackBoardNotifier       *bb_notifier);
 	virtual ~BlackBoardInterfaceManager();
 
 	Interface *
@@ -82,24 +82,24 @@ private:
 	Interface *new_interface_instance(const char *type, const char *identifier, const char *owner);
 	void       delete_interface_instance(Interface *interface);
 
-	void *       find_interface_in_memory(const char *type, const char *identifier);
+	void        *find_interface_in_memory(const char *type, const char *identifier);
 	unsigned int next_mem_serial();
 	void         create_interface(const char *type,
 	                              const char *identifier,
 	                              const char *owner,
 	                              Interface *&interface,
-	                              void *&     ptr);
+	                              void      *&ptr);
 
 	Interface *writer_for_mem_serial(unsigned int mem_serial);
 
 private:
 	unsigned int instance_serial;
 
-	BlackBoardMemoryManager *  memmgr;
-	BlackBoardMessageManager * msgmgr;
-	Mutex *                    mutex;
+	BlackBoardMemoryManager   *memmgr;
+	BlackBoardMessageManager  *msgmgr;
+	Mutex                     *mutex;
 	BlackBoardInstanceFactory *instance_factory;
-	BlackBoardNotifier *       notifier;
+	BlackBoardNotifier        *notifier;
 
 	LockMap<unsigned int, Interface *>      writer_interfaces;
 	LockMap<unsigned int, RefCountRWLock *> rwlocks;
@@ -109,7 +109,7 @@ private:
 		_OwnerInfo() : writer(NULL)
 		{
 		}
-		Interface *            writer;
+		Interface             *writer;
 		std::list<Interface *> readers;
 	} OwnerInfo;
 	LockMap<std::string, OwnerInfo> owner_info_;
