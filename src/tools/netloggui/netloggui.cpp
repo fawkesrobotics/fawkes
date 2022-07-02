@@ -43,7 +43,7 @@ using namespace fawkes;
  * @param cobject C base object
  * @param builder Gtk builder
  */
-NetLogGuiGtkWindow::NetLogGuiGtkWindow(BaseObjectType *                  cobject,
+NetLogGuiGtkWindow::NetLogGuiGtkWindow(BaseObjectType                   *cobject,
                                        const Glib::RefPtr<Gtk::Builder> &builder)
 : Gtk::Window(cobject)
 {
@@ -158,15 +158,15 @@ NetLogGuiGtkWindow::on_service_added(fawkes::NetworkService *service)
 		ntb_logviewers.show();
 	}
 
-	Gtk::HBox *  hbox   = Gtk::manage(new Gtk::HBox(false, 4));
+	Gtk::HBox   *hbox   = Gtk::manage(new Gtk::HBox(false, 4));
 	Gtk::Button *button = Gtk::manage(new Gtk::Button());
-	Gtk::Image * image  = Gtk::manage(new Gtk::Image(Gtk::Stock::CONNECT, Gtk::ICON_SIZE_BUTTON));
+	Gtk::Image  *image  = Gtk::manage(new Gtk::Image(Gtk::Stock::CONNECT, Gtk::ICON_SIZE_BUTTON));
 	button->add(*image);
 	button->set_relief(Gtk::RELIEF_NONE);
 	Gtk::Label *label = Gtk::manage(new Gtk::Label());
 	label->set_markup(Glib::ustring("<b>") + service->host() + "</b>\n" + service->addr_string());
 	label->set_line_wrap();
-	Gtk::Label *         invisible = Gtk::manage(new Gtk::Label(
+	Gtk::Label          *invisible = Gtk::manage(new Gtk::Label(
     Glib::ustring(service->name()) + "::" + service->type() + "::" + service->domain()));
 	Gtk::ScrolledWindow *scrolled  = Gtk::manage(new Gtk::ScrolledWindow());
 	scrolled->set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
@@ -206,11 +206,11 @@ NetLogGuiGtkWindow::on_service_removed(fawkes::NetworkService *service)
 		for (int i = 0; !removed && (i < ntb_logviewers.get_n_pages()); ++i) {
 			Gtk::Widget *child     = ntb_logviewers.get_nth_page(i);
 			Gtk::Widget *tab_label = ntb_logviewers.get_tab_label(*child);
-			Gtk::HBox *  hbox      = dynamic_cast<Gtk::HBox *>(tab_label);
+			Gtk::HBox   *hbox      = dynamic_cast<Gtk::HBox *>(tab_label);
 
 			if (hbox) {
 				std::vector<Gtk::Widget *> children = hbox->get_children();
-				Gtk::Widget *              w        = children[2];
+				Gtk::Widget               *w        = children[2];
 				if (w) {
 					Gtk::Label *label = dynamic_cast<Gtk::Label *>(w);
 					if (label) {

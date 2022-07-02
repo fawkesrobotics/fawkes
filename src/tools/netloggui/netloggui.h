@@ -51,11 +51,11 @@ private:
 	void on_disconnected(Gtk::Image *image);
 
 private:
-	fawkes::AvahiThread *    avahi_thread;
+	fawkes::AvahiThread     *avahi_thread;
 	fawkes::AvahiDispatcher *avahi_dispatcher;
 
-	Gtk::VBox *      vbox_main;
-	Gtk::Label *     lab_no_connection;
+	Gtk::VBox       *vbox_main;
+	Gtk::Label      *lab_no_connection;
 	Gtk::ToolButton *tb_connection;
 	Gtk::ToolButton *tb_exit;
 	Gtk::ToolButton *tb_clear;
