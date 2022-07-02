@@ -249,7 +249,7 @@ void
 NaoQiButtonThread::process_pattern_button(SwitchInterface *switch_if,
                                           float            sensor_value,
                                           float            time_diff_sec,
-                                          bool &           remote_enabled,
+                                          bool            &remote_enabled,
                                           int              sound_short,
                                           int              sound_long)
 {
@@ -281,7 +281,7 @@ NaoQiButtonThread::process_bumpers(SwitchInterface *switch_if,
                                    float            left_value,
                                    float            right_value,
                                    float            time_diff_sec,
-                                   bool &           remote_enabled,
+                                   bool            &remote_enabled,
                                    int              sound_id)
 {
 	float value = 0;
@@ -331,8 +331,8 @@ NaoQiButtonThread::process_messages(SwitchInterface *switch_if, bool &remote_ena
 void
 NaoQiButtonThread::pattern_button_logic(float         value,
                                         float         time_diff_sec,
-                                        bool &        enabled,
-                                        float &       history,
+                                        bool         &enabled,
+                                        float        &history,
                                         unsigned int &activations,
                                         unsigned int &short_act,
                                         unsigned int &long_act,
@@ -383,8 +383,8 @@ NaoQiButtonThread::pattern_button_logic(float         value,
 void
 NaoQiButtonThread::bumpers_logic(float         value,
                                  float         time_diff_sec,
-                                 bool &        enabled,
-                                 float &       history,
+                                 bool         &enabled,
+                                 float        &history,
                                  unsigned int &activations,
                                  int           sound_id)
 {

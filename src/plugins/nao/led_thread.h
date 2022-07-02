@@ -68,7 +68,7 @@ protected:
 
 protected:
 	bool bb_interface_message_received(fawkes::Interface *interface,
-	                                   fawkes::Message *  message) noexcept;
+	                                   fawkes::Message   *message) noexcept;
 
 private:
 	AL::ALPtr<AL::DCMProxy>           dcm_;

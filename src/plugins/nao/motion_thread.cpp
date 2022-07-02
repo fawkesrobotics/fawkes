@@ -149,8 +149,8 @@ NaoQiMotionThread::process_messages()
 {
 	bool                                          stop              = false;
 	HumanoidMotionInterface::WalkVelocityMessage *msg_walk_velocity = NULL;
-	HumanoidMotionInterface::MoveHeadMessage *    msg_move_head     = NULL;
-	Message *                                     msg_action        = NULL;
+	HumanoidMotionInterface::MoveHeadMessage     *msg_move_head     = NULL;
+	Message                                      *msg_action        = NULL;
 
 	// process bb messages
 	while (!hummot_if_->msgq_empty()) {
