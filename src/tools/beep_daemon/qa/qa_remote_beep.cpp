@@ -36,7 +36,7 @@ main(int argc, char **argv)
 {
 	ArgumentParser argp(argc, argv, "01f:d:");
 
-	BlackBoard *     rbb = new RemoteBlackBoard("localhost", 1910);
+	BlackBoard      *rbb = new RemoteBlackBoard("localhost", 1910);
 	SwitchInterface *si  = rbb->open_for_reading<SwitchInterface>("Beep");
 
 	if (argp.has_arg("1")) {
