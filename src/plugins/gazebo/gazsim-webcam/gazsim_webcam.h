@@ -44,7 +44,7 @@ class GazsimWebcam
 public:
 	GazsimWebcam(std::string                shm_id,
 	             gazebo::transport::NodePtr gazebo_world_node,
-	             fawkes::Configuration *    config);
+	             fawkes::Configuration     *config);
 	~GazsimWebcam();
 
 private:

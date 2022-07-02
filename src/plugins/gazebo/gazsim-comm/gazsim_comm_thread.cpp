@@ -159,8 +159,8 @@ GazsimCommThread::loop()
  */
 void
 GazsimCommThread::receive_raw_msg(boost::asio::ip::udp::endpoint &endpoint,
-                                  protobuf_comm::frame_header_t & header,
-                                  void *                          data,
+                                  protobuf_comm::frame_header_t  &header,
+                                  void                           *data,
                                   size_t                          length)
 {
 	//logger->log_info(name(), "Got raw Message from port %d", endpoint.port());
