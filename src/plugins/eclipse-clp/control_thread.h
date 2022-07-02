@@ -55,8 +55,8 @@ public:
 private:
 	EclipseAgentThread *m_eclipse_thread;
 
-	fawkes::TestInterface *           m_test_iface;
-	fawkes::ExitSimulationInterface * m_exit_iface;
+	fawkes::TestInterface            *m_test_iface;
+	fawkes::ExitSimulationInterface  *m_exit_iface;
 	fawkes::EclipseDebuggerInterface *m_debug_iface;
 
 	bool        allow_shutdown_;
