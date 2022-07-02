@@ -75,7 +75,7 @@
  * @param in vector of input arrays
  * @param out_size number of value arrays to generate in out vector
  */
-LaserDataFilter::LaserDataFilter(const std::string &          filter_name,
+LaserDataFilter::LaserDataFilter(const std::string           &filter_name,
                                  unsigned int                 in_data_size,
                                  const std::vector<Buffer *> &in,
                                  unsigned int                 out_size)
@@ -192,7 +192,7 @@ LaserDataFilter::reset_outbuf(Buffer *outbuf)
  * @param outbuf array of out_data_size (= in_data_size) readings
  */
 void
-LaserDataFilter::copy_to_outbuf(LaserDataFilter::Buffer *      outbuf,
+LaserDataFilter::copy_to_outbuf(LaserDataFilter::Buffer       *outbuf,
                                 const LaserDataFilter::Buffer *inbuf)
 {
 	if (in_data_size != out_data_size) {

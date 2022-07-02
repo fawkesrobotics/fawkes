@@ -38,17 +38,17 @@ public:
 		Buffer(size_t num_values = 0);
 		Buffer(const Buffer &other);
 		~Buffer();
-		Buffer &      operator=(const Buffer &other);
+		Buffer       &operator=(const Buffer &other);
 		void          resize(unsigned int num_values);
 		std::string   name;      ///< name of the input buffer
 		std::string   frame;     ///< reference coordinate frame ID
-		float *       values;    ///< values
+		float        *values;    ///< values
 		fawkes::Time *timestamp; ///< timestamp of data
 	private:
 		unsigned int num_values_;
 	};
 
-	LaserDataFilter(const std::string &          filter_name,
+	LaserDataFilter(const std::string           &filter_name,
 	                unsigned int                 in_data_size,
 	                const std::vector<Buffer *> &in,
 	                unsigned int                 out_size);

@@ -37,10 +37,10 @@ class Logger;
 class LaserDeadSpotsDataFilter : public LaserDataFilter
 {
 public:
-	LaserDeadSpotsDataFilter(const std::string &                     filter_name,
-	                         fawkes::Configuration *                 config,
-	                         fawkes::Logger *                        logger,
-	                         const std::string &                     prefix,
+	LaserDeadSpotsDataFilter(const std::string                      &filter_name,
+	                         fawkes::Configuration                  *config,
+	                         fawkes::Logger                         *logger,
+	                         const std::string                      &prefix,
 	                         unsigned int                            data_size,
 	                         std::vector<LaserDataFilter::Buffer *> &in);
 	LaserDeadSpotsDataFilter(const LaserDeadSpotsDataFilter &other);
@@ -58,7 +58,7 @@ private:
 	fawkes::Logger *logger_;
 
 	unsigned int                         num_spots_;
-	unsigned int *                       dead_spots_;
+	unsigned int                        *dead_spots_;
 	unsigned int                         dead_spots_size_;
 	std::vector<std::pair<float, float>> cfg_dead_spots_;
 };

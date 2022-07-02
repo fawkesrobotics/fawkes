@@ -41,8 +41,8 @@ class Logger;
 class LaserProjectionDataFilter : public LaserDataFilter
 {
 public:
-	LaserProjectionDataFilter(const std::string &                     filter_name,
-	                          fawkes::tf::Transformer *               tf,
+	LaserProjectionDataFilter(const std::string                      &filter_name,
+	                          fawkes::tf::Transformer                *tf,
 	                          std::string                             target_frame,
 	                          float                                   not_from_x,
 	                          float                                   not_to_x,

@@ -280,7 +280,7 @@ LaserFilterThread::wait_done()
 
 void
 LaserFilterThread::open_interfaces(std::string                             prefix,
-                                   std::vector<LaserInterface> &           ifs,
+                                   std::vector<LaserInterface>            &ifs,
                                    std::vector<LaserDataFilter::Buffer *> &bufs,
                                    bool                                    writing)
 {

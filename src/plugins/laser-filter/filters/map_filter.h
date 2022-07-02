@@ -36,22 +36,22 @@ class LaserMapFilterDataFilter : public LaserDataFilter
 {
 private:
 	fawkes::tf::Transformer *tf_listener_;
-	fawkes::Configuration *  config_;
-	fawkes::Logger *         logger_;
+	fawkes::Configuration   *config_;
+	fawkes::Logger          *logger_;
 
-	map_t *     map_;
+	map_t      *map_;
 	std::string frame_map_;
 	float       cfg_occupied_thresh_;
 	int         num_pixels_;
 
 public:
-	LaserMapFilterDataFilter(const std::string &                     filter_name,
+	LaserMapFilterDataFilter(const std::string                      &filter_name,
 	                         unsigned int                            in_data_size,
 	                         std::vector<LaserDataFilter::Buffer *> &in,
-	                         fawkes::tf::Transformer *               tf_listener,
-	                         fawkes::Configuration *                 config,
-	                         const std::string &                     prefix,
-	                         fawkes::Logger *                        logger);
+	                         fawkes::tf::Transformer                *tf_listener,
+	                         fawkes::Configuration                  *config,
+	                         const std::string                      &prefix,
+	                         fawkes::Logger                         *logger);
 
 	virtual void filter();
 

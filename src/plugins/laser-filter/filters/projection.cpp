@@ -55,7 +55,7 @@ using namespace fawkes;
  * @param in vector of input arrays
  */
 LaserProjectionDataFilter::LaserProjectionDataFilter(const std::string &filter_name,
-                                                     tf::Transformer *  tf,
+                                                     tf::Transformer   *tf,
                                                      std::string        target_frame,
                                                      float              not_from_x,
                                                      float              not_to_x,

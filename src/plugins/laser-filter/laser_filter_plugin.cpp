@@ -144,7 +144,7 @@ LaserFilterPlugin::LaserFilterPlugin(Configuration *config) : Plugin(config)
 			std::list<LaserFilterThread *> depthreads;
 
 			std::list<std::string>::iterator i, o;
-			std::list<std::string> &         cinputs = inputs[*c];
+			std::list<std::string>          &cinputs = inputs[*c];
 			for (i = cinputs.begin(); i != cinputs.end(); ++i) {
 				//printf("  Input %s\n", i->c_str());
 

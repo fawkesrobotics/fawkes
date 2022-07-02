@@ -41,12 +41,12 @@ public:
 		TIMESTAMP_INDEX   ///< use a specific index in the input buffer list
 	} TimestampSelectionMethod;
 
-	LaserMinMergeDataFilter(const std::string &                     filter_name,
-	                        fawkes::Logger *                        logger,
+	LaserMinMergeDataFilter(const std::string                      &filter_name,
+	                        fawkes::Logger                         *logger,
 	                        unsigned int                            in_data_size,
 	                        std::vector<LaserDataFilter::Buffer *> &in);
-	LaserMinMergeDataFilter(const std::string &                     filter_name,
-	                        fawkes::Logger *                        logger,
+	LaserMinMergeDataFilter(const std::string                      &filter_name,
+	                        fawkes::Logger                         *logger,
 	                        unsigned int                            in_data_size,
 	                        std::vector<LaserDataFilter::Buffer *> &in,
 	                        TimestampSelectionMethod                timestamp_selection_method,
