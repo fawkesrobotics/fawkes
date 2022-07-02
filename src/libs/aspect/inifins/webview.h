@@ -39,9 +39,9 @@ public:
 	virtual void finalize(Thread *thread);
 
 private:
-	WebUrlManager *        url_manager_;
-	WebNavManager *        nav_manager_;
-	WebRequestManager *    request_manager_;
+	WebUrlManager         *url_manager_;
+	WebNavManager         *nav_manager_;
+	WebRequestManager     *request_manager_;
 	WebviewRestApiManager *rest_api_manager_;
 };
 

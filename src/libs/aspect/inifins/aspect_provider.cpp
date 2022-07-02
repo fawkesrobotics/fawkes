@@ -57,7 +57,7 @@ AspectProviderAspectIniFin::init(Thread *thread)
 		                                      thread->name());
 	}
 
-	const std::list<AspectIniFin *> &         aspects = provider_thread->aspect_provider_aspects();
+	const std::list<AspectIniFin *>          &aspects = provider_thread->aspect_provider_aspects();
 	std::list<AspectIniFin *>::const_iterator a;
 	for (a = aspects.begin(); a != aspects.end(); ++a) {
 		aspect_manager_->register_inifin(*a);
@@ -73,7 +73,7 @@ AspectProviderAspectIniFin::prepare_finalize(Thread *thread)
 	if (p_thr == NULL)
 		return true;
 
-	const std::list<AspectIniFin *> &         aspects = p_thr->aspect_provider_aspects();
+	const std::list<AspectIniFin *>          &aspects = p_thr->aspect_provider_aspects();
 	std::list<AspectIniFin *>::const_iterator a;
 	for (a = aspects.begin(); a != aspects.end(); ++a) {
 		if (aspect_manager_->has_threads_for_aspect((*a)->get_aspect_name())) {
@@ -97,7 +97,7 @@ AspectProviderAspectIniFin::finalize(Thread *thread)
 		                                    thread->name());
 	}
 
-	const std::list<AspectIniFin *> &         aspects = provider_thread->aspect_provider_aspects();
+	const std::list<AspectIniFin *>          &aspects = provider_thread->aspect_provider_aspects();
 	std::list<AspectIniFin *>::const_iterator a;
 	for (a = aspects.begin(); a != aspects.end(); ++a) {
 		aspect_manager_->unregister_inifin(*a);

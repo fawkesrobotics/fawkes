@@ -66,9 +66,9 @@ WebviewAspect::~WebviewAspect()
  * @see WebviewMaster
  */
 void
-WebviewAspect::init_WebviewAspect(WebUrlManager *        url_manager,
-                                  WebNavManager *        nav_manager,
-                                  WebRequestManager *    request_manager,
+WebviewAspect::init_WebviewAspect(WebUrlManager         *url_manager,
+                                  WebNavManager         *nav_manager,
+                                  WebRequestManager     *request_manager,
                                   WebviewRestApiManager *rest_api_manager)
 {
 	webview_url_manager      = url_manager;

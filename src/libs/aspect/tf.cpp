@@ -98,9 +98,9 @@ TransformAspect::~TransformAspect()
  * @param thread_name name of thread opening publishers
  */
 void
-TransformAspect::init_TransformAspect(BlackBoard *     blackboard,
+TransformAspect::init_TransformAspect(BlackBoard      *blackboard,
                                       tf::Transformer *transformer,
-                                      const char *     thread_name)
+                                      const char      *thread_name)
 {
 	if (((tf_aspect_mode_ == ONLY_PUBLISHER) || (tf_aspect_mode_ == BOTH))
 	    && (tf_aspect_frame_id_ == NULL)) {

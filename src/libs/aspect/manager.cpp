@@ -224,43 +224,43 @@ AspectManager::prepare_finalize(Thread *thread)
  * @param syncpoint_manager manager for SyncPointManagerAspect
  */
 void
-AspectManager::register_default_inifins(BlackBoard *           blackboard,
-                                        ThreadCollector *      collector,
-                                        Configuration *        config,
-                                        Logger *               logger,
-                                        Clock *                clock,
-                                        FawkesNetworkHub *     fnethub,
-                                        MainLoopEmployer *     mloop_employer,
-                                        LoggerEmployer *       logger_employer,
+AspectManager::register_default_inifins(BlackBoard            *blackboard,
+                                        ThreadCollector       *collector,
+                                        Configuration         *config,
+                                        Logger                *logger,
+                                        Clock                 *clock,
+                                        FawkesNetworkHub      *fnethub,
+                                        MainLoopEmployer      *mloop_employer,
+                                        LoggerEmployer        *logger_employer,
                                         BlockedTimingExecutor *btexec,
-                                        NetworkNameResolver *  nnresolver,
-                                        ServicePublisher *     service_publisher,
-                                        ServiceBrowser *       service_browser,
-                                        PluginManager *        pmanager,
-                                        tf::Transformer *      tf_listener,
-                                        SyncPointManager *     syncpoint_manager)
+                                        NetworkNameResolver   *nnresolver,
+                                        ServicePublisher      *service_publisher,
+                                        ServiceBrowser        *service_browser,
+                                        PluginManager         *pmanager,
+                                        tf::Transformer       *tf_listener,
+                                        SyncPointManager      *syncpoint_manager)
 {
 	if (!default_inifins_.empty())
 		return;
 
 	AspectProviderAspectIniFin *prov_aif   = new AspectProviderAspectIniFin(this);
-	BlackBoardAspectIniFin *    bb_aif     = new BlackBoardAspectIniFin(blackboard);
-	BlockedTimingAspectIniFin * bt_aif     = new BlockedTimingAspectIniFin();
-	ClockAspectIniFin *         clock_aif  = new ClockAspectIniFin(clock);
-	ConfigurableAspectIniFin *  conf_aif   = new ConfigurableAspectIniFin(config);
-	FawkesNetworkAspectIniFin * fnet_aif   = new FawkesNetworkAspectIniFin(fnethub);
-	LoggerAspectIniFin *        logger_aif = new LoggerAspectIniFin(logger_employer);
-	LoggingAspectIniFin *       log_aif    = new LoggingAspectIniFin(logger);
-	MainLoopAspectIniFin *      mloop_aif  = new MainLoopAspectIniFin(mloop_employer, btexec);
-	NetworkAspectIniFin *       net_aif =
+	BlackBoardAspectIniFin     *bb_aif     = new BlackBoardAspectIniFin(blackboard);
+	BlockedTimingAspectIniFin  *bt_aif     = new BlockedTimingAspectIniFin();
+	ClockAspectIniFin          *clock_aif  = new ClockAspectIniFin(clock);
+	ConfigurableAspectIniFin   *conf_aif   = new ConfigurableAspectIniFin(config);
+	FawkesNetworkAspectIniFin  *fnet_aif   = new FawkesNetworkAspectIniFin(fnethub);
+	LoggerAspectIniFin         *logger_aif = new LoggerAspectIniFin(logger_employer);
+	LoggingAspectIniFin        *log_aif    = new LoggingAspectIniFin(logger);
+	MainLoopAspectIniFin       *mloop_aif  = new MainLoopAspectIniFin(mloop_employer, btexec);
+	NetworkAspectIniFin        *net_aif =
 	  new NetworkAspectIniFin(nnresolver, service_publisher, service_browser);
-	PluginDirectorAspectIniFin *  plug_aif = new PluginDirectorAspectIniFin(pmanager);
-	ThreadProducerAspectIniFin *  tp_aif   = new ThreadProducerAspectIniFin(collector);
-	TimeSourceAspectIniFin *      ts_aif   = new TimeSourceAspectIniFin(clock);
-	VisionMasterAspectIniFin *    vm_aif   = new VisionMasterAspectIniFin();
-	VisionAspectIniFin *          vis_aif  = new VisionAspectIniFin(vm_aif);
+	PluginDirectorAspectIniFin   *plug_aif = new PluginDirectorAspectIniFin(pmanager);
+	ThreadProducerAspectIniFin   *tp_aif   = new ThreadProducerAspectIniFin(collector);
+	TimeSourceAspectIniFin       *ts_aif   = new TimeSourceAspectIniFin(clock);
+	VisionMasterAspectIniFin     *vm_aif   = new VisionMasterAspectIniFin();
+	VisionAspectIniFin           *vis_aif  = new VisionAspectIniFin(vm_aif);
 	SyncPointManagerAspectIniFin *spm_aif  = new SyncPointManagerAspectIniFin(syncpoint_manager);
-	SyncPointAspectIniFin *       sp_aif   = new SyncPointAspectIniFin(syncpoint_manager);
+	SyncPointAspectIniFin        *sp_aif   = new SyncPointAspectIniFin(syncpoint_manager);
 #ifdef HAVE_WEBVIEW
 	WebviewAspectIniFin *web_aif = new WebviewAspectIniFin();
 #endif
