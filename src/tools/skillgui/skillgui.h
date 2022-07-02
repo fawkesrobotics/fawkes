@@ -61,7 +61,7 @@ public:
 
 private:
 	void close_bb();
-	void send_graphdir_message(fawkes::SkillerDebugInterface *                   iface,
+	void send_graphdir_message(fawkes::SkillerDebugInterface                    *iface,
 	                           fawkes::SkillerDebugInterface::GraphDirectionEnum gd);
 
 	void on_connection_clicked();
@@ -103,38 +103,38 @@ private:
 
 	Gtk::ToolButton *tb_connection;
 	Gtk::ToolButton *tb_exit;
-	Gtk::Button *    but_exec;
-	Gtk::Button *    but_stop;
-	Gtk::Button *    but_clearlog;
+	Gtk::Button     *but_exec;
+	Gtk::Button     *but_stop;
+	Gtk::Button     *but_clearlog;
 #if GTK_VERSION_GE(3, 0)
 	Gtk::ComboBox *cbe_skillstring;
 #else
-	Gtk::ComboBoxEntry *cbe_skillstring;
+	Gtk::ComboBoxEntry       *cbe_skillstring;
 #endif
-	Gtk::Label *           lab_status;
-	Gtk::Label *           lab_alive;
-	Gtk::Label *           lab_skillstring;
-	Gtk::Label *           lab_error;
-	Gtk::ScrolledWindow *  scw_graph;
-	Gtk::Notebook *        ntb_tabs;
+	Gtk::Label            *lab_status;
+	Gtk::Label            *lab_alive;
+	Gtk::Label            *lab_skillstring;
+	Gtk::Label            *lab_error;
+	Gtk::ScrolledWindow   *scw_graph;
+	Gtk::Notebook         *ntb_tabs;
 	Gtk::ToggleToolButton *tb_skiller;
 	Gtk::ToggleToolButton *tb_agent;
-	Gtk::ComboBoxText *    cb_graphlist;
-	Gtk::ToolItem *        tb_graphlist;
-	Gtk::ToolButton *      tb_graphsave;
-	Gtk::ToolButton *      tb_graphopen;
-	Gtk::ToolButton *      tb_graphupd;
+	Gtk::ComboBoxText     *cb_graphlist;
+	Gtk::ToolItem         *tb_graphlist;
+	Gtk::ToolButton       *tb_graphsave;
+	Gtk::ToolButton       *tb_graphopen;
+	Gtk::ToolButton       *tb_graphupd;
 	Gtk::ToggleToolButton *tb_graphrecord;
-	Gtk::ToolButton *      tb_controller;
-	Gtk::ToolButton *      tb_zoomin;
-	Gtk::ToolButton *      tb_zoomout;
-	Gtk::ToolButton *      tb_zoomfit;
-	Gtk::ToolButton *      tb_zoomreset;
+	Gtk::ToolButton       *tb_controller;
+	Gtk::ToolButton       *tb_zoomin;
+	Gtk::ToolButton       *tb_zoomout;
+	Gtk::ToolButton       *tb_zoomfit;
+	Gtk::ToolButton       *tb_zoomreset;
 #if GTKMM_VERSION_GE(2, 20)
 	Gtk::Spinner *tb_spinner;
 #endif
 
-	Gtk::ToolButton *      tb_graphdir;
+	Gtk::ToolButton       *tb_graphdir;
 	Gtk::ToggleToolButton *tb_graphcolored;
 
 	Glib::RefPtr<Gtk::ListStore> sks_list_;
@@ -149,11 +149,11 @@ private:
 	SkillGuiGraphDrawingArea *gda;
 #endif
 
-	fawkes::SkillerInterface *     skiller_if_;
+	fawkes::SkillerInterface      *skiller_if_;
 	fawkes::SkillerDebugInterface *skdbg_if_;
 	fawkes::SkillerDebugInterface *agdbg_if_;
 
-	fawkes::LogView *       logview_;
+	fawkes::LogView        *logview_;
 	fawkes::PluginTreeView *trv_plugins_;
 };
 

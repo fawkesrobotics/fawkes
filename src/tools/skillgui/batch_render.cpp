@@ -259,7 +259,7 @@ public:
 				if (realpath(infile.c_str(), infile_real)) {
 					infile = infile_real;
 				}
-				char *      basefile = strdup(infile.c_str());
+				char       *basefile = strdup(infile.c_str());
 				std::string basen    = basename(basefile);
 				free(basefile);
 				outfile = outdir + "/" + basen.substr(0, basen.length() - 3) + format;
@@ -298,7 +298,7 @@ public:
 	{
 		printf("Post-processing PNG files, resizing to %fx%f\n", maxwidth, maxheight);
 		struct dirent *d;
-		DIR *          output_dir = opendir(outdir.c_str());
+		DIR           *output_dir = opendir(outdir.c_str());
 		while ((d = readdir(output_dir)) != NULL) {
 			if (fnmatch("*.png", d->d_name, FNM_PATHNAME | FNM_PERIOD) == 0) {
 				infile                                  = outdir + "/" + d->d_name;
@@ -343,7 +343,7 @@ public:
 	}
 
 private:
-	GVC_t *                       gvc;
+	GVC_t                        *gvc;
 	ArgumentParser                argp;
 	std::string                   format;
 	Cairo::RefPtr<Cairo::Surface> surface;
@@ -356,7 +356,7 @@ private:
 	std::string                   outfile;
 	std::string                   indir;
 	std::string                   outdir;
-	DIR *                         directory;
+	DIR                          *directory;
 	double                        maxwidth, maxheight;
 	bool                          postproc_required;
 	bool                          do_postproc;

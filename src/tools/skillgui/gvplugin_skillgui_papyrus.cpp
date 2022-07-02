@@ -213,7 +213,7 @@ skillgui_render_textpara(GVJ_t *job, pointf p, textpara_t *para)
 	++num_text_;
 #endif
 	SkillGuiGraphViewport *gvp = (SkillGuiGraphViewport *)job->context;
-	obj_state_t *          obj = job->obj;
+	obj_state_t           *obj = job->obj;
 
 	switch (para->just) {
 	case 'r': p.x -= para->width; break;
@@ -296,7 +296,7 @@ skillgui_render_ellipse(GVJ_t *job, pointf *A, int filled)
 #endif
 	//printf("Render ellipse\n");
 	SkillGuiGraphViewport *gvp = (SkillGuiGraphViewport *)job->context;
-	obj_state_t *          obj = job->obj;
+	obj_state_t           *obj = job->obj;
 
 	double rx = fabs(A[1].x - A[0].x);
 	double ry = fabs(A[1].y - A[0].y);
@@ -323,7 +323,7 @@ skillgui_render_polygon(GVJ_t *job, pointf *A, int n, int filled)
 #endif
 	//printf("Polygon\n");
 	SkillGuiGraphViewport *gvp = (SkillGuiGraphViewport *)job->context;
-	obj_state_t *          obj = job->obj;
+	obj_state_t           *obj = job->obj;
 
 	Papyrus::Vertices v;
 	for (int i = 0; i < n; ++i) {
@@ -341,7 +341,7 @@ skillgui_render_polygon(GVJ_t *job, pointf *A, int n, int filled)
 }
 
 static void
-skillgui_render_bezier(GVJ_t * job,
+skillgui_render_bezier(GVJ_t  *job,
                        pointf *A,
                        int     n,
                        int     arrow_at_start,
@@ -354,7 +354,7 @@ skillgui_render_bezier(GVJ_t * job,
 #endif
 	//printf("Bezier\n");
 	SkillGuiGraphViewport *gvp = (SkillGuiGraphViewport *)job->context;
-	obj_state_t *          obj = job->obj;
+	obj_state_t           *obj = job->obj;
 
 	Papyrus::BezierVertices v;
 	v.push_back(Papyrus::BezierVertex(A[0].x, A[0].y, A[0].x, A[0].y, A[1].x, A[1].y));
@@ -387,7 +387,7 @@ skillgui_render_polyline(GVJ_t *job, pointf *A, int n)
 #endif
 	//printf("Polyline\n");
 	SkillGuiGraphViewport *gvp = static_cast<SkillGuiGraphViewport *>(job->context);
-	obj_state_t *          obj = job->obj;
+	obj_state_t           *obj = job->obj;
 
 	Papyrus::Vertices v;
 	for (int i = 0; i < n; ++i) {
