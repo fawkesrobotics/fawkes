@@ -125,7 +125,7 @@ private:
 	float cfg_rot_decel_;
 
 	fawkes::Mutex *vel_mutex_;
-	fawkes::Time * vel_last_update_;
+	fawkes::Time  *vel_last_update_;
 	bool           vel_last_zero_;
 	float          des_vx_;
 	float          des_vy_;
@@ -136,7 +136,7 @@ private:
 	float set_omega_;
 
 #ifdef USE_VELOCITY_RECORDING
-	FILE *        f_;
+	FILE         *f_;
 	fawkes::Time *start_;
 #endif
 };

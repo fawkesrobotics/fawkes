@@ -79,9 +79,9 @@ private: // members
 	bool        cfg_enable_gyro_;
 	std::string cfg_imu_iface_id_;
 
-	fawkes::BatteryInterface *       batt_if_;
+	fawkes::BatteryInterface        *batt_if_;
 	fawkes::RobotinoSensorInterface *sens_if_;
-	fawkes::IMUInterface *           imu_if_;
+	fawkes::IMUInterface            *imu_if_;
 };
 
 #endif

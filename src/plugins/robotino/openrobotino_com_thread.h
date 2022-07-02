@@ -125,28 +125,28 @@ private:
 	unsigned int      last_seqnum_;
 
 #ifdef HAVE_OPENROBOTINO_API_1
-	rec::robotino::com::Com *                com_;
-	fawkes::Mutex *                          state_mutex_;
+	rec::robotino::com::Com                 *com_;
+	fawkes::Mutex                           *state_mutex_;
 	unsigned int                             active_state_;
 	rec::iocontrol::remotestate::SensorState sensor_states_[2];
 	fawkes::Time                             times_[2];
 
 	rec::sharedmemory::SharedMemory<rec::iocontrol::robotstate::State> *statemem_;
-	rec::iocontrol::robotstate::State *                                 state_;
+	rec::iocontrol::robotstate::State                                  *state_;
 
 	rec::iocontrol::remotestate::SetState *set_state_;
 
 #else
-	rec::robotino::api2::Com *                com_;
-	rec::robotino::api2::AnalogInputArray *   analog_inputs_com_;
-	rec::robotino::api2::Bumper *             bumper_com_;
-	rec::robotino::api2::DigitalInputArray *  digital_inputs_com_;
+	rec::robotino::api2::Com                 *com_;
+	rec::robotino::api2::AnalogInputArray    *analog_inputs_com_;
+	rec::robotino::api2::Bumper              *bumper_com_;
+	rec::robotino::api2::DigitalInputArray   *digital_inputs_com_;
 	rec::robotino::api2::DistanceSensorArray *distances_com_;
-	rec::robotino::api2::ElectricalGripper *  gripper_com_;
-	rec::robotino::api2::Gyroscope *          gyroscope_com_;
-	rec::robotino::api2::MotorArray *         motors_com_;
-	rec::robotino::api2::Odometry *           odom_com_;
-	rec::robotino::api2::PowerManagement *    power_com_;
+	rec::robotino::api2::ElectricalGripper   *gripper_com_;
+	rec::robotino::api2::Gyroscope           *gyroscope_com_;
+	rec::robotino::api2::MotorArray          *motors_com_;
+	rec::robotino::api2::Odometry            *odom_com_;
+	rec::robotino::api2::PowerManagement     *power_com_;
 #endif
 };
 

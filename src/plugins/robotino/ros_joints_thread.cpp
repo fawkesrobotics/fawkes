@@ -73,8 +73,8 @@ RobotinoRosJointsThread::loop()
 
 	if (sens_if_->refreshed()) {
 		const Time *ct           = sens_if_->timestamp();
-		float *     mot_velocity = sens_if_->mot_velocity();
-		int32_t *   mot_position = sens_if_->mot_position();
+		float      *mot_velocity = sens_if_->mot_velocity();
+		int32_t    *mot_position = sens_if_->mot_position();
 
 		joint_state_msg_.header.seq += 1;
 		joint_state_msg_.header.stamp = ros::Time(ct->get_sec(), ct->get_usec() * 1e3);
