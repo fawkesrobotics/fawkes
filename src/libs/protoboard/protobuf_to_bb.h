@@ -232,7 +232,7 @@ protected:
 	virtual void handle(const ProtoT &msg, IfaceT *iface);
 
 private:
-	IfaceT *    interface_;
+	IfaceT     *interface_;
 	std::string name_;
 };
 

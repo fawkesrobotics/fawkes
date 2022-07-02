@@ -43,7 +43,7 @@ public:
 	 */
 	ProtoboardPlugin(fawkes::Configuration *cfg) : Plugin(cfg)
 	{
-		protoboard::ProtobufThead *    protobuf_thread = new protoboard::ProtobufThead();
+		protoboard::ProtobufThead     *protobuf_thread = new protoboard::ProtobufThead();
 		protoboard::BlackboardManager *bb_mgr = new protoboard::BlackboardManager(protobuf_thread);
 		bb_mgr->set_protobuf_sender(new protoboard::ProtobufSender<IfaceManagerTs...>(bb_mgr));
 		protobuf_thread->set_bb_manager(bb_mgr);

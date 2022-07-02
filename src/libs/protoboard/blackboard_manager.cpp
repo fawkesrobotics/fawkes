@@ -137,7 +137,7 @@ BlackboardManager::add_peer(ProtobufPeerInterface *iface, long peer_id)
  */
 template <>
 void
-BlackboardManager::handle_message(ProtobufPeerInterface *                   iface,
+BlackboardManager::handle_message(ProtobufPeerInterface                    *iface,
                                   ProtobufPeerInterface::CreatePeerMessage *msg)
 {
 	add_peer(iface, message_handler_->peer_create(msg->address(), msg->port()));
@@ -150,7 +150,7 @@ BlackboardManager::handle_message(ProtobufPeerInterface *                   ifac
  */
 template <>
 void
-BlackboardManager::handle_message(ProtobufPeerInterface *                        iface,
+BlackboardManager::handle_message(ProtobufPeerInterface                         *iface,
                                   ProtobufPeerInterface::CreatePeerLocalMessage *msg)
 {
 	add_peer(iface,
@@ -166,7 +166,7 @@ BlackboardManager::handle_message(ProtobufPeerInterface *                       
  */
 template <>
 void
-BlackboardManager::handle_message(ProtobufPeerInterface *                         iface,
+BlackboardManager::handle_message(ProtobufPeerInterface                          *iface,
                                   ProtobufPeerInterface::CreatePeerCryptoMessage *msg)
 {
 	add_peer(iface,
@@ -181,7 +181,7 @@ BlackboardManager::handle_message(ProtobufPeerInterface *                       
  */
 template <>
 void
-BlackboardManager::handle_message(ProtobufPeerInterface *                              iface,
+BlackboardManager::handle_message(ProtobufPeerInterface                               *iface,
                                   ProtobufPeerInterface::CreatePeerLocalCryptoMessage *msg)
 {
 	add_peer(iface,

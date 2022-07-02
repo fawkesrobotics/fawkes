@@ -102,8 +102,8 @@ public:
 	}
 
 private:
-	IfaceT *                          interface_;
-	fawkes::BlackBoard *              blackboard_;
+	IfaceT                           *interface_;
+	fawkes::BlackBoard               *blackboard_;
 	fawkes::BlackBoardOnMessageWaker *waker_;
 };
 
@@ -228,10 +228,10 @@ protected:
 private:
 	friend AbstractProtobufSender;
 
-	ProtobufThead *                         message_handler_;
-	fawkes::ProtobufPeerInterface *         peer_iface_;
+	ProtobufThead                          *message_handler_;
+	fawkes::ProtobufPeerInterface          *peer_iface_;
 	pb_conversion_map                       bb_receiving_interfaces_;
-	fawkes::BlackBoardOnMessageWaker *      on_message_waker_;
+	fawkes::BlackBoardOnMessageWaker       *on_message_waker_;
 	unsigned int                            next_peer_idx_;
 	std::unique_ptr<AbstractProtobufSender> pb_sender_;
 
@@ -243,7 +243,7 @@ private:
 	template <class InterfaceT>
 	struct on_interface
 	{
-		InterfaceT *       iface;
+		InterfaceT        *iface;
 		BlackboardManager *manager;
 
 		on_interface(InterfaceT *iface, BlackboardManager *manager) : iface(iface), manager(manager)

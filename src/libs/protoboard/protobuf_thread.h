@@ -145,7 +145,7 @@ private:
 	peer_setup_crypto(long int peer_id, const std::string &crypto_key, const std::string &cipher);
 
 	void handle_peer_msg(long int                                   peer_id,
-	                     boost::asio::ip::udp::endpoint &           endpoint,
+	                     boost::asio::ip::udp::endpoint            &endpoint,
 	                     uint16_t                                   component_id,
 	                     uint16_t                                   msg_type,
 	                     std::shared_ptr<google::protobuf::Message> msg);
@@ -165,7 +165,7 @@ private:
 
 	std::map<long int, protobuf_comm::ProtobufBroadcastPeer *> peers_;
 
-	BlackboardManager *          bb_manager_;
+	BlackboardManager           *bb_manager_;
 	std::queue<incoming_message> pb_queue_;
 };
 
