@@ -86,16 +86,16 @@ protected:
 
 private:
 	typedef union {
-		fawkes::MetricCounterInterface *  counter;
-		fawkes::MetricGaugeInterface *    gauge;
-		fawkes::MetricUntypedInterface *  untyped;
+		fawkes::MetricCounterInterface   *counter;
+		fawkes::MetricGaugeInterface     *gauge;
+		fawkes::MetricUntypedInterface   *untyped;
 		fawkes::MetricHistogramInterface *histogram;
 		//fawkes::MetricSummaryInterface *  summary;
 	} MetricFamilyData;
 
 	typedef struct
 	{
-		fawkes::MetricFamilyInterface *           metric_family;
+		fawkes::MetricFamilyInterface            *metric_family;
 		fawkes::MetricFamilyInterface::MetricType metric_type;
 		std::list<MetricFamilyData>               data;
 	} MetricFamilyBB;
@@ -127,7 +127,7 @@ private:
 	void parse_labels(const std::string &labels, io::prometheus::client::Metric *m);
 
 private:
-	MetricsRequestProcessor *                    req_proc_;
+	MetricsRequestProcessor                     *req_proc_;
 	fawkes::LockMap<std::string, MetricFamilyBB> metric_bbs_;
 
 	fawkes::MetricsAspectIniFin metrics_aspect_inifin_;

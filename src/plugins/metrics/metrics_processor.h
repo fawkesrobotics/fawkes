@@ -35,8 +35,8 @@ class MetricsRequestProcessor
 {
 public:
 	MetricsRequestProcessor(fawkes::MetricsManager *manager,
-	                        fawkes::Logger *        logger,
-	                        const std::string &     base_url);
+	                        fawkes::Logger         *logger,
+	                        const std::string      &base_url);
 
 	virtual ~MetricsRequestProcessor();
 
@@ -44,7 +44,7 @@ public:
 
 private:
 	fawkes::MetricsManager *metrics_manager_;
-	fawkes::Logger *        logger_;
+	fawkes::Logger         *logger_;
 	std::string             base_url_;
 };
 
