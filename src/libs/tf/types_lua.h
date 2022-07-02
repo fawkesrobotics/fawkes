@@ -38,9 +38,9 @@ public:
 	StampedQuaternion() : Stamped<Quaternion>()
 	{
 	}
-	StampedQuaternion(const Quaternion &  input,
+	StampedQuaternion(const Quaternion   &input,
 	                  const fawkes::Time &timestamp,
-	                  const std::string & frame_id)
+	                  const std::string  &frame_id)
 	: Stamped<Quaternion>(input, timestamp, frame_id)
 	{
 	}

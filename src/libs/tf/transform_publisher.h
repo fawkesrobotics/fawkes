@@ -72,7 +72,7 @@ public:
 	virtual void send_transform(const StampedTransform &transform, const bool is_static = false);
 
 	virtual void
-	send_transform(const Transform &   transform,
+	send_transform(const Transform    &transform,
 	               const fawkes::Time &time,
 	               const std::string   frame,
 	               const std::string   child_frame,
@@ -82,9 +82,9 @@ public:
 	}
 
 private:
-	BlackBoard *        bb_;
+	BlackBoard         *bb_;
 	TransformInterface *tfif_;
-	Mutex *             mutex_;
+	Mutex              *mutex_;
 };
 
 } // end namespace tf

@@ -80,72 +80,72 @@ public:
 	std::vector<TimeCacheInterfacePtr> get_frame_caches() const;
 	std::vector<std::string>           get_frame_id_mappings() const;
 
-	void lookup_transform(const std::string & target_frame,
-	                      const std::string & source_frame,
+	void lookup_transform(const std::string  &target_frame,
+	                      const std::string  &source_frame,
 	                      const fawkes::Time &time,
-	                      StampedTransform &  transform) const;
+	                      StampedTransform   &transform) const;
 
-	void lookup_transform(const std::string & target_frame,
+	void lookup_transform(const std::string  &target_frame,
 	                      const fawkes::Time &target_time,
-	                      const std::string & source_frame,
+	                      const std::string  &source_frame,
 	                      const fawkes::Time &source_time,
-	                      const std::string & fixed_frame,
-	                      StampedTransform &  transform) const;
+	                      const std::string  &fixed_frame,
+	                      StampedTransform   &transform) const;
 
 	void lookup_transform(const std::string &target_frame,
 	                      const std::string &source_frame,
-	                      StampedTransform & transform) const;
+	                      StampedTransform  &transform) const;
 
-	bool can_transform(const std::string & target_frame,
-	                   const std::string & source_frame,
+	bool can_transform(const std::string  &target_frame,
+	                   const std::string  &source_frame,
 	                   const fawkes::Time &time,
-	                   std::string *       error_msg = NULL) const;
+	                   std::string        *error_msg = NULL) const;
 
-	bool can_transform(const std::string & target_frame,
+	bool can_transform(const std::string  &target_frame,
 	                   const fawkes::Time &target_time,
-	                   const std::string & source_frame,
+	                   const std::string  &source_frame,
 	                   const fawkes::Time &source_time,
-	                   const std::string & fixed_frame,
-	                   std::string *       error_msg = NULL) const;
+	                   const std::string  &fixed_frame,
+	                   std::string        *error_msg = NULL) const;
 
-	void transform_quaternion(const std::string &        target_frame,
+	void transform_quaternion(const std::string         &target_frame,
 	                          const Stamped<Quaternion> &stamped_in,
-	                          Stamped<Quaternion> &      stamped_out) const;
-	void transform_vector(const std::string &     target_frame,
+	                          Stamped<Quaternion>       &stamped_out) const;
+	void transform_vector(const std::string      &target_frame,
 	                      const Stamped<Vector3> &stamped_in,
-	                      Stamped<Vector3> &      stamped_out) const;
-	void transform_point(const std::string &   target_frame,
+	                      Stamped<Vector3>       &stamped_out) const;
+	void transform_point(const std::string    &target_frame,
 	                     const Stamped<Point> &stamped_in,
-	                     Stamped<Point> &      stamped_out) const;
-	void transform_pose(const std::string &  target_frame,
+	                     Stamped<Point>       &stamped_out) const;
+	void transform_pose(const std::string   &target_frame,
 	                    const Stamped<Pose> &stamped_in,
-	                    Stamped<Pose> &      stamped_out) const;
+	                    Stamped<Pose>       &stamped_out) const;
 
 	bool transform_origin(const std::string &source_frame,
 	                      const std::string &target_frame,
-	                      Stamped<Pose> &    stamped_out,
+	                      Stamped<Pose>     &stamped_out,
 	                      const fawkes::Time time = fawkes::Time(0, 0)) const;
 
-	void transform_quaternion(const std::string &        target_frame,
-	                          const fawkes::Time &       target_time,
+	void transform_quaternion(const std::string         &target_frame,
+	                          const fawkes::Time        &target_time,
 	                          const Stamped<Quaternion> &stamped_in,
-	                          const std::string &        fixed_frame,
-	                          Stamped<Quaternion> &      stamped_out) const;
-	void transform_vector(const std::string &     target_frame,
-	                      const fawkes::Time &    target_time,
+	                          const std::string         &fixed_frame,
+	                          Stamped<Quaternion>       &stamped_out) const;
+	void transform_vector(const std::string      &target_frame,
+	                      const fawkes::Time     &target_time,
 	                      const Stamped<Vector3> &stamped_in,
-	                      const std::string &     fixed_frame,
-	                      Stamped<Vector3> &      stamped_out) const;
-	void transform_point(const std::string &   target_frame,
-	                     const fawkes::Time &  target_time,
+	                      const std::string      &fixed_frame,
+	                      Stamped<Vector3>       &stamped_out) const;
+	void transform_point(const std::string    &target_frame,
+	                     const fawkes::Time   &target_time,
 	                     const Stamped<Point> &stamped_in,
-	                     const std::string &   fixed_frame,
-	                     Stamped<Point> &      stamped_out) const;
-	void transform_pose(const std::string &  target_frame,
-	                    const fawkes::Time & target_time,
+	                     const std::string    &fixed_frame,
+	                     Stamped<Point>       &stamped_out) const;
+	void transform_pose(const std::string   &target_frame,
+	                    const fawkes::Time  &target_time,
 	                    const Stamped<Pose> &stamped_in,
-	                    const std::string &  fixed_frame,
-	                    Stamped<Pose> &      stamped_out) const;
+	                    const std::string   &fixed_frame,
+	                    Stamped<Pose>       &stamped_out) const;
 
 	std::string all_frames_as_dot(bool print_time, fawkes::Time *time = 0) const;
 

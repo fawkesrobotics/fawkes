@@ -116,33 +116,33 @@ public:
 	void clear();
 
 	bool set_transform(const StampedTransform &transform,
-	                   const std::string &     authority,
+	                   const std::string      &authority,
 	                   bool                    is_static = false);
 
 	/*********** Accessors *************/
-	void lookup_transform(const std::string & target_frame,
-	                      const std::string & source_frame,
+	void lookup_transform(const std::string  &target_frame,
+	                      const std::string  &source_frame,
 	                      const fawkes::Time &time,
-	                      StampedTransform &  transform) const;
+	                      StampedTransform   &transform) const;
 
-	void lookup_transform(const std::string & target_frame,
+	void lookup_transform(const std::string  &target_frame,
 	                      const fawkes::Time &target_time,
-	                      const std::string & source_frame,
+	                      const std::string  &source_frame,
 	                      const fawkes::Time &source_time,
-	                      const std::string & fixed_frame,
-	                      StampedTransform &  transform) const;
+	                      const std::string  &fixed_frame,
+	                      StampedTransform   &transform) const;
 
-	bool can_transform(const std::string & target_frame,
-	                   const std::string & source_frame,
+	bool can_transform(const std::string  &target_frame,
+	                   const std::string  &source_frame,
 	                   const fawkes::Time &time,
-	                   std::string *       error_msg = NULL) const;
+	                   std::string        *error_msg = NULL) const;
 
-	bool can_transform(const std::string & target_frame,
+	bool can_transform(const std::string  &target_frame,
 	                   const fawkes::Time &target_time,
-	                   const std::string & source_frame,
+	                   const std::string  &source_frame,
 	                   const fawkes::Time &source_time,
-	                   const std::string & fixed_frame,
-	                   std::string *       error_msg = NULL) const;
+	                   const std::string  &fixed_frame,
+	                   std::string        *error_msg = NULL) const;
 
 	std::string all_frames_as_YAML(double current_time) const;
 	std::string all_frames_as_YAML() const;
@@ -193,7 +193,7 @@ protected:
 	TimeCacheInterfacePtr allocate_frame(CompactFrameID cfid, bool is_static);
 
 	bool           warn_frame_id(const char *function_name_arg, const std::string &frame_id) const;
-	CompactFrameID validate_frame_id(const char *       function_name_arg,
+	CompactFrameID validate_frame_id(const char        *function_name_arg,
 	                                 const std::string &frame_id) const;
 
 	/// String to number for frame lookup with dynamic allocation of new frames
@@ -207,36 +207,36 @@ protected:
 
 	void create_connectivity_error_string(CompactFrameID source_frame,
 	                                      CompactFrameID target_frame,
-	                                      std::string *  out) const;
+	                                      std::string   *out) const;
 
 	int get_latest_common_time(CompactFrameID target_frame,
 	                           CompactFrameID source_frame,
-	                           fawkes::Time & time,
-	                           std::string *  error_string) const;
+	                           fawkes::Time  &time,
+	                           std::string   *error_string) const;
 
 	template <typename F>
-	int walk_to_top_parent(F &            f,
+	int walk_to_top_parent(F             &f,
 	                       fawkes::Time   time,
 	                       CompactFrameID target_id,
 	                       CompactFrameID source_id,
-	                       std::string *  error_string) const;
+	                       std::string   *error_string) const;
 
 	template <typename F>
-	int walk_to_top_parent(F &                          f,
+	int walk_to_top_parent(F	                         &f,
 	                       fawkes::Time                 time,
 	                       CompactFrameID               target_id,
 	                       CompactFrameID               source_id,
-	                       std::string *                error_string,
+	                       std::string                 *error_string,
 	                       std::vector<CompactFrameID> *frame_chain) const;
 
 	bool can_transform_internal(CompactFrameID      target_id,
 	                            CompactFrameID      source_id,
 	                            const fawkes::Time &time,
-	                            std::string *       error_msg) const;
+	                            std::string        *error_msg) const;
 	bool can_transform_no_lock(CompactFrameID      target_id,
 	                           CompactFrameID      source_id,
 	                           const fawkes::Time &time,
-	                           std::string *       error_msg) const;
+	                           std::string        *error_msg) const;
 };
 
 } // end namespace tf

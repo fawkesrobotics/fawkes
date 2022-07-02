@@ -194,9 +194,9 @@ TransformListener::bb_interface_data_refreshed(Interface *interface) noexcept
 		std::string authority = tfif->writer();
 	}
 
-	double *          translation    = tfif->translation();
-	double *          rotation       = tfif->rotation();
-	const Time *      time           = tfif->timestamp();
+	double           *translation    = tfif->translation();
+	double           *rotation       = tfif->rotation();
+	const Time       *time           = tfif->timestamp();
 	const std::string frame_id       = tfif->frame();
 	const std::string child_frame_id = tfif->child_frame();
 

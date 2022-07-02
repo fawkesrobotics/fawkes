@@ -207,10 +207,10 @@ Transformer::get_frame_id_mappings() const
  * @return true if the transformation can be calculated, false otherwise
  */
 bool
-Transformer::can_transform(const std::string & target_frame,
-                           const std::string & source_frame,
+Transformer::can_transform(const std::string  &target_frame,
+                           const std::string  &source_frame,
                            const fawkes::Time &time,
-                           std::string *       error_msg) const
+                           std::string        *error_msg) const
 {
 	if (likely(enabled_)) {
 		std::string stripped_target = strip_slash(target_frame);
@@ -232,12 +232,12 @@ Transformer::can_transform(const std::string & target_frame,
  * @return true if the transformation can be calculated, false otherwise
  */
 bool
-Transformer::can_transform(const std::string & target_frame,
+Transformer::can_transform(const std::string  &target_frame,
                            const fawkes::Time &target_time,
-                           const std::string & source_frame,
+                           const std::string  &source_frame,
                            const fawkes::Time &source_time,
-                           const std::string & fixed_frame,
-                           std::string *       error_msg) const
+                           const std::string  &fixed_frame,
+                           std::string        *error_msg) const
 {
 	if (likely(enabled_)) {
 		std::string stripped_target = strip_slash(target_frame);
@@ -262,10 +262,10 @@ Transformer::can_transform(const std::string & target_frame,
  * unknown
  */
 void
-Transformer::lookup_transform(const std::string & target_frame,
-                              const std::string & source_frame,
+Transformer::lookup_transform(const std::string  &target_frame,
+                              const std::string  &source_frame,
                               const fawkes::Time &time,
-                              StampedTransform &  transform) const
+                              StampedTransform   &transform) const
 {
 	if (!enabled_) {
 		throw DisabledException("Transformer has been disabled");
@@ -296,12 +296,12 @@ Transformer::lookup_transform(const std::string & target_frame,
  * unknown
  */
 void
-Transformer::lookup_transform(const std::string & target_frame,
+Transformer::lookup_transform(const std::string  &target_frame,
                               const fawkes::Time &target_time,
-                              const std::string & source_frame,
+                              const std::string  &source_frame,
                               const fawkes::Time &source_time,
-                              const std::string & fixed_frame,
-                              StampedTransform &  transform) const
+                              const std::string  &fixed_frame,
+                              StampedTransform   &transform) const
 {
 	if (!enabled_) {
 		throw DisabledException("Transformer has been disabled");
@@ -327,7 +327,7 @@ Transformer::lookup_transform(const std::string & target_frame,
 void
 Transformer::lookup_transform(const std::string &target_frame,
                               const std::string &source_frame,
-                              StampedTransform & transform) const
+                              StampedTransform  &transform) const
 {
 	lookup_transform(target_frame, source_frame, fawkes::Time(0, 0), transform);
 }
@@ -348,9 +348,9 @@ Transformer::lookup_transform(const std::string &target_frame,
  * likely an uninitialized Quaternion (0,0,0,0).
  */
 void
-Transformer::transform_quaternion(const std::string &        target_frame,
+Transformer::transform_quaternion(const std::string         &target_frame,
                                   const Stamped<Quaternion> &stamped_in,
-                                  Stamped<Quaternion> &      stamped_out) const
+                                  Stamped<Quaternion>       &stamped_out) const
 {
 	assert_quaternion_valid(stamped_in);
 
@@ -376,9 +376,9 @@ Transformer::transform_quaternion(const std::string &        target_frame,
  * unknown
  */
 void
-Transformer::transform_vector(const std::string &     target_frame,
+Transformer::transform_vector(const std::string      &target_frame,
                               const Stamped<Vector3> &stamped_in,
-                              Stamped<Vector3> &      stamped_out) const
+                              Stamped<Vector3>       &stamped_out) const
 {
 	StampedTransform transform;
 	lookup_transform(target_frame, stamped_in.frame_id, stamped_in.stamp, transform);
@@ -407,9 +407,9 @@ Transformer::transform_vector(const std::string &     target_frame,
  * unknown
  */
 void
-Transformer::transform_point(const std::string &   target_frame,
+Transformer::transform_point(const std::string    &target_frame,
                              const Stamped<Point> &stamped_in,
-                             Stamped<Point> &      stamped_out) const
+                             Stamped<Point>       &stamped_out) const
 {
 	StampedTransform transform;
 	lookup_transform(target_frame, stamped_in.frame_id, stamped_in.stamp, transform);
@@ -433,9 +433,9 @@ Transformer::transform_point(const std::string &   target_frame,
  * unknown
  */
 void
-Transformer::transform_pose(const std::string &  target_frame,
+Transformer::transform_pose(const std::string   &target_frame,
                             const Stamped<Pose> &stamped_in,
-                            Stamped<Pose> &      stamped_out) const
+                            Stamped<Pose>       &stamped_out) const
 {
 	StampedTransform transform;
 	lookup_transform(target_frame, stamped_in.frame_id, stamped_in.stamp, transform);
@@ -467,7 +467,7 @@ Transformer::transform_pose(const std::string &  target_frame,
 bool
 Transformer::transform_origin(const std::string &source_frame,
                               const std::string &target_frame,
-                              Stamped<Pose> &    stamped_out,
+                              Stamped<Pose>     &stamped_out,
                               const fawkes::Time time) const
 {
 	tf::Stamped<tf::Pose> ident = tf::ident(source_frame, time);
@@ -501,11 +501,11 @@ Transformer::transform_origin(const std::string &source_frame,
  * likely an uninitialized Quaternion (0,0,0,0).
  */
 void
-Transformer::transform_quaternion(const std::string &        target_frame,
-                                  const fawkes::Time &       target_time,
+Transformer::transform_quaternion(const std::string         &target_frame,
+                                  const fawkes::Time        &target_time,
                                   const Stamped<Quaternion> &stamped_in,
-                                  const std::string &        fixed_frame,
-                                  Stamped<Quaternion> &      stamped_out) const
+                                  const std::string         &fixed_frame,
+                                  Stamped<Quaternion>       &stamped_out) const
 {
 	assert_quaternion_valid(stamped_in);
 	StampedTransform transform;
@@ -537,11 +537,11 @@ Transformer::transform_quaternion(const std::string &        target_frame,
  * unknown
  */
 void
-Transformer::transform_vector(const std::string &     target_frame,
-                              const fawkes::Time &    target_time,
+Transformer::transform_vector(const std::string      &target_frame,
+                              const fawkes::Time     &target_time,
                               const Stamped<Vector3> &stamped_in,
-                              const std::string &     fixed_frame,
-                              Stamped<Vector3> &      stamped_out) const
+                              const std::string      &fixed_frame,
+                              Stamped<Vector3>       &stamped_out) const
 {
 	StampedTransform transform;
 	lookup_transform(
@@ -577,11 +577,11 @@ Transformer::transform_vector(const std::string &     target_frame,
  * unknown
  */
 void
-Transformer::transform_point(const std::string &   target_frame,
-                             const fawkes::Time &  target_time,
+Transformer::transform_point(const std::string    &target_frame,
+                             const fawkes::Time   &target_time,
                              const Stamped<Point> &stamped_in,
-                             const std::string &   fixed_frame,
-                             Stamped<Point> &      stamped_out) const
+                             const std::string    &fixed_frame,
+                             Stamped<Point>       &stamped_out) const
 {
 	StampedTransform transform;
 	lookup_transform(
@@ -612,11 +612,11 @@ Transformer::transform_point(const std::string &   target_frame,
  * unknown
  */
 void
-Transformer::transform_pose(const std::string &  target_frame,
-                            const fawkes::Time & target_time,
+Transformer::transform_pose(const std::string   &target_frame,
+                            const fawkes::Time  &target_time,
                             const Stamped<Pose> &stamped_in,
-                            const std::string &  fixed_frame,
-                            Stamped<Pose> &      stamped_out) const
+                            const std::string   &fixed_frame,
+                            Stamped<Pose>       &stamped_out) const
 {
 	StampedTransform transform;
 	lookup_transform(

@@ -161,7 +161,7 @@ BufferCore::clear()
  */
 bool
 BufferCore::set_transform(const StampedTransform &transform_in,
-                          const std::string &     authority,
+                          const std::string      &authority,
                           bool                    is_static)
 {
 	StampedTransform stripped = transform_in;
@@ -275,11 +275,11 @@ enum WalkEnding {
  */
 template <typename F>
 int
-BufferCore::walk_to_top_parent(F &            f,
+BufferCore::walk_to_top_parent(F             &f,
                                fawkes::Time   time,
                                CompactFrameID target_id,
                                CompactFrameID source_id,
-                               std::string *  error_string) const
+                               std::string   *error_string) const
 {
 	return walk_to_top_parent(f, time, target_id, source_id, error_string, NULL);
 }
@@ -296,11 +296,11 @@ BufferCore::walk_to_top_parent(F &            f,
  */
 template <typename F>
 int
-BufferCore::walk_to_top_parent(F &                          f,
+BufferCore::walk_to_top_parent(F                           &f,
                                fawkes::Time                 time,
                                CompactFrameID               target_id,
                                CompactFrameID               source_id,
-                               std::string *                error_string,
+                               std::string                 *error_string,
                                std::vector<CompactFrameID> *frame_chain) const
 {
 	if (frame_chain)
@@ -551,10 +551,10 @@ struct TransformAccum
  * unknown
  */
 void
-BufferCore::lookup_transform(const std::string & target_frame,
-                             const std::string & source_frame,
+BufferCore::lookup_transform(const std::string  &target_frame,
+                             const std::string  &source_frame,
                              const fawkes::Time &time,
-                             StampedTransform &  transform) const
+                             StampedTransform   &transform) const
 {
 	std::unique_lock<std::mutex> lock(frame_mutex_);
 
@@ -621,12 +621,12 @@ BufferCore::lookup_transform(const std::string & target_frame,
  * unknown
  */
 void
-BufferCore::lookup_transform(const std::string & target_frame,
+BufferCore::lookup_transform(const std::string  &target_frame,
                              const fawkes::Time &target_time,
-                             const std::string & source_frame,
+                             const std::string  &source_frame,
                              const fawkes::Time &source_time,
-                             const std::string & fixed_frame,
-                             StampedTransform &  transform) const
+                             const std::string  &fixed_frame,
+                             StampedTransform   &transform) const
 {
 	validate_frame_id("lookup_transform argument target_frame", target_frame);
 	validate_frame_id("lookup_transform argument source_frame", source_frame);
@@ -676,7 +676,7 @@ bool
 BufferCore::can_transform_no_lock(CompactFrameID      target_id,
                                   CompactFrameID      source_id,
                                   const fawkes::Time &time,
-                                  std::string *       error_msg) const
+                                  std::string        *error_msg) const
 {
 	if (target_id == 0 || source_id == 0) {
 		return false;
@@ -706,7 +706,7 @@ bool
 BufferCore::can_transform_internal(CompactFrameID      target_id,
                                    CompactFrameID      source_id,
                                    const fawkes::Time &time,
-                                   std::string *       error_msg) const
+                                   std::string        *error_msg) const
 {
 	std::unique_lock<std::mutex> lock(frame_mutex_);
 	return can_transform_no_lock(target_id, source_id, time, error_msg);
@@ -720,10 +720,10 @@ BufferCore::can_transform_internal(CompactFrameID      target_id,
  * @return True if the transform is possible, false otherwise 
  */
 bool
-BufferCore::can_transform(const std::string & target_frame,
-                          const std::string & source_frame,
+BufferCore::can_transform(const std::string  &target_frame,
+                          const std::string  &source_frame,
                           const fawkes::Time &time,
-                          std::string *       error_msg) const
+                          std::string        *error_msg) const
 {
 	// Short circuit if target_frame == source_frame
 	if (target_frame == source_frame)
@@ -752,12 +752,12 @@ BufferCore::can_transform(const std::string & target_frame,
  * @return true if the transform is possible, false otherwise 
  */
 bool
-BufferCore::can_transform(const std::string & target_frame,
+BufferCore::can_transform(const std::string  &target_frame,
                           const fawkes::Time &target_time,
-                          const std::string & source_frame,
+                          const std::string  &source_frame,
                           const fawkes::Time &source_time,
-                          const std::string & fixed_frame,
-                          std::string *       error_msg) const
+                          const std::string  &fixed_frame,
+                          std::string        *error_msg) const
 {
 	if (warn_frame_id("canTransform argument target_frame", target_frame))
 		return false;
@@ -844,7 +844,7 @@ BufferCore::lookup_frame_string(CompactFrameID frame_id_num) const
 void
 BufferCore::create_connectivity_error_string(CompactFrameID source_frame,
                                              CompactFrameID target_frame,
-                                             std::string *  out) const
+                                             std::string   *out) const
 {
 	if (!out) {
 		return;
@@ -925,8 +925,8 @@ struct TimeAndFrameIDFrameComparator
 int
 BufferCore::get_latest_common_time(CompactFrameID target_id,
                                    CompactFrameID source_id,
-                                   fawkes::Time & time,
-                                   std::string *  error_string) const
+                                   fawkes::Time  &time,
+                                   std::string   *error_string) const
 {
 	// Error if one of the frames don't exist.
 	if (source_id == 0 || target_id == 0)
