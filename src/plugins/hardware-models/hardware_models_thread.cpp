@@ -84,7 +84,7 @@ HardwareModelsThread::init()
  * @param clips Pointer to clips environment
  */
 void
-HardwareModelsThread::clips_context_init(const std::string &          env_name,
+HardwareModelsThread::clips_context_init(const std::string           &env_name,
                                          LockPtr<CLIPS::Environment> &clips)
 {
 	envs_[env_name] = clips;
@@ -166,8 +166,8 @@ HardwareModelsThread::clips_context_destroyed(const std::string &env_name)
 
 void
 HardwareModelsThread::clips_add_terminal_state(LockPtr<CLIPS::Environment> &clips,
-                                               const std::string &          component,
-                                               const std::string &          state)
+                                               const std::string           &component,
+                                               const std::string           &state)
 {
 	CLIPS::Template::pointer temp = clips->get_template("hm-terminal-state");
 	if (temp) {
@@ -196,8 +196,8 @@ HardwareModelsThread::clips_add_terminal_state(LockPtr<CLIPS::Environment> &clip
  */
 void
 HardwareModelsThread::clips_add_component(LockPtr<CLIPS::Environment> &clips,
-                                          const std::string &          component,
-                                          const std::string &          init_state)
+                                          const std::string           &component,
+                                          const std::string           &init_state)
 {
 	CLIPS::Template::pointer temp = clips->get_template("hm-component");
 	if (temp) {
@@ -228,10 +228,10 @@ HardwareModelsThread::clips_add_component(LockPtr<CLIPS::Environment> &clips,
  */
 void
 HardwareModelsThread::clips_add_edge(LockPtr<CLIPS::Environment> &clips,
-                                     const std::string &          component,
-                                     const std::string &          from,
-                                     const std::string &          to,
-                                     const std::string &          trans)
+                                     const std::string           &component,
+                                     const std::string           &from,
+                                     const std::string           &to,
+                                     const std::string           &trans)
 {
 	double prob = 0.0;
 	prob = config->get_float(std::string(component + "/" + from + "/" + to + "/probability").c_str());
