@@ -40,7 +40,7 @@ public:
 
 private:
 	unsigned int refc;
-	Mutex *      ref_mutex;
+	Mutex       *ref_mutex;
 };
 
 } // end namespace fawkes

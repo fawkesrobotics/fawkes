@@ -547,7 +547,7 @@ void
 Exception::print_backtrace() const noexcept
 {
 #ifdef HAVE_EXECINFO
-	void * array[25];
+	void  *array[25];
 	int    size    = backtrace(array, 25);
 	char **symbols = backtrace_symbols(array, size);
 
@@ -569,7 +569,7 @@ char *
 Exception::generate_backtrace() const noexcept
 {
 #ifdef HAVE_BACKTRACE
-	void * array[25];
+	void  *array[25];
 	int    size    = backtrace(array, 25);
 	char **symbols = backtrace_symbols(array, size);
 

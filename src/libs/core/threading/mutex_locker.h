@@ -44,7 +44,7 @@ public:
 private:
 	bool          locked_;
 	RefPtr<Mutex> refmutex_;
-	Mutex *       rawmutex_;
+	Mutex	      *rawmutex_;
 };
 
 } // end namespace fawkes

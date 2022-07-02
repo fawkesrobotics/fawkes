@@ -48,7 +48,7 @@ public:
 
 private:
 	WaitConditionData *cond_data_;
-	Mutex *            mutex_;
+	Mutex             *mutex_;
 	bool               own_mutex_;
 };
 

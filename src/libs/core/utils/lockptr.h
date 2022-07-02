@@ -287,9 +287,9 @@ public:
 	}
 
 private:
-	T_CppObject *  cpp_object_;
+	T_CppObject   *cpp_object_;
 	mutable Mutex *obj_mutex_;
-	mutable int *  ref_count_;
+	mutable int   *ref_count_;
 	mutable Mutex *ref_mutex_;
 };
 
@@ -355,9 +355,9 @@ inline LockPtr<T_CppObject>::LockPtr(T_CppObject *cpp_object, bool recursive_mut
 //Used by cast_*() implementations:
 template <class T_CppObject>
 inline LockPtr<T_CppObject>::LockPtr(T_CppObject *cpp_object,
-                                     Mutex *      objmutex,
-                                     int *        refcount,
-                                     Mutex *      refmutex)
+                                     Mutex       *objmutex,
+                                     int         *refcount,
+                                     Mutex       *refmutex)
 : cpp_object_(cpp_object), obj_mutex_(objmutex), ref_count_(refcount), ref_mutex_(refmutex)
 {
 	if (cpp_object_ && obj_mutex_ && ref_count_ && ref_mutex_) {
@@ -407,9 +407,9 @@ inline void
 LockPtr<T_CppObject>::swap(LockPtr<T_CppObject> &other)
 {
 	T_CppObject *const temp           = cpp_object_;
-	int *              temp_count     = ref_count_;
-	Mutex *            temp_ref_mutex = ref_mutex_;
-	Mutex *            temp_obj_mutex = obj_mutex_;
+	int               *temp_count     = ref_count_;
+	Mutex             *temp_ref_mutex = ref_mutex_;
+	Mutex             *temp_obj_mutex = obj_mutex_;
 
 	cpp_object_ = other.cpp_object_;
 	obj_mutex_  = other.obj_mutex_;

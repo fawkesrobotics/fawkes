@@ -58,7 +58,7 @@ protected:
 	Configuration *config;
 
 private:
-	char *      _name_alloc;
+	char	     *_name_alloc;
 	const char *_name;
 };
 
@@ -111,7 +111,7 @@ typedef const char *(*PluginDependenciesFunc)();
  */
 #define PLUGIN_DESCRIPTION(info_string)                                                    \
 	extern "C" const char _plugin_description[] __attribute((__section__(".fawkes_plugin"))) \
-	  __attribute((__used__)) = info_string;                                                 \
+	__attribute((__used__)) = info_string;                                                   \
                                                                                            \
 	extern "C" const char *plugin_description()                                              \
 	{                                                                                        \
@@ -124,7 +124,7 @@ typedef const char *(*PluginDependenciesFunc)();
  */
 #define PLUGIN_DEPENDS(plugin_list)                                                         \
 	extern "C" const char _plugin_dependencies[] __attribute((__section__(".fawkes_plugin"))) \
-	  __attribute((__used__)) = info_string;                                                  \
+	__attribute((__used__)) = info_string;                                                    \
                                                                                             \
 	extern "C" const char *plugin_depends()                                                   \
 	{                                                                                         \

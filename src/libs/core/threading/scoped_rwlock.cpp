@@ -111,7 +111,7 @@ ScopedRWLock::ScopedRWLock(RefPtr<ReadWriteLock>  rwlock,
  * false to not lock
  * @param lock_type locking type, lock either for writing or for reading
  */
-ScopedRWLock::ScopedRWLock(ReadWriteLock *        rwlock,
+ScopedRWLock::ScopedRWLock(ReadWriteLock         *rwlock,
                            ScopedRWLock::LockType lock_type,
                            bool                   initially_lock)
 {
