@@ -41,7 +41,7 @@ using namespace fawkes;
  * @param cobject C base object
  * @param builder Gtk Builder
  */
-PluginGuiGtkWindow::PluginGuiGtkWindow(BaseObjectType *                 cobject,
+PluginGuiGtkWindow::PluginGuiGtkWindow(BaseObjectType                  *cobject,
                                        const Glib::RefPtr<Gtk::Builder> builder)
 : Gtk::Window(cobject)
 {
