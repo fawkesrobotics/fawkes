@@ -50,10 +50,10 @@ public:
 	bool auto_update();
 	void set_auto_update(bool active, unsigned int interval_sec = 5);
 
-	bool get_selected_image(std::string &   host_name,
+	bool get_selected_image(std::string    &host_name,
 	                        unsigned short &port,
-	                        std::string &   image_id,
-	                        bool &          compression);
+	                        std::string    &image_id,
+	                        bool           &compression);
 
 	// Fuse client handler
 	void fuse_invalid_server_version(uint32_t local_version, uint32_t remote_version) noexcept;
@@ -118,9 +118,9 @@ private:
 #if GTK_VERSION_LT(3, 0)
 	Gtk::Menu *m_popup_menu;
 #endif
-	Gtk::CheckButton *           m_chk_auto_update;
-	Gtk::CheckButton *           m_chk_compression;
-	Gtk::TreeView *              m_trv_image_list;
+	Gtk::CheckButton            *m_chk_auto_update;
+	Gtk::CheckButton            *m_chk_compression;
+	Gtk::TreeView               *m_trv_image_list;
 	Glib::RefPtr<Gtk::TreeStore> m_image_list;
 	fawkes::Mutex                m_img_list_mutex;
 

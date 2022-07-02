@@ -59,7 +59,7 @@ private:
 		void loop();
 		void perform_refresh();
 
-		ImageWidget *    widget_;
+		ImageWidget     *widget_;
 		bool             stop_;
 		bool             do_refresh_;
 		unsigned int     refresh_delay_;
@@ -74,7 +74,7 @@ private:
 
 public:
 	ImageWidget(unsigned int width, unsigned int height);
-	ImageWidget(Camera *     cam,
+	ImageWidget(Camera      *cam,
 	            unsigned int refresh_delay = 0,
 	            unsigned int width         = 0,
 	            unsigned int height        = 0);
@@ -114,8 +114,8 @@ private:
 
 	Glib::RefPtr<Gdk::Pixbuf> pixbuf_;
 
-	RefThread *    refresh_thread_;
-	Camera *       cam_;
+	RefThread     *refresh_thread_;
+	Camera        *cam_;
 	fawkes::Mutex *cam_mutex_;
 	bool           cam_has_buffer_;
 	bool           cam_has_timestamp_;
