@@ -71,7 +71,7 @@ namespace firevision {
  * @param nn_sq_dist_ratio_thr threshold on squared ratio of distances between NN and 2nd NN
  * @param flags flags, not used yet.
  */
-SiftClassifier::SiftClassifier(const char * object_file,
+SiftClassifier::SiftClassifier(const char  *object_file,
                                unsigned int pixel_width,
                                unsigned int pixel_height,
                                int          kdtree_bbf_max_nn_chks,
@@ -142,9 +142,9 @@ SiftClassifier::classify()
 	// list of ROIs to return
 	std::list<ROI> *rv = new std::list<ROI>();
 
-	struct feature * feat;
+	struct feature  *feat;
 	struct feature **nbrs;
-	struct kd_node * kd_root;
+	struct kd_node  *kd_root;
 	CvPoint          pt1, pt2;
 
 	// for ROI calculation

@@ -329,7 +329,7 @@ SurfClassifier::SurfClassifier(std::string  keypoints_dir,
  * @param indexSize Spatial size of the descriptor window (default 4)
  */
 
-SurfClassifier::SurfClassifier(const char * object_dir,
+SurfClassifier::SurfClassifier(const char  *object_dir,
                                unsigned int min_match,
                                float        min_match_ratio,
                                int          samplingStep,

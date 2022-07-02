@@ -50,7 +50,7 @@ namespace firevision {
  * @param color color to look for
  */
 SimpleColorClassifier::SimpleColorClassifier(ScanlineModel *scanline_model,
-                                             ColorModel *   color_model,
+                                             ColorModel    *color_model,
                                              unsigned int   min_num_points,
                                              unsigned int   box_extent,
                                              bool           upward,
@@ -131,7 +131,7 @@ SimpleColorClassifier::classify()
 		return new std::list<ROI>;
 	}
 
-	std::list<ROI> *         rv = new std::list<ROI>();
+	std::list<ROI>          *rv = new std::list<ROI>();
 	std::list<ROI>::iterator roi_it, roi_it2;
 	color_t                  c;
 

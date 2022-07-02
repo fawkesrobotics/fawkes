@@ -87,8 +87,8 @@ Shrinker::shrink(ROI *roi)
        This helps against reflection.
        (If ball is close, this does not work, because it takes away too many edge pixels.) */
 
-		unsigned char *  bufferTmp     = roi->get_roi_buffer_start(src);
-		unsigned char *  line_startTmp = bufferTmp;
+		unsigned char   *bufferTmp     = roi->get_roi_buffer_start(src);
+		unsigned char   *line_startTmp = bufferTmp;
 		fawkes::upoint_t leftmostPixel = {roi->width, 0};
 		fawkes::upoint_t topmostPixel  = {0, roi->height};
 

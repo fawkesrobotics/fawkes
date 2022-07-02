@@ -80,7 +80,7 @@ public:
 	               int          indexSize       = 4);
 
 	//instantiating using a directory containing the png images
-	SurfClassifier(const char * image_directory_png_files,
+	SurfClassifier(const char  *image_directory_png_files,
 	               unsigned int min_match       = 5,
 	               float        min_match_ratio = MIN_MATCH_RATIO,
 	               int          samplingStep    = 2,
@@ -106,13 +106,13 @@ private:
 	double distSquare(double *v1, double *v2, int n);
 
 	// Object objects
-	surf::Image *                          obj_img_;
+	surf::Image                           *obj_img_;
 	std::vector<std::vector<surf::Ipoint>> obj_features_;
 	std::vector<std::string>               obj_names_;
 	int                                    obj_num_features_;
 
 	// Image objects
-	surf::Image *             image_;
+	surf::Image	            *image_;
 	std::vector<surf::Ipoint> img_features_;
 	int                       img_num_features_;
 

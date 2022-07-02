@@ -36,7 +36,7 @@ class MultiColorClassifier : public Classifier
 {
 public:
 	MultiColorClassifier(ScanlineModel *scanline_model,
-	                     ColorModel *   color_model,
+	                     ColorModel    *color_model,
 	                     unsigned int   min_num_points          = 6,
 	                     unsigned int   box_extent              = 50,
 	                     bool           upward                  = false,
@@ -60,7 +60,7 @@ private:
 	bool upward;
 
 	ScanlineModel *scanline_model;
-	ColorModel *   color_model;
+	ColorModel    *color_model;
 };
 
 } // end namespace firevision

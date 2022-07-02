@@ -47,7 +47,7 @@ namespace firevision {
  *           if true the classification can start on a falling flank
  */
 GradientClassifier::GradientClassifier(std::list<ScanlineGrid *> *scanlines,
-                                       Qualifier *                q,
+                                       Qualifier                 *q,
                                        unsigned int               threshold,
                                        unsigned int               max_size,
                                        bool                       use_rising_flank,

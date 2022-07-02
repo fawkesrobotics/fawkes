@@ -56,10 +56,10 @@ namespace firevision {
  * @param min_neighbours minimum neighbours
  * @param flags flags, can only be CV_HAAR_DO_CANNY_PRUNING at the moment.
  */
-FacesClassifier::FacesClassifier(const char * haarcascade_file,
+FacesClassifier::FacesClassifier(const char  *haarcascade_file,
                                  unsigned int pixel_width,
                                  unsigned int pixel_height,
-                                 cv::Mat &    image,
+                                 cv::Mat     &image,
                                  float        haar_scale_factor,
                                  int          min_neighbours,
                                  int          flags)
