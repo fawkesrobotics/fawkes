@@ -255,7 +255,7 @@ private:
 	}
 
 	int          fd_;
-	char *       device_file_;
+	char        *device_file_;
 	unsigned int default_timeout_ms_;
 
 	unsigned char obuffer_[260];

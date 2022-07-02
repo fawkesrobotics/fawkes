@@ -336,7 +336,7 @@ PanTiltSonyEviD100PThread::loop()
 
 bool
 PanTiltSonyEviD100PThread::bb_interface_message_received(Interface *interface,
-                                                         Message *  message) noexcept
+                                                         Message   *message) noexcept
 {
 	if (message->is_of_type<PanTiltInterface::StopMessage>()) {
 		wt_->stop_motion();
@@ -371,12 +371,12 @@ PanTiltSonyEviD100PThread::bb_interface_message_received(Interface *interface,
  * @param tilt_max maximum tilt in rad
  */
 PanTiltSonyEviD100PThread::WorkerThread::WorkerThread(std::string                       ptu_name,
-                                                      fawkes::Logger *                  logger,
+                                                      fawkes::Logger                   *logger,
                                                       fawkes::RefPtr<SonyEviD100PVisca> cam,
-                                                      const float &                     pan_min,
-                                                      const float &                     pan_max,
-                                                      const float &                     tilt_min,
-                                                      const float &                     tilt_max)
+                                                      const float                      &pan_min,
+                                                      const float                      &pan_max,
+                                                      const float                      &tilt_min,
+                                                      const float                      &tilt_max)
 : Thread("", Thread::OPMODE_WAITFORWAKEUP)
 {
 	set_name("SonyEviD100PWorkerThread(%s)", ptu_name.c_str());

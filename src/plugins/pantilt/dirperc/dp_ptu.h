@@ -111,7 +111,7 @@ private:
 	static const char *DPPTU_ASCII_QUERY;
 	static const char *DPPTU_VERSION;
 
-	char *       device_file_;
+	char        *device_file_;
 	int          fd_;
 	bool         opened_;
 	unsigned int timeout_ms_;

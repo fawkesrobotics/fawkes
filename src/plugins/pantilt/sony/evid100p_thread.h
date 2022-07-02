@@ -55,7 +55,7 @@ public:
 
 	// For BlackBoardInterfaceListener
 	virtual bool bb_interface_message_received(fawkes::Interface *interface,
-	                                           fawkes::Message *  message) noexcept;
+	                                           fawkes::Message   *message) noexcept;
 
 	void update_sensor_values();
 
@@ -68,11 +68,11 @@ protected:
 	}
 
 private:
-	fawkes::PanTiltInterface *      pantilt_if_;
-	fawkes::JointInterface *        panjoint_if_;
-	fawkes::JointInterface *        tiltjoint_if_;
+	fawkes::PanTiltInterface       *pantilt_if_;
+	fawkes::JointInterface         *panjoint_if_;
+	fawkes::JointInterface         *tiltjoint_if_;
 	fawkes::CameraControlInterface *camctrl_if_;
-	fawkes::SwitchInterface *       power_if_;
+	fawkes::SwitchInterface        *power_if_;
 
 	fawkes::RefPtr<SonyEviD100PVisca> cam_;
 
@@ -86,12 +86,12 @@ private:
 	{
 	public:
 		WorkerThread(std::string                       ptu_name,
-		             fawkes::Logger *                  logger,
+		             fawkes::Logger                   *logger,
 		             fawkes::RefPtr<SonyEviD100PVisca> cam,
-		             const float &                     pan_min,
-		             const float &                     pan_max,
-		             const float &                     tilt_min,
-		             const float &                     tilt_max);
+		             const float                      &pan_min,
+		             const float                      &pan_max,
+		             const float                      &tilt_min,
+		             const float                      &tilt_max);
 
 		~WorkerThread();
 		void         set_power(bool powered);
@@ -117,7 +117,7 @@ private:
 
 	private:
 		fawkes::RefPtr<SonyEviD100PVisca> cam_;
-		fawkes::Logger *                  logger_;
+		fawkes::Logger		               *logger_;
 
 		fawkes::Mutex *power_mutex_;
 		bool           powered_;
@@ -141,7 +141,7 @@ private:
 		bool           zoom_pending_;
 		float          target_zoom_;
 
-		fawkes::Mutex *                        effect_mutex_;
+		fawkes::Mutex                         *effect_mutex_;
 		bool                                   effect_pending_;
 		fawkes::CameraControlInterface::Effect target_effect_;
 

@@ -54,7 +54,7 @@ public:
 
 	// For BlackBoardInterfaceListener
 	virtual bool bb_interface_message_received(fawkes::Interface *interface,
-	                                           fawkes::Message *  message) noexcept;
+	                                           fawkes::Message   *message) noexcept;
 
 	void update_sensor_values();
 
@@ -68,8 +68,8 @@ protected:
 
 private:
 	fawkes::PanTiltInterface *pantilt_if_;
-	fawkes::JointInterface *  panjoint_if_;
-	fawkes::JointInterface *  tiltjoint_if_;
+	fawkes::JointInterface   *panjoint_if_;
+	fawkes::JointInterface   *tiltjoint_if_;
 
 	fawkes::RefPtr<DirectedPerceptionPTU> ptu_;
 
@@ -83,7 +83,7 @@ private:
 	{
 	public:
 		WorkerThread(std::string                           ptu_name,
-		             fawkes::Logger *                      logger,
+		             fawkes::Logger                       *logger,
 		             fawkes::RefPtr<DirectedPerceptionPTU> ptu);
 
 		~WorkerThread();
@@ -101,7 +101,7 @@ private:
 
 	private:
 		fawkes::RefPtr<DirectedPerceptionPTU> ptu_;
-		fawkes::Logger *                      logger_;
+		fawkes::Logger                       *logger_;
 
 		float pan_min_;
 		float pan_max_;

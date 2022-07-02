@@ -454,16 +454,16 @@ PanTiltRX28Thread::bb_interface_message_received(Interface *interface, Message *
  * @param tilt_offset tilt offset from zero in servo ticks
  */
 PanTiltRX28Thread::WorkerThread::WorkerThread(std::string                 ptu_name,
-                                              fawkes::Logger *            logger,
+                                              fawkes::Logger             *logger,
                                               fawkes::RefPtr<RobotisRX28> rx28,
                                               unsigned char               pan_servo_id,
                                               unsigned char               tilt_servo_id,
-                                              float &                     pan_min,
-                                              float &                     pan_max,
-                                              float &                     tilt_min,
-                                              float &                     tilt_max,
-                                              float &                     pan_offset,
-                                              float &                     tilt_offset)
+                                              float                      &pan_min,
+                                              float                      &pan_max,
+                                              float                      &tilt_min,
+                                              float                      &tilt_max,
+                                              float                      &pan_offset,
+                                              float                      &tilt_offset)
 : Thread("", Thread::OPMODE_WAITFORWAKEUP)
 {
 	set_name("RX28WorkerThread(%s)", ptu_name.c_str());

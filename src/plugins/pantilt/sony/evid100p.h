@@ -32,7 +32,7 @@
 class SonyEviD100PVisca : public Visca
 {
 public:
-	SonyEviD100PVisca(const char * device_file,
+	SonyEviD100PVisca(const char  *device_file,
 	                  unsigned int def_timeout_ms = 30,
 	                  bool         blocking       = true);
 	~SonyEviD100PVisca();

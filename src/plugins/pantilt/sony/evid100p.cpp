@@ -113,7 +113,7 @@ const float SonyEviD100PVisca::SPEED_TABLE_TILT[] = {0.03541, 0.04127, 0.05298, 
  * @param blocking true to make gathering pan/tilt information wait for
  * the reponse, false to be able to split the operation
  */
-SonyEviD100PVisca::SonyEviD100PVisca(const char * device_file,
+SonyEviD100PVisca::SonyEviD100PVisca(const char  *device_file,
                                      unsigned int def_timeout_ms,
                                      bool         blocking)
 : Visca(device_file, def_timeout_ms, blocking)
