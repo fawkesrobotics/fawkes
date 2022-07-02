@@ -75,8 +75,8 @@ private:
 
 	fawkes::FawkesNetworkClient *c;
 	OperationMode                opmode;
-	const char *                 plugin_name;
-	const char *                 program_name_;
+	const char                  *plugin_name;
+	const char                  *program_name_;
 	bool                         quit;
 
 	bool list_found;
