@@ -42,8 +42,8 @@ using namespace fawkes;
  * @param cfg_prefix configuration path prefix
  * @param aqt LaserAcquisitionThread to get data from
  */
-LaserSensorThread::LaserSensorThread(std::string &           cfg_name,
-                                     std::string &           cfg_prefix,
+LaserSensorThread::LaserSensorThread(std::string            &cfg_name,
+                                     std::string            &cfg_prefix,
                                      LaserAcquisitionThread *aqt)
 : Thread("LaserSensorThread", Thread::OPMODE_WAITFORWAKEUP),
   BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE)

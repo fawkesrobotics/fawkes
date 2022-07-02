@@ -705,16 +705,16 @@ LaseEdlAcquisitionThread::process_profiles()
 }
 
 void
-LaseEdlAcquisitionThread::send_and_check(WORD * command_data,
+LaseEdlAcquisitionThread::send_and_check(WORD  *command_data,
                                          int    command_length,
-                                         WORD * expected_response,
+                                         WORD  *expected_response,
                                          int    n,
                                          WORD **real_response,
-                                         int *  response_size)
+                                         int   *response_size)
 {
 	bool   keep_response = (real_response != NULL);
 	WORD **response;
-	WORD * local_response = NULL;
+	WORD  *local_response = NULL;
 	if (keep_response) {
 		response = real_response;
 	} else {

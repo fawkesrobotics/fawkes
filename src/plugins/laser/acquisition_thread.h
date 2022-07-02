@@ -49,8 +49,8 @@ public:
 
 	virtual void pre_init(fawkes::Configuration *config, fawkes::Logger *logger) = 0;
 
-	const float *       get_distance_data();
-	const float *       get_echo_data();
+	const float        *get_distance_data();
+	const float        *get_echo_data();
 	const fawkes::Time *get_timestamp();
 
 	unsigned int get_distance_data_size();
@@ -72,7 +72,7 @@ protected:
 
 protected:
 	fawkes::Mutex *_data_mutex;
-	fawkes::Time * _timestamp;
+	fawkes::Time  *_timestamp;
 
 	bool   _new_data;
 	float *_distances;

@@ -57,9 +57,9 @@ private:
 	unsigned int number_of_values_;
 #ifdef HAVE_URG_GBX_9_11
 	hokuyo_aist::HokuyoLaser *laser_;
-	hokuyo_aist::HokuyoData * data_;
+	hokuyo_aist::HokuyoData  *data_;
 #else
-	hokuyoaist::Sensor *  laser_;
+	hokuyoaist::Sensor   *laser_;
 	hokuyoaist::ScanData *data_;
 #endif
 
