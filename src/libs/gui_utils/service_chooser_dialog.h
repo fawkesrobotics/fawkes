@@ -45,14 +45,14 @@ class ServiceModel;
 class ServiceChooserDialog : public Gtk::Dialog
 {
 public:
-	ServiceChooserDialog(Gtk::Window &        parent,
+	ServiceChooserDialog(Gtk::Window         &parent,
 	                     FawkesNetworkClient *client,
 	                     Glib::ustring        title   = "Select Service",
-	                     const char *         service = "_fawkes._tcp");
+	                     const char          *service = "_fawkes._tcp");
 
-	ServiceChooserDialog(Gtk::Window & parent,
+	ServiceChooserDialog(Gtk::Window  &parent,
 	                     Glib::ustring title   = "Select Service",
-	                     const char *  service = "_fawkes._tcp");
+	                     const char   *service = "_fawkes._tcp");
 
 	virtual ~ServiceChooserDialog();
 
@@ -70,7 +70,7 @@ private:
 	void                         ctor();
 	fawkes::FawkesNetworkClient *client_;
 
-	Gtk::Window &       parent_;
+	Gtk::Window        &parent_;
 	Gtk::TreeView       treeview_;
 	Gtk::Entry          entry_;
 	Gtk::Expander       expander_;

@@ -77,7 +77,7 @@ ServiceSelectorCBE::ServiceSelectorCBE(Gtk::ComboBoxEntry *services,
 #endif
                                        Gtk::Button *connect,
                                        Gtk::Window *parent,
-                                       const char * service)
+                                       const char  *service)
 {
 	m_service_model = new ServiceModel(service);
 
@@ -101,8 +101,8 @@ ServiceSelectorCBE::ServiceSelectorCBE(Gtk::ComboBox *services,
 ServiceSelectorCBE::ServiceSelectorCBE(Gtk::ComboBoxEntry *services,
 #endif
                                        Gtk::ToolButton *connect,
-                                       Gtk::Window *    parent,
-                                       const char *     service)
+                                       Gtk::Window     *parent,
+                                       const char      *service)
 {
 	m_service_model = new ServiceModel(service);
 
@@ -122,10 +122,10 @@ ServiceSelectorCBE::ServiceSelectorCBE(Gtk::ComboBoxEntry *services,
  * @param service service identifier
  */
 ServiceSelectorCBE::ServiceSelectorCBE(Glib::RefPtr<Gtk::Builder> builder,
-                                       const char *               cbe_name,
-                                       const char *               btn_name,
-                                       const char *               wnd_name,
-                                       const char *               service)
+                                       const char                *cbe_name,
+                                       const char                *btn_name,
+                                       const char                *wnd_name,
+                                       const char                *service)
 {
 	m_service_model = new ServiceModel(service);
 

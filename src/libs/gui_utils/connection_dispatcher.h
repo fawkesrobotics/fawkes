@@ -39,7 +39,7 @@ class ConnectionDispatcher : public FawkesNetworkClientHandler
 {
 public:
 	ConnectionDispatcher(unsigned int cid = FAWKES_CID_OBSERVER_MODE);
-	ConnectionDispatcher(const char *       hostname,
+	ConnectionDispatcher(const char        *hostname,
 	                     unsigned short int port,
 	                     unsigned int       cid = FAWKES_CID_OBSERVER_MODE);
 	virtual ~ConnectionDispatcher();

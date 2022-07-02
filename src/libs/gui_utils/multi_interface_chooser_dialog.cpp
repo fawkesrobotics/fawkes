@@ -71,12 +71,12 @@ MultiInterfaceChooserDialog::Record::Record()
  * @return new MultiInterfaceChooserDialog
  */
 MultiInterfaceChooserDialog *
-MultiInterfaceChooserDialog::create(Gtk::Window &         parent,
-                                    BlackBoard *          blackboard,
-                                    const char *          type_pattern,
-                                    const char *          id_pattern,
+MultiInterfaceChooserDialog::create(Gtk::Window          &parent,
+                                    BlackBoard           *blackboard,
+                                    const char           *type_pattern,
+                                    const char           *id_pattern,
                                     const TypeIdPairList &loaded_interfaces,
-                                    const Glib::ustring & title)
+                                    const Glib::ustring  &title)
 {
 	MultiInterfaceChooserDialog *d =
 	  new MultiInterfaceChooserDialog(parent, loaded_interfaces, title);
@@ -92,9 +92,9 @@ MultiInterfaceChooserDialog::create(Gtk::Window &         parent,
  * @param loaded_interfaces list of interfaces which are already loaded
  * @param title title of the dialog
  */
-MultiInterfaceChooserDialog::MultiInterfaceChooserDialog(Gtk::Window &         parent,
+MultiInterfaceChooserDialog::MultiInterfaceChooserDialog(Gtk::Window          &parent,
                                                          const TypeIdPairList &loaded_interfaces,
-                                                         const Glib::ustring & title)
+                                                         const Glib::ustring  &title)
 : InterfaceChooserDialog(parent, title), record_(NULL)
 {
 	loaded_interfaces_.insert(loaded_interfaces.begin(), loaded_interfaces.end());

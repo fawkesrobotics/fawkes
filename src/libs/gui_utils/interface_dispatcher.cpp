@@ -44,7 +44,7 @@ namespace fawkes {
  * event handler has been called, false to drop the message afterwards.
  */
 InterfaceDispatcher::InterfaceDispatcher(const char *listener_name,
-                                         Interface * iface,
+                                         Interface  *iface,
                                          bool        message_enqueueing)
 : BlackBoardInterfaceListener(listener_name)
 {
@@ -68,7 +68,7 @@ InterfaceDispatcher::InterfaceDispatcher(const char *listener_name,
  * message received event handler has been called, false to drop the
  * message afterwards.
  */
-InterfaceDispatcher::InterfaceDispatcher(const char *           listener_name,
+InterfaceDispatcher::InterfaceDispatcher(const char            *listener_name,
                                          std::list<Interface *> ifaces,
                                          bool                   message_enqueueing)
 : BlackBoardInterfaceListener(listener_name)

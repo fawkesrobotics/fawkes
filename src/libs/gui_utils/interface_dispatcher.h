@@ -36,11 +36,11 @@ class Interface;
 class InterfaceDispatcher : public BlackBoardInterfaceListener
 {
 public:
-	InterfaceDispatcher(const char *       listener_name,
+	InterfaceDispatcher(const char        *listener_name,
 	                    fawkes::Interface *iface,
 	                    bool               message_enqueueing = true);
 
-	InterfaceDispatcher(const char *                   listener_name_prefix,
+	InterfaceDispatcher(const char                    *listener_name_prefix,
 	                    std::list<fawkes::Interface *> ifaces,
 	                    bool                           message_enqueueing = true);
 

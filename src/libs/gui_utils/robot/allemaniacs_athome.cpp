@@ -40,7 +40,7 @@ AllemaniACsAtHomeCairoRobotDrawer::AllemaniACsAtHomeCairoRobotDrawer(bool laser_
 }
 
 void
-AllemaniACsAtHomeCairoRobotDrawer::draw_robot(Glib::RefPtr<Gdk::Window> &          window,
+AllemaniACsAtHomeCairoRobotDrawer::draw_robot(Glib::RefPtr<Gdk::Window>           &window,
                                               const Cairo::RefPtr<Cairo::Context> &cr)
 {
 	cr->save();
