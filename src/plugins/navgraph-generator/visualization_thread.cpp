@@ -177,7 +177,7 @@ void
 NavGraphGeneratorVisualizationThread::publish(
   const NavGraphGeneratorThread::ObstacleMap &obstacles,
   const NavGraphGeneratorThread::ObstacleMap &map_obstacles,
-  const NavGraphGeneratorThread::PoiMap &     pois)
+  const NavGraphGeneratorThread::PoiMap      &pois)
 {
 	obstacles_     = obstacles;
 	map_obstacles_ = map_obstacles;

@@ -364,7 +364,7 @@ NavGraphGeneratorThread::loop()
 
 bool
 NavGraphGeneratorThread::bb_interface_message_received(Interface *interface,
-                                                       Message *  message) noexcept
+                                                       Message   *message) noexcept
 {
 	// in continuous mode wait for signal if disabled
 	MutexLocker lock(loop_mutex);
@@ -579,7 +579,7 @@ NavGraphGeneratorThread::map_obstacles(float line_max_dist)
 	unsigned int obstacle_i = 0;
 
 	std::vector<std::pair<int, int>> free_space_indices;
-	map_t *                          map = load_map(free_space_indices);
+	map_t                           *map = load_map(free_space_indices);
 
 	logger->log_info(name(),
 	                 "Map Obstacles: map size: %ux%u (%zu of %u cells free, %.1f%%)",
@@ -683,7 +683,7 @@ void
 NavGraphGeneratorThread::filter_edges_from_map(float max_dist)
 {
 	std::vector<std::pair<int, int>> free_space_indices;
-	map_t *                          map = load_map(free_space_indices);
+	map_t                           *map = load_map(free_space_indices);
 
 	const std::vector<NavGraphEdge> &edges = navgraph->edges();
 

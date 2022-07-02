@@ -86,10 +86,10 @@ private:
 	typedef std::list<Edge>                                EdgeList;
 
 	virtual bool bb_interface_message_received(fawkes::Interface *interface,
-	                                           fawkes::Message *  message) noexcept;
+	                                           fawkes::Message   *message) noexcept;
 
 	ObstacleMap map_obstacles(float line_max_dist);
-	map_t *     load_map(std::vector<std::pair<int, int>> &free_space_indices);
+	map_t      *load_map(std::vector<std::pair<int, int>> &free_space_indices);
 
 	void filter_edges_from_map(float max_dist);
 	void filter_nodes_orphans();

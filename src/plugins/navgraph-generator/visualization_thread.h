@@ -46,7 +46,7 @@ public:
 
 	void publish(const NavGraphGeneratorThread::ObstacleMap &obstacles,
 	             const NavGraphGeneratorThread::ObstacleMap &map_obstacles,
-	             const NavGraphGeneratorThread::PoiMap &     pois);
+	             const NavGraphGeneratorThread::PoiMap      &pois);
 
 private:
 	std::string cfg_global_frame_;
