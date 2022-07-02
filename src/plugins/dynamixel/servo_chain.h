@@ -39,7 +39,7 @@ public:
 	/** List of servo IDs. */
 	typedef std::list<unsigned char> DeviceList;
 
-	DynamixelChain(const char * device_file,
+	DynamixelChain(const char  *device_file,
 	               unsigned int default_timeout_ms          = 30,
 	               bool         enable_echo_fix             = false,
 	               bool         enable_connection_stability = false,
@@ -70,7 +70,7 @@ public:
 	void goto_position(unsigned char id, unsigned int value);
 	void goto_positions(unsigned int num_positions, ...);
 
-	const char *  get_model(unsigned char id, bool refresh = false);
+	const char   *get_model(unsigned char id, bool refresh = false);
 	unsigned int  get_model_number(unsigned char id, bool refresh = false);
 	unsigned int  get_position(unsigned char id, bool refresh = false);
 	unsigned char get_firmware_version(unsigned char id, bool refresh = false);
@@ -256,7 +256,7 @@ private:
 	}
 
 	int          fd_;
-	char *       device_file_;
+	char        *device_file_;
 	unsigned int default_timeout_ms_;
 	bool         enable_echo_fix_;
 	bool         enable_connection_stability_;

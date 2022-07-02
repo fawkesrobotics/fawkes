@@ -152,7 +152,7 @@ using namespace fawkes;
  * @param min_voltage minimum voltage to assume safe operation
  * @param max_voltage maximum voltage to assume safe operation
  */
-DynamixelChain::DynamixelChain(const char * device_file,
+DynamixelChain::DynamixelChain(const char  *device_file,
                                unsigned int default_timeout_ms,
                                bool         enable_echo_fix,
                                bool         enable_connection_stability,

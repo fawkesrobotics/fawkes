@@ -163,7 +163,7 @@ DynamixelDriverThread::init()
 
 	for (auto &sp : servos_) {
 		unsigned int servo_id = sp.first;
-		Servo &      s        = sp.second;
+		Servo       &s        = sp.second;
 
 		chain_->set_led_enabled(servo_id, false);
 		chain_->set_torque_enabled(servo_id, true);
@@ -251,7 +251,7 @@ DynamixelDriverThread::exec_sensor()
 	if (has_fresh_data()) {
 		for (auto &sp : servos_) {
 			unsigned int servo_id = sp.first;
-			Servo &      s        = sp.second;
+			Servo       &s        = sp.second;
 
 			fawkes::Time time;
 			float        angle = get_angle(servo_id, time);
@@ -325,7 +325,7 @@ DynamixelDriverThread::exec_act()
 {
 	for (auto &sp : servos_) {
 		unsigned int servo_id = sp.first;
-		Servo &      s        = sp.second;
+		Servo       &s        = sp.second;
 
 		s.servo_if->set_final(is_final(servo_id));
 
@@ -429,7 +429,7 @@ DynamixelDriverThread::exec_act()
 
 bool
 DynamixelDriverThread::bb_interface_message_received(Interface *interface,
-                                                     Message *  message) noexcept
+                                                     Message   *message) noexcept
 {
 	std::map<unsigned int, Servo>::iterator si =
 	  std::find_if(servos_.begin(),
@@ -790,7 +790,7 @@ DynamixelDriverThread::loop()
 {
 	for (auto &sp : servos_) {
 		unsigned int servo_id = sp.first;
-		Servo &      s        = sp.second;
+		Servo       &s        = sp.second;
 		if (s.enable) {
 			s.value_rwlock->lock_for_write();
 			s.enable = false;
