@@ -109,8 +109,8 @@ private:
 	std::auto_ptr<CCdlCOM>       device_;
 	std::auto_ptr<CCplSerialCRC> protocol_;
 #endif
-	CKatBase *            katbase_;
-	CSctBase *            sensor_ctrl_;
+	CKatBase             *katbase_;
+	CSctBase             *sensor_ctrl_;
 	std::vector<TMotInit> motor_init_;
 
 	std::vector<short> active_motors_;

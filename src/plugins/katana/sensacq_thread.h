@@ -35,7 +35,7 @@ class KatanaSensorAcquisitionThread : public fawkes::Thread
 {
 public:
 	KatanaSensorAcquisitionThread(fawkes::RefPtr<fawkes::KatanaController> katana,
-	                              fawkes::Logger *                         logger);
+	                              fawkes::Logger                          *logger);
 
 	void         set_enabled(bool enabled);
 	virtual void loop();

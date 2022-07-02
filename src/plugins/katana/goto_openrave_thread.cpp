@@ -74,11 +74,11 @@ const std::string KatanaGotoOpenRaveThread::DEFAULT_PLANNERPARAMS_STRAIGHT =
  * @param use_viewer true, if viewer should be started (default: false)
  */
 KatanaGotoOpenRaveThread::KatanaGotoOpenRaveThread(fawkes::RefPtr<fawkes::KatanaController> katana,
-                                                   fawkes::Logger *                         logger,
+                                                   fawkes::Logger                          *logger,
                                                    fawkes::OpenRaveConnector *openrave,
                                                    unsigned int               poll_interval_ms,
-                                                   const std::string &        robot_file,
-                                                   const std::string &        arm_model,
+                                                   const std::string         &robot_file,
+                                                   const std::string         &arm_model,
                                                    bool                       autoload_IK,
                                                    bool                       use_viewer)
 : KatanaMotionThread("KatanaGotoOpenRaveThread", katana, logger),

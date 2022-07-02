@@ -43,9 +43,9 @@
  * @param katana katana controller base class
  * @param logger logger
  */
-KatanaMotionThread::KatanaMotionThread(const char *                             thread_name,
+KatanaMotionThread::KatanaMotionThread(const char                              *thread_name,
                                        fawkes::RefPtr<fawkes::KatanaController> katana,
-                                       fawkes::Logger *                         logger)
+                                       fawkes::Logger                          *logger)
 : Thread(thread_name, Thread::OPMODE_CONTINUOUS)
 {
 	_katana     = katana;

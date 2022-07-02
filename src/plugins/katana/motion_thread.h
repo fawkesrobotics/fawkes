@@ -35,9 +35,9 @@ class KatanaController;
 class KatanaMotionThread : public fawkes::Thread
 {
 public:
-	KatanaMotionThread(const char *                             thread_name,
+	KatanaMotionThread(const char                              *thread_name,
 	                   fawkes::RefPtr<fawkes::KatanaController> katana,
-	                   fawkes::Logger *                         logger);
+	                   fawkes::Logger                          *logger);
 
 	bool         finished() const;
 	virtual void reset();

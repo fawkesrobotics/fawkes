@@ -44,7 +44,7 @@
  * final position has been reached
  */
 KatanaGotoThread::KatanaGotoThread(fawkes::RefPtr<fawkes::KatanaController> katana,
-                                   fawkes::Logger *                         logger,
+                                   fawkes::Logger                          *logger,
                                    unsigned int                             poll_interval_ms)
 : KatanaMotionThread("KatanaGotoThread", katana, logger)
 {
