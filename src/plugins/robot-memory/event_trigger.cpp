@@ -36,9 +36,9 @@
  * @param ns namespace of the trigger, format db.collection
  * @param callback Reference to callback function
  */
-EventTrigger::EventTrigger(mongocxx::change_stream &&                            change_stream,
-                           const bsoncxx::document::view &                       filter_query,
-                           const std::string &                                   ns,
+EventTrigger::EventTrigger(mongocxx::change_stream                             &&change_stream,
+                           const bsoncxx::document::view                        &filter_query,
+                           const std::string                                    &ns,
                            const boost::function<void(bsoncxx::document::view)> &callback)
 : change_stream(std::move(change_stream)),
   filter_query(filter_query),

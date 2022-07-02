@@ -68,10 +68,10 @@ public:
 	template <typename T>
 	Computable *
 	register_computable(bsoncxx::document::value &&query_to_compute,
-	                    const std::string &        collection,
+	                    const std::string         &collection,
 	                    std::list<bsoncxx::document::value> (
 	                      T::*compute_func)(const bsoncxx::document::view &, const std::string &),
-	                    T *    obj,
+	                    T     *obj,
 	                    double caching_time = 0.0,
 	                    int    priority     = 0)
 	{
@@ -91,7 +91,7 @@ private:
 private:
 	std::string            name = "RobotMemory ComputablesManager";
 	fawkes::Configuration *config_;
-	RobotMemory *          robot_memory_;
+	RobotMemory           *robot_memory_;
 
 	std::list<Computable *> computables;
 	std::string             matching_test_collection_;

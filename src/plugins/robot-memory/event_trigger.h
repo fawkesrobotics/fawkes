@@ -34,9 +34,9 @@ class EventTrigger
 	friend class EventTriggerManager;
 
 public:
-	EventTrigger(mongocxx::change_stream &&                            change_stream,
-	             const bsoncxx::document::view &                       oplog_query,
-	             const std::string &                                   ns,
+	EventTrigger(mongocxx::change_stream                             &&change_stream,
+	             const bsoncxx::document::view                        &oplog_query,
+	             const std::string                                    &ns,
 	             const boost::function<void(bsoncxx::document::view)> &callback);
 	virtual ~EventTrigger();
 

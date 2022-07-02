@@ -33,21 +33,21 @@
 class TransformComputable
 {
 public:
-	TransformComputable(RobotMemory *            robot_memory,
+	TransformComputable(RobotMemory             *robot_memory,
 	                    fawkes::tf::Transformer *tf,
-	                    fawkes::Logger *         logger,
-	                    fawkes::Configuration *  config);
+	                    fawkes::Logger          *logger,
+	                    fawkes::Configuration   *config);
 	virtual ~TransformComputable();
 
 private:
 	std::list<bsoncxx::document::value> compute_transform(const bsoncxx::document::view &query,
-	                                                      const std::string &            collection);
+	                                                      const std::string             &collection);
 
-	RobotMemory *             robot_memory_;
-	fawkes::Logger *          logger_;
-	fawkes::tf::Transformer * tf_;
+	RobotMemory	            *robot_memory_;
+	fawkes::Logger           *logger_;
+	fawkes::tf::Transformer  *tf_;
 	std::vector<Computable *> computables;
-	fawkes::Configuration *   config_;
+	fawkes::Configuration    *config_;
 };
 
 #endif /* FAWKES_SRC_PLUGINS_ROBOT_MEMORY_COMPUTABLES_TRANSFORM_COMPUTABLE_H_ */
