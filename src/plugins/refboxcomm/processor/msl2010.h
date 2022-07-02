@@ -42,8 +42,8 @@ class Node;
 class Msl2010RefBoxProcessor : public RefBoxProcessor
 {
 public:
-	Msl2010RefBoxProcessor(fawkes::Logger *   logger,
-	                       const char *       refbox_host,
+	Msl2010RefBoxProcessor(fawkes::Logger    *logger,
+	                       const char        *refbox_host,
 	                       unsigned short int refbox_port);
 	~Msl2010RefBoxProcessor();
 
@@ -55,7 +55,7 @@ private:
 	void reconnect();
 
 private:
-	fawkes::Logger *                 logger_;
+	fawkes::Logger                  *logger_;
 	fawkes::MulticastDatagramSocket *s_;
 
 	unsigned int score_cyan_;
@@ -66,11 +66,11 @@ private:
 	bool quit_;
 	bool connection_died_;
 
-	char *             refbox_host_;
+	char              *refbox_host_;
 	unsigned short int refbox_port_;
 
 	xmlpp::DomParser *dom;
-	xmlpp::Node *     root;
+	xmlpp::Node      *root;
 };
 
 #endif

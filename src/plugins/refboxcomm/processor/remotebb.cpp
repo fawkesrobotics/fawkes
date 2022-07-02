@@ -46,10 +46,10 @@ using namespace fawkes;
  * @param bb_port remote blackboard port
  * @param iface_id ID of the GameStateInterface on the remote blackboard
  */
-RemoteBlackBoardRefBoxProcessor::RemoteBlackBoardRefBoxProcessor(Logger *           logger,
-                                                                 const char *       bb_host,
+RemoteBlackBoardRefBoxProcessor::RemoteBlackBoardRefBoxProcessor(Logger            *logger,
+                                                                 const char        *bb_host,
                                                                  unsigned short int bb_port,
-                                                                 const char *       iface_id)
+                                                                 const char        *iface_id)
 : name_("RBBRefBoxRep")
 {
 	logger_       = logger;

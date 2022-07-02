@@ -84,7 +84,7 @@ typedef struct
 class SplRefBoxProcessor : public RefBoxProcessor
 {
 public:
-	SplRefBoxProcessor(fawkes::Logger *   logger,
+	SplRefBoxProcessor(fawkes::Logger    *logger,
 	                   unsigned short int broadcast_port,
 	                   unsigned int       team_number,
 	                   unsigned int       player_number);
@@ -100,7 +100,7 @@ private:
 
 private:
 	std::shared_ptr<fawkes::DatagramSocket> s_;
-	fawkes::Logger *                        logger_;
+	fawkes::Logger                         *logger_;
 
 	bool quit_;
 
