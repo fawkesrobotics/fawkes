@@ -36,8 +36,8 @@ class SyncWriterInterfaceListener : public fawkes::BlackBoardInterfaceListener
 {
 public:
 	SyncWriterInterfaceListener(BlackBoardSynchronizationThread *sync_thread,
-	                            fawkes::Logger *                 logger,
-	                            const char *                     desc);
+	                            fawkes::Logger                  *logger,
+	                            const char                      *desc);
 
 	void add_interface(fawkes::Interface *interface);
 	void remove_interface(fawkes::Interface *interface);
@@ -49,7 +49,7 @@ public:
 	                                         fawkes::Uuid       instance_serial) noexcept;
 
 private:
-	fawkes::Logger *                 logger_;
+	fawkes::Logger                  *logger_;
 	BlackBoardSynchronizationThread *sync_thread_;
 };
 
