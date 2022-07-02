@@ -47,6 +47,6 @@ private:
 	WebviewRestArray<Backend> cb_list_backends();
 
 private:
-	fawkes::WebviewRestApi *  rest_api_;
+	fawkes::WebviewRestApi   *rest_api_;
 	WebviewRestArray<Backend> backends_;
 };

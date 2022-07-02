@@ -56,12 +56,12 @@ using namespace fawkes;
  * @param mime_file file with MIME types to read
  * @param logger logger
  */
-WebviewStaticRequestProcessor::WebviewStaticRequestProcessor(fawkes::WebUrlManager *   url_manager,
-                                                             const std::string &       base_url,
+WebviewStaticRequestProcessor::WebviewStaticRequestProcessor(fawkes::WebUrlManager    *url_manager,
+                                                             const std::string        &base_url,
                                                              std::vector<std::string> &htdocs_dirs,
                                                              const std::string &catchall_file,
                                                              const std::string &mime_file,
-                                                             fawkes::Logger *   logger)
+                                                             fawkes::Logger    *logger)
 : logger_(logger), url_manager_(url_manager), base_url_(base_url), catchall_file_(catchall_file)
 {
 	if (htdocs_dirs.empty()) {
@@ -155,7 +155,7 @@ WebviewStaticRequestProcessor::find_file(const std::string &filename)
 	for (const auto &h : htdocs_dirs_) {
 		std::string file_path = h + filename;
 		char        rf[PATH_MAX];
-		char *      realfile = realpath(file_path.c_str(), rf);
+		char       *realfile = realpath(file_path.c_str(), rf);
 
 		if (realfile) {
 			if (boost::filesystem::is_directory(realfile))

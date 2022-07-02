@@ -131,7 +131,7 @@ BlackboardRestApi::gen_interface_info(const fawkes::InterfaceInfo &ii)
 
 		std::list<const char *> message_type_names = iface->get_message_types();
 		for (auto mt : message_type_names) {
-			Message *                             msg = iface->create_message(mt);
+			Message                              *msg = iface->create_message(mt);
 			std::shared_ptr<InterfaceMessageType> m   = std::make_shared<InterfaceMessageType>();
 			m->set_name(mt);
 			m->set_fields(gen_fields(msg->fields(), msg->fields_end()));
@@ -156,8 +156,8 @@ BlackboardRestApi::gen_interface_info(const fawkes::InterfaceInfo &ii)
 	}
 
 static rapidjson::Value
-gen_field_value(fawkes::InterfaceFieldIterator &    i,
-                fawkes::Interface *                 iface,
+gen_field_value(fawkes::InterfaceFieldIterator     &i,
+                fawkes::Interface                  *iface,
                 rapidjson::Document::AllocatorType &allocator)
 {
 	rapidjson::Value value;
@@ -234,7 +234,7 @@ BlackboardRestApi::gen_interface_data(Interface *iface, bool pretty)
 
 	// Generate data as JSON document
 	std::shared_ptr<rapidjson::Document> d         = std::make_shared<rapidjson::Document>();
-	rapidjson::Document::AllocatorType & allocator = d->GetAllocator();
+	rapidjson::Document::AllocatorType  &allocator = d->GetAllocator();
 	d->SetObject();
 
 	for (auto i = iface->fields(); i != iface->fields_end(); ++i) {

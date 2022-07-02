@@ -37,16 +37,16 @@ class WebRequest;
 class WebviewStaticRequestProcessor
 {
 public:
-	WebviewStaticRequestProcessor(fawkes::WebUrlManager *   url_manager,
-	                              const std::string &       base_url,
+	WebviewStaticRequestProcessor(fawkes::WebUrlManager    *url_manager,
+	                              const std::string        &base_url,
 	                              std::vector<std::string> &htdocs_dir,
-	                              const std::string &       catchall_file,
-	                              const std::string &       mime_file,
-	                              fawkes::Logger *          logger);
+	                              const std::string        &catchall_file,
+	                              const std::string        &mime_file,
+	                              fawkes::Logger           *logger);
 	~WebviewStaticRequestProcessor();
 
 private:
-	fawkes::WebReply * process_request(const fawkes::WebRequest *request);
+	fawkes::WebReply  *process_request(const fawkes::WebRequest *request);
 	std::string        find_file(const std::string &filename);
 	void               read_mime_database(const std::string &mime_file);
 	const std::string &get_mime_type(const std::string &file_name);
@@ -54,7 +54,7 @@ private:
 private:
 	std::vector<std::string> htdocs_dirs_;
 
-	fawkes::Logger *       logger_;
+	fawkes::Logger        *logger_;
 	fawkes::WebUrlManager *url_manager_;
 
 	std::map<std::string, std::string> mime_types_;

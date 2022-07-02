@@ -72,7 +72,7 @@ ConfigurationRestApi::loop()
 
 static rapidjson::Value
 create_value(std::unique_ptr<fawkes::Configuration::ValueIterator> &i,
-             rapidjson::Document::AllocatorType &                   a)
+             rapidjson::Document::AllocatorType                    &a)
 {
 	rapidjson::Value v;
 	if (i->is_list()) {
@@ -130,7 +130,7 @@ ConfigurationRestApi::cb_get_config(WebviewRestParams &params)
 	response.set_apiVersion(ConfigTree::api_version());
 
 	std::shared_ptr<rapidjson::Document> d = std::make_shared<rapidjson::Document>();
-	rapidjson::Document::AllocatorType & a = d->GetAllocator();
+	rapidjson::Document::AllocatorType  &a = d->GetAllocator();
 	d->SetObject();
 
 	//rapidjson::Value &v{*d};
