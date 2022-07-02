@@ -377,7 +377,7 @@ VisualDisplay2D::Circle::draw(Cairo::RefPtr<Cairo::Context> &cr)
  */
 VisualDisplay2D::Text::Text(float                                    x,
                             float                                    y,
-                            const std::string &                      text,
+                            const std::string                       &text,
                             fawkes::VisualDisplay2DInterface::Anchor anchor,
                             float                                    size,
                             unsigned int                             id,

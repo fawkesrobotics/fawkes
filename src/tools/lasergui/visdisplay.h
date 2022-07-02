@@ -164,7 +164,7 @@ public:
 	public:
 		Text(float                                    x,
 		     float                                    y,
-		     const std::string &                      text,
+		     const std::string                       &text,
 		     fawkes::VisualDisplay2DInterface::Anchor anchor,
 		     float                                    size,
 		     unsigned int                             id,
@@ -186,7 +186,7 @@ public:
 private:
 	std::map<unsigned int, Shape *>           shapes_;
 	std::map<unsigned int, Shape *>::iterator sit_;
-	fawkes::VisualDisplay2DInterface *        interface_;
+	fawkes::VisualDisplay2DInterface         *interface_;
 };
 
 #endif
