@@ -41,7 +41,7 @@ struct intention
 	Thread_Intention_Block_List fils;
 	// cppcheck-suppress unusedStructMember
 	Thread_Intention_Block_List active_tibs;
-	Op_Instance *               top_op;
+	Op_Instance                *top_op;
 	// cppcheck-suppress unusedStructMember
 	short            priority;
 	Intention_Status status;
@@ -65,7 +65,7 @@ struct intention
 extern "C" Term *
 func_op_name(TermList terms)
 {
-	Term *       op_t;
+	Term        *op_t;
 	Op_Instance *opi;
 
 	op_t = (Term *)get_list_pos(terms, 1);
@@ -103,11 +103,11 @@ func_op_names(TermList terms)
 	for (L_List p_l = ops_t->u.l_list; p_l; p_l = l_cdr(p_l)) {
 		Term *t = l_car(p_l);
 		if (t->type == TT_INTENTION) {
-			Op_Instance * opi  = (Op_Instance *)(t->u.in->top_op);
+			Op_Instance  *opi  = (Op_Instance *)(t->u.in->top_op);
 			Op_Structure *op_s = op_instance_op(opi);
 			name_list          = build_term_list(name_list, build_id(op_name(op_s)));
 		} else if (t->type == TT_OP_INSTANCE) {
-			Op_Instance * opi  = (Op_Instance *)(t->u.opi);
+			Op_Instance  *opi  = (Op_Instance *)(t->u.opi);
 			Op_Structure *op_s = op_instance_op(opi);
 			if (!op_s) {
 				name_list = build_term_list(name_list, build_id(declare_atom("NOT-AN-OP")));

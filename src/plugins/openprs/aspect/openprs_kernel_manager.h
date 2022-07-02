@@ -43,12 +43,12 @@ public:
 	                     unsigned short     server_tcp_port,
 	                     const std::string &mp_host,
 	                     unsigned short     mp_tcp_port,
-	                     Logger *           logger,
-	                     Clock *            clock,
-	                     Configuration *    config);
+	                     Logger            *logger,
+	                     Clock             *clock,
+	                     Configuration     *config);
 	virtual ~OpenPRSKernelManager();
 
-	void create_kernel(const std::string &     kernel_name,
+	void create_kernel(const std::string      &kernel_name,
 	                   bool                    use_xoprs,
 	                   std::list<std::string> &extra_data_path,
 	                   bool                    utils_gdb_delay);
@@ -94,8 +94,8 @@ private:
 	const std::string    mp_host_;
 	const unsigned short mp_port_;
 
-	Logger *       logger_;
-	Clock *        clock_;
+	Logger        *logger_;
+	Clock         *clock_;
 	Configuration *config_;
 
 	std::map<std::string, fawkes::SubProcess *> kernels_;

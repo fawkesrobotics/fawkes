@@ -61,11 +61,11 @@ namespace fawkes {
  * @param server_proxy server proxy to use to send commands to kernels
  * @param logger logger for informational messages (optional)
  */
-OpenPRSComm::OpenPRSComm(const char *        local_name,
-                         const char *        hostname,
+OpenPRSComm::OpenPRSComm(const char         *local_name,
+                         const char         *hostname,
                          unsigned short      port,
                          OpenPRSServerProxy *server_proxy,
-                         Logger *            logger)
+                         Logger             *logger)
 : name_(local_name),
   server_proxy_(server_proxy),
   logger_(logger),
@@ -147,7 +147,7 @@ OpenPRSComm::broadcast_message(const std::string &message)
  */
 void
 OpenPRSComm::multicast_message(const std::vector<std::string> &recipients,
-                               const std::string &             message)
+                               const std::string              &message)
 {
 	std::vector<const char *> recs;
 	recs.resize(recipients.size());
@@ -200,7 +200,7 @@ OpenPRSComm::broadcast_message_f(const char *format, ...)
  */
 void
 OpenPRSComm::multicast_message_f(const std::vector<std::string> &recipients,
-                                 const char *                    format,
+                                 const char                     *format,
                                  ...)
 {
 	std::vector<const char *> recs;

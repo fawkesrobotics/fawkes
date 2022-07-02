@@ -45,11 +45,11 @@ public:
 	virtual void init(Thread *thread);
 	virtual void finalize(Thread *thread);
 
-	void prepare(const std::string &            fawkes_host,
+	void prepare(const std::string             &fawkes_host,
 	             unsigned short                 fawkes_port,
 	             LockPtr<OpenPRSKernelManager> &openprs_kernel_mgr,
-	             OpenPRSServerProxy *           openprs_server_proxy,
-	             OpenPRSMessagePasserProxy *    openprs_mp_proxy);
+	             OpenPRSServerProxy            *openprs_server_proxy,
+	             OpenPRSMessagePasserProxy     *openprs_mp_proxy);
 
 	void set_kernel_timeout(float timeout_sec);
 
@@ -57,9 +57,9 @@ private:
 	std::string                   fawkes_host_;
 	unsigned short                fawkes_port_;
 	LockPtr<OpenPRSKernelManager> openprs_kernel_mgr_;
-	OpenPRSComm *                 openprs_comm_;
-	OpenPRSServerProxy *          openprs_server_proxy_;
-	OpenPRSMessagePasserProxy *   openprs_mp_proxy_;
+	OpenPRSComm                  *openprs_comm_;
+	OpenPRSServerProxy           *openprs_server_proxy_;
+	OpenPRSMessagePasserProxy    *openprs_mp_proxy_;
 
 	float kernel_timeout_sec_;
 };
