@@ -63,7 +63,7 @@ main(int argc, char **argv)
 		}
 		ConsoleLogger logger;
 
-		char *             host      = (char *)"localhost";
+		char              *host      = (char *)"localhost";
 		unsigned short int port      = 1910;
 		bool               free_host = argp.parse_hostport("r", &host, &port);
 

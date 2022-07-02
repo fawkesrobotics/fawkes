@@ -63,9 +63,9 @@ public:
 
 private:
 	bool                       warning_printed_;
-	fawkes::BlackBoard *       bb_;
+	fawkes::BlackBoard        *bb_;
 	fawkes::JoystickInterface *joystick_if_;
-	fawkes::Logger *           logger_;
+	fawkes::Logger            *logger_;
 };
 
 #endif

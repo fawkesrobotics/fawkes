@@ -76,7 +76,7 @@ private:
 	fawkes::JoystickInterface *joystick_if_;
 
 	JoystickAcquisitionThread *aqt_;
-	JoystickSensorThread *     senst_;
+	JoystickSensorThread      *senst_;
 
 	MessageProcessor *msgproc_;
 };

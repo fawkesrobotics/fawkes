@@ -65,7 +65,7 @@ private:
 	void send_transrot(float vx, float vy, float omega);
 
 private:
-	fawkes::MotorInterface *   motor_if_;
+	fawkes::MotorInterface    *motor_if_;
 	fawkes::JoystickInterface *joystick_if_;
 	fawkes::Laser360Interface *laser_if_;
 
