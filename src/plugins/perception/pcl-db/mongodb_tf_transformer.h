@@ -35,7 +35,7 @@ namespace tf {
 class MongoDBTransformer : public Transformer
 {
 public:
-	MongoDBTransformer(mongocxx::client * mongodb_client,
+	MongoDBTransformer(mongocxx::client  *mongodb_client,
 	                   const std::string &database_name,
 	                   bool               ensure_index = true);
 	virtual ~MongoDBTransformer();

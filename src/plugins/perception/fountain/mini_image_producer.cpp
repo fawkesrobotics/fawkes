@@ -41,9 +41,9 @@ using namespace firevision;
  * @param scaler Scaler
  * @param logger Logger
  */
-MiniImageProducer::MiniImageProducer(const char *    orig_id,
-                                     const char *    mini_id,
-                                     Scaler *        scaler,
+MiniImageProducer::MiniImageProducer(const char     *orig_id,
+                                     const char     *mini_id,
+                                     Scaler         *scaler,
                                      fawkes::Logger *logger)
 {
 	scale_factor = 0.25;

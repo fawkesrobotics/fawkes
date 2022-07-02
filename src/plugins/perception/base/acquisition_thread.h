@@ -62,10 +62,10 @@ public:
 			 * for this acquisition thread. */
 	} AqtMode;
 
-	FvAcquisitionThread(const char *        id,
+	FvAcquisitionThread(const char         *id,
 	                    firevision::Camera *camera,
-	                    fawkes::Logger *    logger,
-	                    fawkes::Clock *     clock);
+	                    fawkes::Logger     *logger,
+	                    fawkes::Clock      *clock);
 	virtual ~FvAcquisitionThread();
 
 	virtual void init();
@@ -99,15 +99,15 @@ protected:
 
 private:
 	virtual bool bb_interface_message_received(fawkes::Interface *interface,
-	                                           fawkes::Message *  message) noexcept;
+	                                           fawkes::Message   *message) noexcept;
 
 private:
 	bool                   enabled_;
-	fawkes::Mutex *        enabled_mutex_;
+	fawkes::Mutex         *enabled_mutex_;
 	fawkes::WaitCondition *enabled_waitcond_;
 
 	firevision::Camera *camera_;
-	char *              image_id_;
+	char               *image_id_;
 
 	firevision::colorspace_t colorspace_;
 	unsigned int             width_;

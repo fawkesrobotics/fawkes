@@ -185,7 +185,7 @@ TabletopObjectsThread::init()
 	pcl_manager->add_pointcloud<ColorPointType>("tabletop-object-clusters", fclusters_);
 	clusters_ = pcl_utils::cloudptr_from_refptr(fclusters_);
 
-	char *                                          tmp_name;
+	char                                           *tmp_name;
 	fawkes::RefPtr<pcl::PointCloud<ColorPointType>> f_tmp_cloud;
 	pcl::PointCloud<ColorPointType>::Ptr            tmp_cloud;
 	for (int i = 0; i < MAX_CENTROIDS; i++) {
@@ -1380,7 +1380,7 @@ TabletopObjectsThread::colorize_cluster(CloudConstPtr           input_cloud,
 	result->header.frame_id = input_cloud->header.frame_id;
 	uint i                  = 0;
 	for (std::vector<int>::const_iterator it = cluster.begin(); it != cluster.end(); ++it, ++i) {
-		ColorPointType & p1 = result->points.at(i);
+		ColorPointType  &p1 = result->points.at(i);
 		const PointType &p2 = input_cloud->points.at(*it);
 		p1.x                = p2.x;
 		p1.y                = p2.y;
@@ -1394,7 +1394,7 @@ TabletopObjectsThread::colorize_cluster(CloudConstPtr           input_cloud,
 
 bool
 TabletopObjectsThread::compute_bounding_box_scores(
-  Eigen::Vector3f &                                                        cluster_dim,
+  Eigen::Vector3f                                                         &cluster_dim,
   std::vector<Eigen::Vector3f, Eigen::aligned_allocator<Eigen::Vector3f>> &scores)
 {
 	scores.resize(NUM_KNOWN_OBJS_);
@@ -1416,8 +1416,8 @@ TabletopObjectsThread::compute_similarity(double d1, double d2)
 void
 TabletopObjectsThread::set_position(fawkes::Position3DInterface *iface,
                                     bool                         is_visible,
-                                    const Eigen::Vector4f &      centroid,
-                                    const Eigen::Quaternionf &   attitude)
+                                    const Eigen::Vector4f       &centroid,
+                                    const Eigen::Quaternionf    &attitude)
 {
 	tf::Stamped<tf::Pose> baserel_pose;
 	try {
@@ -1439,7 +1439,7 @@ TabletopObjectsThread::set_position(fawkes::Position3DInterface *iface,
 		} else {
 			iface->set_visibility_history(1);
 		}
-		tf::Vector3 &  origin         = baserel_pose.getOrigin();
+		tf::Vector3   &origin         = baserel_pose.getOrigin();
 		tf::Quaternion quat           = baserel_pose.getRotation();
 		double         translation[3] = {origin.x(), origin.y(), origin.z()};
 		double         rotation[4]    = {quat.x(), quat.y(), quat.z(), quat.w()};
@@ -1630,7 +1630,7 @@ TabletopObjectsThread::convert_colored_input()
 	converted_input_->points.resize(size);
 	for (size_t i = 0; i < size; ++i) {
 		const ColorPointType &in  = colored_input_->points[i];
-		PointType &           out = converted_input_->points[i];
+		PointType            &out = converted_input_->points[i];
 
 		out.x = in.x;
 		out.y = in.y;
@@ -1713,7 +1713,7 @@ TabletopObjectsThread::remove_high_centroids(Eigen::Vector4f table_centroid, Cen
 Eigen::Vector4f
 TabletopObjectsThread::fit_cylinder(ColorCloudConstPtr     obj_in_base_frame,
                                     Eigen::Vector4f const &centroid,
-                                    uint const &           centroid_i)
+                                    uint const            &centroid_i)
 {
 	Eigen::Vector4f                                                         new_centroid(centroid);
 	ColorPointType                                                          pnt_min, pnt_max;

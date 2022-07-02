@@ -71,10 +71,10 @@ private:
 	std::string   camera_string_;
 	fawkes::Time *cap_time_;
 
-	firevision::Camera *                 cam;
+	firevision::Camera                  *cam;
 	firevision::SharedMemoryImageBuffer *shm;
-	firevision::SeqWriter *              seq_writer;
-	fawkes::TimeTracker *                tt_;
+	firevision::SeqWriter               *seq_writer;
+	fawkes::TimeTracker                 *tt_;
 	unsigned int                         loop_count_;
 	unsigned int                         ttc_capture_;
 	unsigned int                         ttc_memcpy_;

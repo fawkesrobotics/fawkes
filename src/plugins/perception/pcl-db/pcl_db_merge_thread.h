@@ -70,7 +70,7 @@ protected:
 
 private: // members
 	fawkes::PclDatabaseMergeInterface *merge_if_;
-	fawkes::BlackBoardOnMessageWaker * msg_waker_;
+	fawkes::BlackBoardOnMessageWaker  *msg_waker_;
 
 	fawkes::RefPtr<pcl::PointCloud<pcl::PointXYZRGB>> foutput_;
 	pcl::PointCloud<pcl::PointXYZRGB>::Ptr            output_;
@@ -78,7 +78,7 @@ private: // members
 	std::string cfg_database_;
 	std::string cfg_output_id_;
 
-	PointCloudDBMergePipeline<pcl::PointXYZ> *   pl_xyz_;
+	PointCloudDBMergePipeline<pcl::PointXYZ>    *pl_xyz_;
 	PointCloudDBMergePipeline<pcl::PointXYZRGB> *pl_xyzrgb_;
 };
 
