@@ -63,10 +63,10 @@ protected:
 private:
 	WebviewPtzCamRequestProcessor *web_proc_;
 
-	fawkes::TimeWait *        time_wait_;
+	fawkes::TimeWait         *time_wait_;
 	fawkes::PanTiltInterface *ptu_if_;
-	fawkes::SwitchInterface * power_if_;
-	fawkes::SwitchInterface * camen_if_;
+	fawkes::SwitchInterface  *power_if_;
+	fawkes::SwitchInterface  *camen_if_;
 
 	bool timeout_;
 

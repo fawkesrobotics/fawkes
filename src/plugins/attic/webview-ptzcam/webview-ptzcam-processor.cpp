@@ -70,8 +70,8 @@ WebviewPtzCamRequestProcessor::WebviewPtzCamRequestProcessor(
   unsigned int       zoom_increment,
   float              post_powerup_time,
   const std::map<std::string, std::tuple<std::string, float, float, unsigned int>> &presets,
-  fawkes::BlackBoard *                                                              blackboard,
-  fawkes::Logger *                                                                  logger)
+  fawkes::BlackBoard                                                               *blackboard,
+  fawkes::Logger                                                                   *logger)
 : logger_(logger),
   blackboard_(blackboard),
   image_id_(image_id),

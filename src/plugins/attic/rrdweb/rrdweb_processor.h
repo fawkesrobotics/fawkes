@@ -42,7 +42,7 @@ public:
 
 private:
 	fawkes::RRDManager *rrd_man_;
-	fawkes::Logger *    logger_;
+	fawkes::Logger     *logger_;
 };
 
 #endif
