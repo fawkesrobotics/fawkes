@@ -109,7 +109,7 @@ Message::Message(const Message &mesg)
 
 	memcpy(data_ptr, mesg.data_ptr, data_size);
 
-	interface_fieldinfo_t * info_src  = mesg.fieldinfo_list_;
+	interface_fieldinfo_t  *info_src  = mesg.fieldinfo_list_;
 	interface_fieldinfo_t **info_dest = &fieldinfo_list_;
 	while (info_src) {
 		interface_fieldinfo_t *new_info =
@@ -146,7 +146,7 @@ Message::Message(const Message *mesg)
 
 	memcpy(data_ptr, mesg->data_ptr, data_size);
 
-	interface_fieldinfo_t * info_src  = mesg->fieldinfo_list_;
+	interface_fieldinfo_t  *info_src  = mesg->fieldinfo_list_;
 	interface_fieldinfo_t **info_dest = &fieldinfo_list_;
 	while (info_src) {
 		interface_fieldinfo_t *new_info =
@@ -433,10 +433,10 @@ Message::clone() const
  */
 void
 Message::add_fieldinfo(interface_fieldtype_t       type,
-                       const char *                name,
+                       const char                 *name,
                        size_t                      length,
-                       void *                      value,
-                       const char *                enumtype,
+                       void                       *value,
+                       const char                 *enumtype,
                        const interface_enum_map_t *enum_map)
 {
 	interface_fieldinfo_t *infol   = fieldinfo_list_;

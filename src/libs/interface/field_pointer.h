@@ -88,8 +88,8 @@ public:
 
 private:
 	interface_fieldtype_t type_;
-	const char *          name_;
-	volatile FieldType *  value_;
+	const char           *name_;
+	volatile FieldType   *value_;
 };
 
 } // end namespace fawkes

@@ -56,14 +56,14 @@ public:
 	void         set_id(unsigned int message_id);
 	void         mark_enqueued();
 	bool         enqueued() const;
-	const Time * time_enqueued() const;
+	const Time  *time_enqueued() const;
 
 	Uuid        sender_id() const;
 	Uuid        source_id() const;
 	void        set_sender_id(const Uuid &id);
 	void        set_source_id(const Uuid &id);
 	const char *sender_thread_name() const;
-	Interface * interface() const;
+	Interface  *interface() const;
 	const char *type() const;
 
 	InterfaceFieldIterator fields();
@@ -71,7 +71,7 @@ public:
 
 	unsigned int num_fields() const;
 
-	const void * datachunk() const;
+	const void  *datachunk() const;
 	unsigned int datasize() const;
 
 	unsigned int hops() const;
@@ -101,7 +101,7 @@ private: // fields
 	unsigned int message_id_;
 	unsigned int hops_;
 	bool         enqueued_;
-	Time *       time_enqueued_;
+	Time        *time_enqueued_;
 
 	unsigned int recipient_interface_mem_serial;
 	unsigned int sender_interface_instance_serial;
@@ -122,10 +122,10 @@ private: // methods
 
 protected:
 	void add_fieldinfo(interface_fieldtype_t       type,
-	                   const char *                name,
+	                   const char                 *name,
 	                   size_t                      length,
-	                   void *                      value,
-	                   const char *                enumtype = 0,
+	                   void                       *value,
+	                   const char                 *enumtype = 0,
 	                   const interface_enum_map_t *enum_map = 0);
 
 	/** Set a field
@@ -143,7 +143,7 @@ protected:
 	template <class FieldT, class DataT>
 	void set_field(FieldT &field, unsigned int index, DataT &data);
 
-	void *       data_ptr;
+	void        *data_ptr;
 	unsigned int data_size;
 
 	/** Timestamp data, must be present and first entries for each interface

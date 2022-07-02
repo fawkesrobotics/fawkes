@@ -90,7 +90,7 @@ InterfaceMessageEnqueueException::InterfaceMessageEnqueueException(const char *t
  * @param message enqueued message
  */
 InterfaceInvalidMessageException::InterfaceInvalidMessageException(const Interface *interface,
-                                                                   const Message *  message)
+                                                                   const Message   *message)
 : Exception("Message of type '%s' cannot be enqueued in interface of type '%s'",
             message->type(),
             interface->type())
@@ -341,10 +341,10 @@ Interface::set_hash(unsigned char *ihash)
  */
 void
 Interface::add_fieldinfo(interface_fieldtype_t       type,
-                         const char *                name,
+                         const char                 *name,
                          size_t                      length,
-                         void *                      value,
-                         const char *                enumtype,
+                         void                       *value,
+                         const char                 *enumtype,
                          const interface_enum_map_t *enum_map)
 {
 	interface_fieldinfo_t *infol   = fieldinfo_list_;
@@ -1383,7 +1383,7 @@ Interface::buffer_timestamp(unsigned int buffer)
 	}
 
 	MutexLocker          lock(data_mutex_);
-	void *               buf    = (char *)buffers_ + buffer * data_size;
+	void                *buf    = (char *)buffers_ + buffer * data_size;
 	interface_data_ts_t *buf_ts = (interface_data_ts_t *)buf;
 	return Time(buf_ts->timestamp_sec, buf_ts->timestamp_usec);
 }
@@ -1404,7 +1404,7 @@ Interface::buffer_timestamp(unsigned int buffer, Time *timestamp)
 	}
 
 	MutexLocker          lock(data_mutex_);
-	void *               buf    = (char *)buffers_ + buffer * data_size;
+	void                *buf    = (char *)buffers_ + buffer * data_size;
 	interface_data_ts_t *buf_ts = (interface_data_ts_t *)buf;
 	timestamp->set_time(buf_ts->timestamp_sec, buf_ts->timestamp_usec);
 }
