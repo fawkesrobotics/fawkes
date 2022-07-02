@@ -48,7 +48,7 @@ using namespace fawkes;
  *        blackboard facts are only retracted immediately before a new
  *        fact representing a particular interface is asserted.
  */
-BlackboardCLIPSFeature::BlackboardCLIPSFeature(fawkes::Logger *    logger,
+BlackboardCLIPSFeature::BlackboardCLIPSFeature(fawkes::Logger     *logger,
                                                fawkes::BlackBoard *blackboard,
                                                bool                retract_early)
 : CLIPSFeature("blackboard"),
@@ -78,7 +78,7 @@ BlackboardCLIPSFeature::~BlackboardCLIPSFeature()
 }
 
 void
-BlackboardCLIPSFeature::clips_context_init(const std::string &                  env_name,
+BlackboardCLIPSFeature::clips_context_init(const std::string                   &env_name,
                                            fawkes::LockPtr<CLIPS::Environment> &clips)
 {
 	envs_[env_name] = clips;
@@ -345,7 +345,7 @@ BlackboardCLIPSFeature::clips_blackboard_open_interface(const std::string &env_n
 
 	fawkes::LockPtr<CLIPS::Environment> clips = envs_[env_name];
 
-	Interface *   iface     = NULL;
+	Interface    *iface     = NULL;
 	InterfaceMap &iface_map = writing ? interfaces_[env_name].writing : interfaces_[env_name].reading;
 
 	if (iface_map.find(type) == iface_map.end()) {
@@ -620,7 +620,7 @@ BlackboardCLIPSFeature::clips_blackboard_get_info(const std::string &env_name)
 
 	fawkes::MutexLocker lock(clips.objmutex_ptr());
 	for (auto ii : *iil) {
-		const Time *           timestamp = ii.timestamp();
+		const Time            *timestamp = ii.timestamp();
 		std::list<std::string> quoted_readers;
 		std::list<std::string> readers = ii.readers();
 		std::for_each(readers.begin(), readers.end(), [&quoted_readers](const std::string &r) {
@@ -826,7 +826,7 @@ BlackboardCLIPSFeature::clips_blackboard_list_msg_fields(const std::string &env_
 
 void
 BlackboardCLIPSFeature::clips_blackboard_set_msg_field(const std::string &env_name,
-                                                       void *             msgptr,
+                                                       void              *msgptr,
                                                        const std::string &field_name,
                                                        CLIPS::Value       value)
 {
@@ -845,7 +845,7 @@ BlackboardCLIPSFeature::clips_blackboard_set_msg_field(const std::string &env_na
 
 void
 BlackboardCLIPSFeature::clips_blackboard_set_msg_multifield(const std::string &env_name,
-                                                            void *             msgptr,
+                                                            void              *msgptr,
                                                             const std::string &field_name,
                                                             CLIPS::Values      values)
 {
@@ -912,8 +912,8 @@ BlackboardCLIPSFeature::clips_blackboard_send_msg(const std::string &env_name, v
 bool
 BlackboardCLIPSFeature::set_multifield(InterfaceFieldIterator fit_begin,
                                        InterfaceFieldIterator fit_end,
-                                       const std::string &    env_name,
-                                       const std::string &    field,
+                                       const std::string     &env_name,
+                                       const std::string     &field,
                                        CLIPS::Values          values)
 {
 	//find field and check for length of the interface array/multifield
@@ -950,8 +950,8 @@ BlackboardCLIPSFeature::set_multifield(InterfaceFieldIterator fit_begin,
 bool
 BlackboardCLIPSFeature::set_field(InterfaceFieldIterator fit_begin,
                                   InterfaceFieldIterator fit_end,
-                                  const std::string &    env_name,
-                                  const std::string &    field,
+                                  const std::string     &env_name,
+                                  const std::string     &field,
                                   CLIPS::Value           value,
                                   int                    index)
 {

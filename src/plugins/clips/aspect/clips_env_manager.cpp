@@ -83,8 +83,8 @@ public:
 	}
 
 private:
-	Logger *    logger_;
-	char *      component_;
+	Logger     *logger_;
+	char	     *component_;
 	std::string buffer_;
 };
 
@@ -143,7 +143,7 @@ log_router_query(void *env, char *logical_name)
 static int
 log_router_print(void *env, char *logical_name, char *str)
 {
-	void *       rc     = GetEnvironmentRouterContext(env);
+	void        *rc     = GetEnvironmentRouterContext(env);
 	CLIPSLogger *logger = static_cast<CLIPSLogger *>(rc);
 	logger->log(logical_name, str);
 	return TRUE;
@@ -273,7 +273,7 @@ void
 CLIPSEnvManager::destroy_env(const std::string &env_name)
 {
 	if (envs_.find(env_name) != envs_.end()) {
-		void *                  env = envs_[env_name].env->cobj();
+		void                   *env = envs_[env_name].env->cobj();
 		CLIPSContextMaintainer *cm  = static_cast<CLIPSContextMaintainer *>(GetEnvironmentContext(env));
 
 		EnvDeleteRouter(env, (char *)ROUTER_NAME);

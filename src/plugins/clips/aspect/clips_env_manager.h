@@ -64,7 +64,7 @@ private:
 
 private:
 	Logger *logger_;
-	Clock * clock_;
+	Clock  *clock_;
 
 	std::string clips_dir_;
 

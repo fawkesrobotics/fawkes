@@ -43,12 +43,12 @@ public:
 	virtual ~RedefineWarningCLIPSFeature();
 
 	// for CLIPSFeature
-	virtual void clips_context_init(const std::string &                  env_name,
+	virtual void clips_context_init(const std::string                   &env_name,
 	                                fawkes::LockPtr<CLIPS::Environment> &clips);
 	virtual void clips_context_destroyed(const std::string &env_name);
 
 private: // members
-	fawkes::Logger *                                           logger_;
+	fawkes::Logger                                            *logger_;
 	std::map<std::string, fawkes::LockPtr<CLIPS::Environment>> envs_;
 };
 

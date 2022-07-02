@@ -45,18 +45,18 @@ class InterfaceFieldIterator;
 class BlackboardCLIPSFeature : public fawkes::CLIPSFeature
 {
 public:
-	BlackboardCLIPSFeature(fawkes::Logger *    logger,
+	BlackboardCLIPSFeature(fawkes::Logger     *logger,
 	                       fawkes::BlackBoard *blackboard,
 	                       bool                retract_early);
 	virtual ~BlackboardCLIPSFeature();
 
 	// for CLIPSFeature
-	virtual void clips_context_init(const std::string &                  env_name,
+	virtual void clips_context_init(const std::string                   &env_name,
 	                                fawkes::LockPtr<CLIPS::Environment> &clips);
 	virtual void clips_context_destroyed(const std::string &env_name);
 
 private: // members
-	fawkes::Logger *    logger_;
+	fawkes::Logger     *logger_;
 	fawkes::BlackBoard *blackboard_;
 	bool                cfg_retract_early_;
 
@@ -109,11 +109,11 @@ private: // methods
 	CLIPS::Values clips_blackboard_list_msg_fields(const std::string &env_name, void *msgptr);
 
 	void         clips_blackboard_set_msg_field(const std::string &env_name,
-	                                            void *             msgptr,
+	                                            void              *msgptr,
 	                                            const std::string &field_name,
 	                                            CLIPS::Value       value);
 	void         clips_blackboard_set_msg_multifield(const std::string &env_name,
-	                                                 void *             msgptr,
+	                                                 void              *msgptr,
 	                                                 const std::string &field_name,
 	                                                 CLIPS::Values      values);
 	CLIPS::Value clips_blackboard_send_msg(const std::string &env_name, void *msgptr);
@@ -121,14 +121,14 @@ private: // methods
 	//helper
 	bool set_field(fawkes::InterfaceFieldIterator fit_begin,
 	               fawkes::InterfaceFieldIterator fit_end,
-	               const std::string &            env_name,
-	               const std::string &            field,
+	               const std::string             &env_name,
+	               const std::string             &field,
 	               CLIPS::Value                   value,
 	               int                            index = 0);
 	bool set_multifield(fawkes::InterfaceFieldIterator fit_begin,
 	                    fawkes::InterfaceFieldIterator fit_end,
-	                    const std::string &            env_name,
-	                    const std::string &            field,
+	                    const std::string             &env_name,
+	                    const std::string             &field,
 	                    CLIPS::Values                  values);
 };
 
