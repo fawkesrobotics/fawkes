@@ -54,7 +54,7 @@ print_usage(const char *program_name)
 void
 try_localize(const std::string &host,
              unsigned short int port,
-             std::string &      interface_id,
+             std::string       &interface_id,
              std::string        frame,
              double             translation[3],
              double             rotation[4],
@@ -75,7 +75,7 @@ try_localize(const std::string &host,
 		delete netconf;
 	}
 
-	BlackBoard *           bb     = new RemoteBlackBoard(c);
+	BlackBoard            *bb     = new RemoteBlackBoard(c);
 	LocalizationInterface *loc_if = bb->open_for_reading<LocalizationInterface>(interface_id.c_str());
 
 	if (!loc_if->has_writer()) {
@@ -114,7 +114,7 @@ main(int argc, char **argv)
 		exit(0);
 	}
 
-	char *             host_s    = (char *)"localhost";
+	char              *host_s    = (char *)"localhost";
 	unsigned short int port      = 1910;
 	bool               free_host = argp.parse_hostport("r", &host_s, &port);
 	float              try_sec   = 0.0;
