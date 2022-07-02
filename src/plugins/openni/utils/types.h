@@ -36,7 +36,7 @@ namespace openni {
 /** User info to pass to draw_skeletons(). */
 typedef struct
 {
-	fawkes::HumanSkeletonInterface *          skel_if; /**< Skeleton interface. */
+	fawkes::HumanSkeletonInterface           *skel_if; /**< Skeleton interface. */
 	fawkes::HumanSkeletonProjectionInterface *proj_if; /**< Projection interface. */
 } UserInfo;
 

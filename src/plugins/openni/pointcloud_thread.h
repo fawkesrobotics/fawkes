@@ -101,7 +101,7 @@ private:
 
 	xn::DepthGenerator *depth_gen_;
 	xn::ImageGenerator *image_gen_;
-	xn::DepthMetaData * depth_md_;
+	xn::DepthMetaData  *depth_md_;
 
 	bool cfg_register_depth_image_;
 

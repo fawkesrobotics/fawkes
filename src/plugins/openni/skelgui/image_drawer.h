@@ -39,7 +39,7 @@ public:
 
 private:
 	firevision::Camera *cam_;
-	unsigned char *     rgb_buf_;
+	unsigned char      *rgb_buf_;
 };
 
 #endif

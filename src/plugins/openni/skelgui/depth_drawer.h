@@ -48,11 +48,11 @@ private:
 	firevision::Camera *label_cam_;
 
 	fawkes::MemAutoFree rgb_buf_raii_;
-	unsigned char *     rgb_buf_;
+	unsigned char      *rgb_buf_;
 
 	const unsigned int  max_depth_;
 	fawkes::MemAutoFree histogram_raii_;
-	float *             histogram_;
+	float              *histogram_;
 
 	bool show_labels_;
 };

@@ -69,7 +69,7 @@ protected:
 
 private:
 	xn::ImageGenerator *image_gen_;
-	xn::ImageMetaData * image_md_;
+	xn::ImageMetaData  *image_md_;
 
 	firevision::SharedMemoryImageBuffer *image_buf_yuv_;
 	firevision::SharedMemoryImageBuffer *image_buf_rgb_;

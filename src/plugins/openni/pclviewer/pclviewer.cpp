@@ -47,10 +47,10 @@ using namespace fawkes;
 using namespace fawkes::openni;
 using namespace firevision;
 
-Camera *             g_pcl_cam   = NULL;
-Camera *             g_image_cam = NULL;
-unsigned char *      g_rgb_buf   = NULL;
-const pcl_point_t *  g_pcl_buf   = NULL;
+Camera              *g_pcl_cam   = NULL;
+Camera              *g_image_cam = NULL;
+unsigned char       *g_rgb_buf   = NULL;
+const pcl_point_t   *g_pcl_buf   = NULL;
 const unsigned char *g_image_buf = NULL;
 
 GLfloat  g_scale; /* scaling factor */
@@ -67,8 +67,8 @@ std::list<ObjectPositionInterface *> g_obj_ifs;
 UserMap g_users;
 HandMap g_hands;
 
-SkelIfObserver *         g_obs         = NULL;
-HandIfObserver *         g_hands_obs   = NULL;
+SkelIfObserver          *g_obs         = NULL;
+HandIfObserver          *g_hands_obs   = NULL;
 SkelGuiSkeletonDrawer3D *g_skel_drawer = NULL;
 
 PclViewerTransferThread *g_transfer_thread = NULL;

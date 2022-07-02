@@ -58,7 +58,7 @@ public:
 	void hand_destroy(XnUserID &user, XnFloat &time);
 	void hand_update(XnUserID &user, const XnPoint3D *position, XnFloat &time);
 
-	void gesture_recognized(const XnChar *   gesture_name,
+	void gesture_recognized(const XnChar    *gesture_name,
 	                        const XnPoint3D *position,
 	                        const XnPoint3D *end_position);
 	void gesture_progress(const XnChar *gesture_name, const XnPoint3D *position, XnFloat progress);
@@ -78,8 +78,8 @@ private:
 	typedef std::map<XnUserID, fawkes::ObjectPositionInterface *> HandMap;
 
 private:
-	xn::HandsGenerator *  hand_gen_;
-	xn::DepthGenerator *  depth_gen_;
+	xn::HandsGenerator   *hand_gen_;
+	xn::DepthGenerator   *depth_gen_;
 	xn::GestureGenerator *gesture_gen_;
 
 	XnCallbackHandle hand_cb_handle_;

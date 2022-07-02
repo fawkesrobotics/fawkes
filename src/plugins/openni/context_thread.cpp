@@ -174,7 +174,7 @@ OpenNiContextThread::print_nodes()
 		logger->log_info(name(), "Currently existing nodes:");
 		for (xn::NodeInfoList::Iterator n = nodes.Begin(); n != nodes.End(); ++n) {
 			const XnProductionNodeDescription &pnd  = (*n).GetDescription();
-			const char *                       info = (*n).GetCreationInfo();
+			const char                        *info = (*n).GetCreationInfo();
 			if (strlen(info) == 0)
 				info = NULL;
 

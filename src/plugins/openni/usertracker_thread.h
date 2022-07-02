@@ -81,7 +81,7 @@ private:
 	typedef struct
 	{
 		bool                                      valid;   /**< true if valid */
-		fawkes::HumanSkeletonInterface *          skel_if; /**< Skeleton interface */
+		fawkes::HumanSkeletonInterface           *skel_if; /**< Skeleton interface */
 		fawkes::HumanSkeletonProjectionInterface *proj_if; /**< Projection interface. */
 	} UserInfo;
 
@@ -91,10 +91,10 @@ private:
 	void update_com(XnUserID id, UserInfo &user);
 
 private:
-	xn::UserGenerator * user_gen_;
+	xn::UserGenerator  *user_gen_;
 	xn::DepthGenerator *depth_gen_;
 
-	xn::SceneMetaData *     scene_md_;
+	xn::SceneMetaData      *scene_md_;
 	xn::SkeletonCapability *skelcap_;
 
 	XnCallbackHandle user_cb_handle_;
