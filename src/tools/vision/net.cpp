@@ -247,12 +247,12 @@ public:
 	}
 
 	virtual void
-	service_added(const char *            name,
-	              const char *            type,
-	              const char *            domain,
-	              const char *            host_name,
-	              const char *            interface,
-	              const struct sockaddr * addr,
+	service_added(const char             *name,
+	              const char             *type,
+	              const char             *domain,
+	              const char             *host_name,
+	              const char             *interface,
+	              const struct sockaddr  *addr,
 	              const socklen_t         addr_size,
 	              uint16_t                port,
 	              std::list<std::string> &txt,
@@ -342,7 +342,7 @@ public:
 	{
 		ColormapFile cmf;
 		cmf.read(file_);
-		Colormap *      cm = cmf.get_colormap();
+		Colormap       *cm = cmf.get_colormap();
 		FuseLutContent *lc = new FuseLutContent(lut_id,
 		                                        cm->get_buffer(),
 		                                        cm->width(),
@@ -485,12 +485,12 @@ public:
 
 private:
 	ArgumentParser *argp_;
-	FuseClient *    client_;
+	FuseClient     *client_;
 
 	const char *file_;
 
 	bool           exploring_;
-	Mutex *        explore_mutex_;
+	Mutex         *explore_mutex_;
 	WaitCondition *explore_waitcond_;
 
 #ifdef HAVE_AVAHI

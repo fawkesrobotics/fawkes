@@ -46,8 +46,8 @@ private:
 
 	firevision::Colormap *m_cm;
 
-	Gtk::Image *   m_img_colormap;
-	Gtk::Scale *   m_scl_layer_selector;
+	Gtk::Image    *m_img_colormap;
+	Gtk::Scale    *m_scl_layer_selector;
 	unsigned char *m_colormap_img_buf;
 };
 

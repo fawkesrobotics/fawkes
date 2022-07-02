@@ -45,7 +45,7 @@ using namespace fawkes;
 using namespace firevision;
 
 Gtk::Image *img_image;
-Camera *    cam;
+Camera     *cam;
 
 TimeTracker  tt;
 int          ttc_capture;

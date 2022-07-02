@@ -131,10 +131,10 @@ private:
 	ColormapViewerWidget *m_local_colormap_viewer;
 	ColormapViewerWidget *m_remote_colormap_viewer;
 
-	Gtk::Button *  m_btn_upload;
-	Gtk::Button *  m_btn_download;
-	Gtk::Image *   m_img_local;
-	Gtk::Image *   m_img_remote;
+	Gtk::Button   *m_btn_upload;
+	Gtk::Button   *m_btn_download;
+	Gtk::Image    *m_img_local;
+	Gtk::Image    *m_img_remote;
 	Gtk::TreeView *m_trv_local_lut_list;
 	Gtk::TreeView *m_trv_remote_lut_list;
 

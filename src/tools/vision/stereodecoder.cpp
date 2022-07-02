@@ -120,7 +120,7 @@ main(int argc, char **argv)
 	string dirname = argv[1];
 
 	// Get all files
-	DIR *          dir;
+	DIR           *dir;
 	struct dirent *dirp;
 
 	list<string> files;

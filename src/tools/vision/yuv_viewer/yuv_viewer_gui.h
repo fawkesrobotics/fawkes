@@ -52,12 +52,12 @@ private:
 
 private:
 	// widgets
-	Gtk::EventBox *  yuv_vp_;
-	Gtk::Viewport *  cur_vp_;
-	Gtk::Viewport *  seg_vp_;
-	Gtk::HScale *    y_scale_;
-	Gtk::Label *     u_value_;
-	Gtk::Label *     v_value_;
+	Gtk::EventBox   *yuv_vp_;
+	Gtk::Viewport   *cur_vp_;
+	Gtk::Viewport   *seg_vp_;
+	Gtk::HScale     *y_scale_;
+	Gtk::Label      *u_value_;
+	Gtk::Label      *v_value_;
 	Gtk::SpinButton *y_res_;
 	Gtk::SpinButton *u_res_;
 	Gtk::SpinButton *v_res_;

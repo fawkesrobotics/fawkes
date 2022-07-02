@@ -79,7 +79,7 @@ retrieve(ArgumentParser *argp)
 	}
 
 	CameraArgumentParser *cap = new CameraArgumentParser("bumblebee2:Bumblebee2 BB2-03S2C");
-	Bumblebee2Camera *    bb2 = new Bumblebee2Camera(cap);
+	Bumblebee2Camera     *bb2 = new Bumblebee2Camera(cap);
 	bb2->open();
 
 	TriclopsStereoProcessor *triclops = new TriclopsStereoProcessor(bb2);
@@ -109,7 +109,7 @@ verify(ArgumentParser *argp)
 
 #ifdef HAVE_BUMBLEBEE2_CAM
 	CameraArgumentParser *cap = new CameraArgumentParser("bumblebee2:Bumblebee2 BB2-03S2C");
-	Bumblebee2Camera *    bb2 = new Bumblebee2Camera(cap);
+	Bumblebee2Camera     *bb2 = new Bumblebee2Camera(cap);
 	bb2->open();
 
 	for (unsigned int i = 0; i < argp->num_items(); ++i) {
@@ -165,7 +165,7 @@ deep_verify(ArgumentParser *argp)
 	int rv = 0;
 
 	CameraArgumentParser *cap = new CameraArgumentParser("bumblebee2:Bumblebee2 BB2-03S2C");
-	Bumblebee2Camera *    bb2 = new Bumblebee2Camera(cap);
+	Bumblebee2Camera     *bb2 = new Bumblebee2Camera(cap);
 	bb2->open();
 
 	TriclopsStereoProcessor *triclops = new TriclopsStereoProcessor(bb2);

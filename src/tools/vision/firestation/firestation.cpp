@@ -112,7 +112,7 @@ Firestation::Firestation(Glib::RefPtr<Gtk::Builder> builder)
 #if GTK_VERSION_GE(3, 0)
 	Glib::RefPtr<Gtk::FileFilter> filter_jpg = Gtk::FileFilter::create();
 #else
-	Gtk::FileFilter *filter_jpg = Gtk::manage(new Gtk::FileFilter());
+	Gtk::FileFilter *filter_jpg   = Gtk::manage(new Gtk::FileFilter());
 #endif
 	filter_jpg->set_name("JPEG");
 	filter_jpg->add_pattern("*.jpg");
@@ -224,7 +224,7 @@ Firestation::Firestation(Glib::RefPtr<Gtk::Builder> builder)
 
 #ifndef HAVE_MIRROR_CALIB
 	Gtk::Notebook *nb;
-	Gtk::HBox *    box;
+	Gtk::HBox     *box;
 	builder->get_widget("ntbOptions", nb);
 	builder->get_widget("boxMirrorCalib", box);
 	nb->get_tab_label(*box)->set_sensitive(false);
@@ -570,7 +570,7 @@ Firestation::open_folder()
 		}
 
 		std::string folder = m_fcd_open_image->get_current_folder();
-		char *      as;
+		char       *as;
 		if (asprintf(&as, "file:file:dir=%s:ext=%s", folder.c_str(), extension.c_str()) != -1) {
 			CameraArgumentParser cap(as);
 			m_camera  = new FileLoader(&cap);
@@ -601,7 +601,7 @@ void
 Firestation::open_shm()
 {
 	SharedMemory::SharedMemoryIterator shmit;
-	SharedMemoryImageBufferHeader *    h = new SharedMemoryImageBufferHeader;
+	SharedMemoryImageBufferHeader     *h = new SharedMemoryImageBufferHeader;
 	shmit                                = SharedMemory::find(FIREVISION_SHM_IMAGE_MAGIC_TOKEN, h);
 
 	if (shmit == SharedMemory::end()) {
@@ -1265,10 +1265,10 @@ Firestation::mc_save()
 void
 Firestation::on_service_added(NetworkService *service)
 {
-	const char *       host   = service->host();
-	const char *       name   = service->name();
-	const char *       type   = service->type();
-	const char *       domain = service->domain();
+	const char        *host   = service->host();
+	const char        *name   = service->name();
+	const char        *type   = service->type();
+	const char        *domain = service->domain();
 	unsigned short int port   = service->port();
 
 	std::vector<FUSE_imageinfo_t> image_list;

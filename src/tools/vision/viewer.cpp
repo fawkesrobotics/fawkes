@@ -111,11 +111,11 @@ main(int argc, char **argv)
 	Gtk::Main gtk_main(argc, argv);
 #endif
 
-	Camera *                 cam;
+	Camera                  *cam;
 	SharedMemoryImageBuffer *buf        = NULL;
 	bool                     verbose    = argp.has_arg("v");
 	int                      delay      = 0;
-	Colormap *               colormap   = NULL;
+	Colormap                *colormap   = NULL;
 	unsigned int             colormap_y = 0;
 
 	if (argp.has_arg("d")) {
@@ -237,8 +237,8 @@ main(int argc, char **argv)
 
 #ifdef HAVE_RECTINFO
 	RectificationInfoFile *rectfile       = new RectificationInfoFile();
-	FilterRectify *        rectify_filter = NULL;
-	unsigned char *        filtered_buffer =
+	FilterRectify         *rectify_filter = NULL;
+	unsigned char         *filtered_buffer =
 	  malloc_buffer(YUV422_PLANAR, cam->pixel_width(), cam->pixel_height());
 	unsigned char *unfiltered_buffer =
 	  malloc_buffer(YUV422_PLANAR, cam->pixel_width(), cam->pixel_height());

@@ -86,7 +86,7 @@ main(int argc, char **argv)
 	}
 
 	FileLoader *fl     = NULL;
-	Writer *    writer = NULL;
+	Writer     *writer = NULL;
 
 	if (argp.has_arg("u")) {
 		if (argp.has_arg("c") && argp.has_arg("w") && argp.has_arg("h")) {
