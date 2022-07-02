@@ -85,8 +85,8 @@ private:
 		std::string  id;
 		unsigned int size;
 		union {
-			fawkes::Laser360Interface * as360;
-			fawkes::Laser720Interface * as720;
+			fawkes::Laser360Interface  *as360;
+			fawkes::Laser720Interface  *as720;
 			fawkes::Laser1080Interface *as1080;
 		} interface_typed;
 		fawkes::Interface *interface;

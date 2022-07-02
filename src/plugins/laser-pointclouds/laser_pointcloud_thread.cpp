@@ -310,8 +310,8 @@ LaserPointCloudThread::bb_interface_reader_removed(fawkes::Interface *interface,
 void
 LaserPointCloudThread::conditional_close(Interface *interface) noexcept
 {
-	Laser360Interface * l360if  = dynamic_cast<Laser360Interface *>(interface);
-	Laser720Interface * l720if  = dynamic_cast<Laser720Interface *>(interface);
+	Laser360Interface  *l360if  = dynamic_cast<Laser360Interface *>(interface);
+	Laser720Interface  *l720if  = dynamic_cast<Laser720Interface *>(interface);
 	Laser1080Interface *l1080if = dynamic_cast<Laser1080Interface *>(interface);
 
 	bool                  close = false;
