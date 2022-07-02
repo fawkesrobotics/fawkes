@@ -39,10 +39,10 @@ namespace fawkes {
  * @param logger The fawkes logger
  * @param config The fawkes configuration
  */
-BiwardDriveModule::BiwardDriveModule(ForwardDriveModule * forward,
+BiwardDriveModule::BiwardDriveModule(ForwardDriveModule  *forward,
                                      BackwardDriveModule *backward,
-                                     Logger *             logger,
-                                     Configuration *      config)
+                                     Logger              *logger,
+                                     Configuration       *config)
 : AbstractDriveMode(logger, config)
 {
 	logger_->log_debug("BiwardDriveModule", "(Constructor): Entering...");

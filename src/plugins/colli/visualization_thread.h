@@ -65,8 +65,8 @@ private:
 	fawkes::Mutex mutex_;
 
 	fawkes::LaserOccupancyGrid *occ_grid_;
-	fawkes::Search *            search_;
-	fawkes::RoboShapeColli *    roboshape_;
+	fawkes::Search             *search_;
+	fawkes::RoboShapeColli     *roboshape_;
 	fawkes::colli_cell_cost_t   cell_costs_;
 
 	ros::Publisher *pub_roboshape_;

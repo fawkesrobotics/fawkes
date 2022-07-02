@@ -48,8 +48,8 @@ using namespace std;
  */
 EmergencyMotorInstruct::EmergencyMotorInstruct(fawkes::MotorInterface *motor,
                                                float                   frequency,
-                                               fawkes::Logger *        logger,
-                                               fawkes::Configuration * config)
+                                               fawkes::Logger         *logger,
+                                               fawkes::Configuration  *config)
 : BaseMotorInstruct(motor, frequency, logger, config)
 {
 	logger_->log_debug("EmergencyMotorInstruct", "(Constructor): Entering");

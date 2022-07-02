@@ -55,10 +55,10 @@ namespace fawkes {
  * @param config      The fawkes configuration
  * @param escape_mode The chosen escape mode
  */
-SelectDriveMode::SelectDriveMode(MotorInterface *    motor,
+SelectDriveMode::SelectDriveMode(MotorInterface     *motor,
                                  NavigatorInterface *target,
-                                 Logger *            logger,
-                                 Configuration *     config,
+                                 Logger             *logger,
+                                 Configuration      *config,
                                  colli_escape_mode_t escape_mode)
 : logger_(logger),
   config_(config),

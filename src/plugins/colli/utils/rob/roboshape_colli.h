@@ -43,8 +43,8 @@ class Configuration;
 class RoboShapeColli : public RoboShape
 {
 public:
-	RoboShapeColli(const char *   cfg_prefix,
-	               Logger *       logger,
+	RoboShapeColli(const char    *cfg_prefix,
+	               Logger        *logger,
 	               Configuration *config,
 	               int            readings_per_degree = 1);
 	~RoboShapeColli();
@@ -72,8 +72,8 @@ private:
  * @param config Pointer to the fawkes configuration.
  * @param readings_per_degree Readings per degree constant (default=1)
  */
-inline RoboShapeColli::RoboShapeColli(const char *   cfg_prefix,
-                                      Logger *       logger,
+inline RoboShapeColli::RoboShapeColli(const char    *cfg_prefix,
+                                      Logger        *logger,
                                       Configuration *config,
                                       int            readings_per_degree)
 : RoboShape(cfg_prefix, logger, config)

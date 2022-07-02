@@ -40,10 +40,10 @@ class LaserOccupancyGrid;
 class SelectDriveMode
 {
 public:
-	SelectDriveMode(MotorInterface *    motor,
+	SelectDriveMode(MotorInterface     *motor,
 	                NavigatorInterface *colli_target,
-	                Logger *            logger,
-	                Configuration *     config,
+	                Logger             *logger,
+	                Configuration      *config,
 	                colli_escape_mode_t escape_mode = colli_escape_mode_t::basic);
 	~SelectDriveMode();
 
@@ -70,12 +70,12 @@ public:
 	void set_laser_data(std::vector<fawkes::polar_coord_2d_t> &laser_points);
 
 private:
-	Logger *       logger_;
+	Logger        *logger_;
 	Configuration *config_;
 
 	// local pointers to interfaces
 	NavigatorInterface *if_colli_target_;
-	MotorInterface *    if_motor_;
+	MotorInterface     *if_motor_;
 
 	colli_escape_mode_t cfg_escape_mode_;
 

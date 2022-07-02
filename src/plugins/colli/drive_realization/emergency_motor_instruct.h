@@ -31,8 +31,8 @@ class EmergencyMotorInstruct : public BaseMotorInstruct
 public:
 	EmergencyMotorInstruct(MotorInterface *motor,
 	                       float           frequency,
-	                       Logger *        logger,
-	                       Configuration * config);
+	                       Logger         *logger,
+	                       Configuration  *config);
 	virtual ~EmergencyMotorInstruct();
 
 private:

@@ -46,8 +46,8 @@ using namespace std;
  */
 QuadraticMotorInstruct::QuadraticMotorInstruct(MotorInterface *motor,
                                                float           frequency,
-                                               Logger *        logger,
-                                               Configuration * config)
+                                               Logger         *logger,
+                                               Configuration  *config)
 : BaseMotorInstruct(motor, frequency, logger, config)
 {
 	logger_->log_debug("QuadraticMotorInstruct", "(Constructor): Entering");

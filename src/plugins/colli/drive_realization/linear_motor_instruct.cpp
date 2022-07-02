@@ -47,8 +47,8 @@ using namespace std;
  */
 LinearMotorInstruct::LinearMotorInstruct(MotorInterface *motor,
                                          float           frequency,
-                                         Logger *        logger,
-                                         Configuration * config)
+                                         Logger         *logger,
+                                         Configuration  *config)
 : BaseMotorInstruct(motor, frequency, logger, config)
 {
 	logger_->log_debug("LinearMotorInstruct", "(Constructor): Entering");

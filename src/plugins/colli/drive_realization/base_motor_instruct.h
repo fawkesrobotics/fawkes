@@ -53,7 +53,7 @@ public:
 	void stop();
 
 protected:
-	Logger *       logger_; /**< The fawkes logger */
+	Logger        *logger_; /**< The fawkes logger */
 	Configuration *config_; /**< The fawkse config */
 
 	float trans_acc_; /**< Translation acceleration */
@@ -99,8 +99,8 @@ private:
  */
 inline BaseMotorInstruct::BaseMotorInstruct(MotorInterface *motor,
                                             float           frequency,
-                                            Logger *        logger,
-                                            Configuration * config)
+                                            Logger         *logger,
+                                            Configuration  *config)
 : logger_(logger), config_(config), motor_(motor)
 {
 	logger_->log_debug("BaseMotorInstruct", "(Constructor): Entering");
