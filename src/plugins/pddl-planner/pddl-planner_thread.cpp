@@ -417,7 +417,7 @@ PddlPlannerThread::run_planner(std::string command)
 }
 
 bool
-PddlPlannerThread::bb_interface_message_received(Interface *      interface,
+PddlPlannerThread::bb_interface_message_received(Interface       *interface,
                                                  fawkes::Message *message) noexcept
 {
 	if (message->is_of_type<PddlPlannerInterface::PlanMessage>()) {
