@@ -98,11 +98,11 @@ PointCloudAdapter::~PointCloudAdapter()
 template <typename PointT>
 static void
 fill_info(const fawkes::RefPtr<const pcl::PointCloud<PointT>> &p,
-          unsigned int &                                       width,
-          unsigned int &                                       height,
-          std::string &                                        frame_id,
-          bool &                                               is_dense,
-          PointCloudAdapter::V_PointFieldInfo &                pfi)
+          unsigned int                                        &width,
+          unsigned int                                        &height,
+          std::string                                         &frame_id,
+          bool                                                &is_dense,
+          PointCloudAdapter::V_PointFieldInfo                 &pfi)
 {
 	width    = p->width;
 	height   = p->height;
@@ -139,11 +139,11 @@ fill_info(const fawkes::RefPtr<const pcl::PointCloud<PointT>> &p,
  */
 void
 PointCloudAdapter::get_info(const std::string &id,
-                            unsigned int &     width,
-                            unsigned int &     height,
-                            std::string &      frame_id,
-                            bool &             is_dense,
-                            V_PointFieldInfo & pfi)
+                            unsigned int      &width,
+                            unsigned int      &height,
+                            std::string       &frame_id,
+                            bool              &is_dense,
+                            V_PointFieldInfo  &pfi)
 {
 	if (sas_.find(id) == sas_.end()) {
 		sas_[id] = new StorageAdapter(pcl_manager_->get_storage_adapter(id.c_str()));
@@ -181,13 +181,13 @@ PointCloudAdapter::get_info(const std::string &id,
  */
 void
 PointCloudAdapter::get_data(const std::string &id,
-                            std::string &      frame_id,
-                            unsigned int &     width,
-                            unsigned int &     height,
-                            fawkes::Time &     time,
-                            void **            data_ptr,
-                            size_t &           point_size,
-                            size_t &           num_points)
+                            std::string       &frame_id,
+                            unsigned int      &width,
+                            unsigned int      &height,
+                            fawkes::Time      &time,
+                            void             **data_ptr,
+                            size_t            &point_size,
+                            size_t            &num_points)
 {
 	if (sas_.find(id) == sas_.end()) {
 		sas_[id] = new StorageAdapter(pcl_manager_->get_storage_adapter(id.c_str()));
@@ -217,15 +217,15 @@ PointCloudAdapter::get_data(const std::string &id,
  */
 void
 PointCloudAdapter::get_data_and_info(const std::string &id,
-                                     std::string &      frame_id,
-                                     bool &             is_dense,
-                                     unsigned int &     width,
-                                     unsigned int &     height,
-                                     fawkes::Time &     time,
-                                     V_PointFieldInfo & pfi,
-                                     void **            data_ptr,
-                                     size_t &           point_size,
-                                     size_t &           num_points)
+                                     std::string       &frame_id,
+                                     bool              &is_dense,
+                                     unsigned int      &width,
+                                     unsigned int      &height,
+                                     fawkes::Time      &time,
+                                     V_PointFieldInfo  &pfi,
+                                     void             **data_ptr,
+                                     size_t            &point_size,
+                                     size_t            &num_points)
 {
 	get_info(id, width, height, frame_id, is_dense, pfi);
 	get_data(id, frame_id, width, height, time, data_ptr, point_size, num_points);
