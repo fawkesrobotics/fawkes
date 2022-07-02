@@ -659,7 +659,7 @@ LuaContext::assert_unique_name(const char *name, std::string type)
  */
 void
 LuaContext::set_usertype(const char *name,
-                         void *      data,
+                         void       *data,
                          const char *type_name,
                          const char *name_space)
 {

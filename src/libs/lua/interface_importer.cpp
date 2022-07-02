@@ -49,10 +49,10 @@ namespace fawkes {
  * @param config configuration
  * @param logger Logger
  */
-LuaInterfaceImporter::LuaInterfaceImporter(LuaContext *   context,
-                                           BlackBoard *   blackboard,
+LuaInterfaceImporter::LuaInterfaceImporter(LuaContext    *context,
+                                           BlackBoard    *blackboard,
                                            Configuration *config,
-                                           Logger *       logger)
+                                           Logger        *logger)
 {
 	context_    = context;
 	blackboard_ = blackboard;
@@ -447,8 +447,8 @@ LuaInterfaceImporter::lua_restarted(LuaContext *context)
  */
 LuaInterfaceImporter::InterfaceObserver::InterfaceObserver(LuaInterfaceImporter *lii,
                                                            std::string           varname,
-                                                           const char *          type,
-                                                           const char *          id_pattern)
+                                                           const char           *type,
+                                                           const char           *id_pattern)
 {
 	lii_     = lii;
 	varname_ = varname;
