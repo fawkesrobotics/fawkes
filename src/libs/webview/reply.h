@@ -141,7 +141,7 @@ public:
 	void            append_body(const std::string &s);
 	StaticWebReply &operator+=(std::string text);
 
-	virtual const std::string &    body();
+	virtual const std::string     &body();
 	virtual std::string::size_type body_length();
 
 	virtual void pack();

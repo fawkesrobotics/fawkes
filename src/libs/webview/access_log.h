@@ -39,7 +39,7 @@ public:
 
 private:
 	Mutex *mutex_;
-	FILE * logfile_;
+	FILE  *logfile_;
 };
 
 } // namespace fawkes

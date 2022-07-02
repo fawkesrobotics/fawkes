@@ -52,7 +52,7 @@ namespace fawkes {
  */
 WebServer::WebServer(unsigned short int    port,
                      WebRequestDispatcher *dispatcher,
-                     fawkes::Logger *      logger)
+                     fawkes::Logger       *logger)
 {
 	port_            = port;
 	dispatcher_      = dispatcher;

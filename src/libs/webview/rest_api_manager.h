@@ -43,7 +43,7 @@ public:
 	void unregister_api(WebviewRestApi *api);
 
 	WebviewRestApi *get_api(std::string &name);
-	Mutex &         mutex();
+	Mutex          &mutex();
 
 private:
 	Mutex                                   mutex_;

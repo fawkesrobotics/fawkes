@@ -63,7 +63,7 @@ namespace fawkes {
  * @param headergen page header generator
  * @param footergen page footer generator
  */
-WebRequestDispatcher::WebRequestDispatcher(WebUrlManager *         url_manager,
+WebRequestDispatcher::WebRequestDispatcher(WebUrlManager          *url_manager,
                                            WebPageHeaderGenerator *headergen,
                                            WebPageFooterGenerator *footergen)
 {
@@ -164,14 +164,14 @@ WebRequestDispatcher::uri_log_cb(void *cls, const char *uri)
  * @return appropriate return code for libmicrohttpd
  */
 MHD_RESULT
-WebRequestDispatcher::process_request_cb(void *                 callback_data,
+WebRequestDispatcher::process_request_cb(void                  *callback_data,
                                          struct MHD_Connection *connection,
-                                         const char *           url,
-                                         const char *           method,
-                                         const char *           version,
-                                         const char *           upload_data,
-                                         size_t *               upload_data_size,
-                                         void **                session_data)
+                                         const char            *url,
+                                         const char            *method,
+                                         const char            *version,
+                                         const char            *upload_data,
+                                         size_t                *upload_data_size,
+                                         void                 **session_data)
 {
 	WebRequestDispatcher *rd = static_cast<WebRequestDispatcher *>(callback_data);
 	return rd->process_request(
@@ -185,13 +185,13 @@ WebRequestDispatcher::process_request_cb(void *                 callback_data,
  * @param toe termination code
  */
 void
-WebRequestDispatcher::request_completed_cb(void *                          cls,
-                                           struct MHD_Connection *         connection,
-                                           void **                         con_cls,
+WebRequestDispatcher::request_completed_cb(void                           *cls,
+                                           struct MHD_Connection          *connection,
+                                           void                          **con_cls,
                                            enum MHD_RequestTerminationCode toe)
 {
 	WebRequestDispatcher *rd      = static_cast<WebRequestDispatcher *>(cls);
-	WebRequest *          request = static_cast<WebRequest *>(*con_cls);
+	WebRequest           *request = static_cast<WebRequest *>(*con_cls);
 	rd->request_completed(request, toe);
 	delete request;
 }
@@ -209,7 +209,7 @@ dynamic_reply_data_cb(void *reply, uint64_t pos, char *buf, size_t max)
 {
 	DynamicWebReply *dreply  = static_cast<DynamicWebReply *>(reply);
 	ssize_t          bytes   = dreply->next_chunk(pos, buf, max);
-	WebRequest *     request = dreply->get_request();
+	WebRequest      *request = dreply->get_request();
 	if (bytes > 0 && request)
 		request->increment_reply_size(bytes);
 	return bytes;
@@ -233,7 +233,7 @@ struct MHD_Response *
 WebRequestDispatcher::prepare_static_response(StaticWebReply *sreply)
 {
 	struct MHD_Response *response;
-	WebPageReply *       wpreply = dynamic_cast<WebPageReply *>(sreply);
+	WebPageReply        *wpreply = dynamic_cast<WebPageReply *>(sreply);
 	if (wpreply) {
 		wpreply->pack(active_baseurl_, page_header_generator_, page_footer_generator_);
 	} else {
@@ -254,7 +254,7 @@ WebRequestDispatcher::prepare_static_response(StaticWebReply *sreply)
 		request->increment_reply_size(sreply->body_length());
 	}
 
-	const WebReply::HeaderMap &         headers = sreply->headers();
+	const WebReply::HeaderMap          &headers = sreply->headers();
 	WebReply::HeaderMap::const_iterator i;
 	for (i = headers.begin(); i != headers.end(); ++i) {
 		MHD_add_response_header(response, i->first.c_str(), i->second.c_str());
@@ -270,8 +270,8 @@ WebRequestDispatcher::prepare_static_response(StaticWebReply *sreply)
  */
 MHD_RESULT
 WebRequestDispatcher::queue_dynamic_reply(struct MHD_Connection *connection,
-                                          WebRequest *           request,
-                                          DynamicWebReply *      dreply)
+                                          WebRequest            *request,
+                                          DynamicWebReply       *dreply)
 {
 	dreply->set_request(request);
 	dreply->pack_caching();
@@ -281,7 +281,7 @@ WebRequestDispatcher::queue_dynamic_reply(struct MHD_Connection *connection,
 	response = MHD_create_response_from_callback(
 	  dreply->size(), dreply->chunk_size(), dynamic_reply_data_cb, dreply, dynamic_reply_free_cb);
 
-	const WebReply::HeaderMap &         headers = dreply->headers();
+	const WebReply::HeaderMap          &headers = dreply->headers();
 	WebReply::HeaderMap::const_iterator i;
 	for (i = headers.begin(); i != headers.end(); ++i) {
 		MHD_add_response_header(response, i->first.c_str(), i->second.c_str());
@@ -301,8 +301,8 @@ WebRequestDispatcher::queue_dynamic_reply(struct MHD_Connection *connection,
  */
 MHD_RESULT
 WebRequestDispatcher::queue_static_reply(struct MHD_Connection *connection,
-                                         WebRequest *           request,
-                                         StaticWebReply *       sreply)
+                                         WebRequest            *request,
+                                         StaticWebReply        *sreply)
 {
 	sreply->set_request(request);
 
@@ -359,13 +359,13 @@ WebRequestDispatcher::queue_basic_auth_fail(struct MHD_Connection *connection, W
  *         MHD_NO to abort the iteration
  */
 static MHD_RESULT
-post_iterator(void *             cls,
+post_iterator(void              *cls,
               enum MHD_ValueKind kind,
-              const char *       key,
-              const char *       filename,
-              const char *       content_type,
-              const char *       transfer_encoding,
-              const char *       data,
+              const char        *key,
+              const char        *filename,
+              const char        *content_type,
+              const char        *transfer_encoding,
+              const char        *data,
               uint64_t           off,
               size_t             size)
 {
@@ -402,12 +402,12 @@ WebRequestDispatcher::log_uri(const char *uri)
  */
 MHD_RESULT
 WebRequestDispatcher::process_request(struct MHD_Connection *connection,
-                                      const char *           url,
-                                      const char *           method,
-                                      const char *           version,
-                                      const char *           upload_data,
-                                      size_t *               upload_data_size,
-                                      void **                session_data)
+                                      const char            *url,
+                                      const char            *method,
+                                      const char            *version,
+                                      const char            *upload_data,
+                                      size_t                *upload_data_size,
+                                      void                 **session_data)
 {
 	WebRequest *request = static_cast<WebRequest *>(*session_data);
 
@@ -500,7 +500,7 @@ WebRequestDispatcher::process_request(struct MHD_Connection *connection,
 	}
 
 	try {
-		WebReply * reply = url_manager_->process_request(request);
+		WebReply  *reply = url_manager_->process_request(request);
 		MHD_RESULT ret;
 
 		if (reply) {
@@ -508,7 +508,7 @@ WebRequestDispatcher::process_request(struct MHD_Connection *connection,
 				reply->add_header("Access-Control-Allow-Origin", "*");
 			}
 
-			StaticWebReply * sreply = dynamic_cast<StaticWebReply *>(reply);
+			StaticWebReply  *sreply = dynamic_cast<StaticWebReply *>(reply);
 			DynamicWebReply *dreply = dynamic_cast<DynamicWebReply *>(reply);
 			if (sreply) {
 				ret = queue_static_reply(connection, request, sreply);

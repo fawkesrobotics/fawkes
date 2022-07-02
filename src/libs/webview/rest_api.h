@@ -384,7 +384,7 @@ public:
 
 private:
 	std::string                             name_;
-	fawkes::Logger *                        logger_;
+	fawkes::Logger                         *logger_;
 	bool                                    pretty_json_;
 	std::shared_ptr<WebviewRouter<Handler>> router_;
 };

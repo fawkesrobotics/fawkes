@@ -44,7 +44,7 @@ private:
 	void determine_file_size();
 
 private:
-	FILE * file_;
+	FILE  *file_;
 	size_t size_;
 	bool   close_when_done_;
 };
