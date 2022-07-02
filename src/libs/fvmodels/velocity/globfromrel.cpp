@@ -44,7 +44,7 @@ namespace firevision {
  * @param rel_velo_model relative velocity model
  * @param rel_pos_model relative position model
  */
-VelocityGlobalFromRelative::VelocityGlobalFromRelative(VelocityModel *        rel_velo_model,
+VelocityGlobalFromRelative::VelocityGlobalFromRelative(VelocityModel         *rel_velo_model,
                                                        RelativePositionModel *rel_pos_model)
 {
 	this->relative_velocity = rel_velo_model;

@@ -39,7 +39,7 @@ public:
 	VelocityGlobalFromRelative(VelocityModel *rel_velo_model, RelativePositionModel *rel_pos_model);
 	virtual ~VelocityGlobalFromRelative();
 
-	virtual const char *    getName() const;
+	virtual const char     *getName() const;
 	virtual coordsys_type_t getCoordinateSystem();
 
 	virtual void setRobotPosition(float x, float y, float ori, timeval t);
@@ -58,7 +58,7 @@ public:
 	virtual void reset();
 
 private:
-	VelocityModel *        relative_velocity;
+	VelocityModel         *relative_velocity;
 	RelativePositionModel *relative_position;
 
 	float robot_ori;

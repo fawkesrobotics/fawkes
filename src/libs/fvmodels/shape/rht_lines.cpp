@@ -87,7 +87,7 @@ RhtLinesModel::parseImage(unsigned char *buf, ROI *roi)
 
 	// First, find all the edge pixels,
 	// and store them in the 'pixels' vector.
-	unsigned char *  line_start = buffer;
+	unsigned char   *line_start = buffer;
 	unsigned int     x, y;
 	vector<upoint_t> pixels;
 
@@ -211,7 +211,7 @@ RhtLinesModel::getShapes()
 
 	vector<LineShape> *rv = new vector<LineShape>();
 
-	vector<vector<int>> *         rht_nodes = accumulator.getNodes(votes);
+	vector<vector<int>>          *rht_nodes = accumulator.getNodes(votes);
 	vector<vector<int>>::iterator node_it;
 
 	LineShape l(roi_width, roi_height);

@@ -57,7 +57,7 @@ ScanlineLineGrid::ScanlineLineGrid(unsigned int width,
                                    unsigned int height,
                                    unsigned int offset_hor,
                                    unsigned int offset_ver,
-                                   ROI *        roi,
+                                   ROI         *roi,
                                    unsigned int gap)
 {
 	roi_        = NULL;
@@ -287,7 +287,7 @@ ScanlineLineGrid::set_grid_params(unsigned int width,
                                   unsigned int height,
                                   unsigned int offset_hor,
                                   unsigned int offset_ver,
-                                  ROI *        roi)
+                                  ROI         *roi)
 {
 	offset_hor_ = offset_hor;
 	offset_ver_ = offset_ver;

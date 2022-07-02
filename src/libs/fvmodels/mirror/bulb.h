@@ -142,7 +142,7 @@ private:
 
 	bool valid;
 
-	char *                    lut_id;
+	char                     *lut_id;
 	fawkes::polar_coord_2d_t *lut;
 	unsigned int              lut_bytes;
 	bool                      destroy_on_delete;

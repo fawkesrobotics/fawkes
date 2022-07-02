@@ -52,7 +52,7 @@ public:
 
 	bool         finished();
 	void         reset();
-	const char * get_name();
+	const char  *get_name();
 	unsigned int get_margin();
 
 	virtual void

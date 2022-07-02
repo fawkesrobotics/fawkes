@@ -49,7 +49,7 @@ ScanlineGrid::ScanlineGrid(unsigned int width,
                            unsigned int height,
                            unsigned int offset_x,
                            unsigned int offset_y,
-                           ROI *        roi,
+                           ROI         *roi,
                            bool         horizontal_grid)
 {
 	this->roi = NULL;
@@ -240,7 +240,7 @@ ScanlineGrid::setGridParams(unsigned int width,
                             unsigned int height,
                             unsigned int offset_x,
                             unsigned int offset_y,
-                            ROI *        roi,
+                            ROI         *roi,
                             bool         horizontal_grid)
 {
 	this->horizontal_grid = horizontal_grid;

@@ -272,11 +272,11 @@ RhtCircleModel::getMostLikelyShape(void) const
 }
 
 void
-RhtCircleModel::calcCircle(const upoint_t & p1,
-                           const upoint_t & p2,
-                           const upoint_t & p3,
+RhtCircleModel::calcCircle(const upoint_t  &p1,
+                           const upoint_t  &p2,
+                           const upoint_t  &p3,
                            center_in_roi_t &center,
-                           float &          radius)
+                           float           &radius)
 // Given three points p1, p2, p3,
 // this function calculates the center and radius
 // of the circle that is determined

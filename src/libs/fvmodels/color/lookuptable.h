@@ -44,7 +44,7 @@ public:
 
 	virtual color_t determine(unsigned int y, unsigned int u, unsigned int v) const;
 
-	const char * get_name();
+	const char  *get_name();
 	YuvColormap *get_colormap() const;
 
 	void load(const char *filename);

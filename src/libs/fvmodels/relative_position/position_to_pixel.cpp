@@ -81,8 +81,8 @@ PositionToPixel::PositionToPixel(fawkes::tf::Transformer *tf,
  */
 fawkes::point_t
 PositionToPixel::get_pixel_position_unchecked(fawkes::cart_coord_3d_t &position,
-                                              std::string &            frame,
-                                              const fawkes::Time &     time)
+                                              std::string             &frame,
+                                              const fawkes::Time      &time)
 {
 	fawkes::point_t pixel_in_cam_unchecked;
 
@@ -130,8 +130,8 @@ PositionToPixel::get_pixel_position_unchecked(fawkes::cart_coord_3d_t &position,
  */
 fawkes::upoint_t
 PositionToPixel::get_pixel_position(fawkes::cart_coord_3d_t &position,
-                                    std::string &            frame,
-                                    const fawkes::Time &     time)
+                                    std::string             &frame,
+                                    const fawkes::Time      &time)
 {
 	fawkes::point_t pixel_unchecked = get_pixel_position_unchecked(position, frame, time);
 

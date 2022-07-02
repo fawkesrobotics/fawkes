@@ -60,7 +60,7 @@ public:
 	void abort();
 	void next_step();
 	const unsigned char *get_last_yuv_buffer() const;
-	const char *         get_state_description() const;
+	const char          *get_state_description() const;
 
 	/** Sets preliminary center point.
    * @param x X-coordinate
@@ -154,25 +154,25 @@ private:
 	apply_or(unsigned char *src1, unsigned char *src2, unsigned char *dst, int widt, int height);
 	static void                      make_contrast(unsigned char *buf, size_t buflen);
 	static void                      make_grayscale(unsigned char *buf, size_t buflen);
-	static MirrorCalibTool::MarkList premark(const StepResult &   prev,
+	static MirrorCalibTool::MarkList premark(const StepResult    &prev,
 	                                         const unsigned char *yuv_mask,
-	                                         StepResult &         result,
+	                                         StepResult          &result,
 	                                         PolarAngle           phi,
-	                                         const PixelPoint &   center);
+	                                         const PixelPoint    &center);
 	static MirrorCalibTool::MarkList premark(const ConvexPolygon &polygon,
-	                                         const StepResult &   prev,
+	                                         const StepResult    &prev,
 	                                         const unsigned char *yuv_mask,
-	                                         StepResult &         result,
+	                                         StepResult          &result,
 	                                         PolarAngle           phi,
-	                                         const PixelPoint &   center);
+	                                         const PixelPoint    &center);
 	static HoleList                  search_holes(const MarkList &premarks);
 	static HoleList                  filter_biggest_holes(const HoleList &holes, unsigned int n);
 	static MarkList                  determine_marks(const HoleList &holes);
-	static MarkList                  mark(const MarkList &     premarks,
+	static MarkList                  mark(const MarkList      &premarks,
 	                                      const unsigned char *yuv_mask,
-	                                      StepResult &         result,
+	                                      StepResult          &result,
 	                                      PolarAngle           phi,
-	                                      const PixelPoint &   center);
+	                                      const PixelPoint    &center);
 
 	static PixelPoint     calculate_center(const ImageList &images);
 	static RealDistance   calculate_real_distance(int n);
