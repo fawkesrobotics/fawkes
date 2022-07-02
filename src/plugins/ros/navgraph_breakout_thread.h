@@ -64,8 +64,8 @@ private:
 
 	std::string cfg_action_topic_;
 
-	fawkes::NavigatorInterface *  pp_nav_if_;
-	NavGraphGotoClient *          ac_;
+	fawkes::NavigatorInterface   *pp_nav_if_;
+	NavGraphGotoClient           *ac_;
 	fawkes_msgs::NavGraphGotoGoal goal_;
 	bool                          goal_active_;
 	bool                          was_connected_;

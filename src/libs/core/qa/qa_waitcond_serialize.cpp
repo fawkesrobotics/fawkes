@@ -80,7 +80,7 @@ public:
 
 private:
 	WaitCondition *wc;
-	Mutex *        m;
+	Mutex         *m;
 
 	int *val;
 	int  actval;
@@ -95,7 +95,7 @@ main(int argc, char **argv)
 {
 	int val = 0;
 
-	Mutex *        m  = new Mutex();
+	Mutex         *m  = new Mutex();
 	WaitCondition *wc = new WaitCondition(m);
 
 	ExampleWaitCondThread *t1 = new ExampleWaitCondThread(wc, m, &val, 0, 4);

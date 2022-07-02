@@ -128,12 +128,12 @@ private:
 	inline uint8_t find_closest(TransformStorage *&one,
 	                            TransformStorage *&two,
 	                            fawkes::Time       target_time,
-	                            std::string *      error_str);
+	                            std::string       *error_str);
 
 	inline void interpolate(const TransformStorage &one,
 	                        const TransformStorage &two,
 	                        fawkes::Time            time,
-	                        TransformStorage &      output);
+	                        TransformStorage       &output);
 
 	void prune_list();
 };

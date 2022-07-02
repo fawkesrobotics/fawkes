@@ -91,7 +91,7 @@ BlackBoardNetworkHandler::loop()
 		switch (msg->msgid()) {
 		case MSG_BB_LIST_ALL: {
 			BlackBoardInterfaceListContent *ilist = new BlackBoardInterfaceListContent();
-			InterfaceInfoList *             infl  = bb_->list_all();
+			InterfaceInfoList              *infl  = bb_->list_all();
 
 			for (InterfaceInfoList::iterator i = infl->begin(); i != infl->end(); ++i) {
 				ilist->append_interface(*i);
@@ -259,7 +259,7 @@ BlackBoardNetworkHandler::loop()
 		case MSG_BB_DATA_CHANGED:
 		case MSG_BB_DATA_REFRESHED: {
 			bool            data_changed = msg->msgid() == MSG_BB_DATA_CHANGED;
-			void *          payload      = msg->payload();
+			void			     *payload      = msg->payload();
 			bb_idata_msg_t *dm           = (bb_idata_msg_t *)payload;
 			Uuid            dm_serial    = dm->serial;
 			if (interfaces_.find(dm_serial) != interfaces_.end()) {
@@ -285,7 +285,7 @@ BlackBoardNetworkHandler::loop()
 		} break;
 
 		case MSG_BB_INTERFACE_MESSAGE: {
-			void *             payload   = msg->payload();
+			void              *payload   = msg->payload();
 			bb_imessage_msg_t *mm        = (bb_imessage_msg_t *)payload;
 			Uuid               mm_serial = mm->serial;
 			Uuid               mm_source = mm->source;
@@ -348,7 +348,7 @@ BlackBoardNetworkHandler::loop()
 void
 BlackBoardNetworkHandler::send_opensuccess(unsigned int clid, Interface *interface)
 {
-	void *              payload = calloc(1, sizeof(bb_iopensucc_msg_t) + interface->datasize());
+	void               *payload = calloc(1, sizeof(bb_iopensucc_msg_t) + interface->datasize());
 	bb_iopensucc_msg_t *osm     = (bb_iopensucc_msg_t *)payload;
 	osm->serial                 = interface->serial();
 	osm->writer_readers         = htonl(interface->num_readers());

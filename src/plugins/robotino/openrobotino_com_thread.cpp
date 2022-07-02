@@ -409,9 +409,9 @@ OpenRobotinoComThread::is_connected()
  * @param t upon return contains time of latest data
  */
 void
-OpenRobotinoComThread::get_act_velocity(float &       a1,
-                                        float &       a2,
-                                        float &       a3,
+OpenRobotinoComThread::get_act_velocity(float        &a1,
+                                        float        &a2,
+                                        float        &a3,
                                         unsigned int &seq,
                                         fawkes::Time &t)
 {

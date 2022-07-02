@@ -37,7 +37,7 @@ namespace fawkes {
  * @author Daniel Beck
  */
 
-BlackBoard *           EclExternalBlackBoard::m_blackboard = NULL;
+BlackBoard            *EclExternalBlackBoard::m_blackboard = NULL;
 EclExternalBlackBoard *EclExternalBlackBoard::m_instance   = NULL;
 
 /** Constructor. */
@@ -113,8 +113,8 @@ int
 p_bb_open_interface()
 {
 	EC_atom mode;
-	char *  interface_type;
-	char *  interface_id;
+	char   *interface_type;
+	char   *interface_id;
 
 	if (EC_succeed != EC_arg(1).is_atom(&mode)) {
 		fprintf(stderr, "p_bb_open_interface(): no mode given\n");
@@ -415,7 +415,7 @@ p_bb_get()
 				case IFT_FLOAT:
 					if (fit.get_length() > 1) {
 						EC_word res     = nil();
-						float * f_array = fit.get_floats();
+						float  *f_array = fit.get_floats();
 						for (int i = fit.get_length() - 1; i >= 0; --i)
 							res = ::list(EC_word(f_array[i]), res);
 						if (EC_succeed != EC_arg(3).unify(res)) {

@@ -71,9 +71,9 @@ JoystickAcquisitionThread::JoystickAcquisitionThread()
  * @param handler BlackBoard handler that will post data to the BlackBoard
  * @param logger logging instance
  */
-JoystickAcquisitionThread::JoystickAcquisitionThread(const char *               device_file,
+JoystickAcquisitionThread::JoystickAcquisitionThread(const char                *device_file,
                                                      JoystickBlackBoardHandler *handler,
-                                                     Logger *                   logger)
+                                                     Logger                    *logger)
 : Thread("JoystickAcquisitionThread", Thread::OPMODE_CONTINUOUS)
 {
 	set_prepfin_conc_loop(true);

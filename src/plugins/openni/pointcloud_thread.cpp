@@ -292,7 +292,7 @@ OpenNiPointCloudThread::fill_xyzrgb_no_pcl(fawkes::Time &ts, const XnDepthPixel 
 }
 
 void
-OpenNiPointCloudThread::fill_xyz_xyzrgb_no_pcl(fawkes::Time &            ts,
+OpenNiPointCloudThread::fill_xyz_xyzrgb_no_pcl(fawkes::Time             &ts,
                                                const XnDepthPixel *const depth_data)
 {
 	pcl_xyz_buf_->lock_for_write();
@@ -302,7 +302,7 @@ OpenNiPointCloudThread::fill_xyz_xyzrgb_no_pcl(fawkes::Time &            ts,
 	pcl_xyzrgb_buf_->set_capture_time(&ts);
 
 	pcl_point_xyzrgb_t *pclbuf_rgb = (pcl_point_xyzrgb_t *)pcl_xyzrgb_buf_->buffer();
-	pcl_point_t *       pclbuf_xyz = (pcl_point_t *)pcl_xyz_buf_->buffer();
+	pcl_point_t        *pclbuf_xyz = (pcl_point_t *)pcl_xyz_buf_->buffer();
 
 	unsigned int idx = 0;
 	for (unsigned int h = 0; h < height_; ++h) {
@@ -343,7 +343,7 @@ OpenNiPointCloudThread::fill_rgb_no_pcl()
 	img_thread_->wait_loop_done();
 
 	pcl_point_xyzrgb_t *pclbuf_rgb = (pcl_point_xyzrgb_t *)pcl_xyzrgb_buf_->buffer();
-	RGB_t *             imagebuf   = (RGB_t *)image_rgb_buf_->buffer();
+	RGB_t              *imagebuf   = (RGB_t *)image_rgb_buf_->buffer();
 
 	for (unsigned int i = 0; i < width_ * height_; ++i) {
 		pclbuf_rgb->r = imagebuf[i].R;
@@ -439,7 +439,7 @@ OpenNiPointCloudThread::fill_xyz_xyzrgb(fawkes::Time &ts, const XnDepthPixel *co
 	pcl_xyzrgb_buf_->set_capture_time(&ts);
 
 	pcl_point_xyzrgb_t *pclbuf_rgb = (pcl_point_xyzrgb_t *)pcl_xyzrgb_buf_->buffer();
-	pcl_point_t *       pclbuf_xyz = (pcl_point_t *)pcl_xyz_buf_->buffer();
+	pcl_point_t        *pclbuf_xyz = (pcl_point_t *)pcl_xyz_buf_->buffer();
 
 	unsigned int idx = 0;
 	for (unsigned int h = 0; h < height_; ++h) {
@@ -486,7 +486,7 @@ OpenNiPointCloudThread::fill_rgb(pcl::PointCloud<pcl::PointXYZRGB> &pcl_rgb)
 	img_thread_->wait_loop_done();
 
 	pcl_point_xyzrgb_t *pclbuf_rgb = (pcl_point_xyzrgb_t *)pcl_xyzrgb_buf_->buffer();
-	RGB_t *             imagebuf   = (RGB_t *)image_rgb_buf_->buffer();
+	RGB_t              *imagebuf   = (RGB_t *)image_rgb_buf_->buffer();
 
 	for (unsigned int i = 0; i < width_ * height_; ++i) {
 		pclbuf_rgb->r = pcl_rgb.points[i].r = imagebuf[i].R;

@@ -67,8 +67,8 @@ private:
 	void navgraph_cost_between(PLEXIL::Command *cmd);
 
 private:
-	fawkes::Logger *             logger_;
-	fawkes::BlackBoard *         blackboard_;
+	fawkes::Logger              *logger_;
+	fawkes::BlackBoard          *blackboard_;
 	fawkes::Position3DInterface *pose_if_;
 
 	fawkes::LockPtr<fawkes::NavGraph> navgraph_;

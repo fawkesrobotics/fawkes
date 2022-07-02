@@ -65,7 +65,7 @@ public:
 
 	// For BlackBoardInterfaceListener
 	virtual bool bb_interface_message_received(fawkes::Interface *interface,
-	                                           fawkes::Message *  message) noexcept;
+	                                           fawkes::Message   *message) noexcept;
 
 	void update_sensor_values();
 
@@ -79,9 +79,9 @@ protected:
 
 private:
 	fawkes::PanTiltInterface *pantilt_if_;
-	fawkes::LedInterface *    led_if_;
-	fawkes::JointInterface *  panjoint_if_;
-	fawkes::JointInterface *  tiltjoint_if_;
+	fawkes::LedInterface     *led_if_;
+	fawkes::JointInterface   *panjoint_if_;
+	fawkes::JointInterface   *tiltjoint_if_;
 
 	fawkes::RefPtr<RobotisRX28> rx28_;
 
@@ -127,16 +127,16 @@ private:
 	{
 	public:
 		WorkerThread(std::string                 ptu_name,
-		             fawkes::Logger *            logger,
+		             fawkes::Logger             *logger,
 		             fawkes::RefPtr<RobotisRX28> rx28,
 		             unsigned char               pan_servo_id,
 		             unsigned char               tilt_servo_id,
-		             float &                     pan_min,
-		             float &                     pan_max,
-		             float &                     tilt_min,
-		             float &                     tilt_max,
-		             float &                     pan_offset,
-		             float &                     tilt_offset);
+		             float                      &pan_min,
+		             float                      &pan_max,
+		             float                      &tilt_min,
+		             float                      &tilt_max,
+		             float                      &pan_offset,
+		             float                      &tilt_offset);
 
 		~WorkerThread();
 		void goto_pantilt(float pan, float tilt);
@@ -168,10 +168,10 @@ private:
 		void exec_goto_pantilt(float pan, float tilt);
 
 	private:
-		fawkes::ReadWriteLock *     rx28_rwlock_;
+		fawkes::ReadWriteLock      *rx28_rwlock_;
 		fawkes::RefPtr<RobotisRX28> rx28_;
-		fawkes::Logger *            logger_;
-		fawkes::WaitCondition *     update_waitcond_;
+		fawkes::Logger             *logger_;
+		fawkes::WaitCondition      *update_waitcond_;
 
 		unsigned char pan_servo_id_;
 		unsigned char tilt_servo_id_;

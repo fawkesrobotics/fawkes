@@ -65,6 +65,6 @@ private:
 	std::unique_ptr<fawkes::WebReply> cb_get_image(fawkes::WebviewRestParams &params);
 
 private:
-	fawkes::WebviewRestApi *                                                  rest_api_;
+	fawkes::WebviewRestApi                                                   *rest_api_;
 	std::map<std::string, std::shared_ptr<fawkes::WebviewJpegStreamProducer>> streams_;
 };

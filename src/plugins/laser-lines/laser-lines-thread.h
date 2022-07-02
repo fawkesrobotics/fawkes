@@ -126,22 +126,22 @@ private:
 	void set_interface(unsigned int                idx,
 	                   fawkes::LaserLineInterface *iface,
 	                   bool                        moving_average,
-	                   const TrackedLineInfo &     tinfo,
-	                   const std::string &         frame_id = "");
+	                   const TrackedLineInfo      &tinfo,
+	                   const std::string          &frame_id = "");
 
 	void set_empty_interface(fawkes::LaserLineInterface *iface) const;
 
 #ifdef HAVE_VISUAL_DEBUGGING
 	void publish_visualization(const std::vector<TrackedLineInfo> &linfos,
-	                           const std::string &                 marker_namespace,
-	                           const std::string &                 avg_marker_namespace);
+	                           const std::string                  &marker_namespace,
+	                           const std::string                  &avg_marker_namespace);
 
 	void publish_visualization_add_line(visualization_msgs::MarkerArray &m,
-	                                    unsigned int &                   idnum,
-	                                    const LineInfo &                 info,
+	                                    unsigned int                    &idnum,
+	                                    const LineInfo                  &info,
 	                                    const size_t                     i,
-	                                    const std::string &              marker_namespace,
-	                                    const std::string &              name_suffix = "");
+	                                    const std::string               &marker_namespace,
+	                                    const std::string               &name_suffix = "");
 #endif
 
 private:

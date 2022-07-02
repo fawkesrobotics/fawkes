@@ -42,8 +42,8 @@
  * @param logger logger to output informational and error messages
  */
 XmlRpcPluginMethods::XmlRpcPluginMethods(std::shared_ptr<xmlrpc_c::registry> registry,
-                                         fawkes::PluginManager *             plugin_manager,
-                                         fawkes::Logger *                    logger)
+                                         fawkes::PluginManager              *plugin_manager,
+                                         fawkes::Logger                     *logger)
 {
 	xmlrpc_registry_ = registry;
 	plugin_manager_  = plugin_manager;
@@ -76,7 +76,7 @@ XmlRpcPluginMethods::plugin_list::plugin_list(fawkes::PluginManager *plugin_mana
 {
 	_signature = "A:";
 	_help      = "Returns array of plugins. Each entry is a struct consisting of the "
-	        "entries name, desc, and loaded.";
+	             "entries name, desc, and loaded.";
 
 	plugin_manager_ = plugin_manager;
 }
@@ -126,7 +126,7 @@ XmlRpcPluginMethods::plugin_list::execute(xmlrpc_c::paramList const &params,
  * @param logger logger to report problems
  */
 XmlRpcPluginMethods::plugin_load::plugin_load(fawkes::PluginManager *plugin_manager,
-                                              fawkes::Logger *       logger)
+                                              fawkes::Logger        *logger)
 {
 	_signature = "b:s";
 	_help      = "Load plugin specified as argument, returns true on success, false otherwise.";
@@ -171,7 +171,7 @@ XmlRpcPluginMethods::plugin_load::execute(xmlrpc_c::paramList const &params,
  * @param logger logger to report problems
  */
 XmlRpcPluginMethods::plugin_unload::plugin_unload(fawkes::PluginManager *plugin_manager,
-                                                  fawkes::Logger *       logger)
+                                                  fawkes::Logger        *logger)
 {
 	_signature = "b:s";
 	_help      = "Unload plugin specified as argument, returns true on success, false otherwise.";

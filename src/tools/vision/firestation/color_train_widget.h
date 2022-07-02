@@ -91,14 +91,14 @@ private:
 
 	void reset_gui();
 
-	firevision::BayesColormapGenerator *    m_generator;
+	firevision::BayesColormapGenerator     *m_generator;
 	std::shared_ptr<firevision::Zauberstab> m_zauberstab;
 	std::shared_ptr<ColormapViewerWidget>   m_cvw;
 
 	firevision::hint_t m_fg_object;
 
-	unsigned char *          m_src_buffer;
-	unsigned char *          m_draw_buffer;
+	unsigned char           *m_src_buffer;
+	unsigned char           *m_draw_buffer;
 	unsigned int             m_img_width;
 	unsigned int             m_img_height;
 	unsigned int             m_img_size;
@@ -106,20 +106,20 @@ private:
 	unsigned int             m_seg_img_max_width;
 	unsigned int             m_seg_img_max_height;
 
-	Gtk::Window *           m_wnd_parent;
-	Gtk::Button *           m_btn_reset_selection;
-	Gtk::Button *           m_btn_add_to_colormap;
-	Gtk::Button *           m_btn_reset_colormap;
-	Gtk::Button *           m_btn_load_histos;
-	Gtk::Button *           m_btn_save_histos;
-	Gtk::Button *           m_btn_load_colormap;
-	Gtk::Button *           m_btn_save_colormap;
-	Gtk::SpinButton *       m_spbtn_cm_depth;
-	Gtk::SpinButton *       m_spbtn_cm_width;
-	Gtk::SpinButton *       m_spbtn_cm_height;
-	Gtk::Image *            m_img_segmentation;
-	Gtk::Scale *            m_scl_threshold;
-	Gtk::Scale *            m_scl_min_prob;
+	Gtk::Window            *m_wnd_parent;
+	Gtk::Button            *m_btn_reset_selection;
+	Gtk::Button            *m_btn_add_to_colormap;
+	Gtk::Button            *m_btn_reset_colormap;
+	Gtk::Button            *m_btn_load_histos;
+	Gtk::Button            *m_btn_save_histos;
+	Gtk::Button            *m_btn_load_colormap;
+	Gtk::Button            *m_btn_save_colormap;
+	Gtk::SpinButton        *m_spbtn_cm_depth;
+	Gtk::SpinButton        *m_spbtn_cm_width;
+	Gtk::SpinButton        *m_spbtn_cm_height;
+	Gtk::Image	           *m_img_segmentation;
+	Gtk::Scale	           *m_scl_threshold;
+	Gtk::Scale	           *m_scl_min_prob;
 	Gtk::FileChooserDialog *m_fcd_filechooser;
 
 	Glib::Dispatcher m_signal_update_image;

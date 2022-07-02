@@ -46,9 +46,9 @@ using namespace fawkes;
  * @param writer_bb the BlackBoard instance the writing instance has been
  * created on
  */
-SyncInterfaceListener::SyncInterfaceListener(fawkes::Logger *    logger,
-                                             fawkes::Interface * reader,
-                                             fawkes::Interface * writer,
+SyncInterfaceListener::SyncInterfaceListener(fawkes::Logger     *logger,
+                                             fawkes::Interface  *reader,
+                                             fawkes::Interface  *writer,
                                              fawkes::BlackBoard *reader_bb,
                                              fawkes::BlackBoard *writer_bb)
 : BlackBoardInterfaceListener("SyncInterfaceListener(%s-%s)", writer->uid(), reader->id())
@@ -76,7 +76,7 @@ SyncInterfaceListener::~SyncInterfaceListener()
 
 bool
 SyncInterfaceListener::bb_interface_message_received(Interface *interface,
-                                                     Message *  message) noexcept
+                                                     Message   *message) noexcept
 {
 	try {
 		if (interface == writer_) {

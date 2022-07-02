@@ -158,7 +158,7 @@ ColorTrainWidget::click(unsigned int x, unsigned int y, unsigned int button)
 	memcpy(m_draw_buffer, m_src_buffer, m_img_size);
 
 	ZRegion *region = m_zauberstab->getRegion();
-	Drawer * d      = new Drawer();
+	Drawer  *d      = new Drawer();
 	d->set_buffer(m_draw_buffer, m_img_width, m_img_height);
 
 	for (unsigned int s = 0; s < region->slices->size(); s++) {
@@ -556,7 +556,7 @@ ColorTrainWidget::load_colormap()
 		std::string  filename = m_fcd_filechooser->get_filename();
 		ColormapFile cmf;
 		cmf.read(filename.c_str());
-		Colormap *   tcm  = cmf.get_colormap();
+		Colormap    *tcm  = cmf.get_colormap();
 		YuvColormap *tycm = dynamic_cast<YuvColormap *>(tcm);
 		if (!tycm) {
 			delete tcm;

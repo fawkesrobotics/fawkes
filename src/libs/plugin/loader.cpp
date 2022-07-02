@@ -42,7 +42,7 @@ namespace fawkes {
 class PluginLoader::Data
 {
 public:
-	ModuleManager *                 mm;
+	ModuleManager                  *mm;
 	std::map<Plugin *, Module *>    plugin_module_map;
 	std::map<std::string, Plugin *> name_plugin_map;
 	std::map<Plugin *, std::string> plugin_name_map;
@@ -168,7 +168,7 @@ PluginLoader::create_instance(const char *plugin_name, Module *module)
 	}
 
 	PluginFactoryFunc pff = (PluginFactoryFunc)module->get_symbol("plugin_factory");
-	Plugin *          p   = NULL;
+	Plugin           *p   = NULL;
 
 	p = pff(config_);
 	if (p == NULL) {
@@ -233,7 +233,7 @@ PluginLoader::get_string_symbol(const char *plugin_name,
 {
 #ifdef HAVE_LIBELF
 	GElf_Ehdr elf_header;
-	Elf *     elf;
+	Elf	    *elf;
 
 	std::string module_name =
 	  plugin_base_dir_ + "/" + plugin_name + "." + d_->mm->get_module_file_extension();
@@ -273,7 +273,7 @@ PluginLoader::get_string_symbol(const char *plugin_name,
 				gelf_getsym(edata, i, &sym);
 
 				GElf_Shdr sym_shdr;
-				Elf_Scn * sym_scn = elf_getscn(elf, sym.st_shndx);
+				Elf_Scn  *sym_scn = elf_getscn(elf, sym.st_shndx);
 				gelf_getshdr(sym_scn, &sym_shdr);
 
 				char *secname = elf_strptr(elf, elf_header.e_shstrndx, sym_shdr.sh_name);
@@ -281,10 +281,10 @@ PluginLoader::get_string_symbol(const char *plugin_name,
 
 				if ((strcmp(secname, section_name) == 0) && (strcmp(symname, symbol_name) == 0)) {
 					// found it, extract string
-					Elf_Data *  sym_data = elf_rawdata(sym_scn, NULL);
+					Elf_Data   *sym_data = elf_rawdata(sym_scn, NULL);
 					const char *start = (const char *)sym_data->d_buf + (sym.st_value - sym_shdr.sh_offset);
 					const char *const limit = start + sym.st_size;
-					const char *      end   = (const char *)memchr(start, '\0', limit - start);
+					const char       *end   = (const char *)memchr(start, '\0', limit - start);
 
 					if (end != NULL) {
 						close(fd);

@@ -51,15 +51,15 @@ public:
 	virtual void loop();
 	virtual void finalize();
 
-	virtual void visualize(const std::string &                 frame_id,
-	                       Eigen::Vector4f &                   table_centroid,
-	                       Eigen::Vector4f &                   normal,
-	                       V_Vector4f &                        table_hull_vertices,
-	                       V_Vector4f &                        table_model_vertices,
-	                       V_Vector4f &                        good_table_hull_edges,
-	                       M_Vector4f &                        centroids,
-	                       M_Vector4f &                        cylinder_params,
-	                       std::map<unsigned int, double> &    obj_confidence,
+	virtual void visualize(const std::string                  &frame_id,
+	                       Eigen::Vector4f                    &table_centroid,
+	                       Eigen::Vector4f                    &normal,
+	                       V_Vector4f                         &table_hull_vertices,
+	                       V_Vector4f                         &table_model_vertices,
+	                       V_Vector4f                         &good_table_hull_edges,
+	                       M_Vector4f                         &centroids,
+	                       M_Vector4f                         &cylinder_params,
+	                       std::map<unsigned int, double>     &obj_confidence,
 	                       std::map<unsigned int, signed int> &best_obj_guess) noexcept;
 
 private:
@@ -78,7 +78,7 @@ private:
 	M_Vector4f                         cylinder_params_;
 	std::map<unsigned int, double>     obj_confidence_;
 	std::map<unsigned int, signed int> best_obj_guess_;
-	ros::Publisher *                   vispub_;
+	ros::Publisher                    *vispub_;
 #ifdef USE_POSEPUB
 	ros::Publisher *posepub_;
 #endif

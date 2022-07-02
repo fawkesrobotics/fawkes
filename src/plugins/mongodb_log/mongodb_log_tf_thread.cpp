@@ -158,8 +158,8 @@ MongoLogTransformsThread::loop()
 
 void
 MongoLogTransformsThread::store(std::vector<tf::TimeCacheInterfacePtr> &caches,
-                                std::vector<fawkes::Time> &             from,
-                                std::vector<fawkes::Time> &             to)
+                                std::vector<fawkes::Time>              &from,
+                                std::vector<fawkes::Time>              &to)
 {
 	std::vector<std::string> frame_map = tf_listener->get_frame_id_mappings();
 

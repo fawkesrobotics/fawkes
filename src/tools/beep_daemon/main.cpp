@@ -138,7 +138,7 @@ public:
 
 private:
 	BeepController   beep_;
-	BlackBoard *     bb_;
+	BlackBoard      *bb_;
 	SwitchInterface *switch_if_;
 
 	Time *until_;

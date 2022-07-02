@@ -84,7 +84,7 @@ RobotinoIrPclThread::loop()
 	sens_if_->read();
 
 	if (sens_if_->refreshed()) {
-		const Time * ct        = sens_if_->timestamp();
+		const Time  *ct        = sens_if_->timestamp();
 		const float *distances = sens_if_->distance();
 
 		pcl::PointCloud<pcl::PointXYZ> &pcl = **pcl_xyz_;

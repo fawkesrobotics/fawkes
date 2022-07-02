@@ -69,7 +69,7 @@ private:
 	CLIPS::Values clips_now();
 	void          clips_call_skill(std::string skill_name, CLIPS::Values args);
 	void          clips_skill_call_ext(std::string skill_name, std::string skill_string);
-	const char *  status_string(fawkes::SkillerInterface::SkillStatusEnum status);
+	const char   *status_string(fawkes::SkillerInterface::SkillStatusEnum status);
 
 private:
 	bool  cfg_auto_start_;
@@ -79,7 +79,7 @@ private:
 	bool  cfg_steal_skiller_control_;
 
 	fawkes::SkillerInterface *skiller_if_;
-	fawkes::SwitchInterface * switch_if_;
+	fawkes::SwitchInterface  *switch_if_;
 
 	bool ctrl_recheck_;
 

@@ -45,7 +45,7 @@ public:
 	                 unsigned int height,
 	                 unsigned int offset_hor,
 	                 unsigned int offset_ver,
-	                 ROI *        roi = NULL,
+	                 ROI         *roi = NULL,
 	                 unsigned int gap = 0);
 	virtual ~ScanlineLineGrid();
 
@@ -56,7 +56,7 @@ public:
 
 	bool         finished();
 	void         reset();
-	const char * get_name();
+	const char  *get_name();
 	unsigned int get_margin();
 
 	virtual void set_robot_pose(float x, float y, float ori);
@@ -68,7 +68,7 @@ public:
 	                             unsigned int height,
 	                             unsigned int offset_hor,
 	                             unsigned int offset_ver,
-	                             ROI *        roi = NULL);
+	                             ROI         *roi = NULL);
 	virtual void set_roi(ROI *roi = NULL);
 
 private:

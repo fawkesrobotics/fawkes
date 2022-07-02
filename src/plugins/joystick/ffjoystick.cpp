@@ -95,7 +95,7 @@ public:
 	JoystickBlackBoardLogger(ArgumentParser &argp, Logger *logger)
 	: BlackBoardInterfaceListener("JoystickBlackBoardLogger"), logger_(logger)
 	{
-		char *             host      = (char *)"localhost";
+		char              *host      = (char *)"localhost";
 		unsigned short int port      = 1910;
 		bool               free_host = argp.parse_hostport("r", &host, &port);
 
@@ -185,8 +185,8 @@ public:
 
 private:
 	bool               warning_printed_;
-	BlackBoard *       bb_;
-	Logger *           logger_;
+	BlackBoard        *bb_;
+	Logger            *logger_;
 	JoystickInterface *joystick_if_;
 	WaitCondition      waitcond_;
 };
@@ -204,9 +204,9 @@ public:
    * @param logger logger
    */
 	JoystickBlackBoardActListener(JoystickAcquisitionThread *aqt,
-	                              BlackBoard *               blackboard,
-	                              JoystickInterface *        joystick_if,
-	                              Logger *                   logger)
+	                              BlackBoard                *blackboard,
+	                              JoystickInterface         *joystick_if,
+	                              Logger                    *logger)
 	: BlackBoardInterfaceListener("JoystickBlackBoardActMsgProcThread"),
 	  bb_(blackboard),
 	  joystick_if_(joystick_if)
@@ -239,8 +239,8 @@ public:
 
 private:
 	JoystickActThread::MessageProcessor *msgproc_;
-	BlackBoard *                         bb_;
-	JoystickInterface *                  joystick_if_;
+	BlackBoard                          *bb_;
+	JoystickInterface                   *joystick_if_;
 };
 
 /** Config tool main.
@@ -270,7 +270,7 @@ main(int argc, char **argv)
 			SignalManager::register_handler(SIGINT, &jbl);
 			jbl.run();
 		} else {
-			char *             host      = (char *)"localhost";
+			char              *host      = (char *)"localhost";
 			unsigned short int port      = 1910;
 			bool               free_host = argp.parse_hostport("r", &host, &port);
 

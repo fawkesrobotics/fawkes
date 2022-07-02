@@ -39,14 +39,14 @@ public:
 	~LogFileDescriptorToLog();
 
 private:
-	void start_log(const char *                           logname,
+	void start_log(const char	                          *logname,
 	               Logger::LogLevel                       log_level,
 	               boost::asio::posix::stream_descriptor &sd,
-	               boost::asio::streambuf &               buf);
-	void handle_log_line(const char *                           logname,
+	               boost::asio::streambuf                &buf);
+	void handle_log_line(const char                            *logname,
 	                     Logger::LogLevel                       log_level,
 	                     boost::asio::posix::stream_descriptor &sd,
-	                     boost::asio::streambuf &               buf,
+	                     boost::asio::streambuf                &buf,
 	                     boost::system::error_code              ec,
 	                     size_t                                 bytes_read);
 
@@ -62,7 +62,7 @@ private:
 	boost::asio::posix::stream_descriptor stream_;
 	boost::asio::streambuf                buffer_;
 
-	Logger *         logger_;
+	Logger          *logger_;
 	std::string      log_name_;
 	Logger::LogLevel log_level_;
 };

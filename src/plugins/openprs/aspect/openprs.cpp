@@ -62,9 +62,9 @@ namespace fawkes {
  * If NULL will be set to "fawkes-|kernel_name|" (where |kernel_name|
  * will be replaced by the value of @p kernel_name).
  */
-OpenPRSAspect::OpenPRSAspect(const char *        kernel_name,
+OpenPRSAspect::OpenPRSAspect(const char         *kernel_name,
                              OpenPRSAspect::Mode mode,
-                             const char *        local_name)
+                             const char         *local_name)
 : openprs_kernel_name(kernel_name),
   openprs_kernel_mode(mode),
   openprs_local_name(local_name ? local_name : std::string("fawkes-") + kernel_name),

@@ -78,8 +78,8 @@ NetworkAspect::~NetworkAspect()
  */
 void
 NetworkAspect::init_NetworkAspect(NetworkNameResolver *resolver,
-                                  ServicePublisher *   service_publisher,
-                                  ServiceBrowser *     service_browser)
+                                  ServicePublisher    *service_publisher,
+                                  ServiceBrowser      *service_browser)
 {
 	this->nnresolver        = resolver;
 	this->service_publisher = service_publisher;

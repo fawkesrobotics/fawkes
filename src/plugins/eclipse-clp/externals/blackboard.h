@@ -52,7 +52,7 @@ public:
 	static void                   cleanup_instance();
 	static EclExternalBlackBoard *instance();
 
-	static BlackBoard *                 blackboard_instance();
+	static BlackBoard                  *blackboard_instance();
 	std::map<std::string, Interface *> &interfaces();
 
 	/**
@@ -74,10 +74,10 @@ public:
 	}
 
 private:
-	static EclExternalBlackBoard *     m_instance;
+	static EclExternalBlackBoard      *m_instance;
 	std::map<std::string, Interface *> m_interfaces;
-	static BlackBoard *                m_blackboard;
-	static Logger *                    m_logger;
+	static BlackBoard                 *m_blackboard;
+	static Logger                     *m_logger;
 };
 } // namespace fawkes
 

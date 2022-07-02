@@ -75,7 +75,7 @@ public:
 	 */
 	T &
 	find_handler(WebRequest::Method                  method,
-	             const std::string &                 path,
+	             const std::string                  &path,
 	             std::map<std::string, std::string> &path_args)
 	{
 		auto ri = std::find_if(
@@ -208,8 +208,8 @@ private:
 	 * @return true if the path cold be matched, false otherwise.
 	 */
 	bool
-	path_match(const std::string &                 url,
-	           const path_regex &                  path_re,
+	path_match(const std::string                  &url,
+	           const path_regex                   &path_re,
 	           std::map<std::string, std::string> &path_args)
 	{
 		std::smatch matches;

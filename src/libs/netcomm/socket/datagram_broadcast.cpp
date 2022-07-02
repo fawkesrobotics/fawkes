@@ -48,7 +48,7 @@ namespace fawkes {
  * @param timeout timeout, if 0 all operationsare blocking, otherwise it
  * is tried for timeout seconds.
  */
-BroadcastDatagramSocket::BroadcastDatagramSocket(const char *   broadcast_addr_s,
+BroadcastDatagramSocket::BroadcastDatagramSocket(const char    *broadcast_addr_s,
                                                  unsigned short port,
                                                  float          timeout)
 : Socket(IPv4, UDP, timeout)

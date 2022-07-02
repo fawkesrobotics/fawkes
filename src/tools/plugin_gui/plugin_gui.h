@@ -44,8 +44,8 @@ private:
 	void on_disconnect();
 
 private:
-	Gtk::Statusbar *            m_stb_status;
-	fawkes::PluginTreeView *    m_trv_plugins;
+	Gtk::Statusbar             *m_stb_status;
+	fawkes::PluginTreeView     *m_trv_plugins;
 	fawkes::ServiceSelectorCBE *m_service_selector;
 };
 

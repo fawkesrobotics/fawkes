@@ -65,7 +65,7 @@ public:
 
 	void                 add_colormap(Colormap *colormap);
 	ColormapBlockVector *colormap_blocks();
-	Colormap *           get_colormap();
+	Colormap            *get_colormap();
 
 	uint16_t get_depth();
 	uint16_t get_width();

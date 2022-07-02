@@ -66,9 +66,9 @@ using namespace firevision;
  * @param clock clock to use for timeout measurement (system time)
  */
 FvAcquisitionThread::FvAcquisitionThread(const char *id,
-                                         Camera *    camera,
-                                         Logger *    logger,
-                                         Clock *     clock)
+                                         Camera     *camera,
+                                         Logger     *logger,
+                                         Clock      *clock)
 : Thread("FvAcquisitionThread"), BlackBoardInterfaceListener("FvAcquisitionThread::%s", id)
 {
 	set_prepfin_conc_loop(true);

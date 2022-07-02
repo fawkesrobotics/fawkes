@@ -45,8 +45,8 @@ class LuaInterfaceImporter : public LuaContextWatcher
 	public:
 		InterfaceObserver(LuaInterfaceImporter *lii,
 		                  std::string           varname,
-		                  const char *          type,
-		                  const char *          id_pattern);
+		                  const char           *type,
+		                  const char           *id_pattern);
 
 		virtual void bb_interface_created(const char *type, const char *id) noexcept;
 
@@ -63,10 +63,10 @@ public:
 	/** Map of varname to list of interfaces */
 	typedef fawkes::LockMap<std::string, std::list<fawkes::Interface *>> InterfaceListMap;
 
-	LuaInterfaceImporter(LuaContext *   context_,
-	                     BlackBoard *   blackboard,
+	LuaInterfaceImporter(LuaContext    *context_,
+	                     BlackBoard    *blackboard,
 	                     Configuration *config,
-	                     Logger *       logger);
+	                     Logger        *logger);
 	~LuaInterfaceImporter();
 
 	void open_reading_interfaces(std::string &prefix);
@@ -100,10 +100,10 @@ private:
 	void add_observed_interface(std::string varname, const char *type, const char *id);
 
 private:
-	LuaContext *   context_;
-	BlackBoard *   blackboard_;
+	LuaContext    *context_;
+	BlackBoard    *blackboard_;
 	Configuration *config_;
-	Logger *       logger_;
+	Logger        *logger_;
 
 	bool two_stage_;
 

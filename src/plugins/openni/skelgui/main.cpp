@@ -53,12 +53,12 @@ bool                   g_pause         = false;
 bool                   g_draw_image    = true;
 bool                   g_draw_depth    = false;
 bool                   g_draw_skeleton = true;
-RemoteBlackBoard *     g_rbb;
-Camera *               g_image_cam;
-Camera *               g_depth_cam;
-Camera *               g_label_cam;
-SkelGuiImageDrawer *   g_image_drawer    = NULL;
-SkelGuiDepthDrawer *   g_depth_drawer    = NULL;
+RemoteBlackBoard      *g_rbb;
+Camera                *g_image_cam;
+Camera                *g_depth_cam;
+Camera                *g_label_cam;
+SkelGuiImageDrawer    *g_image_drawer    = NULL;
+SkelGuiDepthDrawer    *g_depth_drawer    = NULL;
 SkelGuiSkeletonDrawer *g_skeleton_drawer = NULL;
 
 UserMap g_users;

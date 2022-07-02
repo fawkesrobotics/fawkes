@@ -100,7 +100,7 @@ Spinlock::lock()
 		throw Exception(err, "Failed to aquire lock for thread %s", Thread::current_thread()->name());
 	}
 #else
-	bool locked = false;
+	bool  locked = false;
 	while (!locked) {
 		locked = spinlock_data->mutex.try_lock();
 	}

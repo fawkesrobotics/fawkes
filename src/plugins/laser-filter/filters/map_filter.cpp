@@ -50,9 +50,9 @@ LaserMapFilterDataFilter::LaserMapFilterDataFilter(const std::string &filter_nam
                                                    unsigned int       in_data_size,
                                                    std::vector<LaserDataFilter::Buffer *> &in,
                                                    fawkes::tf::Transformer *tf_listener,
-                                                   fawkes::Configuration *  config,
-                                                   const std::string &      prefix,
-                                                   fawkes::Logger *         logger)
+                                                   fawkes::Configuration   *config,
+                                                   const std::string       &prefix,
+                                                   fawkes::Logger          *logger)
 : LaserDataFilter(filter_name, in_data_size, in, 1)
 {
 	tf_listener_         = tf_listener;

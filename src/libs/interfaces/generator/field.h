@@ -61,14 +61,14 @@ public:
 	std::string              getDefaultValue() const;
 
 	const std::vector<InterfaceEnumConstant> *getEnumConstants() const;
-	const InterfaceEnumConstant &             getEnumConstant(const std::string &name) const;
+	const InterfaceEnumConstant              &getEnumConstant(const std::string &name) const;
 
 	bool operator<(const InterfaceField &f) const;
 
 private:
-	void tokenize(const std::string &       str,
+	void tokenize(const std::string        &str,
 	              std::vector<std::string> &tokens,
-	              const std::string &       delimiters = " ");
+	              const std::string        &delimiters = " ");
 
 	std::string                         name;
 	std::string                         type;

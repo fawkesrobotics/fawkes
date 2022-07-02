@@ -96,8 +96,8 @@ HokuyoUrgAcquisitionThread::init()
 			cfg_serial_ = config->get_string((cfg_prefix_ + "serial").c_str());
 
 			// try to find device using udev
-			struct udev *           udev;
-			struct udev_enumerate * enumerate;
+			struct udev            *udev;
+			struct udev_enumerate  *enumerate;
 			struct udev_list_entry *devices, *dev_list_entry;
 			udev = udev_new();
 			if (!udev) {
@@ -112,7 +112,7 @@ HokuyoUrgAcquisitionThread::init()
 			devices = udev_enumerate_get_list_entry(enumerate);
 			udev_list_entry_foreach(dev_list_entry, devices)
 			{
-				const char *        path;
+				const char         *path;
 				struct udev_device *dev, *usb_device;
 
 				path = udev_list_entry_get_name(dev_list_entry);

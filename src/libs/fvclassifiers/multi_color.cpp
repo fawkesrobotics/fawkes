@@ -50,7 +50,7 @@ namespace firevision {
  * @param grow_by grow region by that many pixels
  */
 MultiColorClassifier::MultiColorClassifier(ScanlineModel *scanline_model,
-                                           ColorModel *   color_model,
+                                           ColorModel    *color_model,
                                            unsigned int   min_num_points,
                                            unsigned int   box_extent,
                                            bool           upward,

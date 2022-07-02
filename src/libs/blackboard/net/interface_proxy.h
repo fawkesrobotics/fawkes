@@ -41,10 +41,10 @@ class Interface;
 class BlackBoardInterfaceProxy : public InterfaceMediator, public MessageMediator
 {
 public:
-	BlackBoardInterfaceProxy(FawkesNetworkClient * client,
+	BlackBoardInterfaceProxy(FawkesNetworkClient  *client,
 	                         FawkesNetworkMessage *msg,
-	                         BlackBoardNotifier *  notifier,
-	                         Interface *           interface,
+	                         BlackBoardNotifier   *notifier,
+	                         Interface            *interface,
 	                         bool                  readwrite);
 	~BlackBoardInterfaceProxy();
 
@@ -79,12 +79,12 @@ private:
 private:
 	FawkesNetworkClient *fnc_;
 
-	RefCountRWLock *    rwlock_;
+	RefCountRWLock     *rwlock_;
 	BlackBoardNotifier *notifier_;
-	Interface *         interface_;
+	Interface          *interface_;
 
-	void * mem_chunk_;
-	void * data_chunk_;
+	void  *mem_chunk_;
+	void  *data_chunk_;
 	size_t data_size_;
 
 	Uuid           instance_serial_;

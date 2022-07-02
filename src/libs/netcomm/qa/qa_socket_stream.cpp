@@ -92,7 +92,7 @@ public:
 private:
 	unsigned int  i;
 	StreamSocket *s;
-	Socket *      cs;
+	Socket       *cs;
 	bool          accepted;
 };
 
@@ -139,7 +139,7 @@ public:
 	}
 
 private:
-	const char *  host;
+	const char   *host;
 	StreamSocket *s;
 	bool          connected;
 };

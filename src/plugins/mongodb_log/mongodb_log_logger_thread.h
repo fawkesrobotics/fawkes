@@ -97,8 +97,8 @@ private:
 	void insert_message(LogLevel ll, const char *component, fawkes::Exception &e);
 	void tlog_insert_message(LogLevel        ll,
 	                         struct timeval *t,
-	                         const char *    component,
-	                         const char *    format,
+	                         const char     *component,
+	                         const char     *format,
 	                         va_list         va);
 	void
 	tlog_insert_message(LogLevel ll, struct timeval *t, const char *component, fawkes::Exception &);

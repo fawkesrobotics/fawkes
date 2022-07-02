@@ -45,7 +45,7 @@ Computable::Computable(
   bsoncxx::document::value query_to_compute,
   std::string              collection,
   const boost::function<std::list<document::value>(bsoncxx::document::view, std::string)>
-    &    compute_function,
+        &compute_function,
   double caching_time,
   int    priority)
 : compute_function(compute_function), query_to_compute(query_to_compute), collection(collection)

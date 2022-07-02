@@ -48,7 +48,7 @@ using namespace firevision;
  * @param cobject C base object
  * @param builder Gtk::Builder
  */
-FuseViewerGtkWindow::FuseViewerGtkWindow(BaseObjectType *                 cobject,
+FuseViewerGtkWindow::FuseViewerGtkWindow(BaseObjectType                  *cobject,
                                          const Glib::RefPtr<Gtk::Builder> builder)
 : Gtk::Window(cobject)
 {

@@ -112,11 +112,11 @@ private: /* members */
 
 	fawkes::SkillerInterface *skiller_if_;
 
-	fawkes::LuaContext *          lua_;
+	fawkes::LuaContext           *lua_;
 	fawkes::LuaInterfaceImporter *lua_ifi_;
 
 	fawkes::Mutex *ifi_mutex_;
-	LuaThread *    lua_thread_;
+	LuaThread     *lua_thread_;
 };
 
 #endif

@@ -620,15 +620,15 @@ TabletopVisualizationThread::loop()
  * @param best_obj_guess The best guesses of the objects
  */
 void
-TabletopVisualizationThread::visualize(const std::string &                 frame_id,
-                                       Eigen::Vector4f &                   table_centroid,
-                                       Eigen::Vector4f &                   normal,
-                                       V_Vector4f &                        table_hull_vertices,
-                                       V_Vector4f &                        table_model_vertices,
-                                       V_Vector4f &                        good_table_hull_edges,
-                                       M_Vector4f &                        centroids,
-                                       M_Vector4f &                        cylinder_params,
-                                       std::map<unsigned int, double> &    obj_confidence,
+TabletopVisualizationThread::visualize(const std::string                  &frame_id,
+                                       Eigen::Vector4f                    &table_centroid,
+                                       Eigen::Vector4f                    &normal,
+                                       V_Vector4f                         &table_hull_vertices,
+                                       V_Vector4f                         &table_model_vertices,
+                                       V_Vector4f                         &good_table_hull_edges,
+                                       M_Vector4f                         &centroids,
+                                       M_Vector4f                         &cylinder_params,
+                                       std::map<unsigned int, double>     &obj_confidence,
                                        std::map<unsigned int, signed int> &best_obj_guess) noexcept
 {
 	MutexLocker lock(&mutex_);

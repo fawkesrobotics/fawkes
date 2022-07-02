@@ -33,7 +33,7 @@ namespace fawkes {
    * @author Gesche Gierse
    */
 
-Configuration *    EclExternalConfig::m_config   = NULL;
+Configuration     *EclExternalConfig::m_config   = NULL;
 EclExternalConfig *EclExternalConfig::m_instance = NULL;
 
 /** Constructor. */
@@ -111,7 +111,7 @@ int
 p_get_config_value()
 {
 	Configuration *config = EclExternalConfig::instance()->config_instance();
-	char *         path;
+	char          *path;
 
 	if (EC_succeed != EC_arg(1).is_string(&path)) {
 		fprintf(stderr, "p_get_config_value(): no path given\n");

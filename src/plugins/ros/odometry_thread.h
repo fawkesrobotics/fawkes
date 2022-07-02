@@ -60,7 +60,7 @@ private:
 	void publish_odom();
 
 private:
-	fawkes::MotorInterface * motor_if_;
+	fawkes::MotorInterface  *motor_if_;
 	ros::Publisher           pub_;
 	std::string              cfg_odom_frame_id_;
 	std::string              cfg_base_frame_id_;

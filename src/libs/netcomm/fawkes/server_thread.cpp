@@ -61,7 +61,7 @@ FawkesNetworkServerThread::FawkesNetworkServerThread(bool               enable_i
                                                      const std::string &listen_ipv4,
                                                      const std::string &listen_ipv6,
                                                      unsigned int       fawkes_port,
-                                                     ThreadCollector *  thread_collector)
+                                                     ThreadCollector   *thread_collector)
 : Thread("FawkesNetworkServerThread", Thread::OPMODE_WAITFORWAKEUP)
 {
 	this->thread_collector = thread_collector;
@@ -271,7 +271,7 @@ FawkesNetworkServerThread::broadcast(FawkesNetworkMessage *msg)
 void
 FawkesNetworkServerThread::broadcast(unsigned short int component_id,
                                      unsigned short int msg_id,
-                                     void *             payload,
+                                     void              *payload,
                                      unsigned int       payload_size)
 {
 	FawkesNetworkMessage *m = new FawkesNetworkMessage(component_id, msg_id, payload, payload_size);
@@ -325,7 +325,7 @@ void
 FawkesNetworkServerThread::send(unsigned int       to_clid,
                                 unsigned short int component_id,
                                 unsigned short int msg_id,
-                                void *             payload,
+                                void              *payload,
                                 unsigned int       payload_size)
 {
 	FawkesNetworkMessage *m =

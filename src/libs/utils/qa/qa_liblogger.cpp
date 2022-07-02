@@ -84,7 +84,7 @@ public:
 	{
 		unsigned int sleep_time_usec = 0;
 		unsigned int num_threads     = 3;
-		const char * tmp;
+		const char  *tmp;
 		if ((tmp = argp->arg("s")) != NULL) {
 			sleep_time_usec = atoi(tmp);
 		}
@@ -133,7 +133,7 @@ public:
 private:
 	list<Thread *>           threads;
 	list<Thread *>::iterator tit;
-	ArgumentParser *         argp;
+	ArgumentParser          *argp;
 };
 
 int

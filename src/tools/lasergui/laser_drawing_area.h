@@ -58,13 +58,13 @@ public:
 
 	void set_laser_ifs(const std::list<fawkes::Interface *> &laser_if);
 	void reset_laser_ifs();
-	void set_objpos_if(std::list<fawkes::ObjectPositionInterface *> * l_objpos_if_persons,
-	                   std::list<fawkes::ObjectPositionInterface *> * l_objpos_if_legs,
-	                   std::list<fawkes::ObjectPositionInterface *> * l_objpos_if_misc,
-	                   fawkes::Laser720Interface *                    laser_segmentation_if,
+	void set_objpos_if(std::list<fawkes::ObjectPositionInterface *>  *l_objpos_if_persons,
+	                   std::list<fawkes::ObjectPositionInterface *>  *l_objpos_if_legs,
+	                   std::list<fawkes::ObjectPositionInterface *>  *l_objpos_if_misc,
+	                   fawkes::Laser720Interface                     *laser_segmentation_if,
 	                   std::list<fawkes::Position2DTrackInterface *> *l_track_if,
-	                   fawkes::ObjectPositionInterface *              target_if,
-	                   fawkes::SwitchInterface *                      switch_if);
+	                   fawkes::ObjectPositionInterface               *target_if,
+	                   fawkes::SwitchInterface                       *switch_if);
 	void set_line_if(fawkes::ObjectPositionInterface *line_if);
 	void set_visdisp_if(fawkes::VisualDisplay2DInterface *visdisp_if);
 	void set_robot_drawer(fawkes::CairoRobotDrawer *robot_drawer);
@@ -89,14 +89,14 @@ protected:
 	virtual bool on_motion_notify_event(GdkEventMotion *event);
 	virtual bool on_button_press_event(GdkEventButton *event);
 
-	void draw_beams(const fawkes::Interface *            itf,
-	                Glib::RefPtr<Gdk::Window> &          window,
+	void draw_beams(const fawkes::Interface             *itf,
+	                Glib::RefPtr<Gdk::Window>           &window,
 	                const Cairo::RefPtr<Cairo::Context> &cr);
-	void draw_segments(const fawkes::Interface *            itf,
-	                   Glib::RefPtr<Gdk::Window> &          window,
+	void draw_segments(const fawkes::Interface             *itf,
+	                   Glib::RefPtr<Gdk::Window>           &window,
 	                   const Cairo::RefPtr<Cairo::Context> &cr);
 	void draw_scalebox(Glib::RefPtr<Gdk::Window> &window, const Cairo::RefPtr<Cairo::Context> &cr);
-	void draw_persons_legs(Glib::RefPtr<Gdk::Window> &          window,
+	void draw_persons_legs(Glib::RefPtr<Gdk::Window>           &window,
 	                       const Cairo::RefPtr<Cairo::Context> &cr);
 	std::pair<float, float> transform_coords_from_fawkes(float p_x, float p_y);
 
@@ -115,15 +115,15 @@ private:
 	bool all_laser_ifs_have_writer() const;
 
 	InterfaceColorPairList           laser_ifs_;
-	fawkes::Laser720Interface *      laser_segmentation_if_;
-	fawkes::SwitchInterface *        switch_if_;
+	fawkes::Laser720Interface       *laser_segmentation_if_;
+	fawkes::SwitchInterface         *switch_if_;
 	fawkes::ObjectPositionInterface *target_if_;
 
 	fawkes::ObjectPositionInterface *line_if_;
 
-	std::list<fawkes::ObjectPositionInterface *> * l_objpos_if_persons_;
-	std::list<fawkes::ObjectPositionInterface *> * l_objpos_if_legs_;
-	std::list<fawkes::ObjectPositionInterface *> * l_objpos_if_misc_;
+	std::list<fawkes::ObjectPositionInterface *>  *l_objpos_if_persons_;
+	std::list<fawkes::ObjectPositionInterface *>  *l_objpos_if_legs_;
+	std::list<fawkes::ObjectPositionInterface *>  *l_objpos_if_misc_;
 	std::list<fawkes::Position2DTrackInterface *> *l_track_if_;
 
 	bool        connected_;
@@ -141,7 +141,7 @@ private:
 
 	fawkes::CairoRobotDrawer *robot_drawer_;
 
-	VisualDisplay2D *                 visdisp_;
+	VisualDisplay2D	                *visdisp_;
 	fawkes::VisualDisplay2DInterface *visdisp_if_;
 };
 

@@ -165,7 +165,7 @@ inline bool
 convert(const std::string &input, unsigned int &rhs)
 {
 	errno = 0;
-	char *   endptr;
+	char    *endptr;
 	long int l = strtol(input.c_str(), &endptr, 0);
 
 	if ((errno == ERANGE && (l == LONG_MAX || l == LONG_MIN)) || (errno != 0 && l == 0)) {

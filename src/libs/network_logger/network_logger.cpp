@@ -68,10 +68,10 @@ NetworkLogger::~NetworkLogger()
 
 void
 NetworkLogger::send_message(Logger::LogLevel level,
-                            struct timeval * t,
-                            const char *     component,
+                            struct timeval  *t,
+                            const char      *component,
                             bool             is_exception,
-                            const char *     format,
+                            const char      *format,
                             va_list          va)
 {
 	struct timeval now;
@@ -97,10 +97,10 @@ NetworkLogger::send_message(Logger::LogLevel level,
 
 void
 NetworkLogger::send_message(Logger::LogLevel level,
-                            struct timeval * t,
-                            const char *     component,
+                            struct timeval  *t,
+                            const char      *component,
                             bool             is_exception,
-                            const char *     message)
+                            const char      *message)
 {
 	struct timeval now;
 	if (t == NULL) {
@@ -410,10 +410,10 @@ NetworkLogger::client_disconnected(unsigned int clid)
  * @param va va_list containing the arguments for the given format
  */
 NetworkLoggerMessageContent::NetworkLoggerMessageContent(Logger::LogLevel log_level,
-                                                         struct timeval * t,
-                                                         const char *     component,
+                                                         struct timeval  *t,
+                                                         const char      *component,
                                                          bool             is_exception,
-                                                         const char *     format,
+                                                         const char      *format,
                                                          va_list          va)
 {
 	char *tmp = NULL;
@@ -446,10 +446,10 @@ NetworkLoggerMessageContent::NetworkLoggerMessageContent(Logger::LogLevel log_le
  * @param message message string.
  */
 NetworkLoggerMessageContent::NetworkLoggerMessageContent(Logger::LogLevel log_level,
-                                                         struct timeval * t,
-                                                         const char *     component,
+                                                         struct timeval  *t,
+                                                         const char      *component,
                                                          bool             is_exception,
-                                                         const char *     message)
+                                                         const char      *message)
 {
 	_payload_size =
 	  sizeof(NetworkLogger::network_logger_header_t) + strlen(component) + strlen(message) + 2;
@@ -493,7 +493,7 @@ NetworkLoggerMessageContent::NetworkLoggerMessageContent(const NetworkLoggerMess
  */
 NetworkLoggerMessageContent::NetworkLoggerMessageContent(unsigned int component_id,
                                                          unsigned int msg_id,
-                                                         void *       payload,
+                                                         void        *payload,
                                                          size_t       payload_size)
 {
 	if (component_id != FAWKES_CID_NETWORKLOGGER) {

@@ -41,7 +41,7 @@ public:
 	explicit DynamixelPlugin(Configuration *config) : Plugin(config)
 	{
 		DynamixelSensorThread *sensor_thread = new DynamixelSensorThread();
-		DynamixelActThread *   act_thread    = new DynamixelActThread();
+		DynamixelActThread    *act_thread    = new DynamixelActThread();
 
 		std::set<std::string> configs;
 		std::set<std::string> ignored_configs;

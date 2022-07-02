@@ -131,7 +131,7 @@ typedef struct YUV_t_struct
  * @param height image height
  */
 void iyu1_to_yuy2(const unsigned char *src,
-                  unsigned char *      dest,
+                  unsigned char       *dest,
                   unsigned int         width,
                   unsigned int         height);
 
@@ -139,30 +139,30 @@ void iyu1_to_yuy2(const unsigned char *src,
  * This function takes the gray value as Y and sets U and V to 128.
  */
 void gray8_to_yuy2(const unsigned char *src,
-                   unsigned char *      dest,
+                   unsigned char       *dest,
                    unsigned int         width,
                    unsigned int         height);
 
 /** 8-Bit gray to YUV422_PLANAR
  */
 void gray8_to_yuv422planar_plainc(const unsigned char *src,
-                                  unsigned char *      dst,
+                                  unsigned char       *dst,
                                   unsigned int         width,
                                   unsigned int         height);
 void gray8_to_yuv422packed_plainc(const unsigned char *src,
-                                  unsigned char *      dst,
+                                  unsigned char       *dst,
                                   unsigned int         width,
                                   unsigned int         height);
 
 void yuv420planar_to_yuv422planar(const unsigned char *src,
-                                  unsigned char *      dst,
+                                  unsigned char       *dst,
                                   unsigned int         width,
                                   unsigned int         height);
 
 /** Copy part of the U anv V planes of a YUV422planar image to another
  */
 void yuv422planar_copy_uv(const unsigned char *src,
-                          unsigned char *      dst,
+                          unsigned char       *dst,
                           unsigned int         width,
                           unsigned int         height,
                           unsigned int         x,
@@ -173,70 +173,70 @@ void yuv422planar_copy_uv(const unsigned char *src,
 /** Convert YUV422_PLANAR images to YUV422_PACKED
  */
 void yuv422planar_to_yuv422packed(const unsigned char *planar,
-                                  unsigned char *      packed,
+                                  unsigned char       *packed,
                                   unsigned int         width,
                                   unsigned int         height);
 
 /** Convert YUV422_PLANAR_QUARTER images to YUV422_PACKED
  */
 void yuv422planar_quarter_to_yuv422packed(const unsigned char *planar,
-                                          unsigned char *      packed,
+                                          unsigned char       *packed,
                                           const unsigned int   width,
                                           const unsigned int   height);
 
 /** Convert YUV422_PLANAR_QUARTER images to YUV422_PLANAR  */
 void yuv422planar_quarter_to_yuv422planar(const unsigned char *planar,
-                                          unsigned char *      packed,
+                                          unsigned char       *packed,
                                           const unsigned int   width,
                                           const unsigned int   height);
 
 /** Convert YUV422_PACKED images to YUV422_PLANAR
  */
 void yuv422packed_to_yuv422planar(const unsigned char *packed,
-                                  unsigned char *      planar,
+                                  unsigned char       *planar,
                                   unsigned int         width,
                                   unsigned int         height);
 
 /** Convert YUY2 images to YUV422_PLANAR
  */
 void yuy2_to_yuv422planar(const unsigned char *packed,
-                          unsigned char *      planar,
+                          unsigned char       *planar,
                           unsigned int         width,
                           unsigned int         height);
 
 /** Convert YUY2 images to quarter-sized YUV422_PLANAR buffer.
  */
 void yuy2_to_yuv422planar_quarter(const unsigned char *packed,
-                                  unsigned char *      planar,
+                                  unsigned char       *planar,
                                   const unsigned int   width,
                                   const unsigned int   height);
 
 /** Convert YVY2 images to YUV422_PLANAR
  */
 void yvy2_to_yuv422planar(const unsigned char *packed,
-                          unsigned char *      planar,
+                          unsigned char       *planar,
                           unsigned int         width,
                           unsigned int         height);
 
 /** Convert YUV444_PACKED images to YUV422_PLANAR
  */
 void yuv444packed_to_yuv422planar(const unsigned char *yuv444,
-                                  unsigned char *      yuv422,
+                                  unsigned char       *yuv422,
                                   unsigned int         width,
                                   unsigned int         height);
 
 void yuv444packed_to_yuv422packed(const unsigned char *yuv444,
-                                  unsigned char *      yuv422,
+                                  unsigned char       *yuv422,
                                   unsigned int         width,
                                   unsigned int         height);
 
 void yvu444packed_to_yuv422planar(const unsigned char *yuv444,
-                                  unsigned char *      yuv422,
+                                  unsigned char       *yuv422,
                                   unsigned int         width,
                                   unsigned int         height);
 
 void yvu444packed_to_yuv422packed(const unsigned char *yuv444,
-                                  unsigned char *      yuv422,
+                                  unsigned char       *yuv422,
                                   unsigned int         width,
                                   unsigned int         height);
 
@@ -247,25 +247,25 @@ void yuv422planar_erase_u_plane(unsigned char *yuv, unsigned int width, unsigned
 void yuv422planar_erase_v_plane(unsigned char *yuv, unsigned int width, unsigned int height);
 
 void grayscale_yuv422packed(const unsigned char *src,
-                            unsigned char *      dst,
+                            unsigned char       *dst,
                             unsigned int         width,
                             unsigned int         height);
 
 void grayscale_yuv422planar(const unsigned char *src,
-                            unsigned char *      dst,
+                            unsigned char       *dst,
                             unsigned int         width,
                             unsigned int         height);
 
 inline void
 convert_line_yuv422planar_to_yuv444packed(const unsigned char *src,
-                                          unsigned char *      dst,
+                                          unsigned char       *dst,
                                           unsigned int         width,
                                           unsigned int         height,
                                           unsigned int         src_line,
                                           unsigned int         dst_line)
 {
 	unsigned int         i = 0;
-	YUV_t *              y1, *y2;
+	YUV_t               *y1, *y2;
 	const unsigned char *yp, *up, *vp;
 
 	yp = src + (width * src_line);

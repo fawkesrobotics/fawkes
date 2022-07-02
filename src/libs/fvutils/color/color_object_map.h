@@ -61,7 +61,7 @@ private:
 	ColorObjectMap();
 	void set_mapping(hint_t roi, color_t color);
 
-	static ColorObjectMap *   singleton_;
+	static ColorObjectMap    *singleton_;
 	std::map<hint_t, color_t> color_for_hint_;
 	std::map<color_t, hint_t> hint_for_color_;
 	color_t                   c_other_;

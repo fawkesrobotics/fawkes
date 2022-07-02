@@ -106,7 +106,7 @@ WebPageReply::pack(std::string             active_baseurl,
 		merged_body_ += headergen->html_header(_title, active_baseurl, html_header_);
 	else {
 		fawkes::HostInfo hi;
-		char *           s;
+		char            *s;
 		if (asprintf(&s, PAGE_HEADER, _title.c_str(), html_header_.c_str(), hi.short_name()) != -1) {
 			merged_body_ += s;
 			free(s);

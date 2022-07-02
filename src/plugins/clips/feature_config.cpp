@@ -54,7 +54,7 @@ ConfigCLIPSFeature::~ConfigCLIPSFeature()
 }
 
 void
-ConfigCLIPSFeature::clips_context_init(const std::string &                  env_name,
+ConfigCLIPSFeature::clips_context_init(const std::string                   &env_name,
                                        fawkes::LockPtr<CLIPS::Environment> &clips)
 {
 	envs_[env_name] = clips;

@@ -106,9 +106,9 @@ public:
    * @param child_frame_id child frame ID
    */
 	StampedTransform(const tf::Transform &input,
-	                 const fawkes::Time & timestamp,
-	                 const std::string &  frame_id,
-	                 const std::string &  child_frame_id)
+	                 const fawkes::Time  &timestamp,
+	                 const std::string   &frame_id,
+	                 const std::string   &child_frame_id)
 	: tf::Transform(input), stamp(timestamp), frame_id(frame_id), child_frame_id(child_frame_id){};
 
 	/** Default constructor only to be used for preallocation */

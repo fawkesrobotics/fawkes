@@ -43,7 +43,7 @@ public:
 	} ConnectionMode;
 
 	MongoDBClientConfig(fawkes::Configuration *config,
-	                    fawkes::Logger *       logger,
+	                    fawkes::Logger        *logger,
 	                    std::string            cfgname,
 	                    std::string            prefix);
 	mongocxx::client *create_client();
@@ -65,7 +65,7 @@ public:
 
 private:
 	void read_authinfo(fawkes::Configuration *config,
-	                   fawkes::Logger *       logger,
+	                   fawkes::Logger        *logger,
 	                   std::string            cfgname,
 	                   std::string            prefix);
 

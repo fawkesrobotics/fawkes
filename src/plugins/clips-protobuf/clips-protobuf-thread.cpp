@@ -85,7 +85,7 @@ ClipsProtobufThread::finalize()
 }
 
 void
-ClipsProtobufThread::clips_context_init(const std::string &          env_name,
+ClipsProtobufThread::clips_context_init(const std::string           &env_name,
                                         LockPtr<CLIPS::Environment> &clips)
 {
 	logger->log_info(name(), "Called to initialize environment %s", env_name.c_str());

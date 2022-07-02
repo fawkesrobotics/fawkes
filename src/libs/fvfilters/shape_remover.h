@@ -41,7 +41,7 @@ public:
 	virtual void apply();
 
 private:
-	Shape *      shape;
+	Shape       *shape;
 	unsigned int margin;
 };
 

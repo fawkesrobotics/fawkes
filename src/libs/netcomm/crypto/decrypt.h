@@ -47,9 +47,9 @@ public:
 	size_t decrypt();
 
 private:
-	void * plain_buffer;
+	void  *plain_buffer;
 	size_t plain_buffer_length;
-	void * crypt_buffer;
+	void  *crypt_buffer;
 	size_t crypt_buffer_length;
 
 	const unsigned char *key;

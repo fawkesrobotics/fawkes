@@ -62,11 +62,11 @@ public:
 
 	virtual firevision::VisionMaster *vision_master();
 
-	virtual firevision::Camera *
-	                            register_for_camera(const char *             camera_string,
-	                                                fawkes::Thread *         thread,
+	virtual firevision::Camera	                           *
+  register_for_camera(const char              *camera_string,
+	                                                fawkes::Thread          *thread,
 	                                                firevision::colorspace_t cspace = firevision::YUV422_PLANAR);
-	virtual firevision::Camera *register_for_raw_camera(const char *    camera_string,
+	virtual firevision::Camera *register_for_raw_camera(const char     *camera_string,
 	                                                    fawkes::Thread *thread);
 	virtual void                unregister_thread(fawkes::Thread *thread);
 
@@ -85,7 +85,7 @@ protected:
 	}
 
 protected:
-	virtual firevision::CameraControl *acquire_camctrl(const char *          cam_string,
+	virtual firevision::CameraControl *acquire_camctrl(const char           *cam_string,
 	                                                   const std::type_info &typeinf);
 
 private:

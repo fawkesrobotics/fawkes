@@ -59,5 +59,5 @@ private:
 	std::map<std::string, firevision::Camera *> cams_;
 	std::map<std::string, unsigned char *>      buffers_;
 	std::map<std::string, size_t>               buffer_sizes_;
-	fawkes::ReadWriteLock *                     rwlock_;
+	fawkes::ReadWriteLock                      *rwlock_;
 };

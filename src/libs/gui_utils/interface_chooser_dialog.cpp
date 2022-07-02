@@ -76,10 +76,10 @@ InterfaceChooserDialog::Record::Record()
  * @return new InterfaceChooserDialog
  */
 InterfaceChooserDialog *
-InterfaceChooserDialog::create(Gtk::Window &        parent,
-                               BlackBoard *         blackboard,
-                               const char *         type_pattern,
-                               const char *         id_pattern,
+InterfaceChooserDialog::create(Gtk::Window         &parent,
+                               BlackBoard          *blackboard,
+                               const char          *type_pattern,
+                               const char          *id_pattern,
                                const Glib::ustring &title)
 {
 	InterfaceChooserDialog *d = new InterfaceChooserDialog(parent, title);

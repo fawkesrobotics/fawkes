@@ -62,7 +62,7 @@ public:
 private:
 	rectinfo_header_t *_header;
 	uint64_t           _cam_guid;
-	char *             _model;
+	char              *_model;
 };
 
 } // end namespace firevision

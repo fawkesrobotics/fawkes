@@ -39,8 +39,8 @@ using namespace fawkes;
  * @param logger logger to output messages
  */
 XmlRpcLogMethods::XmlRpcLogMethods(std::shared_ptr<xmlrpc_c::registry> registry,
-                                   fawkes::CacheLogger *               cache_logger,
-                                   fawkes::Logger *                    logger)
+                                   fawkes::CacheLogger                *cache_logger,
+                                   fawkes::Logger                     *logger)
 : xmlrpc_registry_(registry), logger_(logger), cache_logger_(cache_logger)
 {
 	log_entries_.reset(new log_entries(cache_logger_));
@@ -76,7 +76,7 @@ XmlRpcLogMethods::log_entries::log_entries(fawkes::CacheLogger *cache_logger)
 {
 	_signature = "A:";
 	_help      = "Returns array of recent log messages. Each entry is a struct "
-	        "consisting of the entries component, time string and message.";
+	             "consisting of the entries component, time string and message.";
 
 	cache_logger_ = cache_logger;
 }

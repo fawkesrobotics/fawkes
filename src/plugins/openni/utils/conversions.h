@@ -35,8 +35,8 @@ namespace openni {
 
 void world2projection(xn::DepthGenerator *depthgen,
                       unsigned int        num_points,
-                      const XnPoint3D *   world,
-                      XnPoint3D *         proj,
+                      const XnPoint3D    *world,
+                      XnPoint3D          *proj,
                       unsigned int        width  = 0,
                       unsigned int        height = 0);
 

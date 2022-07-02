@@ -278,7 +278,7 @@ OpenPRSThread::server_alive()
 }
 
 void
-OpenPRSThread::check_deadline(boost::asio::deadline_timer & deadline,
+OpenPRSThread::check_deadline(boost::asio::deadline_timer  &deadline,
                               boost::asio::ip::tcp::socket &socket)
 {
 	if (deadline.expires_at() <= boost::asio::deadline_timer::traits_type::now()) {

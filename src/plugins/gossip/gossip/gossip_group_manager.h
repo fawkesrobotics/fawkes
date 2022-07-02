@@ -41,11 +41,11 @@ class GossipGroupConfiguration
 public:
 	GossipGroupConfiguration();
 	GossipGroupConfiguration(const GossipGroupConfiguration &c);
-	GossipGroupConfiguration(std::string &  name,
-	                         std::string &  broadcast_address,
+	GossipGroupConfiguration(std::string   &name,
+	                         std::string   &broadcast_address,
 	                         unsigned short broadcast_port);
-	GossipGroupConfiguration(std::string &  name,
-	                         std::string &  broadcast_address,
+	GossipGroupConfiguration(std::string   &name,
+	                         std::string   &broadcast_address,
 	                         unsigned short send_port,
 	                         unsigned short recv_port);
 
@@ -64,8 +64,8 @@ class GossipGroupManager
 	friend GossipAspectIniFin;
 
 public:
-	GossipGroupManager(std::string &                                    service_name,
-	                   ServicePublisher *                               service_publisher,
+	GossipGroupManager(std::string                                     &service_name,
+	                   ServicePublisher                                *service_publisher,
 	                   std::map<std::string, GossipGroupConfiguration> &initial_groups);
 	virtual ~GossipGroupManager();
 
@@ -77,7 +77,7 @@ private:
 
 private:
 	std::string                                service_name_;
-	ServicePublisher *                         service_publisher_;
+	ServicePublisher                          *service_publisher_;
 	std::map<std::string, RefPtr<GossipGroup>> groups_;
 };
 

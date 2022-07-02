@@ -166,7 +166,7 @@ RosImagesThread::get_sets(std::set<std::string> &missing_images,
 	}
 
 	std::set<std::string>              image_buffers;
-	SharedMemoryImageBufferHeader *    h    = new SharedMemoryImageBufferHeader();
+	SharedMemoryImageBufferHeader     *h    = new SharedMemoryImageBufferHeader();
 	SharedMemory::SharedMemoryIterator i    = SharedMemory::find(FIREVISION_SHM_IMAGE_MAGIC_TOKEN, h);
 	SharedMemory::SharedMemoryIterator endi = SharedMemory::end();
 

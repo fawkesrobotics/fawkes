@@ -38,9 +38,9 @@ using std::string;
  * @param error_handler Xabsl error handler
  * @param params parameters of this skill
  */
-XabslSkillWrapper::XabslSkillWrapper(const char *         name,
+XabslSkillWrapper::XabslSkillWrapper(const char          *name,
                                      xabsl::ErrorHandler &error_handler,
-                                     ParameterList &      params)
+                                     ParameterList       &params)
 : xabsl::BasicBehavior(name, error_handler)
 {
 	params_  = params;
@@ -117,7 +117,7 @@ XabslSkillWrapper::skill_string()
 				rv += ", ";
 			}
 			ParameterValue<double> *pvd;
-			ParameterValue<bool> *  pvb;
+			ParameterValue<bool>   *pvb;
 			if ((pvd = dynamic_cast<ParameterValue<double> *>(i->second)) != NULL) {
 				rv += i->first + "=" + fawkes::StringConversions::to_string(pvd->get_value());
 			} else if ((pvb = dynamic_cast<ParameterValue<bool> *>(i->second)) != NULL) {

@@ -45,7 +45,7 @@ using namespace fawkes;
  * @param prefix configuration path prefix
  */
 MongoDBClientConfig::MongoDBClientConfig(Configuration *config,
-                                         Logger *       logger,
+                                         Logger        *logger,
                                          std::string    cfgname,
                                          std::string    prefix)
 {
@@ -125,7 +125,7 @@ MongoDBClientConfig::MongoDBClientConfig(Configuration *config,
  */
 void
 MongoDBClientConfig::read_authinfo(Configuration *config,
-                                   Logger *       logger,
+                                   Logger        *logger,
                                    std::string    cfgname,
                                    std::string    prefix)
 {

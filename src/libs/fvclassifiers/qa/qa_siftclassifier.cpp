@@ -53,7 +53,7 @@ main(int argc, char **argv)
 
 	printf("QASiftClassifier: Load scene as image\n");
 	//JpegReader *reader = new JpegReader(scene_file);
-	PNGReader *    reader = new PNGReader(scene_file);
+	PNGReader     *reader = new PNGReader(scene_file);
 	unsigned char *buffer =
 	  malloc_buffer(YUV422_PLANAR, reader->pixel_width(), reader->pixel_height());
 

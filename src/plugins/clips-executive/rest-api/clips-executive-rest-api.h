@@ -102,28 +102,28 @@ private:
 
 	Goal            generate_goal(CLIPS::Fact::pointer fact);
 	void            gen_plan_precompute(std::map<PlanKey, CLIPS::Fact::pointer> &plans,
-	                                    std::map<PlanKey, ClipsFactList> &       plan_actions,
-	                                    PreCompoundMap &                         prec,
-	                                    PreAtomMap &                             prea,
-	                                    PDDLGroundingMap &                       pgm,
-	                                    PDDLFormulaMap &                         pfm,
-	                                    PDDLPredicateMap &                       ppm,
-	                                    GroundedPDDLFormulaMap &                 gpfm,
-	                                    GroundedPDDLPredicateMap &               gppm);
+	                                    std::map<PlanKey, ClipsFactList>        &plan_actions,
+	                                    PreCompoundMap                          &prec,
+	                                    PreAtomMap                              &prea,
+	                                    PDDLGroundingMap                        &pgm,
+	                                    PDDLFormulaMap                          &pfm,
+	                                    PDDLPredicateMap                        &ppm,
+	                                    GroundedPDDLFormulaMap                  &gpfm,
+	                                    GroundedPDDLPredicateMap                &gppm);
 	GroundedFormula gen_plan_compute_precons(PDDLFormulaTreeNode node,
 	                                         PDDLFormulaTreeMap  tree,
 	                                         PDDLGroundingMap    groundings);
 
-	Plan gen_plan(const PlanKey &            plan_key,
+	Plan gen_plan(const PlanKey             &plan_key,
 	              const CLIPS::Fact::pointer fact,
-	              PlanActionMap &            plan_actions,
-	              PreCompoundMap &           prec,
-	              PreAtomMap &               prea,
-	              PDDLGroundingMap &         pgm,
-	              PDDLFormulaMap &           pfm,
-	              PDDLPredicateMap &         ppm,
-	              GroundedPDDLFormulaMap &   gpfm,
-	              GroundedPDDLPredicateMap & gppm);
+	              PlanActionMap             &plan_actions,
+	              PreCompoundMap            &prec,
+	              PreAtomMap                &prea,
+	              PDDLGroundingMap          &pgm,
+	              PDDLFormulaMap            &pfm,
+	              PDDLPredicateMap          &ppm,
+	              GroundedPDDLFormulaMap    &gpfm,
+	              GroundedPDDLPredicateMap  &gppm);
 
 	std::shared_ptr<PDDLGrounding> gen_pddl_grounding(const CLIPS::Fact::pointer fact);
 
@@ -137,6 +137,6 @@ private:
 	gen_grounded_pddl_predicate(const CLIPS::Fact::pointer fact);
 
 private:
-	fawkes::WebviewRestApi *            rest_api_;
+	fawkes::WebviewRestApi             *rest_api_;
 	fawkes::LockPtr<CLIPS::Environment> clips_;
 };

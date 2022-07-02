@@ -39,12 +39,12 @@ public:
 	/** List of type and ID of an interface. */
 	typedef std::list<TypeIdPair> TypeIdPairList;
 
-	static MultiInterfaceChooserDialog *create(Gtk::Window &         parent,
-	                                           BlackBoard *          blackboard,
-	                                           const char *          type_pattern,
-	                                           const char *          id_pattern,
+	static MultiInterfaceChooserDialog *create(Gtk::Window          &parent,
+	                                           BlackBoard           *blackboard,
+	                                           const char           *type_pattern,
+	                                           const char           *id_pattern,
 	                                           const TypeIdPairList &loaded_interfaces,
-	                                           const Glib::ustring & title = DEFAULT_TITLE);
+	                                           const Glib::ustring  &title = DEFAULT_TITLE);
 
 	virtual ~MultiInterfaceChooserDialog();
 
@@ -59,9 +59,9 @@ protected:
 		Gtk::TreeModelColumn<bool> load; /**< Load this interface? */
 	};
 
-	MultiInterfaceChooserDialog(Gtk::Window &         parent,
+	MultiInterfaceChooserDialog(Gtk::Window          &parent,
 	                            const TypeIdPairList &loaded_interfaces,
-	                            const Glib::ustring & title);
+	                            const Glib::ustring  &title);
 
 	virtual const Record &record() const;
 	virtual int           init_columns();

@@ -77,7 +77,7 @@ public:
 	void colli_stop();
 
 private:
-	fawkes::Mutex *   mutex_;
+	fawkes::Mutex    *mutex_;
 	fawkes::TimeWait *timer_;
 
 	/* ************************************************************************ */
@@ -93,15 +93,15 @@ private:
    *
    * Point                ->  cart_coord_2d_t     (point with 2 floats)
    */
-	fawkes::MotorInterface *    if_motor_;        // MotorObject
-	fawkes::Laser360Interface * if_laser_;        // LaserScannerObject
+	fawkes::MotorInterface     *if_motor_;        // MotorObject
+	fawkes::Laser360Interface  *if_laser_;        // LaserScannerObject
 	fawkes::NavigatorInterface *if_colli_target_; // TargetObject
 	fawkes::colli_data_t        colli_data_;      // Colli Data Object
 
 	fawkes::LaserOccupancyGrid *occ_grid_; // the grid to drive on
-	fawkes::Search *            search_;   // our plan module which calculates the info
+	fawkes::Search             *search_;   // our plan module which calculates the info
 
-	fawkes::SelectDriveMode *  select_drive_mode_;        // the drive mode selection module
+	fawkes::SelectDriveMode   *select_drive_mode_;        // the drive mode selection module
 	fawkes::BaseMotorInstruct *motor_instruct_;           // the motor instructor module
 	fawkes::BaseMotorInstruct *emergency_motor_instruct_; // the emergency motor instructor module
 

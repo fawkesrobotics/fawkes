@@ -56,7 +56,7 @@ InterfaceFieldIterator::InterfaceFieldIterator()
  * @param interface interface this field iterator is assigned to
  * @param info_list pointer to info list entry to start from
  */
-InterfaceFieldIterator::InterfaceFieldIterator(Interface *                  interface,
+InterfaceFieldIterator::InterfaceFieldIterator(Interface                   *interface,
                                                const interface_fieldinfo_t *info_list)
 {
 	interface_    = interface;

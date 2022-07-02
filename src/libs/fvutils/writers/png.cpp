@@ -125,7 +125,7 @@ PNGWriter::write()
 	// png_byte == unsigned char, create one row, three bytes
 	//  png_byte row[width * 3];
 	png_byte       row[width * 3];
-	png_byte *     row_p;
+	png_byte      *row_p;
 	unsigned char *yp, *up, *vp;
 	unsigned char  y1, y2, u = 0, v = 0;
 

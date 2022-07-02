@@ -79,7 +79,7 @@ public:
 
 private:
 	unsigned int       i;
-	DatagramSocket *   s;
+	DatagramSocket    *s;
 	struct sockaddr_in to;
 	struct sockaddr_in from;
 	unsigned int       from_len;
@@ -122,7 +122,7 @@ public:
 	}
 
 private:
-	DatagramSocket *   s;
+	DatagramSocket    *s;
 	struct sockaddr_in to;
 	struct sockaddr_in from;
 	unsigned int       from_len;

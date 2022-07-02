@@ -56,9 +56,9 @@ namespace fawkes {
  * @param title title of the dialog
  * @param service service string
  */
-ServiceChooserDialog::ServiceChooserDialog(Gtk::Window & parent,
+ServiceChooserDialog::ServiceChooserDialog(Gtk::Window  &parent,
                                            Glib::ustring title,
-                                           const char *  service)
+                                           const char   *service)
 : Gtk::Dialog(title, parent, /* modal */ true), parent_(parent), expander_("Manual entry")
 {
 	service_model_ = new ServiceModel(service);
@@ -72,10 +72,10 @@ ServiceChooserDialog::ServiceChooserDialog(Gtk::Window & parent,
  * @param title title of the dialog
  * @param service service string
  */
-ServiceChooserDialog::ServiceChooserDialog(Gtk::Window &        parent,
+ServiceChooserDialog::ServiceChooserDialog(Gtk::Window         &parent,
                                            FawkesNetworkClient *client,
                                            Glib::ustring        title,
-                                           const char *         service)
+                                           const char          *service)
 : Gtk::Dialog(title, parent, /* modal */ true), parent_(parent), expander_("Manual entry")
 {
 	service_model_ = new ServiceModel(service);
@@ -164,8 +164,8 @@ ServiceChooserDialog::ctor()
  * @exception Exception thrown if no service has been selected
  */
 void
-ServiceChooserDialog::get_selected_service(Glib::ustring &     name,
-                                           Glib::ustring &     hostname,
+ServiceChooserDialog::get_selected_service(Glib::ustring      &name,
+                                           Glib::ustring      &hostname,
                                            unsigned short int &port)
 {
 	Glib::RefPtr<Gtk::TreeSelection> treesel = treeview_.get_selection();
@@ -201,7 +201,7 @@ ServiceChooserDialog::get_selected_service(Glib::ustring &     name,
  * @exception Exception thrown if no service has been selected
  */
 void
-ServiceChooserDialog::get_selected_service(Glib::ustring &          hostname,
+ServiceChooserDialog::get_selected_service(Glib::ustring           &hostname,
                                            struct sockaddr_storage &sockaddr)
 {
 	Glib::RefPtr<Gtk::TreeSelection> treesel = treeview_.get_selection();

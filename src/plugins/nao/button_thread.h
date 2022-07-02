@@ -81,8 +81,8 @@ private:
 
 	void pattern_button_logic(float         value,
 	                          float         time_diff_sec,
-	                          bool &        enabled,
-	                          float &       history,
+	                          bool         &enabled,
+	                          float        &history,
 	                          unsigned int &activations,
 	                          unsigned int &short_act,
 	                          unsigned int &long_act,
@@ -91,22 +91,22 @@ private:
 
 	void bumpers_logic(float         value,
 	                   float         time_diff_sec,
-	                   bool &        enabled,
-	                   float &       history,
+	                   bool         &enabled,
+	                   float        &history,
 	                   unsigned int &activations,
 	                   int           sound_id);
 
 	void process_pattern_button(fawkes::SwitchInterface *switch_if,
 	                            float                    sensor_value,
 	                            float                    time_diff_sec,
-	                            bool &                   remote_enabled,
+	                            bool                    &remote_enabled,
 	                            int                      sound_short = -1,
 	                            int                      sound_long  = -1);
 	void process_bumpers(fawkes::SwitchInterface *switch_if,
 	                     float                    left_value,
 	                     float                    right_value,
 	                     float                    time_diff_sec,
-	                     bool &                   remote_enabled,
+	                     bool                    &remote_enabled,
 	                     int                      sound_id = -1);
 
 private:
@@ -115,12 +115,12 @@ private:
 	AL::ALProcessSignals::ProcessSignalConnection dcm_sigconn_;
 
 	fawkes::NaoSensorInterface *sensor_if_;
-	fawkes::SwitchInterface *   chestbut_if_;
-	fawkes::SwitchInterface *   lfoot_bumper_if_;
-	fawkes::SwitchInterface *   rfoot_bumper_if_;
-	fawkes::SwitchInterface *   head_front_if_;
-	fawkes::SwitchInterface *   head_middle_if_;
-	fawkes::SwitchInterface *   head_rear_if_;
+	fawkes::SwitchInterface    *chestbut_if_;
+	fawkes::SwitchInterface    *lfoot_bumper_if_;
+	fawkes::SwitchInterface    *rfoot_bumper_if_;
+	fawkes::SwitchInterface    *head_front_if_;
+	fawkes::SwitchInterface    *head_middle_if_;
+	fawkes::SwitchInterface    *head_rear_if_;
 
 	fawkes::Time now;
 	fawkes::Time last;

@@ -49,16 +49,16 @@ class RobotMemory
 	friend class RobotMemoryThread;
 
 public:
-	RobotMemory(fawkes::Configuration *     config,
-	            fawkes::Logger *            logger,
-	            fawkes::Clock *             clock,
+	RobotMemory(fawkes::Configuration      *config,
+	            fawkes::Logger             *logger,
+	            fawkes::Clock              *clock,
 	            fawkes::MongoDBConnCreator *mongo_connection_manager,
-	            fawkes::BlackBoard *        blackboard);
+	            fawkes::BlackBoard         *blackboard);
 	virtual ~RobotMemory();
 
 	//robot memory functions
 	mongocxx::cursor query(bsoncxx::document::view query,
-	                       const std::string &     collection_name = "",
+	                       const std::string      &collection_name = "",
 	                       mongocxx::options::find query_options   = mongocxx::options::find());
 	// TODO fix int return codes, should be booleans
 	int insert(bsoncxx::document::view, const std::string &collection = "");
@@ -66,22 +66,22 @@ public:
 	int insert(const std::string &obj_str, const std::string &collection = "");
 	int update(const bsoncxx::document::view &query,
 	           const bsoncxx::document::view &update,
-	           const std::string &            collection = "",
+	           const std::string             &collection = "",
 	           bool                           upsert     = false);
 	int update(const bsoncxx::document::view &query,
-	           const std::string &            update_str,
-	           const std::string &            collection = "",
+	           const std::string             &update_str,
+	           const std::string             &collection = "",
 	           bool                           upsert     = false);
 	bsoncxx::document::value find_one_and_update(const bsoncxx::document::view &filter,
 	                                             const bsoncxx::document::view &update,
-	                                             const std::string &            collection,
+	                                             const std::string             &collection,
 	                                             bool                           upsert     = false,
 	                                             bool                           return_new = true);
 	int remove(const bsoncxx::document::view &query, const std::string &collection = "");
 	bsoncxx::document::value mapreduce(const bsoncxx::document::view &query,
-	                                   const std::string &            collection,
-	                                   const std::string &            js_map_fun,
-	                                   const std::string &            js_reduce_fun);
+	                                   const std::string             &collection,
+	                                   const std::string             &js_map_fun,
+	                                   const std::string             &js_reduce_fun);
 	mongocxx::cursor aggregate(mongocxx::pipeline &pipeline, const std::string &collection = "");
 	int              drop_collection(const std::string &collection);
 	int              clear_memory();
@@ -91,7 +91,7 @@ public:
 	int              dump_collection(const std::string &dbcollection,
 	                                 const std::string &directory = "@CONFDIR@/robot-memory");
 	int              create_index(bsoncxx::document::view keys,
-	                              const std::string &     collection = "",
+	                              const std::string      &collection = "",
 	                              bool                    unique     = false);
 
 	//bool semaphore_create(const std::string& name, unsigned int value);
@@ -117,7 +117,7 @@ public:
 	template <typename T>
 	EventTrigger *
 	register_trigger(const bsoncxx::document::view &query,
-	                 const std::string &            collection,
+	                 const std::string             &collection,
 	                 void (T::*callback)(const bsoncxx::document::view &),
 	                 T *_obj)
 	{
@@ -156,10 +156,10 @@ public:
 	template <typename T>
 	Computable *
 	register_computable(bsoncxx::document::value &&query_to_compute,
-	                    const std::string &        collection,
+	                    const std::string         &collection,
 	                    std::list<bsoncxx::document::value> (
 	                      T::*compute_func)(const bsoncxx::document::view &, const std::string &),
-	                    T *    obj,
+	                    T     *obj,
 	                    double caching_time = 0.0,
 	                    int    priority     = 0)
 	{
@@ -170,22 +170,22 @@ public:
 
 private:
 	fawkes::MongoDBConnCreator *mongo_connection_manager_;
-	mongocxx::client *          mongodb_client_local_;
-	mongocxx::client *          mongodb_client_distributed_;
+	mongocxx::client           *mongodb_client_local_;
+	mongocxx::client           *mongodb_client_distributed_;
 	bool                        distributed_;
-	fawkes::Configuration *     config_;
-	fawkes::Logger *            logger_;
-	fawkes::Clock *             clock_;
-	fawkes::BlackBoard *        blackboard_;
+	fawkes::Configuration      *config_;
+	fawkes::Logger             *logger_;
+	fawkes::Clock              *clock_;
+	fawkes::BlackBoard         *blackboard_;
 
-	const char *                  name_ = "RobotMemory";
+	const char                   *name_ = "RobotMemory";
 	std::string                   database_name_;
 	std::string                   default_collection_;
 	bool                          debug_;
 	fawkes::Mutex                 mutex_;
 	fawkes::RobotMemoryInterface *rm_if_;
-	EventTriggerManager *         trigger_manager_;
-	ComputablesManager *          computables_manager_;
+	EventTriggerManager          *trigger_manager_;
+	ComputablesManager           *computables_manager_;
 	std::vector<std::string>      distributed_dbs_;
 
 	std::string cfg_coord_database_;
@@ -198,15 +198,15 @@ private:
 	void log(const std::string &what, const std::string &level = "info");
 	void log_deb(const std::string &what, const std::string &level = "info");
 	void log(const bsoncxx::document::view &query,
-	         const std::string &            what,
-	         const std::string &            level = "info");
+	         const std::string             &what,
+	         const std::string             &level = "info");
 	void log_deb(const bsoncxx::document::view &query,
-	             const std::string &            what,
-	             const std::string &            level = "info");
+	             const std::string             &what,
+	             const std::string             &level = "info");
 
 	bool                 is_distributed_database(const std::string &dbcollection);
 	std::string          get_hostport(const std::string &dbcollection);
-	mongocxx::client *   get_mongodb_client(const std::string &collection);
+	mongocxx::client    *get_mongodb_client(const std::string &collection);
 	mongocxx::collection get_collection(const std::string &dbcollection);
 
 #ifdef USE_TIMETRACKER

@@ -125,7 +125,7 @@ ClipsRestApi::loop()
 
 Fact
 ClipsRestApi::gen_fact(LockPtr<CLIPS::Environment> &clips,
-                       CLIPS::Fact::pointer &       fact,
+                       CLIPS::Fact::pointer        &fact,
                        bool                         formatted)
 {
 	Fact retf;

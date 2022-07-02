@@ -67,7 +67,7 @@ using namespace fawkes;
  * @param cobject base object type
  * @param builder builder to get widgets from
  */
-BatteryMonitorTreeView::BatteryMonitorTreeView(BaseObjectType *                  cobject,
+BatteryMonitorTreeView::BatteryMonitorTreeView(BaseObjectType                   *cobject,
                                                const Glib::RefPtr<Gtk::Builder> &builder)
 : Gtk::TreeView(cobject)
 {
@@ -129,7 +129,7 @@ BatteryMonitorTreeView::add_host(const char *h)
 {
 	string host(h);
 
-	BlackBoard *                             rbb;
+	BlackBoard                              *rbb;
 	std::map<string, BlackBoard *>::iterator i = m_remote_bbs.find(host);
 
 	if (i == m_remote_bbs.end())
@@ -198,7 +198,7 @@ BatteryMonitorTreeView::rem_host(const char *h)
 	// interface nees to be closed
 	{
 		try {
-			BlackBoard *         rbb = rbbit->second;
+			BlackBoard          *rbb = rbbit->second;
 			InterfaceDispatcher *id  = m_interface_dispatcher.find(host)->second;
 			rbb->unregister_listener(id);
 			rbb->close(biit->second);

@@ -173,7 +173,7 @@ InterfaceParser::getPseudoMaps(xmlpp::Node *node, std::vector<InterfaceField> &f
 			}
 
 			const Element *el = dynamic_cast<const Element *>(*r);
-			Attribute *    attr;
+			Attribute     *attr;
 			attr = el->get_attribute("key");
 			if (!attr)
 				throw InterfaceGeneratorInvalidContentException("no key for mapref map");
@@ -289,11 +289,11 @@ InterfaceParser::printPseudoMaps(vector<InterfacePseudoMap> &pseudo_maps)
  * @param messages parsed messages.
  */
 void
-InterfaceParser::printParsed(vector<InterfaceConstant> &    constants,
+InterfaceParser::printParsed(vector<InterfaceConstant>     &constants,
                              vector<InterfaceEnumConstant> &enum_constants,
-                             vector<InterfaceField> &       data_fields,
-                             vector<InterfacePseudoMap> &   pseudo_maps,
-                             vector<InterfaceMessage> &     messages)
+                             vector<InterfaceField>        &data_fields,
+                             vector<InterfacePseudoMap>    &pseudo_maps,
+                             vector<InterfaceMessage>      &messages)
 {
 	cout << "Constants" << endl;
 	for (vector<InterfaceConstant>::iterator i = constants.begin(); i != constants.end(); ++i) {

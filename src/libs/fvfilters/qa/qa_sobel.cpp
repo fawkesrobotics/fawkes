@@ -47,7 +47,7 @@ main(int argc, char **argv)
 	{
 		const char *image_file = argp->arg("f");
 
-		JpegReader *   reader = new JpegReader(image_file);
+		JpegReader    *reader = new JpegReader(image_file);
 		unsigned char *buffer =
 		  malloc_buffer(YUV422_PLANAR, reader->pixel_width(), reader->pixel_height());
 

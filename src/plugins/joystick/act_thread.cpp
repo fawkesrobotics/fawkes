@@ -79,7 +79,7 @@ JoystickActThread::loop()
  * @param joystick_if interface to listen on for messages
  */
 JoystickActThread::MessageProcessor::MessageProcessor(JoystickAcquisitionThread *aqt,
-                                                      JoystickInterface *        joystick_if)
+                                                      JoystickInterface         *joystick_if)
 {
 	aqt_                = aqt;
 	joystick_if_        = joystick_if;

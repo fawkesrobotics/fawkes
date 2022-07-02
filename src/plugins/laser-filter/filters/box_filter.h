@@ -49,8 +49,8 @@ private:
 	};
 
 	fawkes::tf::Transformer *tf_listener_;
-	fawkes::Configuration *  config_;
-	fawkes::Logger *         logger_;
+	fawkes::Configuration   *config_;
+	fawkes::Logger          *logger_;
 
 	//  map_t                   *map_;
 	fawkes::LaserBoxFilterInterface *box_filter_if_;
@@ -58,13 +58,13 @@ private:
 	float                            cfg_occupied_thresh_;
 
 public:
-	LaserBoxFilterDataFilter(const std::string &                     filter_name,
+	LaserBoxFilterDataFilter(const std::string                      &filter_name,
 	                         unsigned int                            in_data_size,
 	                         std::vector<LaserDataFilter::Buffer *> &in,
-	                         fawkes::tf::Transformer *               tf_listener,
-	                         fawkes::Configuration *                 config,
-	                         fawkes::Logger *                        logger,
-	                         fawkes::BlackBoard *                    blackboard);
+	                         fawkes::tf::Transformer                *tf_listener,
+	                         fawkes::Configuration                  *config,
+	                         fawkes::Logger                         *logger,
+	                         fawkes::BlackBoard                     *blackboard);
 
 	virtual void filter();
 

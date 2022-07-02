@@ -94,8 +94,8 @@ public:
 	}
 
 private:
-	Logger *    logger_;
-	char *      component_;
+	Logger     *logger_;
+	char	     *component_;
 	std::string buffer_;
 	std::string warn_buffer_;
 	std::string warn_filter_;
@@ -114,7 +114,7 @@ redefine_warning_router_query(void *env, char *logical_name)
 static int
 redefine_warning_router_print(void *env, char *logical_name, char *str)
 {
-	void *                      rc     = GetEnvironmentRouterContext(env);
+	void                       *rc     = GetEnvironmentRouterContext(env);
 	CLIPSRedefineWarningLogger *logger = static_cast<CLIPSRedefineWarningLogger *>(rc);
 
 	if (strcmp(logical_name, WWARNING) == 0) {
@@ -164,7 +164,7 @@ RedefineWarningCLIPSFeature::~RedefineWarningCLIPSFeature()
 }
 
 void
-RedefineWarningCLIPSFeature::clips_context_init(const std::string &                  env_name,
+RedefineWarningCLIPSFeature::clips_context_init(const std::string                   &env_name,
                                                 fawkes::LockPtr<CLIPS::Environment> &clips)
 {
 	envs_[env_name] = clips;
@@ -202,7 +202,7 @@ RedefineWarningCLIPSFeature::clips_context_destroyed(const std::string &env_name
 	CLIPSRedefineWarningLogger *logger = NULL;
 
 	struct routerData *rd = RouterData(clips->cobj());
-	struct router *    r  = rd->ListOfRouters;
+	struct router     *r  = rd->ListOfRouters;
 	while (r != NULL) {
 		if (strcmp(r->name, ROUTER_NAME) == 0) {
 			logger = static_cast<CLIPSRedefineWarningLogger *>(r->context);

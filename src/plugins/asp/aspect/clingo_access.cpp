@@ -78,7 +78,7 @@ public:
 
 private:
 	Mutex *const mutex_;
-	bool &       bool_;
+	bool        &bool_;
 	const bool   initial_locked_;
 };
 

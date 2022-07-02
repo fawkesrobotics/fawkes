@@ -462,8 +462,8 @@ ProcRRDThread::remove_process(const char *path)
 std::string
 ProcRRDThread::get_process_id(const char *process)
 {
-	DIR *          dir_p;
-	FILE *         file;
+	DIR           *dir_p;
+	FILE          *file;
 	struct dirent *dir_entry_p;
 	std::string    result;
 	result = "";

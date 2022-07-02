@@ -58,12 +58,12 @@ public:
 	uint32_t       file_version() const;
 	bool           is_big_endian() const;
 	uint32_t       num_data_items() const;
-	const char *   scenario() const;
-	const char *   interface_type() const;
-	const char *   interface_id() const;
+	const char    *scenario() const;
+	const char    *interface_type() const;
+	const char    *interface_id() const;
 	unsigned char *interface_hash() const;
 	uint32_t       data_size();
-	fawkes::Time & start_time();
+	fawkes::Time  &start_time();
 
 	size_t       file_size() const;
 	unsigned int remaining_entries();
@@ -98,7 +98,7 @@ private: // methods
 	void repair();
 
 private: // members
-	FILE *             f_;
+	FILE              *f_;
 	bblog_file_header *header_;
 
 	void *ifdata_;
@@ -108,7 +108,7 @@ private: // members
 	char *interface_type_;
 	char *interface_id_;
 
-	fawkes::Interface *                                interface_;
+	fawkes::Interface                                 *interface_;
 	std::unique_ptr<fawkes::BlackBoardInstanceFactory> instance_factory_;
 	fawkes::Time                                       start_time_;
 	fawkes::Time                                       entry_offset_;

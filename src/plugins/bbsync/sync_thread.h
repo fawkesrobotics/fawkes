@@ -105,8 +105,8 @@ private:
      * @param preader_bb Blackboard to read from
      * @param pwriter_bb Blackboard to write to
      */
-		InterfaceInfo(combo_t *           pcombo,
-		              fawkes::Interface * pwriter,
+		InterfaceInfo(combo_t            *pcombo,
+		              fawkes::Interface  *pwriter,
 		              fawkes::BlackBoard *preader_bb,
 		              fawkes::BlackBoard *pwriter_bb)
 		: combo(pcombo), writer(pwriter), reader_bb(preader_bb), writer_bb(pwriter_bb)

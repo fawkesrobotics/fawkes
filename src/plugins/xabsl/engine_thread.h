@@ -75,12 +75,12 @@ protected:
 	}
 
 private:
-	xabsl::Engine *           xe_;
+	xabsl::Engine            *xe_;
 	XabslLoggingErrorHandler *xleh_;
 
 	fawkes::Time *now_;
 
-	fawkes::SkillerInterface *       skiller_if_;
+	fawkes::SkillerInterface        *skiller_if_;
 	fawkes::ObjectPositionInterface *wm_ball_if_;
 	fawkes::ObjectPositionInterface *wm_ball_w_if_;
 

@@ -91,7 +91,7 @@ private:
 	LockList<regex_t *>::iterator     rxit_;
 
 	int    inotify_fd_;
-	char * inotify_buf_;
+	char  *inotify_buf_;
 	size_t inotify_bufsize_;
 
 	std::map<int, std::string>           inotify_watches_;

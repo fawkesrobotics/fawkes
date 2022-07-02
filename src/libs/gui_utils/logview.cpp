@@ -258,13 +258,13 @@ LogView::on_client_disconnected()
 void
 LogView::append_message(Logger::LogLevel log_level,
                         struct timeval   t,
-                        const char *     component,
+                        const char      *component,
                         bool             is_exception,
-                        const char *     message)
+                        const char      *message)
 {
 	const char *loglevel;
 	const char *timestr;
-	char *      time = NULL;
+	char	     *time = NULL;
 	Gdk::Color  color;
 	bool        set_foreground = false;
 	bool        set_background = false;

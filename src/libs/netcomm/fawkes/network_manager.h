@@ -39,31 +39,31 @@ class ServiceBrowser;
 class FawkesNetworkManager
 {
 public:
-	FawkesNetworkManager(ThreadCollector *  thread_collector,
+	FawkesNetworkManager(ThreadCollector   *thread_collector,
 	                     bool               enable_ipv4,
 	                     bool               enable_ipv6,
 	                     const std::string &listen_ipv4,
 	                     const std::string &listen_ipv6,
 	                     unsigned short int fawkes_port,
-	                     const char *       service_name);
+	                     const char        *service_name);
 	~FawkesNetworkManager();
 
-	FawkesNetworkHub *   hub();
+	FawkesNetworkHub    *hub();
 	NetworkNameResolver *nnresolver();
-	ServicePublisher *   service_publisher();
-	ServiceBrowser *     service_browser();
+	ServicePublisher    *service_publisher();
+	ServiceBrowser      *service_browser();
 
 	unsigned short int fawkes_port() const;
 
 private:
 	unsigned short int         fawkes_port_;
-	ThreadCollector *          thread_collector_;
+	ThreadCollector           *thread_collector_;
 	FawkesNetworkServerThread *fawkes_network_thread_;
-	AvahiThread *              avahi_thread_;
+	AvahiThread               *avahi_thread_;
 
 	NetworkNameResolver *nnresolver_;
-	ServicePublisher *   service_publisher_;
-	ServiceBrowser *     service_browser_;
+	ServicePublisher    *service_publisher_;
+	ServiceBrowser      *service_browser_;
 };
 
 } // end namespace fawkes

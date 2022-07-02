@@ -167,13 +167,13 @@ public:
 	double operator-(const Time *t) const;
 	Time   operator-(const long int usec) const;
 	Time   operator-(const double sec) const;
-	Time & operator+=(const long int usec);
-	Time & operator+=(const Time &t);
-	Time & operator+=(const double sec);
-	Time & operator-=(const Time &t);
-	Time & operator-=(const double sec);
-	Time & operator-=(const long int usec);
-	Time & operator=(const Time &t);
+	Time  &operator+=(const long int usec);
+	Time  &operator+=(const Time &t);
+	Time  &operator+=(const double sec);
+	Time  &operator-=(const Time &t);
+	Time  &operator-=(const double sec);
+	Time  &operator-=(const long int usec);
+	Time  &operator=(const Time &t);
 	bool   operator==(const Time &t) const;
 	bool   operator==(const Time *t) const;
 	bool   operator!=(const Time &t) const;
@@ -196,7 +196,7 @@ public:
 	static const unsigned int TIMESTR_SIZE;
 
 private:
-	Clock *       clock_;
+	Clock	      *clock_;
 	timeval       time_;
 	mutable char *timestr_;
 };

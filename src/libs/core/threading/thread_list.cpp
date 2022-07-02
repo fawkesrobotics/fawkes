@@ -198,7 +198,7 @@ ThreadList::wakeup(Barrier *barrier)
 void
 ThreadList::wakeup_unlocked(Barrier *barrier)
 {
-	Exception *  exc   = NULL;
+	Exception   *exc   = NULL;
 	unsigned int count = 1;
 	for (iterator i = begin(); i != end(); ++i) {
 		if (!(*i)->flagged_bad()) {

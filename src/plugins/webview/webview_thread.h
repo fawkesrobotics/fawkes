@@ -68,13 +68,13 @@ protected:
 	}
 
 private:
-	fawkes::WebServer *           webserver_;
+	fawkes::WebServer            *webserver_;
 	fawkes::WebRequestDispatcher *dispatcher_;
 
 	WebviewStaticRequestProcessor *static_processor_;
-	WebviewRESTRequestProcessor *  rest_processor_;
-	WebviewServiceBrowseHandler *  service_browse_handler_;
-	WebviewUserVerifier *          user_verifier_;
+	WebviewRESTRequestProcessor   *rest_processor_;
+	WebviewServiceBrowseHandler   *service_browse_handler_;
+	WebviewUserVerifier           *user_verifier_;
 
 	unsigned int             cfg_port_;
 	bool                     cfg_use_ipv4_;

@@ -413,7 +413,7 @@ LaserClusterThread::loop()
 	for (size_t p = 0; p < clusters_->points.size(); ++p) {
 		ColorPointType &out_point     = clusters_->points[p];
 		LabelPointType &out_lab_point = clusters_labeled_->points[p];
-		PointType &     in_point      = noline_cloud->points[p];
+		PointType      &in_point      = noline_cloud->points[p];
 		out_point.x = out_lab_point.x = in_point.x;
 		out_point.y = out_lab_point.y = in_point.y;
 		out_point.z = out_lab_point.z = in_point.z;
@@ -564,8 +564,8 @@ LaserClusterThread::loop()
 void
 LaserClusterThread::set_position(fawkes::Position3DInterface *iface,
                                  bool                         is_visible,
-                                 const Eigen::Vector4f &      centroid,
-                                 const Eigen::Quaternionf &   attitude)
+                                 const Eigen::Vector4f       &centroid,
+                                 const Eigen::Quaternionf    &attitude)
 {
 	tf::Stamped<tf::Pose> baserel_pose;
 
@@ -595,7 +595,7 @@ LaserClusterThread::set_position(fawkes::Position3DInterface *iface,
 
 	int visibility_history = iface->visibility_history();
 	if (is_visible) {
-		tf::Vector3 &  origin = baserel_pose.getOrigin();
+		tf::Vector3   &origin = baserel_pose.getOrigin();
 		tf::Quaternion quat   = baserel_pose.getRotation();
 
 		Eigen::Vector4f baserel_centroid;

@@ -47,9 +47,9 @@ using namespace fawkes;
  * @param api_mgr REST API manager to check for available APIs
  * @param logger logger
  */
-WebviewRESTRequestProcessor::WebviewRESTRequestProcessor(fawkes::WebUrlManager *        url_manager,
+WebviewRESTRequestProcessor::WebviewRESTRequestProcessor(fawkes::WebUrlManager         *url_manager,
                                                          fawkes::WebviewRestApiManager *api_mgr,
-                                                         fawkes::Logger *               logger)
+                                                         fawkes::Logger                *logger)
 : url_mgr_(url_manager),
   api_mgr_(api_mgr),
   logger_(logger),

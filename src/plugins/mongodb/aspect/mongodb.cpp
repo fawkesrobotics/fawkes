@@ -87,7 +87,7 @@ MongoDBAspect::~MongoDBAspect()
  * @param mongodb_connmgr MongoDB connection manager
  */
 void
-MongoDBAspect::init_MongoDBAspect(mongocxx::client *  mongodb_client,
+MongoDBAspect::init_MongoDBAspect(mongocxx::client   *mongodb_client,
                                   MongoDBConnCreator *mongodb_connmgr)
 {
 	this->mongodb_client  = mongodb_client;

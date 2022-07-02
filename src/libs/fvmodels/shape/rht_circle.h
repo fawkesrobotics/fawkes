@@ -64,8 +64,8 @@ private:
 	  const fawkes::upoint_t &p1,
 	  const fawkes::upoint_t &p2,
 	  const fawkes::upoint_t &p3,
-	  center_in_roi_t &       center,
-	  float &                 radius);
+	  center_in_roi_t        &center,
+	  float                  &radius);
 };
 
 } // end namespace firevision

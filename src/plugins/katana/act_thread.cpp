@@ -440,7 +440,7 @@ KatanaActThread::update_motors(bool refresh)
 void
 KatanaActThread::start_motion(RefPtr<KatanaMotionThread> motion_thread,
                               unsigned int               msgid,
-                              const char *               logmsg,
+                              const char                *logmsg,
                               ...)
 {
 	va_list arg;

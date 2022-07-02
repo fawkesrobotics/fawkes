@@ -46,7 +46,7 @@ private:
 	int *kernel;
 	// only used for OpenCV, but adding unconditional to avoid weird
 	// problems with differently sized class type sizes of macro missing
-	float *      kernel_float;
+	float       *kernel_float;
 	unsigned int kernel_size;
 };
 

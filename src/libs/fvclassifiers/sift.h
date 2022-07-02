@@ -45,7 +45,7 @@ namespace firevision {
 class SiftClassifier : public Classifier
 {
 public:
-	SiftClassifier(const char * features_file,
+	SiftClassifier(const char  *features_file,
 	               unsigned int pixel_width,
 	               unsigned int pixel_height,
 	               int          kdtree_bbf_max_nn_chks = 200,
@@ -60,11 +60,11 @@ private:
 	const char **features_files_;
 
 	IplImage *obj_img_;
-	feature * obj_features_;
+	feature  *obj_features_;
 	int       obj_num_features_;
 
 	CvMemStorage *storage_;
-	IplImage *    image_;
+	IplImage     *image_;
 
 	feature *img_features_;
 

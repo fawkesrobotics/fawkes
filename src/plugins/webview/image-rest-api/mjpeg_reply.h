@@ -54,8 +54,8 @@ private:
 	size_t                                             buffer_bytes_written_;
 
 	std::shared_ptr<WebviewJpegStreamProducer::Buffer> next_buffer_;
-	fawkes::Mutex *                                    next_buffer_mutex_;
-	fawkes::WaitCondition *                            next_buffer_waitcond_;
+	fawkes::Mutex                                     *next_buffer_mutex_;
+	fawkes::WaitCondition                             *next_buffer_waitcond_;
 
 	bool next_frame_;
 };

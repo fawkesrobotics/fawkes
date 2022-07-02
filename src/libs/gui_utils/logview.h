@@ -47,16 +47,16 @@ public:
 
 	void append_message(Logger::LogLevel log_level,
 	                    struct timeval   t,
-	                    const char *     component,
+	                    const char      *component,
 	                    bool             is_exception,
-	                    const char *     message);
+	                    const char      *message);
 
 	void clear();
 
 	ConnectionDispatcher *get_connection_dispatcher() const;
 
 private:
-	virtual void on_row_inserted(const Gtk::TreeModel::Path &    path,
+	virtual void on_row_inserted(const Gtk::TreeModel::Path     &path,
 	                             const Gtk::TreeModel::iterator &iter);
 	virtual void on_message_received(FawkesNetworkMessage *msg);
 	virtual void on_client_connected();

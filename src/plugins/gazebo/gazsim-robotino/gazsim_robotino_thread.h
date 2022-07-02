@@ -90,9 +90,9 @@ private:
 
 	//provided interfaces
 	fawkes::RobotinoSensorInterface *sens_if_;
-	fawkes::MotorInterface *         motor_if_;
-	fawkes::SwitchInterface *        switch_if_;
-	fawkes::IMUInterface *           imu_if_;
+	fawkes::MotorInterface          *motor_if_;
+	fawkes::SwitchInterface         *switch_if_;
+	fawkes::IMUInterface            *imu_if_;
 
 	//config values
 	std::string cfg_frame_odom_;
@@ -131,7 +131,7 @@ private:
 	int           gyro_buffer_index_new_;
 	int           gyro_buffer_index_delayed_;
 	fawkes::Time *gyro_timestamp_buffer_;
-	float *       gyro_angle_buffer_;
+	float	      *gyro_angle_buffer_;
 	float         gyro_delay_;
 	float         infrared_puck_sensor_dist_;
 	float         analog_in_left_;

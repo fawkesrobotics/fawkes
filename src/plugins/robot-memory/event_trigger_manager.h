@@ -50,8 +50,8 @@ class EventTriggerManager
 	friend class RobotMemory;
 
 public:
-	EventTriggerManager(fawkes::Logger *            logger,
-	                    fawkes::Configuration *     config,
+	EventTriggerManager(fawkes::Logger             *logger,
+	                    fawkes::Configuration      *config,
 	                    fawkes::MongoDBConnCreator *mongo_connection_manager);
 	virtual ~EventTriggerManager();
 
@@ -104,13 +104,13 @@ public:
 
 private:
 	void                    check_events();
-	mongocxx::change_stream create_change_stream(mongocxx::collection &  collection,
+	mongocxx::change_stream create_change_stream(mongocxx::collection   &collection,
 	                                             bsoncxx::document::view query);
 
 	std::string            name = "RobotMemory EventTriggerManager";
-	fawkes::Logger *       logger_;
+	fawkes::Logger        *logger_;
 	fawkes::Configuration *config_;
-	fawkes::Mutex *        mutex_;
+	fawkes::Mutex         *mutex_;
 
 	fawkes::MongoDBConnCreator *mongo_connection_manager_;
 	//MongoDB connections (necessary because the mongos instance used by the robot memory has no access to the oplog)

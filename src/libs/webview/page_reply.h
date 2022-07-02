@@ -35,7 +35,7 @@ class WebPageReply : public StaticWebReply
 public:
 	WebPageReply(std::string title, std::string page = "");
 
-	virtual const std::string &    body();
+	virtual const std::string     &body();
 	virtual std::string::size_type body_length();
 	virtual void
 	pack()

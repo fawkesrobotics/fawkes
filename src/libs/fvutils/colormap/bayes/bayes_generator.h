@@ -73,7 +73,7 @@ private:
 	HistogramMap::iterator                histo_it;
 
 	BayesHistosToLut *bhtl;
-	YuvColormap *     cm;
+	YuvColormap      *cm;
 
 	hint_t fg_object;
 
@@ -86,7 +86,7 @@ private:
 
 	unsigned int norm_size;
 
-	unsigned char *                            buffer;
+	unsigned char                             *buffer;
 	std::vector<fawkes::rectangle_t>           region;
 	std::vector<fawkes::rectangle_t>::iterator rit;
 

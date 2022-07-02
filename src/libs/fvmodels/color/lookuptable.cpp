@@ -76,7 +76,7 @@ ColorModelLookupTable::ColorModelLookupTable(const char *lut_id, bool destroy_on
  * @param destroy_on_free true to destroy lookup table in shmem on delete
  */
 ColorModelLookupTable::ColorModelLookupTable(unsigned int depth,
-                                             const char * lut_id,
+                                             const char  *lut_id,
                                              bool         destroy_on_free)
 {
 	colormap_ = new YuvColormap(lut_id, destroy_on_free, depth);
@@ -93,7 +93,7 @@ ColorModelLookupTable::ColorModelLookupTable(const char *file,
 {
 	ColormapFile cmf;
 	cmf.read(file);
-	Colormap *   tcm  = cmf.get_colormap();
+	Colormap    *tcm  = cmf.get_colormap();
 	YuvColormap *tycm = dynamic_cast<YuvColormap *>(tcm);
 	if (!tycm) {
 		delete tcm;
@@ -163,7 +163,7 @@ ColorModelLookupTable::load(const char *filename)
 {
 	ColormapFile cmf;
 	cmf.read(filename);
-	Colormap *   tcm  = cmf.get_colormap();
+	Colormap    *tcm  = cmf.get_colormap();
 	YuvColormap *tycm = dynamic_cast<YuvColormap *>(tcm);
 	if (!tycm) {
 		delete tcm;

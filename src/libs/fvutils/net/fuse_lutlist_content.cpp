@@ -63,7 +63,7 @@ FuseLutListContent::FuseLutListContent()
 FuseLutListContent::FuseLutListContent(uint32_t type, void *payload, size_t payload_size)
 {
 	FUSE_lutlist_message_t *tmsg         = (FUSE_lutlist_message_t *)payload;
-	void *                  list_payload = (void *)((size_t)payload + sizeof(FUSE_lutlist_message_t));
+	void                   *list_payload = (void *)((size_t)payload + sizeof(FUSE_lutlist_message_t));
 	list_                                = new DynamicBuffer(&(tmsg->lut_list),
                             list_payload,
                             payload_size - sizeof(FUSE_lutlist_message_t));
@@ -83,7 +83,7 @@ FuseLutListContent::~FuseLutListContent()
  * @param bytes_per_cell bytes per cell
  */
 void
-FuseLutListContent::add_lutinfo(const char * lut_id,
+FuseLutListContent::add_lutinfo(const char  *lut_id,
                                 unsigned int width,
                                 unsigned int height,
                                 unsigned int depth,
@@ -126,7 +126,7 @@ FUSE_lutinfo_t *
 FuseLutListContent::next()
 {
 	size_t size;
-	void * tmp = list_->next(&size);
+	void  *tmp = list_->next(&size);
 	if (size != sizeof(FUSE_lutinfo_t)) {
 		throw TypeMismatchException("Lut list content contains element that is of an "
 		                            "unexpected size");

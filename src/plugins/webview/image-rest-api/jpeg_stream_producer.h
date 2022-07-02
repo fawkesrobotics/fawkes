@@ -101,13 +101,13 @@ private:
 
 	TimeWait *timewait_;
 
-	firevision::SharedMemoryCamera * cam_;
+	firevision::SharedMemoryCamera  *cam_;
 	fawkes::LockList<Subscriber *>   subs_;
 	firevision::JpegImageCompressor *jpeg_;
 
 	std::shared_ptr<Buffer> last_buf_;
-	fawkes::Mutex *         last_buf_mutex_;
-	fawkes::WaitCondition * last_buf_waitcond_;
+	fawkes::Mutex          *last_buf_mutex_;
+	fawkes::WaitCondition  *last_buf_waitcond_;
 };
 
 } // end namespace fawkes

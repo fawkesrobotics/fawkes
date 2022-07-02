@@ -136,9 +136,9 @@ ActionSkillMapping::has_mapping(const std::string &action_name) const
  * @return The skill string of the mapped action, or an empty string in case of an error.
  */
 std::string
-ActionSkillMapping::map_skill(const std::string &                       name,
+ActionSkillMapping::map_skill(const std::string                        &name,
                               const std::map<std::string, std::string> &params,
-                              std::multimap<std::string, std::string> & messages) const
+                              std::multimap<std::string, std::string>  &messages) const
 {
 	std::string rv;
 

@@ -43,28 +43,28 @@ class ServiceSelectorCBE
 public:
 #if GTK_VERSION_GE(3, 0)
 	ServiceSelectorCBE(Gtk::ComboBox *services,
-	                   Gtk::Button *  connect,
-	                   Gtk::Window *  parent,
-	                   const char *   service = "_fawkes._tcp");
-	ServiceSelectorCBE(Gtk::ComboBox *  services,
+	                   Gtk::Button   *connect,
+	                   Gtk::Window   *parent,
+	                   const char    *service = "_fawkes._tcp");
+	ServiceSelectorCBE(Gtk::ComboBox   *services,
 	                   Gtk::ToolButton *connect,
-	                   Gtk::Window *    parent,
-	                   const char *     service = "_fawkes._tcp");
+	                   Gtk::Window     *parent,
+	                   const char      *service = "_fawkes._tcp");
 #else
 	ServiceSelectorCBE(Gtk::ComboBoxEntry *services,
-	                   Gtk::Button *       connect,
-	                   Gtk::Window *       parent,
-	                   const char *        service = "_fawkes._tcp");
+	                   Gtk::Button        *connect,
+	                   Gtk::Window        *parent,
+	                   const char         *service = "_fawkes._tcp");
 	ServiceSelectorCBE(Gtk::ComboBoxEntry *services,
-	                   Gtk::ToolButton *   connect,
-	                   Gtk::Window *       parent,
-	                   const char *        service = "_fawkes._tcp");
+	                   Gtk::ToolButton    *connect,
+	                   Gtk::Window        *parent,
+	                   const char         *service = "_fawkes._tcp");
 #endif
 	ServiceSelectorCBE(Glib::RefPtr<Gtk::Builder> builder,
-	                   const char *               cbe_name = "cbeServices",
-	                   const char *               btn_name = "btnConnect",
-	                   const char *               wnd_name = "wndMain",
-	                   const char *               service  = "_fawkes._tcp");
+	                   const char                *cbe_name = "cbeServices",
+	                   const char                *btn_name = "btnConnect",
+	                   const char                *wnd_name = "wndMain",
+	                   const char                *service  = "_fawkes._tcp");
 	virtual ~ServiceSelectorCBE();
 
 	FawkesNetworkClient *get_network_client();
@@ -88,12 +88,12 @@ protected:
 #else
 	Gtk::ComboBoxEntry *m_cbe_services;
 #endif
-	Gtk::Button *    m_btn_connect;
+	Gtk::Button     *m_btn_connect;
 	Gtk::ToolButton *m_tbtn_connect;
-	Gtk::Window *    m_parent;
+	Gtk::Window     *m_parent;
 
 	ConnectionDispatcher *m_dispatcher;
-	ServiceModel *        m_service_model;
+	ServiceModel         *m_service_model;
 
 private:
 	Glib::ustring  hostname_;

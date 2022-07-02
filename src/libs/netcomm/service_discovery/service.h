@@ -37,18 +37,18 @@ class NetworkNameResolver;
 class NetworkService
 {
 public:
-	NetworkService(const char *       name,
-	               const char *       type,
-	               const char *       domain,
-	               const char *       host,
+	NetworkService(const char        *name,
+	               const char        *type,
+	               const char        *domain,
+	               const char        *host,
 	               unsigned short int port);
 
-	NetworkService(const char *            name,
-	               const char *            type,
-	               const char *            domain,
-	               const char *            host,
+	NetworkService(const char             *name,
+	               const char             *type,
+	               const char             *domain,
+	               const char             *host,
 	               unsigned short int      port,
-	               const struct sockaddr * addr,
+	               const struct sockaddr  *addr,
 	               const socklen_t         addr_size,
 	               std::list<std::string> &txt);
 
@@ -57,8 +57,8 @@ public:
 	NetworkService(const char *name, const char *type, const char *domain);
 
 	NetworkService(NetworkNameResolver *nnresolver,
-	               const char *         name,
-	               const char *         type,
+	               const char          *name,
+	               const char          *type,
 	               unsigned short int   port);
 
 	NetworkService(const NetworkService *s);
@@ -71,11 +71,11 @@ public:
 	void set_name(const char *new_name);
 	void set_modified_name(const char *new_name) const;
 
-	const char *                  name() const;
-	const char *                  modified_name() const;
-	const char *                  type() const;
-	const char *                  domain() const;
-	const char *                  host() const;
+	const char                   *name() const;
+	const char                   *modified_name() const;
+	const char                   *type() const;
+	const char                   *domain() const;
+	const char                   *host() const;
 	std::string                   addr_string() const;
 	unsigned short int            port() const;
 	const std::list<std::string> &txt() const;
@@ -87,10 +87,10 @@ public:
 
 private:
 	std::list<std::string>  list;
-	char *                  _name;
-	char *                  _type;
-	char *                  _domain;
-	char *                  _host;
+	char                   *_name;
+	char                   *_type;
+	char                   *_domain;
+	char                   *_host;
 	unsigned short int      _port;
 	struct sockaddr_storage _addr;
 

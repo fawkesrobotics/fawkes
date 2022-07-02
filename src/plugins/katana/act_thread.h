@@ -81,7 +81,7 @@ public:
 
 	// For BlackBoardInterfaceListener
 	virtual bool bb_interface_message_received(fawkes::Interface *interface,
-	                                           fawkes::Message *  message) noexcept;
+	                                           fawkes::Message   *message) noexcept;
 
 	void update_sensor_values();
 
@@ -100,11 +100,11 @@ private:
 	void update_motors(bool refresh);
 	void start_motion(fawkes::RefPtr<KatanaMotionThread> motion_thread,
 	                  unsigned int                       msgid,
-	                  const char *                       logmsg,
+	                  const char                        *logmsg,
 	                  ...);
 
 private:
-	fawkes::KatanaInterface *              katana_if_;
+	fawkes::KatanaInterface               *katana_if_;
 	std::vector<fawkes::JointInterface *> *joint_ifs_;
 
 	std::string  cfg_controller_;

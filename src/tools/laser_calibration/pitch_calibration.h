@@ -26,8 +26,8 @@
 class PitchCalibration : public LaserCalibration
 {
 public:
-	PitchCalibration(LaserInterface *              laser,
-	                 fawkes::tf::Transformer *     tf_transformer,
+	PitchCalibration(LaserInterface               *laser,
+	                 fawkes::tf::Transformer      *tf_transformer,
 	                 fawkes::NetworkConfiguration *config,
 	                 std::string                   config_path);
 	virtual void calibrate();

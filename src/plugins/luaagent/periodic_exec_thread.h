@@ -85,10 +85,10 @@ private: /* members */
 	std::string cfg_agent_;
 	bool        cfg_watch_files_;
 
-	fawkes::SkillerInterface *     skiller_if_;
+	fawkes::SkillerInterface      *skiller_if_;
 	fawkes::SkillerDebugInterface *agdbg_if_;
 
-	fawkes::LuaContext *          lua_;
+	fawkes::LuaContext           *lua_;
 	fawkes::LuaInterfaceImporter *lua_ifi_;
 };
 

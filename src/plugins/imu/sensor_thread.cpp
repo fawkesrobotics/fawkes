@@ -40,8 +40,8 @@ using namespace fawkes;
  * @param cfg_prefix configuration path prefix
  * @param aqt IMUAcquisitionThread to get data from
  */
-IMUSensorThread::IMUSensorThread(std::string &         cfg_name,
-                                 std::string &         cfg_prefix,
+IMUSensorThread::IMUSensorThread(std::string          &cfg_name,
+                                 std::string          &cfg_prefix,
                                  IMUAcquisitionThread *aqt)
 : Thread("IMUSensorThread", Thread::OPMODE_WAITFORWAKEUP),
   BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE)

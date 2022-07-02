@@ -36,16 +36,16 @@ class NetworkAspectIniFin : public AspectIniFin
 {
 public:
 	NetworkAspectIniFin(NetworkNameResolver *nnresolver,
-	                    ServicePublisher *   service_publisher,
-	                    ServiceBrowser *     service_browser);
+	                    ServicePublisher    *service_publisher,
+	                    ServiceBrowser      *service_browser);
 
 	virtual void init(Thread *thread);
 	virtual void finalize(Thread *thread);
 
 private:
 	NetworkNameResolver *nnresolver_;
-	ServicePublisher *   service_publisher_;
-	ServiceBrowser *     service_browser_;
+	ServicePublisher    *service_publisher_;
+	ServiceBrowser      *service_browser_;
 };
 
 } // end namespace fawkes

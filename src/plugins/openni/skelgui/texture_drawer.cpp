@@ -149,8 +149,8 @@ SkelGuiTextureDrawer::draw()
 void
 SkelGuiTextureDrawer::copy_rgb_to_texture(const unsigned char *rgb_buf)
 {
-	unsigned char *      row = texture_;
-	unsigned char *      tex = texture_;
+	unsigned char       *row = texture_;
+	unsigned char       *tex = texture_;
 	const unsigned char *rgb = rgb_buf;
 	for (unsigned int h = 0; h < height_; ++h) {
 		tex = row;

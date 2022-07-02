@@ -221,7 +221,7 @@ MessageQueue::size() const
 {
 	mutex_->lock();
 	unsigned int rv = 0;
-	msg_list_t * l  = list_;
+	msg_list_t  *l  = list_;
 	while (l) {
 		++rv;
 		l = l->next;

@@ -50,8 +50,8 @@ using namespace fawkes;
  * @param logger logger to report problems
  * @param baseurl base URL of the RRD webrequest processor
  */
-MetricsRequestProcessor::MetricsRequestProcessor(MetricsManager *   metrics_manager,
-                                                 fawkes::Logger *   logger,
+MetricsRequestProcessor::MetricsRequestProcessor(MetricsManager    *metrics_manager,
+                                                 fawkes::Logger    *logger,
                                                  const std::string &baseurl)
 : metrics_manager_(metrics_manager), logger_(logger), base_url_(baseurl)
 {

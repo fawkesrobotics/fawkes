@@ -82,7 +82,7 @@ private:
 
 	bool scale_override_;
 
-	Gtk::FileChooserDialog *           fcd_;
+	Gtk::FileChooserDialog            *fcd_;
 	Papyrus::AffineController::pointer affine_;
 	Papyrus::Translator::pointer       translator_;
 };

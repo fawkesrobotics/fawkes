@@ -47,18 +47,18 @@ public:
 
 	virtual void transform(const std::string &target_frame, const tf::Transformer &transformer) = 0;
 
-	virtual void transform(const std::string &    target_frame,
-	                       const Time &           target_time,
-	                       const std::string &    fixed_frame,
+	virtual void transform(const std::string     &target_frame,
+	                       const Time            &target_time,
+	                       const std::string     &fixed_frame,
 	                       const tf::Transformer &transformer) = 0;
 
-	virtual const char *    get_typename()                     = 0;
+	virtual const char     *get_typename()                     = 0;
 	virtual StorageAdapter *clone() const                      = 0;
 	virtual size_t          point_size() const                 = 0;
 	virtual unsigned int    width() const                      = 0;
 	virtual unsigned int    height() const                     = 0;
 	virtual size_t          num_points() const                 = 0;
-	virtual void *          data_ptr() const                   = 0;
+	virtual void           *data_ptr() const                   = 0;
 	virtual std::string     frame_id() const                   = 0;
 	virtual void            get_time(fawkes::Time &time) const = 0;
 };
@@ -119,9 +119,9 @@ public:
    *  @param fixed_frame frame fixed over time
    *  @param transformer transformer to get transform from
    */
-	virtual void transform(const std::string &    target_frame,
-	                       const Time &           target_time,
-	                       const std::string &    fixed_frame,
+	virtual void transform(const std::string     &target_frame,
+	                       const Time            &target_time,
+	                       const std::string     &fixed_frame,
 	                       const tf::Transformer &transformer);
 
 	/** Get typename of storage adapter.
@@ -229,7 +229,7 @@ PointCloudStorageAdapter<PointT>::get_time(fawkes::Time &time) const
 
 template <typename PointT>
 void
-PointCloudStorageAdapter<PointT>::transform(const std::string &    target_frame,
+PointCloudStorageAdapter<PointT>::transform(const std::string     &target_frame,
                                             const tf::Transformer &transformer)
 {
 	pcl::PointCloud<PointT> tmp;
@@ -239,9 +239,9 @@ PointCloudStorageAdapter<PointT>::transform(const std::string &    target_frame,
 
 template <typename PointT>
 void
-PointCloudStorageAdapter<PointT>::transform(const std::string &    target_frame,
-                                            const Time &           target_time,
-                                            const std::string &    fixed_frame,
+PointCloudStorageAdapter<PointT>::transform(const std::string     &target_frame,
+                                            const Time            &target_time,
+                                            const std::string     &fixed_frame,
                                             const tf::Transformer &transformer)
 {
 	pcl::PointCloud<PointT> tmp;

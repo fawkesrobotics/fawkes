@@ -100,7 +100,7 @@ private:
 	rs2_intrinsics rgb_intrinsics_;
 
 	rs2::pipeline *rs_pipe_;
-	rs2::context * rs_context_;
+	rs2::context  *rs_context_;
 	rs2::device    rs_device_;
 	rs2::frameset  rs_data_;
 	rs2_intrinsics intrinsics_;

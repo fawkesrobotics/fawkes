@@ -62,11 +62,11 @@ public:
 	virtual void finalize();
 
 private:
-	bool merge_cb(fawkes_msgs::MergePointClouds::Request & req,
+	bool merge_cb(fawkes_msgs::MergePointClouds::Request  &req,
 	              fawkes_msgs::MergePointClouds::Response &resp);
-	bool retrieve_cb(fawkes_msgs::RetrievePointCloud::Request & req,
+	bool retrieve_cb(fawkes_msgs::RetrievePointCloud::Request  &req,
 	                 fawkes_msgs::RetrievePointCloud::Response &resp);
-	bool store_cb(fawkes_msgs::StorePointCloud::Request & req,
+	bool store_cb(fawkes_msgs::StorePointCloud::Request  &req,
 	              fawkes_msgs::StorePointCloud::Response &resp);
 	bool record_cb(fawkes_msgs::RecordData::Request &req, fawkes_msgs::RecordData::Response &resp);
 
@@ -79,18 +79,18 @@ protected:
 	}
 
 private: // members
-	fawkes::PclDatabaseMergeInterface *   merge_if_;
+	fawkes::PclDatabaseMergeInterface    *merge_if_;
 	fawkes::PclDatabaseRetrieveInterface *retrieve_if_;
-	fawkes::PclDatabaseStoreInterface *   store_if_;
+	fawkes::PclDatabaseStoreInterface    *store_if_;
 
 	fawkes::BlackBoardOnUpdateWaker *merge_update_waker_;
-	fawkes::WaitCondition *          merge_waitcond_;
+	fawkes::WaitCondition           *merge_waitcond_;
 
 	fawkes::BlackBoardOnUpdateWaker *retrieve_update_waker_;
-	fawkes::WaitCondition *          retrieve_waitcond_;
+	fawkes::WaitCondition           *retrieve_waitcond_;
 
 	fawkes::BlackBoardOnUpdateWaker *store_update_waker_;
-	fawkes::WaitCondition *          store_waitcond_;
+	fawkes::WaitCondition           *store_waitcond_;
 
 	ros::ServiceServer *srv_merge_;
 	ros::ServiceServer *srv_retrieve_;

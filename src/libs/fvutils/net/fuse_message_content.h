@@ -35,7 +35,7 @@ public:
 	virtual ~FuseMessageContent();
 
 	virtual void   serialize() = 0;
-	virtual void * payload() const;
+	virtual void  *payload() const;
 	virtual size_t payload_size() const;
 
 	void free_payload();

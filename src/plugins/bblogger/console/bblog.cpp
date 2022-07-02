@@ -212,7 +212,7 @@ public:
 private:
 	bool                   quit_;
 	FileAlterationMonitor *fam_;
-	BBLogFile &            file_;
+	BBLogFile             &file_;
 };
 
 int
@@ -234,7 +234,7 @@ set_enabled(const char *hostname, unsigned short int port, bool enabled)
 {
 	bool rv = 0;
 
-	BlackBoard *     bb = new RemoteBlackBoard(hostname, port);
+	BlackBoard      *bb = new RemoteBlackBoard(hostname, port);
 	SwitchInterface *si = bb->open_for_reading<SwitchInterface>("BBLogger");
 	if (!si->has_writer()) {
 		printf("No writer exists, BBLogger not loaded?\n");
@@ -372,7 +372,7 @@ main(int argc, char **argv)
 		return repair_file(file);
 
 	} else if ((command == "enable") || (command == "disable")) {
-		char *             host = strdup("localhost");
+		char              *host = strdup("localhost");
 		unsigned short int port = 1910;
 		if (argp.has_arg("r")) {
 			argp.parse_hostport("r", &host, &port);

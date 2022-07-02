@@ -195,7 +195,7 @@ public:
 
 	std::string to_string(bool escaped = false);
 
-	static size_t unescape(unsigned char *      unescaped,
+	static size_t unescape(unsigned char       *unescaped,
 	                       size_t               unescaped_size,
 	                       const unsigned char *escaped,
 	                       size_t               escaped_size);

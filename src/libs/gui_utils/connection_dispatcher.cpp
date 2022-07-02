@@ -54,7 +54,7 @@ ConnectionDispatcher::ConnectionDispatcher(unsigned int cid)
  * @param hostname hostname to connect to
  * @param port port to connect to
  */
-ConnectionDispatcher::ConnectionDispatcher(const char *       hostname,
+ConnectionDispatcher::ConnectionDispatcher(const char        *hostname,
                                            unsigned short int port,
                                            unsigned int       cid)
 {

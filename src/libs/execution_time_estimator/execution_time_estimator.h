@@ -55,9 +55,9 @@ public:
 	class Property
 	{
 	public:
-		Property(fawkes::Configuration * config,
-		         const std::string &     path,
-		         const std::string &     property,
+		Property(fawkes::Configuration  *config,
+		         const std::string      &path,
+		         const std::string      &property,
 		         const std::optional<T> &default_value = std::nullopt);
 		T get_property(const std::string &key) const;
 		T get_default_value() const;

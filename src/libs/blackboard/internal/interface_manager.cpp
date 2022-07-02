@@ -60,9 +60,9 @@ namespace fawkes {
  * @param bb_notifier BlackBoard notifier to all for events
  * @see bbconfig.h
  */
-BlackBoardInterfaceManager::BlackBoardInterfaceManager(BlackBoardMemoryManager * bb_memmgr,
+BlackBoardInterfaceManager::BlackBoardInterfaceManager(BlackBoardMemoryManager  *bb_memmgr,
                                                        BlackBoardMessageManager *bb_msgmgr,
-                                                       BlackBoardNotifier *      bb_notifier)
+                                                       BlackBoardNotifier       *bb_notifier)
 {
 	memmgr   = bb_memmgr;
 	msgmgr   = bb_msgmgr;
@@ -138,7 +138,7 @@ BlackBoardInterfaceManager::delete_interface_instance(Interface *interface)
 void *
 BlackBoardInterfaceManager::find_interface_in_memory(const char *type, const char *identifier)
 {
-	interface_header_t *                   ih;
+	interface_header_t                    *ih;
 	BlackBoardMemoryManager::ChunkIterator cit;
 	for (cit = memmgr->begin(); cit != memmgr->end(); ++cit) {
 		ih = (interface_header_t *)*cit;
@@ -159,7 +159,7 @@ unsigned int
 BlackBoardInterfaceManager::next_mem_serial()
 {
 	unsigned int                           serial = 1;
-	interface_header_t *                   ih;
+	interface_header_t                    *ih;
 	BlackBoardMemoryManager::ChunkIterator cit;
 	for (cit = memmgr->begin(); cit != memmgr->end(); ++cit) {
 		ih = (interface_header_t *)*cit;
@@ -186,7 +186,7 @@ BlackBoardInterfaceManager::create_interface(const char *type,
                                              const char *identifier,
                                              const char *owner,
                                              Interface *&interface,
-                                             void *&     ptr)
+                                             void      *&ptr)
 {
 	interface_header_t *ih;
 
@@ -244,8 +244,8 @@ BlackBoardInterfaceManager::open_for_reading(const char *type,
 	}
 
 	mutex->lock();
-	Interface *         iface = NULL;
-	void *              ptr   = NULL;
+	Interface          *iface = NULL;
+	void               *ptr   = NULL;
 	interface_header_t *ih;
 	bool                created = false;
 
@@ -317,8 +317,8 @@ BlackBoardInterfaceManager::open_multiple_for_reading(const char *type_pattern,
 
 	std::list<Interface *> rv;
 
-	Interface *                            iface = NULL;
-	interface_header_t *                   ih;
+	Interface                             *iface = NULL;
+	interface_header_t                    *ih;
 	BlackBoardMemoryManager::ChunkIterator cit;
 
 	try {
@@ -411,8 +411,8 @@ BlackBoardInterfaceManager::open_for_writing(const char *type,
 	mutex->lock();
 	memmgr->lock();
 
-	Interface *         iface = NULL;
-	void *              ptr   = NULL;
+	Interface          *iface = NULL;
+	void               *ptr   = NULL;
 	interface_header_t *ih;
 	bool                created = false;
 
@@ -518,7 +518,7 @@ BlackBoardInterfaceManager::list_all() const
 	InterfaceInfoList *infl = new InterfaceInfoList();
 
 	memmgr->lock();
-	interface_header_t *                   ih;
+	interface_header_t                    *ih;
 	BlackBoardMemoryManager::ChunkIterator cit;
 	for (cit = memmgr->begin(); cit != memmgr->end(); ++cit) {
 		ih = (interface_header_t *)*cit;
@@ -563,7 +563,7 @@ BlackBoardInterfaceManager::list(const char *type_pattern, const char *id_patter
 	InterfaceInfoList *infl = new InterfaceInfoList();
 
 	memmgr->lock();
-	interface_header_t *                   ih;
+	interface_header_t                    *ih;
 	BlackBoardMemoryManager::ChunkIterator cit;
 	for (cit = memmgr->begin(); cit != memmgr->end(); ++cit) {
 		ih = (interface_header_t *)*cit;

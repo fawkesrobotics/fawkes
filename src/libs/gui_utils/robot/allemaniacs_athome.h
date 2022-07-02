@@ -33,7 +33,7 @@ class AllemaniACsAtHomeCairoRobotDrawer : public CairoRobotDrawer
 public:
 	AllemaniACsAtHomeCairoRobotDrawer(bool laser_at_center = false);
 
-	virtual void draw_robot(Glib::RefPtr<Gdk::Window> &          window,
+	virtual void draw_robot(Glib::RefPtr<Gdk::Window>           &window,
 	                        const Cairo::RefPtr<Cairo::Context> &cr);
 
 private:

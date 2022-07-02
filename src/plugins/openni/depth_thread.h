@@ -69,7 +69,7 @@ protected:
 
 private:
 	xn::DepthGenerator *depth_gen_;
-	xn::DepthMetaData * depth_md_;
+	xn::DepthMetaData  *depth_md_;
 
 	firevision::SharedMemoryImageBuffer *depth_buf_;
 

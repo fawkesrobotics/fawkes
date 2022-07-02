@@ -99,7 +99,7 @@ protected:
 
 	NavigatorInterface::DriveMode drive_mode_; /**< the drive mode name */
 
-	Logger *       logger_; /**< The fawkes logger */
+	Logger        *logger_; /**< The fawkes logger */
 	Configuration *config_; /**< The fawkes configuration */
 
 	float max_trans_; /**< The maximum translation speed */

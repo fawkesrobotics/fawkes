@@ -46,7 +46,7 @@ using namespace fawkes;
  */
 BlackBoardInterfaceListMaintainer::BlackBoardInterfaceListMaintainer(const char *n,
                                                                      BlackBoard *bb,
-                                                                     Logger *    l,
+                                                                     Logger     *l,
                                                                      const char *type,
                                                                      const char *pattern)
 : BlackBoardInterfaceListener(n)

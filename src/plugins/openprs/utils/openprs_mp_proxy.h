@@ -40,7 +40,7 @@ public:
 	OpenPRSMessagePasserProxy(unsigned short     tcp_port,
 	                          const std::string &mp_host,
 	                          unsigned short     mp_port,
-	                          fawkes::Logger *   logger);
+	                          fawkes::Logger    *logger);
 	virtual ~OpenPRSMessagePasserProxy();
 
 private:
@@ -50,9 +50,9 @@ private:
 		/** Shortcut for shared pointer of session. */
 		typedef std::shared_ptr<Mapping> Ptr;
 		Mapping(boost::asio::io_service &io_service,
-		        const std::string &      mp_host,
+		        const std::string       &mp_host,
 		        unsigned short           mp_port,
-		        fawkes::Logger *         logger);
+		        fawkes::Logger          *logger);
 		~Mapping();
 
 		void start();
@@ -61,7 +61,7 @@ private:
 
 	private: // methods
 		void disconnect(const char *where, const char *reason);
-		void handle_resolve(const boost::system::error_code &        err,
+		void handle_resolve(const boost::system::error_code         &err,
 		                    boost::asio::ip::tcp::resolver::iterator endpoint_iterator);
 		void handle_connect(const boost::system::error_code &err);
 		void start_recv_client();
@@ -76,10 +76,10 @@ private:
 		void        write_int_to_socket(boost::asio::ip::tcp::socket &socket, int i);
 		void        write_string_to_socket(boost::asio::ip::tcp::socket &socket, std::string &str);
 		void        write_string_newline_to_socket(boost::asio::ip::tcp::socket &socket,
-		                                           const std::string &           str);
+		                                           const std::string            &str);
 
 	private: // members
-		boost::asio::io_service &      io_service_;
+		boost::asio::io_service       &io_service_;
 		boost::asio::ip::tcp::resolver resolver_;
 
 		std::string            server_host_;
@@ -111,7 +111,7 @@ private:
 
 	std::string    mp_host_;
 	unsigned short mp_port_;
-	Logger *       logger_;
+	Logger        *logger_;
 
 	std::list<Mapping::Ptr> mappings_;
 };

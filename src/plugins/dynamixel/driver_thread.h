@@ -63,7 +63,7 @@ public:
 
 	// For BlackBoardInterfaceListener
 	virtual bool bb_interface_message_received(fawkes::Interface *interface,
-	                                           fawkes::Message *  message) noexcept;
+	                                           fawkes::Message   *message) noexcept;
 
 	void exec_sensor();
 	void exec_act();
@@ -81,8 +81,8 @@ private:
 	{
 	public:
 		fawkes::DynamixelServoInterface *servo_if;
-		fawkes::LedInterface *           led_if;
-		fawkes::JointInterface *         joint_if;
+		fawkes::LedInterface            *led_if;
+		fawkes::JointInterface          *joint_if;
 
 		fawkes::ReadWriteLock *value_rwlock;
 
@@ -106,7 +106,7 @@ private:
 	std::map<unsigned int, Servo> servos_;
 
 	fawkes::RefPtr<DynamixelChain> chain_;
-	fawkes::ReadWriteLock *        chain_rwlock_;
+	fawkes::ReadWriteLock         *chain_rwlock_;
 
 	std::string               cfg_prefix_;
 	std::string               cfg_name_;

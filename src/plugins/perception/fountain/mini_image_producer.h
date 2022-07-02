@@ -34,10 +34,10 @@ class SharedMemoryImageBuffer;
 class MiniImageProducer
 {
 public:
-	MiniImageProducer(const char *        orig_id,
-	                  const char *        mini_id,
+	MiniImageProducer(const char         *orig_id,
+	                  const char         *mini_id,
 	                  firevision::Scaler *scaler,
-	                  fawkes::Logger *    logger);
+	                  fawkes::Logger     *logger);
 
 	~MiniImageProducer();
 
@@ -45,8 +45,8 @@ public:
 	void produce();
 
 private:
-	fawkes::Logger *                     logger;
-	firevision::Scaler *                 scaler;
+	fawkes::Logger                      *logger;
+	firevision::Scaler                  *scaler;
 	firevision::SharedMemoryImageBuffer *orig_shmem;
 	firevision::SharedMemoryImageBuffer *mini_shmem;
 

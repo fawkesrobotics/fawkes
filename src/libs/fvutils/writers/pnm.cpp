@@ -59,7 +59,7 @@ PNMWriter::PNMWriter(PNMFormat format) : Writer("pnm")
  * @param height image height
  */
 PNMWriter::PNMWriter(PNMFormat    format,
-                     const char * filename,
+                     const char  *filename,
                      unsigned int width,
                      unsigned int height)
 : Writer("pnm")

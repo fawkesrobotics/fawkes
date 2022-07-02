@@ -53,7 +53,7 @@ public:
    * @param sleep_time Variable sleep time at end of thread
    */
 	ExampleMutexCountThread(string        s,
-	                        Mutex *       m,
+	                        Mutex        *m,
 	                        unsigned int *mutex_count,
 	                        unsigned int *non_mutex_count,
 	                        unsigned int  sleep_time)
@@ -105,7 +105,7 @@ private:
 	string        s;
 	bool          sl;
 	unsigned int  slt;
-	Mutex *       m;
+	Mutex	      *m;
 	unsigned int *mc;
 	unsigned int *nmc;
 };

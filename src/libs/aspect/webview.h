@@ -39,9 +39,9 @@ public:
 	WebviewAspect();
 	virtual ~WebviewAspect();
 
-	void init_WebviewAspect(WebUrlManager *        url_manager,
-	                        WebNavManager *        nav_manager,
-	                        WebRequestManager *    request_manager,
+	void init_WebviewAspect(WebUrlManager         *url_manager,
+	                        WebNavManager         *nav_manager,
+	                        WebRequestManager     *request_manager,
 	                        WebviewRestApiManager *rest_api_manager);
 
 protected:

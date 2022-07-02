@@ -38,7 +38,7 @@ using namespace fawkes;
  * @param modc modulo count, every modc iterations a message is printed to stdout
  */
 ExampleThread::ExampleThread(BlockedTimingAspect::WakeupHook hook,
-                             const char *                    name,
+                             const char                     *name,
                              unsigned int                    modc)
 : Thread(name, Thread::OPMODE_WAITFORWAKEUP), BlockedTimingAspect(hook)
 {

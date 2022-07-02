@@ -127,8 +127,8 @@ main(int argc, char **argv)
 	unsigned int height = 512;
 
 	unsigned char *yuv_buffer = malloc_buffer(YUV422_PLANAR, width, height);
-	YUVSpaceDemo * yuvspace   = new YUVSpaceDemo(yuv_buffer);
-	ImageDisplay * display    = new ImageDisplay(width, height);
+	YUVSpaceDemo  *yuvspace   = new YUVSpaceDemo(yuv_buffer);
+	ImageDisplay  *display    = new ImageDisplay(width, height);
 
 	cout << endl << endl << " V" << endl << " ^" << endl << " |" << endl << " +--> U" << endl << endl;
 

@@ -39,7 +39,7 @@
  * @param logger logger
  */
 KatanaCalibrationThread::KatanaCalibrationThread(fawkes::RefPtr<fawkes::KatanaController> katana,
-                                                 fawkes::Logger *                         logger)
+                                                 fawkes::Logger                          *logger)
 : KatanaMotionThread("KatanaCalibrationThread", katana, logger)
 {
 }

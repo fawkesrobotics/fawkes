@@ -37,10 +37,10 @@ namespace stn {
  * @param cond_breakups A list of conditional breakups
  * @param temp_breakups A list of temporal breakups
  */
-DomainAction::DomainAction(const std::string &             name,
+DomainAction::DomainAction(const std::string              &name,
                            const std::vector<std::string> &params,
-                           const std::vector<Predicate> &  preconds,
-                           const std::vector<Predicate> &  effects,
+                           const std::vector<Predicate>   &preconds,
+                           const std::vector<Predicate>   &effects,
                            int                             duration,
                            const std::vector<std::string> &cond_breakups,
                            const std::vector<std::string> &temp_breakups)

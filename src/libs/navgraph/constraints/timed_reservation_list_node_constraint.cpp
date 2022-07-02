@@ -38,7 +38,7 @@ namespace fawkes {
  * @param clock time source to evaluate constraint timeouts
  */
 NavGraphTimedReservationListNodeConstraint::NavGraphTimedReservationListNodeConstraint(
-  Logger *       logger,
+  Logger        *logger,
   std::string    name,
   fawkes::Clock *clock)
 : NavGraphNodeConstraint(name)
@@ -54,9 +54,9 @@ NavGraphTimedReservationListNodeConstraint::NavGraphTimedReservationListNodeCons
  * @param node_time_list list of nodes with valid_time
  */
 NavGraphTimedReservationListNodeConstraint::NavGraphTimedReservationListNodeConstraint(
-  Logger *                                                   logger,
+  Logger                                                    *logger,
   std::string                                                name,
-  fawkes::Clock *                                            clock,
+  fawkes::Clock                                             *clock,
   std::vector<std::pair<fawkes::NavGraphNode, fawkes::Time>> node_time_list)
 : NavGraphNodeConstraint(name)
 {

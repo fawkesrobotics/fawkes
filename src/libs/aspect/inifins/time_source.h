@@ -41,7 +41,7 @@ public:
 	virtual void finalize(Thread *thread);
 
 private:
-	Clock *                          clock_;
+	Clock                           *clock_;
 	UniquenessConstraint<TimeSource> timesource_uc_;
 };
 

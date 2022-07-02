@@ -103,8 +103,8 @@ static const std::string REFBOX_CARDCOLOR_RED    = "red";
  * @param refbox_host refbox host
  * @param refbox_port refbox port
  */
-Msl2010RefBoxProcessor::Msl2010RefBoxProcessor(Logger *           logger,
-                                               const char *       refbox_host,
+Msl2010RefBoxProcessor::Msl2010RefBoxProcessor(Logger            *logger,
+                                               const char        *refbox_host,
                                                unsigned short int refbox_port)
 : name_("Msl2010RefBoxProc")
 {
@@ -220,7 +220,7 @@ Msl2010RefBoxProcessor::process_string(char *buf, size_t len)
 					//printf("child has %u children!\n", nl.size());
 
 					for (Node::NodeList::const_iterator cit = cnl.begin(); cit != cnl.end(); ++cit) {
-						const Node *   cnode = *cit;
+						const Node    *cnode = *cit;
 						const Element *cel   = dynamic_cast<const Element *>(cnode);
 						std::string    cnodename(cnode->get_name().data());
 

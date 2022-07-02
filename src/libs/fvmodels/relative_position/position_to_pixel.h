@@ -42,11 +42,11 @@ public:
 	                float                    cam_angle_y = 0);
 
 	fawkes::upoint_t get_pixel_position(fawkes::cart_coord_3d_t &position,
-	                                    std::string &            frame,
-	                                    const fawkes::Time &     time);
+	                                    std::string             &frame,
+	                                    const fawkes::Time      &time);
 	fawkes::point_t  get_pixel_position_unchecked(fawkes::cart_coord_3d_t &position,
-	                                              std::string &            frame,
-	                                              const fawkes::Time &     time);
+	                                              std::string             &frame,
+	                                              const fawkes::Time      &time);
 
 private:
 	std::string              cam_frame_;

@@ -396,7 +396,7 @@ private:
 	void handle_response();
 	void finish_nonblocking(unsigned int socket);
 
-	char *       device_file_;
+	char        *device_file_;
 	int          fd_;
 	bool         opened_;
 	unsigned int default_timeout_ms_;

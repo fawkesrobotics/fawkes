@@ -69,7 +69,7 @@ private:
 
 	unsigned int               _clid;
 	bool                       _alive;
-	StreamSocket *             _s;
+	StreamSocket              *_s;
 	FawkesNetworkServerThread *_parent;
 	FawkesNetworkMessageQueue *_inbound_queue;
 

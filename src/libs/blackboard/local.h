@@ -72,9 +72,9 @@ public:
 
 private: /* members */
 	BlackBoardInterfaceManager *im_;
-	BlackBoardMemoryManager *   memmgr_;
-	BlackBoardMessageManager *  msgmgr_;
-	BlackBoardNetworkHandler *  nethandler_;
+	BlackBoardMemoryManager    *memmgr_;
+	BlackBoardMessageManager   *msgmgr_;
+	BlackBoardNetworkHandler   *nethandler_;
 };
 
 } // end namespace fawkes

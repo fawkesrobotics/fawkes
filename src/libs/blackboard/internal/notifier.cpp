@@ -84,7 +84,7 @@ BlackBoardNotifier::~BlackBoardNotifier()
  * processed
  */
 void
-BlackBoardNotifier::register_listener(BlackBoardInterfaceListener *    listener,
+BlackBoardNotifier::register_listener(BlackBoardInterfaceListener     *listener,
                                       BlackBoard::ListenerRegisterFlag flag)
 {
 	update_listener(listener, flag);
@@ -96,7 +96,7 @@ BlackBoardNotifier::register_listener(BlackBoardInterfaceListener *    listener,
  * processed
  */
 void
-BlackBoardNotifier::update_listener(BlackBoardInterfaceListener *    listener,
+BlackBoardNotifier::update_listener(BlackBoardInterfaceListener     *listener,
                                     BlackBoard::ListenerRegisterFlag flag)
 {
 	const BlackBoardInterfaceListener::InterfaceQueue &queue = listener->bbil_acquire_queue();
@@ -162,13 +162,13 @@ BlackBoardNotifier::update_listener(BlackBoardInterfaceListener *    listener,
 
 void
 BlackBoardNotifier::proc_listener_maybe_queue(bool                         op,
-                                              Interface *                  interface,
+                                              Interface                   *interface,
                                               BlackBoardInterfaceListener *listener,
-                                              Mutex *                      mutex,
-                                              unsigned int &               events,
-                                              BBilMap &                    map,
-                                              BBilQueue &                  queue,
-                                              const char *                 hint)
+                                              Mutex                       *mutex,
+                                              unsigned int                &events,
+                                              BBilMap                     &map,
+                                              BBilQueue                   &queue,
+                                              const char                  *hint)
 {
 	MutexLocker lock(mutex);
 	if (events > 0) {
@@ -253,9 +253,9 @@ BlackBoardNotifier::unregister_listener(BlackBoardInterfaceListener *listener)
  * @param ilmap internal map to add listener to
  */
 void
-BlackBoardNotifier::add_listener(Interface *                  interface,
+BlackBoardNotifier::add_listener(Interface                   *interface,
                                  BlackBoardInterfaceListener *listener,
-                                 BBilMap &                    ilmap)
+                                 BBilMap                     &ilmap)
 {
 	std::pair<BBilMap::iterator, BBilMap::iterator> ret = ilmap.equal_range(interface->uid());
 
@@ -268,9 +268,9 @@ BlackBoardNotifier::add_listener(Interface *                  interface,
 }
 
 void
-BlackBoardNotifier::remove_listener(Interface *                  interface,
+BlackBoardNotifier::remove_listener(Interface                   *interface,
                                     BlackBoardInterfaceListener *listener,
-                                    BBilMap &                    ilmap)
+                                    BBilMap                     &ilmap)
 {
 	std::pair<BBilMap::iterator, BBilMap::iterator> ret = ilmap.equal_range(interface->uid());
 	for (BBilMap::iterator j = ret.first; j != ret.second; ++j) {
@@ -283,8 +283,8 @@ BlackBoardNotifier::remove_listener(Interface *                  interface,
 
 bool
 BlackBoardNotifier::is_in_queue(bool                         op,
-                                BBilQueue &                  queue,
-                                const char *                 uid,
+                                BBilQueue                   &queue,
+                                const char                  *uid,
                                 BlackBoardInterfaceListener *bbil)
 {
 	BBilQueue::iterator q;
@@ -298,9 +298,9 @@ BlackBoardNotifier::is_in_queue(bool                         op,
 
 void
 BlackBoardNotifier::queue_listener(bool                         op,
-                                   Interface *                  interface,
+                                   Interface                   *interface,
                                    BlackBoardInterfaceListener *listener,
-                                   BBilQueue &                  queue)
+                                   BBilQueue                   &queue)
 {
 	BBilQueueEntry qe = {op, interface->uid(), interface, listener};
 	queue.push_back(qe);
@@ -323,9 +323,9 @@ BlackBoardNotifier::register_observer(BlackBoardInterfaceObserver *observer)
 }
 
 void
-BlackBoardNotifier::add_observer(BlackBoardInterfaceObserver *                          observer,
+BlackBoardNotifier::add_observer(BlackBoardInterfaceObserver                           *observer,
                                  BlackBoardInterfaceObserver::ObservedInterfaceLockMap *its,
-                                 BBioMap &                                              bbiomap)
+                                 BBioMap                                               &bbiomap)
 {
 	BlackBoardInterfaceObserver::ObservedInterfaceLockMapIterator i;
 	its->lock();
@@ -499,7 +499,7 @@ BlackBoardNotifier::notify_of_writer_added(const Interface *interface,
 	bbil_writer_events_ += 1;
 	bbil_writer_mutex_->unlock();
 
-	const char *                                    uid = interface->uid();
+	const char                                     *uid = interface->uid();
 	std::pair<BBilMap::iterator, BBilMap::iterator> ret = bbil_writer_.equal_range(uid);
 	for (BBilMap::iterator j = ret.first; j != ret.second; ++j) {
 		BlackBoardInterfaceListener *bbil = j->second;
@@ -536,7 +536,7 @@ BlackBoardNotifier::notify_of_writer_removed(const Interface *interface,
 	bbil_writer_events_ += 1;
 	bbil_writer_mutex_->unlock();
 
-	const char *                                    uid = interface->uid();
+	const char                                     *uid = interface->uid();
 	std::pair<BBilMap::iterator, BBilMap::iterator> ret = bbil_writer_.equal_range(uid);
 	for (BBilMap::iterator j = ret.first; j != ret.second; ++j) {
 		BlackBoardInterfaceListener *bbil = j->second;
@@ -593,7 +593,7 @@ BlackBoardNotifier::notify_of_reader_added(const Interface *interface,
 	bbil_reader_events_ += 1;
 	bbil_reader_mutex_->unlock();
 
-	const char *                                    uid = interface->uid();
+	const char                                     *uid = interface->uid();
 	std::pair<BBilMap::iterator, BBilMap::iterator> ret = bbil_reader_.equal_range(uid);
 	for (BBilMap::iterator j = ret.first; j != ret.second; ++j) {
 		BlackBoardInterfaceListener *bbil = j->second;
@@ -630,7 +630,7 @@ BlackBoardNotifier::notify_of_reader_removed(const Interface *interface,
 	bbil_reader_events_ += 1;
 	bbil_reader_mutex_->unlock();
 
-	const char *                                    uid = interface->uid();
+	const char                                     *uid = interface->uid();
 	std::pair<BBilMap::iterator, BBilMap::iterator> ret = bbil_reader_.equal_range(uid);
 	for (BBilMap::iterator j = ret.first; j != ret.second; ++j) {
 		BlackBoardInterfaceListener *bbil = j->second;
@@ -692,7 +692,7 @@ BlackBoardNotifier::notify_of_data_refresh(const Interface *interface, bool has_
 	bbil_data_events_ += 1;
 	bbil_data_mutex_->unlock();
 
-	const char *                                    uid = interface->uid();
+	const char                                     *uid = interface->uid();
 	std::pair<BBilMap::iterator, BBilMap::iterator> ret = bbil_data_.equal_range(uid);
 	for (BBilMap::iterator j = ret.first; j != ret.second; ++j) {
 		BlackBoardInterfaceListener *bbil = j->second;
@@ -749,7 +749,7 @@ BlackBoardNotifier::notify_of_message_received(const Interface *interface, Messa
 
 	bool enqueue = true;
 
-	const char *                                    uid = interface->uid();
+	const char                                     *uid = interface->uid();
 	std::pair<BBilMap::iterator, BBilMap::iterator> ret = bbil_messages_.equal_range(uid);
 	for (BBilMap::iterator j = ret.first; j != ret.second; ++j) {
 		BlackBoardInterfaceListener *bbil = j->second;

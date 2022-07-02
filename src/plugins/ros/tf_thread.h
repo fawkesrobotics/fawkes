@@ -88,7 +88,7 @@ private:
 	void publish_transform_to_fawkes(const geometry_msgs::TransformStamped &ts,
 	                                 bool                                   static_tf = false);
 	geometry_msgs::TransformStamped create_transform_stamped(fawkes::TransformInterface *tfif,
-	                                                         const fawkes::Time *        time = NULL);
+	                                                         const fawkes::Time         *time = NULL);
 
 	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
 protected:
@@ -110,7 +110,7 @@ private:
 	ros::Publisher  pub_tf_;
 	ros::Publisher  pub_static_tf_;
 
-	fawkes::Mutex *                       tf_msg_queue_mutex_;
+	fawkes::Mutex                        *tf_msg_queue_mutex_;
 	unsigned int                          active_queue_;
 	std::queue<::tf::tfMessage::ConstPtr> tf_msg_queues_[2];
 #ifdef HAVE_TF2_MSGS

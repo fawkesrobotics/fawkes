@@ -83,10 +83,10 @@ public:
    * coordinate reference frames
    * @param output output point cloud
    */
-	PointCloudDBMergePipeline(mongocxx::client *                                      mongodb_client,
-	                          fawkes::Configuration *                                 config,
-	                          fawkes::Logger *                                        logger,
-	                          fawkes::tf::Transformer *                               transformer,
+	PointCloudDBMergePipeline(mongocxx::client                                       *mongodb_client,
+	                          fawkes::Configuration                                  *config,
+	                          fawkes::Logger                                         *logger,
+	                          fawkes::tf::Transformer                                *transformer,
 	                          typename PointCloudDBPipeline<PointType>::ColorCloudPtr output)
 	: PointCloudDBPipeline<PointType>(mongodb_client, config, logger, output), tf_(transformer)
 	{
@@ -478,7 +478,7 @@ private: // methods
 	bool
 	align_icp(typename PointCloudDBPipeline<PointType>::CloudConstPtr source,
 	          typename PointCloudDBPipeline<PointType>::CloudConstPtr target,
-	          Eigen::Matrix4f &                                       transform)
+	          Eigen::Matrix4f                                        &transform)
 	{
 		typename PointCloudDBPipeline<PointType>::Cloud final;
 
@@ -541,9 +541,9 @@ private: // methods
 #endif
 
 	void
-	merge_output(std::string &                                                   database,
+	merge_output(std::string                                                    &database,
 	             std::vector<typename PointCloudDBPipeline<PointType>::CloudPtr> clouds,
-	             std::vector<long> &                                             actual_times)
+	             std::vector<long>                                              &actual_times)
 	{
 		size_t       num_points = 0;
 		const size_t num_clouds = clouds.size();
@@ -563,7 +563,7 @@ private: // methods
 				continue;
 
 			for (size_t p = 0; p < cldn; ++p, ++out_p) {
-				const PointType &                                         ip = lpcl->points[p];
+				const PointType                                          &ip = lpcl->points[p];
 				typename PointCloudDBPipeline<PointType>::ColorPointType &op = this->output_->points[out_p];
 
 				op.x = ip.x;

@@ -67,7 +67,7 @@ FuseNetworkMessage::FuseNetworkMessage(FUSE_message_t *msg)
  * and ownership of payload is claimed.
  */
 FuseNetworkMessage::FuseNetworkMessage(FUSE_message_type_t type,
-                                       void *              payload,
+                                       void               *payload,
                                        size_t              payload_size,
                                        bool                copy_payload)
 {

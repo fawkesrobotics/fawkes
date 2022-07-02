@@ -96,7 +96,7 @@ using namespace fawkes;
  * @param cfg_name configuration name
  * @param cfg_prefix configuration path prefix
  */
-IMUAcquisitionThread::IMUAcquisitionThread(const char *       thread_name,
+IMUAcquisitionThread::IMUAcquisitionThread(const char        *thread_name,
                                            bool               continuous,
                                            const std::string &cfg_name,
                                            const std::string &cfg_prefix)

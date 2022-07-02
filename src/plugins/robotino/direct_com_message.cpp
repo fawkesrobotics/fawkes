@@ -796,7 +796,7 @@ DirectRobotinoComMessage::escape()
  * @throw Exception if not enough bytes could be unescaped
  */
 size_t
-DirectRobotinoComMessage::unescape(unsigned char *      unescaped,
+DirectRobotinoComMessage::unescape(unsigned char       *unescaped,
                                    size_t               unescaped_size,
                                    const unsigned char *escaped,
                                    size_t               escaped_size)
@@ -935,7 +935,7 @@ std::string
 DirectRobotinoComMessage::to_string(bool escaped)
 {
 	boost::asio::const_buffer b;
-	const unsigned char *     bp;
+	const unsigned char      *bp;
 	size_t                    bsize;
 	if (escaped) {
 		b     = buffer();

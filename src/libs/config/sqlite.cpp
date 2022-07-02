@@ -351,8 +351,8 @@ SQLiteConfiguration::dump(::sqlite3 *tdb, const char *dumpfile)
 
 	fprintf(f, "BEGIN TRANSACTION;\n");
 
-	const char *sql = "SELECT name, sql FROM sqlite_master "
-	                  "WHERE sql NOT NULL AND type=='table'";
+	const char   *sql = "SELECT name, sql FROM sqlite_master "
+	                    "WHERE sql NOT NULL AND type=='table'";
 	sqlite3_stmt *stmt;
 	if ((sqlite3_prepare(tdb, sql, -1, &stmt, 0) != SQLITE_OK) || !stmt) {
 		throw ConfigurationException("dump_query/prepare", sqlite3_errmsg(tdb));
@@ -650,7 +650,7 @@ SQLiteConfiguration::load(const char *file_path)
 		// Now go for the .db filename
 
 		// generate filename
-		char * defaults_db;
+		char  *defaults_db;
 		size_t len = strlen(file_path);
 		if (fnmatch("*.sql", file_path, FNM_PATHNAME) == 0) {
 			defaults_db = (char *)calloc(1, len); // yes, that's one byte less!
@@ -745,7 +745,7 @@ SQLiteConfiguration::exists(const char *path)
 {
 	mutex->lock();
 	sqlite3_stmt *stmt;
-	const char *  tail;
+	const char   *tail;
 	bool          e;
 
 	if (sqlite3_prepare(db, SQL_SELECT_TYPE, -1, &stmt, &tail) != SQLITE_OK) {
@@ -771,7 +771,7 @@ std::string
 SQLiteConfiguration::get_type(const char *path)
 {
 	sqlite3_stmt *stmt;
-	const char *  tail;
+	const char   *tail;
 	std::string   s = "";
 
 	mutex->lock();
@@ -804,7 +804,7 @@ std::string
 SQLiteConfiguration::get_comment(const char *path)
 {
 	sqlite3_stmt *stmt;
-	const char *  tail;
+	const char   *tail;
 	std::string   s = "";
 
 	mutex->lock();
@@ -833,7 +833,7 @@ std::string
 SQLiteConfiguration::get_default_comment(const char *path)
 {
 	sqlite3_stmt *stmt;
-	const char *  tail;
+	const char   *tail;
 	std::string   s = "";
 
 	mutex->lock();
@@ -899,7 +899,7 @@ SQLiteConfiguration::is_default(const char *path)
 {
 	mutex->lock();
 	sqlite3_stmt *stmt;
-	const char *  tail;
+	const char   *tail;
 	bool          e;
 
 	if (sqlite3_prepare(db, SQL_SELECT_TYPE, -1, &stmt, &tail) != SQLITE_OK) {
@@ -929,7 +929,7 @@ sqlite3_stmt *
 SQLiteConfiguration::get_typed_value(const char *path, const char *type)
 {
 	sqlite3_stmt *stmt;
-	const char *  tail;
+	const char   *tail;
 
 	if (sqlite3_prepare(db, SQL_SELECT_VALUE_TYPE, -1, &stmt, &tail) != SQLITE_OK) {
 		throw ConfigurationException("get_typed_value/prepare", sqlite3_errmsg(db));
@@ -1090,7 +1090,7 @@ Configuration::ValueIterator *
 SQLiteConfiguration::get_value(const char *path)
 {
 	sqlite3_stmt *stmt;
-	const char *  tail;
+	const char   *tail;
 
 	if (sqlite3_prepare(db, SQL_SELECT_COMPLETE, -1, &stmt, &tail) != SQLITE_OK) {
 		throw ConfigurationException("get_value/prepare", sqlite3_errmsg(db));
@@ -1109,7 +1109,7 @@ sqlite3_stmt *
 SQLiteConfiguration::prepare_update(const char *sql, const char *path)
 {
 	sqlite3_stmt *stmt;
-	const char *  tail;
+	const char   *tail;
 
 	if (sqlite3_prepare(db, sql, -1, &stmt, &tail) != SQLITE_OK) {
 		throw ConfigurationException("prepare_update/prepare", sqlite3_errmsg(db));
@@ -1127,7 +1127,7 @@ sqlite3_stmt *
 SQLiteConfiguration::prepare_insert_value(const char *sql, const char *type, const char *path)
 {
 	sqlite3_stmt *stmt;
-	const char *  tail;
+	const char   *tail;
 
 	if (sqlite3_prepare(db, sql, -1, &stmt, &tail) != SQLITE_OK) {
 		throw ConfigurationException("prepare_insert_value/prepare", sqlite3_errmsg(db));
@@ -1492,7 +1492,7 @@ void
 SQLiteConfiguration::erase(const char *path)
 {
 	sqlite3_stmt *stmt;
-	const char *  tail;
+	const char   *tail;
 
 	if (sqlite3_prepare(db, SQL_DELETE_VALUE, -1, &stmt, &tail) != SQLITE_OK) {
 		throw ConfigurationException("erase/prepare", sqlite3_errmsg(db));
@@ -1814,7 +1814,7 @@ void
 SQLiteConfiguration::erase_default(const char *path)
 {
 	sqlite3_stmt *stmt;
-	const char *  tail;
+	const char   *tail;
 
 	if (sqlite3_prepare(db, SQL_DELETE_DEFAULT_VALUE, -1, &stmt, &tail) != SQLITE_OK) {
 		throw ConfigurationException("erase_default/prepare", sqlite3_errmsg(db));
@@ -1869,7 +1869,7 @@ Configuration::ValueIterator *
 SQLiteConfiguration::iterator()
 {
 	sqlite3_stmt *stmt;
-	const char *  tail;
+	const char   *tail;
 
 	if (sqlite3_prepare(db, SQL_SELECT_ALL, -1, &stmt, &tail) != SQLITE_OK) {
 		throw ConfigurationException("iterator: Preparation SQL failed");
@@ -1889,7 +1889,7 @@ Configuration::ValueIterator *
 SQLiteConfiguration::iterator_default()
 {
 	sqlite3_stmt *stmt;
-	const char *  tail;
+	const char   *tail;
 
 	if (sqlite3_prepare(db, SQL_SELECT_ALL_DEFAULT, -1, &stmt, &tail) != SQLITE_OK) {
 		throw ConfigurationException("iterator_default: Preparation SQL failed");
@@ -1909,7 +1909,7 @@ Configuration::ValueIterator *
 SQLiteConfiguration::iterator_hostspecific()
 {
 	sqlite3_stmt *stmt;
-	const char *  tail;
+	const char   *tail;
 
 	if (sqlite3_prepare(db, SQL_SELECT_ALL_HOSTSPECIFIC, -1, &stmt, &tail) != SQLITE_OK) {
 		throw ConfigurationException("iterator_hostspecific: Preparation SQL failed");
@@ -1927,7 +1927,7 @@ SQLiteConfiguration::SQLiteValueIterator *
 SQLiteConfiguration::modified_iterator()
 {
 	sqlite3_stmt *stmt;
-	const char *  tail;
+	const char   *tail;
 
 	if (sqlite3_prepare(db, SQL_SELECT_MODIFIED_ALL, -1, &stmt, &tail) != SQLITE_OK) {
 		throw ConfigurationException("modified_iterator: Preparation SQL failed");
@@ -1951,7 +1951,7 @@ Configuration::ValueIterator *
 SQLiteConfiguration::search(const char *path)
 {
 	sqlite3_stmt *stmt;
-	const char *  tail;
+	const char   *tail;
 
 	char *p;
 	if (asprintf(&p, "%s%%", path) == -1) {

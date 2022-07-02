@@ -66,7 +66,7 @@ public:
 
 private:
 	ReadWriteLock *rwlock;
-	int *          val;
+	int           *val;
 	unsigned int   sleep_time;
 };
 
@@ -103,7 +103,7 @@ public:
 private:
 	string         pp;
 	ReadWriteLock *rwlock;
-	int *          val;
+	int           *val;
 	unsigned int   sleep_time;
 };
 

@@ -132,7 +132,7 @@ typedef struct _pf_t
 
 	// Function used to draw random pose samples
 	pf_init_model_fn_t random_pose_fn;
-	void *             random_pose_data;
+	void              *random_pose_data;
 } pf_t;
 
 // Create a new filter
@@ -141,7 +141,7 @@ pf_t *pf_alloc(int                min_samples,
                double             alpha_slow,
                double             alpha_fast,
                pf_init_model_fn_t random_pose_fn,
-               void *             random_pose_data);
+               void              *random_pose_data);
 
 // Free an existing filter
 void pf_free(pf_t *pf);

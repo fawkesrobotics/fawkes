@@ -103,9 +103,9 @@ LoggerFactory::instance(const char *type, const char *as)
 		// no supported arguments
 		l = new ConsoleLogger();
 	} else if (strcmp(type, "file") == 0) {
-		char *      tmp = strdup(as);
-		char *      saveptr;
-		char *      r = strtok_r(tmp, ":", &saveptr);
+		char       *tmp = strdup(as);
+		char       *saveptr;
+		char       *r = strtok_r(tmp, ":", &saveptr);
 		const char *file_name;
 		r = strtok_r(tmp, ":", &saveptr);
 		if (r == NULL) {
@@ -144,11 +144,11 @@ LoggerFactory::multilogger_instance(const char *as, Logger::LogLevel default_ll)
 	MultiLogger *m = new MultiLogger();
 	m->set_loglevel(default_ll);
 
-	char *      logger_string = strdup(as);
-	char *      str           = logger_string;
-	char *      saveptr, *r;
+	char	     *logger_string = strdup(as);
+	char	     *str           = logger_string;
+	char	     *saveptr, *r;
 	const char *type, *args, *level;
-	char *      typeargs_saveptr, *level_saveptr, *type_str;
+	char	     *typeargs_saveptr, *level_saveptr, *type_str;
 	const char *logger_delim          = ";";
 	const char *logger_typeargs_delim = ":";
 	const char *logger_level_delim    = "/";

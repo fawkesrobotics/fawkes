@@ -53,7 +53,7 @@ using namespace fawkes;
  * @param cobject Gtk C object
  * @param builder Gtk Builder
  */
-LaserDrawingArea::LaserDrawingArea(BaseObjectType *                  cobject,
+LaserDrawingArea::LaserDrawingArea(BaseObjectType                   *cobject,
                                    const Glib::RefPtr<Gtk::Builder> &builder)
 : Gtk::DrawingArea(cobject)
 {
@@ -140,10 +140,10 @@ void
 LaserDrawingArea::set_objpos_if(std::list<fawkes::ObjectPositionInterface *> *l_objpos_if_persons,
                                 std::list<fawkes::ObjectPositionInterface *> *l_objpos_if_legs,
                                 std::list<fawkes::ObjectPositionInterface *> *l_objpos_if_misc,
-                                fawkes::Laser720Interface *                   laser_segmentation_if,
+                                fawkes::Laser720Interface                    *laser_segmentation_if,
                                 std::list<fawkes::Position2DTrackInterface *> *l_track_if,
-                                fawkes::ObjectPositionInterface *              target_if,
-                                fawkes::SwitchInterface *                      switch_if)
+                                fawkes::ObjectPositionInterface               *target_if,
+                                fawkes::SwitchInterface                       *switch_if)
 {
 	l_objpos_if_persons_   = l_objpos_if_persons;
 	l_objpos_if_legs_      = l_objpos_if_legs;
@@ -426,7 +426,7 @@ LaserDrawingArea::on_expose_event(GdkEventExpose *event)
 			     it != laser_ifs_.end();
 			     ++it) {
 				const fawkes::Interface *laser_if = it->first;
-				const Color &            color    = it->second;
+				const Color             &color    = it->second;
 				cr->save();
 				cr->set_source_rgb(color.r, color.g, color.b);
 				draw_beams(laser_if, window, cr);
@@ -438,7 +438,7 @@ LaserDrawingArea::on_expose_event(GdkEventExpose *event)
 			     it != laser_ifs_.end();
 			     ++it) {
 				const fawkes::Interface *laser_if = it->first;
-				const Color &            color    = it->second;
+				const Color             &color    = it->second;
 				cr->save();
 				cr->set_source_rgb(color.r, color.g, color.b);
 				draw_segments(laser_if, window, cr);
@@ -500,7 +500,7 @@ LaserDrawingArea::on_expose_event(GdkEventExpose *event)
  * have been setup before.
  */
 void
-LaserDrawingArea::draw_scalebox(Glib::RefPtr<Gdk::Window> &          window,
+LaserDrawingArea::draw_scalebox(Glib::RefPtr<Gdk::Window>           &window,
                                 const Cairo::RefPtr<Cairo::Context> &cr)
 {
 	cr->save();
@@ -518,15 +518,15 @@ LaserDrawingArea::draw_scalebox(Glib::RefPtr<Gdk::Window> &          window,
  * have been setup before.
  */
 void
-LaserDrawingArea::draw_beams(const fawkes::Interface *            itf,
-                             Glib::RefPtr<Gdk::Window> &          window,
+LaserDrawingArea::draw_beams(const fawkes::Interface             *itf,
+                             Glib::RefPtr<Gdk::Window>           &window,
                              const Cairo::RefPtr<Cairo::Context> &cr)
 {
-	float *                           distances;
+	float                            *distances;
 	size_t                            nd;
 	bool                              clockwise;
-	const fawkes::Laser360Interface * itf360  = NULL;
-	const fawkes::Laser720Interface * itf720  = NULL;
+	const fawkes::Laser360Interface  *itf360  = NULL;
+	const fawkes::Laser720Interface  *itf720  = NULL;
 	const fawkes::Laser1080Interface *itf1080 = NULL;
 	if ((itf360 = dynamic_cast<const fawkes::Laser360Interface *>(itf))) {
 		distances = itf360->distances();
@@ -608,7 +608,7 @@ LaserDrawingArea::draw_beams(const fawkes::Interface *            itf,
  * have been setup before.
  */
 void
-LaserDrawingArea::draw_persons_legs(Glib::RefPtr<Gdk::Window> &          window,
+LaserDrawingArea::draw_persons_legs(Glib::RefPtr<Gdk::Window>           &window,
                                     const Cairo::RefPtr<Cairo::Context> &cr)
 {
 	std::list<ObjectPositionInterface *>::iterator objpos_if_itt;
@@ -728,14 +728,14 @@ LaserDrawingArea::draw_persons_legs(Glib::RefPtr<Gdk::Window> &          window,
 		std::list<Position2DTrackInterface *>::iterator track_if_itt;
 		;
 		const float  radius(0.1);
-		float *      x_positions1;
-		float *      y_positions1;
-		int *        timestamps1;
-		float *      x_positions2  = NULL;
-		float *      y_positions2  = NULL;
+		float       *x_positions1;
+		float       *y_positions1;
+		int         *timestamps1;
+		float       *x_positions2  = NULL;
+		float       *y_positions2  = NULL;
 		unsigned int track_length1 = 0;
 		unsigned int track_length2 = 0;
-		int *        timestamps2   = NULL;
+		int         *timestamps2   = NULL;
 		unsigned int id;
 		int          color_it = 0;
 		float        delta    = 0.25;
@@ -915,16 +915,16 @@ LaserDrawingArea::draw_persons_legs(Glib::RefPtr<Gdk::Window> &          window,
  * have been setup before.
  */
 void
-LaserDrawingArea::draw_segments(const fawkes::Interface *            itf,
-                                Glib::RefPtr<Gdk::Window> &          window,
+LaserDrawingArea::draw_segments(const fawkes::Interface             *itf,
+                                Glib::RefPtr<Gdk::Window>           &window,
                                 const Cairo::RefPtr<Cairo::Context> &cr)
 {
 	size_t      nd        = laser_segmentation_if_->maxlenof_distances();
 	const float nd_factor = 360.0 / nd;
 
-	float *                           distances;
-	const fawkes::Laser360Interface * itf360  = NULL;
-	const fawkes::Laser720Interface * itf720  = NULL;
+	float                            *distances;
+	const fawkes::Laser360Interface  *itf360  = NULL;
+	const fawkes::Laser720Interface  *itf720  = NULL;
 	const fawkes::Laser1080Interface *itf1080 = NULL;
 	if ((itf360 = dynamic_cast<const fawkes::Laser360Interface *>(itf))) {
 		distances = itf360->distances();

@@ -82,8 +82,8 @@ public:
 	}
 	int                     parseImage(unsigned char *buffer, ROI *roi);
 	int                     getShapeCount(void) const;
-	LineShape *             getShape(int id) const;
-	LineShape *             getMostLikelyShape(void) const;
+	LineShape              *getShape(int id) const;
+	LineShape              *getMostLikelyShape(void) const;
 	std::vector<LineShape> *getShapes();
 
 private:

@@ -277,11 +277,11 @@ skillgui_cairo_render_textpara(GVJ_t *job, pointf p, textpara_t *para)
 #endif
 	SkillGuiCairoRenderInstructor *cri   = (SkillGuiCairoRenderInstructor *)job->context;
 	Cairo::RefPtr<Cairo::Context>  cairo = cri->get_cairo();
-	obj_state_t *                  obj   = job->obj;
+	obj_state_t                   *obj   = job->obj;
 
 	Cairo::FontWeight weight     = Cairo::FONT_WEIGHT_NORMAL;
 	Cairo::FontSlant  slant      = Cairo::FONT_SLANT_NORMAL;
-	char *            fontweight = NULL;
+	char             *fontweight = NULL;
 	if (obj->type == CLUSTER_OBJTYPE) {
 		fontweight = agget(obj->u.sg, (char *)"fontweight");
 	} else if (obj->type == ROOTGRAPH_OBJTYPE) {
@@ -376,7 +376,7 @@ skillgui_cairo_render_ellipse(GVJ_t *job, pointf *A, int filled)
 	//printf("Render ellipse\n");
 	SkillGuiCairoRenderInstructor *cri   = (SkillGuiCairoRenderInstructor *)job->context;
 	Cairo::RefPtr<Cairo::Context>  cairo = cri->get_cairo();
-	obj_state_t *                  obj   = job->obj;
+	obj_state_t                   *obj   = job->obj;
 
 	Cairo::Matrix old_matrix;
 	cairo->get_matrix(old_matrix);
@@ -416,7 +416,7 @@ skillgui_cairo_render_polygon(GVJ_t *job, pointf *A, int n, int filled)
 	//printf("Polygon\n");
 	SkillGuiCairoRenderInstructor *cri   = (SkillGuiCairoRenderInstructor *)job->context;
 	Cairo::RefPtr<Cairo::Context>  cairo = cri->get_cairo();
-	obj_state_t *                  obj   = job->obj;
+	obj_state_t                   *obj   = job->obj;
 
 	skillgui_cairo_set_penstyle(cairo, job);
 
@@ -447,7 +447,7 @@ skillgui_cairo_render_polygon(GVJ_t *job, pointf *A, int n, int filled)
 }
 
 static void
-skillgui_cairo_render_bezier(GVJ_t * job,
+skillgui_cairo_render_bezier(GVJ_t  *job,
                              pointf *A,
                              int     n,
                              int     arrow_at_start,
@@ -461,7 +461,7 @@ skillgui_cairo_render_bezier(GVJ_t * job,
 	//printf("Bezier\n");
 	SkillGuiCairoRenderInstructor *cri   = (SkillGuiCairoRenderInstructor *)job->context;
 	Cairo::RefPtr<Cairo::Context>  cairo = cri->get_cairo();
-	obj_state_t *                  obj   = job->obj;
+	obj_state_t                   *obj   = job->obj;
 
 	skillgui_cairo_set_penstyle(cairo, job);
 
@@ -490,7 +490,7 @@ skillgui_cairo_render_polyline(GVJ_t *job, pointf *A, int n)
 	//printf("Polyline\n");
 	SkillGuiCairoRenderInstructor *cri   = static_cast<SkillGuiCairoRenderInstructor *>(job->context);
 	Cairo::RefPtr<Cairo::Context>  cairo = cri->get_cairo();
-	obj_state_t *                  obj   = job->obj;
+	obj_state_t                   *obj   = job->obj;
 
 	skillgui_cairo_set_penstyle(cairo, job);
 

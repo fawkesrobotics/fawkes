@@ -61,7 +61,7 @@ public:
    * @param manip Pointer to pointer of the copied manipulator
    */
 	virtual void clone(OpenRaveEnvironmentPtr &env,
-	                   OpenRaveRobotPtr &      robot,
+	                   OpenRaveRobotPtr       &robot,
 	                   OpenRaveManipulatorPtr &manip) const = 0;
 
 	/** Start OpenRave viewer */
@@ -126,7 +126,7 @@ public:
  * @param trans_z transition offset on z-axis
  * @param calibrate decides whether to calculate offset (true )or set them directly (false; default)
  */
-	virtual void set_manipulator(OpenRaveRobotPtr &      robot,
+	virtual void set_manipulator(OpenRaveRobotPtr       &robot,
 	                             OpenRaveManipulatorPtr &manip,
 	                             float                   trans_x   = 0.f,
 	                             float                   trans_y   = 0.f,
@@ -183,7 +183,7 @@ public:
 	                         float              trans_x,
 	                         float              trans_y,
 	                         float              trans_z,
-	                         OpenRaveRobotPtr & robot) = 0;
+	                         OpenRaveRobotPtr  &robot) = 0;
 
 	/** Move object in the environment. Uses currently active robot.
   * Distances are given in meters

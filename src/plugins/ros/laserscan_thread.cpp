@@ -258,11 +258,11 @@ RosLaserScanThread::loop()
 void
 RosLaserScanThread::bb_interface_data_refreshed(fawkes::Interface *interface) noexcept
 {
-	Laser360Interface * ls360if  = dynamic_cast<Laser360Interface *>(interface);
-	Laser720Interface * ls720if  = dynamic_cast<Laser720Interface *>(interface);
+	Laser360Interface  *ls360if  = dynamic_cast<Laser360Interface *>(interface);
+	Laser720Interface  *ls720if  = dynamic_cast<Laser720Interface *>(interface);
 	Laser1080Interface *ls1080if = dynamic_cast<Laser1080Interface *>(interface);
 
-	PublisherInfo &         pi  = pubs_[interface->uid()];
+	PublisherInfo          &pi  = pubs_[interface->uid()];
 	sensor_msgs::LaserScan &msg = pi.msg;
 
 	if (ls360if) {
@@ -477,8 +477,8 @@ void
 RosLaserScanThread::conditional_close(Interface *interface) noexcept
 {
 	// Verify it's a laser interface
-	Laser360Interface * ls360if  = dynamic_cast<Laser360Interface *>(interface);
-	Laser720Interface * ls720if  = dynamic_cast<Laser720Interface *>(interface);
+	Laser360Interface  *ls360if  = dynamic_cast<Laser360Interface *>(interface);
+	Laser720Interface  *ls720if  = dynamic_cast<Laser720Interface *>(interface);
 	Laser1080Interface *ls1080if = dynamic_cast<Laser1080Interface *>(interface);
 
 	if (ls360if) {

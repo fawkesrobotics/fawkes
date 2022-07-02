@@ -47,7 +47,7 @@ public:
 private:
 	SDL_Surface *_surface;
 	SDL_Overlay *_overlay;
-	SDL_Rect *   _rect;
+	SDL_Rect    *_rect;
 
 	unsigned int _width;
 	unsigned int _height;

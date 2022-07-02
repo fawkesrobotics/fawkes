@@ -67,7 +67,7 @@ protected:
 
 private: // members
 	fawkes::PclDatabaseRetrieveInterface *retrieve_if_;
-	fawkes::BlackBoardOnMessageWaker *    msg_waker_;
+	fawkes::BlackBoardOnMessageWaker     *msg_waker_;
 
 	fawkes::RefPtr<pcl::PointCloud<pcl::PointXYZRGB>> foutput_;
 	pcl::PointCloud<pcl::PointXYZRGB>::Ptr            output_;
@@ -79,7 +79,7 @@ private: // members
 	std::string cfg_output_id_;
 	std::string cfg_original_id_;
 
-	PointCloudDBRetrievePipeline<pcl::PointXYZ> *   pl_xyz_;
+	PointCloudDBRetrievePipeline<pcl::PointXYZ>    *pl_xyz_;
 	PointCloudDBRetrievePipeline<pcl::PointXYZRGB> *pl_xyzrgb_;
 };
 

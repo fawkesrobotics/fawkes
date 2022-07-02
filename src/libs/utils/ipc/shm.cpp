@@ -345,12 +345,12 @@ SharedMemory::SharedMemory(const SharedMemory &s)
  * @exception ShmCouldNotAttachException Could not attach to shared
  *                                       memory segment
  */
-SharedMemory::SharedMemory(const char *        magic_token,
+SharedMemory::SharedMemory(const char         *magic_token,
                            SharedMemoryHeader *header,
                            bool                is_read_only,
                            bool                create,
                            bool                destroy_on_delete,
-                           const char *        registry_name)
+                           const char         *registry_name)
 {
 	_magic_token = new char[MagicTokenSize];
 	memset(_magic_token, 0, MagicTokenSize);
@@ -526,8 +526,8 @@ SharedMemory::attach()
 
 	std::list<SharedMemoryRegistry::SharedMemID>::iterator s;
 
-	void *          shm_buf;
-	void *          shm_ptr;
+	void           *shm_buf;
+	void           *shm_ptr;
 	struct shmid_ds shm_segment;
 
 	for (s = segments.begin(); (_memptr == NULL) && (s != segments.end()); ++s) {
@@ -1113,10 +1113,10 @@ SharedMemory::num_attached(int shm_id)
  * @param registry_name name of the SharedMemoryRegistry to use
  */
 void
-SharedMemory::list(const char *        magic_token,
+SharedMemory::list(const char         *magic_token,
                    SharedMemoryHeader *header,
                    SharedMemoryLister *lister,
-                   const char *        registry_name)
+                   const char         *registry_name)
 {
 	//printf("Looking for '%s' @ registry '%s'\n", magic_token,
 	//       registry_name ? registry_name : "default");
@@ -1148,10 +1148,10 @@ SharedMemory::list(const char *        magic_token,
  * @param registry_name name of the SharedMemoryRegistry to use
  */
 void
-SharedMemory::erase(const char *        magic_token,
+SharedMemory::erase(const char         *magic_token,
                     SharedMemoryHeader *header,
                     SharedMemoryLister *lister,
-                    const char *        registry_name)
+                    const char         *registry_name)
 {
 	if (lister != NULL)
 		lister->print_header();
@@ -1196,10 +1196,10 @@ SharedMemory::erase(const char *        magic_token,
  * @param registry_name name of the SharedMemoryRegistry to use
  */
 void
-SharedMemory::erase_orphaned(const char *        magic_token,
+SharedMemory::erase_orphaned(const char         *magic_token,
                              SharedMemoryHeader *header,
                              SharedMemoryLister *lister,
-                             const char *        registry_name)
+                             const char         *registry_name)
 {
 	if (lister != NULL)
 		lister->print_header();
@@ -1345,7 +1345,7 @@ SharedMemory::SharedMemoryIterator::SharedMemoryIterator(const SharedMemoryItera
  */
 SharedMemory::SharedMemoryIterator::SharedMemoryIterator(
   std::list<SharedMemoryRegistry::SharedMemID> ids,
-  SharedMemoryHeader *                         header)
+  SharedMemoryHeader                          *header)
 {
 	header_      = header->clone();
 	cur_shmid_   = -1;

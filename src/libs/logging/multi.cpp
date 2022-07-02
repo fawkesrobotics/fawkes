@@ -48,7 +48,7 @@ public:
 
 	LockList<Logger *>           loggers;
 	LockList<Logger *>::iterator logit;
-	Mutex *                      mutex;
+	Mutex                       *mutex;
 	Thread::CancelState          old_state;
 };
 /// @endcond
@@ -576,8 +576,8 @@ MultiLogger::tlog_error(struct timeval *t, const char *component, Exception &e)
 void
 MultiLogger::vtlog(LogLevel        level,
                    struct timeval *t,
-                   const char *    component,
-                   const char *    format,
+                   const char     *component,
+                   const char     *format,
                    va_list         va)
 {
 	data->mutex->lock();

@@ -55,7 +55,7 @@ namespace fawkes {
 OpenPRSMessagePasserProxy::OpenPRSMessagePasserProxy(unsigned short     tcp_port,
                                                      const std::string &mp_host,
                                                      unsigned short     mp_port,
-                                                     fawkes::Logger *   logger)
+                                                     fawkes::Logger    *logger)
 : io_service_work_(io_service_),
   acceptor_(io_service_, ip::tcp::endpoint(ip::tcp::v6(), tcp_port)),
   mp_host_(mp_host),
@@ -99,9 +99,9 @@ OpenPRSMessagePasserProxy::handle_accept(Mapping::Ptr                     mappin
 }
 
 OpenPRSMessagePasserProxy::Mapping::Mapping(boost::asio::io_service &io_service,
-                                            const std::string &      mp_host,
+                                            const std::string       &mp_host,
                                             unsigned short           mp_port,
-                                            fawkes::Logger *         logger)
+                                            fawkes::Logger          *logger)
 : io_service_(io_service),
   resolver_(io_service_),
   server_host_(mp_host),
@@ -461,7 +461,7 @@ OpenPRSMessagePasserProxy::Mapping::write_int_to_socket(boost::asio::ip::tcp::so
 
 void
 OpenPRSMessagePasserProxy::Mapping::write_string_to_socket(boost::asio::ip::tcp::socket &socket,
-                                                           std::string &                 str)
+                                                           std::string                  &str)
 {
 	boost::system::error_code                ec;
 	uint32_t                                 s_size = htonl(str.size());
@@ -478,7 +478,7 @@ OpenPRSMessagePasserProxy::Mapping::write_string_to_socket(boost::asio::ip::tcp:
 void
 OpenPRSMessagePasserProxy::Mapping::write_string_newline_to_socket(
   boost::asio::ip::tcp::socket &socket,
-  const std::string &           str)
+  const std::string            &str)
 {
 	boost::system::error_code ec;
 	std::string               s = str + "\n";

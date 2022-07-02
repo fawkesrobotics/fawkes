@@ -271,7 +271,7 @@ ScanlineStar::generate_scan_points()
 {
 	float        angle = 0.0;
 	unsigned int radius;
-	Ray *        current_ray;
+	Ray         *current_ray;
 	bool         abort_ray;
 	YUV_t        ignore(0);
 

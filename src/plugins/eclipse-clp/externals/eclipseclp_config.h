@@ -44,7 +44,7 @@ public:
 
 private:
 	static EclExternalConfig *m_instance;
-	static Configuration *    m_config;
+	static Configuration     *m_config;
 };
 } // namespace fawkes
 

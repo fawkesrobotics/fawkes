@@ -75,7 +75,7 @@ private:
 private:
 	fawkes::SkillerInterface *skiller_if_;
 
-	SkillerServer * server_;
+	SkillerServer  *server_;
 	ros::Subscriber sub_cmd_;
 	ros::Publisher  pub_status_;
 

@@ -306,7 +306,7 @@ void
 Stn::drawGraph()
 {
 	Agraph_t *G;
-	GVC_t *   gvc;
+	GVC_t    *gvc;
 
 	gvc               = gvContext();
 	char graph_name[] = "STN";

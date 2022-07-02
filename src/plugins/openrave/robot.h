@@ -38,9 +38,9 @@ class OpenRaveRobot
 {
 public:
 	OpenRaveRobot(fawkes::Logger *logger = 0);
-	OpenRaveRobot(const std::string &             filename,
+	OpenRaveRobot(const std::string              &filename,
 	              fawkes::OpenRaveEnvironmentPtr &env,
-	              fawkes::Logger *                logger = 0);
+	              fawkes::Logger                 *logger = 0);
 	OpenRaveRobot(const fawkes::OpenRaveRobot &src, const fawkes::OpenRaveEnvironmentPtr &new_env);
 	virtual ~OpenRaveRobot();
 
@@ -55,9 +55,9 @@ public:
 	virtual void update_model();
 
 	virtual bool attach_object(OpenRAVE::KinBodyPtr object, const char *manip_name = NULL);
-	virtual bool attach_object(const char *                    name,
+	virtual bool attach_object(const char                     *name,
 	                           fawkes::OpenRaveEnvironmentPtr &env,
-	                           const char *                    manip_name = NULL);
+	                           const char                     *manip_name = NULL);
 	virtual bool release_object(OpenRAVE::KinBodyPtr object);
 	virtual bool release_object(const std::string &name, fawkes::OpenRaveEnvironmentPtr &env);
 	virtual bool release_all_objects();
@@ -115,8 +115,8 @@ public:
 	virtual target_t                                    get_target() const;
 	virtual OpenRaveManipulatorPtr                      get_manipulator() const;
 	virtual OpenRAVE::PlannerBase::PlannerParametersPtr get_planner_params() const;
-	virtual std::vector<std::vector<OpenRAVE::dReal>> * get_trajectory() const;
-	virtual std::vector<std::vector<float>> *           get_trajectory_device() const;
+	virtual std::vector<std::vector<OpenRAVE::dReal>>  *get_trajectory() const;
+	virtual std::vector<std::vector<float>>            *get_trajectory_device() const;
 
 	virtual bool display_planned_movements() const;
 
@@ -127,12 +127,12 @@ private:
 	void        build_name_str();
 	const char *name() const;
 
-	bool                         set_target_transform(OpenRAVE::Vector &        trans,
-	                                                  OpenRAVE::Vector &        rotQuat,
+	bool                         set_target_transform(OpenRAVE::Vector         &trans,
+	                                                  OpenRAVE::Vector         &rotQuat,
 	                                                  OpenRAVE::IkFilterOptions filter,
 	                                                  bool                      no_offset = false);
-	bool                         set_target_euler(OpenRAVE::Vector &        trans,
-	                                              std::vector<float> &      rotations,
+	bool                         set_target_euler(OpenRAVE::Vector         &trans,
+	                                              std::vector<float>       &rotations,
 	                                              OpenRAVE::IkFilterOptions filter,
 	                                              bool                      no_offset = false);
 	OpenRAVE::IkParameterization get_5dof_ikparam(OpenRAVE::Transform &trans);
@@ -150,7 +150,7 @@ private:
 	OpenRAVE::ModuleBasePtr mod_basemanip_;
 
 	OpenRAVE::PlannerBase::PlannerParametersPtr planner_params_;
-	std::vector<std::vector<OpenRAVE::dReal>> * traj_;
+	std::vector<std::vector<OpenRAVE::dReal>>  *traj_;
 
 	float trans_offset_x_;
 	float trans_offset_y_;

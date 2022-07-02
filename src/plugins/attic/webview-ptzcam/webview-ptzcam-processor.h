@@ -50,8 +50,8 @@ public:
 	  unsigned int       zoom_increment,
 	  float              post_powerup_time,
 	  const std::map<std::string, std::tuple<std::string, float, float, unsigned int>> &presets,
-	  fawkes::BlackBoard *                                                              blackboard,
-	  fawkes::Logger *                                                                  logger);
+	  fawkes::BlackBoard                                                               *blackboard,
+	  fawkes::Logger                                                                   *logger);
 
 	~WebviewPtzCamRequestProcessor();
 
@@ -64,13 +64,13 @@ private:
 	void wakeup_hardware();
 
 private:
-	fawkes::Logger *    logger_;
+	fawkes::Logger     *logger_;
 	fawkes::BlackBoard *blackboard_;
 
-	fawkes::PanTiltInterface *      ptu_if_;
+	fawkes::PanTiltInterface       *ptu_if_;
 	fawkes::CameraControlInterface *camctrl_if_;
-	fawkes::SwitchInterface *       power_if_;
-	fawkes::SwitchInterface *       camen_if_;
+	fawkes::SwitchInterface        *power_if_;
+	fawkes::SwitchInterface        *camen_if_;
 
 	std::string image_id_;
 

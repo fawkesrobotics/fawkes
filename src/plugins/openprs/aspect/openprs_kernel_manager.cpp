@@ -53,9 +53,9 @@ OpenPRSKernelManager::OpenPRSKernelManager(const std::string &server_host,
                                            unsigned short     server_tcp_port,
                                            const std::string &mp_host,
                                            unsigned short     mp_tcp_port,
-                                           Logger *           logger,
-                                           Clock *            clock,
-                                           Configuration *    config)
+                                           Logger            *logger,
+                                           Clock             *clock,
+                                           Configuration     *config)
 : server_host_(server_host), server_port_(server_tcp_port), mp_host_(mp_host), mp_port_(mp_tcp_port)
 {
 	logger_ = logger;
@@ -82,7 +82,7 @@ OpenPRSKernelManager::~OpenPRSKernelManager()
  * and print a gdb command to start debugging the kernel process.
  */
 void
-OpenPRSKernelManager::create_kernel(const std::string &     kernel_name,
+OpenPRSKernelManager::create_kernel(const std::string      &kernel_name,
                                     bool                    use_xoprs,
                                     std::list<std::string> &extra_data_path,
                                     bool                    utils_gdb_delay)

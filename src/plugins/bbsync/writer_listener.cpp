@@ -44,8 +44,8 @@ using namespace fawkes;
  */
 SyncWriterInterfaceListener::SyncWriterInterfaceListener(
   BlackBoardSynchronizationThread *sync_thread,
-  fawkes::Logger *                 logger,
-  const char *                     desc)
+  fawkes::Logger                  *logger,
+  const char                      *desc)
 : BlackBoardInterfaceListener("SyncWriterInterfaceListener(%s)", desc)
 {
 	logger_      = logger;

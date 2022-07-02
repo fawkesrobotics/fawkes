@@ -56,7 +56,7 @@ public:
 	virtual void finalize();
 
 	// for CLIPSFeature
-	virtual void clips_context_init(const std::string &                  env_name,
+	virtual void clips_context_init(const std::string                   &env_name,
 	                                fawkes::LockPtr<CLIPS::Environment> &clips);
 	virtual void clips_context_destroyed(const std::string &env_name);
 
@@ -76,16 +76,16 @@ private:
 	fawkes::HardwareModelsInterface *hm_if_;
 
 	void clips_add_terminal_state(fawkes::LockPtr<CLIPS::Environment> &clips,
-	                              const std::string &                  component,
-	                              const std::string &                  state);
+	                              const std::string                   &component,
+	                              const std::string                   &state);
 	void clips_add_component(fawkes::LockPtr<CLIPS::Environment> &clips,
-	                         const std::string &                  component,
-	                         const std::string &                  init_state);
+	                         const std::string                   &component,
+	                         const std::string                   &init_state);
 	void clips_add_edge(fawkes::LockPtr<CLIPS::Environment> &clips,
-	                    const std::string &                  component,
-	                    const std::string &                  from,
-	                    const std::string &                  to,
-	                    const std::string &                  trans);
+	                    const std::string                   &component,
+	                    const std::string                   &from,
+	                    const std::string                   &to,
+	                    const std::string                   &trans);
 	void clips_add_transition(const std::string &component, const std::string &transition) noexcept;
 };
 

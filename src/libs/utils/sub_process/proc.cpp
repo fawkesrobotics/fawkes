@@ -78,10 +78,10 @@ SubProcess::SubProcess(const char *progname,
  * last element must be NULL. Can be NULL to omit.
  * @param logger logger to redirect stdout and stderr to
  */
-SubProcess::SubProcess(const char *    progname,
-                       const char *    file,
-                       const char *    argv[],
-                       const char *    envp[],
+SubProcess::SubProcess(const char     *progname,
+                       const char     *file,
+                       const char     *argv[],
+                       const char     *envp[],
                        fawkes::Logger *logger)
 : progname_(progname),
   io_service_work_(io_service_),
@@ -104,8 +104,8 @@ SubProcess::SubProcess(const char *    progname,
  * @param envp array of environment variables for the process, the
  * last element must be NULL. Can be NULL to omit.
  */
-SubProcess::SubProcess(const std::string &             progname,
-                       const std::string &             file,
+SubProcess::SubProcess(const std::string              &progname,
+                       const std::string              &file,
                        const std::vector<std::string> &argv,
                        const std::vector<std::string> &envp)
 : progname_(progname),
@@ -141,11 +141,11 @@ SubProcess::SubProcess(const std::string &             progname,
  * last element must be NULL. Can be NULL to omit.
  * @param logger logger to redirect stdout and stderr to
  */
-SubProcess::SubProcess(const std::string &             progname,
-                       const std::string &             file,
+SubProcess::SubProcess(const std::string              &progname,
+                       const std::string              &file,
                        const std::vector<std::string> &argv,
                        const std::vector<std::string> &envp,
-                       fawkes::Logger *                logger)
+                       fawkes::Logger                 *logger)
 : progname_(progname),
   io_service_work_(io_service_),
   logger_(logger),
@@ -195,9 +195,9 @@ pid_t
 SubProcess::run_proc(const char *file,
                      const char *argv[],
                      const char *envp[],
-                     int &       pipe_stdin_w,
-                     int &       pipe_stdout_r,
-                     int &       pipe_stderr_r)
+                     int        &pipe_stdin_w,
+                     int        &pipe_stdout_r,
+                     int        &pipe_stderr_r)
 {
 	int pipe_stdin[2];
 	int pipe_stdout[2];
@@ -301,10 +301,10 @@ SubProcess::run_proc(const char *file, const char *argv[], const char *envp[])
 }
 
 void
-SubProcess::start_log(const char *                           logname,
+SubProcess::start_log(const char                            *logname,
                       Logger::LogLevel                       log_level,
                       boost::asio::posix::stream_descriptor &sd,
-                      boost::asio::streambuf &               buf)
+                      boost::asio::streambuf                &buf)
 {
 	boost::asio::async_read_until(sd,
 	                              buf,
@@ -320,10 +320,10 @@ SubProcess::start_log(const char *                           logname,
 }
 
 void
-SubProcess::handle_log_line(const char *                           logname,
+SubProcess::handle_log_line(const char                            *logname,
                             Logger::LogLevel                       log_level,
                             boost::asio::posix::stream_descriptor &sd,
-                            boost::asio::streambuf &               buf,
+                            boost::asio::streambuf                &buf,
                             boost::system::error_code              ec,
                             size_t                                 bytes_read)
 {

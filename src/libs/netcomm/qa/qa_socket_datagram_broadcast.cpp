@@ -190,7 +190,7 @@ public:
 	}
 
 private:
-	BroadcastDatagramServerThread *   s;
+	BroadcastDatagramServerThread    *s;
 	BroadcastDatagramReflectorThread *r;
 };
 

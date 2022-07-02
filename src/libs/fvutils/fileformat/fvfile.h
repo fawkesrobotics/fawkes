@@ -60,14 +60,14 @@ public:
 
 	/** List of FireVision data file blocks. */
 	typedef std::list<FireVisionDataFileBlock *> BlockList;
-	BlockList &                                  blocks();
+	BlockList                                   &blocks();
 
 protected:
-	void * _spec_header;
+	void  *_spec_header;
 	size_t _spec_header_size;
 
 private:
-	fvff_header_t *     header_;
+	fvff_header_t      *header_;
 	BlockList           blocks_;
 	BlockList::iterator bi_;
 

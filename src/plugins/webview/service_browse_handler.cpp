@@ -39,7 +39,7 @@ using namespace fawkes;
  * @param webview_service service of our own service as it was announced on the
  * network, used to filter it out from the list of services.
  */
-WebviewServiceBrowseHandler::WebviewServiceBrowseHandler(fawkes::Logger *        logger,
+WebviewServiceBrowseHandler::WebviewServiceBrowseHandler(fawkes::Logger         *logger,
                                                          fawkes::NetworkService *webview_service)
 {
 	logger_          = logger;
@@ -74,12 +74,12 @@ WebviewServiceBrowseHandler::browse_failed(const char *name, const char *type, c
 }
 
 void
-WebviewServiceBrowseHandler::service_added(const char *            name,
-                                           const char *            type,
-                                           const char *            domain,
-                                           const char *            host_name,
-                                           const char *            interface,
-                                           const struct sockaddr * addr,
+WebviewServiceBrowseHandler::service_added(const char             *name,
+                                           const char             *type,
+                                           const char             *domain,
+                                           const char             *host_name,
+                                           const char             *interface,
+                                           const struct sockaddr  *addr,
                                            const socklen_t         addr_size,
                                            uint16_t                port,
                                            std::list<std::string> &txt,

@@ -36,9 +36,9 @@ namespace gpp {
 class BBMessageActionExecutor : public ActionExecutor
 {
 public:
-	BBMessageActionExecutor(Logger *           logger,
-	                        BlackBoard *       blackboard,
-	                        Configuration *    config,
+	BBMessageActionExecutor(Logger            *logger,
+	                        BlackBoard        *blackboard,
+	                        Configuration     *config,
 	                        const std::string &cfg_prefix);
 	virtual ~BBMessageActionExecutor();
 	void start(std::shared_ptr<gologpp::Activity> activity) override;
@@ -46,8 +46,8 @@ public:
 	bool can_execute_activity(std::shared_ptr<gologpp::Activity> activity) const override;
 
 private:
-	BlackBoard *                       blackboard_;
-	Configuration *                    config_;
+	BlackBoard                        *blackboard_;
+	Configuration                     *config_;
 	std::string                        cfg_prefix_;
 	std::map<std::string, Interface *> open_interfaces_;
 };

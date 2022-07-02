@@ -35,7 +35,7 @@ class InterruptibleBarrierData
 {
 public:
 	unsigned int   threads_left;
-	Mutex *        mutex;
+	Mutex         *mutex;
 	WaitCondition *waitcond;
 	bool           own_mutex;
 

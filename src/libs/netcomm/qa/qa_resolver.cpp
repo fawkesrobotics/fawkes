@@ -166,7 +166,7 @@ public:
 	}
 
 private:
-	ArgumentParser *     argp;
+	ArgumentParser      *argp;
 	NetworkNameResolver *r;
 	bool                 quit;
 #ifdef HAVE_AVAHI

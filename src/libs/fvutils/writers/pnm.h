@@ -54,7 +54,7 @@ private:
 	unsigned int calc_buffer_size();
 
 	unsigned int write_header(bool simulate = false);
-	const char * format2string(PNMFormat format);
+	const char  *format2string(PNMFormat format);
 
 	PNMFormat      format;
 	unsigned int   buffer_size;

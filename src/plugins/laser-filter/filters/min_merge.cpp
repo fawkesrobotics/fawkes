@@ -42,7 +42,7 @@
  * @param in vector of input arrays
  */
 LaserMinMergeDataFilter::LaserMinMergeDataFilter(const std::string &filter_name,
-                                                 fawkes::Logger *   logger,
+                                                 fawkes::Logger    *logger,
                                                  unsigned int       in_data_size,
                                                  std::vector<LaserDataFilter::Buffer *> &in)
 : LaserDataFilter(filter_name, in_data_size, in, 1),
@@ -62,8 +62,8 @@ LaserMinMergeDataFilter::LaserMinMergeDataFilter(const std::string &filter_name,
  * is the index of the input buffer to choose the timestamp from
  */
 LaserMinMergeDataFilter::LaserMinMergeDataFilter(
-  const std::string &                     filter_name,
-  fawkes::Logger *                        logger,
+  const std::string                      &filter_name,
+  fawkes::Logger                         *logger,
   unsigned int                            in_data_size,
   std::vector<LaserDataFilter::Buffer *> &in,
   TimestampSelectionMethod                timestamp_selection_method,

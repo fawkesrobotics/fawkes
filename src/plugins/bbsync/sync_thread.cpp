@@ -360,9 +360,9 @@ BlackBoardSynchronizationThread::writer_added(fawkes::Interface *interface) noex
 	} else {
 		logger->log_warn(name(), "Writer added for %s, opening relay writer", interface->uid());
 
-		Interface *            iface         = NULL;
+		Interface             *iface         = NULL;
 		SyncInterfaceListener *sync_listener = NULL;
-		InterfaceInfo &        ii            = interfaces_[interface];
+		InterfaceInfo         &ii            = interfaces_[interface];
 		try {
 			iface = ii.writer_bb->open_for_writing(ii.combo->type.c_str(), ii.combo->writer_id.c_str());
 

@@ -78,12 +78,12 @@ private:
 	                       unsigned char *dest,
 	                       unsigned int   width,
 	                       unsigned int   height);
-	void fill_xyz_xyzrgb(const short int *                  dispdata,
-	                     const TriclopsColorImage *         img_right_rect_color,
-	                     pcl::PointCloud<pcl::PointXYZ> &   pcl_xyz,
+	void fill_xyz_xyzrgb(const short int                   *dispdata,
+	                     const TriclopsColorImage          *img_right_rect_color,
+	                     pcl::PointCloud<pcl::PointXYZ>    &pcl_xyz,
 	                     pcl::PointCloud<pcl::PointXYZRGB> &pcl_xyzrgb);
-	void fill_xyzrgb(const short int *                  dispdata,
-	                 const TriclopsColorImage *         img_rect_color,
+	void fill_xyzrgb(const short int                   *dispdata,
+	                 const TriclopsColorImage          *img_rect_color,
 	                 pcl::PointCloud<pcl::PointXYZRGB> &pcl_xyzrgb);
 	void fill_xyz(const short int *dispdata, pcl::PointCloud<pcl::PointXYZ> &pcl_xyz);
 
@@ -103,11 +103,11 @@ private:
 	fawkes::RefPtr<pcl::PointCloud<pcl::PointXYZ>>    pcl_xyz_;
 	fawkes::RefPtr<pcl::PointCloud<pcl::PointXYZRGB>> pcl_xyzrgb_;
 
-	fawkes::SwitchInterface *            switch_if_;
+	fawkes::SwitchInterface             *switch_if_;
 	fawkes::OpenCVStereoParamsInterface *params_if_;
 
 	firevision::Bumblebee2Camera *bb2_;
-	TriclopsData *                triclops_;
+	TriclopsData                 *triclops_;
 
 	unsigned int width_;
 	unsigned int height_;
@@ -166,7 +166,7 @@ private:
 
 	cv::Mat *cv_disparity_;
 
-	fawkes::Time *                tf_last_publish_;
+	fawkes::Time                 *tf_last_publish_;
 	fawkes::tf::StampedTransform *tf_left_;
 	fawkes::tf::StampedTransform *tf_right_;
 

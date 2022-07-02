@@ -45,8 +45,8 @@ class FuseServer : public fawkes::Thread, public fawkes::NetworkIncomingConnecti
 public:
 	FuseServer(bool                     enable_ipv4,
 	           bool                     enable_ipv6,
-	           const std::string &      listen_ipv4,
-	           const std::string &      listen_ipv6,
+	           const std::string       &listen_ipv4,
+	           const std::string       &listen_ipv6,
 	           unsigned short int       port,
 	           fawkes::ThreadCollector *collector = 0);
 	virtual ~FuseServer();

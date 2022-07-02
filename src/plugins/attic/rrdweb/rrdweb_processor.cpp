@@ -45,7 +45,7 @@ using namespace fawkes;
  * @param logger logger to report problems
  */
 RRDWebRequestProcessor::RRDWebRequestProcessor(fawkes::RRDManager *rrd_manager,
-                                               fawkes::Logger *    logger)
+                                               fawkes::Logger     *logger)
 {
 	rrd_man_ = rrd_manager;
 	logger_  = logger;
@@ -63,7 +63,7 @@ RRDWebRequestProcessor::~RRDWebRequestProcessor()
 WebReply *
 RRDWebRequestProcessor::process_graph(const fawkes::WebRequest *request)
 {
-	const RWLockVector<RRDGraphDefinition *> &         graphs(rrd_man_->get_graphs());
+	const RWLockVector<RRDGraphDefinition *>          &graphs(rrd_man_->get_graphs());
 	RWLockVector<RRDGraphDefinition *>::const_iterator g;
 
 	ScopedRWLock(graphs.rwlock(), ScopedRWLock::LOCK_READ);

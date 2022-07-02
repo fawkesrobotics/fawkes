@@ -63,7 +63,7 @@ private:
 	void                     process_inbound();
 	SharedMemoryImageBuffer *get_shmimgbuf(const char *id);
 
-	FuseServer *          fuse_server_;
+	FuseServer           *fuse_server_;
 	fawkes::StreamSocket *socket_;
 
 	FuseNetworkMessageQueue *outbound_queue_;

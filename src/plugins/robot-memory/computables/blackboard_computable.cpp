@@ -40,9 +40,9 @@ using namespace mongocxx;
  * @param logger Logger
  * @param config Configuration
  */
-BlackboardComputable::BlackboardComputable(RobotMemory *          robot_memory,
-                                           fawkes::BlackBoard *   blackboard,
-                                           fawkes::Logger *       logger,
+BlackboardComputable::BlackboardComputable(RobotMemory           *robot_memory,
+                                           fawkes::BlackBoard    *blackboard,
+                                           fawkes::Logger        *logger,
                                            fawkes::Configuration *config)
 {
 	robot_memory_ = robot_memory;

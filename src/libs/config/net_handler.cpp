@@ -95,7 +95,7 @@ ConfigNetworkHandler::send_value(unsigned int clid, const Configuration::ValueIt
 			uint32_t *values;
 			uint16_t  num_values = i->is_list() ? i->get_list_size() : 0;
 			size_t    data_size  = 0;
-			void *    m          = prepare_value_msg<uint32_t>(
+			void     *m          = prepare_value_msg<uint32_t>(
         i->path(), i->is_default(), i->is_list(), num_values, data_size, (void **)&values);
 			if (i->is_list()) {
 				std::vector<unsigned int> c_values = i->get_uints();
@@ -116,7 +116,7 @@ ConfigNetworkHandler::send_value(unsigned int clid, const Configuration::ValueIt
 			int32_t *values;
 			int16_t  num_values = i->is_list() ? i->get_list_size() : 0;
 			size_t   data_size  = 0;
-			void *   m          = prepare_value_msg<int32_t>(
+			void    *m          = prepare_value_msg<int32_t>(
         i->path(), i->is_default(), i->is_list(), num_values, data_size, (void **)&values);
 			if (i->is_list()) {
 				std::vector<int> c_values = i->get_ints();
@@ -137,7 +137,7 @@ ConfigNetworkHandler::send_value(unsigned int clid, const Configuration::ValueIt
 			int32_t *values;
 			int16_t  num_values = i->is_list() ? i->get_list_size() : 0;
 			size_t   data_size  = 0;
-			void *   m          = prepare_value_msg<int32_t>(
+			void    *m          = prepare_value_msg<int32_t>(
         i->path(), i->is_default(), i->is_list(), num_values, data_size, (void **)&values);
 			if (i->is_list()) {
 				std::vector<bool> c_values = i->get_bools();
@@ -155,10 +155,10 @@ ConfigNetworkHandler::send_value(unsigned int clid, const Configuration::ValueIt
 		}
 	} else if (i->is_float()) {
 		try {
-			float *  values;
+			float   *values;
 			uint16_t num_values = i->is_list() ? i->get_list_size() : 0;
 			size_t   data_size  = 0;
-			void *   m          = prepare_value_msg<float>(
+			void    *m          = prepare_value_msg<float>(
         i->path(), i->is_default(), i->is_list(), num_values, data_size, (void **)&values);
 			if (i->is_list()) {
 				std::vector<float> c_values = i->get_floats();
@@ -193,7 +193,7 @@ ConfigNetworkHandler::send_value(unsigned int clid, const Configuration::ValueIt
 				char *tmp = ((char *)m + sizeof(config_descriptor_t));
 				for (unsigned int j = 0; j < s.size(); ++j) {
 					config_string_value_t *sv         = (config_string_value_t *)tmp;
-					char *                 msg_string = tmp + sizeof(config_string_value_t);
+					char                  *msg_string = tmp + sizeof(config_string_value_t);
 					sv->s_length                      = s[j].length();
 					strcpy(msg_string, s[j].c_str());
 					tmp += sizeof(config_string_value_t) + sv->s_length + 1;
@@ -204,7 +204,7 @@ ConfigNetworkHandler::send_value(unsigned int clid, const Configuration::ValueIt
 				std::string s = i->get_string();
 				size_t      data_size =
 				  sizeof(config_descriptor_t) + sizeof(config_string_value_t) + s.length() + 1;
-				void *               m  = calloc(1, data_size);
+				void                *m  = calloc(1, data_size);
 				config_descriptor_t *cd = (config_descriptor_t *)m;
 				strncpy(cd->path, i->path(), CONFIG_MSG_PATH_LENGTH - 1);
 				cd->is_default = i->is_default();
@@ -245,7 +245,7 @@ ConfigNetworkHandler::loop()
 			subscribers_.unique();
 
 			config_->lock();
-			ConfigListContent *           content = new ConfigListContent();
+			ConfigListContent            *content = new ConfigListContent();
 			Configuration::ValueIterator *i       = config_->iterator();
 			while (i->next()) {
 				if (i->is_default()) {
@@ -460,14 +460,14 @@ ConfigNetworkHandler::loop()
 							std::vector<std::string> values(cd->num_values);
 							for (unsigned int i = 0; i < cd->num_values; ++i) {
 								config_string_value_t *sv         = (config_string_value_t *)tmp;
-								char *                 msg_string = tmp + sizeof(config_string_value_t);
+								char                  *msg_string = tmp + sizeof(config_string_value_t);
 								tmp += sizeof(config_string_value_t) + sv->s_length + 1;
 								values[i] = std::string(msg_string, sv->s_length);
 							}
 							config_->set_strings(path, values);
 						} else {
 							config_string_value_t *sv         = (config_string_value_t *)tmp;
-							char *                 msg_string = tmp + sizeof(config_string_value_t);
+							char                  *msg_string = tmp + sizeof(config_string_value_t);
 							std::string            value      = std::string(msg_string, sv->s_length);
 							if (msg->msgid() == MSG_CONFIG_SET_INT) {
 								config_->set_string(path, value);

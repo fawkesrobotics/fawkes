@@ -338,7 +338,7 @@ NavGraphConstraintRepo::increases_cost(const fawkes::NavGraphNode &from,
 fawkes::NavGraphEdgeCostConstraint *
 NavGraphConstraintRepo::increases_cost(const fawkes::NavGraphNode &from,
                                        const fawkes::NavGraphNode &to,
-                                       float &                     cost_factor)
+                                       float                      &cost_factor)
 {
 	float                               max_cost = 1.0;
 	fawkes::NavGraphEdgeCostConstraint *max_c    = NULL;

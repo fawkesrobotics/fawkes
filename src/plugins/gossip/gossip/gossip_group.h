@@ -103,27 +103,27 @@ public:
 	}
 
 private:
-	GossipGroup(std::string &      group_name,
-	            std::string &      peer_name,
-	            std::string &      broadcast_address,
+	GossipGroup(std::string       &group_name,
+	            std::string       &peer_name,
+	            std::string       &broadcast_address,
 	            unsigned short     broadcast_port,
-	            ServicePublisher * service_publisher,
+	            ServicePublisher  *service_publisher,
 	            const std::string &crypto_key,
 	            const std::string &crypto_cipher);
 
-	GossipGroup(std::string &      group_name,
-	            std::string &      peer_name,
-	            std::string &      broadcast_address,
+	GossipGroup(std::string       &group_name,
+	            std::string       &peer_name,
+	            std::string       &broadcast_address,
 	            unsigned short     send_port,
 	            unsigned short     recv_port,
-	            ServicePublisher * service_publisher,
+	            ServicePublisher  *service_publisher,
 	            const std::string &crypto_key,
 	            const std::string &crypto_cipher);
 
 private:
 	std::string name_;
 
-	ServicePublisher *                                    service_publisher_;
+	ServicePublisher                                     *service_publisher_;
 	std::shared_ptr<NetworkService>                       service_;
 	std::shared_ptr<protobuf_comm::ProtobufBroadcastPeer> pb_peer_;
 };

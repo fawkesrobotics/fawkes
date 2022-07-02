@@ -121,7 +121,7 @@ main(int argc, char **argv)
 	success = true;
 	cout << endl << endl << "Running ModuleManagerTemplate tests" << endl;
 	ModuleManagerTemplate<ModuleDL> mm(PLUGINDIR);
-	Module *                        mod = mm.open_module("test_plugin.so");
+	Module                         *mod = mm.open_module("test_plugin.so");
 	if (mod == NULL) {
 		cout << "Failed to retrieve module from manager" << endl;
 		success = false;

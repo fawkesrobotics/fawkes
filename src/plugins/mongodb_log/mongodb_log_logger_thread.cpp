@@ -223,13 +223,13 @@ MongoLogLoggerThread::log_error(const char *component, Exception &e)
 void
 MongoLogLoggerThread::tlog_insert_message(LogLevel        ll,
                                           struct timeval *t,
-                                          const char *    component,
-                                          const char *    format,
+                                          const char     *component,
+                                          const char     *format,
                                           va_list         va)
 {
 	if (log_level <= ll) {
 		MutexLocker lock(mutex_);
-		char *      msg;
+		char       *msg;
 		if (vasprintf(&msg, format, va) == -1) {
 			return;
 		}
@@ -264,8 +264,8 @@ MongoLogLoggerThread::tlog_insert_message(LogLevel        ll,
 void
 MongoLogLoggerThread::tlog_insert_message(LogLevel        ll,
                                           struct timeval *t,
-                                          const char *    component,
-                                          Exception &     e)
+                                          const char     *component,
+                                          Exception      &e)
 {
 	if (log_level <= ll) {
 		MutexLocker            lock(mutex_);
@@ -355,8 +355,8 @@ MongoLogLoggerThread::tlog_error(struct timeval *t, const char *component, Excep
 
 void
 MongoLogLoggerThread::vtlog_debug(struct timeval *t,
-                                  const char *    component,
-                                  const char *    format,
+                                  const char     *component,
+                                  const char     *format,
                                   va_list         va)
 {
 	tlog_insert_message(LL_DEBUG, t, component, format, va);
@@ -364,8 +364,8 @@ MongoLogLoggerThread::vtlog_debug(struct timeval *t,
 
 void
 MongoLogLoggerThread::vtlog_info(struct timeval *t,
-                                 const char *    component,
-                                 const char *    format,
+                                 const char     *component,
+                                 const char     *format,
                                  va_list         va)
 {
 	tlog_insert_message(LL_INFO, t, component, format, va);
@@ -373,8 +373,8 @@ MongoLogLoggerThread::vtlog_info(struct timeval *t,
 
 void
 MongoLogLoggerThread::vtlog_warn(struct timeval *t,
-                                 const char *    component,
-                                 const char *    format,
+                                 const char     *component,
+                                 const char     *format,
                                  va_list         va)
 {
 	tlog_insert_message(LL_WARN, t, component, format, va);
@@ -382,8 +382,8 @@ MongoLogLoggerThread::vtlog_warn(struct timeval *t,
 
 void
 MongoLogLoggerThread::vtlog_error(struct timeval *t,
-                                  const char *    component,
-                                  const char *    format,
+                                  const char     *component,
+                                  const char     *format,
                                   va_list         va)
 {
 	tlog_insert_message(LL_ERROR, t, component, format, va);

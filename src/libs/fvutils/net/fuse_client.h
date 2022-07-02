@@ -64,14 +64,14 @@ private:
 	void recv();
 	void sleep();
 
-	char *             hostname_;
+	char              *hostname_;
 	unsigned short int port_;
 
 	fawkes::StreamSocket *socket_;
 	unsigned int          wait_timeout_;
 
-	fawkes::Mutex *        mutex_;
-	fawkes::Mutex *        recv_mutex_;
+	fawkes::Mutex         *mutex_;
+	fawkes::Mutex         *recv_mutex_;
 	fawkes::WaitCondition *recv_waitcond_;
 
 	FuseNetworkMessageQueue *inbound_msgq_;
@@ -80,7 +80,7 @@ private:
 	FuseClientHandler *handler_;
 
 	bool                   greeting_received_;
-	fawkes::Mutex *        greeting_mutex_;
+	fawkes::Mutex         *greeting_mutex_;
 	fawkes::WaitCondition *greeting_waitcond_;
 
 	bool alive_;

@@ -43,11 +43,11 @@ class KatanaGotoOpenRaveThread : public KatanaMotionThread
 #ifdef HAVE_OPENRAVE
 public:
 	KatanaGotoOpenRaveThread(fawkes::RefPtr<fawkes::KatanaController> katana,
-	                         fawkes::Logger *                         logger,
-	                         fawkes::OpenRaveConnector *              openrave,
+	                         fawkes::Logger                          *logger,
+	                         fawkes::OpenRaveConnector               *openrave,
 	                         unsigned int                             poll_interval_ms,
-	                         const std::string &                      robot_file,
-	                         const std::string &                      arm_model,
+	                         const std::string                       &robot_file,
+	                         const std::string                       &arm_model,
 	                         bool                                     autoload_IK,
 	                         bool                                     use_viewer);
 
@@ -78,7 +78,7 @@ private:
 	fawkes::OpenRaveManipulatorPtr OR_manip_;
 
 	std::string                               target_object_;
-	std::vector<std::vector<float>> *         target_traj_;
+	std::vector<std::vector<float>>          *target_traj_;
 	std::vector<std::vector<float>>::iterator it_;
 
 	std::vector<int>   motor_encoders_;

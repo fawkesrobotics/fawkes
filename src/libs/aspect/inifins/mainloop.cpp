@@ -38,7 +38,7 @@ namespace fawkes {
  * @param employer main loop employer to register main loop to
  * @param btexec blocked timing executor to pass to thread
  */
-MainLoopAspectIniFin::MainLoopAspectIniFin(MainLoopEmployer *     employer,
+MainLoopAspectIniFin::MainLoopAspectIniFin(MainLoopEmployer      *employer,
                                            BlockedTimingExecutor *btexec)
 : AspectIniFin("MainLoopAspect")
 {

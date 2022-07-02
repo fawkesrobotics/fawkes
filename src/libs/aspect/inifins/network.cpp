@@ -40,8 +40,8 @@ namespace fawkes {
  * @param service_publisher service publisher resolver to pass to threads
  */
 NetworkAspectIniFin::NetworkAspectIniFin(NetworkNameResolver *nnresolver,
-                                         ServicePublisher *   service_publisher,
-                                         ServiceBrowser *     service_browser)
+                                         ServicePublisher    *service_publisher,
+                                         ServiceBrowser      *service_browser)
 : AspectIniFin("NetworkAspect")
 {
 	nnresolver_        = nnresolver;

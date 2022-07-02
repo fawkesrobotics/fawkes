@@ -117,9 +117,9 @@ private:
 	void update_barrier();
 
 private:
-	char *                name_;
+	char                 *name_;
 	bool                  sealed_;
-	Mutex *               finalize_mutex_;
+	Mutex                *finalize_mutex_;
 	InterruptibleBarrier *wnw_barrier_;
 
 	std::list<std::pair<InterruptibleBarrier *, ThreadList>>           wnw_bad_barriers_;

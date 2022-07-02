@@ -64,11 +64,11 @@ protected:
 private:
 	void publish_graph();
 	void convert_nodes(const std::vector<fawkes::NavGraphNode> &nodes,
-	                   std::vector<fawkes_msgs::NavGraphNode> & out);
+	                   std::vector<fawkes_msgs::NavGraphNode>  &out);
 
-	bool svs_search_path_cb(fawkes_msgs::NavGraphSearchPath::Request & req,
+	bool svs_search_path_cb(fawkes_msgs::NavGraphSearchPath::Request  &req,
 	                        fawkes_msgs::NavGraphSearchPath::Response &res);
-	bool svs_get_pwcosts_cb(fawkes_msgs::NavGraphGetPairwiseCosts::Request & req,
+	bool svs_get_pwcosts_cb(fawkes_msgs::NavGraphGetPairwiseCosts::Request  &req,
 	                        fawkes_msgs::NavGraphGetPairwiseCosts::Response &res);
 
 private:

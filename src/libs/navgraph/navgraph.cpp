@@ -1030,8 +1030,8 @@ NavGraph::search_path(const std::string &from,
  * or it was prohibited when using constraints.
  */
 fawkes::NavGraphPath
-NavGraph::search_path(const std::string &        from,
-                      const std::string &        to,
+NavGraph::search_path(const std::string         &from,
+                      const std::string         &to,
                       navgraph::EstimateFunction estimate_func,
                       navgraph::CostFunction     cost_func,
                       bool                       use_constraints,
@@ -1067,8 +1067,8 @@ NavGraph::search_path(const std::string &        from,
  * or it was prohibited when using constraints.
  */
 fawkes::NavGraphPath
-NavGraph::search_path(const NavGraphNode &       from,
-                      const NavGraphNode &       to,
+NavGraph::search_path(const NavGraphNode        &from,
+                      const NavGraphNode        &to,
                       navgraph::EstimateFunction estimate_func,
                       navgraph::CostFunction     cost_func,
                       bool                       use_constraints,
@@ -1098,7 +1098,7 @@ NavGraph::search_path(const NavGraphNode &       from,
 	}
 
 	std::vector<fawkes::NavGraphNode> path(a_star_solution.size());
-	NavGraphSearchState *             solstate;
+	NavGraphSearchState              *solstate;
 	for (unsigned int i = 0; i < a_star_solution.size(); ++i) {
 		solstate = dynamic_cast<NavGraphSearchState *>(a_star_solution[i]);
 		path[i]  = solstate->node();
@@ -1181,8 +1181,8 @@ void
 NavGraph::edge_add_split_intersection(const NavGraphEdge &edge)
 {
 	std::list<std::pair<cart_coord_2d_t, NavGraphEdge>> intersections;
-	const NavGraphNode &                                n1 = node(edge.from());
-	const NavGraphNode &                                n2 = node(edge.to());
+	const NavGraphNode                                 &n1 = node(edge.from());
+	const NavGraphNode                                 &n2 = node(edge.to());
 
 	try {
 		for (const NavGraphEdge &e : edges_) {
@@ -1198,16 +1198,16 @@ NavGraph::edge_add_split_intersection(const NavGraphEdge &edge)
 
 		for (auto i1 = intersections.begin(); i1 != intersections.end(); ++i1) {
 			const std::pair<cart_coord_2d_t, NavGraphEdge> &p1 = *i1;
-			const cart_coord_2d_t &                         c1 = p1.first;
-			const NavGraphEdge &                            e1 = p1.second;
+			const cart_coord_2d_t                          &c1 = p1.first;
+			const NavGraphEdge                             &e1 = p1.second;
 
 			const NavGraphNode &n1_from = node(e1.from());
 			const NavGraphNode &n1_to   = node(e1.to());
 
 			for (auto i2 = std::next(i1); i2 != intersections.end(); ++i2) {
 				const std::pair<cart_coord_2d_t, NavGraphEdge> &p2 = *i2;
-				const cart_coord_2d_t &                         c2 = p2.first;
-				const NavGraphEdge &                            e2 = p2.second;
+				const cart_coord_2d_t                          &c2 = p2.first;
+				const NavGraphEdge                             &e2 = p2.second;
 
 				if (points_different(c1.x, c1.y, c2.x, c2.y))
 					continue;
@@ -1253,7 +1253,7 @@ NavGraph::edge_add_split_intersection(const NavGraphEdge &edge)
 			std::string     prev_to;
 			for (const auto &i : intersections) {
 				const cart_coord_2d_t &c = i.first;
-				const NavGraphEdge &   e = i.second;
+				const NavGraphEdge    &e = i.second;
 
 				// add intersection point (if necessary)
 				NavGraphNode ip = closest_node(c.x, c.y);
@@ -1458,7 +1458,7 @@ NavGraph::format_name(const char *format, ...)
 {
 	va_list arg;
 	va_start(arg, format);
-	char *      tmp;
+	char	     *tmp;
 	std::string rv;
 	if (vasprintf(&tmp, format, arg) != -1) {
 		rv = tmp;

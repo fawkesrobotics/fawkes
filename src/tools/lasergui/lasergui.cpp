@@ -206,7 +206,7 @@ protected:
 		     ++it) {
 			const Glib::ustring &type = it->first;
 			const Glib::ustring &id   = it->second;
-			Interface *          itf  = NULL;
+			Interface           *itf  = NULL;
 			try {
 				if (type == "Laser1080Interface") {
 					itf = bb_->open_for_reading<Laser1080Interface>(id.c_str());
@@ -590,38 +590,38 @@ protected:
 	}
 
 private:
-	BlackBoard *                bb_;
+	BlackBoard                 *bb_;
 	InterfaceDispatcherPairList laser_ifs_;
-	Laser720Interface *         laser_segmentation_if_;
-	SwitchInterface *           switch_if_;
-	ObjectPositionInterface *   target_if_;
+	Laser720Interface          *laser_segmentation_if_;
+	SwitchInterface            *switch_if_;
+	ObjectPositionInterface    *target_if_;
 
-	std::list<ObjectPositionInterface *> * l_objpos_if_persons_;
-	std::list<ObjectPositionInterface *> * l_objpos_if_legs_;
-	std::list<ObjectPositionInterface *> * l_objpos_if_misc_;
+	std::list<ObjectPositionInterface *>  *l_objpos_if_persons_;
+	std::list<ObjectPositionInterface *>  *l_objpos_if_legs_;
+	std::list<ObjectPositionInterface *>  *l_objpos_if_misc_;
 	std::list<Position2DTrackInterface *> *l_track_if_;
 
-	ObjectPositionInterface * line_if_;
+	ObjectPositionInterface  *line_if_;
 	VisualDisplay2DInterface *visdis_if_;
 
-	LaserDrawingArea *                area_;
+	LaserDrawingArea                 *area_;
 	AllemaniACsAtHomeCairoRobotDrawer athome_drawer_;
 	ConnectionDispatcher              connection_dispatcher_;
 
-	Gtk::ToolButton *      tb_connection_;
-	Gtk::RadioToolButton * tb_lines_;
-	Gtk::RadioToolButton * tb_points_;
-	Gtk::RadioToolButton * tb_hull_;
+	Gtk::ToolButton       *tb_connection_;
+	Gtk::RadioToolButton  *tb_lines_;
+	Gtk::RadioToolButton  *tb_points_;
+	Gtk::RadioToolButton  *tb_hull_;
 	Gtk::ToggleToolButton *tb_trimvals_;
 	Gtk::ToggleToolButton *tb_rotation_;
 	Gtk::ToggleToolButton *tb_legtracker_;
 	Gtk::ToggleToolButton *tb_stop_;
-	Gtk::ToolButton *      tb_zoom_in_;
-	Gtk::ToolButton *      tb_zoom_out_;
-	Gtk::ToolButton *      tb_exit_;
-	Gtk::ToolButton *      tb_select_;
+	Gtk::ToolButton       *tb_zoom_in_;
+	Gtk::ToolButton       *tb_zoom_out_;
+	Gtk::ToolButton       *tb_exit_;
+	Gtk::ToolButton       *tb_select_;
 
-	Gtk::Dialog *     dlg_ltopen_;
+	Gtk::Dialog      *dlg_ltopen_;
 	Gtk::ProgressBar *pgb_ltopen_;
 
 	TypeIdPairList laser_if_names_;

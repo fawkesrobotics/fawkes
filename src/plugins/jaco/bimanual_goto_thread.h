@@ -72,7 +72,7 @@ private:
 
 	typedef struct arm_struct
 	{
-		fawkes::jaco_arm_t *                  arm;
+		fawkes::jaco_arm_t                   *arm;
 		fawkes::RefPtr<fawkes::jaco_target_t> target;
 		float                                 finger_last[4]; // 3 positions + 1 counter
 	} arm_struct_t;

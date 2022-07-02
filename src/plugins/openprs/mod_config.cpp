@@ -32,7 +32,7 @@ using namespace fawkes;
 extern "C" void finalize();
 
 // Global variables
-FawkesNetworkClient * g_fnet_client = NULL;
+FawkesNetworkClient  *g_fnet_client = NULL;
 NetworkConfiguration *g_config      = NULL;
 
 extern "C" Term *

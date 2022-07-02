@@ -55,7 +55,7 @@ public:
 	void         advance();
 	bool         finished();
 	void         reset();
-	const char * get_name();
+	const char  *get_name();
 	unsigned int get_margin();
 	void         set_robot_pose(float x, float y, float ori);
 	void         set_pan_tilt(float pan, float tilt);
@@ -78,7 +78,7 @@ private:
 	unsigned int     m_max_radius;
 	unsigned int     m_margin;
 	float            m_angle_incr;
-	unsigned char *  m_mask;
+	unsigned char   *m_mask;
 
 	bool m_first_on_ray;
 	bool m_done;

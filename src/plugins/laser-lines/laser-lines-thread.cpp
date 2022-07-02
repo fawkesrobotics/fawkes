@@ -349,7 +349,7 @@ LaserLinesThread::publish_known_lines()
 		if (info.raw.cloud) {
 			for (size_t p = 0; p < info.raw.cloud->points.size(); ++p) {
 				ColorPointType &out_point = lines_->points[oi++];
-				PointType &     in_point  = info.raw.cloud->points[p];
+				PointType      &in_point  = info.raw.cloud->points[p];
 				out_point.x               = in_point.x;
 				out_point.y               = in_point.y;
 				out_point.z               = in_point.z;
@@ -424,8 +424,8 @@ void
 LaserLinesThread::set_interface(unsigned int                idx,
                                 fawkes::LaserLineInterface *iface,
                                 bool                        moving_average,
-                                const TrackedLineInfo &     tinfo,
-                                const std::string &         frame_id)
+                                const TrackedLineInfo      &tinfo,
+                                const std::string          &frame_id)
 {
 	const LineInfo &info = moving_average ? tinfo.smooth : tinfo.raw;
 
@@ -450,7 +450,7 @@ LaserLinesThread::set_interface(unsigned int                idx,
 	// this makes the usual assumption that the laser data is in the X-Y plane
 	fawkes::Time now(clock);
 	std::string  frame_name_1, frame_name_2;
-	char *       tmp;
+	char        *tmp;
 	std::string  avg = moving_average ? "avg_" : "";
 	if (asprintf(&tmp, "laser_line_%s%u_e1", avg.c_str(), idx + 1) != -1) {
 		frame_name_1 = tmp;
@@ -531,11 +531,11 @@ LaserLinesThread::set_empty_interface(fawkes::LaserLineInterface *iface) const
 #ifdef HAVE_VISUAL_DEBUGGING
 void
 LaserLinesThread::publish_visualization_add_line(visualization_msgs::MarkerArray &m,
-                                                 unsigned int &                   idnum,
-                                                 const LineInfo &                 info,
+                                                 unsigned int                    &idnum,
+                                                 const LineInfo                  &info,
                                                  const size_t                     i,
-                                                 const std::string &              marker_namespace,
-                                                 const std::string &              name_suffix)
+                                                 const std::string               &marker_namespace,
+                                                 const std::string               &name_suffix)
 {
 	/*
 	  visualization_msgs::Marker basevec;
@@ -700,8 +700,8 @@ LaserLinesThread::publish_visualization_add_line(visualization_msgs::MarkerArray
 
 void
 LaserLinesThread::publish_visualization(const std::vector<TrackedLineInfo> &linfos,
-                                        const std::string &                 marker_namespace,
-                                        const std::string &                 avg_marker_namespace)
+                                        const std::string                  &marker_namespace,
+                                        const std::string                  &avg_marker_namespace)
 {
 	visualization_msgs::MarkerArray m;
 

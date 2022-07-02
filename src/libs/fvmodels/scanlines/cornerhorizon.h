@@ -57,7 +57,7 @@ public:
 
 	bool         finished();
 	void         reset();
-	const char * get_name();
+	const char  *get_name();
 	unsigned int get_margin();
 
 	void set_robot_pose(float x, float y, float ori);

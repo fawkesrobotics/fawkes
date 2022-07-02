@@ -95,7 +95,7 @@ public:
 	virtual unsigned int gain();
 	virtual void         set_gain(unsigned int gain);
 
-	virtual const char * format();
+	virtual const char  *format();
 	virtual void         set_format(const char *format);
 	virtual unsigned int width();
 	virtual unsigned int height();
@@ -171,15 +171,15 @@ private:
 	ReadMethod   _read_method; ///< Used read method
 	bool         _opened;      ///< Device has been open()ed
 	bool         _started;     ///< Device has been start()ed
-	char *       _standard;    ///< Desired video standard
-	char *       _input;       ///< Desired video input
+	char        *_standard;    ///< Desired video standard
+	char        *_input;       ///< Desired video input
 	char         _format[5];   ///< FourCC of the image format
 	colorspace_t _colorspace;  ///< Used colorspace_t
 
 	unsigned int  _width;          ///< Image width
 	unsigned int  _height;         ///< Image height
 	unsigned int  _bytes_per_line; ///< Image bytes per line
-	FrameBuffer * _frame_buffers;  ///< Image buffers
+	FrameBuffer  *_frame_buffers;  ///< Image buffers
 	unsigned int  _buffers_length; ///< Image buffer size
 	int           _current_buffer; ///< Current Image buffer (-1 if not set)
 	fawkes::Time *_capture_time;   ///< Time when last picture was captured

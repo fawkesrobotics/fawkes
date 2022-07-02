@@ -65,12 +65,12 @@ protected:
 
 private:
 	void store(std::vector<fawkes::tf::TimeCacheInterfacePtr> &caches,
-	           std::vector<fawkes::Time> &                     from,
-	           std::vector<fawkes::Time> &                     to);
+	           std::vector<fawkes::Time>                      &from,
+	           std::vector<fawkes::Time>                      &to);
 
 private:
-	fawkes::Mutex *           mutex_;
-	fawkes::TimeWait *        wait_;
+	fawkes::Mutex            *mutex_;
+	fawkes::TimeWait         *wait_;
 	std::string               database_;
 	std::string               collection_;
 	float                     cfg_storage_interval_;

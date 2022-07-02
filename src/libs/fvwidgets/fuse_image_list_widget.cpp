@@ -247,10 +247,10 @@ FuseImageListWidget::set_auto_update(bool active, unsigned int interval_sec)
  * @return true if references could be assigned
  */
 bool
-FuseImageListWidget::get_selected_image(std::string &   host_name,
+FuseImageListWidget::get_selected_image(std::string    &host_name,
                                         unsigned short &port,
-                                        std::string &   image_id,
-                                        bool &          compression)
+                                        std::string    &image_id,
+                                        bool           &compression)
 {
 	if (!m_trv_image_list) {
 		return false;
@@ -525,7 +525,7 @@ FuseImageListWidget::on_add_host_manually()
 	Gtk::Label *hlab = Gtk::manage(new Gtk::Label("Host:"));
 	Gtk::Label *plab = Gtk::manage(new Gtk::Label("Port:"));
 	Gtk::Entry *hent = Gtk::manage(new Gtk::Entry());
-	Gtk::HBox * pbox = Gtk::manage(new Gtk::HBox());
+	Gtk::HBox  *pbox = Gtk::manage(new Gtk::HBox());
 
 #if GTK_VERSION_GE(3, 0)
 	Glib::RefPtr<Gtk::Adjustment> prange = Gtk::Adjustment::create(2208, 1, 65535);

@@ -45,7 +45,7 @@ public:
 
 	static const float UNKNOWN;
 
-	RRDDataSource(const char * name,
+	RRDDataSource(const char  *name,
 	              Type         type,
 	              unsigned int heartbeat = 30,
 	              float        min       = 0,
@@ -95,12 +95,12 @@ public:
 	};
 
 private:
-	char *       name_;
+	char        *name_;
 	Type         type_;
 	unsigned int heartbeat_;
 	float        min_;
 	float        max_;
-	char *       rpn_expression_;
+	char        *rpn_expression_;
 
 	mutable char *string_;
 };
@@ -120,7 +120,7 @@ public:
 	RRDArchive(const RRDArchive &rra);
 	~RRDArchive();
 
-	const char *       to_string() const;
+	const char        *to_string() const;
 	static const char *cf_to_string(ConsolidationFunction cf);
 
 	RRDArchive &operator=(const RRDArchive &rra);
@@ -162,14 +162,14 @@ private:
 class RRDDefinition
 {
 public:
-	RRDDefinition(const char *                name,
+	RRDDefinition(const char                 *name,
 	              std::vector<RRDDataSource> &ds,
 	              unsigned int                step_sec = 10,
 	              bool                        recreate = false);
 
-	RRDDefinition(const char *                name,
+	RRDDefinition(const char                 *name,
 	              std::vector<RRDDataSource> &ds,
-	              std::vector<RRDArchive> &   rra,
+	              std::vector<RRDArchive>    &rra,
 	              unsigned int                step_sec = 10,
 	              bool                        recreate = false);
 	RRDDefinition(const RRDDefinition &other);
@@ -229,12 +229,12 @@ public:
 	void set_rrd_manager(RRDManager *rrd_manager);
 
 private:
-	char *                     name_;
+	char                      *name_;
 	unsigned int               step_sec_;
 	bool                       recreate_;
 	std::vector<RRDDataSource> ds_;
 	std::vector<RRDArchive>    rra_;
-	char *                     filename_;
+	char                      *filename_;
 
 	RRDManager *rrd_manager_;
 };
@@ -242,10 +242,10 @@ private:
 class RRDGraphDataDefinition
 {
 public:
-	RRDGraphDataDefinition(const char *                      name,
+	RRDGraphDataDefinition(const char                       *name,
 	                       RRDArchive::ConsolidationFunction cf,
-	                       const RRDDefinition *             rrd_def,
-	                       const char *                      ds_name = NULL);
+	                       const RRDDefinition              *rrd_def,
+	                       const char                       *ds_name = NULL);
 	RRDGraphDataDefinition(const char *name, const char *rpn_expression);
 	RRDGraphDataDefinition(const RRDGraphDataDefinition &other);
 	~RRDGraphDataDefinition();
@@ -285,10 +285,10 @@ public:
 	};
 
 private:
-	char *                            name_;
-	const RRDDefinition *             rrd_def_;
-	char *                            ds_name_;
-	char *                            rpn_expression_;
+	char                             *name_;
+	const RRDDefinition              *rrd_def_;
+	char                             *ds_name_;
+	char                             *rpn_expression_;
 	RRDArchive::ConsolidationFunction cf_;
 
 	mutable char *string_;
@@ -301,7 +301,7 @@ public:
 	{
 	}
 	virtual RRDGraphElement *clone() const = 0;
-	virtual const char *     to_string() const;
+	virtual const char      *to_string() const;
 };
 
 class RRDGraphGPrint : public RRDGraphElement
@@ -341,9 +341,9 @@ public:
 	}
 
 private:
-	char *                            def_name_;
+	char                             *def_name_;
 	RRDArchive::ConsolidationFunction cf_;
-	char *                            format_;
+	char                             *format_;
 
 	mutable char *string_;
 };
@@ -464,12 +464,12 @@ private:
 class RRDGraphDefinition
 {
 public:
-	RRDGraphDefinition(const char *                         name,
-	                   RRDDefinition *                      rrd_def,
-	                   const char *                         title,
-	                   const char *                         vertical_label,
+	RRDGraphDefinition(const char                          *name,
+	                   RRDDefinition                       *rrd_def,
+	                   const char                          *title,
+	                   const char                          *vertical_label,
 	                   std::vector<RRDGraphDataDefinition> &def,
-	                   std::vector<RRDGraphElement *> &     elements,
+	                   std::vector<RRDGraphElement *>      &elements,
 	                   time_t                               start           = -600,
 	                   time_t                               end             = -10,
 	                   unsigned int                         step            = 10,
@@ -567,26 +567,26 @@ public:
 	}
 
 private:
-	char *                              name_;
-	const RRDDefinition *               rrd_def_;
+	char                               *name_;
+	const RRDDefinition                *rrd_def_;
 	const time_t                        start_;
 	const time_t                        end_;
 	unsigned int                        step_;
-	char *                              title_;
-	char *                              vertical_label_;
+	char                               *title_;
+	char                               *vertical_label_;
 	const unsigned int                  update_interval_;
 	const bool                          slope_mode_;
 	std::vector<RRDGraphDataDefinition> defs_;
 	std::vector<RRDGraphElement *>      elements_;
 	unsigned int                        width_;
-	char *                              width_s_;
-	char *                              start_s_;
-	char *                              end_s_;
-	char *                              step_s_;
+	char                               *width_s_;
+	char                               *start_s_;
+	char                               *end_s_;
+	char                               *step_s_;
 	std::vector<const char *>           fonts_;
-	char *                              filename_;
+	char                               *filename_;
 	mutable size_t                      argc_;
-	mutable const char **               argv_;
+	mutable const char                **argv_;
 };
 
 } // end namespace fawkes

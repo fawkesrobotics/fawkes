@@ -110,7 +110,7 @@ static const char SPL_GAMECONTROL_HEADER[SPL_HEADER_SIZE] = {'R', 'G', 'm', 'e'}
  * @param team_number our team number
  * @param player_number individual player number
  */
-SplRefBoxProcessor::SplRefBoxProcessor(fawkes::Logger *   logger,
+SplRefBoxProcessor::SplRefBoxProcessor(fawkes::Logger    *logger,
                                        unsigned short int broadcast_port,
                                        unsigned int       team_number,
                                        unsigned int       player_number)

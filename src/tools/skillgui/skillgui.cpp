@@ -57,7 +57,7 @@ using namespace fawkes;
  * @param cobject C base object
  * @param builder Gtk Builder
  */
-SkillGuiGtkWindow::SkillGuiGtkWindow(BaseObjectType *                  cobject,
+SkillGuiGtkWindow::SkillGuiGtkWindow(BaseObjectType                   *cobject,
                                      const Glib::RefPtr<Gtk::Builder> &builder)
 : Gtk::Window(cobject)
 {
@@ -723,7 +723,7 @@ SkillGuiGtkWindow::on_graphdir_clicked()
 }
 
 void
-SkillGuiGtkWindow::send_graphdir_message(SkillerDebugInterface *                   iface,
+SkillGuiGtkWindow::send_graphdir_message(SkillerDebugInterface                    *iface,
                                          SkillerDebugInterface::GraphDirectionEnum gd)
 {
 	try {

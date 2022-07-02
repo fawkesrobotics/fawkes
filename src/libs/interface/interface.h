@@ -87,25 +87,25 @@ public:
 	virtual ~Interface();
 
 	bool                 oftype(const char *interface_type) const;
-	const void *         datachunk() const;
+	const void          *datachunk() const;
 	unsigned int         datasize() const;
-	const char *         type() const;
-	const char *         id() const;
-	const char *         uid() const;
+	const char          *type() const;
+	const char          *id() const;
+	const char          *uid() const;
 	Uuid                 serial() const;
 	unsigned int         mem_serial() const;
 	bool                 operator==(Interface &comp) const;
 	const unsigned char *hash() const;
 	size_t               hash_size() const;
-	const char *         hash_printable() const;
+	const char          *hash_printable() const;
 	bool                 is_writer() const;
 	void                 set_validity(bool valid);
 	bool                 is_valid() const;
-	const char *         owner() const;
+	const char          *owner() const;
 
 	void set_from_chunk(void *chunk);
 
-	virtual Message *   create_message(const char *type) const             = 0;
+	virtual Message    *create_message(const char *type) const             = 0;
 	virtual void        copy_values(const Interface *interface)            = 0;
 	virtual const char *enum_tostring(const char *enumtype, int val) const = 0;
 
@@ -147,7 +147,7 @@ public:
 	bool         msgq_try_lock();
 	void         msgq_unlock();
 	void         msgq_pop();
-	Message *    msgq_first();
+	Message     *msgq_first();
 	bool         msgq_empty();
 	void         msgq_append(Message *message);
 
@@ -191,7 +191,7 @@ public:
 	/** Message info list */
 	struct interface_messageinfo_t
 	{
-		const char *             type; /**< the type of the message */
+		const char              *type; /**< the type of the message */
 		interface_messageinfo_t *next; /**< the next field, NULL if last */
 	};
 
@@ -217,10 +217,10 @@ protected:
 
 	void set_hash(unsigned char *ihash);
 	void add_fieldinfo(interface_fieldtype_t       type,
-	                   const char *                name,
+	                   const char                 *name,
 	                   size_t                      length,
-	                   void *                      value,
-	                   const char *                enumtype = 0,
+	                   void                       *value,
+	                   const char                 *enumtype = 0,
 	                   const interface_enum_map_t *enum_map = 0);
 	void add_messageinfo(const char *name);
 
@@ -241,7 +241,7 @@ protected:
 	template <class FieldT, class DataT>
 	void set_field(FieldT &field, unsigned int index, DataT &data);
 
-	void *       data_ptr;
+	void        *data_ptr;
 	unsigned int data_size;
 	bool         data_refreshed;
 	bool         data_changed;
@@ -267,35 +267,35 @@ private:
 	char          uid_[INTERFACE_UID_SIZE_ + 1];
 	unsigned char hash_[INTERFACE_HASH_SIZE_];
 	char          hash_printable_[INTERFACE_HASH_SIZE_ * 2 + 1];
-	char *        owner_;
+	char         *owner_;
 
 	Uuid instance_serial_;
 	bool valid_;
 
-	void *       mem_data_ptr_;
-	void *       mem_real_ptr_;
+	void        *mem_data_ptr_;
+	void        *mem_real_ptr_;
 	unsigned int mem_serial_;
 	bool         write_access_;
 
-	void *       buffers_;
+	void        *buffers_;
 	unsigned int num_buffers_;
 
-	Mutex *         data_mutex_;
+	Mutex          *data_mutex_;
 	RefCountRWLock *rwlock_;
 
 	InterfaceMediator *interface_mediator_;
-	MessageMediator *  message_mediator_;
-	MessageQueue *     message_queue_;
+	MessageMediator   *message_mediator_;
+	MessageQueue      *message_queue_;
 	unsigned short     next_message_id_;
 
-	interface_fieldinfo_t *  fieldinfo_list_;
+	interface_fieldinfo_t   *fieldinfo_list_;
 	interface_messageinfo_t *messageinfo_list_;
 
 	unsigned int num_fields_;
 
 	Clock *clock_;
-	Time * timestamp_;
-	Time * local_read_timestamp_;
+	Time  *timestamp_;
+	Time  *local_read_timestamp_;
 	bool   auto_timestamping_;
 };
 

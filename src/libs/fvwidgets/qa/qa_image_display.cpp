@@ -45,7 +45,7 @@ main(int argc, char **argv)
 		exit(-1);
 	}
 
-	FvRawReader *  fvraw = new FvRawReader(img_file);
+	FvRawReader   *fvraw = new FvRawReader(img_file);
 	unsigned char *buffer =
 	  malloc_buffer(fvraw->colorspace(), fvraw->pixel_width(), fvraw->pixel_height());
 

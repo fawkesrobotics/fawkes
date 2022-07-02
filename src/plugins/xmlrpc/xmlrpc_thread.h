@@ -70,13 +70,13 @@ protected:
 	}
 
 private:
-	fawkes::WebServer *           webserver_;
+	fawkes::WebServer            *webserver_;
 	fawkes::WebRequestDispatcher *dispatcher_;
-	fawkes::WebUrlManager *       url_manager_;
+	fawkes::WebUrlManager        *url_manager_;
 
 	XmlRpcRequestProcessor *processor_;
-	XmlRpcPluginMethods *   plugin_methods_;
-	XmlRpcLogMethods *      log_methods_;
+	XmlRpcPluginMethods    *plugin_methods_;
+	XmlRpcLogMethods       *log_methods_;
 
 	bool         custom_server_;
 	unsigned int cfg_port_;

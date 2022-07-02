@@ -175,7 +175,7 @@ ConfigurationPlexilAdapter::invokeAbort(PLEXIL::Command *cmd)
 }
 
 void
-ConfigurationPlexilAdapter::config_get_value_or_default(PLEXIL::Command * cmd,
+ConfigurationPlexilAdapter::config_get_value_or_default(PLEXIL::Command  *cmd,
                                                         PLEXIL::ValueType value_type)
 {
 	std::vector<PLEXIL::Value> const &args = cmd->getArgValues();

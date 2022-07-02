@@ -62,7 +62,7 @@ protected:
 	}
 
 private:
-	fawkes::JoystickInterface * joy_if_;
+	fawkes::JoystickInterface  *joy_if_;
 	fawkes::Roomba500Interface *roomba500_if_;
 
 	int last_velo_;

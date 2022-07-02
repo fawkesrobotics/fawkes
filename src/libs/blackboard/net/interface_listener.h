@@ -34,8 +34,8 @@ class BlackBoard;
 class BlackBoardNetHandlerInterfaceListener : public BlackBoardInterfaceListener
 {
 public:
-	BlackBoardNetHandlerInterfaceListener(BlackBoard *      blackboard,
-	                                      Interface *       interface,
+	BlackBoardNetHandlerInterfaceListener(BlackBoard       *blackboard,
+	                                      Interface        *interface,
 	                                      FawkesNetworkHub *hub,
 	                                      unsigned int      clid);
 	virtual ~BlackBoardNetHandlerInterfaceListener();
@@ -51,8 +51,8 @@ public:
 private:
 	void send_event_serial(Interface *interface, unsigned int msg_id, Uuid event_serial);
 
-	BlackBoard *      blackboard_;
-	Interface *       interface_;
+	BlackBoard       *blackboard_;
+	Interface        *interface_;
 	FawkesNetworkHub *fnh_;
 
 	unsigned int clid_;

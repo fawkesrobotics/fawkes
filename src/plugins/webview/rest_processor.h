@@ -37,18 +37,18 @@ class WebReply;
 class WebviewRESTRequestProcessor
 {
 public:
-	WebviewRESTRequestProcessor(fawkes::WebUrlManager *        url_manager,
+	WebviewRESTRequestProcessor(fawkes::WebUrlManager         *url_manager,
 	                            fawkes::WebviewRestApiManager *api_mgr,
-	                            fawkes::Logger *               logger);
+	                            fawkes::Logger                *logger);
 	~WebviewRESTRequestProcessor();
 
 private:
 	fawkes::WebReply *process_request(const fawkes::WebRequest *request);
 
 private:
-	fawkes::WebUrlManager *        url_mgr_;
+	fawkes::WebUrlManager         *url_mgr_;
 	fawkes::WebviewRestApiManager *api_mgr_;
-	fawkes::Logger *               logger_;
+	fawkes::Logger                *logger_;
 
 	std::vector<fawkes::WebRequest::Method> methods_;
 };

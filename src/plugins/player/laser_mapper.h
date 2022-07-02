@@ -36,16 +36,16 @@ class LaserProxy;
 class PlayerLaserMapper : public PlayerProxyFawkesInterfaceMapper
 {
 public:
-	PlayerLaserMapper(const std::string &        varname,
+	PlayerLaserMapper(const std::string         &varname,
 	                  fawkes::Laser360Interface *interface,
-	                  PlayerCc::LaserProxy *     proxy);
+	                  PlayerCc::LaserProxy      *proxy);
 
 	virtual void sync_fawkes_to_player();
 	virtual void sync_player_to_fawkes();
 
 private:
 	fawkes::Laser360Interface *interface_;
-	PlayerCc::LaserProxy *     proxy_;
+	PlayerCc::LaserProxy      *proxy_;
 
 	bool         first_read_;
 	unsigned int index_offset_;

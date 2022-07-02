@@ -90,7 +90,7 @@ typedef struct
 typedef struct
 {
 	FUSE_header_t header;  /**< header */
-	void *        payload; /**< payload */
+	void         *payload; /**< payload */
 } FUSE_message_t;
 
 /** version packet, bi-directional */

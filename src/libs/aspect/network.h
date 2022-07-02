@@ -38,13 +38,13 @@ public:
 	virtual ~NetworkAspect();
 
 	void init_NetworkAspect(NetworkNameResolver *resolver,
-	                        ServicePublisher *   service_publisher,
-	                        ServiceBrowser *     service_browser);
+	                        ServicePublisher    *service_publisher,
+	                        ServiceBrowser      *service_browser);
 
 protected:
 	NetworkNameResolver *nnresolver;
-	ServicePublisher *   service_publisher;
-	ServiceBrowser *     service_browser;
+	ServicePublisher    *service_publisher;
+	ServiceBrowser      *service_browser;
 };
 
 } // end namespace fawkes

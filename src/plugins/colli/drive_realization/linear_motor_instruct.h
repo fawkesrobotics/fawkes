@@ -33,8 +33,8 @@ class LinearMotorInstruct : public BaseMotorInstruct
 public:
 	LinearMotorInstruct(MotorInterface *motor,
 	                    float           frequency,
-	                    Logger *        logger,
-	                    Configuration * config);
+	                    Logger         *logger,
+	                    Configuration  *config);
 	virtual ~LinearMotorInstruct();
 
 private:

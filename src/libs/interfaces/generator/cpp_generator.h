@@ -43,13 +43,13 @@ public:
 	                      std::string                               year,
 	                      std::string                               creation_date,
 	                      std::string                               data_comment,
-	                      const unsigned char *                     hash,
+	                      const unsigned char                      *hash,
 	                      size_t                                    hash_size,
-	                      const std::vector<InterfaceConstant> &    constants,
+	                      const std::vector<InterfaceConstant>     &constants,
 	                      const std::vector<InterfaceEnumConstant> &enum_constants,
-	                      const std::vector<InterfaceField> &       data_fields,
-	                      const std::vector<InterfacePseudoMap> &   pseudo_maps,
-	                      const std::vector<InterfaceMessage> &     messages);
+	                      const std::vector<InterfaceField>        &data_fields,
+	                      const std::vector<InterfacePseudoMap>    &pseudo_maps,
+	                      const std::vector<InterfaceMessage>      &messages);
 	~CppInterfaceGenerator();
 
 	void write_h(FILE *f);
@@ -62,18 +62,18 @@ public:
 	void write_messages_cpp(FILE *f);
 	void write_messages_h(FILE *f);
 	void write_ctor_dtor_h(FILE *f, std::string /* indent space */ is, std::string classname);
-	void write_ctor_dtor_cpp(FILE *                        f,
+	void write_ctor_dtor_cpp(FILE                         *f,
 	                         std::string                   classname,
 	                         std::string                   super_class,
 	                         std::string                   inclusion_prefix,
 	                         std::vector<InterfaceField>   fields,
 	                         std::vector<InterfaceMessage> messages);
 
-	void write_message_ctor_dtor_h(FILE *                         f,
+	void write_message_ctor_dtor_h(FILE                          *f,
 	                               std::string /* indent space */ is,
 	                               std::string                    classname,
 	                               std::vector<InterfaceField>    fields);
-	void write_message_ctor_dtor_cpp(FILE *                      f,
+	void write_message_ctor_dtor_cpp(FILE                       *f,
 	                                 std::string                 classname,
 	                                 std::string                 super_class,
 	                                 std::string                 inclusion_prefix,
@@ -83,7 +83,7 @@ public:
 
 	void
 	write_methods_h(FILE *f, std::string /* indent space */ is, std::vector<InterfaceField> fields);
-	void write_methods_cpp(FILE *                      f,
+	void write_methods_cpp(FILE                       *f,
 	                       std::string                 interface_classname,
 	                       std::string                 classname,
 	                       std::vector<InterfaceField> fields,
@@ -95,11 +95,11 @@ public:
 	void write_basemethods_h(FILE *f, std::string is);
 	void write_basemethods_cpp(FILE *f);
 
-	void write_methods_h(FILE *                          f,
+	void write_methods_h(FILE                           *f,
 	                     std::string /* indent space */  is,
 	                     std::vector<InterfaceField>     fields,
 	                     std::vector<InterfacePseudoMap> pseudo_maps);
-	void write_methods_cpp(FILE *                          f,
+	void write_methods_cpp(FILE                           *f,
 	                       std::string                     interface_classname,
 	                       std::string                     classname,
 	                       std::vector<InterfaceField>     fields,
@@ -111,7 +111,7 @@ public:
 	void write_enum_map_population(FILE *f);
 	void write_add_fieldinfo_calls(FILE *f, std::vector<InterfaceField> &fields);
 
-	void write_struct(FILE *                         f,
+	void write_struct(FILE                          *f,
 	                  std::string                    name,
 	                  std::string /* indent space */ is,
 	                  std::vector<InterfaceField>    fields);

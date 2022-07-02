@@ -297,7 +297,7 @@ FvBaseThread::register_for_camera(const char *camera_string, Thread *thread, col
 Camera *
 FvBaseThread::register_for_raw_camera(const char *camera_string, Thread *thread)
 {
-	Camera *             camera = register_for_camera(camera_string, thread, CS_UNKNOWN);
+	Camera              *camera = register_for_camera(camera_string, thread, CS_UNKNOWN);
 	CameraArgumentParser cap(camera_string);
 	try {
 		std::string id = cap.cam_type() + "." + cap.cam_id();

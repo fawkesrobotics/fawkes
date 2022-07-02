@@ -68,21 +68,21 @@ public:
 
 	bool has_threads_for_aspect(const char *aspect_name);
 
-	void register_default_inifins(BlackBoard *           blackboard,
-	                              ThreadCollector *      collector,
-	                              Configuration *        config,
-	                              Logger *               logger,
-	                              Clock *                clock,
-	                              FawkesNetworkHub *     fnethub,
-	                              MainLoopEmployer *     mloop_employer,
-	                              LoggerEmployer *       logger_employer,
+	void register_default_inifins(BlackBoard            *blackboard,
+	                              ThreadCollector       *collector,
+	                              Configuration         *config,
+	                              Logger                *logger,
+	                              Clock                 *clock,
+	                              FawkesNetworkHub      *fnethub,
+	                              MainLoopEmployer      *mloop_employer,
+	                              LoggerEmployer        *logger_employer,
 	                              BlockedTimingExecutor *btexec,
-	                              NetworkNameResolver *  nnresolver,
-	                              ServicePublisher *     service_publisher,
-	                              ServiceBrowser *       service_browser,
-	                              PluginManager *        pmanager,
-	                              tf::Transformer *      tf_listener,
-	                              SyncPointManager *     syncpoint_manager);
+	                              NetworkNameResolver   *nnresolver,
+	                              ServicePublisher      *service_publisher,
+	                              ServiceBrowser        *service_browser,
+	                              PluginManager         *pmanager,
+	                              tf::Transformer       *tf_listener,
+	                              SyncPointManager      *syncpoint_manager);
 
 private:
 	std::map<std::string, AspectIniFin *>      inifins_;

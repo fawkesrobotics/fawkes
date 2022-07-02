@@ -64,7 +64,7 @@ private:
 template <class FawkesInterfaceType, class PlayerProxyType, class MapperType>
 PlayerProxyFawkesInterfaceMapper *
 PlayerMapperFactory::try_create(std::string            varname,
-                                fawkes::Interface *    interface,
+                                fawkes::Interface     *interface,
                                 PlayerCc::ClientProxy *proxy)
 {
 	FawkesInterfaceType *fi;

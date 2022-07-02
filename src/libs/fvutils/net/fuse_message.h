@@ -42,7 +42,7 @@ public:
 	FuseNetworkMessage();
 	FuseNetworkMessage(FUSE_message_t *msg);
 	FuseNetworkMessage(FUSE_message_type_t type,
-	                   void *              payload,
+	                   void               *payload,
 	                   size_t              payload_size,
 	                   bool                copy_payload = false);
 	FuseNetworkMessage(FUSE_message_type_t type, FuseMessageContent *content);
@@ -51,7 +51,7 @@ public:
 
 	uint32_t type() const;
 	size_t   payload_size() const;
-	void *   payload() const;
+	void    *payload() const;
 
 	const FUSE_message_t &fmsg() const;
 

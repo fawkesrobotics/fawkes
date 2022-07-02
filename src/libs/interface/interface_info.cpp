@@ -49,15 +49,15 @@ namespace fawkes {
  * @param writer name of writer of interface
  * @param timestamp interface timestamp (time of last write or data timestamp)
  */
-InterfaceInfo::InterfaceInfo(const char *                  type,
-                             const char *                  id,
-                             const unsigned char *         hash,
+InterfaceInfo::InterfaceInfo(const char                   *type,
+                             const char                   *id,
+                             const unsigned char          *hash,
                              unsigned int                  serial,
                              bool                          has_writer,
                              unsigned int                  num_readers,
                              const std::list<std::string> &readers,
-                             const std::string &           writer,
-                             const Time *                  timestamp)
+                             const std::string            &writer,
+                             const Time                   *timestamp)
 {
 	type_ = strndup(type, INTERFACE_TYPE_SIZE_);
 	id_   = strndup(id, INTERFACE_ID_SIZE_);
@@ -257,15 +257,15 @@ InterfaceInfo::operator<(const InterfaceInfo &ii) const
  * @param timestamp interface timestamp (time of last write or data timestamp)
  */
 void
-InterfaceInfoList::append(const char *                  type,
-                          const char *                  id,
-                          const unsigned char *         hash,
+InterfaceInfoList::append(const char                   *type,
+                          const char                   *id,
+                          const unsigned char          *hash,
                           unsigned int                  serial,
                           bool                          has_writer,
                           unsigned int                  num_readers,
                           const std::list<std::string> &readers,
-                          const std::string &           writer,
-                          const Time &                  timestamp)
+                          const std::string            &writer,
+                          const Time                   &timestamp)
 {
 	push_back(
 	  InterfaceInfo(type, id, hash, serial, has_writer, num_readers, readers, writer, &timestamp));

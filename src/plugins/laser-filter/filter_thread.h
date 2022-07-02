@@ -72,8 +72,8 @@ private:
 		std::string  id;
 		unsigned int size;
 		union {
-			fawkes::Laser360Interface * as360;
-			fawkes::Laser720Interface * as720;
+			fawkes::Laser360Interface  *as360;
+			fawkes::Laser720Interface  *as720;
 			fawkes::Laser1080Interface *as1080;
 		} interface_typed;
 		fawkes::Interface *interface;
@@ -81,7 +81,7 @@ private:
 	/// @endcond
 
 	void open_interfaces(std::string                             prefix,
-	                     std::vector<LaserInterface> &           ifs,
+	                     std::vector<LaserInterface>            &ifs,
 	                     std::vector<LaserDataFilter::Buffer *> &bufs,
 	                     bool                                    writing);
 
@@ -113,9 +113,9 @@ private:
 
 	std::list<LaserFilterThread *> wait_threads_;
 	bool                           wait_done_;
-	fawkes::Mutex *                wait_mutex_;
-	fawkes::WaitCondition *        wait_cond_;
-	fawkes::Barrier *              wait_barrier_;
+	fawkes::Mutex                 *wait_mutex_;
+	fawkes::WaitCondition         *wait_cond_;
+	fawkes::Barrier               *wait_barrier_;
 };
 
 #endif

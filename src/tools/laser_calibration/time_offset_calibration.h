@@ -26,9 +26,9 @@
 class TimeOffsetCalibration : public LaserCalibration
 {
 public:
-	TimeOffsetCalibration(LaserInterface *              laser,
-	                      fawkes::MotorInterface *      motor,
-	                      fawkes::tf::Transformer *     tf_transformer,
+	TimeOffsetCalibration(LaserInterface               *laser,
+	                      fawkes::MotorInterface       *motor,
+	                      fawkes::tf::Transformer      *tf_transformer,
 	                      fawkes::NetworkConfiguration *config,
 	                      std::string                   config_path);
 

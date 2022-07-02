@@ -64,7 +64,7 @@ namespace firevision {
  * @param height Height of the image contained in the YUV buffer
  */
 void yuv411packed_to_rgb_plainc(const unsigned char *YUV,
-                                unsigned char *      RGB,
+                                unsigned char       *RGB,
                                 unsigned int         width,
                                 unsigned int         height);
 
@@ -84,38 +84,38 @@ void yuv411packed_to_rgb_plainc(const unsigned char *YUV,
  * @param height Height of the image contained in the YUV buffer
  */
 void yuv422planar_to_rgb_plainc(const unsigned char *planar,
-                                unsigned char *      RGB,
+                                unsigned char       *RGB,
                                 unsigned int         width,
                                 unsigned int         height);
 
 void yuv422packed_to_rgb_plainc(const unsigned char *planar,
-                                unsigned char *      RGB,
+                                unsigned char       *RGB,
                                 const unsigned int   width,
                                 const unsigned int   height);
 
 void yuv422planar_to_bgr_plainc(const unsigned char *planar,
-                                unsigned char *      BGR,
+                                unsigned char       *BGR,
                                 unsigned int         width,
                                 unsigned int         height);
 
 void yuv422planar_to_rgb_with_alpha_plainc(const unsigned char *planar,
-                                           unsigned char *      RGB,
+                                           unsigned char       *RGB,
                                            unsigned int         width,
                                            unsigned int         height);
 
 void yuv422planar_to_bgr_with_alpha_plainc(const unsigned char *planar,
-                                           unsigned char *      BGR,
+                                           unsigned char       *BGR,
                                            unsigned int         width,
                                            unsigned int         height);
 
 void yuv422packed_to_bgr_with_alpha_plainc(const unsigned char *YUV,
-                                           unsigned char *      BGR,
+                                           unsigned char       *BGR,
                                            unsigned int         width,
                                            unsigned int         height);
 
 #if (defined __i386__ || defined __386__ || defined __X86__ || defined _M_IX86 || defined i386)
 void yuv411planar_to_rgb_mmx(const unsigned char *yuv,
-                             unsigned char *      rgb,
+                             unsigned char       *rgb,
                              unsigned int         w,
                              unsigned int         h);
 #endif
@@ -124,9 +124,9 @@ inline void
 pixel_yuv_to_rgb(const unsigned char y,
                  unsigned            u,
                  unsigned char       v,
-                 unsigned char *     r,
-                 unsigned char *     g,
-                 unsigned char *     b)
+                 unsigned char      *r,
+                 unsigned char      *g,
+                 unsigned char      *b)
 {
 	int yt, ut, vt;
 
@@ -152,14 +152,14 @@ pixel_yuv_to_rgb(const unsigned char y,
  */
 inline void
 convert_line_yuv422planar_to_rgb(const unsigned char *YUV,
-                                 unsigned char *      RGB,
+                                 unsigned char       *RGB,
                                  unsigned int         width,
                                  unsigned int         height,
                                  unsigned int         yuv_line,
                                  unsigned int         rgb_line)
 {
 	unsigned int         i = 0;
-	RGB_t *              r1, *r2;
+	RGB_t               *r1, *r2;
 	const unsigned char *yp, *up, *vp;
 
 	yp = YUV + (width * yuv_line);

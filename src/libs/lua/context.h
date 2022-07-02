@@ -122,9 +122,9 @@ public:
 	lua_Integer to_integer(int idx);
 	bool        to_boolean(int idx);
 	const char *to_string(int idx);
-	void *      to_userdata(int idx);
-	void *      to_pointer(int idx);
-	void *      to_usertype(int idx);
+	void	     *to_userdata(int idx);
+	void	     *to_pointer(int idx);
+	void	     *to_usertype(int idx);
 
 	bool is_boolean(int idx);
 	bool is_cfunction(int idx);
@@ -158,7 +158,7 @@ private:
 	bool       enable_tracebacks_;
 
 	Mutex *lua_mutex_;
-	char * start_script_;
+	char  *start_script_;
 
 	std::list<std::string>           package_dirs_;
 	std::list<std::string>           cpackage_dirs_;
@@ -183,7 +183,7 @@ private:
 	std::string finalize_cancel_call_;
 
 	RefPtr<FileAlterationMonitor> fam_;
-	FamThread *                   fam_thread_;
+	FamThread                    *fam_thread_;
 
 	LockList<LuaContextWatcher *> watchers_;
 };

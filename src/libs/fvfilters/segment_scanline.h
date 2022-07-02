@@ -39,7 +39,7 @@ public:
 	virtual void apply();
 
 private:
-	ColorModel *   cm;
+	ColorModel    *cm;
 	ScanlineModel *slm;
 };
 

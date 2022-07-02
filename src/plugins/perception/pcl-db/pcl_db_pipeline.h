@@ -115,9 +115,9 @@ public:
    * @param logger Logger
    * @param output output point cloud
    */
-	PointCloudDBPipeline(mongocxx::client *     mongodb_client,
+	PointCloudDBPipeline(mongocxx::client      *mongodb_client,
 	                     fawkes::Configuration *config,
-	                     fawkes::Logger *       logger,
+	                     fawkes::Logger        *logger,
 	                     ColorCloudPtr          output)
 	: mongodb_client_(mongodb_client), logger_(logger), output_(output)
 	{
@@ -272,8 +272,8 @@ protected: // methods
 	std::vector<CloudPtr>
 	retrieve_clouds(std::vector<long> &times,
 	                std::vector<long> &actual_times,
-	                std::string &      database,
-	                std::string &      collection_name)
+	                std::string       &database,
+	                std::string       &collection_name)
 	{
 		using namespace bsoncxx::builder;
 		auto collection = mongodb_client_->database(database)[collection_name];

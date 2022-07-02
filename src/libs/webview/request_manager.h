@@ -46,7 +46,7 @@ private:
 	void set_server(WebServer *server);
 
 private:
-	Mutex *    mutex_;
+	Mutex     *mutex_;
 	WebServer *server_;
 };
 

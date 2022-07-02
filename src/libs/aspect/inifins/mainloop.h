@@ -46,8 +46,8 @@ public:
 	virtual bool thread_init_failed(Thread *thread) noexcept;
 
 private:
-	MainLoopEmployer *                   employer_;
-	BlockedTimingExecutor *              btexec_;
+	MainLoopEmployer                    *employer_;
+	BlockedTimingExecutor               *btexec_;
 	UniquenessConstraint<MainLoopAspect> mainloop_uc_;
 };
 

@@ -57,7 +57,7 @@ template <class ProdNodeClass>
 void
 find_or_create_node(fawkes::LockPtr<xn::Context> &openni,
                     XnProductionNodeType          type,
-                    ProdNodeClass *               node)
+                    ProdNodeClass                *node)
 {
 	XnStatus st;
 	if ((st = openni->FindExistingNode(type, *node)) != XN_STATUS_OK) {

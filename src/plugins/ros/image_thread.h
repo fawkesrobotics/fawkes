@@ -80,8 +80,8 @@ private:
 	std::map<std::string, PublisherInfo> pubs_;
 
 	image_transport::ImageTransport *it_;
-	fawkes::Time *                   last_update_;
-	fawkes::Time *                   now_;
+	fawkes::Time                    *last_update_;
+	fawkes::Time                    *now_;
 };
 
 #endif

@@ -46,8 +46,8 @@ NavGraphInteractiveThread::~NavGraphInteractiveThread()
 void
 NavGraphInteractiveThread::process_node_ori_feedback(
   const visualization_msgs::InteractiveMarkerFeedbackConstPtr &feedback,
-  const NodeMenu &                                             menu,
-  visualization_msgs::InteractiveMarker &                      int_marker)
+  const NodeMenu                                              &menu,
+  visualization_msgs::InteractiveMarker                       &int_marker)
 {
 	const std::shared_ptr<MenuHandler> &handler = menu.handler;
 	MenuHandler::EntryHandle entry_handle       = (MenuHandler::EntryHandle)feedback->menu_entry_id;

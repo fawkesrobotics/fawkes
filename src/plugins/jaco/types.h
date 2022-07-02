@@ -92,10 +92,10 @@ typedef std::list<RefPtr<jaco_target_t>> jaco_target_queue_t;
 typedef struct jaco_arm_struct
 {
 	jaco_arm_config_t config; /**< configuration for this arm */
-	fawkes::JacoArm * arm;    /**< pointer to actual JacoArm instance, controlling this arm */
-	JacoInterface *   iface;  /**< pointer to JacoInterface, assigned to this arm */
+	fawkes::JacoArm  *arm;    /**< pointer to actual JacoArm instance, controlling this arm */
+	JacoInterface    *iface;  /**< pointer to JacoInterface, assigned to this arm */
 
-	JacoGotoThread *    goto_thread;     /**< the GotoThread of this arm. */
+	JacoGotoThread     *goto_thread;     /**< the GotoThread of this arm. */
 	JacoOpenraveThread *openrave_thread; /**< the OpenraveThread of this arm. */
 
 	RefPtr<Mutex> target_mutex; /**< mutex, used for accessing the target_queue */
@@ -111,10 +111,10 @@ typedef struct jaco_arm_struct
 /// \brief Jaco struct containing all components required for a dual-arm setup
 typedef struct jaco_dual_arm_struct
 {
-	jaco_arm_t *                left;        /**< the struct with all the data for the left arm. */
-	jaco_arm_t *                right;       /**< the struct with all the data for the right arm. */
-	JacoBimanualInterface *     iface;       /**< interface used for coordinated manipulation. */
-	JacoBimanualGotoThread *    goto_thread; /**< GotoThread for coordinated manipulation. */
+	jaco_arm_t                 *left;        /**< the struct with all the data for the left arm. */
+	jaco_arm_t                 *right;       /**< the struct with all the data for the right arm. */
+	JacoBimanualInterface      *iface;       /**< interface used for coordinated manipulation. */
+	JacoBimanualGotoThread     *goto_thread; /**< GotoThread for coordinated manipulation. */
 	JacoBimanualOpenraveThread *openrave_thread; /**< OpenraveThread for coordinated manipulation. */
 } jaco_dual_arm_t;
 

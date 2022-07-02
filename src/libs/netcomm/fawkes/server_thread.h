@@ -53,7 +53,7 @@ public:
 	                          const std::string &listen_ipv4,
 	                          const std::string &listen_ipv6,
 	                          unsigned int       fawkes_port,
-	                          ThreadCollector *  thread_collector = 0);
+	                          ThreadCollector   *thread_collector = 0);
 	virtual ~FawkesNetworkServerThread();
 
 	virtual void loop();
@@ -64,7 +64,7 @@ public:
 	virtual void broadcast(FawkesNetworkMessage *msg);
 	virtual void broadcast(unsigned short int component_id,
 	                       unsigned short int msg_id,
-	                       void *             payload,
+	                       void              *payload,
 	                       unsigned int       payload_size);
 	virtual void broadcast(unsigned short int component_id, unsigned short int msg_id);
 
@@ -74,7 +74,7 @@ public:
 	virtual void send(unsigned int       to_clid,
 	                  unsigned short int component_id,
 	                  unsigned short int msg_id,
-	                  void *             payload,
+	                  void              *payload,
 	                  unsigned int       payload_size);
 	virtual void send(unsigned int                 to_clid,
 	                  unsigned short int           component_id,
@@ -95,7 +95,7 @@ protected:
 	}
 
 private:
-	ThreadCollector *                    thread_collector;
+	ThreadCollector                     *thread_collector;
 	unsigned int                         next_client_id;
 	std::vector<NetworkAcceptorThread *> acceptor_threads;
 

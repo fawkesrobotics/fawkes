@@ -47,9 +47,9 @@ class LaserOccupancyGrid : public OccupancyGrid
 {
 public:
 	LaserOccupancyGrid(Laser360Interface *laser,
-	                   Logger *           logger,
-	                   Configuration *    config,
-	                   tf::Transformer *  listener,
+	                   Logger            *logger,
+	                   Configuration     *config,
+	                   tf::Transformer   *listener,
 	                   int                width       = 150,
 	                   int                height      = 150,
 	                   int                cell_width  = 5,
@@ -99,7 +99,7 @@ private:
 	void validate_old_laser_points(cart_coord_2d_t pos_robot, cart_coord_2d_t pos_new_laser_point);
 
 	std::vector<LaserPoint> *transform_laser_points(std::vector<LaserPoint> &laser_points,
-	                                                tf::StampedTransform &   transform);
+	                                                tf::StampedTransform    &transform);
 
 	/** Integrate historical readings to the current occgrid. */
 	void integrate_old_readings(int                   mid_x,
@@ -128,8 +128,8 @@ private:
 	std::string      laser_frame_;
 	bool             cfg_write_spam_debug_;
 
-	Logger *                          logger_;
-	Laser360Interface *               if_laser_;
+	Logger                           *logger_;
+	Laser360Interface                *if_laser_;
 	std::shared_ptr<RoboShapeColli>   robo_shape_;   /**< my roboshape */
 	std::shared_ptr<ColliObstacleMap> obstacle_map_; /**< fast obstacle map */
 

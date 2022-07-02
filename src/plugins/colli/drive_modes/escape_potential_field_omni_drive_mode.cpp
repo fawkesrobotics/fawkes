@@ -37,7 +37,7 @@ namespace fawkes {
  * @param logger The fawkes logger
  * @param config The fawkes configuration
  */
-EscapePotentialFieldOmniDriveModule::EscapePotentialFieldOmniDriveModule(Logger *       logger,
+EscapePotentialFieldOmniDriveModule::EscapePotentialFieldOmniDriveModule(Logger        *logger,
                                                                          Configuration *config)
 : AbstractDriveMode(logger, config)
 {

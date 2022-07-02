@@ -53,9 +53,9 @@ namespace fawkes {
  * @param cell_height The height of a cell (in cm)
  */
 LaserOccupancyGrid::LaserOccupancyGrid(Laser360Interface *laser,
-                                       Logger *           logger,
-                                       Configuration *    config,
-                                       tf::Transformer *  listener,
+                                       Logger            *logger,
+                                       Configuration     *config,
+                                       tf::Transformer   *listener,
                                        int                width,
                                        int                height,
                                        int                cell_width,
@@ -422,7 +422,7 @@ LaserOccupancyGrid::update_occ_grid(int midX, int midY, float inc, float vx, flo
  */
 std::vector<LaserOccupancyGrid::LaserPoint> *
 LaserOccupancyGrid::transform_laser_points(std::vector<LaserOccupancyGrid::LaserPoint> &laserPoints,
-                                           tf::StampedTransform &                       transform)
+                                           tf::StampedTransform                        &transform)
 {
 	int                                          count_points = laserPoints.size();
 	std::vector<LaserOccupancyGrid::LaserPoint> *laserPointsTransformed =

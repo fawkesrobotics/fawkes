@@ -53,7 +53,7 @@ public:
 	}
 
 private:
-	Barrier *    barrier;
+	Barrier     *barrier;
 	unsigned int sleep_time;
 	string       pp;
 };

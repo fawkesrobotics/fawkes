@@ -47,8 +47,8 @@ replace_tokens(std::string &s)
 }
 
 inline bool
-verify_args(const std::vector<PLEXIL::Value> &                            args,
-            const std::string &                                           func,
+verify_args(const std::vector<PLEXIL::Value>                             &args,
+            const std::string                                            &func,
             const std::vector<std::pair<std::string, PLEXIL::ValueType>> &types)
 {
 	if (args.size() != types.size()) {

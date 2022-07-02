@@ -48,7 +48,7 @@ class BlackBoardInterfaceListMaintainer : public fawkes::BlackBoardInterfaceObse
 public:
 	BlackBoardInterfaceListMaintainer(const char *n,
 	                                  BlackBoard *bb,
-	                                  Logger *    l,
+	                                  Logger     *l,
 	                                  const char *type,
 	                                  const char *pattern);
 	virtual ~BlackBoardInterfaceListMaintainer();
@@ -71,9 +71,9 @@ private:
 	void conditional_close(fawkes::Interface *interface) noexcept;
 
 private:
-	BlackBoard *                          blackboard_;
-	Logger *                              logger_;
-	char *                                name_;
+	BlackBoard                           *blackboard_;
+	Logger                               *logger_;
+	char                                 *name_;
 	fawkes::LockList<fawkes::Interface *> ifs_;
 };
 

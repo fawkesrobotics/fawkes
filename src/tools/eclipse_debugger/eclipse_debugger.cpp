@@ -87,7 +87,7 @@ EclipseDebugger::on_connect()
 			debugger_if_->msgq_enqueue(cm);
 			sleep(1);
 			debugger_if_->read();
-			char *            host = debugger_if_->host();
+			char             *host = debugger_if_->host();
 			unsigned int      port = debugger_if_->port();
 			std::stringstream portstr;
 			portstr << port;

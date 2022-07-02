@@ -37,11 +37,11 @@ class Logger;
 class OpenPRSComm
 {
 public:
-	OpenPRSComm(const char *        local_name,
-	            const char *        hostname,
+	OpenPRSComm(const char         *local_name,
+	            const char         *hostname,
 	            unsigned short      port,
 	            OpenPRSServerProxy *server_proxy,
-	            Logger *            logger = NULL);
+	            Logger             *logger = NULL);
 	virtual ~OpenPRSComm();
 
 	/** Get OpenPRS local name.
@@ -89,7 +89,7 @@ private: // members
 	const std::string   name_;
 	int                 mp_socket_;
 	OpenPRSServerProxy *server_proxy_;
-	Logger *            logger_;
+	Logger             *logger_;
 
 	boost::asio::io_service               io_service_;
 	std::thread                           io_service_thread_;

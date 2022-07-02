@@ -1915,7 +1915,7 @@ NaoGuiGtkWindow::on_led_slider_changed(std::string iface_id, Gtk::Scale *scl)
 bool
 NaoGuiGtkWindow::on_led_slider_button_release(GdkEventButton *event,
                                               std::string     iface_id,
-                                              Gtk::Scale *    scl)
+                                              Gtk::Scale     *scl)
 {
 	if ((led_ifs.find(iface_id) != led_ifs.end()) && led_ifs[iface_id]->is_valid()) {
 		on_led_data_changed(led_ifs[iface_id]);

@@ -51,7 +51,7 @@ private:
 	unsigned char *buffer;
 	unsigned char *row_buffer;
 
-	FILE *                        infile;
+	FILE                         *infile;
 	int                           row_stride;
 	struct jpeg_decompress_struct cinfo;
 	struct jpeg_error_mgr         jerr;

@@ -75,11 +75,11 @@ using namespace fawkes;
  * @param scenario ID of the log scenario
  * @param start_time time to use as start time for the log
  */
-BBLoggerThread::BBLoggerThread(const char *  iface_uid,
-                               const char *  logdir,
+BBLoggerThread::BBLoggerThread(const char   *iface_uid,
+                               const char   *logdir,
                                bool          buffering,
                                bool          flushing,
-                               const char *  scenario,
+                               const char   *scenario,
                                fawkes::Time *start_time)
 : Thread("BBLoggerThread", Thread::OPMODE_WAITFORWAKEUP),
   BlackBoardInterfaceListener("BBLoggerThread(%s)", iface_uid)
@@ -348,7 +348,7 @@ BBLoggerThread::loop()
 bool
 BBLoggerThread::bb_interface_message_received(Interface *interface, Message *message) noexcept
 {
-	SwitchInterface::EnableSwitchMessage * enm;
+	SwitchInterface::EnableSwitchMessage  *enm;
 	SwitchInterface::DisableSwitchMessage *dism;
 
 	bool enabled = true;

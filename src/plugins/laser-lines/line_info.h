@@ -66,7 +66,7 @@ public:
 	fawkes::tf::Stamped<fawkes::tf::Point>
 	  base_point_odom; ///< last reference point (in odom frame) for line tracking
 	fawkes::tf::Transformer
-	  *         transformer;    ///< Transformer used to transform from input_frame_id_to odom
+             *transformer;    ///< Transformer used to transform from input_frame_id_to odom
 	std::string input_frame_id; ///< Input frame ID of raw line infos (base_laser usually)
 	std::string
 	  tracking_frame_id; ///< Track lines relative to this frame (e.g. odom helps compensate movement)
@@ -79,12 +79,12 @@ public:
 	std::string     plugin_name; ///< Plugin name of the calling class
 
 	TrackedLineInfo(fawkes::tf::Transformer *tfer,
-	                const std::string &      input_frame_id,
-	                const std::string &      tracking_frame_id,
+	                const std::string       &input_frame_id,
+	                const std::string       &tracking_frame_id,
 	                float                    cfg_switch_tolerance,
 	                unsigned int             cfg_moving_avg_len,
-	                fawkes::Logger *         logger,
-	                const std::string &      plugin_name);
+	                fawkes::Logger          *logger,
+	                const std::string       &plugin_name);
 
 	btScalar distance(const LineInfo &linfo) const;
 	void     update(LineInfo &new_linfo);

@@ -60,21 +60,21 @@ private:
 
 private:
 	// widgets
-	Gtk::ScrolledWindow *   image_list_scroll_;
-	Gtk::Viewport *         image_viewport_;
-	Gtk::AspectFrame *      save_box_;
-	Gtk::ComboBoxText *     save_type_;
+	Gtk::ScrolledWindow    *image_list_scroll_;
+	Gtk::Viewport          *image_viewport_;
+	Gtk::AspectFrame       *save_box_;
+	Gtk::ComboBoxText      *save_type_;
 	Gtk::FileChooserButton *save_filechooser_;
-	Gtk::CheckButton *      auto_save_;
-	Gtk::Button *           save_btn_;
-	Gtk::Statusbar *        statusbar_;
+	Gtk::CheckButton       *auto_save_;
+	Gtk::Button            *save_btn_;
+	Gtk::Statusbar         *statusbar_;
 
-	fawkes::AvahiThread *    avahi_thread_;
+	fawkes::AvahiThread     *avahi_thread_;
 	fawkes::AvahiDispatcher *avahi_dispatcher_;
 
 	firevision::FuseImageListWidget *img_list_widget_;
 
-	firevision::ImageWidget *  img_widget_;
+	firevision::ImageWidget   *img_widget_;
 	firevision::NetworkCamera *cam_;
 
 	std::map<std::string, std::string> host_service_map_;

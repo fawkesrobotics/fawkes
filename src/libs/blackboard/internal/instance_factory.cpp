@@ -80,7 +80,7 @@ BlackBoardInstanceFactory::new_interface_instance(const char *type, const char *
 		throw Exception("Interface ID '%s' too long, maximum length is %zu", type, INTERFACE_ID_SIZE_);
 	}
 
-	Module *    mod      = NULL;
+	Module     *mod      = NULL;
 	std::string filename = std::string("lib") + type + "." + mm_->get_module_file_extension();
 	try {
 		mod = mm_->open_module(filename.c_str());

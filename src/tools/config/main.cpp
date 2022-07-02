@@ -107,7 +107,7 @@ public:
 
 private:
 	FawkesNetworkClient *c;
-	Configuration *      config;
+	Configuration       *config;
 	bool                 quit;
 };
 
@@ -331,9 +331,9 @@ main(int argc, char **argv)
 		quiet = false;
 	}
 
-	FawkesNetworkClient * c       = NULL;
+	FawkesNetworkClient  *c       = NULL;
 	NetworkConfiguration *netconf = NULL;
-	Configuration *       config;
+	Configuration        *config;
 
 	if (config_file.empty()) {
 		c = new FawkesNetworkClient(host.c_str(), port);
@@ -433,7 +433,7 @@ main(int argc, char **argv)
 						}
 					}
 				} else if ((desired_type == "unsigned int") || (desired_type == "uint")) {
-					char *   endptr;
+					char    *endptr;
 					long int li = strtol(args[2], &endptr, 10);
 					if ((endptr[0] != 0) || (li < 0)) {
 						printf("ERROR: '%s' is not an unsigned int\n", args[2]);
@@ -445,7 +445,7 @@ main(int argc, char **argv)
 						}
 					}
 				} else if (desired_type == "int") {
-					char *   endptr;
+					char    *endptr;
 					long int li = strtol(args[2], &endptr, 10);
 					if (endptr[0] != 0) {
 						printf("ERROR: '%s' is not an int\n", args[2]);

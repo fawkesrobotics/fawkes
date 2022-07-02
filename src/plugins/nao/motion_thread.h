@@ -104,7 +104,7 @@ private:
 	AL::ALPtr<AL::ALThreadPool>  thread_pool_;
 
 	fawkes::HumanoidMotionInterface *hummot_if_;
-	fawkes::NaoSensorInterface *     sensor_if_;
+	fawkes::NaoSensorInterface      *sensor_if_;
 
 	int                   motion_task_id_;
 	int                   head_task_id_;

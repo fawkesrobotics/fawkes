@@ -174,7 +174,7 @@ RemoteBlackBoard::open_interface(const char *type,
                                  const char *identifier,
                                  const char *owner,
                                  bool        writer,
-                                 Interface * iface)
+                                 Interface  *iface)
 {
 	if (!fnc_->connected()) {
 		throw Exception("Cannot instantiate remote interface, connection is dead");

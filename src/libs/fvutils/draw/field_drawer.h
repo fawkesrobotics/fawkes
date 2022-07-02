@@ -69,7 +69,7 @@ protected:
 	unsigned int   _img_height;
 
 private: //Members
-	const FieldLines &  lines_;
+	const FieldLines   &lines_;
 	fawkes::field_pos_t own_position_, own_pos_est_;
 	float               head_yaw_;
 

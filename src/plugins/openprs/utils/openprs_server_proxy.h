@@ -41,7 +41,7 @@ public:
 	OpenPRSServerProxy(unsigned short     tcp_port,
 	                   const std::string &server_host,
 	                   unsigned short     server_port,
-	                   fawkes::Logger *   logger);
+	                   fawkes::Logger    *logger);
 	virtual ~OpenPRSServerProxy();
 
 	void transmit_command(const std::string &client_name, const std::string &command);
@@ -55,7 +55,7 @@ public:
 	static void        write_int_to_socket(boost::asio::ip::tcp::socket &socket, int i);
 	static void write_string_to_socket(boost::asio::ip::tcp::socket &socket, const std::string &str);
 	static void write_string_newline_to_socket(boost::asio::ip::tcp::socket &socket,
-	                                           const std::string &           str);
+	                                           const std::string            &str);
 
 private:
 	class Mapping
@@ -64,9 +64,9 @@ private:
 		/** Shortcut for shared pointer of session. */
 		typedef std::shared_ptr<Mapping> Ptr;
 		Mapping(boost::asio::io_service &io_service,
-		        const std::string &      server_host,
+		        const std::string       &server_host,
 		        unsigned short           server_port,
-		        fawkes::Logger *         logger);
+		        fawkes::Logger          *logger);
 		~Mapping();
 
 		void start();
@@ -76,7 +76,7 @@ private:
 		void transmit_command(const std::string &command);
 
 	private: // methods
-		void handle_resolve(const boost::system::error_code &        err,
+		void handle_resolve(const boost::system::error_code         &err,
 		                    boost::asio::ip::tcp::resolver::iterator endpoint_iterator);
 		void handle_connect(const boost::system::error_code &err);
 		void start_recv_client();
@@ -85,7 +85,7 @@ private:
 		void handle_recv_server(const boost::system::error_code &err);
 
 	private: // members
-		boost::asio::io_service &      io_service_;
+		boost::asio::io_service       &io_service_;
 		boost::asio::ip::tcp::resolver resolver_;
 
 		std::string    server_host_;
@@ -115,7 +115,7 @@ private:
 
 	std::string    server_host_;
 	unsigned short server_port_;
-	Logger *       logger_;
+	Logger        *logger_;
 
 	fawkes::LockList<Mapping::Ptr> mappings_;
 };

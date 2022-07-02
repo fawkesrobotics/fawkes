@@ -37,20 +37,20 @@
 class BlackboardComputable
 {
 public:
-	BlackboardComputable(RobotMemory *          robot_memory,
-	                     fawkes::BlackBoard *   blackboard,
-	                     fawkes::Logger *       logger,
+	BlackboardComputable(RobotMemory           *robot_memory,
+	                     fawkes::BlackBoard    *blackboard,
+	                     fawkes::Logger        *logger,
 	                     fawkes::Configuration *config);
 	virtual ~BlackboardComputable();
 
 private:
 	std::list<bsoncxx::document::value> compute_interfaces(const bsoncxx::document::view &query,
-	                                                       const std::string &            collection);
+	                                                       const std::string             &collection);
 
-	RobotMemory *       robot_memory_;
+	RobotMemory        *robot_memory_;
 	fawkes::BlackBoard *blackboard_;
-	fawkes::Logger *    logger_;
-	Computable *        computable;
+	fawkes::Logger     *logger_;
+	Computable         *computable;
 };
 
 #endif /* FAWKES_SRC_PLUGINS_ROBOT_MEMORY_COMPUTABLES_BLACKBOARD_COMPUTABLE_H_ */

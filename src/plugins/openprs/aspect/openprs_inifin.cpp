@@ -132,11 +132,11 @@ OpenPRSAspectIniFin::finalize(Thread *thread)
  * @param openprs_mp_proxy OpenPRS Message Passer proxy
  */
 void
-OpenPRSAspectIniFin::prepare(const std::string &            fawkes_host,
+OpenPRSAspectIniFin::prepare(const std::string             &fawkes_host,
                              unsigned short                 fawkes_port,
                              LockPtr<OpenPRSKernelManager> &openprs_kernel_mgr,
-                             OpenPRSServerProxy *           openprs_server_proxy,
-                             OpenPRSMessagePasserProxy *    openprs_mp_proxy)
+                             OpenPRSServerProxy            *openprs_server_proxy,
+                             OpenPRSMessagePasserProxy     *openprs_mp_proxy)
 {
 	fawkes_host_          = fawkes_host;
 	fawkes_port_          = fawkes_port;

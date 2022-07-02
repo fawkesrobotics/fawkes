@@ -35,14 +35,14 @@ namespace fawkes {
 class NavGraphSearchState : public fawkes::AStarState
 {
 public:
-	NavGraphSearchState(const fawkes::NavGraphNode &    node,
-	                    const fawkes::NavGraphNode &    goal,
-	                    fawkes::NavGraph *              map_graph,
+	NavGraphSearchState(const fawkes::NavGraphNode     &node,
+	                    const fawkes::NavGraphNode     &goal,
+	                    fawkes::NavGraph               *map_graph,
 	                    fawkes::NavGraphConstraintRepo *constraint_repo = NULL);
 
 	NavGraphSearchState(const fawkes::NavGraphNode &node,
 	                    const fawkes::NavGraphNode &goal,
-	                    fawkes::NavGraph *          map_graph,
+	                    fawkes::NavGraph           *map_graph,
 	                    navgraph::EstimateFunction  estimate_func,
 	                    navgraph::CostFunction      cost_func = NavGraphSearchState::euclidean_cost,
 	                    fawkes::NavGraphConstraintRepo *constraint_repo = NULL);
@@ -83,11 +83,11 @@ public:
 	}
 
 private:
-	NavGraphSearchState(const fawkes::NavGraphNode &    node,
-	                    const fawkes::NavGraphNode &    goal,
+	NavGraphSearchState(const fawkes::NavGraphNode     &node,
+	                    const fawkes::NavGraphNode     &goal,
 	                    double                          cost_sofar,
-	                    NavGraphSearchState *           parent_state,
-	                    fawkes::NavGraph *              map_graph,
+	                    NavGraphSearchState            *parent_state,
+	                    fawkes::NavGraph               *map_graph,
 	                    navgraph::EstimateFunction      estimate_func,
 	                    navgraph::CostFunction          cost_func,
 	                    fawkes::NavGraphConstraintRepo *constraint_repo = NULL);

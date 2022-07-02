@@ -59,7 +59,7 @@ public:
 
 private:
 	Camera *_v4l_cam;
-	char *  _device_name;
+	char   *_device_name;
 };
 
 } // end namespace firevision

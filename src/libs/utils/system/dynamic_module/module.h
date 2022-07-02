@@ -104,7 +104,7 @@ public:
 	virtual bool         notref();
 	virtual unsigned int get_ref_count();
 	virtual bool         has_symbol(const char *symbol_name);
-	virtual void *       get_symbol(const char *symbol_name);
+	virtual void        *get_symbol(const char *symbol_name);
 	virtual std::string  get_filename();
 	virtual std::string  get_base_filename();
 	virtual bool         operator==(const Module &cmod);
@@ -114,7 +114,7 @@ public:
 private:
 	static const char *FILE_EXTENSION;
 
-	void *       handle_;
+	void        *handle_;
 	std::string  filename_;
 	ModuleFlags  flags_;
 	bool         is_resident_;

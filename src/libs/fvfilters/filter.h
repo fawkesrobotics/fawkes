@@ -36,7 +36,7 @@ public:
 	virtual ~Filter();
 
 	virtual void set_src_buffer(unsigned char *buf,
-	                            ROI *          roi,
+	                            ROI           *roi,
 	                            orientation_t  ori        = ORI_HORIZONTAL,
 	                            unsigned int   buffer_num = 0);
 

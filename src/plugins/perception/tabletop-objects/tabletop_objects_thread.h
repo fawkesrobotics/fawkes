@@ -187,8 +187,8 @@ private:
 private:
 	void set_position(fawkes::Position3DInterface *iface,
 	                  bool                         is_visible,
-	                  const Eigen::Vector4f &      centroid = Eigen::Vector4f(0, 0, 0, 0),
-	                  const Eigen::Quaternionf &   rotation = Eigen::Quaternionf(1, 0, 0, 0));
+	                  const Eigen::Vector4f       &centroid = Eigen::Vector4f(0, 0, 0, 0),
+	                  const Eigen::Quaternionf    &rotation = Eigen::Quaternionf(1, 0, 0, 0));
 
 	CloudPtr simplify_polygon(CloudPtr polygon, float sqr_dist_threshold);
 	CloudPtr generate_table_model(const float length,
@@ -205,7 +205,7 @@ private:
 	                                PointType &br_p1p,
 	                                PointType &br_p2p);
 	bool     compute_bounding_box_scores(
-	      Eigen::Vector3f &                                                        cluster_dim,
+	      Eigen::Vector3f                                                         &cluster_dim,
 	      std::vector<Eigen::Vector3f, Eigen::aligned_allocator<Eigen::Vector3f>> &scores);
 	double compute_similarity(double d1, double d2);
 
@@ -228,7 +228,7 @@ private:
 	void            remove_high_centroids(Eigen::Vector4f table_centroid, CentroidMap centroids);
 	Eigen::Vector4f fit_cylinder(ColorCloudConstPtr     obj_in_base_frame,
 	                             Eigen::Vector4f const &centroid,
-	                             uint const &           centroid_i);
+	                             uint const            &centroid_i);
 	std::map<unsigned int, int> track_objects(
 	  std::vector<Eigen::Vector4f, Eigen::aligned_allocator<Eigen::Vector4f>> new_centroids);
 

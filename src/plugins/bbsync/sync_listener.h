@@ -33,15 +33,15 @@ class Logger;
 class SyncInterfaceListener : public fawkes::BlackBoardInterfaceListener
 {
 public:
-	SyncInterfaceListener(fawkes::Logger *    logger,
-	                      fawkes::Interface * reader,
-	                      fawkes::Interface * writer,
+	SyncInterfaceListener(fawkes::Logger     *logger,
+	                      fawkes::Interface  *reader,
+	                      fawkes::Interface  *writer,
 	                      fawkes::BlackBoard *reader_bb,
 	                      fawkes::BlackBoard *writer_bb);
 	virtual ~SyncInterfaceListener();
 
 	virtual bool bb_interface_message_received(fawkes::Interface *interface,
-	                                           fawkes::Message *  message) noexcept;
+	                                           fawkes::Message   *message) noexcept;
 	virtual void bb_interface_data_refreshed(fawkes::Interface *interface) noexcept;
 
 private:

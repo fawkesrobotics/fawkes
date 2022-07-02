@@ -92,7 +92,7 @@ public:
 	                        unsigned int       num_measurements,
 	                        float              compare_distance,
 	                        float              margin,
-	                        BlackBoard *       blackboard,
+	                        BlackBoard        *blackboard,
 	                        Laser360Interface *laser360,
 	                        Laser720Interface *laser720)
 	: BlackBoardInterfaceListener("LaserDeadSpotCalibrator")
@@ -392,7 +392,7 @@ private:
 		printf("\r%3u samples remaining...", num_measurements_ - cur_measurement_);
 		fflush(stdout);
 
-		float *      distances     = NULL;
+		float       *distances     = NULL;
 		unsigned int num_distances = 0;
 		if (lowres_calibrate_) {
 			laser360_->read();
@@ -419,7 +419,7 @@ private:
 	}
 
 private:
-	BlackBoard *       blackboard_;
+	BlackBoard        *blackboard_;
 	Laser360Interface *laser360_;
 	Laser720Interface *laser720_;
 	WaitCondition      finish_waitcond_;
@@ -447,7 +447,7 @@ main(int argc, char **argv)
 		exit(0);
 	}
 
-	char *             host             = (char *)"localhost";
+	char              *host             = (char *)"localhost";
 	unsigned short int port             = FAWKES_TCP_PORT;
 	long int           num_measurements = DEFAULT_NUM_MEASUREMENTS;
 	long int           wait_time        = DEFAULT_WAIT_TIME;
@@ -516,8 +516,8 @@ main(int argc, char **argv)
 	}
 	bool free_host = argp.parse_hostport("r", &host, &port);
 
-	FawkesNetworkClient * client;
-	BlackBoard *          blackboard;
+	FawkesNetworkClient  *client;
+	BlackBoard           *blackboard;
 	NetworkConfiguration *netconf;
 
 	try {

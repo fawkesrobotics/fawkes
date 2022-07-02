@@ -142,49 +142,49 @@ private:
 	fawkes::AvahiDispatcher *m_avahi_dispatcher;
 
 	// widgets
-	Gtk::Window *           m_wnd_main;
-	Gtk::Dialog *           m_dlg_open_shm;
-	Gtk::Dialog *           m_dlg_open_fuse;
-	Gtk::CheckButton *      m_ckb_fuse_jpeg;
-	Gtk::CheckButton *      m_ckb_cont_trans;
-	Gtk::SpinButton *       m_spb_update_time;
+	Gtk::Window            *m_wnd_main;
+	Gtk::Dialog            *m_dlg_open_shm;
+	Gtk::Dialog            *m_dlg_open_fuse;
+	Gtk::CheckButton       *m_ckb_fuse_jpeg;
+	Gtk::CheckButton       *m_ckb_cont_trans;
+	Gtk::SpinButton        *m_spb_update_time;
 	Gtk::FileChooserDialog *m_fcd_open_image;
 	Gtk::FileChooserDialog *m_fcd_save_image;
-	Gtk::ToolButton *       m_tbtn_open_file;
-	Gtk::ToolButton *       m_tbtn_open_folder;
-	Gtk::ToolButton *       m_tbtn_open_shm;
-	Gtk::ToolButton *       m_tbtn_open_fuse;
-	Gtk::ToolButton *       m_tbtn_update;
-	Gtk::ToolButton *       m_tbtn_save;
-	Gtk::ToolButton *       m_tbtn_close_camera;
-	Gtk::ToolButton *       m_tbtn_exit;
-	Gtk::Image *            m_img_image;
-	Gtk::EventBox *         m_evt_image;
-	Gtk::TreeView *         m_trv_shm_image_ids;
-	Gtk::TreeView *         m_trv_fuse_services;
-	Gtk::Statusbar *        m_stb_status;
+	Gtk::ToolButton        *m_tbtn_open_file;
+	Gtk::ToolButton        *m_tbtn_open_folder;
+	Gtk::ToolButton        *m_tbtn_open_shm;
+	Gtk::ToolButton        *m_tbtn_open_fuse;
+	Gtk::ToolButton        *m_tbtn_update;
+	Gtk::ToolButton        *m_tbtn_save;
+	Gtk::ToolButton        *m_tbtn_close_camera;
+	Gtk::ToolButton        *m_tbtn_exit;
+	Gtk::Image	           *m_img_image;
+	Gtk::EventBox          *m_evt_image;
+	Gtk::TreeView          *m_trv_shm_image_ids;
+	Gtk::TreeView          *m_trv_fuse_services;
+	Gtk::Statusbar         *m_stb_status;
 
 	// color training widgets
-	Gtk::ComboBox *    m_cmb_ct_type;
+	Gtk::ComboBox     *m_cmb_ct_type;
 	Gtk::ToggleButton *m_btn_ct_start;
 	Gtk::ToggleButton *m_btn_ct_seg;
-	Gtk::SpinButton *  m_spbtn_depth;
-	Gtk::SpinButton *  m_spbtn_width;
-	Gtk::SpinButton *  m_spbtn_height;
+	Gtk::SpinButton   *m_spbtn_depth;
+	Gtk::SpinButton   *m_spbtn_width;
+	Gtk::SpinButton   *m_spbtn_height;
 
 	// mirror calibration widgets
 	Gtk::FileChooserDialog *m_fcd_mc_load_mask;
 	Gtk::FileChooserDialog *m_fcd_mc_save;
 	Gtk::FileChooserDialog *m_fcd_mc_load;
-	Gtk::Button *           m_btn_mc_load_mask;
-	Gtk::ToggleButton *     m_btn_mc_set_center;
-	Gtk::Button *           m_btn_mc_memorize;
-	Gtk::Button *           m_btn_mc_simulate_clicks;
-	Gtk::Scale *            m_scl_mc_line;
-	Gtk::Button *           m_btn_mc_load;
-	Gtk::Button *           m_btn_mc_save;
-	Gtk::Entry *            m_ent_mc_dist;
-	Gtk::Entry *            m_ent_mc_ori;
+	Gtk::Button            *m_btn_mc_load_mask;
+	Gtk::ToggleButton      *m_btn_mc_set_center;
+	Gtk::Button            *m_btn_mc_memorize;
+	Gtk::Button            *m_btn_mc_simulate_clicks;
+	Gtk::Scale	           *m_scl_mc_line;
+	Gtk::Button            *m_btn_mc_load;
+	Gtk::Button            *m_btn_mc_save;
+	Gtk::Entry	           *m_ent_mc_dist;
+	Gtk::Entry	           *m_ent_mc_ori;
 
 	ShmColumnRecord              m_shm_columns;
 	Glib::RefPtr<Gtk::ListStore> m_shm_list_store;
@@ -193,8 +193,8 @@ private:
 	Glib::RefPtr<Gtk::TreeStore> m_fuse_tree_store;
 
 	firevision::SharedMemoryImageBuffer *m_shm_buffer;
-	firevision::Camera *                 m_camera;
-	firevision::Writer *                 m_img_writer;
+	firevision::Camera                  *m_camera;
+	firevision::Writer                  *m_img_writer;
 
 	ImageSource m_img_src;
 	OpMode      m_op_mode;
@@ -220,8 +220,8 @@ private:
 #ifdef HAVE_MIRROR_CALIB
 	firevision::MirrorCalibTool *m_calib_tool;
 #endif
-	ColorTrainWidget *               m_ctw;
-	FuseTransferWidget *             m_ftw;
+	ColorTrainWidget                *m_ctw;
+	FuseTransferWidget              *m_ftw;
 	firevision::FuseImageListWidget *m_filw;
 
 	fawkes::AvahiThread *m_avahi_thread;

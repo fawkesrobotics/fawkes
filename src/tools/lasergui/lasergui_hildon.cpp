@@ -293,9 +293,9 @@ protected:
 
 private:
 	AllemaniACsAtHomeCairoRobotDrawer athome_drawer_;
-	BlackBoard *                      bb_;
-	Laser360Interface *               laser_if_;
-	InterfaceDispatcher *             ifd_;
+	BlackBoard                       *bb_;
+	Laser360Interface                *laser_if_;
+	InterfaceDispatcher              *ifd_;
 	ConnectionDispatcher              connection_dispatcher_;
 
 	Gtk::Image             img_lines_;

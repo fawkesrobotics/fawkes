@@ -392,7 +392,7 @@ AmclThread::init()
 	pos3d_if_->set_frame(global_frame_id_.c_str());
 	pos3d_if_->write();
 
-	char *      map_file = strdup(cfg_map_file_.c_str());
+	char	     *map_file = strdup(cfg_map_file_.c_str());
 	std::string map_name = basename(map_file);
 	free(map_file);
 	std::string::size_type pos;
@@ -889,11 +889,11 @@ AmclThread::finalize()
 
 bool
 AmclThread::get_odom_pose(tf::Stamped<tf::Pose> &odom_pose,
-                          double &               x,
-                          double &               y,
-                          double &               yaw,
-                          const fawkes::Time *   t,
-                          const std::string &    f)
+                          double                &x,
+                          double                &y,
+                          double                &yaw,
+                          const fawkes::Time    *t,
+                          const std::string     &f)
 {
 	// Get the robot's pose
 	tf::Stamped<tf::Pose> ident(tf::Transform(tf::Quaternion(0, 0, 0, 1), tf::Vector3(0, 0, 0)),
@@ -1048,10 +1048,10 @@ AmclThread::uniform_pose_generator(void *arg)
 }
 
 void
-AmclThread::set_initial_pose(const std::string & frame_id,
+AmclThread::set_initial_pose(const std::string  &frame_id,
                              const fawkes::Time &msg_time,
-                             const tf::Pose &    pose,
-                             const double *      covariance)
+                             const tf::Pose     &pose,
+                             const double       *covariance)
 {
 	MutexLocker lock(conf_mutex_);
 	if (frame_id == "") {

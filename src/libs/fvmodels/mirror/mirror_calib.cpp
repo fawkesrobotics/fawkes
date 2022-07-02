@@ -114,7 +114,7 @@ private:
 	size_t         buflen_;
 	int            width_;
 	int            height_;
-	unsigned int * refcount_;
+	unsigned int  *refcount_;
 
 public:
 	/** Constructor.
@@ -337,7 +337,7 @@ public:
 class MirrorCalibTool::CartesianImage
 {
 private:
-	unsigned char *      buf_;
+	unsigned char       *buf_;
 	const int            width_;
 	const int            height_;
 	const PixelPoint     center_;
@@ -351,7 +351,7 @@ public:
    * @param center The center of the image from the robot's point of view; i.e.
    *               the center of the cone mirror.
    * @param mask The mask that indicates which pixels should be ignored. */
-	CartesianImage(const StepResult &   res,
+	CartesianImage(const StepResult    &res,
 	               PolarAngle           phi,
 	               PixelPoint           center,
 	               const unsigned char *mask = 0)
@@ -389,7 +389,7 @@ public:
 	               int                  width,
 	               int                  height,
 	               PolarAngle           phi,
-	               const PixelPoint &   center)
+	               const PixelPoint    &center)
 	: buf_(const_cast<unsigned char *>(buf)),
 	  width_(width),
 	  height_(height),
@@ -406,7 +406,7 @@ public:
    * @param phi The angle by which the image is rotated counter-clockwise.
    * @param center The center of the image from the robot's point of view; i.e.
    *               the center of the cone mirror. */
-	CartesianImage(unsigned char *   buf,
+	CartesianImage(unsigned char    *buf,
 	               int               width,
 	               int               height,
 	               PolarAngle        phi,
@@ -1019,7 +1019,7 @@ private:
 	StepResultList results_;
 	MarkList       premarks_;
 	MarkList       marks_;
-	unsigned int * refcount_;
+	unsigned int  *refcount_;
 }; // Image
 
 /** Constructor. */
@@ -1159,7 +1159,7 @@ MirrorCalibTool::apply_sobel(unsigned char *src,
                              int            height,
                              orientation_t  ori)
 {
-	ROI *       roi = ROI::full_image(width, height);
+	ROI        *roi = ROI::full_image(width, height);
 	FilterSobel filter;
 	filter.set_src_buffer(src, roi, ori, 0);
 	filter.set_dst_buffer(dst, roi);
@@ -1174,7 +1174,7 @@ MirrorCalibTool::apply_sobel(unsigned char *src,
 void
 MirrorCalibTool::apply_sharpen(unsigned char *src, unsigned char *dst, int width, int height)
 {
-	ROI *         roi = ROI::full_image(width, height);
+	ROI          *roi = ROI::full_image(width, height);
 	FilterSharpen filter;
 	filter.set_src_buffer(src, roi, 0);
 	filter.set_dst_buffer(dst, roi);
@@ -1190,7 +1190,7 @@ MirrorCalibTool::apply_sharpen(unsigned char *src, unsigned char *dst, int width
 void
 MirrorCalibTool::apply_median(unsigned char *src, unsigned char *dst, int width, int height, int i)
 {
-	ROI *        roi = ROI::full_image(width, height);
+	ROI         *roi = ROI::full_image(width, height);
 	FilterMedian filter(i);
 	filter.set_src_buffer(src, roi, 0);
 	filter.set_dst_buffer(dst, roi);
@@ -1205,7 +1205,7 @@ MirrorCalibTool::apply_median(unsigned char *src, unsigned char *dst, int width,
 void
 MirrorCalibTool::apply_min(unsigned char *src, unsigned char *dst, int width, int height)
 {
-	ROI *     roi = ROI::full_image(width, height);
+	ROI	    *roi = ROI::full_image(width, height);
 	FilterMin filter;
 	filter.set_src_buffer(src, roi, 0);
 	filter.set_dst_buffer(dst, roi);
@@ -1225,7 +1225,7 @@ MirrorCalibTool::apply_or(unsigned char *src1,
                           int            width,
                           int            height)
 {
-	ROI *    roi = ROI::full_image(width, height);
+	ROI     *roi = ROI::full_image(width, height);
 	FilterOr filter;
 	filter.set_src_buffer(src1, roi, 0);
 	filter.set_src_buffer(src2, roi, 1);
@@ -1275,11 +1275,11 @@ MirrorCalibTool::get_state_description() const
  * @return mark list
  */
 MirrorCalibTool::MarkList
-MirrorCalibTool::premark(const StepResult &   prev,
+MirrorCalibTool::premark(const StepResult    &prev,
                          const unsigned char *yuv_mask,
-                         StepResult &         result,
+                         StepResult          &result,
                          PolarAngle           phi,
-                         const PixelPoint &   center)
+                         const PixelPoint    &center)
 {
 	const ConvexPolygon empty_polygon;
 	return premark(empty_polygon, prev, yuv_mask, result, phi, center);
@@ -1290,11 +1290,11 @@ MirrorCalibTool::premark(const StepResult &   prev,
  */
 MirrorCalibTool::MarkList
 MirrorCalibTool::premark(const ConvexPolygon &polygon,
-                         const StepResult &   prev,
+                         const StepResult    &prev,
                          const unsigned char *yuv_mask,
-                         StepResult &         result,
+                         StepResult          &result,
                          PolarAngle           phi,
-                         const PixelPoint &   center)
+                         const PixelPoint    &center)
 {
 	const CartesianImage prev_img(prev, phi, center, yuv_mask);
 	CartesianImage       res_img(result, phi, center, yuv_mask);
@@ -1420,11 +1420,11 @@ MirrorCalibTool::determine_marks(const HoleList &holes)
 
 /** Sets marks between all holes. The last step of marking. */
 MirrorCalibTool::MarkList
-MirrorCalibTool::mark(const MarkList &     premarks,
+MirrorCalibTool::mark(const MarkList      &premarks,
                       const unsigned char *yuv_mask,
-                      StepResult &         result,
+                      StepResult          &result,
                       PolarAngle           phi,
-                      const PixelPoint &   center)
+                      const PixelPoint    &center)
 {
 	std::cout << "Premarked places: " << premarks.size() << std::endl;
 	HoleList holes = search_holes(premarks);
@@ -1510,7 +1510,7 @@ MirrorCalibTool::next_step()
 	if (state_.image_index >= source_images_.size()) {
 		return;
 	}
-	Image &    src_img = source_images_[state_.image_index];
+	Image     &src_img = source_images_[state_.image_index];
 	StepResult result(src_img.buflen(), src_img.width(), src_img.height());
 	switch (state_.step) {
 	case SHARPENING: {
@@ -1522,7 +1522,7 @@ MirrorCalibTool::next_step()
 		goto_next_state();
 		return;
 	case EDGE_DETECTION: {
-		StepResult &        prev   = src_img.result(0);
+		StepResult         &prev   = src_img.result(0);
 		const int           offset = (src_img.results().size() - 1) % ORIENTATION_COUNT;
 		const orientation_t ori    = static_cast<orientation_t>(ORI_DEG_0 + offset);
 		apply_sobel(prev.yuv_buffer(), result.yuv_buffer(), prev.width(), prev.height(), ori);
@@ -1614,7 +1614,7 @@ MirrorCalibTool::next_step()
 			StepResultList results = it->results();
 			results.erase(results.begin() + 1, results.end());
 
-			const Image &    src_img                           = *it;
+			const Image     &src_img                           = *it;
 			const PolarAngle ori                               = src_img.ori();
 			MarkList         marks                             = src_img.marks();
 			mark_map_[imageRotationToRelativeOrientation(ori)] = marks;
@@ -1629,7 +1629,7 @@ MirrorCalibTool::next_step()
 		for (MarkMap::const_iterator map_iter = mark_map_.begin(); map_iter != mark_map_.end();
 		     map_iter++) {
 			const PolarAngle phi  = map_iter->first;
-			const MarkList & list = map_iter->second;
+			const MarkList  &list = map_iter->second;
 			printf("%3.f: ", rad2deg(phi));
 			for (MarkList::const_iterator list_iter = list.begin(); list_iter != list.end();
 			     list_iter++) {
@@ -1663,7 +1663,7 @@ MirrorCalibTool::calculate_center(const ImageList &images)
 	int x = 0;
 	int y = 0;
 	for (ImageList::const_iterator it = images.begin(); it != images.end(); it++) {
-		const Image &        image    = *it;
+		const Image         &image    = *it;
 		const PolarRadius    radius   = image.marks().at(0);
 		const unsigned char *null_buf = 0;
 		const CartesianImage cart_image(null_buf, image.width(), image.height(), image.ori());
@@ -1868,8 +1868,8 @@ MirrorCalibTool::generate(int width, int height, const PixelPoint &center, const
 			assert(0.0 <= weight1 && weight1 <= 1.0);
 			assert(0.0 <= weight2 && weight2 <= 1.0);
 			assert(1.0 - 10e-5 < weight1 + weight2 && weight1 + weight2 < 1.0 + 10e-5);
-			const MarkList &   marks1 = mark_map.at(nearest_neighbors.first);
-			const MarkList &   marks2 = mark_map.at(nearest_neighbors.second);
+			const MarkList    &marks1 = mark_map.at(nearest_neighbors.first);
+			const MarkList    &marks2 = mark_map.at(nearest_neighbors.second);
 			const RealDistance dist1  = interpolate(cp.length(), marks1);
 			const RealDistance dist2  = interpolate(cp.length(), marks2);
 #if 0
@@ -1950,7 +1950,7 @@ void
 MirrorCalibTool::save(const char *filename)
 {
 	if (state_.step == DONE) {
-		const Image &    src_img = source_images_[state_.image_index];
+		const Image     &src_img = source_images_[state_.image_index];
 		const PixelPoint center(img_center_x_, img_center_y_);
 		Bulb             bulb = generate(src_img.width(), src_img.height(), center, mark_map_);
 		bulb.save(filename);
@@ -1997,7 +1997,7 @@ void
 MirrorCalibTool::draw_mark_lines(unsigned char *yuv_buffer)
 {
 	for (ImageList::const_iterator it = source_images_.begin(); it != source_images_.end(); it++) {
-		const Image &  src_img = *it;
+		const Image   &src_img = *it;
 		CartesianImage img(yuv_buffer,
 		                   src_img.width(),
 		                   src_img.height(),

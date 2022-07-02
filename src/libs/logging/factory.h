@@ -43,8 +43,8 @@ class MultiLogger;
 class LoggerFactory
 {
 public:
-	static Logger *     instance(const char *type, const char *as);
-	static MultiLogger *multilogger_instance(const char *     as,
+	static Logger      *instance(const char *type, const char *as);
+	static MultiLogger *multilogger_instance(const char      *as,
 	                                         Logger::LogLevel default_ll = Logger::LL_DEBUG);
 
 	/** Get typed instance of logger.
@@ -68,7 +68,7 @@ L *
 LoggerFactory::instance(const char *type, const char *as)
 {
 	Logger *l  = LoggerFactory::instance(type, as);
-	L *     tl = dynamic_cast<L *>(l);
+	L      *tl = dynamic_cast<L *>(l);
 	if (tl == NULL) {
 		throw TypeMismatchException("Named type %s is not template type", type);
 	}

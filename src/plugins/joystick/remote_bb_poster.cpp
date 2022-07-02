@@ -38,9 +38,9 @@ using namespace fawkes;
  * @param port remote bb port to connect to
  * @param logger logger
  */
-JoystickRemoteBlackBoardPoster::JoystickRemoteBlackBoardPoster(const char *       host,
+JoystickRemoteBlackBoardPoster::JoystickRemoteBlackBoardPoster(const char        *host,
                                                                unsigned short int port,
-                                                               Logger *           logger)
+                                                               Logger            *logger)
 : logger_(logger)
 {
 	bb_ = new RemoteBlackBoard(host, port);

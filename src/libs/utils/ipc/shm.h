@@ -55,12 +55,12 @@ public:
 	static const unsigned int MagicTokenSize;
 	static const short        MaxNumConcurrentReaders;
 
-	SharedMemory(const char *        magic_token,
+	SharedMemory(const char         *magic_token,
 	             SharedMemoryHeader *header,
 	             bool                is_read_only,
 	             bool                create,
 	             bool                destroy_on_delete,
-	             const char *        registry_name = 0);
+	             const char         *registry_name = 0);
 
 	SharedMemory(const SharedMemory &s);
 
@@ -74,7 +74,7 @@ public:
 	bool         is_valid() const;
 	bool         is_creator() const;
 	bool         is_protected() const;
-	void *       memptr() const;
+	void        *memptr() const;
 	size_t       data_size() const;
 	int          shmem_id() const;
 	unsigned int num_attached() const;
@@ -93,20 +93,20 @@ public:
 	void *ptr(void *addr) const;
 	void *addr(void *ptr) const;
 
-	static void list(const char *        magic_token,
+	static void list(const char         *magic_token,
 	                 SharedMemoryHeader *header,
 	                 SharedMemoryLister *lister,
-	                 const char *        registry_name = 0);
+	                 const char         *registry_name = 0);
 
-	static void erase(const char *        magic_token,
+	static void erase(const char         *magic_token,
 	                  SharedMemoryHeader *header,
 	                  SharedMemoryLister *lister        = 0,
-	                  const char *        registry_name = 0);
+	                  const char         *registry_name = 0);
 
-	static void erase_orphaned(const char *        magic_token,
+	static void erase_orphaned(const char         *magic_token,
 	                           SharedMemoryHeader *header,
 	                           SharedMemoryLister *lister        = 0,
-	                           const char *        registry_name = 0);
+	                           const char         *registry_name = 0);
 
 	static bool
 	exists(const char *magic_token, SharedMemoryHeader *header, const char *registry_name = 0);
@@ -121,24 +121,24 @@ public:
 		SharedMemoryIterator();
 		SharedMemoryIterator(const SharedMemoryIterator &shmit);
 		SharedMemoryIterator(std::list<SharedMemoryRegistry::SharedMemID> ids,
-		                     SharedMemoryHeader *                         header);
+		                     SharedMemoryHeader                          *header);
 		~SharedMemoryIterator();
 
-		SharedMemoryIterator &    operator++();        // prefix
+		SharedMemoryIterator     &operator++();        // prefix
 		SharedMemoryIterator      operator++(int inc); // postfix
-		SharedMemoryIterator &    operator+(unsigned int i);
-		SharedMemoryIterator &    operator+=(unsigned int i);
+		SharedMemoryIterator     &operator+(unsigned int i);
+		SharedMemoryIterator     &operator+=(unsigned int i);
 		bool                      operator==(const SharedMemoryIterator &s) const;
 		bool                      operator!=(const SharedMemoryIterator &s) const;
 		const SharedMemoryHeader *operator*() const;
-		SharedMemoryIterator &    operator=(const SharedMemoryIterator &shmit);
+		SharedMemoryIterator     &operator=(const SharedMemoryIterator &shmit);
 
 		const char *magic_token() const;
 		int         shmid() const;
 		int         semaphore() const;
 		size_t      segmsize() const;
 		size_t      segmnattch() const;
-		void *      databuf() const;
+		void       *databuf() const;
 
 	private:
 		void attach();
@@ -148,9 +148,9 @@ public:
 		std::list<SharedMemoryRegistry::SharedMemID>           ids_;
 		std::list<SharedMemoryRegistry::SharedMemID>::iterator id_it_;
 		int                                                    cur_shmid_;
-		SharedMemoryHeader *                                   header_;
-		void *                                                 shm_buf_;
-		void *                                                 data_buf_;
+		SharedMemoryHeader                                    *header_;
+		void                                                  *shm_buf_;
+		void                                                  *data_buf_;
 		int                                                    semaphore_;
 		size_t                                                 segmsize_;
 		size_t                                                 segmnattch_;
@@ -179,22 +179,22 @@ protected:
 	void attach();
 	void free();
 
-	void *                 _memptr;
+	void                  *_memptr;
 	size_t                 _mem_size;
 	size_t                 _data_size;
-	SharedMemoryHeader *   _header;
+	SharedMemoryHeader    *_header;
 	bool                   _is_read_only;
 	bool                   _destroy_on_delete;
 	bool                   _should_create;
-	char *                 _magic_token;
-	char *                 _shm_magic_token;
+	char                  *_magic_token;
+	char                  *_shm_magic_token;
 	SharedMemory_header_t *_shm_header;
-	void *                 _shm_upper_bound;
+	void                  *_shm_upper_bound;
 	long unsigned int      _shm_offset;
 
 private:
 	SharedMemoryRegistry *shm_registry_;
-	char *                registry_name_;
+	char                 *registry_name_;
 
 	void *shared_mem_;
 	int   shared_mem_id_;

@@ -259,8 +259,8 @@ BehaviorEnginePlexilAdapter::format_skillstring(const std::vector<PLEXIL::Value>
 }
 
 std::string
-BehaviorEnginePlexilAdapter::map_skillstring(const std::string &               name,
-                                             const skill_config &              skill_config,
+BehaviorEnginePlexilAdapter::map_skillstring(const std::string                &name,
+                                             const skill_config               &skill_config,
                                              const std::vector<PLEXIL::Value> &values)
 {
 	if (skill_config.args.size() != values.size()) {

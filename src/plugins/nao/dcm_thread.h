@@ -71,9 +71,9 @@ protected:
 private:
 	void                     dcm_callback();
 	void                     read_values();
-	void                     update_interfaces(fawkes::NaoJointPositionInterface * joint_pos_if,
+	void                     update_interfaces(fawkes::NaoJointPositionInterface  *joint_pos_if,
 	                                           fawkes::NaoJointStiffnessInterface *joint_stiffness_if,
-	                                           fawkes::NaoSensorInterface *        sensor_if);
+	                                           fawkes::NaoSensorInterface         *sensor_if);
 	void                     process_messages();
 	std::vector<std::string> parse_servo_bitfield(unsigned int servos);
 
@@ -96,12 +96,12 @@ private:
 	int                       dcm_time_;
 	fawkes::LockVector<float> values_;
 
-	fawkes::NaoJointPositionInterface * joint_pos_highfreq_if_;
-	fawkes::NaoJointPositionInterface * joint_pos_if_;
+	fawkes::NaoJointPositionInterface  *joint_pos_highfreq_if_;
+	fawkes::NaoJointPositionInterface  *joint_pos_if_;
 	fawkes::NaoJointStiffnessInterface *joint_stiffness_highfreq_if_;
 	fawkes::NaoJointStiffnessInterface *joint_stiffness_if_;
-	fawkes::NaoSensorInterface *        sensor_highfreq_if_;
-	fawkes::NaoSensorInterface *        sensor_if_;
+	fawkes::NaoSensorInterface         *sensor_highfreq_if_;
+	fawkes::NaoSensorInterface         *sensor_if_;
 
 	uint8_t                                      robot_version_[4];
 	fawkes::NaoJointPositionInterface::RobotType robot_type_;

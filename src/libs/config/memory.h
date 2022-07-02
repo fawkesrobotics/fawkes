@@ -66,7 +66,7 @@ public:
 	virtual std::vector<int>          get_ints(const char *path);
 	virtual std::vector<bool>         get_bools(const char *path);
 	virtual std::vector<std::string>  get_strings(const char *path);
-	virtual ValueIterator *           get_value(const char *path);
+	virtual ValueIterator            *get_value(const char *path);
 	virtual std::string               get_comment(const char *path);
 	virtual std::string               get_default_comment(const char *path);
 

@@ -248,8 +248,8 @@ public:
 	}
 
 private:
-	T_CppObject *  cpp_object_;
-	mutable int *  ref_count_;
+	T_CppObject   *cpp_object_;
+	mutable int   *ref_count_;
 	mutable Mutex *ref_mutex_;
 };
 
@@ -358,8 +358,8 @@ inline void
 RefPtr<T_CppObject>::swap(RefPtr<T_CppObject> &other)
 {
 	T_CppObject *const temp       = cpp_object_;
-	int *              temp_count = ref_count_;
-	Mutex *            temp_mutex = ref_mutex_;
+	int               *temp_count = ref_count_;
+	Mutex             *temp_mutex = ref_mutex_;
 
 	cpp_object_ = other.cpp_object_;
 	ref_count_  = other.ref_count_;

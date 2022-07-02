@@ -47,11 +47,11 @@
 extern "C" {
 typedef Slist *List_Envar;
 List_Envar     global_var_list;
-Shash *        id_hash;
+Shash         *id_hash;
 
 typedef struct type Type;
-typedef Slist *     TypeList;
-typedef Slist *     SymList;
+typedef Slist      *TypeList;
+typedef Slist      *SymList;
 Symbol              wait_sym;
 
 /* type de Variable */
@@ -60,15 +60,15 @@ typedef enum { LOGICAL_VARIABLE, PROGRAM_VARIABLE } Variable_Type;
 struct envar
 {                           /* Un envar */
 	Symbol             name;  /* son name */
-	Term *             value; /* le term sur lequel elle pointe */
-	Type *             unif_type;
+	Term              *value; /* le term sur lequel elle pointe */
+	Type              *unif_type;
 	Variable_Type type BITFIELDS( : 8); /* Le type de la variable */
 };
 
 struct type
 {
 	Symbol   name;
-	Type *   father;
+	Type    *father;
 	TypeList sur_types; /* Plus itself */
 	SymList  elts;
 };

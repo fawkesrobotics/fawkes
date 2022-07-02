@@ -54,9 +54,9 @@ using namespace std;
  *  @param config The network config to read from and write the time offset to
  *  @param config_path The config path to read from and write the time offset to
  */
-TimeOffsetCalibration::TimeOffsetCalibration(LaserInterface *      laser,
-                                             MotorInterface *      motor,
-                                             tf::Transformer *     tf_transformer,
+TimeOffsetCalibration::TimeOffsetCalibration(LaserInterface       *laser,
+                                             MotorInterface       *motor,
+                                             tf::Transformer      *tf_transformer,
                                              NetworkConfiguration *config,
                                              string                config_path)
 : LaserCalibration(laser, tf_transformer, config, config_path),

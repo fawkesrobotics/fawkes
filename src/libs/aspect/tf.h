@@ -54,9 +54,9 @@ public:
 	TransformAspect(Mode mode = ONLY_LISTENER, const char *frame_id = 0);
 	virtual ~TransformAspect();
 
-	void init_TransformAspect(BlackBoard *     blackboard,
+	void init_TransformAspect(BlackBoard      *blackboard,
 	                          tf::Transformer *transformer,
-	                          const char *     thread_name);
+	                          const char      *thread_name);
 	void finalize_TransformAspect();
 
 protected: // methods
@@ -64,14 +64,14 @@ protected: // methods
 	void tf_add_publisher(const char *frame_id_format, ...);
 
 protected: // members
-	tf::Transformer *       tf_listener;
+	tf::Transformer        *tf_listener;
 	tf::TransformPublisher *tf_publisher;
 
 	std::map<std::string, tf::TransformPublisher *> tf_publishers;
 
 private:
 	Mode        tf_aspect_mode_;
-	char *      tf_aspect_frame_id_;
+	char	     *tf_aspect_frame_id_;
 	BlackBoard *tf_aspect_blackboard_;
 };
 

@@ -45,9 +45,9 @@ class JoystickAcquisitionThread : public fawkes::Thread,
 {
 public:
 	JoystickAcquisitionThread();
-	JoystickAcquisitionThread(const char *               device_file,
+	JoystickAcquisitionThread(const char                *device_file,
 	                          JoystickBlackBoardHandler *handler,
-	                          fawkes::Logger *           logger);
+	                          fawkes::Logger            *logger);
 
 	virtual void init();
 	virtual void finalize();
@@ -58,9 +58,9 @@ public:
 
 	char         num_axes() const;
 	char         num_buttons() const;
-	const char * joystick_name() const;
+	const char  *joystick_name() const;
 	unsigned int pressed_buttons() const;
-	float *      axis_values();
+	float       *axis_values();
 
 	/** Access force feedback of joystick.
    * @return instance of JoystickForceFeedback class for current joystick. */
@@ -106,10 +106,10 @@ private:
 	fawkes::Mutex *data_mutex_;
 
 	unsigned int pressed_buttons_;
-	float *      axis_values_;
+	float       *axis_values_;
 
 	JoystickBlackBoardHandler *bbhandler_;
-	JoystickForceFeedback *    ff_;
+	JoystickForceFeedback     *ff_;
 };
 
 #endif

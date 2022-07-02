@@ -36,9 +36,9 @@
  * @param interface Fawkes interface instance
  * @param proxy Player proxy instance
  */
-PlayerPositionMapper::PlayerPositionMapper(const std::string &              varname,
+PlayerPositionMapper::PlayerPositionMapper(const std::string               &varname,
                                            fawkes::ObjectPositionInterface *interface,
-                                           PlayerCc::Position2dProxy *      proxy)
+                                           PlayerCc::Position2dProxy       *proxy)
 : PlayerProxyFawkesInterfaceMapper(varname)
 {
 	interface_ = interface;

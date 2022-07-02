@@ -51,7 +51,7 @@ generate_plugin(std::string author_name,
 {
 	time_t      now            = time(0);
 	std::string date           = ctime(&now);
-	tm *        time_structure = localtime(&now);
+	tm         *time_structure = localtime(&now);
 	std::string year           = std::to_string(time_structure->tm_year + 1900);
 	//TimeStructure's year is the number of years since 1900
 

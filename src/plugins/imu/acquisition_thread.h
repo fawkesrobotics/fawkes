@@ -43,7 +43,7 @@ class IMUAcquisitionThread : public fawkes::Thread,
                              public fawkes::BlackBoardAspect
 {
 public:
-	IMUAcquisitionThread(const char *       thread_name,
+	IMUAcquisitionThread(const char        *thread_name,
 	                     bool               continuous,
 	                     const std::string &cfg_name,
 	                     const std::string &cfg_prefix);
@@ -128,7 +128,7 @@ protected:
 	bool        cfg_continuous_;
 
 	fawkes::Mutex *data_mutex_;
-	fawkes::Time * timestamp_;
+	fawkes::Time  *timestamp_;
 
 	bool new_data_;
 

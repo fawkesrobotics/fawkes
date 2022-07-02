@@ -40,7 +40,7 @@ using namespace fawkes;
 JoystickPlugin::JoystickPlugin(Configuration *config) : Plugin(config)
 {
 	JoystickAcquisitionThread *aqt   = new JoystickAcquisitionThread();
-	JoystickSensorThread *     senst = new JoystickSensorThread(aqt);
+	JoystickSensorThread      *senst = new JoystickSensorThread(aqt);
 	thread_list.push_back(senst);
 	thread_list.push_back(aqt);
 	thread_list.push_back(new JoystickActThread(aqt, senst));

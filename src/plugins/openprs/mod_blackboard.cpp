@@ -35,7 +35,7 @@ using namespace fawkes;
 extern "C" void finalize();
 
 // Global variables
-BlackBoard *                       g_blackboard = NULL;
+BlackBoard                        *g_blackboard = NULL;
 std::map<std::string, Interface *> g_interfaces_read;
 std::map<std::string, Interface *> g_interfaces_write;
 Symbol                             g_bb_read_sym;
@@ -260,7 +260,7 @@ action_blackboard_print(TermList terms)
 
 #define ADD_ARRAY(src_type, target_type, array_type)                                            \
 	do {                                                                                          \
-		target_type * array     = (target_type *)OPRS_MALLOC(sizeof(target_type) * f.get_length()); \
+		target_type  *array     = (target_type *)OPRS_MALLOC(sizeof(target_type) * f.get_length()); \
 		src_type##_t *src_array = f.get_##src_type##s();                                            \
 		for (unsigned int j = 0; j < f.get_length(); ++j)                                           \
 			array[j] = src_array[j];                                                                  \

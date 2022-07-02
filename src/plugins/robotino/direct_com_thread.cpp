@@ -371,9 +371,9 @@ DirectRobotinoComThread::is_connected()
 }
 
 void
-DirectRobotinoComThread::get_act_velocity(float &       a1,
-                                          float &       a2,
-                                          float &       a3,
+DirectRobotinoComThread::get_act_velocity(float        &a1,
+                                          float        &a2,
+                                          float        &a3,
                                           unsigned int &seq,
                                           fawkes::Time &t)
 {
@@ -454,10 +454,10 @@ DirectRobotinoComThread::find_device_udev()
 	std::string cfg_device = "";
 
 	// try to find device using udev
-	struct udev *           udev;
-	struct udev_enumerate * enumerate;
+	struct udev            *udev;
+	struct udev_enumerate  *enumerate;
 	struct udev_list_entry *devices, *dev_list_entry;
-	struct udev_device *    dev, *usb_device;
+	struct udev_device     *dev, *usb_device;
 	udev = udev_new();
 	if (!udev) {
 		throw Exception("RobotinoDirect: Failed to initialize udev for "

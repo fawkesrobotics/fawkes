@@ -38,17 +38,17 @@ public:
 	BlackBoardInterfaceListContent();
 	BlackBoardInterfaceListContent(unsigned int component_id,
 	                               unsigned int msg_id,
-	                               void *       payload,
+	                               void        *payload,
 	                               size_t       payload_size);
 	virtual ~BlackBoardInterfaceListContent();
 
-	void append_interface(const char *         type,
-	                      const char *         id,
+	void append_interface(const char          *type,
+	                      const char          *id,
 	                      const unsigned char *hash,
 	                      unsigned int         serial,
 	                      bool                 has_writer,
 	                      unsigned int         num_readers,
-	                      const fawkes::Time & time);
+	                      const fawkes::Time  &time);
 	void append_interface(InterfaceInfo &info);
 
 	virtual void serialize();

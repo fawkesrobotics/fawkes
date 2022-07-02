@@ -49,12 +49,12 @@ public:
 	virtual void all_for_now();
 	virtual void cache_exhausted();
 	virtual void browse_failed(const char *name, const char *type, const char *domain);
-	virtual void service_added(const char *            name,
-	                           const char *            type,
-	                           const char *            domain,
-	                           const char *            host_name,
-	                           const char *            interface,
-	                           const struct sockaddr * addr,
+	virtual void service_added(const char             *name,
+	                           const char             *type,
+	                           const char             *domain,
+	                           const char             *host_name,
+	                           const char             *interface,
+	                           const struct sockaddr  *addr,
 	                           const socklen_t         addr_size,
 	                           uint16_t                port,
 	                           std::list<std::string> &txt,

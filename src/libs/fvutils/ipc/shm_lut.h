@@ -49,11 +49,11 @@ class SharedMemoryLookupTableHeader : public fawkes::SharedMemoryHeader
 {
 public:
 	SharedMemoryLookupTableHeader();
-	SharedMemoryLookupTableHeader(const char * lut_id,
+	SharedMemoryLookupTableHeader(const char  *lut_id,
 	                              unsigned int width,
 	                              unsigned int height,
 	                              unsigned int bytes_per_cell);
-	SharedMemoryLookupTableHeader(const char * lut_id,
+	SharedMemoryLookupTableHeader(const char  *lut_id,
 	                              unsigned int width,
 	                              unsigned int height,
 	                              unsigned int depth,
@@ -73,7 +73,7 @@ public:
 
 	virtual void print_info();
 
-	const char * lut_id() const;
+	const char  *lut_id() const;
 	void         set_lut_id(const char *lut_id);
 	unsigned int width() const;
 	unsigned int height() const;
@@ -85,7 +85,7 @@ public:
 private:
 	SharedMemoryLookupTable_header_t *header_;
 
-	char *       lut_id_;
+	char        *lut_id_;
 	unsigned int width_;
 	unsigned int height_;
 	unsigned int depth_;
@@ -106,13 +106,13 @@ public:
 	                        int                               shm_id,
 	                        int                               semaphore,
 	                        unsigned int                      mem_size,
-	                        const void *                      memptr);
+	                        const void                       *memptr);
 };
 
 class SharedMemoryLookupTable : public fawkes::SharedMemory
 {
 public:
-	SharedMemoryLookupTable(const char * lut_id,
+	SharedMemoryLookupTable(const char  *lut_id,
 	                        unsigned int width,
 	                        unsigned int height,
 	                        unsigned int depth          = 1,
@@ -120,7 +120,7 @@ public:
 	SharedMemoryLookupTable(const char *lut_id, bool is_read_only = true);
 	~SharedMemoryLookupTable();
 
-	const char *   lut_id() const;
+	const char    *lut_id() const;
 	bool           set_lut_id(const char *lut_id);
 	unsigned char *buffer() const;
 	unsigned int   width() const;
@@ -134,17 +134,17 @@ public:
 	static void wipe(const char *lut_id);
 
 private:
-	void constructor(const char * lut_id,
+	void constructor(const char  *lut_id,
 	                 unsigned int width,
 	                 unsigned int height,
 	                 unsigned int depth,
 	                 unsigned int bytes_per_cell,
 	                 bool         is_read_only);
 
-	SharedMemoryLookupTableHeader *   priv_header_;
+	SharedMemoryLookupTableHeader    *priv_header_;
 	SharedMemoryLookupTable_header_t *raw_header_;
 
-	char *       lut_id_;
+	char        *lut_id_;
 	unsigned int width_;
 	unsigned int height_;
 	unsigned int depth_;

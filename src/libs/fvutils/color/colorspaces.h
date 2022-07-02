@@ -79,7 +79,7 @@ typedef enum {
 
 size_t         colorspace_buffer_size(colorspace_t cspace, unsigned int width, unsigned int height);
 colorspace_t   colorspace_by_name(const char *colorspace);
-const char *   colorspace_to_string(colorspace_t colorspace);
+const char    *colorspace_to_string(colorspace_t colorspace);
 unsigned char *malloc_buffer(colorspace_t colorspace, unsigned int width, unsigned int height);
 
 } // end namespace firevision

@@ -64,7 +64,7 @@ public:
 	{
 		VL::Sift::Keypoint key;            /**< keypoint */
 		int                number_of_desc; /**< number of descriptors */
-		VL::float_t **     descs;          /**< descriptors */
+		VL::float_t      **descs;          /**< descriptors */
 	};
 
 private:
@@ -76,12 +76,12 @@ private:
 	double distSquare(VL::float_t *v1, VL::float_t *v2, int n);
 
 	// Object objects
-	VL::PgmBuffer *      obj_img_;
+	VL::PgmBuffer       *obj_img_;
 	std::vector<Feature> obj_features_;
 	int                  obj_num_features_;
 
 	// Image objects
-	VL::PgmBuffer *      image_;
+	VL::PgmBuffer       *image_;
 	std::vector<Feature> img_features_;
 	int                  img_num_features_;
 

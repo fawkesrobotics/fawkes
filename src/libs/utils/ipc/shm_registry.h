@@ -69,7 +69,7 @@ private:
 	int   shmfd_;
 	char *shm_name_;
 
-	sem_t *  sem_;
+	sem_t   *sem_;
 	MemInfo *meminfo_;
 };
 

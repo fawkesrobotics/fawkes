@@ -42,10 +42,10 @@ class InterfaceChooserDialog : public Gtk::Dialog
 public:
 	static const char *const DEFAULT_TITLE;
 
-	static InterfaceChooserDialog *create(Gtk::Window &        parent,
-	                                      BlackBoard *         blackboard,
-	                                      const char *         type_pattern,
-	                                      const char *         id_pattern,
+	static InterfaceChooserDialog *create(Gtk::Window         &parent,
+	                                      BlackBoard          *blackboard,
+	                                      const char          *type_pattern,
+	                                      const char          *id_pattern,
 	                                      const Glib::ustring &title = DEFAULT_TITLE);
 
 	virtual ~InterfaceChooserDialog();
@@ -83,7 +83,7 @@ private:
 
 	BlackBoard *bb_;
 
-	Gtk::Window &       parent_;
+	Gtk::Window        &parent_;
 	Gtk::ScrolledWindow scrollwin_;
 
 	const Record *record_; /**< Should only be accessed by record(). */

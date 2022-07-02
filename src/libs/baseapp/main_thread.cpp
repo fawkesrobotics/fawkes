@@ -61,13 +61,13 @@ namespace fawkes {
  * to load on startup.
  * @param default_plugin additional default plugin name
  */
-FawkesMainThread::FawkesMainThread(Configuration *   config,
-                                   MultiLogger *     multi_logger,
-                                   ThreadManager *   thread_manager,
+FawkesMainThread::FawkesMainThread(Configuration    *config,
+                                   MultiLogger      *multi_logger,
+                                   ThreadManager    *thread_manager,
                                    SyncPointManager *syncpoint_manager,
-                                   PluginManager *   plugin_manager,
-                                   const char *      load_plugins,
-                                   const char *      default_plugin)
+                                   PluginManager    *plugin_manager,
+                                   const char       *load_plugins,
+                                   const char       *default_plugin)
 : Thread("FawkesMainThread")
 {
 	plugin_manager_    = plugin_manager;

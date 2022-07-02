@@ -56,7 +56,7 @@ public:
 	virtual void loop();
 
 	// for CLIPSFeature
-	virtual void clips_context_init(const std::string &                  env_name,
+	virtual void clips_context_init(const std::string                   &env_name,
 	                                fawkes::LockPtr<CLIPS::Environment> &clips);
 	virtual void clips_context_destroyed(const std::string &env_name);
 
@@ -94,9 +94,9 @@ private:
 	void         clips_robotmemory_insert(std::string collection, void *bson);
 	void         clips_robotmemory_create_index(std::string collection, void *bson);
 	void         clips_robotmemory_create_unique_index(std::string collection, void *bson);
-	void         robotmemory_update(std::string &                  collection,
+	void         robotmemory_update(std::string                   &collection,
 	                                const bsoncxx::document::view &obj,
-	                                CLIPS::Value &                 query,
+	                                CLIPS::Value                  &query,
 	                                bool                           upsert);
 	CLIPS::Value clips_robotmemory_query_sort(std::string collection, void *bson, void *bson_sort);
 	CLIPS::Value clips_robotmemory_query(const std::string &collection, void *bson);
@@ -132,7 +132,7 @@ private:
 
 	CLIPS::Value clips_robotmemory_register_trigger(std::string env_name,
 	                                                std::string collection,
-	                                                void *      query,
+	                                                void       *query,
 	                                                std::string assert_name);
 	void         clips_robotmemory_destroy_trigger(void *trigger);
 

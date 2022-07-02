@@ -54,9 +54,9 @@ OpenRaveRobot::OpenRaveRobot(fawkes::Logger *logger)
  * @param env pointer to OpenRaveEnvironment object
  * @param logger pointer to fawkes logger
  */
-OpenRaveRobot::OpenRaveRobot(const std::string &             filename,
+OpenRaveRobot::OpenRaveRobot(const std::string              &filename,
                              fawkes::OpenRaveEnvironmentPtr &env,
-                             fawkes::Logger *                logger)
+                             fawkes::Logger                 *logger)
 : logger_(logger),
   name_(""),
   name_str_(""),
@@ -77,7 +77,7 @@ OpenRaveRobot::OpenRaveRobot(const std::string &             filename,
  * @param new_env Pointer to the new OpenRaveEnvironment. We need this to set robot_
  *  to the correct robot in the new OpenRAVE-environment.
  */
-OpenRaveRobot::OpenRaveRobot(const OpenRaveRobot &                 src,
+OpenRaveRobot::OpenRaveRobot(const OpenRaveRobot                  &src,
                              const fawkes::OpenRaveEnvironmentPtr &new_env)
 : logger_(src.logger_), name_(src.name_), find_best_ik_(src.find_best_ik_)
 {
@@ -816,9 +816,9 @@ OpenRaveRobot::attach_object(OpenRAVE::KinBodyPtr object, const char *manip_name
  * @return true if successful
  */
 bool
-OpenRaveRobot::attach_object(const char *                    name,
+OpenRaveRobot::attach_object(const char                     *name,
                              fawkes::OpenRaveEnvironmentPtr &env,
-                             const char *                    manip_name)
+                             const char                     *manip_name)
 {
 	OpenRAVE::KinBodyPtr body;
 	{
@@ -895,7 +895,7 @@ OpenRaveRobot::release_all_objects()
  * @return true if solvable, false otherwise
  */
 bool
-OpenRaveRobot::set_target_transform(Vector &          trans,
+OpenRaveRobot::set_target_transform(Vector           &trans,
                                     OpenRAVE::Vector &rotQuat,
                                     IkFilterOptions   filter,
                                     bool              no_offset)
@@ -960,8 +960,8 @@ OpenRaveRobot::set_target_transform(Vector &          trans,
  * @return true if solvable, false otherwise
  */
 bool
-OpenRaveRobot::set_target_euler(OpenRAVE::Vector &        trans,
-                                std::vector<float> &      rotations,
+OpenRaveRobot::set_target_euler(OpenRAVE::Vector         &trans,
+                                std::vector<float>       &rotations,
                                 OpenRAVE::IkFilterOptions filter,
                                 bool                      no_offset)
 {

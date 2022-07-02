@@ -101,14 +101,14 @@ private:
 	void push_message(LogLevel ll, const char *component, Exception &e);
 	void tlog_push_message(LogLevel        ll,
 	                       struct timeval *t,
-	                       const char *    component,
-	                       const char *    format,
+	                       const char     *component,
+	                       const char     *format,
 	                       va_list         va);
 	void tlog_push_message(LogLevel ll, struct timeval *t, const char *component, Exception &);
 
 private:
 	struct ::tm *now_s;
-	Mutex *      mutex;
+	Mutex       *mutex;
 
 	std::list<CacheEntry> messages_;
 	unsigned int          num_entries_;

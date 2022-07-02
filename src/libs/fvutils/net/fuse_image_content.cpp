@@ -113,8 +113,8 @@ FuseImageContent::FuseImageContent(SharedMemoryImageBuffer *b)
  * @param capture_time_usec optional microseconds part of the capture time
  */
 FuseImageContent::FuseImageContent(FUSE_image_format_t image_format,
-                                   const char *        image_id,
-                                   unsigned char *     buffer,
+                                   const char         *image_id,
+                                   unsigned char      *buffer,
                                    size_t              buffer_size,
                                    colorspace_t        colorspace,
                                    unsigned int        width,

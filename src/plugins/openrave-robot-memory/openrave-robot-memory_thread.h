@@ -61,7 +61,7 @@ protected:
 	}
 
 private:
-	fawkes::OpenRaveInterface *           openrave_if_;
+	fawkes::OpenRaveInterface            *openrave_if_;
 	fawkes::OpenraveRobotMemoryInterface *or_rm_if_;
 	std::list<std::string>                added_objects_;
 	std::list<std::string>                added_object_types_;

@@ -56,11 +56,11 @@ public:
 	virtual void disable_debug();
 
 	virtual void start_viewer();
-	virtual void load_IK_solver(OpenRaveRobotPtr &               robot,
+	virtual void load_IK_solver(OpenRaveRobotPtr                &robot,
 	                            OpenRAVE::IkParameterizationType iktype = OpenRAVE::IKP_Transform6D);
 	virtual void run_planner(OpenRaveRobotPtr &robot, float sampling = 0.01f);
 	virtual void run_graspplanning(const std::string &target_name,
-	                               OpenRaveRobotPtr & robot,
+	                               OpenRaveRobotPtr  &robot,
 	                               float              sampling = 0.01f);
 
 	virtual void add_robot(const std::string &filename);
@@ -76,7 +76,7 @@ public:
 	                         float              trans_x,
 	                         float              trans_y,
 	                         float              trans_z,
-	                         OpenRaveRobotPtr & robot);
+	                         OpenRaveRobotPtr  &robot);
 	virtual bool
 	rotate_object(const std::string &name, float quat_x, float quat_y, float quat_z, float quat_w);
 	virtual bool rotate_object(const std::string &name, float rot_x, float rot_y, float rot_z);

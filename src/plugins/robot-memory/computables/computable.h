@@ -35,7 +35,7 @@ public:
 	  bsoncxx::document::value query_to_compute,
 	  std::string              collection,
 	  const boost::function<std::list<bsoncxx::document::value>(bsoncxx::document::view, std::string)>
-	    &    compute_function,
+          &compute_function,
 	  double caching_time = 0.0,
 	  int    priority     = 0);
 	virtual ~Computable();

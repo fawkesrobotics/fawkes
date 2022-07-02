@@ -88,9 +88,9 @@ WebRequest::WebRequest(const char *uri) : pp_(NULL), is_setup_(false), uri_(uri)
  * @param connection MicroHTTPd connection
  */
 void
-WebRequest::setup(const char *    url,
-                  const char *    method,
-                  const char *    version,
+WebRequest::setup(const char     *url,
+                  const char     *method,
+                  const char     *version,
                   MHD_Connection *connection)
 {
 	url_ = url;

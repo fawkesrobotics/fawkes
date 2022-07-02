@@ -42,7 +42,7 @@ using namespace fawkes;
  */
 KatanaSensorAcquisitionThread::KatanaSensorAcquisitionThread(
   fawkes::RefPtr<fawkes::KatanaController> katana,
-  fawkes::Logger *                         logger)
+  fawkes::Logger                          *logger)
 : Thread("KatanaSensorAcqusitionThread", Thread::OPMODE_WAITFORWAKEUP)
 {
 	katana_  = katana;

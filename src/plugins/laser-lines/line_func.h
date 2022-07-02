@@ -53,8 +53,8 @@ template <class PointType>
 float
 calc_line_length(typename pcl::PointCloud<PointType>::Ptr cloud_line,
                  pcl::ModelCoefficients::Ptr              coeff,
-                 Eigen::Vector3f &                        end_point_1,
-                 Eigen::Vector3f &                        end_point_2)
+                 Eigen::Vector3f                         &end_point_1,
+                 Eigen::Vector3f                         &end_point_2)
 {
 	if (cloud_line->points.size() < 2)
 		return 0.;

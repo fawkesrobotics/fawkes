@@ -66,7 +66,7 @@ private:
 
 private:
 	fawkes::Configuration *config_;
-	fawkes::Logger *       logger_;
+	fawkes::Logger        *logger_;
 
 	bool cfg_default_adapter_;
 

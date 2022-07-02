@@ -98,7 +98,7 @@ OpenRaveThread::loop()
  */
 void
 OpenRaveThread::clone(OpenRaveEnvironmentPtr &env,
-                      OpenRaveRobotPtr &      robot,
+                      OpenRaveRobotPtr       &robot,
                       OpenRaveManipulatorPtr &manip) const
 {
 	env   = new OpenRaveEnvironment(**OR_env_);
@@ -155,7 +155,7 @@ OpenRaveThread::set_active_robot(OpenRaveRobot *robot)
  * @param calibrate decides whether to calculate offset (true )or set them directly (false; default)
  */
 void
-OpenRaveThread::set_manipulator(OpenRaveRobotPtr &      robot,
+OpenRaveThread::set_manipulator(OpenRaveRobotPtr       &robot,
                                 OpenRaveManipulatorPtr &manip,
                                 float                   trans_x,
                                 float                   trans_y,
@@ -321,7 +321,7 @@ OpenRaveThread::move_object(const std::string &name,
                             float              trans_x,
                             float              trans_y,
                             float              trans_z,
-                            OpenRaveRobotPtr & robot)
+                            OpenRaveRobotPtr  &robot)
 {
 	return OR_env_->move_object(name, trans_x, trans_y, trans_z, robot);
 }

@@ -90,11 +90,11 @@ private:
 	                  bool        is_default,
 	                  bool        is_list,
 	                  uint16_t    num_values,
-	                  size_t &    data_size,
+	                  size_t     &data_size,
 	                  void *__attribute__((__may_alias__)) * data)
 	{
 		data_size               = sizeof(config_descriptor_t) + sizeof(T) * (is_list ? num_values : 1);
-		void *               m  = calloc(1, data_size);
+		void                *m  = calloc(1, data_size);
 		config_descriptor_t *cd = (config_descriptor_t *)m;
 		snprintf(cd->path, CONFIG_MSG_PATH_LENGTH, "%s", path);
 		cd->is_default = is_default;
@@ -103,8 +103,8 @@ private:
 		return m;
 	}
 
-	Configuration *                   config_;
-	FawkesNetworkHub *                hub_;
+	Configuration                    *config_;
+	FawkesNetworkHub                 *hub_;
 	LockQueue<FawkesNetworkMessage *> inbound_queue_;
 
 	LockList<unsigned int>           subscribers_;

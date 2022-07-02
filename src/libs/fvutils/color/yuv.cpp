@@ -59,7 +59,7 @@ iyu1_to_yuy2(const unsigned char *src, unsigned char *dest, unsigned int width, 
  */
 void
 gray8_to_yuy2(const unsigned char *src,
-              unsigned char *      dest,
+              unsigned char       *dest,
               unsigned int         width,
               unsigned int         height)
 {
@@ -76,7 +76,7 @@ gray8_to_yuy2(const unsigned char *src,
  */
 void
 gray8_to_yuv422planar_plainc(const unsigned char *src,
-                             unsigned char *      dst,
+                             unsigned char       *dst,
                              unsigned int         width,
                              unsigned int         height)
 {
@@ -90,7 +90,7 @@ gray8_to_yuv422planar_plainc(const unsigned char *src,
  */
 void
 gray8_to_yuv422packed_plainc(const unsigned char *src,
-                             unsigned char *      dst,
+                             unsigned char       *dst,
                              unsigned int         width,
                              unsigned int         height)
 {
@@ -107,7 +107,7 @@ gray8_to_yuv422packed_plainc(const unsigned char *src,
  */
 void
 yuv422planar_copy_uv(const unsigned char *src,
-                     unsigned char *      dst,
+                     unsigned char       *dst,
                      unsigned int         width,
                      unsigned int         height,
                      unsigned int         x,
@@ -142,7 +142,7 @@ yuv422planar_copy_uv(const unsigned char *src,
  */
 void
 yuv420planar_to_yuv422planar(const unsigned char *src,
-                             unsigned char *      dst,
+                             unsigned char       *dst,
                              unsigned int         width,
                              unsigned int         height)
 {
@@ -176,7 +176,7 @@ yuv420planar_to_yuv422planar(const unsigned char *src,
 
 void
 yuv422planar_to_yuv422packed(const unsigned char *planar,
-                             unsigned char *      packed,
+                             unsigned char       *packed,
                              unsigned int         width,
                              unsigned int         height)
 {
@@ -197,7 +197,7 @@ yuv422planar_to_yuv422packed(const unsigned char *planar,
 
 void
 yuv422planar_quarter_to_yuv422packed(const unsigned char *planar,
-                                     unsigned char *      packed,
+                                     unsigned char       *packed,
                                      const unsigned int   width,
                                      const unsigned int   height)
 {
@@ -232,7 +232,7 @@ yuv422planar_quarter_to_yuv422packed(const unsigned char *planar,
  */
 void
 yuv422planar_quarter_to_yuv422planar(const unsigned char *quarter,
-                                     unsigned char *      planar,
+                                     unsigned char       *planar,
                                      const unsigned int   width,
                                      const unsigned int   height)
 {
@@ -281,7 +281,7 @@ yuv422planar_quarter_to_yuv422planar(const unsigned char *quarter,
 
 void
 yuv422packed_to_yuv422planar(const unsigned char *packed,
-                             unsigned char *      planar,
+                             unsigned char       *planar,
                              unsigned int         width,
                              unsigned int         height)
 {
@@ -310,7 +310,7 @@ yuv422packed_to_yuv422planar(const unsigned char *packed,
 
 void
 yuy2_to_yuv422planar(const unsigned char *packed,
-                     unsigned char *      planar,
+                     unsigned char       *planar,
                      unsigned int         width,
                      unsigned int         height)
 {
@@ -339,7 +339,7 @@ yuy2_to_yuv422planar(const unsigned char *packed,
 
 void
 yvy2_to_yuv422planar(const unsigned char *packed,
-                     unsigned char *      planar,
+                     unsigned char       *planar,
                      unsigned int         width,
                      unsigned int         height)
 {
@@ -368,7 +368,7 @@ yvy2_to_yuv422planar(const unsigned char *packed,
 
 void
 yuy2_to_yuv422planar_quarter(const unsigned char *packed,
-                             unsigned char *      planar,
+                             unsigned char       *planar,
                              const unsigned int   width,
                              const unsigned int   height)
 {
@@ -398,7 +398,7 @@ yuy2_to_yuv422planar_quarter(const unsigned char *packed,
 
 void
 yuv444packed_to_yuv422planar(const unsigned char *yuv444,
-                             unsigned char *      yuv422,
+                             unsigned char       *yuv422,
                              unsigned int         width,
                              unsigned int         height)
 {
@@ -427,7 +427,7 @@ yuv444packed_to_yuv422planar(const unsigned char *yuv444,
 
 void
 yuv444packed_to_yuv422packed(const unsigned char *yvu444,
-                             unsigned char *      yuv422,
+                             unsigned char       *yuv422,
                              unsigned int         width,
                              unsigned int         height)
 {
@@ -450,7 +450,7 @@ yuv444packed_to_yuv422packed(const unsigned char *yvu444,
 
 void
 yvu444packed_to_yuv422planar(const unsigned char *yvu444,
-                             unsigned char *      yuv422,
+                             unsigned char       *yuv422,
                              unsigned int         width,
                              unsigned int         height)
 {
@@ -479,7 +479,7 @@ yvu444packed_to_yuv422planar(const unsigned char *yvu444,
 
 void
 yvu444packed_to_yuv422packed(const unsigned char *yvu444,
-                             unsigned char *      yuv422,
+                             unsigned char       *yuv422,
                              unsigned int         width,
                              unsigned int         height)
 {
@@ -520,7 +520,7 @@ yuv422planar_erase_v_plane(unsigned char *yuv, unsigned int width, unsigned int 
 
 void
 grayscale_yuv422packed(const unsigned char *src,
-                       unsigned char *      dst,
+                       unsigned char       *dst,
                        unsigned int         width,
                        unsigned int         height)
 {
@@ -538,7 +538,7 @@ grayscale_yuv422packed(const unsigned char *src,
 
 void
 grayscale_yuv422planar(const unsigned char *src,
-                       unsigned char *      dst,
+                       unsigned char       *dst,
                        unsigned int         width,
                        unsigned int         height)
 {

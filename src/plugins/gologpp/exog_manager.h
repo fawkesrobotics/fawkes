@@ -66,9 +66,9 @@ private:
 	class BlackboardEventHandler
 	{
 	public:
-		BlackboardEventHandler(BlackBoard *                             bb,
+		BlackboardEventHandler(BlackBoard                              *bb,
 		                       gologpp::shared_ptr<gologpp::ExogAction> exog,
-		                       ExogManager &                            exog_mgr);
+		                       ExogManager                             &exog_mgr);
 		BlackboardEventHandler(const BlackboardEventHandler &) = delete;
 		BlackboardEventHandler &operator=(const BlackboardEventHandler &) = delete;
 		BlackboardEventHandler(BlackboardEventHandler &&)                 = default;
@@ -79,10 +79,10 @@ private:
 		static std::string extract_id(const std::string &iface_uid);
 
 	protected:
-		BlackBoard *                                      blackboard_;
+		BlackBoard                                       *blackboard_;
 		gologpp::shared_ptr<gologpp::ExogAction>          target_exog_;
 		std::unordered_map<std::string, gologpp::arity_t> fields_order_;
-		ExogManager &                                     exog_manager_;
+		ExogManager                                      &exog_manager_;
 	};
 
 	///////////////////////////////////////////////////////////////////
@@ -122,10 +122,10 @@ private:
 	std::unordered_map<std::string, gologpp::shared_ptr<gologpp::ExogAction>> mapped_exogs_;
 	std::vector<std::unique_ptr<InterfaceWatcher>>                            watchers_;
 	std::vector<std::unique_ptr<PatternObserver>>                             observers_;
-	GologppThread *                                                           exec_thread_;
-	Configuration *                                                           config_;
-	BlackBoard *                                                              blackboard_;
-	Logger *                                                                  logger_;
+	GologppThread                                                            *exec_thread_;
+	Configuration                                                            *config_;
+	BlackBoard                                                               *blackboard_;
+	Logger                                                                   *logger_;
 
 	static const std::unordered_map<interface_fieldtype_t, std::string> iface_type_to_golog_type_;
 };

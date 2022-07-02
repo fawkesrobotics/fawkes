@@ -51,7 +51,7 @@ protected:
 	}
 
 private:
-	fawkes::RRDDefinition *     test_rrd_def_;
+	fawkes::RRDDefinition      *test_rrd_def_;
 	fawkes::RRDGraphDefinition *test_graph_def_;
 
 	unsigned int loop_count_;

@@ -70,8 +70,8 @@ protected:
 
 private: // members
 	fawkes::PclDatabaseStoreInterface *store_if_;
-	fawkes::BlackBoardOnMessageWaker * msg_waker_;
-	PointCloudAdapter *                adapter_;
+	fawkes::BlackBoardOnMessageWaker  *msg_waker_;
+	PointCloudAdapter                 *adapter_;
 
 	std::string cfg_input_id_;
 	std::string cfg_database_;

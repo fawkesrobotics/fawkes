@@ -116,7 +116,7 @@ main(int argc, char **argv)
 		       cdarkgray.c_str(),
 		       cnormal.c_str());
 
-		interface_header_t *                   ih;
+		interface_header_t                    *ih;
 		BlackBoardMemoryManager::ChunkIterator cit;
 		for (cit = memmgr->begin(); cit != memmgr->end(); ++cit) {
 			if (*cit == NULL) {

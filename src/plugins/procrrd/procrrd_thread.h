@@ -69,14 +69,14 @@ private:
 	virtual void config_value_erased(const char *path);
 
 private:
-	fawkes::TimeWait * timewait_;
+	fawkes::TimeWait  *timewait_;
 	int                samplerate_;
 	std::string        netinterface_;
 	unsigned long int *lastcpu_;
 
 	fawkes::RRDGraphDefinition *net_recv_graph_;
 	fawkes::RRDGraphDefinition *net_trans_graph_;
-	fawkes::RRDDefinition *     net_rrd_;
+	fawkes::RRDDefinition      *net_rrd_;
 
 	/// @cond INTERNALS
 	typedef struct
@@ -84,8 +84,8 @@ private:
 		std::string                 pid;
 		std::string                 name;
 		std::string                 rrd_name;
-		unsigned long int *         last_cpu;
-		fawkes::RRDDefinition *     rrd;
+		unsigned long int          *last_cpu;
+		fawkes::RRDDefinition      *rrd;
 		fawkes::RRDGraphDefinition *cpu_graph;
 		fawkes::RRDGraphDefinition *mem_graph;
 		fawkes::RRDGraphDefinition *io_read_graph;

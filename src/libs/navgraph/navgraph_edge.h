@@ -41,8 +41,8 @@ class NavGraphEdge
 public:
 	NavGraphEdge();
 
-	NavGraphEdge(const std::string &                from,
-	             const std::string &                to,
+	NavGraphEdge(const std::string                 &from,
+	             const std::string                 &to,
 	             std::map<std::string, std::string> properties,
 	             bool                               directed = false);
 

@@ -45,7 +45,7 @@ using namespace fawkes;
  */
 GazsimWebcam::GazsimWebcam(std::string                shm_id,
                            gazebo::transport::NodePtr gazebo_world_node,
-                           Configuration *            config)
+                           Configuration             *config)
 {
 	shm_buffer_ = NULL;
 	//read config values

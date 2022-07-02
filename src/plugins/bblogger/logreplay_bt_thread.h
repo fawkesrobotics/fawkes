@@ -32,9 +32,9 @@ class BBLogReplayBlockedTimingThread : public BBLogReplayThread, public fawkes::
 {
 public:
 	BBLogReplayBlockedTimingThread(fawkes::BlockedTimingAspect::WakeupHook hook,
-	                               const char *                            logfile_name,
-	                               const char *                            logdir,
-	                               const char *                            scenario,
+	                               const char                             *logfile_name,
+	                               const char                             *logdir,
+	                               const char                             *scenario,
 	                               float                                   grace_period,
 	                               bool                                    loop_replay,
 	                               bool                                    non_blocking);

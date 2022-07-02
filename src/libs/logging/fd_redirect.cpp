@@ -42,8 +42,8 @@ namespace fawkes {
  * @param log_level log level to log with
  */
 LogFileDescriptorToLog::LogFileDescriptorToLog(int              fd,
-                                               Logger *         logger,
-                                               const char *     logname,
+                                               Logger          *logger,
+                                               const char      *logname,
                                                Logger::LogLevel log_level)
 : io_service_work_(io_service_),
   stream_(io_service_),
@@ -87,10 +87,10 @@ LogFileDescriptorToLog::~LogFileDescriptorToLog()
 }
 
 void
-LogFileDescriptorToLog::start_log(const char *                           logname,
+LogFileDescriptorToLog::start_log(const char                            *logname,
                                   Logger::LogLevel                       log_level,
                                   boost::asio::posix::stream_descriptor &sd,
-                                  boost::asio::streambuf &               buf)
+                                  boost::asio::streambuf                &buf)
 {
 	boost::asio::async_read_until(sd,
 	                              buf,
@@ -106,10 +106,10 @@ LogFileDescriptorToLog::start_log(const char *                           logname
 }
 
 void
-LogFileDescriptorToLog::handle_log_line(const char *                           logname,
+LogFileDescriptorToLog::handle_log_line(const char                            *logname,
                                         Logger::LogLevel                       log_level,
                                         boost::asio::posix::stream_descriptor &sd,
-                                        boost::asio::streambuf &               buf,
+                                        boost::asio::streambuf                &buf,
                                         boost::system::error_code              ec,
                                         size_t                                 bytes_read)
 {

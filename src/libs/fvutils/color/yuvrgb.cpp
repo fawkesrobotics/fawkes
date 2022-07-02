@@ -45,7 +45,7 @@ namespace firevision {
  */
 void
 yuv411packed_to_rgb_plainc(const unsigned char *YUV,
-                           unsigned char *      RGB,
+                           unsigned char       *RGB,
                            unsigned int         width,
                            unsigned int         height)
 {
@@ -98,7 +98,7 @@ yuv411packed_to_rgb_plainc(const unsigned char *YUV,
  */
 void
 yuv422planar_to_rgb_plainc(const unsigned char *planar,
-                           unsigned char *      RGB,
+                           unsigned char       *RGB,
                            unsigned int         width,
                            unsigned int         height)
 {
@@ -150,7 +150,7 @@ yuv422planar_to_rgb_plainc(const unsigned char *planar,
  */
 void
 yuv422packed_to_rgb_plainc(const unsigned char *YUV,
-                           unsigned char *      RGB,
+                           unsigned char       *RGB,
                            const unsigned int   width,
                            const unsigned int   height)
 {
@@ -183,7 +183,7 @@ yuv422packed_to_rgb_plainc(const unsigned char *YUV,
  */
 void
 yuv422planar_to_bgr_plainc(const unsigned char *planar,
-                           unsigned char *      BGR,
+                           unsigned char       *BGR,
                            unsigned int         width,
                            unsigned int         height)
 {
@@ -220,7 +220,7 @@ yuv422planar_to_bgr_plainc(const unsigned char *planar,
 
 void
 yuv422planar_to_rgb_with_alpha_plainc(const unsigned char *planar,
-                                      unsigned char *      RGB,
+                                      unsigned char       *RGB,
                                       unsigned int         width,
                                       unsigned int         height)
 {
@@ -259,7 +259,7 @@ yuv422planar_to_rgb_with_alpha_plainc(const unsigned char *planar,
 
 void
 yuv422planar_to_bgr_with_alpha_plainc(const unsigned char *planar,
-                                      unsigned char *      BGR,
+                                      unsigned char       *BGR,
                                       unsigned int         width,
                                       unsigned int         height)
 {
@@ -298,7 +298,7 @@ yuv422planar_to_bgr_with_alpha_plainc(const unsigned char *planar,
 
 void
 yuv422packed_to_bgr_with_alpha_plainc(const unsigned char *YUV,
-                                      unsigned char *      BGR,
+                                      unsigned char       *BGR,
                                       unsigned int         width,
                                       unsigned int         height)
 {
@@ -367,13 +367,13 @@ __aligned(8) const volatile unsigned short _const_16[4]     = FOUR(16);
 
 void
 yuv411planar_to_rgb_mmx(const unsigned char *yuv,
-                        unsigned char *      rgb,
+                        unsigned char       *rgb,
                         unsigned int         w,
                         unsigned int         h)
 {
 	unsigned int         xx, yy;
 	const unsigned char *yp1, *up, *vp;
-	unsigned char *      dp1;
+	unsigned char       *dp1;
 
 	/* plane pointers */
 	yp1 = yuv;

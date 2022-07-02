@@ -58,13 +58,13 @@ class FawkesNetworkManager;
 class FawkesMainThread : public Thread, public MainLoopEmployer
 {
 public:
-	FawkesMainThread(Configuration *   config,
-	                 MultiLogger *     multi_logger,
-	                 ThreadManager *   thread_manager,
+	FawkesMainThread(Configuration    *config,
+	                 MultiLogger      *multi_logger,
+	                 ThreadManager    *thread_manager,
 	                 SyncPointManager *syncpoint_manager,
-	                 PluginManager *   plugin_manager,
-	                 const char *      load_plugins,
-	                 const char *      default_plugin = 0);
+	                 PluginManager    *plugin_manager,
+	                 const char       *load_plugins,
+	                 const char       *default_plugin = 0);
 	virtual ~FawkesMainThread();
 
 	virtual void once();
@@ -86,7 +86,7 @@ public:
 
 	private:
 		FawkesMainThread *fmt_;
-		Mutex *           init_mutex_;
+		Mutex            *init_mutex_;
 		bool              init_running_;
 		bool              init_quit_;
 		bool              sigint_running_;
@@ -120,29 +120,29 @@ private:
 	}
 
 	Configuration *config_;
-	MultiLogger *  multi_logger_;
-	Clock *        clock_;
-	TimeWait *     time_wait_;
+	MultiLogger   *multi_logger_;
+	Clock         *clock_;
+	TimeWait      *time_wait_;
 
-	Barrier *             init_barrier_;
-	Thread *              mainloop_thread_;
-	Mutex *               mainloop_mutex_;
+	Barrier              *init_barrier_;
+	Thread               *mainloop_thread_;
+	Mutex                *mainloop_mutex_;
 	InterruptibleBarrier *mainloop_barrier_;
 
 	char *default_plugin_;
 	char *load_plugins_;
 
-	ThreadManager *   thread_manager_;
+	ThreadManager    *thread_manager_;
 	SyncPointManager *syncpoint_manager_;
-	PluginManager *   plugin_manager_;
+	PluginManager    *plugin_manager_;
 
 	std::list<std::string> recovered_threads_;
 	unsigned int           desired_loop_time_usec_;
 	float                  desired_loop_time_sec_;
 	unsigned int           max_thread_time_usec_;
 	unsigned int           max_thread_time_nanosec_;
-	Time *                 loop_start_;
-	Time *                 loop_end_;
+	Time                  *loop_start_;
+	Time                  *loop_end_;
 	bool                   enable_looptime_warnings_;
 
 	std::vector<RefPtr<SyncPoint>> syncpoints_start_hook_;

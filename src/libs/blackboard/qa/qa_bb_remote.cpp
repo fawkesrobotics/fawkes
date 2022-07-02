@@ -117,8 +117,8 @@ test_messaging(TestInterface *ti_reader, TestInterface *ti_writer)
 class SyncInterfaceListener : public fawkes::BlackBoardInterfaceListener
 {
 public:
-	SyncInterfaceListener(fawkes::Interface * reader,
-	                      fawkes::Interface * writer,
+	SyncInterfaceListener(fawkes::Interface  *reader,
+	                      fawkes::Interface  *writer,
 	                      fawkes::BlackBoard *reader_bb,
 	                      fawkes::BlackBoard *writer_bb)
 	: BlackBoardInterfaceListener("SyncInterfaceListener(%s-%s)", writer->uid(), reader->id())
@@ -200,7 +200,7 @@ main(int argc, char **argv)
 	signal(SIGINT, signal_handler);
 
 	LocalBlackBoard *llbb = new LocalBlackBoard(BLACKBOARD_MEMSIZE);
-	BlackBoard *     lbb  = llbb;
+	BlackBoard      *lbb  = llbb;
 
 	FawkesNetworkServerThread *fns = new FawkesNetworkServerThread(1910);
 	fns->start();

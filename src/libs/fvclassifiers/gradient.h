@@ -33,7 +33,7 @@ class GradientClassifier : public Classifier
 {
 public:
 	GradientClassifier(std::list<ScanlineGrid *> *scanlines,
-	                   Qualifier *                q,
+	                   Qualifier                 *q,
 	                   unsigned int               threshold,
 	                   unsigned int               max_size          = 0,
 	                   bool                       use_rising_flank  = true,
@@ -55,7 +55,7 @@ private:
 	unsigned int _max_size;
 
 	std::list<ScanlineGrid *> *_scanlines;
-	Qualifier *                _q;
+	Qualifier                 *_q;
 
 	bool _use_falling_edge;
 	bool _use_rising_edge;

@@ -46,9 +46,9 @@ public:
 	BlackBoardNotifier();
 	virtual ~BlackBoardNotifier();
 
-	void register_listener(BlackBoardInterfaceListener *    listener,
+	void register_listener(BlackBoardInterfaceListener     *listener,
 	                       BlackBoard::ListenerRegisterFlag flag);
-	void update_listener(BlackBoardInterfaceListener *    listener,
+	void update_listener(BlackBoardInterfaceListener     *listener,
 	                     BlackBoard::ListenerRegisterFlag flag);
 	void unregister_listener(BlackBoardInterfaceListener *listener);
 
@@ -70,7 +70,7 @@ private:
 	{
 		bool                         op;
 		std::string                  uid;
-		Interface *                  interface;
+		Interface                   *interface;
 		BlackBoardInterfaceListener *listener;
 	} BBilQueueEntry;
 	/// @endcond INTERNALS
@@ -91,24 +91,24 @@ private:
 	typedef BBioMap::iterator  BBioMapIterator;
 
 	void proc_listener_maybe_queue(bool                         op,
-	                               Interface *                  interface,
+	                               Interface                   *interface,
 	                               BlackBoardInterfaceListener *listener,
-	                               Mutex *                      mutex,
-	                               unsigned int &               events,
-	                               BBilMap &                    map,
-	                               BBilQueue &                  queue,
-	                               const char *                 hint);
+	                               Mutex                       *mutex,
+	                               unsigned int                &events,
+	                               BBilMap                     &map,
+	                               BBilQueue                   &queue,
+	                               const char                  *hint);
 
 	void add_listener(Interface *interface, BlackBoardInterfaceListener *listener, BBilMap &ilmap);
 	void remove_listener(Interface *interface, BlackBoardInterfaceListener *listener, BBilMap &ilmap);
 	void queue_listener(bool                         op,
-	                    Interface *                  interface,
+	                    Interface                   *interface,
 	                    BlackBoardInterfaceListener *listener,
-	                    BBilQueue &                  queue);
+	                    BBilQueue                   &queue);
 
-	void add_observer(BlackBoardInterfaceObserver *                          observer,
+	void add_observer(BlackBoardInterfaceObserver                           *observer,
 	                  BlackBoardInterfaceObserver::ObservedInterfaceLockMap *its,
-	                  BBioMap &                                              bbiomap);
+	                  BBioMap                                               &bbiomap);
 
 	void remove_observer(BBioMap &iomap, BlackBoardInterfaceObserver *observer);
 
@@ -124,29 +124,29 @@ private:
 	BBilMap bbil_writer_;
 	BBilMap bbil_messages_;
 
-	Mutex *   bbil_unregister_mutex_;
+	Mutex    *bbil_unregister_mutex_;
 	BBilQueue bbil_unregister_queue_;
 
-	Mutex *      bbil_writer_mutex_;
+	Mutex       *bbil_writer_mutex_;
 	unsigned int bbil_writer_events_;
 	BBilQueue    bbil_writer_queue_;
 
-	Mutex *      bbil_reader_mutex_;
+	Mutex       *bbil_reader_mutex_;
 	unsigned int bbil_reader_events_;
 	BBilQueue    bbil_reader_queue_;
 
-	Mutex *      bbil_data_mutex_;
+	Mutex       *bbil_data_mutex_;
 	unsigned int bbil_data_events_;
 	BBilQueue    bbil_data_queue_;
 
-	Mutex *      bbil_messages_mutex_;
+	Mutex       *bbil_messages_mutex_;
 	unsigned int bbil_messages_events_;
 	BBilQueue    bbil_messages_queue_;
 
 	BBioMap bbio_created_;
 	BBioMap bbio_destroyed_;
 
-	Mutex *      bbio_mutex_;
+	Mutex       *bbio_mutex_;
 	unsigned int bbio_events_;
 	BBioQueue    bbio_queue_;
 };

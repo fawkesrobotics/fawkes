@@ -41,7 +41,7 @@ public:
 	virtual void finalize(Thread *thread);
 
 private:
-	BlackBoard *     blackboard_;
+	BlackBoard      *blackboard_;
 	tf::Transformer *transformer_;
 };
 

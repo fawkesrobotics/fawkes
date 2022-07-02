@@ -300,7 +300,7 @@ GlobalStatePlexilAdapter::invokeAbort(PLEXIL::Command *cmd)
  * @param cache_entry cache entry for retrieved value
  */
 void
-GlobalStatePlexilAdapter::lookupNow(PLEXIL::State const &    state,
+GlobalStatePlexilAdapter::lookupNow(PLEXIL::State const     &state,
                                     PLEXIL::StateCacheEntry &cache_entry)
 {
 	if (values_.find(state) == values_.end()) {

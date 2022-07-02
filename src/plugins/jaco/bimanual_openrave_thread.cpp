@@ -546,8 +546,8 @@ JacoBimanualOpenraveThread::_plan_path()
 
 		} else {
 			// sampling trajectory and setting target trajectory
-			jaco_trajec_t *     trajec_l = new jaco_trajec_t();
-			jaco_trajec_t *     trajec_r = new jaco_trajec_t();
+			jaco_trajec_t      *trajec_l = new jaco_trajec_t();
+			jaco_trajec_t      *trajec_r = new jaco_trajec_t();
 			jaco_trajec_point_t p; // point we will add to trajectories
 			vector<dReal>       tmp_p;
 			int                 arm_dof = cfg_spec.GetDOF() / 2;

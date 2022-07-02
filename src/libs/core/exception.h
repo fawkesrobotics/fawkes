@@ -47,7 +47,7 @@ public:
 	void         append(const Exception &e) noexcept;
 	void         print_trace() noexcept;
 	void         print_backtrace() const noexcept;
-	char *       generate_backtrace() const noexcept;
+	char        *generate_backtrace() const noexcept;
 
 	int get_errno() noexcept;
 
@@ -64,7 +64,7 @@ protected:
 	struct message_list_t
 	{
 		message_list_t *next; /**< pointer to next element, NULL if last element */
-		char *          msg;  /**< pointer to message, may not be NULL, will be freed
+		char           *msg;  /**< pointer to message, may not be NULL, will be freed
 			       *   in dtor */
 	};
 
@@ -87,7 +87,7 @@ public:
 		bool operator!=(const iterator &i) const;
 
 		const char *operator*() const;
-		iterator &  operator=(const iterator &i);
+		iterator   &operator=(const iterator &i);
 
 	private:
 		message_list_t *mlist;
@@ -108,7 +108,7 @@ protected:
 	message_list_t *messages;
 	message_list_t *messages_iterator;
 	message_list_t *messages_end;
-	Mutex *         messages_mutex;
+	Mutex          *messages_mutex;
 
 	int _errno;
 

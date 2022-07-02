@@ -41,8 +41,8 @@ namespace pcl_utils {
 template <typename PointT>
 void
 transform_pointcloud(const pcl::PointCloud<PointT> &cloud_in,
-                     pcl::PointCloud<PointT> &      cloud_out,
-                     const tf::Transform &          transform)
+                     pcl::PointCloud<PointT>       &cloud_out,
+                     const tf::Transform           &transform)
 {
 	// Bullet (used by tf) and Eigen both store quaternions in x,y,z,w
 	// order, despite the ordering of arguments in Eigen's
@@ -82,10 +82,10 @@ transform_pointcloud(pcl::PointCloud<PointT> &cloud_inout, const tf::Transform &
  */
 template <typename PointT>
 void
-transform_pointcloud(const std::string &            target_frame,
+transform_pointcloud(const std::string             &target_frame,
                      const pcl::PointCloud<PointT> &cloud_in,
-                     pcl::PointCloud<PointT> &      cloud_out,
-                     const tf::Transformer &        transformer)
+                     pcl::PointCloud<PointT>       &cloud_out,
+                     const tf::Transformer         &transformer)
 {
 	if (cloud_in.header.frame_id == target_frame) {
 		cloud_out = cloud_in;
@@ -109,9 +109,9 @@ transform_pointcloud(const std::string &            target_frame,
  */
 template <typename PointT>
 void
-transform_pointcloud(const std::string &      target_frame,
+transform_pointcloud(const std::string       &target_frame,
                      pcl::PointCloud<PointT> &cloud_inout,
-                     const tf::Transformer &  transformer)
+                     const tf::Transformer   &transformer)
 {
 	pcl::PointCloud<PointT> tmp;
 	transform_pointcloud(target_frame, cloud_inout, tmp, transformer);
@@ -127,12 +127,12 @@ transform_pointcloud(const std::string &      target_frame,
  */
 template <typename PointT>
 void
-transform_pointcloud(const std::string &            target_frame,
-                     const Time &                   target_time,
-                     const std::string &            fixed_frame,
+transform_pointcloud(const std::string             &target_frame,
+                     const Time                    &target_time,
+                     const std::string             &fixed_frame,
                      const pcl::PointCloud<PointT> &cloud_in,
-                     pcl::PointCloud<PointT> &      cloud_out,
-                     const tf::Transformer &        transformer)
+                     pcl::PointCloud<PointT>       &cloud_out,
+                     const tf::Transformer         &transformer)
 {
 	if (cloud_in.header.frame_id == target_frame) {
 		cloud_out = cloud_in;
@@ -160,11 +160,11 @@ transform_pointcloud(const std::string &            target_frame,
  */
 template <typename PointT>
 void
-transform_pointcloud(const std::string &      target_frame,
-                     const Time &             target_time,
-                     const std::string &      fixed_frame,
+transform_pointcloud(const std::string       &target_frame,
+                     const Time              &target_time,
+                     const std::string       &fixed_frame,
                      pcl::PointCloud<PointT> &cloud_inout,
-                     const tf::Transformer &  transformer)
+                     const tf::Transformer   &transformer)
 {
 	pcl::PointCloud<PointT> tmp;
 	transform_pointcloud(target_frame, target_time, fixed_frame, cloud_inout, tmp, transformer);

@@ -79,7 +79,7 @@ public:
 	virtual std::vector<int>          get_ints(const char *path);
 	virtual std::vector<bool>         get_bools(const char *path);
 	virtual std::vector<std::string>  get_strings(const char *path);
-	virtual ValueIterator *           get_value(const char *path);
+	virtual ValueIterator            *get_value(const char *path);
 	virtual std::string               get_comment(const char *path);
 	virtual std::string               get_default_comment(const char *path);
 	virtual std::string               get_type(const char *path);
@@ -162,9 +162,9 @@ public:
 
 	private:
 		Configuration::ValueIterator *i;
-		FawkesNetworkMessage *        msg;
+		FawkesNetworkMessage         *msg;
 		bool                          iterated_once;
-		char *                        _path;
+		char                         *_path;
 	};
 
 	ValueIterator *iterator();
@@ -182,16 +182,16 @@ private:
 	void send_get(const char *path, unsigned int msgid, unsigned int expected_reply);
 
 	void set_value_internal(unsigned int msg_type,
-	                        const char * path,
+	                        const char  *path,
 	                        uint16_t     num_values,
 	                        size_t       data_size,
-	                        void *       data);
+	                        void        *data);
 
 	void erase_internal(const char *path, bool is_default);
 
-	FawkesNetworkClient * c;
+	FawkesNetworkClient  *c;
 	FawkesNetworkMessage *msg;
-	Mutex *               mutex;
+	Mutex                *mutex;
 	bool                  mirror_init_waiting_;
 	InterruptibleBarrier *mirror_init_barrier_;
 

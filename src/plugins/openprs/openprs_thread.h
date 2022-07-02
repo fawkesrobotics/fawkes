@@ -96,7 +96,7 @@ private: // members
 	fawkes::OpenPRSManagerAspectIniFin            openprs_manager_aspect_inifin_;
 	fawkes::LockPtr<fawkes::OpenPRSKernelManager> openprs_kernel_mgr_;
 
-	fawkes::OpenPRSServerProxy *       openprs_server_proxy_;
+	fawkes::OpenPRSServerProxy        *openprs_server_proxy_;
 	fawkes::OpenPRSMessagePasserProxy *openprs_mp_proxy_;
 
 	boost::asio::io_service      io_service_;

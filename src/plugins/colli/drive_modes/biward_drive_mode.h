@@ -33,16 +33,16 @@ class BackwardDriveModule;
 class BiwardDriveModule : public AbstractDriveMode
 {
 public:
-	BiwardDriveModule(ForwardDriveModule * forward,
+	BiwardDriveModule(ForwardDriveModule  *forward,
 	                  BackwardDriveModule *backward,
-	                  Logger *             logger,
-	                  Configuration *      config);
+	                  Logger              *logger,
+	                  Configuration       *config);
 	~BiwardDriveModule();
 
 	void update();
 
 private:
-	ForwardDriveModule * mod_forward_;
+	ForwardDriveModule  *mod_forward_;
 	BackwardDriveModule *mod_backward_;
 
 	int count_forward_;

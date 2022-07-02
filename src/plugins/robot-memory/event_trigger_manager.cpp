@@ -46,8 +46,8 @@ using namespace mongocxx;
  * @param config Configuration
  * @param mongo_connection_manager MongoDBConnCreator
  */
-EventTriggerManager::EventTriggerManager(Logger *            logger,
-                                         Configuration *     config,
+EventTriggerManager::EventTriggerManager(Logger             *logger,
+                                         Configuration      *config,
                                          MongoDBConnCreator *mongo_connection_manager)
 : cfg_debug_(false)
 {

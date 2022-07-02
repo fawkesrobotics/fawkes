@@ -54,7 +54,7 @@ namespace firevision {
  */
 FireVisionDataFileBlock::FireVisionDataFileBlock(unsigned int type,
                                                  size_t       data_size,
-                                                 void *       spec_header,
+                                                 void        *spec_header,
                                                  size_t       spec_header_size)
 {
 	constructor(type, data_size, spec_header, spec_header_size);
@@ -109,7 +109,7 @@ FireVisionDataFileBlock::FireVisionDataFileBlock(FireVisionDataFileBlock *block)
 void
 FireVisionDataFileBlock::constructor(unsigned int type,
                                      size_t       data_size,
-                                     void *       spec_header,
+                                     void        *spec_header,
                                      size_t       spec_header_size)
 {
 	_data_size        = data_size;

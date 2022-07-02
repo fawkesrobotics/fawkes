@@ -36,11 +36,11 @@ class YuvColormap : public Colormap
 {
 public:
 	YuvColormap(unsigned int depth = 1, unsigned int width = 256, unsigned int height = 256);
-	YuvColormap(const char * shmem_lut_id,
+	YuvColormap(const char  *shmem_lut_id,
 	            unsigned int depth  = 1,
 	            unsigned int width  = 256,
 	            unsigned int height = 256);
-	YuvColormap(const char * shmem_lut_id,
+	YuvColormap(const char  *shmem_lut_id,
 	            bool         destroy_on_free,
 	            unsigned int depth  = 1,
 	            unsigned int width  = 256,
@@ -79,11 +79,11 @@ private:
 	void constructor(unsigned int depth,
 	                 unsigned int width,
 	                 unsigned int height,
-	                 const char * shmem_lut_id    = 0,
+	                 const char  *shmem_lut_id    = 0,
 	                 bool         destroy_on_free = false);
 
 	SharedMemoryLookupTable *shm_lut_;
-	unsigned char *          lut_;
+	unsigned char           *lut_;
 	size_t                   lut_size_;
 
 	unsigned int width_;

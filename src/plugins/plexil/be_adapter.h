@@ -82,15 +82,15 @@ private:
 	};
 
 	std::string format_skillstring(const std::vector<PLEXIL::Value> &values);
-	std::string map_skillstring(const std::string &               name,
-	                            const skill_config &              skill_config,
+	std::string map_skillstring(const std::string                &name,
+	                            const skill_config               &skill_config,
 	                            const std::vector<PLEXIL::Value> &values);
 	void        call_skill(const std::string &skill_string, PLEXIL::Command *cmd);
 
 private:
-	fawkes::Configuration *   config_;
-	fawkes::Logger *          logger_;
-	fawkes::BlackBoard *      blackboard_;
+	fawkes::Configuration    *config_;
+	fawkes::Logger           *logger_;
+	fawkes::BlackBoard       *blackboard_;
 	fawkes::SkillerInterface *skiller_if_;
 
 	std::shared_ptr<fawkes::ActionSkillMapping> action_skill_mapping_;

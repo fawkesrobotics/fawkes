@@ -44,9 +44,9 @@ public:
 class SkillerActionExecutor : public ActionExecutor, public BlackBoardInterfaceListener
 {
 public:
-	SkillerActionExecutor(Logger *           logger,
-	                      BlackBoard *       blackboard,
-	                      Configuration *    config,
+	SkillerActionExecutor(Logger            *logger,
+	                      BlackBoard        *blackboard,
+	                      Configuration     *config,
 	                      const std::string &cfg_prefix);
 	virtual ~SkillerActionExecutor() override;
 	void         start(std::shared_ptr<gologpp::Activity> activity) override;
@@ -63,8 +63,8 @@ private:
 	void               initialize_action_skill_mapping();
 	std::string        map_activity_to_skill(std::shared_ptr<gologpp::Activity> activity);
 	ActionSkillMapping action_skill_mapping_;
-	SkillerInterface * skiller_if_;
-	Configuration *    config_;
+	SkillerInterface  *skiller_if_;
+	Configuration     *config_;
 	const std::string  cfg_prefix_;
 };
 

@@ -106,7 +106,7 @@ using Skill = ExecutionTimeEstimator::Skill;
  * @param config configuration to read all values from
  * @param cfg_prefix prefix where the estimator-specific configs are located
  */
-ExecutionTimeEstimator::ExecutionTimeEstimator(Configuration *      config,
+ExecutionTimeEstimator::ExecutionTimeEstimator(Configuration       *config,
                                                const ::std::string &cfg_prefix)
 : config_(config),
   cfg_prefix_(cfg_prefix),
@@ -241,9 +241,9 @@ ExecutionTimeEstimator::get_property(const Property<T> &property) const
 }
 
 template <typename T>
-ExecutionTimeEstimator::Property<T>::Property(fawkes::Configuration * config,
-                                              const std::string &     path,
-                                              const std::string &     property,
+ExecutionTimeEstimator::Property<T>::Property(fawkes::Configuration  *config,
+                                              const std::string      &path,
+                                              const std::string      &property,
                                               const std::optional<T> &default_val)
 {
 	try {

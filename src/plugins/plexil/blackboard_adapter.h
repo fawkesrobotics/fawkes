@@ -79,7 +79,7 @@ private:
 	void bb_print(PLEXIL::Command *cmd);
 
 private:
-	fawkes::Logger *    logger_;
+	fawkes::Logger     *logger_;
 	fawkes::BlackBoard *blackboard_;
 
 	std::mutex                                 ifs_read_mutex_;

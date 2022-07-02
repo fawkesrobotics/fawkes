@@ -85,19 +85,19 @@ private:
 	AvahiThread *avahi_thread_;
 #endif
 
-	Mutex *                          namesq_mutex_;
+	Mutex                           *namesq_mutex_;
 	unsigned int                     namesq_active_;
 	typedef LockHashSet<std::string> NamesQMap;
 	NamesQMap                        namesqs_[2];
-	NamesQMap *                      namesq_;
-	NamesQMap *                      namesq_proc_;
+	NamesQMap                       *namesq_;
+	NamesQMap                       *namesq_proc_;
 
-	Mutex *                              addrq_mutex_;
+	Mutex                               *addrq_mutex_;
 	unsigned int                         addrq_active_;
 	typedef std::list<struct sockaddr *> AddrQList;
 	AddrQList                            addrqs_[2];
-	AddrQList *                          addrq_;
-	AddrQList *                          addrq_proc_;
+	AddrQList                           *addrq_;
+	AddrQList                           *addrq_proc_;
 };
 
 } // end namespace fawkes

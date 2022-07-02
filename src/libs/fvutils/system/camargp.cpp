@@ -175,7 +175,7 @@ long int
 CameraArgumentParser::get_int(std::string s) const
 {
 	if (values.find(s) != values.end()) {
-		char *   endptr;
+		char    *endptr;
 		long int rv = strtol((*(values.find(s))).second.c_str(), &endptr, 10);
 		if (endptr[0] != 0) {
 			throw IllegalArgumentException("Supplied argument is not of type int");
@@ -198,7 +198,7 @@ double
 CameraArgumentParser::get_float(std::string s) const
 {
 	if (values.find(s) != values.end()) {
-		char * endptr;
+		char  *endptr;
 		double rv = strtod((*(values.find(s))).second.c_str(), &endptr);
 		if (endptr[0] != 0) {
 			throw IllegalArgumentException("Supplied argument is not of type double");

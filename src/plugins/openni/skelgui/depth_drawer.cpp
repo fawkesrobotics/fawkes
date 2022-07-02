@@ -91,7 +91,7 @@ SkelGuiDepthDrawer::fill_texture()
 		throw;
 	}
 
-	uint16_t *   depth      = (uint16_t *)depth_cam_->buffer();
+	uint16_t    *depth      = (uint16_t *)depth_cam_->buffer();
 	unsigned int num_points = 0;
 	memset(histogram_, 0, max_depth_ * sizeof(float));
 
@@ -123,8 +123,8 @@ SkelGuiDepthDrawer::fill_texture()
 			e.print_trace();
 			throw;
 		}
-		uint16_t *     l = (uint16_t *)label_cam_->buffer();
-		uint16_t *     d = depth;
+		uint16_t      *l = (uint16_t *)label_cam_->buffer();
+		uint16_t      *d = depth;
 		unsigned char *r = rgb_buf_;
 		for (unsigned int i = 0; i < width_ * height_; ++i, ++l, ++d, r += 3) {
 			r[0]               = 0;
@@ -143,7 +143,7 @@ SkelGuiDepthDrawer::fill_texture()
 		}
 		label_cam_->dispose_buffer();
 	} else {
-		uint16_t *     d = depth;
+		uint16_t      *d = depth;
 		unsigned char *r = rgb_buf_;
 		for (unsigned int i = 0; i < width_ * height_; ++i, ++d, r += 3) {
 			r[0] = 0;

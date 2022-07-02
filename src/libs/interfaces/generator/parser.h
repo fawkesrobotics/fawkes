@@ -42,20 +42,20 @@ public:
 	InterfaceParser(std::string config_filename);
 	~InterfaceParser();
 
-	std::vector<InterfaceField>     getFields(xmlpp::Node *                node,
+	std::vector<InterfaceField>     getFields(xmlpp::Node                 *node,
 	                                          const std::set<std::string> &reserved_names);
-	std::vector<InterfacePseudoMap> getPseudoMaps(xmlpp::Node *                node,
+	std::vector<InterfacePseudoMap> getPseudoMaps(xmlpp::Node                 *node,
 	                                              std::vector<InterfaceField> &fields);
 	void                            parse();
 
 	void printFields(std::vector<InterfaceField> &fields);
 	void printPseudoMaps(std::vector<InterfacePseudoMap> &pseudo_maps);
 	void print();
-	void printParsed(std::vector<InterfaceConstant> &    constants,
+	void printParsed(std::vector<InterfaceConstant>     &constants,
 	                 std::vector<InterfaceEnumConstant> &enum_constants,
-	                 std::vector<InterfaceField> &       data_fields,
-	                 std::vector<InterfacePseudoMap> &   pseudo_maps,
-	                 std::vector<InterfaceMessage> &     messages);
+	                 std::vector<InterfaceField>        &data_fields,
+	                 std::vector<InterfacePseudoMap>    &pseudo_maps,
+	                 std::vector<InterfaceMessage>      &messages);
 
 	std::string                        getInterfaceName();
 	std::string                        getInterfaceAuthor();
@@ -70,7 +70,7 @@ public:
 
 private:
 	xmlpp::DomParser *dom;
-	xmlpp::Node *     root;
+	xmlpp::Node      *root;
 	std::string       name;
 	std::string       author;
 	std::string       year;

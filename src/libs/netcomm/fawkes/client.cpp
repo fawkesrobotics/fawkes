@@ -168,9 +168,9 @@ protected:
 	}
 
 private:
-	StreamSocket *             s_;
-	FawkesNetworkClient *      parent_;
-	Mutex *                    outbound_mutex_;
+	StreamSocket              *s_;
+	FawkesNetworkClient       *parent_;
+	Mutex                     *outbound_mutex_;
 	unsigned int               outbound_active_;
 	bool                       outbound_havemore_;
 	FawkesNetworkMessageQueue *outbound_msgq_;
@@ -287,10 +287,10 @@ protected:
 	}
 
 private:
-	StreamSocket *             s_;
-	FawkesNetworkClient *      parent_;
+	StreamSocket              *s_;
+	FawkesNetworkClient       *parent_;
 	FawkesNetworkMessageQueue *inbound_msgq_;
-	Mutex *                    recv_mutex_;
+	Mutex                     *recv_mutex_;
 };
 
 /** @class FawkesNetworkClient netcomm/fawkes/client.h

@@ -313,7 +313,7 @@ OpenPRSProtobuf::oprs_pb_field_type(void *msgptr, std::string field_name)
 	if (!*m)
 		return build_id(declare_atom("INVALID-MESSAGE"));
 
-	const Descriptor *     desc  = (*m)->GetDescriptor();
+	const Descriptor      *desc  = (*m)->GetDescriptor();
 	const FieldDescriptor *field = desc->FindFieldByName(field_name);
 	if (!field) {
 		return build_id(declare_atom("DOES-NOT-EXIST"));
@@ -354,7 +354,7 @@ OpenPRSProtobuf::oprs_pb_has_field(void *msgptr, std::string field_name)
 	if (!*m)
 		return false;
 
-	const Descriptor *     desc  = (*m)->GetDescriptor();
+	const Descriptor      *desc  = (*m)->GetDescriptor();
 	const FieldDescriptor *field = desc->FindFieldByName(field_name);
 	if (!field)
 		return false;
@@ -381,7 +381,7 @@ OpenPRSProtobuf::oprs_pb_field_label(void *msgptr, std::string field_name)
 	if (!*m)
 		return build_id(declare_atom("INVALID-MESSAGE"));
 
-	const Descriptor *     desc  = (*m)->GetDescriptor();
+	const Descriptor      *desc  = (*m)->GetDescriptor();
 	const FieldDescriptor *field = desc->FindFieldByName(field_name);
 	if (!field)
 		return build_id(declare_atom("DOES-NOT-EXIST"));
@@ -406,7 +406,7 @@ OpenPRSProtobuf::oprs_pb_field_value(void *msgptr, std::string field_name)
 	if (!*m)
 		return build_id(declare_atom("INVALID-MESSAGE"));
 
-	const Descriptor *     desc  = (*m)->GetDescriptor();
+	const Descriptor      *desc  = (*m)->GetDescriptor();
 	const FieldDescriptor *field = desc->FindFieldByName(field_name);
 	if (!field)
 		return build_id(declare_atom("DOES-NOT-EXIST"));
@@ -428,7 +428,7 @@ OpenPRSProtobuf::oprs_pb_field_value(void *msgptr, std::string field_name)
 	case FieldDescriptor::TYPE_STRING: return build_string(refl->GetString(**m, field).c_str());
 	case FieldDescriptor::TYPE_MESSAGE: {
 		const google::protobuf::Message &mfield = refl->GetMessage(**m, field);
-		google::protobuf::Message *      mcopy  = mfield.New();
+		google::protobuf::Message       *mcopy  = mfield.New();
 		mcopy->CopyFrom(mfield);
 		void *ptr = new std::shared_ptr<google::protobuf::Message>(mcopy);
 		return build_pointer(ptr);
@@ -458,7 +458,7 @@ OpenPRSProtobuf::oprs_pb_set_field(void *msgptr, std::string field_name, Term *v
 	if (!*m)
 		return;
 
-	const Descriptor *     desc  = (*m)->GetDescriptor();
+	const Descriptor      *desc  = (*m)->GetDescriptor();
 	const FieldDescriptor *field = desc->FindFieldByName(field_name);
 	if (!field) {
 		//logger_->log_warn("RefBox", "Could not find field %s", field_name.c_str());
@@ -573,7 +573,7 @@ OpenPRSProtobuf::oprs_pb_set_field(void *msgptr, std::string field_name, Term *v
 				                       + (*m)->GetTypeName() + field_name);
 			}
 
-			const EnumDescriptor *     enumdesc = field->enum_type();
+			const EnumDescriptor      *enumdesc = field->enum_type();
 			const EnumValueDescriptor *enumval  = enumdesc->FindValueByName(sym_name);
 			if (enumval) {
 				refl->SetEnum(m->get(), field, enumval);
@@ -620,7 +620,7 @@ OpenPRSProtobuf::oprs_pb_add_list(void *msgptr, std::string field_name, Term *va
 	if (!(m && *m))
 		return;
 
-	const Descriptor *     desc  = (*m)->GetDescriptor();
+	const Descriptor      *desc  = (*m)->GetDescriptor();
 	const FieldDescriptor *field = desc->FindFieldByName(field_name);
 	if (!field) {
 		//logger_->log_warn("RefBox", "Could not find field %s", field_name.c_str());
@@ -728,7 +728,7 @@ OpenPRSProtobuf::oprs_pb_add_list(void *msgptr, std::string field_name, Term *va
 				throw std::logic_error(std::string("Invalid type, required symbol or string for ")
 				                       + (*m)->GetTypeName() + field_name);
 			}
-			const EnumDescriptor *     enumdesc = field->enum_type();
+			const EnumDescriptor      *enumdesc = field->enum_type();
 			const EnumValueDescriptor *enumval  = enumdesc->FindValueByName(sym_name);
 			if (enumval) {
 				refl->AddEnum(m->get(), field, enumval);
@@ -897,7 +897,7 @@ OpenPRSProtobuf::oprs_pb_field_list(void *msgptr, std::string field_name)
 	if (!(m && *m))
 		return build_id(declare_atom("INVALID-MESSAGE"));
 
-	const Descriptor *     desc  = (*m)->GetDescriptor();
+	const Descriptor      *desc  = (*m)->GetDescriptor();
 	const FieldDescriptor *field = desc->FindFieldByName(field_name);
 	if (!field)
 		return build_id(declare_atom("DOES-NOT-EXIST"));
@@ -936,7 +936,7 @@ OpenPRSProtobuf::oprs_pb_field_list(void *msgptr, std::string field_name)
 			break;
 		case FieldDescriptor::TYPE_MESSAGE: {
 			const google::protobuf::Message &msg   = refl->GetRepeatedMessage(**m, field, i);
-			google::protobuf::Message *      mcopy = msg.New();
+			google::protobuf::Message       *mcopy = msg.New();
 			mcopy->CopyFrom(msg);
 			void *ptr = new std::shared_ptr<google::protobuf::Message>(mcopy);
 			tl        = build_term_list(tl, build_pointer(ptr));
@@ -979,7 +979,7 @@ OpenPRSProtobuf::oprs_pb_field_is_list(void *msgptr, std::string field_name)
 	if (!(m && *m))
 		return false;
 
-	const Descriptor *     desc  = (*m)->GetDescriptor();
+	const Descriptor      *desc  = (*m)->GetDescriptor();
 	const FieldDescriptor *field = desc->FindFieldByName(field_name);
 	if (!field) {
 		return false;
@@ -1045,7 +1045,7 @@ OpenPRSProtobuf::oprs_pb_events_pending()
 
 void
 OpenPRSProtobuf::oprs_assert_server_client_event(long int       client_id,
-                                                 std::string &  host,
+                                                 std::string   &host,
                                                  unsigned short port,
                                                  bool           connect)
 {
@@ -1073,7 +1073,7 @@ OpenPRSProtobuf::oprs_assert_client_event(long int client_id, bool connect)
 }
 
 void
-OpenPRSProtobuf::oprs_assert_message(std::string &                               endpoint_host,
+OpenPRSProtobuf::oprs_assert_message(std::string                                &endpoint_host,
                                      unsigned short                              endpoint_port,
                                      uint16_t                                    comp_id,
                                      uint16_t                                    msg_type,
@@ -1209,7 +1209,7 @@ OpenPRSProtobuf::handle_server_client_fail(ProtobufStreamServer::ClientID client
  */
 void
 OpenPRSProtobuf::handle_peer_msg(long int                                   peer_id,
-                                 boost::asio::ip::udp::endpoint &           endpoint,
+                                 boost::asio::ip::udp::endpoint            &endpoint,
                                  uint16_t                                   component_id,
                                  uint16_t                                   msg_type,
                                  std::shared_ptr<google::protobuf::Message> msg)

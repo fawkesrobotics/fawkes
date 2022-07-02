@@ -72,14 +72,14 @@ main(int argc, char **argv)
 		BlackBoard *bb = new RemoteBlackBoard(c);
 		//SwitchInterface *sw_if = bb->open_for_reading<SwitchInterface>("Start");
 		if (argp.has_arg("e")) {
-			const char *     switch_name = argp.arg("e");
+			const char      *switch_name = argp.arg("e");
 			SwitchInterface *sw_if       = bb->open_for_reading<SwitchInterface>(switch_name);
 			//send enable msg
 			SwitchInterface::EnableSwitchMessage *em = new SwitchInterface::EnableSwitchMessage();
 			sw_if->msgq_enqueue(em);
 			bb->close(sw_if);
 		} else if (argp.has_arg("d")) {
-			const char *     switch_name = argp.arg("d");
+			const char      *switch_name = argp.arg("d");
 			SwitchInterface *sw_if       = bb->open_for_reading<SwitchInterface>(switch_name);
 			//send disable msg
 			SwitchInterface::DisableSwitchMessage *dm = new SwitchInterface::DisableSwitchMessage();

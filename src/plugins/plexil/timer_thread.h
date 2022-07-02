@@ -53,7 +53,7 @@ protected:
 	}
 
 private:
-	fawkes::Mutex *        mutex_;
+	fawkes::Mutex         *mutex_;
 	fawkes::WaitCondition *waitcond_;
 
 	CallbackListener *listener_;

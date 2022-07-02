@@ -69,7 +69,7 @@ protected:
 #if GTK_VERSION_GE(3, 0)
 	virtual bool on_draw(const Cairo::RefPtr<Cairo::Context> &cr);
 #else
-	virtual bool on_expose_event(GdkEventExpose *event);
+	virtual bool     on_expose_event(GdkEventExpose *event);
 #endif
 	virtual bool on_scroll_event(GdkEventScroll *event);
 	virtual bool on_button_press_event(GdkEventButton *event);
@@ -80,9 +80,9 @@ private:
 
 private:
 	Cairo::RefPtr<Cairo::Context> cairo_;
-	Gtk::FileChooserDialog *      fcd_save_;
-	Gtk::FileChooserDialog *      fcd_open_;
-	Gtk::FileChooserDialog *      fcd_recording_;
+	Gtk::FileChooserDialog       *fcd_save_;
+	Gtk::FileChooserDialog       *fcd_open_;
+	Gtk::FileChooserDialog       *fcd_recording_;
 #if GTK_VERSION_GE(3, 0)
 	Glib::RefPtr<Gtk::FileFilter> filter_pdf_;
 	Glib::RefPtr<Gtk::FileFilter> filter_svg_;

@@ -55,7 +55,7 @@ StringContent::StringContent(const char *initial_string)
  */
 StringContent::StringContent(unsigned int cid,
                              unsigned int msgid,
-                             void *       payload,
+                             void        *payload,
                              size_t       payload_size)
 {
 	string_owner_ = false;

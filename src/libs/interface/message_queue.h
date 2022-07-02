@@ -46,9 +46,9 @@ private:
    */
 	struct msg_list_t
 	{
-		msg_list_t * next;   /**< pointer to next element in list */
+		msg_list_t  *next;   /**< pointer to next element in list */
 		unsigned int msg_id; /**< message id */
-		Message *    msg;    /**< pointer to message */
+		Message     *msg;    /**< pointer to message */
 	};
 
 public:
@@ -71,8 +71,8 @@ public:
 		MessageIterator &operator+=(unsigned int i);
 		bool             operator==(const MessageIterator &c) const;
 		bool             operator!=(const MessageIterator &c) const;
-		Message *        operator*() const;
-		Message *        operator->() const;
+		Message         *operator*() const;
+		Message         *operator->() const;
 		MessageIterator &operator=(const MessageIterator &c);
 
 		unsigned int id() const;
@@ -112,7 +112,7 @@ private:
 
 	msg_list_t *list_;
 	msg_list_t *end_el_;
-	Mutex *     mutex_;
+	Mutex      *mutex_;
 };
 
 /** Check if message is of given type.

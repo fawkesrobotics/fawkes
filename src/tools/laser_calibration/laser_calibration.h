@@ -66,8 +66,8 @@ public:
 class LaserCalibration
 {
 public:
-	LaserCalibration(LaserInterface *              laser,
-	                 fawkes::tf::Transformer *     tf_transformer,
+	LaserCalibration(LaserInterface               *laser,
+	                 fawkes::tf::Transformer      *tf_transformer,
 	                 fawkes::NetworkConfiguration *config,
 	                 std::string                   config_path);
 	virtual ~LaserCalibration();

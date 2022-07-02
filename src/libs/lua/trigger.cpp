@@ -70,7 +70,7 @@ void
 LuaTriggerManager::trigger(const char *event, const char *param_format, ...)
 {
 	va_list args;
-	char *  params = NULL;
+	char   *params = NULL;
 	if (param_format) {
 		va_start(args, param_format);
 		if (vasprintf(&params, param_format, args) == -1) {

@@ -48,7 +48,7 @@ public:
 	const std::unordered_map<std::string, LockPtr<ClingoAccess>> &controls(void) const;
 
 private:
-	Logger *                                               logger_;
+	Logger                                                *logger_;
 	std::unordered_map<std::string, LockPtr<ClingoAccess>> controls_;
 };
 

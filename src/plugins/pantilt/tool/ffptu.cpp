@@ -98,7 +98,7 @@ public:
 	void
 	init_bb()
 	{
-		char *             host      = (char *)"localhost";
+		char              *host      = (char *)"localhost";
 		unsigned short int port      = 1910;
 		bool               free_host = argp_.parse_hostport("r", &host, &port);
 
@@ -379,10 +379,10 @@ private:
 
 private:
 	ArgumentParser    argp_;
-	BlackBoard *      bb_;
+	BlackBoard       *bb_;
 	PanTiltInterface *ptu_if_;
 	float             resolution_;
-	RobotisRX28 *     rx28_;
+	RobotisRX28      *rx28_;
 };
 
 /** Config tool main.

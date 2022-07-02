@@ -85,7 +85,7 @@ private:
 	void conditional_close(Interface *interface) noexcept;
 
 private:
-	BlackBoard * bb_;
+	BlackBoard  *bb_;
 	Transformer *tf_transformer_;
 	bool         bb_is_remote_;
 

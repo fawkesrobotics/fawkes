@@ -26,8 +26,8 @@ namespace dcm {
 
 void
 set_value(AL::ALPtr<AL::DCMProxy> &dcm,
-          const std::string &      device,
-          const std::string &      kind,
+          const std::string       &device,
+          const std::string       &kind,
           float                    value,
           int                      time)
 {
@@ -44,9 +44,9 @@ set_value(AL::ALPtr<AL::DCMProxy> &dcm,
 }
 
 std::vector<std::string>
-get_devices(AL::ALPtr<AL::DCMProxy> &     dcm,
+get_devices(AL::ALPtr<AL::DCMProxy>      &dcm,
             AL::ALPtr<AL::ALMemoryProxy> &almem,
-            const std::string &           type)
+            const std::string            &type)
 {
 	AL::ALValue names       = almem->getDataListName();
 	std::string subd_prefix = dcm->getPrefix()[0];

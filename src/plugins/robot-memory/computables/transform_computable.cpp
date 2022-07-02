@@ -37,10 +37,10 @@ using namespace bsoncxx;
  * @param logger Logger
  * @param config Configuration
  */
-TransformComputable::TransformComputable(RobotMemory *            robot_memory,
+TransformComputable::TransformComputable(RobotMemory             *robot_memory,
                                          fawkes::tf::Transformer *tf,
-                                         fawkes::Logger *         logger,
-                                         fawkes::Configuration *  config)
+                                         fawkes::Logger          *logger,
+                                         fawkes::Configuration   *config)
 {
 	robot_memory_ = robot_memory;
 	tf_           = tf;

@@ -65,7 +65,7 @@ public:
 	virtual void timer_event();
 
 private:
-	fawkes::Clock *    clock_;
+	fawkes::Clock     *clock_;
 	PlexilTimerThread *timer_;
 };
 

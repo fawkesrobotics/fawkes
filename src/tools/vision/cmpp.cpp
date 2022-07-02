@@ -57,7 +57,7 @@ main(int argc, char **argv)
 
 		ColormapFile cmfile;
 		cmfile.read(in_file);
-		Colormap *   cm        = cmfile.get_colormap();
+		Colormap    *cm        = cmfile.get_colormap();
 		unsigned int cm_width  = cm->width();
 		unsigned int cm_height = cm->height();
 		unsigned int cm_depth  = cm->depth();

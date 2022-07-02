@@ -35,10 +35,10 @@ class GameStateInterface;
 class RemoteBlackBoardRefBoxProcessor : public RefBoxProcessor
 {
 public:
-	RemoteBlackBoardRefBoxProcessor(fawkes::Logger *   logger,
-	                                const char *       bb_host,
+	RemoteBlackBoardRefBoxProcessor(fawkes::Logger    *logger,
+	                                const char        *bb_host,
 	                                unsigned short int bb_port,
-	                                const char *       iface_id);
+	                                const char        *iface_id);
 	~RemoteBlackBoardRefBoxProcessor();
 
 	bool check_connection();
@@ -48,16 +48,16 @@ private: // methods
 	void reconnect();
 
 private:
-	fawkes::Logger *    logger_;
+	fawkes::Logger     *logger_;
 	fawkes::BlackBoard *rbb_;
 
 	fawkes::GameStateInterface *gamestate_if_;
 
 	const char *name_;
 
-	char *             bb_host_;
+	char              *bb_host_;
 	unsigned short int bb_port_;
-	char *             iface_id_;
+	char              *iface_id_;
 
 	bool message_shown_;
 };

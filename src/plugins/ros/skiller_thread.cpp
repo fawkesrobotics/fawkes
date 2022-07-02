@@ -221,7 +221,7 @@ RosSkillerThread::loop()
 					as_goal_.setSucceeded(create_result(error_msg), error_msg);
 				} else if (skiller_if_->status() == SkillerInterface::S_FAILED) {
 					std::string error_msg = "Failed to execute skill";
-					char *      tmp;
+					char       *tmp;
 					if (asprintf(&tmp, "Failed to execute skill, error: %s", skiller_if_->error()) != -1) {
 						error_msg = tmp;
 						free(tmp);
@@ -234,7 +234,7 @@ RosSkillerThread::loop()
 
 	if (skiller_if_->refreshed()) {
 		fawkes_msgs::SkillStatus msg;
-		const Time *             time = skiller_if_->timestamp();
+		const Time              *time = skiller_if_->timestamp();
 		msg.stamp                     = ros::Time(time->get_sec(), time->get_nsec());
 		msg.skill_string              = skiller_if_->skill_string();
 		msg.error                     = skiller_if_->error();

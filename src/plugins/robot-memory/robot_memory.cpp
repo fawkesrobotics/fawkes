@@ -64,11 +64,11 @@ using namespace bsoncxx;
  * @param mongo_connection_manager MongoDBConnCreator to create client connections to the shared and local db
  * @param blackboard Fawkes blackboard
  */
-RobotMemory::RobotMemory(fawkes::Configuration *     config,
-                         fawkes::Logger *            logger,
-                         fawkes::Clock *             clock,
+RobotMemory::RobotMemory(fawkes::Configuration      *config,
+                         fawkes::Logger             *logger,
+                         fawkes::Clock              *clock,
                          fawkes::MongoDBConnCreator *mongo_connection_manager,
-                         fawkes::BlackBoard *        blackboard)
+                         fawkes::BlackBoard         *blackboard)
 {
 	config_                     = config;
 	logger_                     = logger;
@@ -176,7 +176,7 @@ RobotMemory::loop()
  */
 cursor
 RobotMemory::query(document::view          query,
-                   const std::string &     collection_name,
+                   const std::string      &collection_name,
                    mongocxx::options::find query_options)
 {
 	collection collection = get_collection(collection_name);
@@ -232,7 +232,7 @@ RobotMemory::insert(bsoncxx::document::view doc, const std::string &collection_n
  */
 int
 RobotMemory::create_index(bsoncxx::document::view keys,
-                          const std::string &     collection_name,
+                          const std::string      &collection_name,
                           bool                    unique)
 {
 	collection collection = get_collection(collection_name);
@@ -312,7 +312,7 @@ RobotMemory::insert(const std::string &obj_str, const std::string &collection)
 int
 RobotMemory::update(const bsoncxx::document::view &query,
                     const bsoncxx::document::view &update,
-                    const std::string &            collection_name,
+                    const std::string             &collection_name,
                     bool                           upsert)
 {
 	collection collection = get_collection(collection_name);
@@ -348,8 +348,8 @@ RobotMemory::update(const bsoncxx::document::view &query,
  */
 int
 RobotMemory::update(const bsoncxx::document::view &query,
-                    const std::string &            update_str,
-                    const std::string &            collection,
+                    const std::string             &update_str,
+                    const std::string             &collection,
                     bool                           upsert)
 {
 	return update(query, from_json(update_str), collection, upsert);
@@ -367,7 +367,7 @@ RobotMemory::update(const bsoncxx::document::view &query,
 document::value
 RobotMemory::find_one_and_update(const document::view &filter,
                                  const document::view &update,
-                                 const std::string &   collection_name,
+                                 const std::string    &collection_name,
                                  bool                  upsert,
                                  bool                  return_new)
 {
@@ -436,9 +436,9 @@ RobotMemory::remove(const bsoncxx::document::view &query, const std::string &col
  */
 bsoncxx::document::value
 RobotMemory::mapreduce(const bsoncxx::document::view &query,
-                       const std::string &            collection,
-                       const std::string &            js_map_fun,
-                       const std::string &            js_reduce_fun)
+                       const std::string             &collection,
+                       const std::string             &js_map_fun,
+                       const std::string             &js_reduce_fun)
 {
 	throw Exception("Not implemented");
 	/*
@@ -631,8 +631,8 @@ RobotMemory::log_deb(const std::string &what, const std::string &level)
 
 void
 RobotMemory::log_deb(const bsoncxx::document::view &query,
-                     const std::string &            what,
-                     const std::string &            level)
+                     const std::string             &what,
+                     const std::string             &level)
 {
 	if (debug_) {
 		log(query, what, level);
@@ -641,8 +641,8 @@ RobotMemory::log_deb(const bsoncxx::document::view &query,
 
 void
 RobotMemory::log(const bsoncxx::document::view &query,
-                 const std::string &            what,
-                 const std::string &            level)
+                 const std::string             &what,
+                 const std::string             &level)
 {
 	log(what + " " + to_json(query), level);
 }

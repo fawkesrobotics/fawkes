@@ -67,7 +67,7 @@ protected:
 	}
 
 private:
-	firevision::SharedMemoryImageBuffer *          pcl_buf_;
+	firevision::SharedMemoryImageBuffer           *pcl_buf_;
 	fawkes::RefPtr<pcl::PointCloud<pcl::PointXYZ>> pcl_;
 
 	fawkes::Time last_capture_time_;

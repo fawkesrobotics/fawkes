@@ -101,13 +101,13 @@ private:
 	void pb_peer_create(PLEXIL::Command *cmd);
 	void pb_peer_create_local(PLEXIL::Command *cmd);
 	void pb_peer_create_crypto(PLEXIL::Command *cmd);
-	void pb_peer_create_local_crypto(PLEXIL::Command *                 cmd,
+	void pb_peer_create_local_crypto(PLEXIL::Command                  *cmd,
 	                                 const std::vector<PLEXIL::Value> *args = nullptr);
 	void pb_peer_destroy(PLEXIL::Command *cmd);
 	void pb_peer_setup_crypto(PLEXIL::Command *cmd);
 
 	void handle_peer_msg(int                                        peer_id,
-	                     boost::asio::ip::udp::endpoint &           endpoint,
+	                     boost::asio::ip::udp::endpoint            &endpoint,
 	                     uint16_t                                   component_id,
 	                     uint16_t                                   msg_type,
 	                     std::shared_ptr<google::protobuf::Message> msg);
@@ -117,8 +117,8 @@ private:
 
 private:
 	fawkes::Configuration *config_;
-	fawkes::Logger *       logger_;
-	fawkes::Clock *        clock_;
+	fawkes::Logger        *logger_;
+	fawkes::Clock         *clock_;
 
 	std::mutex                          queue_mutex_;
 	std::map<std::string, queue_entry>  queue_;

@@ -102,7 +102,7 @@ private:
 
 	fawkes::LockList<fawkes::Position3DInterface *> cluster_ifs_;
 
-	fawkes::NavGraphEdgeConstraint *    edge_constraint_;
+	fawkes::NavGraphEdgeConstraint     *edge_constraint_;
 	fawkes::NavGraphEdgeCostConstraint *edge_cost_constraint_;
 };
 

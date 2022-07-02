@@ -61,8 +61,8 @@ protected:
 	}
 
 private:
-	fawkes::Laser360Interface * laser360_if_;
-	fawkes::Laser720Interface * laser720_if_;
+	fawkes::Laser360Interface  *laser360_if_;
+	fawkes::Laser720Interface  *laser720_if_;
 	fawkes::Laser1080Interface *laser1080_if_;
 
 	LaserAcquisitionThread *aqt_;

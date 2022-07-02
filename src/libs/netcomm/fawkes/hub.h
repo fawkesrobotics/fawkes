@@ -39,7 +39,7 @@ public:
 
 	virtual void broadcast(unsigned short int component_id,
 	                       unsigned short int msg_id,
-	                       void *             payload,
+	                       void              *payload,
 	                       unsigned int       payload_size) = 0;
 
 	virtual void broadcast(unsigned short int component_id, unsigned short int msg_id) = 0;
@@ -52,7 +52,7 @@ public:
 	virtual void send(unsigned int       to_clid,
 	                  unsigned short int component_id,
 	                  unsigned short int msg_id,
-	                  void *             payload,
+	                  void              *payload,
 	                  unsigned int       payload_size) = 0;
 
 	virtual void send(unsigned int                 to_clid,

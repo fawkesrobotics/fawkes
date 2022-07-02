@@ -58,7 +58,7 @@ protected:
 	}
 
 private:
-	OpenRaveThread *           or_thread_;
+	OpenRaveThread            *or_thread_;
 	fawkes::OpenRaveInterface *if_openrave_;
 };
 

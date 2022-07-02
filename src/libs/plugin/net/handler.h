@@ -87,7 +87,7 @@ protected:
 	}
 
 private:
-	PluginManager *   manager_;
+	PluginManager    *manager_;
 	FawkesNetworkHub *hub_;
 
 	LockQueue<FawkesNetworkMessage *> inbound_queue_;

@@ -64,7 +64,7 @@ ImageWidget::ImageWidget(unsigned int width, unsigned int height)
  * @param height of the widget (if not equal to the camera height the
  *        image gets scaled)
  */
-ImageWidget::ImageWidget(Camera *     cam,
+ImageWidget::ImageWidget(Camera      *cam,
                          unsigned int refresh_delay,
                          unsigned int width,
                          unsigned int height)

@@ -392,8 +392,8 @@ JacoBimanualGotoThread::_exec_trajecs()
 			first  = 1;
 			second = 0;
 		}
-		JacoArm *      arm_first     = v_arms_[first]->arm->arm;
-		JacoArm *      arm_second    = v_arms_[second]->arm->arm;
+		JacoArm       *arm_first     = v_arms_[first]->arm->arm;
+		JacoArm       *arm_second    = v_arms_[second]->arm->arm;
 		jaco_trajec_t *trajec_first  = *(v_arms_[first]->target->trajec);
 		jaco_trajec_t *trajec_second = *(v_arms_[second]->target->trajec);
 		unsigned int   size_first    = trajec_first->size();

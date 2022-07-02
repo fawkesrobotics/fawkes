@@ -67,7 +67,7 @@ class SharedMemoryImageBufferHeader : public fawkes::SharedMemoryHeader
 {
 public:
 	SharedMemoryImageBufferHeader();
-	SharedMemoryImageBufferHeader(const char * image_id,
+	SharedMemoryImageBufferHeader(const char  *image_id,
 	                              colorspace_t colorspace,
 	                              unsigned int width,
 	                              unsigned int height);
@@ -90,20 +90,20 @@ public:
 	colorspace_t colorspace() const;
 	unsigned int width() const;
 	unsigned int height() const;
-	const char * image_id() const;
-	const char * frame_id() const;
+	const char  *image_id() const;
+	const char  *frame_id() const;
 
 	SharedMemoryImageBuffer_header_t *raw_header();
 
 private:
-	char *       _image_id;
-	char *       _frame_id;
+	char        *_image_id;
+	char        *_frame_id;
 	colorspace_t _colorspace;
 	unsigned int _width;
 	unsigned int _height;
 
-	char *       _orig_image_id;
-	char *       _orig_frame_id;
+	char        *_orig_image_id;
+	char        *_orig_frame_id;
 	colorspace_t _orig_colorspace;
 	unsigned int _orig_width;
 	unsigned int _orig_height;
@@ -125,7 +125,7 @@ public:
 	                        int                               shm_id,
 	                        int                               semaphore,
 	                        unsigned int                      mem_size,
-	                        const void *                      memptr);
+	                        const void                       *memptr);
 };
 
 class SharedMemoryImageBufferMetaData
@@ -142,8 +142,8 @@ public:
 	bool   mem_destroyed; ///< True if memory has already been marked destroyed
 
 	SharedMemoryImageBufferMetaData();
-	SharedMemoryImageBufferMetaData(const char * image_id,
-	                                const char * frame_id,
+	SharedMemoryImageBufferMetaData(const char  *image_id,
+	                                const char  *frame_id,
 	                                colorspace_t colorspace,
 	                                unsigned int width,
 	                                unsigned int height,
@@ -166,7 +166,7 @@ public:
 	                        int                               shm_id,
 	                        int                               semaphore,
 	                        unsigned int                      mem_size,
-	                        const void *                      memptr);
+	                        const void                       *memptr);
 
 	/** Get meta data.
    * @return image buffer meta data */
@@ -183,15 +183,15 @@ private:
 class SharedMemoryImageBuffer : public fawkes::SharedMemory
 {
 public:
-	SharedMemoryImageBuffer(const char * image_id,
+	SharedMemoryImageBuffer(const char  *image_id,
 	                        colorspace_t cspace,
 	                        unsigned int width,
 	                        unsigned int height);
 	SharedMemoryImageBuffer(const char *image_id, bool is_read_only = true);
 	~SharedMemoryImageBuffer();
 
-	const char *   image_id() const;
-	const char *   frame_id() const;
+	const char    *image_id() const;
+	const char    *frame_id() const;
 	unsigned char *buffer() const;
 	colorspace_t   colorspace() const;
 	unsigned int   width() const;
@@ -230,16 +230,16 @@ public:
 	static std::list<SharedMemoryImageBufferMetaData> list_meta_data();
 
 private:
-	void constructor(const char * image_id,
+	void constructor(const char  *image_id,
 	                 colorspace_t cspace,
 	                 unsigned int width,
 	                 unsigned int height,
 	                 bool         is_read_only);
 
-	SharedMemoryImageBufferHeader *   priv_header;
+	SharedMemoryImageBufferHeader    *priv_header;
 	SharedMemoryImageBuffer_header_t *raw_header;
 
-	char *       _image_id;
+	char        *_image_id;
 	colorspace_t _colorspace;
 	unsigned int _width;
 	unsigned int _height;

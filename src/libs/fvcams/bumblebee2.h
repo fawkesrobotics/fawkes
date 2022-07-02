@@ -65,8 +65,8 @@ public:
 	                               unsigned char *deinterlaced,
 	                               unsigned int   width,
 	                               unsigned int   height);
-	static void decode_bayer(unsigned char * deinterlaced,
-	                         unsigned char * rgb,
+	static void decode_bayer(unsigned char  *deinterlaced,
+	                         unsigned char  *rgb,
 	                         unsigned int    width,
 	                         unsigned int    height,
 	                         bayer_pattern_t bayer_pattern);

@@ -51,9 +51,9 @@ LaserBoxFilterDataFilter::LaserBoxFilterDataFilter(const std::string &filter_nam
                                                    unsigned int       in_data_size,
                                                    std::vector<LaserDataFilter::Buffer *> &in,
                                                    fawkes::tf::Transformer *tf_listener,
-                                                   fawkes::Configuration *  config,
-                                                   fawkes::Logger *         logger,
-                                                   BlackBoard *             blackboard)
+                                                   fawkes::Configuration   *config,
+                                                   fawkes::Logger          *logger,
+                                                   BlackBoard              *blackboard)
 : LaserDataFilter(filter_name, in_data_size, in, 1)
 {
 	tf_listener_         = tf_listener;

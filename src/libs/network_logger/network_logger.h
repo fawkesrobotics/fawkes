@@ -100,16 +100,16 @@ public:
 
 private:
 	void send_message(Logger::LogLevel level,
-	                  struct timeval * t,
-	                  const char *     component,
+	                  struct timeval  *t,
+	                  const char      *component,
 	                  bool             is_exception,
-	                  const char *     format,
+	                  const char      *format,
 	                  va_list          va);
 	void send_message(Logger::LogLevel level,
-	                  struct timeval * t,
-	                  const char *     component,
+	                  struct timeval  *t,
+	                  const char      *component,
 	                  bool             is_exception,
-	                  const char *     message);
+	                  const char      *message);
 
 	FawkesNetworkHub *hub;
 
@@ -123,35 +123,35 @@ class NetworkLoggerMessageContent : public FawkesNetworkMessageContent
 {
 public:
 	NetworkLoggerMessageContent(Logger::LogLevel log_level,
-	                            struct timeval * t,
-	                            const char *     component,
+	                            struct timeval  *t,
+	                            const char      *component,
 	                            bool             is_exception,
-	                            const char *     message);
+	                            const char      *message);
 	NetworkLoggerMessageContent(Logger::LogLevel log_level,
-	                            struct timeval * t,
-	                            const char *     component,
+	                            struct timeval  *t,
+	                            const char      *component,
 	                            bool             is_exception,
-	                            const char *     format,
+	                            const char      *format,
 	                            va_list          va);
 	NetworkLoggerMessageContent(const NetworkLoggerMessageContent *content);
 	NetworkLoggerMessageContent(unsigned int component_id,
 	                            unsigned int msg_id,
-	                            void *       payload,
+	                            void        *payload,
 	                            size_t       payload_size);
 	virtual ~NetworkLoggerMessageContent();
 
 	struct timeval   get_time() const;
 	Logger::LogLevel get_loglevel() const;
-	const char *     get_component() const;
-	const char *     get_message() const;
+	const char      *get_component() const;
+	const char      *get_message() const;
 	bool             is_exception() const;
 
 	virtual void serialize();
 
 private:
 	NetworkLogger::network_logger_header_t *header;
-	const char *                            component_;
-	const char *                            message_;
+	const char                             *component_;
+	const char                             *message_;
 	bool                                    own_payload_;
 };
 

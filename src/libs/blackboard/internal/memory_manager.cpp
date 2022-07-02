@@ -133,7 +133,7 @@ BlackBoardMemoryManager::BlackBoardMemoryManager(size_t memsize)
 BlackBoardMemoryManager::BlackBoardMemoryManager(size_t       memsize,
                                                  unsigned int version,
                                                  bool         master,
-                                                 const char * shmem_token)
+                                                 const char  *shmem_token)
 {
 	memory_  = NULL;
 	memsize_ = memsize;

@@ -167,7 +167,7 @@ PointCloudDBROSCommThread::loop()
 }
 
 bool
-PointCloudDBROSCommThread::merge_cb(fawkes_msgs::MergePointClouds::Request & req,
+PointCloudDBROSCommThread::merge_cb(fawkes_msgs::MergePointClouds::Request  &req,
                                     fawkes_msgs::MergePointClouds::Response &resp)
 {
 	PclDatabaseMergeInterface::MergeMessage *mm = new PclDatabaseMergeInterface::MergeMessage();
@@ -222,7 +222,7 @@ PointCloudDBROSCommThread::merge_cb(fawkes_msgs::MergePointClouds::Request & req
 }
 
 bool
-PointCloudDBROSCommThread::retrieve_cb(fawkes_msgs::RetrievePointCloud::Request & req,
+PointCloudDBROSCommThread::retrieve_cb(fawkes_msgs::RetrievePointCloud::Request  &req,
                                        fawkes_msgs::RetrievePointCloud::Response &resp)
 {
 	PclDatabaseRetrieveInterface::RetrieveMessage *mm =
@@ -259,7 +259,7 @@ PointCloudDBROSCommThread::retrieve_cb(fawkes_msgs::RetrievePointCloud::Request 
 }
 
 bool
-PointCloudDBROSCommThread::store_cb(fawkes_msgs::StorePointCloud::Request & req,
+PointCloudDBROSCommThread::store_cb(fawkes_msgs::StorePointCloud::Request  &req,
                                     fawkes_msgs::StorePointCloud::Response &resp)
 {
 #if PCL_VERSION_COMPARE(>=, 1, 7, 0)
@@ -325,7 +325,7 @@ PointCloudDBROSCommThread::store_cb(fawkes_msgs::StorePointCloud::Request & req,
 }
 
 bool
-PointCloudDBROSCommThread::record_cb(fawkes_msgs::RecordData::Request & req,
+PointCloudDBROSCommThread::record_cb(fawkes_msgs::RecordData::Request  &req,
                                      fawkes_msgs::RecordData::Response &resp)
 {
 	logger->log_info(name(), "Recording ordered for %f sec", req.range.toSec());

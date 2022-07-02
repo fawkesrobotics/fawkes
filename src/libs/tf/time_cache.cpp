@@ -240,7 +240,7 @@ uint8_t
 TimeCache::find_closest(TransformStorage *&one,
                         TransformStorage *&two,
                         fawkes::Time       target_time,
-                        std::string *      error_str)
+                        std::string       *error_str)
 {
 	//No values stored
 	if (storage_.empty()) {
@@ -304,7 +304,7 @@ void
 TimeCache::interpolate(const TransformStorage &one,
                        const TransformStorage &two,
                        fawkes::Time            time,
-                       TransformStorage &      output)
+                       TransformStorage       &output)
 {
 	// Check for zero distance case
 	if (two.stamp == one.stamp) {

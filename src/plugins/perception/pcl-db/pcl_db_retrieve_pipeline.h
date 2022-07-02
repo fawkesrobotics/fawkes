@@ -63,9 +63,9 @@ public:
    * @param original input point cloud
    * @param output output point cloud
    */
-	PointCloudDBRetrievePipeline(mongocxx::client *       mongodb_client,
-	                             fawkes::Configuration *  config,
-	                             fawkes::Logger *         logger,
+	PointCloudDBRetrievePipeline(mongocxx::client        *mongodb_client,
+	                             fawkes::Configuration   *config,
+	                             fawkes::Logger          *logger,
 	                             fawkes::tf::Transformer *transformer,
 	                             typename PointCloudDBPipeline<PointType>::ColorCloudPtr original,
 	                             typename PointCloudDBPipeline<PointType>::ColorCloudPtr output)
@@ -108,7 +108,7 @@ public:
 	         std::string &database,
 	         std::string &collection,
 	         std::string &target_frame,
-	         long &       actual_time)
+	         long        &actual_time)
 	{
 		TIMETRACK_START(ttc_retrieve_);
 
@@ -203,7 +203,7 @@ private: //methods
 		out->width  = num_points;
 
 		for (size_t p = 0; p < num_points; ++p) {
-			const PointType &                                         ip = in->points[p];
+			const PointType                                          &ip = in->points[p];
 			typename PointCloudDBPipeline<PointType>::ColorPointType &op = out->points[p];
 
 			op.x = ip.x;
@@ -230,7 +230,7 @@ private: //methods
 		out->width  = num_points;
 
 		for (size_t p = 0; p < num_points; ++p) {
-			const PointType &                                         ip = in->points[p];
+			const PointType                                          &ip = in->points[p];
 			typename PointCloudDBPipeline<PointType>::ColorPointType &op = out->points[p];
 
 			op.x = ip.x;
@@ -244,7 +244,7 @@ private: //methods
 	}
 
 	void
-	copy_output(pcl::PointCloud<pcl::PointXYZ>::Ptr &   in,
+	copy_output(pcl::PointCloud<pcl::PointXYZ>::Ptr    &in,
 	            pcl::PointCloud<pcl::PointXYZRGB>::Ptr &out,
 	            const int                               r = 255,
 	            const int                               g = 255,
@@ -257,7 +257,7 @@ private: //methods
 		out->width  = num_points;
 
 		for (size_t p = 0; p < num_points; ++p) {
-			const PointType &                                         ip = in->points[p];
+			const PointType                                          &ip = in->points[p];
 			typename PointCloudDBPipeline<PointType>::ColorPointType &op = out->points[p];
 
 			op.x = ip.x;

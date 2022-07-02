@@ -224,7 +224,7 @@ PanTiltDirectedPerceptionThread::loop()
 
 bool
 PanTiltDirectedPerceptionThread::bb_interface_message_received(Interface *interface,
-                                                               Message *  message) noexcept
+                                                               Message   *message) noexcept
 {
 	if (message->is_of_type<PanTiltInterface::StopMessage>()) {
 		wt_->stop_motion();
@@ -256,7 +256,7 @@ PanTiltDirectedPerceptionThread::bb_interface_message_received(Interface *interf
  */
 PanTiltDirectedPerceptionThread::WorkerThread::WorkerThread(
   std::string                           ptu_name,
-  fawkes::Logger *                      logger,
+  fawkes::Logger                       *logger,
   fawkes::RefPtr<DirectedPerceptionPTU> ptu)
 : Thread("", Thread::OPMODE_WAITFORWAKEUP)
 {

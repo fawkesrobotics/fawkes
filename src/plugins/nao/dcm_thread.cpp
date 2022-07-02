@@ -581,9 +581,9 @@ NaoQiDCMThread::loop()
 }
 
 void
-NaoQiDCMThread::update_interfaces(NaoJointPositionInterface * joint_pos_if,
+NaoQiDCMThread::update_interfaces(NaoJointPositionInterface  *joint_pos_if,
                                   NaoJointStiffnessInterface *joint_stiffness_if,
-                                  NaoSensorInterface *        sensor_if)
+                                  NaoSensorInterface         *sensor_if)
 {
 	// Joint Position
 	// Head

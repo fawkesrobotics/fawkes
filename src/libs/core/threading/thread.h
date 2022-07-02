@@ -107,8 +107,8 @@ public:
 	void unset_flag(uint32_t flag);
 	bool flagged_bad() const;
 
-	static Thread *    current_thread();
-	static Thread *    current_thread_noexc() noexcept;
+	static Thread     *current_thread();
+	static Thread     *current_thread_noexc() noexcept;
 	static pthread_t   current_thread_id();
 	static std::string current_thread_name();
 	static void        current_thread_name(const std::string &thread_name);
@@ -150,12 +150,12 @@ protected:
 
 	bool           finalize_prepared;
 	mutable Mutex *loop_mutex;
-	Mutex *        loopinterrupt_antistarve_mutex;
+	Mutex         *loopinterrupt_antistarve_mutex;
 
 private:
 	Thread(const Thread &t);
 	Thread(const char *name, pthread_t id);
-	Thread &     operator=(const Thread &t);
+	Thread      &operator=(const Thread &t);
 	static void *entry(void *pthis);
 	void         __constructor(const char *name, OpMode op_mode);
 	void         notify_of_startup();
@@ -166,18 +166,18 @@ private:
 
 	pthread_t thread_id_;
 
-	Barrier *      startup_barrier_;
+	Barrier       *startup_barrier_;
 	mutable Mutex *sleep_mutex_;
 	WaitCondition *sleep_condition_;
 	unsigned int   pending_wakeups_;
-	Barrier *      barrier_;
+	Barrier       *barrier_;
 
 	bool           loop_done_;
-	Mutex *        loop_done_mutex_;
+	Mutex         *loop_done_mutex_;
 	WaitCondition *loop_done_waitcond_;
 
 	bool           prepfin_hold_;
-	Mutex *        prepfin_hold_mutex_;
+	Mutex         *prepfin_hold_mutex_;
 	WaitCondition *prepfin_hold_waitcond_;
 
 	bool  started_;

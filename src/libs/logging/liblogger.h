@@ -63,7 +63,7 @@ private:
 	LibLogger(){};
 
 	static MultiLogger *logger;
-	static Mutex *      mutex;
+	static Mutex       *mutex;
 };
 
 } // end namespace fawkes

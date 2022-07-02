@@ -714,14 +714,14 @@ ClipsExecutiveRestApi::cb_get_grounded_pddl_predicates(WebviewRestParams &params
 }
 
 void
-ClipsExecutiveRestApi::gen_plan_precompute(PlanMap &                 plans,
-                                           PlanActionMap &           plan_actions,
-                                           PreCompoundMap &          prec,
-                                           PreAtomMap &              prea,
-                                           PDDLGroundingMap &        pgm,
-                                           PDDLFormulaMap &          pfm,
-                                           PDDLPredicateMap &        ppm,
-                                           GroundedPDDLFormulaMap &  gpfm,
+ClipsExecutiveRestApi::gen_plan_precompute(PlanMap                  &plans,
+                                           PlanActionMap            &plan_actions,
+                                           PreCompoundMap           &prec,
+                                           PreAtomMap               &prea,
+                                           PDDLGroundingMap         &pgm,
+                                           PDDLFormulaMap           &pfm,
+                                           PDDLPredicateMap         &ppm,
+                                           GroundedPDDLFormulaMap   &gpfm,
                                            GroundedPDDLPredicateMap &gppm)
 {
 	CLIPS::Fact::pointer fact = clips_->get_facts();
@@ -796,16 +796,16 @@ ClipsExecutiveRestApi::gen_plan_compute_precons(PDDLFormulaTreeNode node,
 }
 
 Plan
-ClipsExecutiveRestApi::gen_plan(const PlanKey &            plan_key,
+ClipsExecutiveRestApi::gen_plan(const PlanKey             &plan_key,
                                 const CLIPS::Fact::pointer fact,
-                                PlanActionMap &            plan_actions,
-                                PreCompoundMap &           prec,
-                                PreAtomMap &               prea,
-                                PDDLGroundingMap &         pgm,
-                                PDDLFormulaMap &           pfm,
-                                PDDLPredicateMap &         ppm,
-                                GroundedPDDLFormulaMap &   gpfm,
-                                GroundedPDDLPredicateMap & gppm)
+                                PlanActionMap             &plan_actions,
+                                PreCompoundMap            &prec,
+                                PreAtomMap                &prea,
+                                PDDLGroundingMap          &pgm,
+                                PDDLFormulaMap            &pfm,
+                                PDDLPredicateMap          &ppm,
+                                GroundedPDDLFormulaMap    &gpfm,
+                                GroundedPDDLPredicateMap  &gppm)
 {
 	const std::string &goal_id = get_value<std::string>(fact, "goal-id");
 	const std::string &plan_id = get_value<std::string>(fact, "id");

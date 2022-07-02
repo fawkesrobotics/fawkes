@@ -32,8 +32,8 @@ class QuadraticMotorInstruct : public BaseMotorInstruct
 public:
 	QuadraticMotorInstruct(MotorInterface *motor,
 	                       float           frequency,
-	                       Logger *        logger,
-	                       Configuration * config);
+	                       Logger         *logger,
+	                       Configuration  *config);
 	virtual ~QuadraticMotorInstruct();
 
 private:

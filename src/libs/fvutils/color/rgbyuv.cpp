@@ -72,13 +72,13 @@ rgb_to_yuy2(const unsigned char *RGB, unsigned char *YUV, unsigned int width, un
  */
 void
 rgb_to_yuv411packed_plainc(const unsigned char *RGB,
-                           unsigned char *      YUV,
+                           unsigned char       *YUV,
                            unsigned int         width,
                            unsigned int         height)
 {
 	unsigned int i = 0, j = 0;
 	int          y[4] = {0, 0, 0, 0}, u, v;
-	RGB_t *      r;
+	RGB_t       *r;
 	unsigned int su = 0;
 	unsigned int sv = 0;
 
@@ -112,7 +112,7 @@ rgb_to_yuv411packed_plainc(const unsigned char *RGB,
  */
 void
 convert_line_rgb_to_yuv422planar(const unsigned char *RGB,
-                                 unsigned char *      YUV,
+                                 unsigned char       *YUV,
                                  unsigned int         width,
                                  unsigned int         height,
                                  unsigned int         rgb_line,
@@ -120,7 +120,7 @@ convert_line_rgb_to_yuv422planar(const unsigned char *RGB,
 {
 	unsigned int   i = 0;
 	int            y1, y2, u1, u2, v1, v2;
-	RGB_t *        r1, *r2;
+	RGB_t         *r1, *r2;
 	unsigned char *yp, *up, *vp;
 
 	yp = YUV + (width * yuv_line);
@@ -158,13 +158,13 @@ convert_line_rgb_to_yuv422planar(const unsigned char *RGB,
  */
 void
 rgb_to_yuv422planar_plainc(const unsigned char *RGB,
-                           unsigned char *      YUV,
+                           unsigned char       *YUV,
                            unsigned int         width,
                            unsigned int         height)
 {
 	unsigned int   i = 0;
 	int            y1, y2, u1, u2, v1, v2;
-	RGB_t *        r1, *r2;
+	RGB_t         *r1, *r2;
 	unsigned char *yp, *up, *vp;
 
 	yp = YUV;
@@ -202,7 +202,7 @@ rgb_to_yuv422planar_plainc(const unsigned char *RGB,
  */
 void
 convert_line_rgb_to_yuv422packed(const unsigned char *RGB,
-                                 unsigned char *      YUV,
+                                 unsigned char       *YUV,
                                  unsigned int         width,
                                  unsigned int         height,
                                  unsigned int         rgb_line,
@@ -210,7 +210,7 @@ convert_line_rgb_to_yuv422packed(const unsigned char *RGB,
 {
 	unsigned int   i = 0;
 	int            y1, y2, u1, u2, v1, v2;
-	RGB_t *        r1, *r2;
+	RGB_t         *r1, *r2;
 	unsigned char *p;
 
 	p = YUV + (width * yuv_line) * 2;
@@ -246,13 +246,13 @@ convert_line_rgb_to_yuv422packed(const unsigned char *RGB,
  */
 void
 rgb_to_yuv422packed_plainc(const unsigned char *RGB,
-                           unsigned char *      YUV,
+                           unsigned char       *YUV,
                            unsigned int         width,
                            unsigned int         height)
 {
 	unsigned int   i = 0;
 	int            y1, y2, u1, u2, v1, v2;
-	RGB_t *        r1, *r2;
+	RGB_t         *r1, *r2;
 	unsigned char *p;
 
 	p = YUV;
@@ -277,7 +277,7 @@ rgb_to_yuv422packed_plainc(const unsigned char *RGB,
 
 void
 rgb_planar_to_yuv422packed_plainc(const unsigned char *rgb_planar,
-                                  unsigned char *      YUV,
+                                  unsigned char       *YUV,
                                   unsigned int         width,
                                   unsigned int         height)
 {
@@ -322,13 +322,13 @@ rgb_planar_to_yuv422packed_plainc(const unsigned char *rgb_planar,
  */
 void
 bgr_to_yuv422planar_plainc(const unsigned char *BGR,
-                           unsigned char *      YUV,
+                           unsigned char       *YUV,
                            unsigned int         width,
                            unsigned int         height)
 {
 	unsigned int   i = 0;
 	int            y1, y2, u1, u2, v1, v2;
-	BGR_t *        r1, *r2;
+	BGR_t         *r1, *r2;
 	unsigned char *yp, *up, *vp;
 
 	yp = YUV;

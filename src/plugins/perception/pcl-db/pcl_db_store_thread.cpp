@@ -136,7 +136,7 @@ PointCloudDBStoreThread::store_pointcloud(std::string  pcl_id,
 	std::string                         frame_id;
 	unsigned int                        width, height;
 	bool                                is_dense;
-	void *                              point_data;
+	void                               *point_data;
 	size_t                              point_size, num_points;
 	fawkes::Time                        time;
 	PointCloudAdapter::V_PointFieldInfo fieldinfo;

@@ -1051,7 +1051,7 @@ NavGraphThread::fam_event(const char *filename, unsigned int mask)
 void
 NavGraphThread::log_graph()
 {
-	const std::vector<NavGraphNode> &         nodes = graph_->nodes();
+	const std::vector<NavGraphNode>          &nodes = graph_->nodes();
 	std::vector<NavGraphNode>::const_iterator n;
 	for (n = nodes.begin(); n != nodes.end(); ++n) {
 		logger->log_info(name(),
@@ -1061,7 +1061,7 @@ NavGraphThread::log_graph()
 		                 n->y(),
 		                 n->unconnected() ? " UNCONNECTED" : "");
 
-		const std::map<std::string, std::string> &         props = n->properties();
+		const std::map<std::string, std::string>          &props = n->properties();
 		std::map<std::string, std::string>::const_iterator p;
 		for (p = props.begin(); p != props.end(); ++p) {
 			logger->log_info(name(), "  - %s: %s", p->first.c_str(), p->second.c_str());
@@ -1077,7 +1077,7 @@ NavGraphThread::log_graph()
 		                 e->is_directed() ? ">" : "-",
 		                 e->to().c_str());
 
-		const std::map<std::string, std::string> &         props = e->properties();
+		const std::map<std::string, std::string>          &props = e->properties();
 		std::map<std::string, std::string>::const_iterator p;
 		for (p = props.begin(); p != props.end(); ++p) {
 			logger->log_info(name(), "  - %s: %s", p->first.c_str(), p->second.c_str());

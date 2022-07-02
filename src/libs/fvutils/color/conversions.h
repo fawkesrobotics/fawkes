@@ -32,7 +32,7 @@ namespace firevision {
 extern void convert(colorspace_t         from,
                     colorspace_t         to,
                     const unsigned char *src,
-                    unsigned char *      dst,
+                    unsigned char       *dst,
                     unsigned int         width,
                     unsigned int         height);
 

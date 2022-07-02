@@ -50,7 +50,7 @@ const float RRDDataSource::UNKNOWN = FLT_MIN;
  * @param min minimum value, use UNKNOWN constant if not known
  * @param max maximum value, use UNKNOWN constant if not known
  */
-RRDDataSource::RRDDataSource(const char * name,
+RRDDataSource::RRDDataSource(const char  *name,
                              Type         type,
                              unsigned int heartbeat,
                              float        min,
@@ -285,7 +285,7 @@ RRDArchive::cf_to_string(ConsolidationFunction cf)
  * @param recreate if true existing RRD files will be overwritten, otherwise
  * data is appended.
  */
-RRDDefinition::RRDDefinition(const char *                name,
+RRDDefinition::RRDDefinition(const char                 *name,
                              std::vector<RRDDataSource> &ds,
                              unsigned int                step_sec,
                              bool                        recreate)
@@ -308,9 +308,9 @@ RRDDefinition::RRDDefinition(const char *                name,
  * @param recreate if true existing RRD files will be overwritten, otherwise
  * data is appended.
  */
-RRDDefinition::RRDDefinition(const char *                name,
+RRDDefinition::RRDDefinition(const char                 *name,
                              std::vector<RRDDataSource> &ds,
-                             std::vector<RRDArchive> &   rra,
+                             std::vector<RRDArchive>    &rra,
                              unsigned int                step_sec,
                              bool                        recreate)
 : name_(strdup(name)),
@@ -482,10 +482,10 @@ RRDDefinition::set_rrd_manager(RRDManager *rrd_manager)
  * @param ds_name data source name in RRD, @p rrd_def will be queried for the
  * data source. If ds_name is NULL, @p name will be used as the data source name.
  */
-RRDGraphDataDefinition::RRDGraphDataDefinition(const char *                      name,
+RRDGraphDataDefinition::RRDGraphDataDefinition(const char                       *name,
                                                RRDArchive::ConsolidationFunction cf,
-                                               const RRDDefinition *             rrd_def,
-                                               const char *                      ds_name)
+                                               const RRDDefinition              *rrd_def,
+                                               const char                       *ds_name)
 : name_(strdup(name)),
   rrd_def_(rrd_def),
   ds_name_(ds_name ? strdup(ds_name) : strdup(name)),
@@ -625,9 +625,9 @@ RRDGraphElement::to_string() const
  * @param cf consolidation function to use
  * @param format Format string, cf. man rrdgraph_graph(1).
  */
-RRDGraphGPrint::RRDGraphGPrint(const char *                      def_name,
+RRDGraphGPrint::RRDGraphGPrint(const char                       *def_name,
                                RRDArchive::ConsolidationFunction cf,
-                               const char *                      format)
+                               const char                       *format)
 : def_name_(strdup(def_name)), cf_(cf), format_(strdup(format)), string_(NULL)
 {
 }
@@ -894,12 +894,12 @@ RRDGraphArea::to_string() const
  * @param elements elements to print in the graph. This graph definition takes
  * ownership of the graph elemenets and will delete them in its dtor.
  */
-RRDGraphDefinition::RRDGraphDefinition(const char *                         name,
-                                       RRDDefinition *                      rrd_def,
-                                       const char *                         title,
-                                       const char *                         vertical_label,
+RRDGraphDefinition::RRDGraphDefinition(const char                          *name,
+                                       RRDDefinition                       *rrd_def,
+                                       const char                          *title,
+                                       const char                          *vertical_label,
                                        std::vector<RRDGraphDataDefinition> &def,
-                                       std::vector<RRDGraphElement *> &     elements,
+                                       std::vector<RRDGraphElement *>      &elements,
                                        time_t                               start,
                                        time_t                               end,
                                        unsigned int                         step,

@@ -396,13 +396,13 @@ PlexilExecutiveThread::read_plexil_interface_configs(const std::string &config_p
 // Add adapter configurations to Plexil interface XML config
 void
 PlexilExecutiveThread::add_plexil_interface_configs(
-  pugi::xml_node &                                                             parent,
+  pugi::xml_node                                                              &parent,
   const std::map<std::string, PlexilExecutiveThread::plexil_interface_config> &configs,
-  const char *                                                                 tag_name,
-  const char *                                                                 type_attr_name)
+  const char                                                                  *tag_name,
+  const char                                                                  *type_attr_name)
 {
 	for (const auto &a_item : configs) {
-		const auto &   a           = a_item.second;
+		const auto    &a           = a_item.second;
 		pugi::xml_node xml_adapter = parent.append_child(tag_name);
 		xml_adapter.append_attribute(type_attr_name).set_value(a.type.c_str());
 		for (const auto &attr : a.attr) {
@@ -414,7 +414,7 @@ PlexilExecutiveThread::add_plexil_interface_configs(
 			xml_adapter_arg.text().set(arg.second.c_str());
 		}
 		for (const auto &arg : a.verbatim_args) {
-			const auto &   varg            = arg.second;
+			const auto    &varg            = arg.second;
 			pugi::xml_node xml_adapter_arg = xml_adapter.append_child(varg.tag.c_str());
 			for (const auto &attr : varg.attr) {
 				xml_adapter_arg.append_attribute(attr.first.c_str()).set_value(attr.second.c_str());

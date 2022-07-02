@@ -87,55 +87,55 @@ private:
 
 	static void entry_group_callback(AvahiEntryGroup *g, AvahiEntryGroupState state, void *instance);
 
-	static void browse_callback(AvahiServiceBrowser *  b,
+	static void browse_callback(AvahiServiceBrowser   *b,
 	                            AvahiIfIndex           interface,
 	                            AvahiProtocol          protocol,
 	                            AvahiBrowserEvent      event,
-	                            const char *           name,
-	                            const char *           type,
-	                            const char *           domain,
+	                            const char            *name,
+	                            const char            *type,
+	                            const char            *domain,
 	                            AvahiLookupResultFlags flags,
-	                            void *                 instance);
+	                            void                  *instance);
 
-	static void resolve_callback(AvahiServiceResolver *         r,
+	static void resolve_callback(AvahiServiceResolver          *r,
 	                             AVAHI_GCC_UNUSED AvahiIfIndex  interface,
 	                             AVAHI_GCC_UNUSED AvahiProtocol protocol,
 	                             AvahiResolverEvent             event,
-	                             const char *                   name,
-	                             const char *                   type,
-	                             const char *                   domain,
-	                             const char *                   host_name,
-	                             const AvahiAddress *           address,
+	                             const char                    *name,
+	                             const char                    *type,
+	                             const char                    *domain,
+	                             const char                    *host_name,
+	                             const AvahiAddress            *address,
 	                             uint16_t                       port,
-	                             AvahiStringList *              txt,
+	                             AvahiStringList               *txt,
 	                             AvahiLookupResultFlags         flags,
-	                             void *                         instance);
+	                             void                          *instance);
 
 	static void host_name_resolver_callback(AvahiHostNameResolver *r,
 	                                        AvahiIfIndex           interface,
 	                                        AvahiProtocol          protocol,
 	                                        AvahiResolverEvent     event,
-	                                        const char *           name,
-	                                        const AvahiAddress *   a,
+	                                        const char            *name,
+	                                        const AvahiAddress    *a,
 	                                        AvahiLookupResultFlags flags,
-	                                        void *                 userdata);
+	                                        void                  *userdata);
 
-	static void address_resolver_callback(AvahiAddressResolver * r,
+	static void address_resolver_callback(AvahiAddressResolver  *r,
 	                                      AvahiIfIndex           interface,
 	                                      AvahiProtocol          protocol,
 	                                      AvahiResolverEvent     event,
-	                                      const AvahiAddress *   a,
-	                                      const char *           name,
+	                                      const AvahiAddress    *a,
+	                                      const char            *name,
 	                                      AvahiLookupResultFlags flags,
-	                                      void *                 userdata);
+	                                      void                  *userdata);
 
 	void call_handler_service_removed(const char *name, const char *type, const char *domain);
-	void call_handler_service_added(const char *            name,
-	                                const char *            type,
-	                                const char *            domain,
-	                                const char *            host_name,
+	void call_handler_service_added(const char             *name,
+	                                const char             *type,
+	                                const char             *domain,
+	                                const char             *host_name,
 	                                const AvahiIfIndex      interface,
-	                                const AvahiAddress *    address,
+	                                const AvahiAddress     *address,
 	                                uint16_t                port,
 	                                std::list<std::string> &txt,
 	                                AvahiLookupResultFlags  flags);
@@ -177,7 +177,7 @@ private:
 	void start_hostname_resolvers();
 	void start_hostname_resolver(const char *name, AvahiResolverCallbackData *data);
 	void start_address_resolver(const struct sockaddr_storage *in_addr,
-	                            AvahiResolverCallbackData *    data);
+	                            AvahiResolverCallbackData     *data);
 
 	bool enable_ipv4;
 	bool enable_ipv6;
@@ -186,8 +186,8 @@ private:
 	bool do_erase_browsers;
 	bool do_reset_groups;
 
-	AvahiSimplePoll *                 simple_poll;
-	AvahiClient *                     client;
+	AvahiSimplePoll	                *simple_poll;
+	AvahiClient                      *client;
 	AvahiClientState                  client_state;
 	AvahiProtocol                     service_protocol;
 	const static std::chrono::seconds wait_on_init_failure;

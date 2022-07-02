@@ -90,7 +90,7 @@ private:
 	double x_, y_, z_;
 	double phi_, theta_, psi_;
 
-	fawkes::OpenRaveConnector *         openrave_;
+	fawkes::OpenRaveConnector          *openrave_;
 	fawkes::OpenRaveEnvironmentPtr      OR_env_;
 	fawkes::OpenRaveRobotPtr            OR_robot_;
 	fawkes::OpenRaveManipulatorPtr      OR_manip_;

@@ -105,12 +105,12 @@ TwoLinesCellRenderer::get_size(Gtk::Widget &widget, int *width, int *height) con
  * @param height upon return contains the required height of the cell
  */
 void
-TwoLinesCellRenderer::get_size_vfunc(Gtk::Widget &         widget,
+TwoLinesCellRenderer::get_size_vfunc(Gtk::Widget          &widget,
                                      const Gdk::Rectangle *cell_area,
-                                     int *                 x_offset,
-                                     int *                 y_offset,
-                                     int *                 width,
-                                     int *                 height) const
+                                     int                  *x_offset,
+                                     int                  *y_offset,
+                                     int                  *width,
+                                     int                  *height) const
 #endif
 {
 #ifdef GLIBMM_PROPERTIES_ENABLED
@@ -156,8 +156,8 @@ TwoLinesCellRenderer::get_size_vfunc(Gtk::Widget &         widget,
  */
 void
 TwoLinesCellRenderer::get_preferred_width_vfunc(Gtk::Widget &widget,
-                                                int &        minimum_width,
-                                                int &        natural_width) const
+                                                int         &minimum_width,
+                                                int         &natural_width) const
 {
 	int width = 0;
 	get_size(widget, &width, NULL);
@@ -171,8 +171,8 @@ TwoLinesCellRenderer::get_preferred_width_vfunc(Gtk::Widget &widget,
  */
 void
 TwoLinesCellRenderer::get_preferred_height_vfunc(Gtk::Widget &widget,
-                                                 int &        minimum_height,
-                                                 int &        natural_height) const
+                                                 int         &minimum_height,
+                                                 int         &natural_height) const
 {
 	int height = 0;
 	get_size(widget, NULL, &height);
@@ -191,9 +191,9 @@ TwoLinesCellRenderer::get_preferred_height_vfunc(Gtk::Widget &widget,
  */
 void
 TwoLinesCellRenderer::render_vfunc(const Cairo::RefPtr<Cairo::Context> &cr,
-                                   Gtk::Widget &                        widget,
-                                   const Gdk::Rectangle &               background_area,
-                                   const Gdk::Rectangle &               cell_area,
+                                   Gtk::Widget                         &widget,
+                                   const Gdk::Rectangle                &background_area,
+                                   const Gdk::Rectangle                &cell_area,
                                    Gtk::CellRendererState               flags)
 #else
 /** Render the cell.
@@ -207,10 +207,10 @@ TwoLinesCellRenderer::render_vfunc(const Cairo::RefPtr<Cairo::Context> &cr,
  */
 void
 TwoLinesCellRenderer::render_vfunc(const Glib::RefPtr<Gdk::Drawable> &window,
-                                   Gtk::Widget &                      widget,
-                                   const Gdk::Rectangle &             background_area,
-                                   const Gdk::Rectangle &             cell_area,
-                                   const Gdk::Rectangle &             expose_area,
+                                   Gtk::Widget                       &widget,
+                                   const Gdk::Rectangle              &background_area,
+                                   const Gdk::Rectangle              &cell_area,
+                                   const Gdk::Rectangle              &expose_area,
                                    Gtk::CellRendererState             flags)
 #endif
 {

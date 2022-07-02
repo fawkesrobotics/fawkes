@@ -33,10 +33,10 @@ namespace firevision {
 class FacesClassifier : public Classifier
 {
 public:
-	FacesClassifier(const char * haarcascade_file,
+	FacesClassifier(const char  *haarcascade_file,
 	                unsigned int pixel_width,
 	                unsigned int pixel_height,
-	                cv::Mat &    image,
+	                cv::Mat     &image,
 	                float        haar_scale_factor = 1.1,
 	                int          min_neighbours    = 3,
 	                int          flags             = 0);

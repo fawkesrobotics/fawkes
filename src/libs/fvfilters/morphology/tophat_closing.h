@@ -44,7 +44,7 @@ public:
 	static const unsigned int FILTERIMAGE;
 
 private:
-	FilterClosing *   closing;
+	FilterClosing    *closing;
 	FilterDifference *diff;
 };
 

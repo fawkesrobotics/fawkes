@@ -75,11 +75,11 @@ ConfigError::ConfigError(const std::string &msg) : Exception(msg.c_str())
  * @param blackboard The blackboard to use to read data from
  * @param logger A logger instance to use for logging messages
  */
-ExogManager::ExogManager(GologppThread *    exec_thread,
-                         Configuration *    config,
+ExogManager::ExogManager(GologppThread     *exec_thread,
+                         Configuration     *config,
                          const std::string &cfg_prefix,
-                         BlackBoard *       blackboard,
-                         Logger *           logger)
+                         BlackBoard        *blackboard,
+                         Logger            *logger)
 : exec_thread_(exec_thread), config_(config), blackboard_(blackboard), logger_(logger)
 {
 	// Build a map to lookup all exog actions by their mapped name (i.e. the
@@ -138,9 +138,9 @@ ExogManager::exog_queue_push(shared_ptr<ExogEvent> evt)
  * @param exog_mgr The ExogManager to send the ExogAction to
  */
 ExogManager::BlackboardEventHandler::BlackboardEventHandler(
-  BlackBoard *                             bb,
+  BlackBoard                              *bb,
   gologpp::shared_ptr<gologpp::ExogAction> exog,
-  ExogManager &                            exog_mgr)
+  ExogManager                             &exog_mgr)
 : blackboard_(bb), target_exog_(exog), exog_manager_(exog_mgr)
 {
 	for (const auto &pair : target_exog_->mapping().arg_mapping()) {
@@ -215,10 +215,10 @@ ExogManager::BlackboardEventHandler::extract_id(const std::string &iface_uid)
 	return iface_uid.substr(idx + 2);
 }
 
-ExogManager::InterfaceWatcher::InterfaceWatcher(BlackBoard *           bb,
-                                                const string &         uid,
+ExogManager::InterfaceWatcher::InterfaceWatcher(BlackBoard            *bb,
+                                                const string          &uid,
                                                 shared_ptr<ExogAction> exog,
-                                                ExogManager &          exog_mgr)
+                                                ExogManager           &exog_mgr)
 : BlackboardEventHandler(bb, exog, exog_mgr),
   BlackBoardInterfaceListener("gologpp_blackboard_manager"),
   iface_(blackboard_->open_for_reading(extract_type_name(uid).c_str(), extract_id(uid).c_str()))
@@ -286,10 +286,10 @@ ExogManager::InterfaceWatcher::bb_interface_data_refreshed(Interface *iface) noe
 	}
 }
 
-ExogManager::PatternObserver::PatternObserver(BlackBoard *           bb,
-                                              const std::string &    pattern,
+ExogManager::PatternObserver::PatternObserver(BlackBoard            *bb,
+                                              const std::string     &pattern,
                                               shared_ptr<ExogAction> exog,
-                                              ExogManager &          exog_mgr)
+                                              ExogManager           &exog_mgr)
 : BlackboardEventHandler(bb, exog, exog_mgr)
 {
 	bbio_add_observed_create(extract_type_name(pattern).c_str(), extract_id(pattern).c_str());

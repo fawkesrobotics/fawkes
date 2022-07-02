@@ -73,8 +73,8 @@ public:
 
 private:
 	struct ::tm *now_s;
-	Mutex *      mutex;
-	FILE *       outf_;
+	Mutex       *mutex;
+	FILE        *outf_;
 };
 
 } // end namespace fawkes

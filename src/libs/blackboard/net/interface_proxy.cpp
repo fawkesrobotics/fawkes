@@ -52,10 +52,10 @@ namespace fawkes {
  * this ctor and can be used afterwards.
  * @param writer true to make this a writing instance, false otherwise
  */
-BlackBoardInterfaceProxy::BlackBoardInterfaceProxy(FawkesNetworkClient * client,
+BlackBoardInterfaceProxy::BlackBoardInterfaceProxy(FawkesNetworkClient  *client,
                                                    FawkesNetworkMessage *msg,
-                                                   BlackBoardNotifier *  notifier,
-                                                   Interface *           interface,
+                                                   BlackBoardNotifier   *notifier,
+                                                   Interface            *interface,
                                                    bool                  writer)
 {
 	fnc_ = client;
@@ -63,7 +63,7 @@ BlackBoardInterfaceProxy::BlackBoardInterfaceProxy(FawkesNetworkClient * client,
 		throw Exception("Expected open success message");
 	}
 
-	void *              payload = msg->payload();
+	void               *payload = msg->payload();
 	bb_iopensucc_msg_t *osm     = (bb_iopensucc_msg_t *)payload;
 
 	notifier_        = notifier;
@@ -121,7 +121,7 @@ BlackBoardInterfaceProxy::process_data_refreshed(FawkesNetworkMessage *msg)
 		return;
 	}
 
-	void *          payload = msg->payload();
+	void           *payload = msg->payload();
 	bb_idata_msg_t *dm      = (bb_idata_msg_t *)payload;
 	if (dm->serial != instance_serial_) {
 		LibLogger::log_error("BlackBoardInterfaceProxy",
@@ -160,7 +160,7 @@ BlackBoardInterfaceProxy::process_interface_message(FawkesNetworkMessage *msg)
 		return;
 	}
 
-	void *             payload = msg->payload();
+	void              *payload = msg->payload();
 	bb_imessage_msg_t *mm      = (bb_imessage_msg_t *)payload;
 	if (mm->serial != instance_serial_) {
 		LibLogger::log_error("BlackBoardInterfaceProxy",
@@ -320,7 +320,7 @@ BlackBoardInterfaceProxy::notify_of_data_refresh(const Interface *interface, boo
 {
 	// need to send write message
 	size_t          payload_size = sizeof(bb_idata_msg_t) + interface->datasize();
-	void *          payload      = malloc(payload_size);
+	void           *payload      = malloc(payload_size);
 	bb_idata_msg_t *dm           = (bb_idata_msg_t *)payload;
 	dm->serial                   = interface->serial();
 	dm->data_size                = htonl(interface->datasize());
@@ -341,7 +341,7 @@ BlackBoardInterfaceProxy::transmit(Message *message)
 {
 	// send out interface message
 	size_t             payload_size = sizeof(bb_imessage_msg_t) + message->datasize();
-	void *             payload      = calloc(1, payload_size);
+	void              *payload      = calloc(1, payload_size);
 	bb_imessage_msg_t *dm           = (bb_imessage_msg_t *)payload;
 	dm->serial                      = interface_->serial();
 	dm->source                      = message->source_id();

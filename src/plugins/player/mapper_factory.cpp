@@ -52,7 +52,7 @@ using namespace fawkes;
  */
 PlayerProxyFawkesInterfaceMapper *
 PlayerMapperFactory::create_mapper(std::string            varname,
-                                   fawkes::Interface *    interface,
+                                   fawkes::Interface     *interface,
                                    PlayerCc::ClientProxy *proxy)
 {
 	PlayerProxyFawkesInterfaceMapper *rv = NULL;

@@ -44,7 +44,7 @@ namespace tf {
  * @param database_name name of database to restore transforms from
  * @param ensure_index if true ensures that the required index on timestamps exists
  */
-MongoDBTransformer::MongoDBTransformer(mongocxx::client * mongodb_client,
+MongoDBTransformer::MongoDBTransformer(mongocxx::client  *mongodb_client,
                                        const std::string &database_name,
                                        bool               ensure_index)
 : mongodb_client_(mongodb_client), database_(database_name)

@@ -216,7 +216,7 @@ ClipsAgentThread::loop()
 		std::list<std::string>                         finished_skills;
 		std::map<std::string, SkillExecInfo>::iterator as;
 		for (as = active_skills_.begin(); as != active_skills_.end(); ++as) {
-			const std::string &  as_name = as->first;
+			const std::string   &as_name = as->first;
 			const SkillExecInfo &as_info = as->second;
 
 			if (cfg_skill_sim_) {
