@@ -43,13 +43,13 @@ public:
 	                        std::string                               year,
 	                        std::string                               creation_date,
 	                        std::string                               data_comment,
-	                        const unsigned char *                     hash,
+	                        const unsigned char                      *hash,
 	                        size_t                                    hash_size,
-	                        const std::vector<InterfaceConstant> &    constants,
+	                        const std::vector<InterfaceConstant>     &constants,
 	                        const std::vector<InterfaceEnumConstant> &enum_constants,
-	                        const std::vector<InterfaceField> &       data_fields,
-	                        const std::vector<InterfacePseudoMap> &   pseudo_maps,
-	                        const std::vector<InterfaceMessage> &     messages);
+	                        const std::vector<InterfaceField>        &data_fields,
+	                        const std::vector<InterfacePseudoMap>    &pseudo_maps,
+	                        const std::vector<InterfaceMessage>      &messages);
 	~ToLuaInterfaceGenerator();
 
 	void write_toluaf(FILE *f);
@@ -62,11 +62,11 @@ public:
 	void write_lua_code(FILE *f, std::string classname);
 	void
 	write_methods_h(FILE *f, std::string /* indent space */ is, std::vector<InterfaceField> fields);
-	void write_methods_h(FILE *                          f,
+	void write_methods_h(FILE                           *f,
 	                     std::string /* indent space */  is,
 	                     std::vector<InterfaceField>     fields,
 	                     std::vector<InterfacePseudoMap> pseudo_maps);
-	void write_message_ctor_dtor_h(FILE *                         f,
+	void write_message_ctor_dtor_h(FILE                          *f,
 	                               std::string /* indent space */ is,
 	                               std::string                    classname,
 	                               std::vector<InterfaceField>    fields);

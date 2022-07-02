@@ -60,9 +60,9 @@ main(int argc, char **argv)
 
 	cout << "Message queue initialized, now appending three test messages" << endl;
 
-	TestInterface::SetTestIntMessage *   m1 = new TestInterface::SetTestIntMessage(1);
-	TestInterface::SetTestIntMessage *   m2 = new TestInterface::SetTestIntMessage(2);
-	TestInterface::SetTestIntMessage *   m3 = new TestInterface::SetTestIntMessage(3);
+	TestInterface::SetTestIntMessage    *m1 = new TestInterface::SetTestIntMessage(1);
+	TestInterface::SetTestIntMessage    *m2 = new TestInterface::SetTestIntMessage(2);
+	TestInterface::SetTestIntMessage    *m3 = new TestInterface::SetTestIntMessage(3);
 	TestInterface::SetTestStringMessage *m4 = new TestInterface::SetTestStringMessage();
 	id                                      = mq->append(m1);
 	cout << "m1 added with id " << id << endl;

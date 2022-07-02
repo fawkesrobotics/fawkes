@@ -63,13 +63,13 @@ CppInterfaceGenerator::CppInterfaceGenerator(
   std::string                               year,
   std::string                               creation_date,
   std::string                               data_comment,
-  const unsigned char *                     hash,
+  const unsigned char                      *hash,
   size_t                                    hash_size,
-  const std::vector<InterfaceConstant> &    constants,
+  const std::vector<InterfaceConstant>     &constants,
   const std::vector<InterfaceEnumConstant> &enum_constants,
-  const std::vector<InterfaceField> &       data_fields,
-  const std::vector<InterfacePseudoMap> &   pseudo_maps,
-  const std::vector<InterfaceMessage> &     messages)
+  const std::vector<InterfaceField>        &data_fields,
+  const std::vector<InterfacePseudoMap>    &pseudo_maps,
+  const std::vector<InterfaceMessage>      &messages)
 {
 	this->dir = directory;
 	if (dir.find_last_of("/") != (dir.length() - 1)) {
@@ -123,7 +123,7 @@ CppInterfaceGenerator::~CppInterfaceGenerator()
  * @param fields fields for struct
  */
 void
-CppInterfaceGenerator::write_struct(FILE *                         f,
+CppInterfaceGenerator::write_struct(FILE                          *f,
                                     std::string                    name,
                                     std::string /* indent space */ is,
                                     std::vector<InterfaceField>    fields)
@@ -549,7 +549,7 @@ CppInterfaceGenerator::write_basemethods_cpp(FILE *f)
  * @param classname name of class
  */
 void
-CppInterfaceGenerator::write_ctor_dtor_h(FILE *                         f,
+CppInterfaceGenerator::write_ctor_dtor_h(FILE                          *f,
                                          std::string /* indent space */ is,
                                          std::string                    classname)
 {
@@ -569,7 +569,7 @@ CppInterfaceGenerator::write_ctor_dtor_h(FILE *                         f,
  * @param fields vector of data fields of message
  */
 void
-CppInterfaceGenerator::write_message_ctor_dtor_h(FILE *                         f,
+CppInterfaceGenerator::write_message_ctor_dtor_h(FILE                          *f,
                                                  std::string /* indent space */ is,
                                                  std::string                    classname,
                                                  std::vector<InterfaceField>    fields)
@@ -719,7 +719,7 @@ CppInterfaceGenerator::write_add_fieldinfo_calls(FILE *f, std::vector<InterfaceF
  * @param messages messages
  */
 void
-CppInterfaceGenerator::write_ctor_dtor_cpp(FILE *                        f,
+CppInterfaceGenerator::write_ctor_dtor_cpp(FILE                         *f,
                                            std::string                   classname,
                                            std::string                   super_class,
                                            std::string                   inclusion_prefix,
@@ -778,7 +778,7 @@ CppInterfaceGenerator::write_ctor_dtor_cpp(FILE *                        f,
  * @param fields vector of data fields of message
  */
 void
-CppInterfaceGenerator::write_message_ctor_dtor_cpp(FILE *                      f,
+CppInterfaceGenerator::write_message_ctor_dtor_cpp(FILE                       *f,
                                                    std::string                 classname,
                                                    std::string                 super_class,
                                                    std::string                 inclusion_prefix,
@@ -918,7 +918,7 @@ CppInterfaceGenerator::write_message_ctor_dtor_cpp(FILE *                      f
  * @param inclusion_prefix used if class is included in another class.
  */
 void
-CppInterfaceGenerator::write_methods_cpp(FILE *                      f,
+CppInterfaceGenerator::write_methods_cpp(FILE                       *f,
                                          std::string                 interface_classname,
                                          std::string                 classname,
                                          std::vector<InterfaceField> fields,
@@ -1061,7 +1061,7 @@ CppInterfaceGenerator::write_methods_cpp(FILE *                      f,
  * @param inclusion_prefix used if class is included in another class.
  */
 void
-CppInterfaceGenerator::write_methods_cpp(FILE *                          f,
+CppInterfaceGenerator::write_methods_cpp(FILE                           *f,
                                          std::string                     interface_classname,
                                          std::string                     classname,
                                          std::vector<InterfaceField>     fields,
@@ -1089,7 +1089,7 @@ CppInterfaceGenerator::write_methods_cpp(FILE *                          f,
 		        (*i).getName().c_str(),
 		        (*i).getKeyType().c_str());
 
-		InterfacePseudoMap::RefList &         reflist = i->getRefList();
+		InterfacePseudoMap::RefList          &reflist = i->getRefList();
 		InterfacePseudoMap::RefList::iterator paref;
 		bool                                  first = true;
 		for (paref = reflist.begin(); paref != reflist.end(); ++paref) {
@@ -1147,7 +1147,7 @@ CppInterfaceGenerator::write_methods_cpp(FILE *                          f,
  * @param fields fields to write accessor methods for.
  */
 void
-CppInterfaceGenerator::write_methods_h(FILE *                         f,
+CppInterfaceGenerator::write_methods_h(FILE                          *f,
                                        std::string /* indent space */ is,
                                        std::vector<InterfaceField>    fields)
 {
@@ -1193,7 +1193,7 @@ CppInterfaceGenerator::write_methods_h(FILE *                         f,
  * @param pseudo_maps pseudo maps
  */
 void
-CppInterfaceGenerator::write_methods_h(FILE *                          f,
+CppInterfaceGenerator::write_methods_h(FILE                           *f,
                                        std::string /* indent space */  is,
                                        std::vector<InterfaceField>     fields,
                                        std::vector<InterfacePseudoMap> pseudo_maps)

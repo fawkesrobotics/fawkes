@@ -64,13 +64,13 @@ ToLuaInterfaceGenerator::ToLuaInterfaceGenerator(
   std::string                               year,
   std::string                               creation_date,
   std::string                               data_comment,
-  const unsigned char *                     hash,
+  const unsigned char                      *hash,
   size_t                                    hash_size,
-  const std::vector<InterfaceConstant> &    constants,
+  const std::vector<InterfaceConstant>     &constants,
   const std::vector<InterfaceEnumConstant> &enum_constants,
-  const std::vector<InterfaceField> &       data_fields,
-  const std::vector<InterfacePseudoMap> &   pseudo_maps,
-  const std::vector<InterfaceMessage> &     messages)
+  const std::vector<InterfaceField>        &data_fields,
+  const std::vector<InterfacePseudoMap>    &pseudo_maps,
+  const std::vector<InterfaceMessage>      &messages)
 {
 	this->dir = directory;
 	if (dir.find_last_of("/") != (dir.length() - 1)) {
@@ -265,7 +265,7 @@ ToLuaInterfaceGenerator::write_messages_h(FILE *f)
  * @param classname name of class
  */
 void
-ToLuaInterfaceGenerator::write_ctor_dtor_h(FILE *                         f,
+ToLuaInterfaceGenerator::write_ctor_dtor_h(FILE                          *f,
                                            std::string /* indent space */ is,
                                            std::string                    classname)
 {
@@ -285,7 +285,7 @@ ToLuaInterfaceGenerator::write_ctor_dtor_h(FILE *                         f,
  * @param fields vector of data fields of message
  */
 void
-ToLuaInterfaceGenerator::write_message_ctor_dtor_h(FILE *                         f,
+ToLuaInterfaceGenerator::write_message_ctor_dtor_h(FILE                          *f,
                                                    std::string /* indent space */ is,
                                                    std::string                    classname,
                                                    std::vector<InterfaceField>    fields)
@@ -417,7 +417,7 @@ ToLuaInterfaceGenerator::write_lua_code(FILE *f, std::string classname)
  * @param fields fields to write accessor methods for.
  */
 void
-ToLuaInterfaceGenerator::write_methods_h(FILE *                         f,
+ToLuaInterfaceGenerator::write_methods_h(FILE                          *f,
                                          std::string /* indent space */ is,
                                          std::vector<InterfaceField>    fields)
 {
@@ -462,7 +462,7 @@ ToLuaInterfaceGenerator::write_methods_h(FILE *                         f,
  * @param pseudo_maps pseudo maps
  */
 void
-ToLuaInterfaceGenerator::write_methods_h(FILE *                          f,
+ToLuaInterfaceGenerator::write_methods_h(FILE                           *f,
                                          std::string /* indent space */  is,
                                          std::vector<InterfaceField>     fields,
                                          std::vector<InterfacePseudoMap> pseudo_maps)

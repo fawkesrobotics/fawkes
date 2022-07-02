@@ -312,9 +312,9 @@ InterfaceField::setFlags(const std::vector<std::string> &flags)
  * @param delimiters string with delimiters.
  */
 void
-InterfaceField::tokenize(const std::string &       str,
+InterfaceField::tokenize(const std::string        &str,
                          std::vector<std::string> &tokens,
-                         const std::string &       delimiters)
+                         const std::string        &delimiters)
 {
 	// Skip delimiters at beginning.
 	std::string::size_type last_pos = str.find_first_not_of(delimiters, 0);

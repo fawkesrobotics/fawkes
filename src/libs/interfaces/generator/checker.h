@@ -34,7 +34,7 @@
 class InterfaceChecker
 {
 public:
-	static bool validType(const std::string &                 type,
+	static bool validType(const std::string                  &type,
 	                      std::vector<InterfaceEnumConstant> *enum_constants = 0);
 	static bool validValue(const std::string &type, const std::string &value);
 	static bool validName(const std::string &name, const std::set<std::string> &reserved_names);
