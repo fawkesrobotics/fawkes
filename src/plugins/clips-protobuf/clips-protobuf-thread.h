@@ -51,7 +51,7 @@ public:
 	virtual void finalize();
 
 	// for CLIPSFeature
-	virtual void clips_context_init(const std::string &                  env_name,
+	virtual void clips_context_init(const std::string                   &env_name,
 	                                fawkes::LockPtr<CLIPS::Environment> &clips);
 	virtual void clips_context_destroyed(const std::string &env_name);
 
