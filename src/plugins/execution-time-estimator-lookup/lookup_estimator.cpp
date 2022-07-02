@@ -47,9 +47,9 @@ namespace fawkes {
  * @param logger The logger to inform about client connection status
  */
 LookupEstimator::LookupEstimator(MongoDBConnCreator *mongo_connection_manager,
-                                 Configuration *     config,
-                                 const std::string & cfg_prefix,
-                                 Logger *            logger)
+                                 Configuration      *config,
+                                 const std::string  &cfg_prefix,
+                                 Logger             *logger)
 : ExecutionTimeEstimator(config, cfg_prefix),
   mongo_connection_manager_(mongo_connection_manager),
   logger_(logger),

@@ -40,9 +40,9 @@ class LookupEstimator : public ExecutionTimeEstimator
 
 public:
 	LookupEstimator(MongoDBConnCreator *mongo_connection_manager,
-	                Configuration *     config,
-	                const std::string & cfg_prefix,
-	                Logger *            logger);
+	                Configuration      *config,
+	                const std::string  &cfg_prefix,
+	                Logger             *logger);
 	float get_execution_time(const Skill &skill) override;
 	bool  can_provide_exec_time(const Skill &skill) const override;
 	std::pair<SkillerInterface::SkillStatusEnum, std::string> execute(const Skill &skill) override;
@@ -51,14 +51,14 @@ private:
 	bsoncxx::builder::basic::document get_skill_query(const Skill &skill) const;
 
 	MongoDBConnCreator *mongo_connection_manager_;
-	Logger *            logger_;
+	Logger             *logger_;
 
 	constexpr static char logger_name_[]      = "LookupEstimator";
 	constexpr static char skill_name_field_[] = "name";
 	constexpr static char duration_field_[]   = "duration";
 
 	mutable fawkes::Mutex mutex_;
-	mongocxx::client *    mongodb_client_lookup_;
+	mongocxx::client     *mongodb_client_lookup_;
 
 	Property<bool> fully_match_args_;
 	Property<bool> include_failures_;

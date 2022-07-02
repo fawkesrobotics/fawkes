@@ -35,7 +35,7 @@ namespace fawkes {
  * @param config The config to read from
  * @param cfg_prefix The config prefix to read from
  */
-ConfigExecutionTimeEstimator::ConfigExecutionTimeEstimator(Configuration *    config,
+ConfigExecutionTimeEstimator::ConfigExecutionTimeEstimator(Configuration     *config,
                                                            const std::string &cfg_prefix)
 : ExecutionTimeEstimator(config, cfg_prefix), exec_times_(config_, cfg_prefix_, "exec-time")
 {

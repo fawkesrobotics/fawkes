@@ -34,7 +34,7 @@ class NavGraphEstimator : public ExecutionTimeEstimator
 {
 public:
 	NavGraphEstimator(LockPtr<NavGraph>  navgraph,
-	                  Configuration *    config,
+	                  Configuration     *config,
 	                  const std::string &cfg_prefix);
 	float get_execution_time(const Skill &skill) override;
 	bool  can_provide_exec_time(const Skill &skill) const override;
