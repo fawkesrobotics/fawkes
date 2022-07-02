@@ -39,8 +39,8 @@ public:
 	FuseImageContent(SharedMemoryImageBuffer *b);
 	FuseImageContent(uint32_t type, void *payload, size_t payload_size);
 	FuseImageContent(FUSE_image_format_t image_format,
-	                 const char *        image_id,
-	                 unsigned char *     buffer,
+	                 const char         *image_id,
+	                 unsigned char      *buffer,
 	                 size_t              buffer_size,
 	                 colorspace_t        colorspace,
 	                 unsigned int        width,
@@ -63,7 +63,7 @@ public:
 	virtual void serialize();
 
 private:
-	unsigned char *              buffer_;
+	unsigned char               *buffer_;
 	size_t                       buffer_size_;
 	FUSE_image_message_header_t *header_;
 

@@ -77,7 +77,7 @@ public:
 
 private:
 	histogram_block_header_t *_block_header;
-	uint32_t *                _histogram_data;
+	uint32_t                 *_histogram_data;
 };
 
 } // end namespace firevision

@@ -50,7 +50,7 @@ public:
 	unsigned int range_to() const;
 
 private:
-	YuvColormap *             cm_;
+	YuvColormap	            *cm_;
 	unsigned int              level_;
 	cmfile_yuvblock_header_t *header_;
 };

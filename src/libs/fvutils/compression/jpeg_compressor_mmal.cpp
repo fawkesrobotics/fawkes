@@ -73,10 +73,10 @@ public:
 	}
 
 	CompressionDestination compdest;
-	FILE *                 file_handle;
-	char *                 buffer;
+	FILE                  *file_handle;
+	char                  *buffer;
 
-	char *       jpeg_buffer;
+	char        *jpeg_buffer;
 	unsigned int jpeg_buffer_size;
 	unsigned int jpeg_bytes;
 
@@ -86,7 +86,7 @@ public:
 	MMAL_POOL_T *encoder_pool_out; /// Pointer to the pool of buffers used by encoder input port
 
 	bool                   frame_complete_;
-	fawkes::Mutex *        frame_complete_mutex_;
+	fawkes::Mutex         *frame_complete_mutex_;
 	fawkes::WaitCondition *frame_complete_waitcond_;
 };
 
@@ -410,9 +410,9 @@ void
 JpegImageCompressorMMAL::create_encoder_component()
 {
 	MMAL_COMPONENT_T *encoder       = 0;
-	MMAL_PORT_T *     encoder_input = NULL, *encoder_output = NULL;
+	MMAL_PORT_T      *encoder_input = NULL, *encoder_output = NULL;
 	MMAL_STATUS_T     status;
-	MMAL_POOL_T *     pool;
+	MMAL_POOL_T      *pool;
 
 	status = mmal_component_create(MMAL_COMPONENT_DEFAULT_IMAGE_ENCODER, &encoder);
 

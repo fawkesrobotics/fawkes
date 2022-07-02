@@ -72,7 +72,7 @@ rgb_to_yuy2(const unsigned char *RGB, unsigned char *YUV, unsigned int width, un
  * @param height Height of the image contained in the RGB buffer
  */
 void rgb_to_yuv411packed_plainc(const unsigned char *RGB,
-                                unsigned char *      YUV,
+                                unsigned char       *YUV,
                                 unsigned int         width,
                                 unsigned int         height);
 
@@ -88,7 +88,7 @@ void rgb_to_yuv411packed_plainc(const unsigned char *RGB,
  * @param yuv_line the index of the line to convert to in the YUV buffer
  */
 void convert_line_rgb_to_yuv422planar(const unsigned char *RGB,
-                                      unsigned char *      YUV,
+                                      unsigned char       *YUV,
                                       unsigned int         width,
                                       unsigned int         height,
                                       unsigned int         rgb_line,
@@ -104,7 +104,7 @@ void convert_line_rgb_to_yuv422planar(const unsigned char *RGB,
  * @param height Height of the image contained in the RGB buffer
  */
 void rgb_to_yuv422planar_plainc(const unsigned char *RGB,
-                                unsigned char *      YUV,
+                                unsigned char       *YUV,
                                 unsigned int         width,
                                 unsigned int         height);
 
@@ -118,7 +118,7 @@ void rgb_to_yuv422planar_plainc(const unsigned char *RGB,
  * @param height Height of the image contained in the RGB buffer
  */
 void rgb_planar_to_yuv422packed_plainc(const unsigned char *rgb_planar,
-                                       unsigned char *      YUV,
+                                       unsigned char       *YUV,
                                        unsigned int         width,
                                        unsigned int         height);
 
@@ -134,7 +134,7 @@ void rgb_planar_to_yuv422packed_plainc(const unsigned char *rgb_planar,
  * @param yuv_line the index of the line to convert to in the YUV buffer
  */
 void convert_line_rgb_to_yuv422packed(const unsigned char *RGB,
-                                      unsigned char *      YUV,
+                                      unsigned char       *YUV,
                                       unsigned int         width,
                                       unsigned int         height,
                                       unsigned int         rgb_line,
@@ -150,7 +150,7 @@ void convert_line_rgb_to_yuv422packed(const unsigned char *RGB,
  * @param height Height of the image contained in the RGB buffer
  */
 void rgb_to_yuv422packed_plainc(const unsigned char *RGB,
-                                unsigned char *      YUV,
+                                unsigned char       *YUV,
                                 unsigned int         width,
                                 unsigned int         height);
 
@@ -164,7 +164,7 @@ void rgb_to_yuv422packed_plainc(const unsigned char *RGB,
  * @param height Height of the image contained in the RGB buffer
  */
 void bgr_to_yuv422planar_plainc(const unsigned char *BGR,
-                                unsigned char *      YUV,
+                                unsigned char       *YUV,
                                 unsigned int         width,
                                 unsigned int         height);
 

@@ -54,7 +54,7 @@ typedef struct
 typedef struct
 {
 	struct jpeg_destination_mgr pub;       /**< public fields */
-	JOCTET *                    buffer;    /**< start of buffer */
+	JOCTET                     *buffer;    /**< start of buffer */
 	int                         bufsize;   /**< buffer size */
 	int                         datacount; /**< final data size */
 } fv_jpeg_memory_destination_mgr_t;
@@ -225,7 +225,7 @@ JpegImageCompressorLibJpeg::compress()
 	struct jpeg_compress_struct cinfo;
 	fv_jpeg_error_mgr_t         jerr;
 	unsigned int                row_stride;
-	unsigned char *             row_buffer;
+	unsigned char              *row_buffer;
 
 	// mem destination specific
 	fv_jpeg_memory_destination_mgr_t *dest;

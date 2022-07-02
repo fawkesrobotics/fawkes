@@ -45,7 +45,7 @@ public:
 	void operator+=(fawkes::upoint_t *p);
 	void operator+=(fawkes::upoint_t p);
 
-	unsigned int *  get_histogram();
+	unsigned int   *get_histogram();
 	HistogramBlock *get_histogram_block();
 	void            get_dimensions(unsigned int &width, unsigned int &height, unsigned int &depth);
 	unsigned int    get_value(unsigned int x, unsigned int y);
@@ -76,12 +76,12 @@ private:
 	unsigned int    depth;
 	unsigned int    dimension;
 	unsigned int    histogram_size;
-	unsigned int *  histogram;
+	unsigned int   *histogram;
 	HistogramBlock *histogram_block;
 	unsigned int    number_of_values;
 
 	unsigned int **undo_overlay;
-	unsigned int * undo_num_vals;
+	unsigned int  *undo_num_vals;
 	unsigned int   undo_num;
 	unsigned int   undo_current;
 };

@@ -48,7 +48,7 @@ public:
 private:
 	bool           opened;
 	unsigned char *buffer;
-	FILE *         infile;
+	FILE          *infile;
 
 	unsigned int buffer_size;
 

@@ -35,7 +35,7 @@ class ColormapFileBlock : public FireVisionDataFileBlock
 public:
 	ColormapFileBlock(unsigned int type,
 	                  size_t       data_size,
-	                  void *       spec_header,
+	                  void        *spec_header,
 	                  size_t       spec_header_size);
 	ColormapFileBlock(unsigned int type, size_t data_size, size_t spec_header_size);
 	ColormapFileBlock(unsigned int type, size_t data_size);

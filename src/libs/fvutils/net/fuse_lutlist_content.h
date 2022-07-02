@@ -37,7 +37,7 @@ public:
 	FuseLutListContent(uint32_t type, void *payload, size_t payload_size);
 	~FuseLutListContent();
 
-	void add_lutinfo(const char * lut_id,
+	void add_lutinfo(const char  *lut_id,
 	                 unsigned int width,
 	                 unsigned int height,
 	                 unsigned int depth,

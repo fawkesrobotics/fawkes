@@ -45,9 +45,9 @@ public:
 	void write(unsigned char *buffer);
 
 private:
-	Writer *     writer;
-	char *       filename;
-	char *       img_path;
+	Writer      *writer;
+	char        *filename;
+	char        *img_path;
 	colorspace_t cspace;
 	unsigned int frame_number;
 };

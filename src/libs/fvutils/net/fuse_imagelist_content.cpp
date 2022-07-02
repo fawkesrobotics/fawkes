@@ -89,7 +89,7 @@ FuseImageListContent::~FuseImageListContent()
  * @param pixel_height height of image in pixels
  */
 void
-FuseImageListContent::add_imageinfo(const char * image_id,
+FuseImageListContent::add_imageinfo(const char  *image_id,
                                     colorspace_t colorspace,
                                     unsigned int pixel_width,
                                     unsigned int pixel_height)
@@ -131,7 +131,7 @@ FUSE_imageinfo_t *
 FuseImageListContent::next()
 {
 	size_t size;
-	void * tmp = list_->next(&size);
+	void  *tmp = list_->next(&size);
 	if (size != sizeof(FUSE_imageinfo_t)) {
 		throw TypeMismatchException("Image list content contains element that is of an "
 		                            "unexpected size");

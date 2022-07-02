@@ -69,7 +69,7 @@ YuvColormap::YuvColormap(unsigned int depth, unsigned int width, unsigned int he
  * @param width U depth
  * @param height V depth
  */
-YuvColormap::YuvColormap(const char * shmem_lut_id,
+YuvColormap::YuvColormap(const char  *shmem_lut_id,
                          unsigned int depth,
                          unsigned int width,
                          unsigned int height)
@@ -85,7 +85,7 @@ YuvColormap::YuvColormap(const char * shmem_lut_id,
  * @param width U depth
  * @param height V depth
  */
-YuvColormap::YuvColormap(const char * shmem_lut_id,
+YuvColormap::YuvColormap(const char  *shmem_lut_id,
                          bool         destroy_on_free,
                          unsigned int depth,
                          unsigned int width,
@@ -129,7 +129,7 @@ void
 YuvColormap::constructor(unsigned int depth,
                          unsigned int width,
                          unsigned int height,
-                         const char * shmem_lut_id,
+                         const char  *shmem_lut_id,
                          bool         destroy_on_free)
 {
 	if (depth > 256) {
@@ -309,7 +309,7 @@ YuvColormap::operator+=(const char *filename)
 {
 	ColormapFile cmf;
 	cmf.read(filename);
-	Colormap *   tcm  = cmf.get_colormap();
+	Colormap    *tcm  = cmf.get_colormap();
 	YuvColormap *tycm = dynamic_cast<YuvColormap *>(tcm);
 	if (!tycm) {
 		delete tcm;

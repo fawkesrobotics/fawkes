@@ -58,7 +58,7 @@ namespace firevision {
  * @param width image width
  * @param height image height
  */
-SharedMemoryImageBuffer::SharedMemoryImageBuffer(const char * image_id,
+SharedMemoryImageBuffer::SharedMemoryImageBuffer(const char  *image_id,
                                                  colorspace_t cspace,
                                                  unsigned int width,
                                                  unsigned int height)
@@ -91,7 +91,7 @@ SharedMemoryImageBuffer::SharedMemoryImageBuffer(const char *image_id, bool is_r
 }
 
 void
-SharedMemoryImageBuffer::constructor(const char * image_id,
+SharedMemoryImageBuffer::constructor(const char  *image_id,
                                      colorspace_t cspace,
                                      unsigned int width,
                                      unsigned int height,
@@ -563,7 +563,7 @@ SharedMemoryImageBufferHeader::SharedMemoryImageBufferHeader()
  * @param width width
  * @param height height
  */
-SharedMemoryImageBufferHeader::SharedMemoryImageBufferHeader(const char * image_id,
+SharedMemoryImageBufferHeader::SharedMemoryImageBufferHeader(const char  *image_id,
                                                              colorspace_t colorspace,
                                                              unsigned int width,
                                                              unsigned int height)
@@ -939,7 +939,7 @@ SharedMemoryImageBufferLister::print_info(const SharedMemoryHeader *header,
                                           int                       shm_id,
                                           int                       semaphore,
                                           unsigned int              mem_size,
-                                          const void *              memptr)
+                                          const void               *memptr)
 {
 	SharedMemoryImageBufferHeader *h = (SharedMemoryImageBufferHeader *)header;
 
@@ -983,8 +983,8 @@ SharedMemoryImageBufferMetaData::SharedMemoryImageBufferMetaData()
  * @param mem_swapable True if memory might be moved to swap space
  * @param mem_destroyed True if memory has already been marked destroyed
  */
-SharedMemoryImageBufferMetaData::SharedMemoryImageBufferMetaData(const char * image_id,
-                                                                 const char * frame_id,
+SharedMemoryImageBufferMetaData::SharedMemoryImageBufferMetaData(const char  *image_id,
+                                                                 const char  *frame_id,
                                                                  colorspace_t colorspace,
                                                                  unsigned int width,
                                                                  unsigned int height,
@@ -1041,7 +1041,7 @@ SharedMemoryImageBufferMetaDataCollector::print_info(const SharedMemoryHeader *h
                                                      int                       shm_id,
                                                      int                       semaphore,
                                                      unsigned int              mem_size,
-                                                     const void *              memptr)
+                                                     const void               *memptr)
 {
 	SharedMemoryImageBufferHeader *h = (SharedMemoryImageBufferHeader *)header;
 

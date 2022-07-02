@@ -44,7 +44,7 @@ public:
 
 private:
 	rectinfo_lut_16x16_block_header_t *_lut_block_header;
-	rectinfo_lut_16x16_entry_t *       _lut_data;
+	rectinfo_lut_16x16_entry_t        *_lut_data;
 };
 
 } // end namespace firevision

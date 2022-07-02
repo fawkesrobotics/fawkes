@@ -45,7 +45,7 @@ class VisionMaster
 public:
 	virtual ~VisionMaster();
 
-	virtual Camera *register_for_camera(const char *    camera_string,
+	virtual Camera *register_for_camera(const char     *camera_string,
 	                                    fawkes::Thread *thread,
 	                                    colorspace_t    cspace = YUV422_PLANAR)                   = 0;
 	virtual Camera *register_for_raw_camera(const char *camera_string, fawkes::Thread *thread) = 0;
@@ -116,8 +116,8 @@ CC *
 VisionMaster::acquire_camctrl(const char *camera_string, CC *&cc)
 {
 	const std::type_info &t   = typeid(CC);
-	CameraControl *       pcc = acquire_camctrl(camera_string, t);
-	CC *                  tcc = dynamic_cast<CC *>(pcc);
+	CameraControl        *pcc = acquire_camctrl(camera_string, t);
+	CC                   *tcc = dynamic_cast<CC *>(pcc);
 	if (tcc) {
 		if (cc)
 			cc = tcc;
@@ -134,8 +134,8 @@ CC *
 VisionMaster::acquire_camctrl(const char *camera_string)
 {
 	const std::type_info &t   = typeid(CC);
-	CameraControl *       pcc = acquire_camctrl(camera_string, t);
-	CC *                  tcc = dynamic_cast<CC *>(pcc);
+	CameraControl        *pcc = acquire_camctrl(camera_string, t);
+	CC                   *tcc = dynamic_cast<CC *>(pcc);
 	if (tcc) {
 		return tcc;
 	} else {
@@ -150,7 +150,7 @@ CC *
 VisionMaster::register_for_raw_camera(const char *camera_string, fawkes::Thread *thread)
 {
 	Camera *camera = register_for_raw_camera(camera_string, thread);
-	CC *    tcc    = dynamic_cast<CC *>(camera);
+	CC	   *tcc    = dynamic_cast<CC *>(camera);
 	if (tcc) {
 		return tcc;
 	} else {

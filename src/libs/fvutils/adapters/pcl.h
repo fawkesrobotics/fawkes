@@ -31,10 +31,10 @@ namespace firevision {
 
 class SharedMemoryImageBuffer;
 
-void convert_buffer_to_pcl(const SharedMemoryImageBuffer * buffer,
+void convert_buffer_to_pcl(const SharedMemoryImageBuffer  *buffer,
                            pcl::PointCloud<pcl::PointXYZ> &pcl);
 
-void convert_buffer_to_pcl(const SharedMemoryImageBuffer *    buffer,
+void convert_buffer_to_pcl(const SharedMemoryImageBuffer     *buffer,
                            pcl::PointCloud<pcl::PointXYZRGB> &pcl);
 
 } // end namespace firevision

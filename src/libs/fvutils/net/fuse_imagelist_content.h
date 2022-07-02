@@ -37,7 +37,7 @@ public:
 	FuseImageListContent(uint32_t type, void *payload, size_t payload_size);
 	~FuseImageListContent();
 
-	void add_imageinfo(const char * image_id,
+	void add_imageinfo(const char  *image_id,
 	                   colorspace_t colorspace,
 	                   unsigned int pixel_width,
 	                   unsigned int pixel_height);
@@ -49,7 +49,7 @@ public:
 	virtual void serialize();
 
 private:
-	fawkes::DynamicBuffer *  list_;
+	fawkes::DynamicBuffer   *list_;
 	FUSE_imagelist_message_t imagelist_msg_;
 };
 

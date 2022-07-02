@@ -52,7 +52,7 @@ namespace firevision {
  * @param depth LUT depth
  * @param bytes_per_cell LUT bytes per cell
  */
-SharedMemoryLookupTable::SharedMemoryLookupTable(const char * lut_id,
+SharedMemoryLookupTable::SharedMemoryLookupTable(const char  *lut_id,
                                                  unsigned int width,
                                                  unsigned int height,
                                                  unsigned int depth,
@@ -78,7 +78,7 @@ SharedMemoryLookupTable::SharedMemoryLookupTable(const char *lut_id, bool is_rea
 }
 
 void
-SharedMemoryLookupTable::constructor(const char * lut_id,
+SharedMemoryLookupTable::constructor(const char  *lut_id,
                                      unsigned int width,
                                      unsigned int height,
                                      unsigned int depth,
@@ -257,7 +257,7 @@ SharedMemoryLookupTableHeader::SharedMemoryLookupTableHeader()
  * @param height LUT height
  * @param bytes_per_cell bytes per cell
  */
-SharedMemoryLookupTableHeader::SharedMemoryLookupTableHeader(const char * lut_id,
+SharedMemoryLookupTableHeader::SharedMemoryLookupTableHeader(const char  *lut_id,
                                                              unsigned int width,
                                                              unsigned int height,
                                                              unsigned int bytes_per_cell)
@@ -277,7 +277,7 @@ SharedMemoryLookupTableHeader::SharedMemoryLookupTableHeader(const char * lut_id
  * @param depth LUT depth
  * @param bytes_per_cell bytes per cell
  */
-SharedMemoryLookupTableHeader::SharedMemoryLookupTableHeader(const char * lut_id,
+SharedMemoryLookupTableHeader::SharedMemoryLookupTableHeader(const char  *lut_id,
                                                              unsigned int width,
                                                              unsigned int height,
                                                              unsigned int depth,
@@ -567,7 +567,7 @@ SharedMemoryLookupTableLister::print_info(const SharedMemoryHeader *header,
                                           int                       shm_id,
                                           int                       semaphore,
                                           unsigned int              mem_size,
-                                          const void *              memptr)
+                                          const void               *memptr)
 {
 	SharedMemoryLookupTableHeader *h = (SharedMemoryLookupTableHeader *)header;
 

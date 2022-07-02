@@ -33,7 +33,7 @@ class FvRawWriter : public Writer
 public:
 	FvRawWriter();
 	FvRawWriter(const char *filename, unsigned int width, unsigned int height);
-	FvRawWriter(const char *   filename,
+	FvRawWriter(const char    *filename,
 	            unsigned int   width,
 	            unsigned int   height,
 	            colorspace_t   colorspace,

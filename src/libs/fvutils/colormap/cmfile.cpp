@@ -131,7 +131,7 @@ ColormapFile::ColormapBlockVector *
 ColormapFile::colormap_blocks()
 {
 	FireVisionDataFile::BlockList &b  = blocks();
-	ColormapBlockVector *          rv = new ColormapBlockVector();
+	ColormapBlockVector           *rv = new ColormapBlockVector();
 	for (std::list<FireVisionDataFileBlock *>::iterator i = b.begin(); i != b.end(); ++i) {
 		if ((*i)->type() == CMFILE_TYPE_YUV) {
 			ColormapFileYuvBlock *yuvb = new ColormapFileYuvBlock(*i);
@@ -164,7 +164,7 @@ Colormap *
 ColormapFile::get_colormap()
 {
 	// Make sure we only have YUV blocks
-	BlockList &  bl = blocks();
+	BlockList   &bl = blocks();
 	YuvColormap *cm = NULL;
 
 	for (BlockList::iterator b = bl.begin(); b != bl.end(); ++b) {

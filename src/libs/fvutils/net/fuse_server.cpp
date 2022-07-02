@@ -58,7 +58,7 @@ FuseServer::FuseServer(bool               enable_ipv4,
                        const std::string &listen_ipv4,
                        const std::string &listen_ipv6,
                        unsigned short int port,
-                       ThreadCollector *  collector)
+                       ThreadCollector   *collector)
 : Thread("FuseServer", Thread::OPMODE_WAITFORWAKEUP)
 {
 	thread_collector_ = collector;

@@ -43,7 +43,7 @@ public:
 	virtual void         read();
 
 private:
-	FILE *         m_pnmfile;
+	FILE          *m_pnmfile;
 	unsigned char *m_yuv_buffer;
 	unsigned char *m_pnm_buffer;
 

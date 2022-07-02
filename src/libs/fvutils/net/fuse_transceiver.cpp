@@ -85,7 +85,7 @@ FuseNetworkTransceiver::send(StreamSocket *s, FuseNetworkMessageQueue *msgq)
  * operation since for any error the conncetion is considered dead.
  */
 void
-FuseNetworkTransceiver::recv(StreamSocket *           s,
+FuseNetworkTransceiver::recv(StreamSocket            *s,
                              FuseNetworkMessageQueue *msgq,
                              unsigned int             max_num_msgs)
 {

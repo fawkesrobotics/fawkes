@@ -42,13 +42,13 @@ namespace firevision {
 
 void
 bayerGBRG_to_yuv422planar_nearest_neighbour(const unsigned char *bayer,
-                                            unsigned char *      yuv,
+                                            unsigned char       *yuv,
                                             unsigned int         width,
                                             unsigned int         height)
 {
-	unsigned char *      y = yuv;
-	unsigned char *      u = YUV422_PLANAR_U_PLANE(yuv, width, height);
-	unsigned char *      v = YUV422_PLANAR_V_PLANE(yuv, width, height);
+	unsigned char       *y = yuv;
+	unsigned char       *u = YUV422_PLANAR_U_PLANE(yuv, width, height);
+	unsigned char       *v = YUV422_PLANAR_V_PLANE(yuv, width, height);
 	const unsigned char *b = bayer;
 
 	int y1, u1, v1, y2, u2, v2;
@@ -89,13 +89,13 @@ bayerGBRG_to_yuv422planar_nearest_neighbour(const unsigned char *bayer,
 
 void
 bayerGBRG_to_yuv422planar_bilinear(const unsigned char *bayer,
-                                   unsigned char *      yuv,
+                                   unsigned char       *yuv,
                                    unsigned int         width,
                                    unsigned int         height)
 {
-	unsigned char *      y  = yuv;
-	unsigned char *      u  = YUV422_PLANAR_U_PLANE(yuv, width, height);
-	unsigned char *      v  = YUV422_PLANAR_V_PLANE(yuv, width, height);
+	unsigned char       *y  = yuv;
+	unsigned char       *u  = YUV422_PLANAR_U_PLANE(yuv, width, height);
+	unsigned char       *v  = YUV422_PLANAR_V_PLANE(yuv, width, height);
 	const unsigned char *bf = bayer;
 
 	int y1, u1, v1, y2, u2, v2;
@@ -274,13 +274,13 @@ bayerGBRG_to_yuv422planar_bilinear(const unsigned char *bayer,
 
 void
 bayerGBRG_to_yuv422planar_bilinear2(const unsigned char *bayer,
-                                    unsigned char *      yuv,
+                                    unsigned char       *yuv,
                                     unsigned int         width,
                                     unsigned int         height)
 {
-	unsigned char *      y  = yuv;
-	unsigned char *      u  = YUV422_PLANAR_U_PLANE(yuv, width, height);
-	unsigned char *      v  = YUV422_PLANAR_V_PLANE(yuv, width, height);
+	unsigned char       *y  = yuv;
+	unsigned char       *u  = YUV422_PLANAR_U_PLANE(yuv, width, height);
+	unsigned char       *v  = YUV422_PLANAR_V_PLANE(yuv, width, height);
 	const unsigned char *bf = bayer;
 
 	int y1, u1, v1, y2, u2, v2;
@@ -550,13 +550,13 @@ bayerGBRG_to_yuv422planar_bilinear2(const unsigned char *bayer, unsigned char *y
 
 void
 bayerGRBG_to_yuv422planar_nearest_neighbour(const unsigned char *bayer,
-                                            unsigned char *      yuv,
+                                            unsigned char       *yuv,
                                             unsigned int         width,
                                             unsigned int         height)
 {
-	unsigned char *      y = yuv;
-	unsigned char *      u = YUV422_PLANAR_U_PLANE(yuv, width, height);
-	unsigned char *      v = YUV422_PLANAR_V_PLANE(yuv, width, height);
+	unsigned char       *y = yuv;
+	unsigned char       *u = YUV422_PLANAR_U_PLANE(yuv, width, height);
+	unsigned char       *v = YUV422_PLANAR_V_PLANE(yuv, width, height);
 	const unsigned char *b = bayer;
 
 	int y1, u1, v1, y2, u2, v2;
@@ -588,13 +588,13 @@ bayerGRBG_to_yuv422planar_nearest_neighbour(const unsigned char *bayer,
 
 void
 bayerRGGB_to_yuv422planar_nearest_neighbour(const unsigned char *bayer,
-                                            unsigned char *      yuv,
+                                            unsigned char       *yuv,
                                             unsigned int         width,
                                             unsigned int         height)
 {
-	unsigned char *      y = yuv;
-	unsigned char *      u = YUV422_PLANAR_U_PLANE(yuv, width, height);
-	unsigned char *      v = YUV422_PLANAR_V_PLANE(yuv, width, height);
+	unsigned char       *y = yuv;
+	unsigned char       *u = YUV422_PLANAR_U_PLANE(yuv, width, height);
+	unsigned char       *v = YUV422_PLANAR_V_PLANE(yuv, width, height);
 	const unsigned char *b = bayer;
 
 	int y1, u1, v1, y2, u2, v2;
@@ -626,13 +626,13 @@ bayerRGGB_to_yuv422planar_nearest_neighbour(const unsigned char *bayer,
 
 void
 bayerGRBG_to_yuv422planar_bilinear(const unsigned char *bayer,
-                                   unsigned char *      yuv,
+                                   unsigned char       *yuv,
                                    unsigned int         width,
                                    unsigned int         height)
 {
-	unsigned char *      y  = yuv;
-	unsigned char *      u  = YUV422_PLANAR_U_PLANE(yuv, width, height);
-	unsigned char *      v  = YUV422_PLANAR_V_PLANE(yuv, width, height);
+	unsigned char       *y  = yuv;
+	unsigned char       *u  = YUV422_PLANAR_U_PLANE(yuv, width, height);
+	unsigned char       *v  = YUV422_PLANAR_V_PLANE(yuv, width, height);
 	const unsigned char *bf = bayer;
 
 	int y1, u1, v1, y2, u2, v2;
@@ -811,7 +811,7 @@ bayerGRBG_to_yuv422planar_bilinear(const unsigned char *bayer,
 
 void
 bayerGRBG_to_rgb_nearest_neighbour(const unsigned char *bayer,
-                                   unsigned char *      rgb,
+                                   unsigned char       *rgb,
                                    unsigned int         width,
                                    unsigned int         height)
 {
@@ -846,7 +846,7 @@ bayerGRBG_to_rgb_nearest_neighbour(const unsigned char *bayer,
 
 void
 bayerGRBG_to_rgb_bilinear(const unsigned char *bayer,
-                          unsigned char *      rgb,
+                          unsigned char       *rgb,
                           unsigned int         width,
                           unsigned int         height)
 {

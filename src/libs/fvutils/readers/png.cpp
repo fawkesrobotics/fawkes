@@ -40,7 +40,7 @@ namespace firevision {
 class PNGReaderData
 {
 public:
-	FILE *      infile;
+	FILE	     *infile;
 	png_structp png_ptr;
 	png_infop   info_ptr;
 	int         number_passes;

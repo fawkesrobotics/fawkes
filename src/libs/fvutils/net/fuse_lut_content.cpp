@@ -105,8 +105,8 @@ FuseLutContent::FuseLutContent(SharedMemoryLookupTable *b)
  * @param depth LUT depth
  * @param bpc LUT bytes per cell
  */
-FuseLutContent::FuseLutContent(const char * lut_id,
-                               void *       buffer,
+FuseLutContent::FuseLutContent(const char  *lut_id,
+                               void        *buffer,
                                unsigned int width,
                                unsigned int height,
                                unsigned int depth,

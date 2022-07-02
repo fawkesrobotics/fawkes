@@ -80,18 +80,18 @@ public:
 	void         deleteRegion(ZRegion *region2);
 	bool         isEmptyRegion();
 
-	ZRegion *                        getRegion() const;
+	ZRegion                         *getRegion() const;
 	std::vector<fawkes::rectangle_t> getSelection();
 
 private:
 	unsigned int   threshold;
-	ZRegion *      region;
+	ZRegion       *region;
 	unsigned char *buffer;
 	unsigned int   width;
 	unsigned int   height;
 
 	ZRegion *privFindRegion(unsigned int seedX, unsigned int seedY);
-	ZSlice * findSlice(unsigned int x, unsigned int y, unsigned int vSeed, int uSeed = -1);
+	ZSlice  *findSlice(unsigned int x, unsigned int y, unsigned int vSeed, int uSeed = -1);
 	bool     isSimilarV(unsigned int v1, unsigned int v2);
 	bool     isSimilarU(unsigned int u1, unsigned int u2);
 	bool     isSimilarUV(unsigned int u1, unsigned int u2, unsigned int v1, unsigned int v2);

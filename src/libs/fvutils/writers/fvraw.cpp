@@ -78,7 +78,7 @@ FvRawWriter::FvRawWriter(const char *filename, unsigned int width, unsigned int 
  * @param colorspace colorspace
  * @param buffer buffer
  */
-FvRawWriter::FvRawWriter(const char *   filename,
+FvRawWriter::FvRawWriter(const char    *filename,
                          unsigned int   width,
                          unsigned int   height,
                          colorspace_t   colorspace,
