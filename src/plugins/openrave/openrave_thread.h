@@ -51,7 +51,7 @@ public:
 	//for OpenRaveConnector
 	//virtual void testDebug();
 	virtual void clone(fawkes::OpenRaveEnvironmentPtr &env,
-	                   fawkes::OpenRaveRobotPtr &      robot,
+	                   fawkes::OpenRaveRobotPtr       &robot,
 	                   fawkes::OpenRaveManipulatorPtr &manip) const;
 
 	virtual fawkes::OpenRaveEnvironmentPtr get_environment() const;
@@ -66,7 +66,7 @@ public:
 	                             float                           trans_y   = 0.f,
 	                             float                           trans_z   = 0.f,
 	                             bool                            calibrate = 0);
-	virtual void set_manipulator(fawkes::OpenRaveRobotPtr &      robot,
+	virtual void set_manipulator(fawkes::OpenRaveRobotPtr       &robot,
 	                             fawkes::OpenRaveManipulatorPtr &manip,
 	                             float                           trans_x   = 0.f,
 	                             float                           trans_y   = 0.f,
@@ -84,7 +84,7 @@ public:
 	virtual bool delete_object(const std::string &name);
 	virtual bool delete_all_objects();
 	virtual bool rename_object(const std::string &name, const std::string &new_name);
-	virtual bool move_object(const std::string &       name,
+	virtual bool move_object(const std::string        &name,
 	                         float                     trans_x,
 	                         float                     trans_y,
 	                         float                     trans_z,

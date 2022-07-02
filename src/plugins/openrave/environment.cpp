@@ -294,7 +294,7 @@ OpenRaveEnvironment::start_viewer()
  * @param iktype IK type of solver (default: Transform6D; use TranslationDirection5D for 5DOF arms)
  */
 void
-OpenRaveEnvironment::load_IK_solver(OpenRaveRobotPtr &               robot,
+OpenRaveEnvironment::load_IK_solver(OpenRaveRobotPtr                &robot,
                                     OpenRAVE::IkParameterizationType iktype)
 {
 	EnvironmentMutex::scoped_lock(env_->GetMutex());
@@ -470,7 +470,7 @@ OpenRaveEnvironment::run_planner(OpenRaveRobotPtr &robot, float sampling)
  */
 void
 OpenRaveEnvironment::run_graspplanning(const std::string &target_name,
-                                       OpenRaveRobotPtr & robot,
+                                       OpenRaveRobotPtr  &robot,
                                        float              sampling)
 {
 	std::string filename = SRCDIR "/python/graspplanning.py";
@@ -487,7 +487,7 @@ OpenRaveEnvironment::run_graspplanning(const std::string &target_name,
 
 	// Need to aquire global interpreter lock (GIL), create new sub-interpreter to run code in there
 	PyGILState_STATE gil_state = PyGILState_Ensure(); // aquire python GIL
-	PyThreadState *  cur_state =
+	PyThreadState   *cur_state =
 	  PyThreadState_Get(); // get current ThreadState; need this to switch back to later
 	PyThreadState *int_state = Py_NewInterpreter(); // create new sub-interpreter
 	PyThreadState_Swap(
@@ -765,7 +765,7 @@ OpenRaveEnvironment::move_object(const std::string &name,
                                  float              trans_x,
                                  float              trans_y,
                                  float              trans_z,
-                                 OpenRaveRobotPtr & robot)
+                                 OpenRaveRobotPtr  &robot)
 {
 	// remember, OpenRAVE Vector is 4-tuple (w,x,y,z)
 	Transform t;
