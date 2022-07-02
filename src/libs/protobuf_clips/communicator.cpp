@@ -65,8 +65,8 @@ namespace protobuf_clips {
  * @param logger optional logger for informational output
  */
 ClipsProtobufCommunicator::ClipsProtobufCommunicator(CLIPS::Environment *env,
-                                                     fawkes::Mutex &     env_mutex,
-                                                     fawkes::Logger *    logger)
+                                                     fawkes::Mutex      &env_mutex,
+                                                     fawkes::Logger     *logger)
 : clips_(env), clips_mutex_(env_mutex), logger_(logger), server_(NULL), next_client_id_(0)
 {
 	message_register_ = new MessageRegister();
@@ -79,10 +79,10 @@ ClipsProtobufCommunicator::ClipsProtobufCommunicator(CLIPS::Environment *env,
  * @param proto_path proto path passed to a newly instantiated message register
  * @param logger optional logger for informational output
  */
-ClipsProtobufCommunicator::ClipsProtobufCommunicator(CLIPS::Environment *      env,
-                                                     fawkes::Mutex &           env_mutex,
+ClipsProtobufCommunicator::ClipsProtobufCommunicator(CLIPS::Environment       *env,
+                                                     fawkes::Mutex            &env_mutex,
                                                      std::vector<std::string> &proto_path,
-                                                     fawkes::Logger *          logger)
+                                                     fawkes::Logger           *logger)
 : clips_(env), clips_mutex_(env_mutex), logger_(logger), server_(NULL), next_client_id_(0)
 {
 	message_register_ = new MessageRegister(proto_path);
@@ -423,7 +423,7 @@ ClipsProtobufCommunicator::clips_pb_field_type(void *msgptr, std::string field_n
 	if (!*m)
 		return CLIPS::Value("INVALID-MESSAGE", CLIPS::TYPE_SYMBOL);
 
-	const Descriptor *     desc  = (*m)->GetDescriptor();
+	const Descriptor      *desc  = (*m)->GetDescriptor();
 	const FieldDescriptor *field = desc->FindFieldByName(field_name);
 	if (!field) {
 		return CLIPS::Value("DOES-NOT-EXIST", CLIPS::TYPE_SYMBOL);
@@ -458,7 +458,7 @@ ClipsProtobufCommunicator::clips_pb_has_field(void *msgptr, std::string field_na
 	if (!*m)
 		return CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL);
 
-	const Descriptor *     desc  = (*m)->GetDescriptor();
+	const Descriptor      *desc  = (*m)->GetDescriptor();
 	const FieldDescriptor *field = desc->FindFieldByName(field_name);
 	if (!field)
 		return CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL);
@@ -480,7 +480,7 @@ ClipsProtobufCommunicator::clips_pb_field_label(void *msgptr, std::string field_
 	if (!*m)
 		return CLIPS::Value("INVALID-MESSAGE", CLIPS::TYPE_SYMBOL);
 
-	const Descriptor *     desc  = (*m)->GetDescriptor();
+	const Descriptor      *desc  = (*m)->GetDescriptor();
 	const FieldDescriptor *field = desc->FindFieldByName(field_name);
 	if (!field) {
 		return CLIPS::Value("DOES-NOT-EXIST", CLIPS::TYPE_SYMBOL);
@@ -505,7 +505,7 @@ ClipsProtobufCommunicator::clips_pb_field_value(void *msgptr, std::string field_
 		return CLIPS::Value("INVALID-MESSAGE", CLIPS::TYPE_SYMBOL);
 	}
 
-	const Descriptor *     desc  = (*m)->GetDescriptor();
+	const Descriptor      *desc  = (*m)->GetDescriptor();
 	const FieldDescriptor *field = desc->FindFieldByName(field_name);
 	if (!field) {
 		if (logger_) {
@@ -544,7 +544,7 @@ ClipsProtobufCommunicator::clips_pb_field_value(void *msgptr, std::string field_
 	case FieldDescriptor::TYPE_STRING: return CLIPS::Value(refl->GetString(**m, field));
 	case FieldDescriptor::TYPE_MESSAGE: {
 		const google::protobuf::Message &mfield = refl->GetMessage(**m, field);
-		google::protobuf::Message *      mcopy  = mfield.New();
+		google::protobuf::Message       *mcopy  = mfield.New();
 		mcopy->CopyFrom(mfield);
 		void *ptr = new std::shared_ptr<google::protobuf::Message>(mcopy);
 		return CLIPS::Value(ptr);
@@ -562,7 +562,7 @@ ClipsProtobufCommunicator::clips_pb_field_value(void *msgptr, std::string field_
 }
 
 void
-ClipsProtobufCommunicator::clips_pb_set_field(void *       msgptr,
+ClipsProtobufCommunicator::clips_pb_set_field(void        *msgptr,
                                               std::string  field_name,
                                               CLIPS::Value value)
 {
@@ -571,7 +571,7 @@ ClipsProtobufCommunicator::clips_pb_set_field(void *       msgptr,
 	if (!(m && *m))
 		return;
 
-	const Descriptor *     desc  = (*m)->GetDescriptor();
+	const Descriptor      *desc  = (*m)->GetDescriptor();
 	const FieldDescriptor *field = desc->FindFieldByName(field_name);
 	if (!field) {
 		if (logger_) {
@@ -606,7 +606,7 @@ ClipsProtobufCommunicator::clips_pb_set_field(void *       msgptr,
 		case FieldDescriptor::TYPE_FIXED32:
 		case FieldDescriptor::TYPE_UINT32: refl->SetUInt32(m->get(), field, value.as_integer()); break;
 		case FieldDescriptor::TYPE_ENUM: {
-			const EnumDescriptor *     enumdesc = field->enum_type();
+			const EnumDescriptor      *enumdesc = field->enum_type();
 			const EnumValueDescriptor *enumval  = enumdesc->FindValueByName(value);
 			if (enumval) {
 				refl->SetEnum(m->get(), field, enumval);
@@ -638,7 +638,7 @@ ClipsProtobufCommunicator::clips_pb_set_field(void *       msgptr,
 }
 
 void
-ClipsProtobufCommunicator::clips_pb_add_list(void *       msgptr,
+ClipsProtobufCommunicator::clips_pb_add_list(void        *msgptr,
                                              std::string  field_name,
                                              CLIPS::Value value)
 {
@@ -647,7 +647,7 @@ ClipsProtobufCommunicator::clips_pb_add_list(void *       msgptr,
 	if (!(m && *m))
 		return;
 
-	const Descriptor *     desc  = (*m)->GetDescriptor();
+	const Descriptor      *desc  = (*m)->GetDescriptor();
 	const FieldDescriptor *field = desc->FindFieldByName(field_name);
 	if (!field) {
 		if (logger_) {
@@ -682,7 +682,7 @@ ClipsProtobufCommunicator::clips_pb_add_list(void *       msgptr,
 		case FieldDescriptor::TYPE_FIXED32:
 		case FieldDescriptor::TYPE_UINT32: refl->AddUInt32(m->get(), field, value); break;
 		case FieldDescriptor::TYPE_ENUM: {
-			const EnumDescriptor *     enumdesc = field->enum_type();
+			const EnumDescriptor      *enumdesc = field->enum_type();
 			const EnumValueDescriptor *enumval  = enumdesc->FindValueByName(value);
 			if (enumval)
 				refl->AddEnum(m->get(), field, enumval);
@@ -882,7 +882,7 @@ ClipsProtobufCommunicator::clips_pb_field_list(void *msgptr, std::string field_n
 	if (!(m && *m))
 		return CLIPS::Values(1, CLIPS::Value("INVALID-MESSAGE", CLIPS::TYPE_SYMBOL));
 
-	const Descriptor *     desc  = (*m)->GetDescriptor();
+	const Descriptor      *desc  = (*m)->GetDescriptor();
 	const FieldDescriptor *field = desc->FindFieldByName(field_name);
 	if (!field) {
 		return CLIPS::Values(1, CLIPS::Value("DOES-NOT-EXIST", CLIPS::TYPE_SYMBOL));
@@ -926,7 +926,7 @@ ClipsProtobufCommunicator::clips_pb_field_list(void *msgptr, std::string field_n
 			break;
 		case FieldDescriptor::TYPE_MESSAGE: {
 			const google::protobuf::Message &msg   = refl->GetRepeatedMessage(**m, field, i);
-			google::protobuf::Message *      mcopy = msg.New();
+			google::protobuf::Message       *mcopy = msg.New();
 			mcopy->CopyFrom(msg);
 			void *ptr = new std::shared_ptr<google::protobuf::Message>(mcopy);
 			rv[i]     = CLIPS::Value(ptr);
@@ -962,7 +962,7 @@ ClipsProtobufCommunicator::clips_pb_field_is_list(void *msgptr, std::string fiel
 	if (!(m && *m))
 		return CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL);
 
-	const Descriptor *     desc  = (*m)->GetDescriptor();
+	const Descriptor      *desc  = (*m)->GetDescriptor();
 	const FieldDescriptor *field = desc->FindFieldByName(field_name);
 	if (!field)
 		return CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL);
@@ -981,7 +981,7 @@ ClipsProtobufCommunicator::clips_assert_message(std::pair<std::string, unsigned 
 	if (temp) {
 		struct timeval tv;
 		gettimeofday(&tv, 0);
-		void *               ptr  = new std::shared_ptr<google::protobuf::Message>(msg);
+		void                *ptr  = new std::shared_ptr<google::protobuf::Message>(msg);
 		CLIPS::Fact::pointer fact = CLIPS::Fact::create(*clips_, temp);
 		fact->set_slot("type", msg->GetTypeName());
 		fact->set_slot("comp-id", comp_id);
@@ -1114,7 +1114,7 @@ ClipsProtobufCommunicator::handle_server_client_fail(ProtobufStreamServer::Clien
  */
 void
 ClipsProtobufCommunicator::handle_peer_msg(long int                                   peer_id,
-                                           boost::asio::ip::udp::endpoint &           endpoint,
+                                           boost::asio::ip::udp::endpoint            &endpoint,
                                            uint16_t                                   component_id,
                                            uint16_t                                   msg_type,
                                            std::shared_ptr<google::protobuf::Message> msg)

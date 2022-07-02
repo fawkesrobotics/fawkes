@@ -59,12 +59,12 @@ class ClipsProtobufCommunicator
 {
 public:
 	ClipsProtobufCommunicator(CLIPS::Environment *env,
-	                          fawkes::Mutex &     env_mutex,
-	                          fawkes::Logger *    logger = NULL);
-	ClipsProtobufCommunicator(CLIPS::Environment *      env,
-	                          fawkes::Mutex &           env_mutex,
+	                          fawkes::Mutex      &env_mutex,
+	                          fawkes::Logger     *logger = NULL);
+	ClipsProtobufCommunicator(CLIPS::Environment       *env,
+	                          fawkes::Mutex            &env_mutex,
 	                          std::vector<std::string> &proto_path,
-	                          fawkes::Logger *          logger = NULL);
+	                          fawkes::Logger           *logger = NULL);
 	~ClipsProtobufCommunicator();
 
 	void enable_server(int port);
@@ -161,16 +161,16 @@ private:
 	void     clips_pb_peer_setup_crypto(long int peer_id, std::string crypto_key, std::string cipher);
 
 	typedef enum { CT_SERVER, CT_CLIENT, CT_PEER } ClientType;
-	void clips_assert_message(std::pair<std::string, unsigned short> &    endpoint,
+	void clips_assert_message(std::pair<std::string, unsigned short>     &endpoint,
 	                          uint16_t                                    comp_id,
 	                          uint16_t                                    msg_type,
 	                          std::shared_ptr<google::protobuf::Message> &msg,
 	                          ClientType                                  ct,
 	                          long int                                    client_id = 0);
 	void handle_server_client_connected(protobuf_comm::ProtobufStreamServer::ClientID client,
-	                                    boost::asio::ip::tcp::endpoint &              endpoint);
+	                                    boost::asio::ip::tcp::endpoint               &endpoint);
 	void handle_server_client_disconnected(protobuf_comm::ProtobufStreamServer::ClientID client,
-	                                       const boost::system::error_code &             error);
+	                                       const boost::system::error_code              &error);
 
 	void handle_server_client_msg(protobuf_comm::ProtobufStreamServer::ClientID client,
 	                              uint16_t                                      component_id,
@@ -183,7 +183,7 @@ private:
 	                               std::string                                   msg);
 
 	void handle_peer_msg(long int                                   peer_id,
-	                     boost::asio::ip::udp::endpoint &           endpoint,
+	                     boost::asio::ip::udp::endpoint            &endpoint,
 	                     uint16_t                                   component_id,
 	                     uint16_t                                   msg_type,
 	                     std::shared_ptr<google::protobuf::Message> msg);
@@ -207,11 +207,11 @@ private:
 
 private:
 	CLIPS::Environment *clips_;
-	fawkes::Mutex &     clips_mutex_;
+	fawkes::Mutex      &clips_mutex_;
 
 	fawkes::Logger *logger_;
 
-	protobuf_comm::MessageRegister *     message_register_;
+	protobuf_comm::MessageRegister      *message_register_;
 	protobuf_comm::ProtobufStreamServer *server_;
 
 	boost::signals2::signal<void(protobuf_comm::ProtobufStreamServer::ClientID,
