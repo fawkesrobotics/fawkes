@@ -48,13 +48,13 @@ class BBLogReplayThread : public fawkes::Thread,
                           public fawkes::BlackBoardAspect
 {
 public:
-	BBLogReplayThread(const char *           logfile_name,
-	                  const char *           logdir,
-	                  const char *           scenario,
+	BBLogReplayThread(const char            *logfile_name,
+	                  const char            *logdir,
+	                  const char            *scenario,
 	                  float                  grace_period,
 	                  bool                   loop_replay,
 	                  bool                   non_blocking = false,
-	                  const char *           thread_name  = "BBLogReplayThread",
+	                  const char            *thread_name  = "BBLogReplayThread",
 	                  fawkes::Thread::OpMode th_opmode    = Thread::OPMODE_CONTINUOUS);
 	virtual ~BBLogReplayThread();
 

@@ -44,7 +44,7 @@ main(int argc, char **argv)
 {
 	signal(SIGINT, signal_handler);
 
-	BlackBoard *   rbb = new RemoteBlackBoard("localhost", 1910);
+	BlackBoard    *rbb = new RemoteBlackBoard("localhost", 1910);
 	TestInterface *ti  = rbb->open_for_writing<TestInterface>("BBLoggerTest");
 
 	int i = 0;

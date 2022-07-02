@@ -51,11 +51,11 @@ class BBLoggerThread : public fawkes::Thread,
                        public fawkes::BlackBoardInterfaceListener
 {
 public:
-	BBLoggerThread(const char *  iface_uid,
-	               const char *  logdir,
+	BBLoggerThread(const char   *iface_uid,
+	               const char   *logdir,
 	               bool          buffering,
 	               bool          flushing,
-	               const char *  scenario,
+	               const char   *scenario,
 	               fawkes::Time *start_time);
 	virtual ~BBLoggerThread();
 
@@ -68,7 +68,7 @@ public:
 	virtual void loop();
 
 	virtual bool bb_interface_message_received(fawkes::Interface *interface,
-	                                           fawkes::Message *  message) noexcept;
+	                                           fawkes::Message   *message) noexcept;
 	virtual void bb_interface_data_refreshed(fawkes::Interface *interface) noexcept;
 	virtual void bb_interface_writer_added(fawkes::Interface *interface,
 	                                       fawkes::Uuid       instance_serial) noexcept;
@@ -98,13 +98,13 @@ private:
 	bool        buffering_;
 	bool        flushing_;
 	size_t      data_size_;
-	char *      scenario_;
-	char *      filename_;
-	char *      logdir_;
-	char *      uid_;
+	char	     *scenario_;
+	char	     *filename_;
+	char	     *logdir_;
+	char	     *uid_;
 	std::string type_;
 	std::string id_;
-	FILE *      f_data_;
+	FILE	     *f_data_;
 
 	fawkes::Time *start_;
 	fawkes::Time *now_;
@@ -113,7 +113,7 @@ private:
 	fawkes::ThreadList       threads_;
 	fawkes::SwitchInterface *switch_if_;
 
-	fawkes::Mutex *           queue_mutex_;
+	fawkes::Mutex            *queue_mutex_;
 	unsigned int              act_queue_;
 	fawkes::LockQueue<void *> queues_[2];
 };

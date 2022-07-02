@@ -71,13 +71,13 @@ using namespace fawkes;
  * @param thread_name initial thread name
  * @param th_opmode thread operation mode
  */
-BBLogReplayThread::BBLogReplayThread(const char *           logfile_name,
-                                     const char *           logdir,
-                                     const char *           scenario,
+BBLogReplayThread::BBLogReplayThread(const char            *logfile_name,
+                                     const char            *logdir,
+                                     const char            *scenario,
                                      float                  grace_period,
                                      bool                   loop_replay,
                                      bool                   non_blocking,
-                                     const char *           thread_name,
+                                     const char            *thread_name,
                                      fawkes::Thread::OpMode th_opmode)
 : Thread(thread_name, th_opmode)
 {
