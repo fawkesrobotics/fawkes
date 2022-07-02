@@ -82,8 +82,8 @@ private:
 private:
 	void set_position(fawkes::Position3DInterface *iface,
 	                  bool                         is_visible,
-	                  const Eigen::Vector4f &      centroid = Eigen::Vector4f(0, 0, 0, 0),
-	                  const Eigen::Quaternionf &   rotation = Eigen::Quaternionf(1, 0, 0, 0));
+	                  const Eigen::Vector4f       &centroid = Eigen::Vector4f(0, 0, 0, 0),
+	                  const Eigen::Quaternionf    &rotation = Eigen::Quaternionf(1, 0, 0, 0));
 
 	float calc_line_length(CloudPtr                    cloud,
 	                       pcl::PointIndices::Ptr      inliers,
@@ -109,7 +109,7 @@ private:
 
 	std::vector<fawkes::Position3DInterface *> cluster_pos_ifs_;
 
-	fawkes::SwitchInterface *      switch_if_;
+	fawkes::SwitchInterface       *switch_if_;
 	fawkes::LaserClusterInterface *config_if_;
 
 	typedef enum { SELECT_MIN_ANGLE, SELECT_MIN_DIST } selection_mode_t;
