@@ -94,7 +94,7 @@ NavGraphROSPubThread::graph_changed() noexcept
 
 void
 NavGraphROSPubThread::convert_nodes(const std::vector<fawkes::NavGraphNode> &nodes,
-                                    std::vector<fawkes_msgs::NavGraphNode> & out)
+                                    std::vector<fawkes_msgs::NavGraphNode>  &out)
 {
 	for (const NavGraphNode &node : nodes) {
 		fawkes_msgs::NavGraphNode ngn;
@@ -107,7 +107,7 @@ NavGraphROSPubThread::convert_nodes(const std::vector<fawkes::NavGraphNode> &nod
 		}
 		ngn.unconnected                                 = node.unconnected();
 		const std::map<std::string, std::string> &props = node.properties();
-		for (const auto p : props) {
+		for (const auto &p : props) {
 			fawkes_msgs::NavGraphProperty ngp;
 			ngp.key   = p.first;
 			ngp.value = p.second;
@@ -134,7 +134,7 @@ NavGraphROSPubThread::publish_graph()
 		nge.to_node                                     = edge.to();
 		nge.directed                                    = edge.is_directed();
 		const std::map<std::string, std::string> &props = edge.properties();
-		for (const auto p : props) {
+		for (const auto &p : props) {
 			fawkes_msgs::NavGraphProperty ngp;
 			ngp.key   = p.first;
 			ngp.value = p.second;
@@ -147,7 +147,7 @@ NavGraphROSPubThread::publish_graph()
 }
 
 bool
-NavGraphROSPubThread::svs_search_path_cb(fawkes_msgs::NavGraphSearchPath::Request & req,
+NavGraphROSPubThread::svs_search_path_cb(fawkes_msgs::NavGraphSearchPath::Request  &req,
                                          fawkes_msgs::NavGraphSearchPath::Response &res)
 {
 	NavGraphNode from, to;
@@ -210,7 +210,7 @@ NavGraphROSPubThread::svs_search_path_cb(fawkes_msgs::NavGraphSearchPath::Reques
 }
 
 bool
-NavGraphROSPubThread::svs_get_pwcosts_cb(fawkes_msgs::NavGraphGetPairwiseCosts::Request & req,
+NavGraphROSPubThread::svs_get_pwcosts_cb(fawkes_msgs::NavGraphGetPairwiseCosts::Request  &req,
                                          fawkes_msgs::NavGraphGetPairwiseCosts::Response &res)
 {
 	for (unsigned int i = 0; i < req.nodes.size(); ++i) {

@@ -68,7 +68,7 @@ protected:
 			params[i]       = new thread_params();
 			params[i]->cond = cond;
 			pthread_create(&threads[i], NULL, thread_func, params[i]);
-			pthread_yield();
+			sched_yield();
 		}
 
 		usleep(1000);
@@ -99,7 +99,7 @@ start_waiter_thread(void *args)
 void *
 start_abstimed_waiter_thread(void *args)
 {
-	thread_params * params = (thread_params *)args;
+	thread_params  *params = (thread_params *)args;
 	struct timespec ts;
 	EXPECT_NE(-1, clock_gettime(CLOCK_REALTIME, &ts));
 	ts.tv_sec += 5;

@@ -445,7 +445,7 @@ TEST_F(SyncPointManagerTest, MultipleManagerRequests)
 		params[i]->num_wait_calls = 0;
 		params[i]->sp_identifier  = sp_identifier;
 		pthread_create(&threads[i], &attrs, start_waiter_thread, params[i]);
-		pthread_yield();
+		sched_yield();
 		ASSERT_LE(manager->get_syncpoints().size(), 3u);
 	}
 
@@ -474,7 +474,7 @@ TEST_F(SyncPointManagerTest, ParallelWaitCalls)
 		params[i]->num_wait_calls = num_wait_calls;
 		params[i]->sp_identifier  = sp_identifier;
 		pthread_create(&threads[i], &attrs, start_waiter_thread, params[i]);
-		pthread_yield();
+		sched_yield();
 		ASSERT_LE(manager->get_syncpoints().size(), 3u);
 	}
 
@@ -506,7 +506,7 @@ TEST_F(SyncPointManagerTest, ParallelWaitsReturn)
 		params[i]->num_wait_calls = num_wait_calls;
 		params[i]->sp_identifier  = sp_identifier;
 		pthread_create(&threads[i], &attrs, start_waiter_thread, params[i]);
-		pthread_yield();
+		sched_yield();
 	}
 
 	for (uint i = 0; i < num_threads; i++) {
@@ -835,7 +835,7 @@ TEST_F(SyncBarrierTest, SyncBarrierHierarchy)
 	uint                  num_threads = identifiers.size();
 	pthread_t             threads[num_threads];
 	waiter_thread_params *params[num_threads];
-	Barrier *             barrier = new Barrier(num_threads + 1);
+	Barrier              *barrier = new Barrier(num_threads + 1);
 	for (uint i = 0; i < num_threads; i++) {
 		params[i]                 = new waiter_thread_params();
 		params[i]->component      = "component " + to_string(i);
@@ -1272,7 +1272,7 @@ TEST_F(SyncPointManagerTest, WaitForOneSeparateTimeoutTest)
 	sp->register_emitter("emitter1");
 	string               sp_identifier = "/test";
 	uint                 num_threads   = 2;
-	Barrier *            barrier       = new Barrier(num_threads + 2);
+	Barrier             *barrier       = new Barrier(num_threads + 2);
 	pthread_t            wait_for_one_thread;
 	waiter_thread_params wait_for_one_params;
 	wait_for_one_params.component      = "wait_for_one";
