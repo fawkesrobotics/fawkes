@@ -66,7 +66,7 @@ ClipsRobotMemoryThread::finalize()
 }
 
 void
-ClipsRobotMemoryThread::clips_context_init(const std::string &          env_name,
+ClipsRobotMemoryThread::clips_context_init(const std::string           &env_name,
                                            LockPtr<CLIPS::Environment> &clips)
 {
 	envs_[env_name] = clips;
@@ -320,7 +320,7 @@ ClipsRobotMemoryThread::clips_bson_append(void *bson, std::string field_name, CL
 }
 
 void
-ClipsRobotMemoryThread::clips_bson_append_regex(void *       bson,
+ClipsRobotMemoryThread::clips_bson_append_regex(void        *bson,
                                                 std::string  field_name,
                                                 CLIPS::Value regex_string)
 {
@@ -341,7 +341,7 @@ ClipsRobotMemoryThread::clips_bson_append_regex(void *       bson,
 }
 
 void
-ClipsRobotMemoryThread::clips_bson_append_array(void *        bson,
+ClipsRobotMemoryThread::clips_bson_append_array(void         *bson,
                                                 std::string   field_name,
                                                 CLIPS::Values values)
 {
@@ -422,7 +422,7 @@ ClipsRobotMemoryThread::clips_bson_array_append(void *array, CLIPS::Value value)
 }
 
 void
-ClipsRobotMemoryThread::clips_bson_append_time(void *        bson,
+ClipsRobotMemoryThread::clips_bson_append_time(void         *bson,
                                                std::string   field_name,
                                                CLIPS::Values time)
 {
@@ -487,9 +487,9 @@ ClipsRobotMemoryThread::clips_robotmemory_create_unique_index(std::string collec
 }
 
 void
-ClipsRobotMemoryThread::robotmemory_update(std::string &                  collection,
+ClipsRobotMemoryThread::robotmemory_update(std::string                   &collection,
                                            const bsoncxx::document::view &update,
-                                           CLIPS::Value &                 query,
+                                           CLIPS::Value                  &query,
                                            bool                           upsert)
 {
 	try {
@@ -513,7 +513,7 @@ ClipsRobotMemoryThread::robotmemory_update(std::string &                  collec
 
 void
 ClipsRobotMemoryThread::clips_robotmemory_upsert(std::string  collection,
-                                                 void *       bson,
+                                                 void        *bson,
                                                  CLIPS::Value query)
 {
 	auto b = static_cast<bsoncxx::builder::basic::document *>(bson);
@@ -526,7 +526,7 @@ ClipsRobotMemoryThread::clips_robotmemory_upsert(std::string  collection,
 
 void
 ClipsRobotMemoryThread::clips_robotmemory_update(std::string  collection,
-                                                 void *       bson,
+                                                 void        *bson,
                                                  CLIPS::Value query)
 {
 	auto b = static_cast<bsoncxx::builder::basic::document *>(bson);
@@ -539,7 +539,7 @@ ClipsRobotMemoryThread::clips_robotmemory_update(std::string  collection,
 
 void
 ClipsRobotMemoryThread::clips_robotmemory_replace(std::string  collection,
-                                                  void *       bson,
+                                                  void        *bson,
                                                   CLIPS::Value query)
 {
 	auto b = static_cast<bsoncxx::builder::basic::document *>(bson);
@@ -550,8 +550,8 @@ ClipsRobotMemoryThread::clips_robotmemory_replace(std::string  collection,
 
 CLIPS::Value
 ClipsRobotMemoryThread::clips_robotmemory_query_sort(std::string collection,
-                                                     void *      bson,
-                                                     void *      bson_sort)
+                                                     void       *bson,
+                                                     void       *bson_sort)
 {
 	auto b = static_cast<bsoncxx::builder::basic::document *>(bson);
 
@@ -864,7 +864,7 @@ ClipsRobotMemoryThread::clips_bson_get_time(void *bson, std::string field_name)
 CLIPS::Value
 ClipsRobotMemoryThread::clips_robotmemory_register_trigger(std::string env_name,
                                                            std::string collection,
-                                                           void *      query,
+                                                           void       *query,
                                                            std::string assert_name)
 {
 	bsoncxx::document::value b{static_cast<bsoncxx::builder::basic::document *>(query)->view()};

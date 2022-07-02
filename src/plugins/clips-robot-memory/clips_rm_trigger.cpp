@@ -37,9 +37,9 @@ using namespace mongocxx;
  * @param logger Logger
  */
 ClipsRmTrigger::ClipsRmTrigger(std::string                  assert_name,
-                               RobotMemory *                robot_memory,
+                               RobotMemory                 *robot_memory,
                                LockPtr<CLIPS::Environment> &clips,
-                               fawkes::Logger *             logger)
+                               fawkes::Logger              *logger)
 {
 	this->assert_name  = assert_name;
 	this->robot_memory = robot_memory;
