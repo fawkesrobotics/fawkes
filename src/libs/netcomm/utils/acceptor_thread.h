@@ -39,15 +39,15 @@ class NetworkAcceptorThread : public Thread
 public:
 	NetworkAcceptorThread(NetworkIncomingConnectionHandler *handler,
 	                      unsigned short int                port,
-	                      const char *                      thread_name = "NetworkAcceptorThread");
+	                      const char                       *thread_name = "NetworkAcceptorThread");
 	NetworkAcceptorThread(NetworkIncomingConnectionHandler *handler,
 	                      Socket::AddrType                  addr_type,
-	                      const std::string &               listen_addr,
+	                      const std::string                &listen_addr,
 	                      unsigned short int                port,
-	                      const char *                      thread_name = "NetworkAcceptorThread");
+	                      const char                       *thread_name = "NetworkAcceptorThread");
 	NetworkAcceptorThread(NetworkIncomingConnectionHandler *handler,
-	                      StreamSocket *                    socket,
-	                      const char *                      thread_name = "NetworkAcceptorThread");
+	                      StreamSocket                     *socket,
+	                      const char                       *thread_name = "NetworkAcceptorThread");
 	~NetworkAcceptorThread();
 
 	virtual void loop();
@@ -62,7 +62,7 @@ protected:
 
 private:
 	unsigned short int port_;
-	StreamSocket *     socket_;
+	StreamSocket      *socket_;
 
 	NetworkIncomingConnectionHandler *handler_;
 };

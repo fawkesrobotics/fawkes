@@ -200,9 +200,9 @@ NetworkNameResolver::resolve_name(const char *name, struct sockaddr **addr, sock
  * @return true if resolution was successful, false otherwise
  */
 bool
-NetworkNameResolver::resolve_name_blocking(const char *      name,
+NetworkNameResolver::resolve_name_blocking(const char       *name,
                                            struct sockaddr **addr,
-                                           socklen_t *       addrlen)
+                                           socklen_t        *addrlen)
 {
 	if (resolve_name(name, addr, addrlen)) {
 		return true;

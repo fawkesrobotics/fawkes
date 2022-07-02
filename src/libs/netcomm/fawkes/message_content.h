@@ -37,7 +37,7 @@ public:
 	virtual ~FawkesNetworkMessageContent();
 
 	virtual void   serialize() = 0;
-	virtual void * payload();
+	virtual void  *payload();
 	virtual size_t payload_size();
 
 protected:

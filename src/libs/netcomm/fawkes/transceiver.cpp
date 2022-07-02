@@ -82,7 +82,7 @@ FawkesNetworkTransceiver::send(StreamSocket *s, FawkesNetworkMessageQueue *msgq)
  * operation since for any error the conncetion is considered dead.
  */
 void
-FawkesNetworkTransceiver::recv(StreamSocket *             s,
+FawkesNetworkTransceiver::recv(StreamSocket              *s,
                                FawkesNetworkMessageQueue *msgq,
                                unsigned int               max_num_msgs)
 {

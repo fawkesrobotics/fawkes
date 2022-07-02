@@ -57,13 +57,13 @@ namespace fawkes {
  * @param fawkes_port port to listen on for Fawkes network connections
  * @param service_name Avahi service name for Fawkes network service
  */
-FawkesNetworkManager::FawkesNetworkManager(ThreadCollector *  thread_collector,
+FawkesNetworkManager::FawkesNetworkManager(ThreadCollector   *thread_collector,
                                            bool               enable_ipv4,
                                            bool               enable_ipv6,
                                            const std::string &listen_ipv4,
                                            const std::string &listen_ipv6,
                                            unsigned short int fawkes_port,
-                                           const char *       service_name)
+                                           const char        *service_name)
 {
 	fawkes_port_           = fawkes_port;
 	thread_collector_      = thread_collector;

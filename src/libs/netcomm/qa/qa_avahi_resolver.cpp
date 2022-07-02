@@ -148,7 +148,7 @@ public:
 	}
 
 private:
-	AvahiThread *   at;
+	AvahiThread    *at;
 	ArgumentParser *argp;
 
 	bool wait_for_name;

@@ -56,7 +56,7 @@ main(int argc, char **argv)
 		char tmp[1024];
 		memset(tmp, 0, sizeof(tmp));
 		size_t size;
-		void * buf = dr->next(&size);
+		void  *buf = dr->next(&size);
 		strncpy(tmp, (const char *)buf, size);
 		printf("Read string (%lu bytes): '%s'\n", (unsigned long int)size, tmp);
 	}

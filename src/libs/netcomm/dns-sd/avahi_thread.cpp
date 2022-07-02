@@ -292,7 +292,7 @@ AvahiThread::create_service(const NetworkService &service, AvahiEntryGroup *exgr
 		}
 	}
 
-	AvahiStringList *             al = NULL;
+	AvahiStringList              *al = NULL;
 	const std::list<std::string> &l  = service.txt();
 	for (std::list<std::string>::const_iterator j = l.begin(); j != l.end(); ++j) {
 		al = avahi_string_list_add(al, j->c_str());
@@ -619,12 +619,12 @@ AvahiThread::call_handler_service_removed(const char *name, const char *type, co
  * @param flags flags
  */
 void
-AvahiThread::call_handler_service_added(const char *            name,
-                                        const char *            type,
-                                        const char *            domain,
-                                        const char *            host_name,
+AvahiThread::call_handler_service_added(const char             *name,
+                                        const char             *type,
+                                        const char             *domain,
+                                        const char             *host_name,
                                         const AvahiIfIndex      interface,
-                                        const AvahiAddress *    address,
+                                        const AvahiAddress     *address,
                                         uint16_t                port,
                                         std::list<std::string> &txt,
                                         AvahiLookupResultFlags  flags)
@@ -756,15 +756,15 @@ AvahiThread::call_handler_cache_exhausted(const char *type)
  * the search
  */
 void
-AvahiThread::browse_callback(AvahiServiceBrowser *  b,
+AvahiThread::browse_callback(AvahiServiceBrowser   *b,
                              AvahiIfIndex           interface,
                              AvahiProtocol          protocol,
                              AvahiBrowserEvent      event,
-                             const char *           name,
-                             const char *           type,
-                             const char *           domain,
+                             const char            *name,
+                             const char            *type,
+                             const char            *domain,
                              AvahiLookupResultFlags flags,
-                             void *                 instance)
+                             void                  *instance)
 {
 	AvahiThread *at = static_cast<AvahiThread *>(instance);
 
@@ -831,19 +831,19 @@ AvahiThread::browse_callback(AvahiServiceBrowser *  b,
  * the search
  */
 void
-AvahiThread::resolve_callback(AvahiServiceResolver *         r,
+AvahiThread::resolve_callback(AvahiServiceResolver          *r,
                               AvahiIfIndex                   interface,
                               AVAHI_GCC_UNUSED AvahiProtocol protocol,
                               AvahiResolverEvent             event,
-                              const char *                   name,
-                              const char *                   type,
-                              const char *                   domain,
-                              const char *                   host_name,
-                              const AvahiAddress *           address,
+                              const char                    *name,
+                              const char                    *type,
+                              const char                    *domain,
+                              const char                    *host_name,
+                              const AvahiAddress            *address,
                               uint16_t                       port,
-                              AvahiStringList *              txt,
+                              AvahiStringList               *txt,
                               AvahiLookupResultFlags         flags,
-                              void *                         instance)
+                              void                          *instance)
 {
 	AvahiThread *at = static_cast<AvahiThread *>(instance);
 
@@ -857,7 +857,7 @@ AvahiThread::resolve_callback(AvahiServiceResolver *         r,
 		// handler add
 		{
 			std::list<std::string> txts;
-			AvahiStringList *      l = txt;
+			AvahiStringList       *l = txt;
 
 			txts.clear();
 			while (l) {
@@ -947,7 +947,7 @@ AvahiThread::start_address_resolvers()
  * @param handler handler to call for the result
  */
 void
-AvahiThread::resolve_address(struct sockaddr *     addr,
+AvahiThread::resolve_address(struct sockaddr      *addr,
                              socklen_t             addrlen,
                              AvahiResolverHandler *handler)
 {
@@ -974,7 +974,7 @@ AvahiThread::resolve_address(struct sockaddr *     addr,
 
 void
 AvahiThread::start_address_resolver(const struct sockaddr_storage *in_addr,
-                                    AvahiResolverCallbackData *    data)
+                                    AvahiResolverCallbackData     *data)
 {
 	AvahiAddress a;
 
@@ -1033,10 +1033,10 @@ AvahiThread::host_name_resolver_callback(AvahiHostNameResolver *r,
                                          AvahiIfIndex           interface,
                                          AvahiProtocol          protocol,
                                          AvahiResolverEvent     event,
-                                         const char *           name,
-                                         const AvahiAddress *   a,
+                                         const char            *name,
+                                         const AvahiAddress    *a,
                                          AvahiLookupResultFlags flags,
-                                         void *                 userdata)
+                                         void                  *userdata)
 {
 	AvahiResolverCallbackData *cd = static_cast<AvahiResolverCallbackData *>(userdata);
 
@@ -1071,14 +1071,14 @@ AvahiThread::host_name_resolver_callback(AvahiHostNameResolver *r,
  * Callback for avahi.
  */
 void
-AvahiThread::address_resolver_callback(AvahiAddressResolver * r,
+AvahiThread::address_resolver_callback(AvahiAddressResolver  *r,
                                        AvahiIfIndex           interface,
                                        AvahiProtocol          protocol,
                                        AvahiResolverEvent     event,
-                                       const AvahiAddress *   a,
-                                       const char *           name,
+                                       const AvahiAddress    *a,
+                                       const char            *name,
                                        AvahiLookupResultFlags flags,
-                                       void *                 userdata)
+                                       void                  *userdata)
 {
 	AvahiResolverCallbackData *cd = static_cast<AvahiResolverCallbackData *>(userdata);
 

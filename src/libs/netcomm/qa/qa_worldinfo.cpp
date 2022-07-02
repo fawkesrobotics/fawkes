@@ -90,7 +90,7 @@ public:
 private:
 	WorldInfoTransceiver *t;
 	unsigned int          i;
-	float *               covariance;
+	float                *covariance;
 };
 
 class WorldInfoReceiverThread : public Thread, public WorldInfoHandler
@@ -153,7 +153,7 @@ public:
 	              float       dist,
 	              float       bearing,
 	              float       slope,
-	              float *     covariance)
+	              float      *covariance)
 	{
 		printf("Ball[%s]: vis: %i  vishis: %i   (d,b,s)=(%f,%f,%f)  cov=(%f,%f,%f,%f,%f,%f,%f,%f,%f)\n",
 		       from_host,
@@ -178,18 +178,18 @@ public:
 	                   float       vel_x,
 	                   float       vel_y,
 	                   float       vel_z,
-	                   float *     covariance)
+	                   float      *covariance)
 	{
 		cout << "BVel[" << from_host << "]: (vx,vy,vz)=(" << vel_x << "," << vel_y << "," << vel_z
 		     << ")" << endl;
 	}
 
 	virtual void
-	opponent_pose_rcvd(const char * from_host,
+	opponent_pose_rcvd(const char  *from_host,
 	                   unsigned int uid,
 	                   float        distance,
 	                   float        bearing,
-	                   float *      covariance)
+	                   float       *covariance)
 	{
 		printf("Oppt[%s]: (uid,d,b)=(%u,%f,%f)  cov=(%f,%f,%f,%f)\n",
 		       from_host,
@@ -209,7 +209,7 @@ public:
 	}
 
 	virtual void
-	gamestate_rcvd(const char *                    from_host,
+	gamestate_rcvd(const char                     *from_host,
 	               worldinfo_gamestate_t           game_state,
 	               worldinfo_gamestate_team_t      state_team,
 	               unsigned int                    score_cyan,
@@ -302,10 +302,10 @@ public:
 	}
 
 private:
-	ArgumentParser *         argp;
-	WorldInfoSenderThread *  s;
+	ArgumentParser          *argp;
+	WorldInfoSenderThread   *s;
 	WorldInfoReceiverThread *r;
-	NetworkNameResolver *    rs;
+	NetworkNameResolver     *rs;
 #ifdef HAVE_AVAHI
 	AvahiThread *at;
 #endif

@@ -44,7 +44,7 @@ namespace fawkes {
  */
 NetworkAcceptorThread::NetworkAcceptorThread(NetworkIncomingConnectionHandler *handler,
                                              unsigned short int                port,
-                                             const char *                      thread_name)
+                                             const char                       *thread_name)
 : Thread(thread_name)
 {
 	handler_ = handler;
@@ -72,9 +72,9 @@ NetworkAcceptorThread::NetworkAcceptorThread(NetworkIncomingConnectionHandler *h
  */
 NetworkAcceptorThread::NetworkAcceptorThread(NetworkIncomingConnectionHandler *handler,
                                              Socket::AddrType                  addr_type,
-                                             const std::string &               listen_addr,
+                                             const std::string                &listen_addr,
                                              unsigned short int                port,
-                                             const char *                      thread_name)
+                                             const char                       *thread_name)
 : Thread(thread_name)
 {
 	handler_ = handler;
@@ -103,8 +103,8 @@ NetworkAcceptorThread::NetworkAcceptorThread(NetworkIncomingConnectionHandler *h
  * @exception SocketException as thrown by StreamSocket connstructor, bind and listen.
  */
 NetworkAcceptorThread::NetworkAcceptorThread(NetworkIncomingConnectionHandler *handler,
-                                             StreamSocket *                    socket,
-                                             const char *                      thread_name)
+                                             StreamSocket                     *socket,
+                                             const char                       *thread_name)
 : Thread(thread_name)
 {
 	handler_ = handler;

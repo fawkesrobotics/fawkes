@@ -53,7 +53,7 @@ typedef struct
 typedef struct
 {
 	fawkes_message_header_t header;  /**< message header */
-	void *                  payload; /**< message payload */
+	void                   *payload; /**< message payload */
 } fawkes_message_t;
 
 /** Fawkes transfer header.
@@ -81,12 +81,12 @@ public:
 	FawkesNetworkMessage(unsigned int       clid,
 	                     unsigned short int cid,
 	                     unsigned short int msg_id,
-	                     void *             payload,
+	                     void              *payload,
 	                     size_t             payload_size);
 	FawkesNetworkMessage(unsigned int clid, unsigned short int cid, unsigned short int msg_id);
 	FawkesNetworkMessage(unsigned short int cid,
 	                     unsigned short int msg_id,
-	                     void *             payload,
+	                     void              *payload,
 	                     size_t             payload_size);
 	FawkesNetworkMessage(unsigned int                 clid,
 	                     unsigned short int           cid,
@@ -105,7 +105,7 @@ public:
 	unsigned short int      cid() const;
 	unsigned short int      msgid() const;
 	size_t                  payload_size() const;
-	void *                  payload() const;
+	void                   *payload() const;
 	const fawkes_message_t &fmsg() const;
 
 	/** Get correctly casted payload.

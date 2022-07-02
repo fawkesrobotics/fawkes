@@ -33,7 +33,7 @@ class MulticastDatagramSocket : public Socket
 {
 public:
 	MulticastDatagramSocket(AddrType       addr_type,
-	                        const char *   multicast_addr_s,
+	                        const char    *multicast_addr_s,
 	                        unsigned short port,
 	                        float          timeout = 0.f);
 	MulticastDatagramSocket(MulticastDatagramSocket &s);

@@ -94,7 +94,7 @@ private:
 	void set_send_slave_alive();
 	void set_recv_slave_alive();
 
-	char *             host_;
+	char              *host_;
 	unsigned short int port_;
 
 	StreamSocket *s;
@@ -103,12 +103,12 @@ private:
 	HandlerMap                                                  handlers;
 
 	WaitCondition *connest_waitcond_;
-	Mutex *        connest_mutex_;
+	Mutex         *connest_mutex_;
 	bool           connest_;
 	bool           connest_interrupted_;
 
-	Mutex *                        recv_mutex_;
-	WaitCondition *                recv_waitcond_;
+	Mutex                         *recv_mutex_;
+	WaitCondition                 *recv_waitcond_;
 	std::map<unsigned int, bool>   recv_received_;
 	FawkesNetworkClientRecvThread *recv_slave_;
 	FawkesNetworkClientSendThread *send_slave_;
@@ -116,7 +116,7 @@ private:
 	bool                           send_slave_alive_;
 
 	bool         connection_died_recently;
-	Mutex *      slave_status_mutex;
+	Mutex       *slave_status_mutex;
 	bool         _has_id;
 	unsigned int _id;
 

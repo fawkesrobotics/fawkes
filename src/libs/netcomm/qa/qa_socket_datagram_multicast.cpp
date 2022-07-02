@@ -192,8 +192,8 @@ public:
 	}
 
 private:
-	ArgumentParser *                  argp;
-	MulticastDatagramServerThread *   s;
+	ArgumentParser                   *argp;
+	MulticastDatagramServerThread    *s;
 	MulticastDatagramReflectorThread *r;
 };
 

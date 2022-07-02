@@ -59,7 +59,7 @@ namespace fawkes {
  * Avahi is not used.
  */
 NetworkNameResolverThread::NetworkNameResolverThread(NetworkNameResolver *resolver,
-                                                     AvahiThread *        avahi_thread)
+                                                     AvahiThread         *avahi_thread)
 : Thread("NetworkNameResolverThread", Thread::OPMODE_WAITFORWAKEUP)
 {
 	resolver_     = resolver;
@@ -119,8 +119,8 @@ NetworkNameResolverThread::~NetworkNameResolverThread()
  */
 bool
 NetworkNameResolverThread::resolve_name_immediately(const std::string &name,
-                                                    struct sockaddr ** addr,
-                                                    socklen_t *        addr_len)
+                                                    struct sockaddr  **addr,
+                                                    socklen_t         *addr_len)
 {
 	bool found = false;
 
@@ -172,8 +172,8 @@ NetworkNameResolverThread::resolve_name_immediately(const std::string &name,
  */
 bool
 NetworkNameResolverThread::resolve_address_immediately(struct sockaddr *addr,
-                                                       std::string &    name,
-                                                       bool &           namefound)
+                                                       std::string     &name,
+                                                       bool            &namefound)
 {
 	bool      found = false;
 	char      hbuf[NI_MAXHOST];

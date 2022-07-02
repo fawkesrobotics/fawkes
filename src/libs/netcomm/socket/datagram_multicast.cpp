@@ -49,7 +49,7 @@ namespace fawkes {
  * is tried for timeout seconds.
  */
 MulticastDatagramSocket::MulticastDatagramSocket(AddrType       addr_type,
-                                                 const char *   multicast_addr_s,
+                                                 const char    *multicast_addr_s,
                                                  unsigned short port,
                                                  float          timeout)
 : Socket(addr_type, UDP, timeout)

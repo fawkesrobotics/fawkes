@@ -136,10 +136,10 @@ protected:
 	}
 
 private:
-	StreamSocket *                   s_;
+	StreamSocket                    *s_;
 	FawkesNetworkServerClientThread *parent_;
 
-	Mutex *                    outbound_mutex_;
+	Mutex                     *outbound_mutex_;
 	unsigned int               outbound_active_;
 	bool                       outbound_havemore_;
 	FawkesNetworkMessageQueue *outbound_msgq_;
@@ -162,7 +162,7 @@ private:
  * @param s socket to client
  * @param parent parent network thread
  */
-FawkesNetworkServerClientThread::FawkesNetworkServerClientThread(StreamSocket *             s,
+FawkesNetworkServerClientThread::FawkesNetworkServerClientThread(StreamSocket              *s,
                                                                  FawkesNetworkServerThread *parent)
 : Thread("FawkesNetworkServerClientThread")
 {

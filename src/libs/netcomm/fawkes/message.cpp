@@ -122,7 +122,7 @@ FawkesNetworkMessage::FawkesNetworkMessage(fawkes_message_t &msg)
  */
 FawkesNetworkMessage::FawkesNetworkMessage(unsigned short int cid,
                                            unsigned short int msg_id,
-                                           void *             payload,
+                                           void              *payload,
                                            size_t             payload_size)
 {
 	_clid    = 0;
@@ -221,7 +221,7 @@ FawkesNetworkMessage::FawkesNetworkMessage(unsigned int                 clid,
 FawkesNetworkMessage::FawkesNetworkMessage(unsigned int       clid,
                                            unsigned short int cid,
                                            unsigned short int msg_id,
-                                           void *             payload,
+                                           void              *payload,
                                            size_t             payload_size)
 {
 	_content = NULL;

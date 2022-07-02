@@ -53,7 +53,7 @@ public:
 	virtual ~DynamicBuffer();
 
 	void         append(const void *data, size_t data_size);
-	void *       buffer();
+	void        *buffer();
 	size_t       buffer_size();
 	unsigned int num_elements();
 
@@ -70,15 +70,15 @@ private:
 
 	bool _read_only;
 
-	dynamic_list_t *  _db;
-	void *            _buffer;
+	dynamic_list_t   *_db;
+	void             *_buffer;
 	size_t            _buffer_size;
 	element_header_t *_curhead;
-	void *            _curdata;
+	void             *_curdata;
 
 	uint16_t          _it_curel;
 	element_header_t *_it_curhead;
-	void *            _it_curdata;
+	void             *_it_curdata;
 };
 
 } // end namespace fawkes
