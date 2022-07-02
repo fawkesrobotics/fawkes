@@ -42,7 +42,7 @@ NavGraphPolygonNodeConstraint::NavGraphPolygonNodeConstraint(const std::string &
  * @param polygon polygon to add immediately
  */
 NavGraphPolygonNodeConstraint::NavGraphPolygonNodeConstraint(const std::string &name,
-                                                             const Polygon &    polygon)
+                                                             const Polygon     &polygon)
 : NavGraphNodeConstraint(name), NavGraphPolygonConstraint(polygon)
 {
 }

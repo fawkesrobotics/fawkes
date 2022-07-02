@@ -48,11 +48,11 @@ namespace fawkes {
  * match the cost function to be admissible.
  * @param constraint_repo constraint repository, null to plan only without constraints
  */
-NavGraphSearchState::NavGraphSearchState(const NavGraphNode &            node,
-                                         const NavGraphNode &            goal,
+NavGraphSearchState::NavGraphSearchState(const NavGraphNode             &node,
+                                         const NavGraphNode             &goal,
                                          double                          cost_sofar,
-                                         NavGraphSearchState *           parent,
-                                         NavGraph *                      map_graph,
+                                         NavGraphSearchState            *parent,
+                                         NavGraph                       *map_graph,
                                          navgraph::EstimateFunction      estimate_func,
                                          navgraph::CostFunction          cost_func,
                                          fawkes::NavGraphConstraintRepo *constraint_repo)
@@ -76,9 +76,9 @@ NavGraphSearchState::NavGraphSearchState(const NavGraphNode &            node,
  * @param map_graph map graph
  * @param constraint_repo constraint repository, null to plan only without constraints
  */
-NavGraphSearchState::NavGraphSearchState(const NavGraphNode &            node,
-                                         const NavGraphNode &            goal,
-                                         NavGraph *                      map_graph,
+NavGraphSearchState::NavGraphSearchState(const NavGraphNode             &node,
+                                         const NavGraphNode             &goal,
+                                         NavGraph                       *map_graph,
                                          fawkes::NavGraphConstraintRepo *constraint_repo)
 : AStarState(0, NULL)
 {
@@ -112,9 +112,9 @@ NavGraphSearchState::NavGraphSearchState(const NavGraphNode &            node,
  * match the cost function to be admissible.
  * @param constraint_repo constraint repository, null to plan only without constraints
  */
-NavGraphSearchState::NavGraphSearchState(const NavGraphNode &            node,
-                                         const NavGraphNode &            goal,
-                                         NavGraph *                      map_graph,
+NavGraphSearchState::NavGraphSearchState(const NavGraphNode             &node,
+                                         const NavGraphNode             &goal,
+                                         NavGraph                       *map_graph,
                                          navgraph::EstimateFunction      estimate_func,
                                          navgraph::CostFunction          cost_func,
                                          fawkes::NavGraphConstraintRepo *constraint_repo)

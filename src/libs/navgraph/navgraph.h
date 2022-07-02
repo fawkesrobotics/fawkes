@@ -73,8 +73,8 @@ public:
 	virtual ~NavGraph();
 
 	std::string                             name() const;
-	const std::vector<NavGraphNode> &       nodes() const;
-	const std::vector<NavGraphEdge> &       edges() const;
+	const std::vector<NavGraphNode>        &nodes() const;
+	const std::vector<NavGraphEdge>        &edges() const;
 	fawkes::LockPtr<NavGraphConstraintRepo> constraint_repo() const;
 
 	const std::map<std::string, std::string> &default_properties() const;
@@ -127,8 +127,8 @@ public:
 	                                 bool               use_constraints     = true,
 	                                 bool               compute_constraints = true);
 
-	fawkes::NavGraphPath search_path(const std::string &        from,
-	                                 const std::string &        to,
+	fawkes::NavGraphPath search_path(const std::string         &from,
+	                                 const std::string         &to,
 	                                 navgraph::EstimateFunction estimate_func,
 	                                 navgraph::CostFunction     cost_func,
 	                                 bool                       use_constraints     = true,
@@ -139,8 +139,8 @@ public:
 	                                 bool                use_constraints     = true,
 	                                 bool                compute_constraints = true);
 
-	fawkes::NavGraphPath search_path(const NavGraphNode &       from,
-	                                 const NavGraphNode &       to,
+	fawkes::NavGraphPath search_path(const NavGraphNode        &from,
+	                                 const NavGraphNode        &to,
 	                                 navgraph::EstimateFunction estimate_func,
 	                                 navgraph::CostFunction     cost_func,
 	                                 bool                       use_constraints     = true,

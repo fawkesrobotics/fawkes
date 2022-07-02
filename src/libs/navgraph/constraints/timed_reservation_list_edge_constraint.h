@@ -36,14 +36,14 @@ namespace fawkes {
 class NavGraphTimedReservationListEdgeConstraint : public NavGraphEdgeConstraint
 {
 public:
-	NavGraphTimedReservationListEdgeConstraint(Logger *       logger,
+	NavGraphTimedReservationListEdgeConstraint(Logger        *logger,
 	                                           std::string    constraint_name,
 	                                           fawkes::Clock *clock);
 
 	NavGraphTimedReservationListEdgeConstraint(
-	  Logger *                                                   logger,
+	  Logger                                                    *logger,
 	  std::string                                                constraint_name,
-	  fawkes::Clock *                                            clock,
+	  fawkes::Clock                                             *clock,
 	  std::vector<std::pair<fawkes::NavGraphEdge, fawkes::Time>> edge_time_list);
 
 	virtual ~NavGraphTimedReservationListEdgeConstraint();
@@ -62,8 +62,8 @@ public:
 private:
 	std::vector<std::pair<fawkes::NavGraphEdge, fawkes::Time>> edge_time_list_;
 	bool                                                       modified_;
-	Logger *                                                   logger_;
-	fawkes::Clock *                                            clock_;
+	Logger                                                    *logger_;
+	fawkes::Clock                                             *clock_;
 	std::string                                                constraint_name_;
 };
 

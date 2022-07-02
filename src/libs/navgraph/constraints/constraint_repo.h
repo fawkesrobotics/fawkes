@@ -53,12 +53,12 @@ public:
 	void unregister_constraint(std::string name);
 
 	bool                                has_constraint(std::string &name);
-	fawkes::NavGraphNodeConstraint *    get_node_constraint(std::string &name);
-	fawkes::NavGraphEdgeConstraint *    get_edge_constraint(std::string &name);
+	fawkes::NavGraphNodeConstraint     *get_node_constraint(std::string &name);
+	fawkes::NavGraphEdgeConstraint     *get_edge_constraint(std::string &name);
 	fawkes::NavGraphEdgeCostConstraint *get_edge_cost_constraint(std::string &name);
 
-	const NodeConstraintList &    node_constraints() const;
-	const EdgeConstraintList &    edge_constraints() const;
+	const NodeConstraintList     &node_constraints() const;
+	const EdgeConstraintList     &edge_constraints() const;
 	const EdgeCostConstraintList &edge_cost_constraints() const;
 
 	bool has_constraints() const;
@@ -73,7 +73,7 @@ public:
 
 	NavGraphEdgeCostConstraint *increases_cost(const fawkes::NavGraphNode &from,
 	                                           const fawkes::NavGraphNode &to,
-	                                           float &                     cost_factor);
+	                                           float                      &cost_factor);
 
 	float cost_factor(const fawkes::NavGraphNode &from, const fawkes::NavGraphNode &to);
 

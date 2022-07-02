@@ -87,7 +87,7 @@ public:
 	void add_node(const NavGraphNode &node, float cost_from_end = 0);
 	void set_nodes(const std::vector<NavGraphNode> &nodes, float cost = -1);
 
-	const NavGraph &    graph() const;
+	const NavGraph     &graph() const;
 	const NavGraphNode &goal() const;
 
 	std::string              get_path_as_string(const char delim = ':') const;
@@ -139,7 +139,7 @@ public:
 	bool operator==(const NavGraphPath &p) const;
 
 private:
-	const NavGraph *          graph_;
+	const NavGraph           *graph_;
 	std::vector<NavGraphNode> nodes_;
 	float                     cost_;
 };

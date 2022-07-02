@@ -57,8 +57,8 @@ NavGraphEdge::NavGraphEdge()
  * @param properties properties of the new node
  * @param directed true if the edge is directed, false for bidirectional edges
  */
-NavGraphEdge::NavGraphEdge(const std::string &                from,
-                           const std::string &                to,
+NavGraphEdge::NavGraphEdge(const std::string                 &from,
+                           const std::string                 &to,
                            std::map<std::string, std::string> properties,
                            bool                               directed)
 {

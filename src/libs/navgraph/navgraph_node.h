@@ -37,7 +37,7 @@ class NavGraphNode
 public:
 	NavGraphNode();
 
-	NavGraphNode(const std::string &                name,
+	NavGraphNode(const std::string                 &name,
 	             float                              x,
 	             float                              y,
 	             std::map<std::string, std::string> properties);

@@ -40,7 +40,7 @@ NavGraphNode::NavGraphNode() : unconnected_(false)
  * @param y y coordinate in global frame of node
  * @param properties properties for the new node
  */
-NavGraphNode::NavGraphNode(const std::string &                name,
+NavGraphNode::NavGraphNode(const std::string                 &name,
                            float                              x,
                            float                              y,
                            std::map<std::string, std::string> properties)
