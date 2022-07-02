@@ -48,7 +48,7 @@ public:
 	std::shared_ptr<xmlrpc_c::registry> registry();
 
 private:
-	fawkes::Logger *                    logger_;
+	fawkes::Logger                     *logger_;
 	std::shared_ptr<xmlrpc_c::registry> xmlrpc_registry_;
 };
 

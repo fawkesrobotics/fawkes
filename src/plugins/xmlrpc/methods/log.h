@@ -35,8 +35,8 @@ class XmlRpcLogMethods
 {
 public:
 	XmlRpcLogMethods(std::shared_ptr<xmlrpc_c::registry> registry,
-	                 fawkes::CacheLogger *               cache_logger,
-	                 fawkes::Logger *                    logger);
+	                 fawkes::CacheLogger                *cache_logger,
+	                 fawkes::Logger                     *logger);
 	~XmlRpcLogMethods();
 
 	class log_entries : public xmlrpc_c::method
@@ -83,15 +83,15 @@ public:
 		virtual void execute(xmlrpc_c::paramList const &params, xmlrpc_c::value *const result);
 
 	private:
-		fawkes::Logger *         logger_;
+		fawkes::Logger          *logger_;
 		fawkes::Logger::LogLevel log_level_;
 	};
 
 private:
 	std::shared_ptr<xmlrpc_c::registry> xmlrpc_registry_;
 
-	fawkes::Logger *              logger_;
-	fawkes::CacheLogger *         cache_logger_;
+	fawkes::Logger               *logger_;
+	fawkes::CacheLogger          *cache_logger_;
 	std::unique_ptr<log_entries>  log_entries_;
 	std::unique_ptr<log_get_size> log_get_size_;
 	std::unique_ptr<log_set_size> log_set_size_;
