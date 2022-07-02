@@ -72,12 +72,12 @@ private:
 	void  set_mode(Roomba500::Mode mode);
 
 private:
-	fawkes::LedInterface *   led_if_debris_;
-	fawkes::LedInterface *   led_if_spot_;
-	fawkes::LedInterface *   led_if_dock_;
-	fawkes::LedInterface *   led_if_check_robot_;
-	fawkes::LedInterface *   led_if_clean_color_;
-	fawkes::LedInterface *   led_if_clean_intensity_;
+	fawkes::LedInterface    *led_if_debris_;
+	fawkes::LedInterface    *led_if_spot_;
+	fawkes::LedInterface    *led_if_dock_;
+	fawkes::LedInterface    *led_if_check_robot_;
+	fawkes::LedInterface    *led_if_clean_color_;
+	fawkes::LedInterface    *led_if_clean_intensity_;
 	fawkes::SwitchInterface *switch_if_vacuuming_;
 	fawkes::SwitchInterface *switch_if_but_clean_;
 	fawkes::SwitchInterface *switch_if_but_spot_;
@@ -88,7 +88,7 @@ private:
 	fawkes::SwitchInterface *switch_if_but_schedule_;
 	fawkes::SwitchInterface *switch_if_but_clock_;
 	//fawkes::MotorInterface     *motor_if_;
-	fawkes::BatteryInterface *  battery_if_;
+	fawkes::BatteryInterface   *battery_if_;
 	fawkes::Roomba500Interface *roomba500_if_;
 
 	fawkes::RefPtr<Roomba500> roomba_;

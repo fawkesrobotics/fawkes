@@ -326,7 +326,7 @@ Roomba500::open()
 		throw Exception("Native RooTooth support unavailable at compile time.");
 #else
 		struct hci_dev_info di;
-		inquiry_info *      ii = NULL;
+		inquiry_info       *ii = NULL;
 		int                 max_rsp, num_rsp;
 		int                 dev_id, sock, len, flags;
 		char                addrstr[19] = {0};

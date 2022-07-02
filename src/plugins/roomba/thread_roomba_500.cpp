@@ -52,8 +52,8 @@ public:
    * @param roomba refptr to Roomba500 instance
    * @param query_mode true to query data instead of streaming it.
    */
-	WorkerThread(fawkes::Logger *          logger,
-	             fawkes::Clock *           clock,
+	WorkerThread(fawkes::Logger           *logger,
+	             fawkes::Clock            *clock,
 	             fawkes::RefPtr<Roomba500> roomba,
 	             bool                      query_mode)
 	: Thread("Roomba500WorkerThread", Thread::OPMODE_CONTINUOUS),
@@ -135,10 +135,10 @@ public:
 	}
 
 private:
-	Logger *          logger;
+	Logger           *logger;
 	RefPtr<Roomba500> roomba_;
-	TimeWait *        time_wait_;
-	Mutex *           fresh_data_mutex_;
+	TimeWait         *time_wait_;
+	Mutex            *fresh_data_mutex_;
 #ifdef USE_TIMETRACKER
 	TimeTracker  tt_;
 	unsigned int ttc_query_;
