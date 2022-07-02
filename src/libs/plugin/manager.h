@@ -47,9 +47,9 @@ class PluginManagerListener;
 class PluginManager : public fawkes::ConfigurationChangeHandler, public FamListener
 {
 public:
-	PluginManager(ThreadCollector *   thread_collector,
-	              Configuration *     config,
-	              const char *        meta_plugin_prefix,
+	PluginManager(ThreadCollector    *thread_collector,
+	              Configuration      *config,
+	              const char         *meta_plugin_prefix,
 	              Module::ModuleFlags module_flags = Module::MODULE_FLAGS_DEFAULT,
 	              bool                init_cache   = true);
 	~PluginManager();
@@ -93,8 +93,8 @@ private:
 
 private:
 	ThreadCollector *thread_collector;
-	PluginLoader *   plugin_loader;
-	Mutex *          mutex_;
+	PluginLoader    *plugin_loader;
+	Mutex           *mutex_;
 
 	LockList<Plugin *>                   plugins;
 	LockList<Plugin *>::iterator         pit;

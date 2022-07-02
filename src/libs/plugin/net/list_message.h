@@ -37,7 +37,7 @@ public:
 	PluginListMessage();
 	PluginListMessage(unsigned int component_id,
 	                  unsigned int msg_id,
-	                  void *       payload,
+	                  void        *payload,
 	                  size_t       payload_size);
 	virtual ~PluginListMessage();
 
@@ -49,7 +49,7 @@ public:
 	char *next();
 
 private:
-	DynamicBuffer *   plugin_list;
+	DynamicBuffer    *plugin_list;
 	plugin_list_msg_t msg;
 };
 

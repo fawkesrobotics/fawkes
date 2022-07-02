@@ -82,9 +82,9 @@ private:
  * is unavailable until the cache has been initialized. You can defer
  * initialization of the cache if required.
  */
-PluginManager::PluginManager(ThreadCollector *   thread_collector,
-                             Configuration *     config,
-                             const char *        meta_plugin_prefix,
+PluginManager::PluginManager(ThreadCollector    *thread_collector,
+                             Configuration      *config,
+                             const char         *meta_plugin_prefix,
                              Module::ModuleFlags module_flags,
                              bool                init_cache)
 : ConfigurationChangeHandler(meta_plugin_prefix)
@@ -162,17 +162,17 @@ PluginManager::init_pinfo_cache()
 {
 	pinfo_cache_.lock();
 
-	DIR *          plugin_dir;
+	DIR           *plugin_dir;
 	struct dirent *dirp;
-	const char *   file_ext = "." SOEXT;
+	const char    *file_ext = "." SOEXT;
 
 	if (NULL == (plugin_dir = opendir(PLUGINDIR))) {
 		throw Exception(errno, "Plugin directory %s could not be opened", PLUGINDIR);
 	}
 
 	for (unsigned int i = 0; NULL != (dirp = readdir(plugin_dir)); ++i) {
-		char *      file_name = dirp->d_name;
-		char *      pos       = strstr(file_name, file_ext);
+		char       *file_name = dirp->d_name;
+		char       *pos       = strstr(file_name, file_ext);
 		std::string plugin_name =
 		  std::string(file_name).substr(0, strlen(file_name) - strlen(file_ext));
 		if (NULL != pos) {

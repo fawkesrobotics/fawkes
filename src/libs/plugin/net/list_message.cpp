@@ -56,14 +56,14 @@ PluginListMessage::PluginListMessage()
  */
 PluginListMessage::PluginListMessage(unsigned int component_id,
                                      unsigned int msg_id,
-                                     void *       payload,
+                                     void        *payload,
                                      size_t       payload_size)
 {
 	if (component_id != FAWKES_CID_PLUGINMANAGER) {
 		throw TypeMismatchException("PluginListMessage: invalid component ID");
 	}
 	plugin_list_msg_t *tmsg                = (plugin_list_msg_t *)payload;
-	void *             plugin_list_payload = (void *)((size_t)payload + sizeof(msg));
+	void              *plugin_list_payload = (void *)((size_t)payload + sizeof(msg));
 	plugin_list =
 	  new DynamicBuffer(&(tmsg->plugin_list), plugin_list_payload, payload_size - sizeof(msg));
 }
@@ -126,7 +126,7 @@ char *
 PluginListMessage::next()
 {
 	size_t size;
-	void * tmp = plugin_list->next(&size);
+	void  *tmp = plugin_list->next(&size);
 	return strndup((const char *)tmp, size);
 }
 
