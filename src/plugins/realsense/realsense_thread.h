@@ -94,9 +94,9 @@ private:
 	fawkes::RefPtr<Cloud> realsense_depth_refptr_;
 	CloudPtr              realsense_depth_;
 
-	rs_error *    rs_error_ = 0;
-	rs_context *  rs_context_;
-	rs_device *   rs_device_;
+	rs_error     *rs_error_ = 0;
+	rs_context   *rs_context_;
+	rs_device    *rs_device_;
 	rs_intrinsics z_intrinsic_;
 	rs_stream     rs_stream_type_;
 	int           num_of_cameras_;
