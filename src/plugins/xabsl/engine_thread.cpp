@@ -103,7 +103,7 @@ XabslEngineThread::init()
 			                                                         (float *)i.get_value());
 			xe_->registerDecimalInputSymbol("ball.relative_x",
 			                                ball_rx_,
-			                                (double (xabsl::FunctionProvider::*)())
+			                                (double(xabsl::FunctionProvider::*)())
 			                                  & XabslInterfaceFieldWrapper<double, float>::get_value);
 		} else if (strcmp(i.get_name(), "relative_y") == 0) {
 			ball_ry_ = new XabslInterfaceFieldWrapper<double, float>(i.get_type(),
@@ -111,7 +111,7 @@ XabslEngineThread::init()
 			                                                         (float *)i.get_value());
 			xe_->registerDecimalInputSymbol("ball.relative_y",
 			                                ball_ry_,
-			                                (double (xabsl::FunctionProvider::*)())
+			                                (double(xabsl::FunctionProvider::*)())
 			                                  & XabslInterfaceFieldWrapper<double, float>::get_value);
 		}
 	}
