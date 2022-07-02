@@ -68,9 +68,9 @@ InvalidArgumentException::InvalidArgumentException(const char *format, ...) : Ex
  * @param config The config to read the skill mapping from
  * @param cfg_prefix The spec-specific config prefix to use
  */
-SkillerActionExecutor::SkillerActionExecutor(Logger *           logger,
-                                             BlackBoard *       blackboard,
-                                             Configuration *    config,
+SkillerActionExecutor::SkillerActionExecutor(Logger            *logger,
+                                             BlackBoard        *blackboard,
+                                             Configuration     *config,
                                              const std::string &cfg_prefix)
 : ActionExecutor(logger),
   BlackBoardInterfaceListener("Golog++SkillerActionExecutor"),

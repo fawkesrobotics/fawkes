@@ -36,7 +36,7 @@ public:
 	virtual void finalize(Thread *thread);
 
 private:
-	GologppDispatcherAspect *      get_aspect(Thread *thread) const;
+	GologppDispatcherAspect       *get_aspect(Thread *thread) const;
 	gpp::ActionExecutorDispatcher *dispatcher_;
 };
 

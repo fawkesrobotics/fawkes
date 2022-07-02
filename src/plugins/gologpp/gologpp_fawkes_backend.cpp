@@ -50,8 +50,8 @@ using namespace gologpp;
  */
 GologppFawkesBackend::GologppFawkesBackend(Configuration *config,
                                            std::string    cfg_prefix,
-                                           Logger *       logger,
-                                           BlackBoard *   blackboard)
+                                           Logger        *logger,
+                                           BlackBoard    *blackboard)
 : AspectProviderAspect(&dispatcher_inifin_), logger_(logger), blackboard_(blackboard)
 {
 	// Register RemoteSkillerActionExecutors before the local

@@ -44,9 +44,9 @@ namespace gpp {
  * @param config The configuration to read the mapping from
  * @param cfg_prefix The config prefix to use for the message mapping
  */
-BBMessageActionExecutor::BBMessageActionExecutor(Logger *           logger,
-                                                 BlackBoard *       blackboard,
-                                                 Configuration *    config,
+BBMessageActionExecutor::BBMessageActionExecutor(Logger            *logger,
+                                                 BlackBoard        *blackboard,
+                                                 Configuration     *config,
                                                  const std::string &cfg_prefix)
 : ActionExecutor(logger), blackboard_(blackboard), config_(config), cfg_prefix_(cfg_prefix)
 {

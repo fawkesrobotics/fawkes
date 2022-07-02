@@ -41,7 +41,7 @@ public:
 
 protected:
 	std::shared_ptr<gologpp::Activity> running_activity_;
-	Logger *                           logger_;
+	Logger                            *logger_;
 };
 
 } // namespace gpp

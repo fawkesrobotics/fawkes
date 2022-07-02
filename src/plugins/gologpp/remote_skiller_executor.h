@@ -27,12 +27,12 @@ namespace gpp {
 class RemoteSkillerActionExecutor : public SkillerActionExecutor
 {
 public:
-	RemoteSkillerActionExecutor(Logger *           logger,
+	RemoteSkillerActionExecutor(Logger            *logger,
 	                            const std::string &agent_name_key,
 	                            const std::string &agent_name_value,
 	                            const std::string &hostname,
 	                            unsigned short int port,
-	                            Configuration *    config,
+	                            Configuration     *config,
 	                            const std::string &cfg_prefix);
 	virtual ~RemoteSkillerActionExecutor() override;
 	bool can_execute_activity(std::shared_ptr<gologpp::Activity> activity) const override;

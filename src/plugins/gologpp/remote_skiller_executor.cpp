@@ -45,12 +45,12 @@ namespace gpp {
  * @param config The config to read the skill mapping from
  * @param cfg_prefix The spec-specific config prefix to use
  */
-RemoteSkillerActionExecutor::RemoteSkillerActionExecutor(Logger *           logger,
+RemoteSkillerActionExecutor::RemoteSkillerActionExecutor(Logger            *logger,
                                                          const std::string &agent_param_name,
                                                          const std::string &agent_param_value,
                                                          const std::string &hostname,
                                                          unsigned short int port,
-                                                         Configuration *    config,
+                                                         Configuration     *config,
                                                          const std::string &cfg_prefix)
 : SkillerActionExecutor(logger, new RemoteBlackBoard(hostname.c_str(), port), config, cfg_prefix),
   agent_param_name_(agent_param_name),

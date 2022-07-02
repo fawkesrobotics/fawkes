@@ -60,8 +60,8 @@ public:
 private:
 	std::filesystem::path                 find_prog_file(const std::filesystem::path &spec) const;
 	std::unique_ptr<gologpp::Instruction> main_prog_;
-	SkillerInterface *                    skiller_if_;
-	ExogManager *                         exog_mgr_;
+	SkillerInterface                     *skiller_if_;
+	ExogManager                          *exog_mgr_;
 	std::mutex                            run_mutex_;
 };
 

@@ -47,8 +47,8 @@ class GologppFawkesBackend : public gologpp::PlatformBackend,
 public:
 	GologppFawkesBackend(Configuration *config,
 	                     std::string    cfg_prefix,
-	                     Logger *       logger,
-	                     BlackBoard *   blackboard);
+	                     Logger        *logger,
+	                     BlackBoard    *blackboard);
 	virtual ~GologppFawkesBackend();
 
 	virtual void preempt_activity(std::shared_ptr<gologpp::Activity> a) override;
@@ -57,9 +57,9 @@ public:
 private:
 	virtual void execute_activity(std::shared_ptr<gologpp::Activity>) override;
 
-	SkillerInterface *            skiller_if_;
-	Logger *                      logger_;
-	BlackBoard *                  blackboard_;
+	SkillerInterface             *skiller_if_;
+	Logger                       *logger_;
+	BlackBoard                   *blackboard_;
 	ActionExecutorDispatcher      action_dispatcher_;
 	GologppDispatcherAspectIniFin dispatcher_inifin_;
 };
