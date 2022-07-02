@@ -40,10 +40,10 @@ enum EdgeType { CONDITIONAL, TEMPORAL };
 class StnAction
 {
 public:
-	StnAction(const std::string &             name,
-	          const std::vector<Predicate> &  preconds,
-	          const std::vector<Predicate> &  effects,
-	          const std::string &             opts,
+	StnAction(const std::string              &name,
+	          const std::vector<Predicate>   &preconds,
+	          const std::vector<Predicate>   &effects,
+	          const std::string              &opts,
 	          size_t                          duration      = 0,
 	          const std::vector<std::string> &cond_breakups = {},
 	          const std::vector<std::string> &temp_breakups = {});
@@ -66,7 +66,7 @@ public:
 	std::string                   opts() const;
 
 private:
-	friend std::ostream &    operator<<(std::ostream &, const StnAction &);
+	friend std::ostream     &operator<<(std::ostream &, const StnAction &);
 	size_t                   id_;
 	std::string              name_;
 	std::vector<Predicate>   preconds_;

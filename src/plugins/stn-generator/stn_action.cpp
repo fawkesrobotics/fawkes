@@ -41,10 +41,10 @@ size_t StnAction::count = 0;
  * @param cond_breakups A vector of conditional breakups as strings.
  * @param temp_breakups A vector of temporal breakups as strings.
  */
-StnAction::StnAction(const std::string &             name,
-                     const std::vector<Predicate> &  preconds,
-                     const std::vector<Predicate> &  effects,
-                     const std::string &             opts,
+StnAction::StnAction(const std::string              &name,
+                     const std::vector<Predicate>   &preconds,
+                     const std::vector<Predicate>   &effects,
+                     const std::string              &opts,
                      size_t                          duration,
                      const std::vector<std::string> &cond_breakups,
                      const std::vector<std::string> &temp_breakups)
