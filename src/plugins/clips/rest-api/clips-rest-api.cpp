@@ -20,8 +20,9 @@
  */
 
 #include "clips-rest-api.h"
-
+extern "C" {
 #include <clips/clips.h>
+}
 #include <core/threading/mutex_locker.h>
 #include <webview/rest_api_manager.h>
 

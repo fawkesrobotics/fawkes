@@ -40,14 +40,14 @@ using namespace fawkes;
  * COMPONENT-NAME:
  *  states:
  *      \verbatim<List of states, the first state is assumed to be the initial state>\endverbatim
- * 
+ *
  *  STATE_1:
  *   edges:
  *    \verbatim<List of states the state has an edge to>\endverbatim
  *   edge_1:
  *    transition: \verbatim<name of the action that causes the transition>\endverbatim
  *    (optional)probability: \verbatim<probability of the transition if it is an exogenous action>\endverbatim
- *     
+ *
  *  Any component plugin can inform the HardwareModel Plugin about state changes
  *  by sending a HardwareModelInterfaceMessage.
  * @author Daniel Habering
@@ -79,7 +79,7 @@ HardwareModelsThread::init()
 
 /**
  * @brief Initializes hardware components from yaml files for a clips environment
- * 
+ *
  * @param env_name Name of clips environment
  * @param clips Pointer to clips environment
  */
@@ -172,8 +172,11 @@ HardwareModelsThread::clips_add_terminal_state(LockPtr<CLIPS::Environment> &clip
 	CLIPS::Template::pointer temp = clips->get_template("hm-terminal-state");
 	if (temp) {
 		CLIPS::Fact::pointer fact = CLIPS::Fact::create(**clips, temp);
-		fact->set_slot("name", CLIPS::Value(component.c_str(), CLIPS::TYPE_SYMBOL));
-		fact->set_slot("state", CLIPS::Value(state.c_str(), CLIPS::TYPE_SYMBOL));
+		bool success = fact->set_slot("name", CLIPS::Value(component.c_str(), CLIPS::TYPE_SYMBOL));
+		success = success && fact->set_slot("state", CLIPS::Value(state.c_str(), CLIPS::TYPE_SYMBOL));
+		if (!success) {
+			logger->log_warn(name(), "Setting slots for terminal state %s failed", component.c_str());
+		}
 
 		CLIPS::Fact::pointer new_fact = clips->assert_fact(fact);
 
@@ -189,7 +192,7 @@ HardwareModelsThread::clips_add_terminal_state(LockPtr<CLIPS::Environment> &clip
 
 /**
  * @brief Adds a hardware component fact to the given clips environment
- * 
+ *
  * @param clips Pointer to clips environment
  * @param component Name of the hardware component
  * @param init_state Name of the initial state of the component
@@ -202,8 +205,13 @@ HardwareModelsThread::clips_add_component(LockPtr<CLIPS::Environment> &clips,
 	CLIPS::Template::pointer temp = clips->get_template("hm-component");
 	if (temp) {
 		CLIPS::Fact::pointer fact = CLIPS::Fact::create(**clips, temp);
-		fact->set_slot("name", CLIPS::Value(component.c_str(), CLIPS::TYPE_SYMBOL));
-		fact->set_slot("initial-state", CLIPS::Value(init_state.c_str(), CLIPS::TYPE_SYMBOL));
+		bool success = fact->set_slot("name", CLIPS::Value(component.c_str(), CLIPS::TYPE_SYMBOL));
+		success =
+		  success
+		  && fact->set_slot("initial-state", CLIPS::Value(init_state.c_str(), CLIPS::TYPE_SYMBOL));
+		if (!success) {
+			logger->log_warn(name(), "Settting slots for component %s failed", component.c_str());
+		}
 
 		CLIPS::Fact::pointer new_fact = clips->assert_fact(fact);
 
@@ -218,7 +226,7 @@ HardwareModelsThread::clips_add_component(LockPtr<CLIPS::Environment> &clips,
 
 /**
  * @brief Adds a hardware component edge fact to the given clips environment
- * 
+ *
  * @param clips Pointer to the clips environment
  * @param component Name of the component the edge belongs to
  * @param from Name of the origin state
@@ -239,11 +247,18 @@ HardwareModelsThread::clips_add_edge(LockPtr<CLIPS::Environment> &clips,
 	CLIPS::Template::pointer temp = clips->get_template("hm-edge");
 	if (temp) {
 		CLIPS::Fact::pointer fact = CLIPS::Fact::create(**clips, temp);
-		fact->set_slot("component", CLIPS::Value(component.c_str(), CLIPS::TYPE_SYMBOL));
-		fact->set_slot("from", CLIPS::Value(from.c_str(), CLIPS::TYPE_SYMBOL));
-		fact->set_slot("to", CLIPS::Value(to.c_str(), CLIPS::TYPE_SYMBOL));
-		fact->set_slot("transition", CLIPS::Value(trans.c_str(), CLIPS::TYPE_SYMBOL));
-		fact->set_slot("probability", prob);
+		bool success = fact->set_slot("component", CLIPS::Value(component.c_str(), CLIPS::TYPE_SYMBOL));
+		success = success && fact->set_slot("from", CLIPS::Value(from.c_str(), CLIPS::TYPE_SYMBOL));
+		success = success && fact->set_slot("to", CLIPS::Value(to.c_str(), CLIPS::TYPE_SYMBOL));
+		success =
+		  success && fact->set_slot("transition", CLIPS::Value(trans.c_str(), CLIPS::TYPE_SYMBOL));
+		success = success && fact->set_slot("probability", prob);
+		if (!success) {
+			logger->log_warn(name(),
+			                 "Setting slots for edge from %s to %s failed",
+			                 from.c_str(),
+			                 to.c_str());
+		}
 
 		CLIPS::Fact::pointer new_fact = clips->assert_fact(fact);
 
@@ -262,7 +277,7 @@ HardwareModelsThread::clips_add_edge(LockPtr<CLIPS::Environment> &clips,
 /**
  * @brief Adds a transition fact to all registered clips environments. This represents that
  *        the given component changed its state by executing the transition.
- * 
+ *
  * @param component Name of the component that executed the transition
  * @param transition Name of the transition action
  */
@@ -275,9 +290,15 @@ HardwareModelsThread::clips_add_transition(const std::string &component,
 		clips.lock();
 		CLIPS::Template::pointer temp = clips->get_template("hm-transition");
 		if (temp) {
-			CLIPS::Fact::pointer fact = CLIPS::Fact::create(**clips, temp);
-			fact->set_slot("component", component.c_str());
-			fact->set_slot("transition", transition.c_str());
+			CLIPS::Fact::pointer fact    = CLIPS::Fact::create(**clips, temp);
+			bool                 success = fact->set_slot("component", component.c_str());
+			success                      = success && fact->set_slot("transition", transition.c_str());
+			if (!success) {
+				logger->log_warn(name(),
+				                 "Setting slots for transition of %s: %s failed",
+				                 component.c_str(),
+				                 transition.c_str());
+			}
 
 			CLIPS::Fact::pointer new_fact = clips->assert_fact(fact);
 
@@ -304,7 +325,7 @@ HardwareModelsThread::finalize()
 
 /**
  * @brief Loop function to be executed when a new HardwareInterfaceMessage is recieved
- * 
+ *
  */
 void
 HardwareModelsThread::loop()

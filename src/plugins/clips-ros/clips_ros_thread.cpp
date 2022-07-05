@@ -165,11 +165,16 @@ ClipsROSThread::clips_ros_get_nodes(std::string env_name)
 			for (auto t : n.second.services)
 				services.push_back(t);
 
-			CLIPS::Fact::pointer fact = CLIPS::Fact::create(**clips, temp);
-			fact->set_slot("name", n.first);
-			fact->set_slot("published", published);
-			fact->set_slot("subscribed", subscribed);
-			fact->set_slot("services", services);
+			CLIPS::Fact::pointer fact    = CLIPS::Fact::create(**clips, temp);
+			bool                 success = fact->set_slot("name", n.first);
+			success                      = success && fact->set_slot("published", published);
+			success                      = success && fact->set_slot("subscribed", subscribed);
+			success                      = success && fact->set_slot("services", services);
+			if (!success) {
+				logger->log_warn(("CLIPS-ROS|" + env_name).c_str(),
+				                 "Failed to set slots of ros-node fact for %s",
+				                 n.first.c_str());
+			}
 
 			CLIPS::Fact::pointer new_fact = clips->assert_fact(fact);
 			if (!new_fact) {
@@ -206,10 +211,15 @@ ClipsROSThread::clips_ros_get_topics(std::string env_name)
 	CLIPS::Template::pointer temp = clips->get_template("ros-topic");
 	if (temp) {
 		for (auto t : topics) {
-			CLIPS::Fact::pointer fact = CLIPS::Fact::create(**clips, temp);
-			fact->set_slot("name", t.name);
-			fact->set_slot("type", t.datatype);
-			clips->assert_fact(fact);
+			CLIPS::Fact::pointer fact    = CLIPS::Fact::create(**clips, temp);
+			bool                 success = fact->set_slot("name", t.name);
+			success                      = success && fact->set_slot("type", t.datatype);
+			fact                         = clips->assert_fact(fact);
+			if (!fact || !success) {
+				logger->log_warn(("CLIPS-ROS|" + env_name).c_str(),
+				                 "Failure when asserting topic fact for topic %s",
+				                 t.name.c_str());
+			}
 		}
 	} else {
 		logger->log_warn(("CLIPS-ROS|" + env_name).c_str(), "Could not get deftemplate 'ros-topic'");
@@ -317,10 +327,16 @@ ClipsROSThread::clips_ros_get_topic_connections(std::string env_name)
 	connections.resize(c - connections.begin());
 
 	for (auto c : connections) {
-		CLIPS::Fact::pointer fact = CLIPS::Fact::create(**clips, temp);
-		fact->set_slot("topic", std::get<0>(c));
-		fact->set_slot("from", std::get<1>(c));
-		fact->set_slot("to", std::get<2>(c));
-		clips->assert_fact(fact);
+		CLIPS::Fact::pointer fact    = CLIPS::Fact::create(**clips, temp);
+		bool                 success = fact->set_slot("topic", std::get<0>(c));
+		success                      = success && fact->set_slot("from", std::get<1>(c));
+		success                      = success && fact->set_slot("to", std::get<2>(c));
+		fact                         = clips->assert_fact(fact);
+		if (!fact || !success) {
+			logger->log_warn(("CLIPS-ROS|" + env_name).c_str(),
+			                 "Failure when asserting connection fact for from %s to %s",
+			                 std::get<1>(c).c_str(),
+			                 std::get<2>(c).c_str());
+		}
 	}
 }
