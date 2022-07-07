@@ -71,6 +71,9 @@ SyncInterfaceListener::SyncInterfaceListener(fawkes::Logger     *logger,
 SyncInterfaceListener::~SyncInterfaceListener()
 {
 	reader_bb_->unregister_listener(this);
+	// The listener needs an update in order to restore its bbil_maps, which
+	// is necessary in order to clean up the notifier of the second bb
+	writer_bb_->update_listener(this, BlackBoard::BBIL_FLAG_ALL);
 	writer_bb_->unregister_listener(this);
 }
 
