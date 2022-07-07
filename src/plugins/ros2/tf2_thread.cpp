@@ -65,7 +65,7 @@ ROS2TF2Thread::init()
 	cfg_tf_prefix_ = config->get_string_or_default("/ros2/tf/tf_prefix", "");
 	cfg_tf_prefix_exclusions_ = config->get_strings_or_defaults("/ros2/tf/tf_prefix_exclusions", std::vector<std::string>());
 	cfg_use_namespace_ = config->get_bool_or_default("/ros2/tf/use_namespace", false);
-	tf_prefix_enabled_ = false;	
+	tf_prefix_enabled_ = false;
 
         if (cfg_tf_prefix_ == "$HOSTNAME") {
                 HostInfo hinfo;
@@ -78,7 +78,7 @@ ROS2TF2Thread::init()
                                                     tf_prefix_pattern, "") + std::string("_");
         }
         if (cfg_tf_prefix_ != "") {
-		tf_prefix_enabled_ = true;	
+		tf_prefix_enabled_ = true;
         }
 
 //	tf_prefix_ = cfg_tf_prefix_;
@@ -96,10 +96,10 @@ ROS2TF2Thread::init()
 		tf_static_topic.insert(0, 1, '/');
 	}
 
-	sub_tf_        = node_handle->create_subscription<tf2_msgs::msg::TFMessage>(tf_topic, 100, std::bind(&ROS2TF2Thread::tf_message_cb_dynamic, this, _1), rclcpp::SubscriptionOptionsWithAllocator<std::allocator<void>>(subopts));
-	sub_static_tf_ = node_handle->create_subscription<tf2_msgs::msg::TFMessage>(tf_static_topic, rclcpp::QoS(100).transient_local(), std::bind(&ROS2TF2Thread::tf_message_cb_static, this, _1), rclcpp::SubscriptionOptionsWithAllocator<std::allocator<void>>(subopts));
-	pub_tf_        = node_handle->create_publisher<tf2_msgs::msg::TFMessage>(tf_topic, 100);
-	pub_static_tf_ = node_handle->create_publisher<tf2_msgs::msg::TFMessage>(tf_static_topic, rclcpp::QoS(100).transient_local());
+	sub_tf_        = node_handle->create_subscription<tf2_msgs::msg::TFMessage>(tf_topic, 1, std::bind(&ROS2TF2Thread::tf_message_cb_dynamic, this, _1), rclcpp::SubscriptionOptionsWithAllocator<std::allocator<void>>(subopts));
+	sub_static_tf_ = node_handle->create_subscription<tf2_msgs::msg::TFMessage>(tf_static_topic, rclcpp::QoS(1).transient_local(), std::bind(&ROS2TF2Thread::tf_message_cb_static, this, _1), rclcpp::SubscriptionOptionsWithAllocator<std::allocator<void>>(subopts));
+	pub_tf_        = node_handle->create_publisher<tf2_msgs::msg::TFMessage>(tf_topic, 1);
+	pub_static_tf_ = node_handle->create_publisher<tf2_msgs::msg::TFMessage>(tf_static_topic, rclcpp::QoS(1).transient_local());
 
 	tfifs_ = blackboard->open_multiple_for_reading<TransformInterface>("/tf*");
 	std::list<TransformInterface *>::iterator i;
