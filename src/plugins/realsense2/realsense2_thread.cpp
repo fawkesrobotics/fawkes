@@ -56,6 +56,7 @@ Realsense2Thread::init()
 	laser_power_ = config->get_float_or_default((cfg_prefix + "laser_power").c_str(), -1);
 
 	cfg_use_switch_ = config->get_bool_or_default((cfg_prefix + "use_switch").c_str(), true);
+	enable_depth_ = config->get_bool_or_default((cfg_prefix + "enable_depth").c_str(), false);
 
 	//rgb image path
 	rgb_path_ =
@@ -143,14 +144,10 @@ Realsense2Thread::loop()
 		}
 	}
 
-	if (cfg_use_switch_) {
-		read_switch();
-	}
-
-	if (enable_camera_ && !depth_enabled_) {
+	if (enable_camera_ && enable_depth_ && !depth_enabled_) {
 		enable_depth_stream();
 		return;
-	} else if (!enable_camera_ && depth_enabled_) {
+	} else if ((!enable_camera_ || !enable_depth_) && depth_enabled_) {
 		disable_depth_stream();
 		return;
 	} else if (!depth_enabled_) {

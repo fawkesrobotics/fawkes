@@ -114,6 +114,7 @@ private:
 	bool        camera_running_ = false;
 	bool        enable_camera_  = true;
 	bool        depth_enabled_  = false;
+	bool        enable_depth_   = false;
 	uint        restart_after_num_errors_;
 	uint        error_counter_ = 0;
 
