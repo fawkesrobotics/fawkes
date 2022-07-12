@@ -115,7 +115,7 @@ Realsense2Thread::loop()
 			rgb_error_counter_           = 0;
 			rs2::video_frame color_frame = rgb_rs_data_.first(RS2_STREAM_COLOR, RS2_FORMAT_RGB8);
 			fawkes::Time     now(clock);
-			int time_dif =   &now - &save_time_;
+			int time_dif =   now - &save_time_;
 
 			// set image in shared memory
 			firevision::convert(firevision::RGB,
