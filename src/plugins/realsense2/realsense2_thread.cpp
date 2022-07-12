@@ -126,7 +126,7 @@ Realsense2Thread::loop()
 			                    image_height_);
 			shm_buffer_->set_capture_time(&now);
 
-			if (save_images_ && time_dif >= 1000) {
+			if (save_images_ && time_dif >= 333) {
 				image_name_ =
 				  rgb_path_ + std::to_string(name_it_) + color_frame.get_profile().stream_name() + ".png";
 				png_writer_.set_filename(image_name_.c_str());
