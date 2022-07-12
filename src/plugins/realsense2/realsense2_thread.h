@@ -69,6 +69,7 @@ private:
 	void disable_depth_stream();
 	void stop_camera();
 
+
 	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
 protected:
 	virtual void
@@ -116,7 +117,7 @@ private:
 	bool        depth_enabled_  = false;
 	uint        restart_after_num_errors_;
 	uint        error_counter_ = 0;
-
+	fawkes::Time save_time_;
 	/// firevision image buffer
 	firevision::SharedMemoryImageBuffer *shm_buffer_;
 	/// Image Buffer Id

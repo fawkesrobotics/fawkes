@@ -94,6 +94,8 @@ Realsense2Thread::init()
 	rgb_rs_pipe_ = new rs2::pipeline();
 
 	name_it_ = 0;
+	//Timer Init 
+	save_time_ = new fawkes::Time(clock);
 }
 
 void
@@ -106,13 +108,14 @@ Realsense2Thread::loop()
 	if (cfg_use_switch_) {
 		read_switch();
 	}
-
+	
 	// take picture
 	if (enable_camera_) {
 		if (rgb_rs_pipe_->poll_for_frames(&rgb_rs_data_)) {
 			rgb_error_counter_           = 0;
 			rs2::video_frame color_frame = rgb_rs_data_.first(RS2_STREAM_COLOR, RS2_FORMAT_RGB8);
 			fawkes::Time     now(clock);
+			int time_dif = &save_time_ - &now;
 
 			// set image in shared memory
 			firevision::convert(firevision::RGB,
@@ -123,7 +126,7 @@ Realsense2Thread::loop()
 			                    image_height_);
 			shm_buffer_->set_capture_time(&now);
 
-			if (save_images_) {
+			if (save_images_ && time_dif >= 1000) {
 				image_name_ =
 				  rgb_path_ + std::to_string(name_it_) + color_frame.get_profile().stream_name() + ".png";
 				png_writer_.set_filename(image_name_.c_str());
@@ -131,6 +134,7 @@ Realsense2Thread::loop()
 				png_writer_.set_buffer(firevision::RGB, (unsigned char *)color_frame.get_data());
 				png_writer_.write();
 				name_it_++;
+				save_time_ = fawkes::Time(clock);
 			}
 		} else {
 			rgb_error_counter_++;
