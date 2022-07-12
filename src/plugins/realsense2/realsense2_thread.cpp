@@ -59,7 +59,7 @@ Realsense2Thread::init()
 
 	//rgb image path
 	rgb_path_ =
-	  config->get_string_or_default((cfg_prefix + "rgb_path").c_str(), "/tmp/realsense_images/");
+	  config->get_string_or_default((cfg_prefix + "rgb_path").c_str(), "/realsense_images/");
 	//rgb camera resolution/frame rate
 	image_width_    = config->get_int_or_default((cfg_prefix + "rgb_width").c_str(), 640);
 	image_height_   = config->get_int_or_default((cfg_prefix + "rgb_height").c_str(), 480);
@@ -115,7 +115,7 @@ Realsense2Thread::loop()
 			rgb_error_counter_           = 0;
 			rs2::video_frame color_frame = rgb_rs_data_.first(RS2_STREAM_COLOR, RS2_FORMAT_RGB8);
 			fawkes::Time     now(clock);
-			int time_dif =   now - &save_time_;
+			float time_dif =   now - &save_time_;
 			logger->log_info("load image time ", std::to_string(time_dif).c_str());
 
 			// set image in shared memory
@@ -127,7 +127,7 @@ Realsense2Thread::loop()
 			                    image_height_);
 			shm_buffer_->set_capture_time(&now);
 
-			if (save_images_ && time_dif >= 333) {
+			if (save_images_ && time_dif >= 0.333) {
 				image_name_ =
 				  rgb_path_ + std::to_string(name_it_) + color_frame.get_profile().stream_name() + ".png";
 				png_writer_.set_filename(image_name_.c_str());
