@@ -50,6 +50,7 @@ function notify_reader_removed(instance_serial)
 	 if instance_serial == skiller_if:exclusive_controller() then
 			print_info("Controlling interface instance was closed, revoking exclusive control")
 			skiller_if:set_exclusive_controller("")
+      skiller_if:set_status_timestamp(os.time())
 			skiller_if:write()
 	 end
 end
@@ -187,15 +188,18 @@ function process_skiller_messages()
 	 end
 
 	 if write_skiller_if then
+
+      skiller_if:set_status_timestamp(os.time())
 			skiller_if:write()
 	 end
 end
 
 function publish_skill_status()
 	 local old_status = skiller_if:status()
+
 	 local old_time 	= skiller_if:status_timestamp()
 	 local new_status = skillenv.get_overall_status()
-	 local new_time 	=  os.time()
+	 local new_time 	= os.time()
 
 	 skiller_if:set_status_timestamp(new_time)
 
