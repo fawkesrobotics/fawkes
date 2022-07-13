@@ -198,7 +198,7 @@ function publish_skill_status()
 	 skiller_if:set_status(old_status)
 	 local new_time 	= os.time()
 
-	 skiller_if:set_status_timestamp = os.time()
+	 skiller_if:set_status_timestamp(new_time)
 
 	 if old_status ~= new_status then
       skiller_if:set_status(new_status)
@@ -242,6 +242,7 @@ function loop()
 
 				 skiller_if:set_error(errstr)
 				 skiller_if:set_status(SkillerInterface.S_FAILED)
+         skiller_if:set_status_timestamp(os.time())
 				 skiller_if:write()
 
 				 skillenv.reset_all()
