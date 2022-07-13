@@ -193,8 +193,12 @@ end
 
 function publish_skill_status()
 	 local old_status = skiller_if:status()
+	 local old_time 	= skiller_if:status_timestamp()
 	 local new_status = skillenv.get_overall_status()
 	 skiller_if:set_status(old_status)
+	 local new_time 	= os.time()
+
+	 skiller_if:set_status_timestamp = os.time()
 
 	 if old_status ~= new_status then
       skiller_if:set_status(new_status)
@@ -204,7 +208,8 @@ function publish_skill_status()
 			elseif new_status == SkillerInterface.S_RUNNING or new_status == SkillerInterface.S_FINAL then
 				 skiller_if:set_error("")
       end
-
+      skiller_if:write()
+	 elseif old_time < new_time then
       skiller_if:write()
 	 end
 end

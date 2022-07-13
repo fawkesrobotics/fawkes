@@ -39,6 +39,9 @@
     <field type="SkillStatusEnum" name="status">
       The status of the current skill execution.
     </field>
+    <field type="int64" name="status_timestamp">
+			Timestamp of the most recent status.
+    </field>
   </data>
   <message name="ExecSkill">
     <comment>
