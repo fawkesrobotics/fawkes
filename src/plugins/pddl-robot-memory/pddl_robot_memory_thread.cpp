@@ -200,7 +200,7 @@ PddlRobotMemoryThread::loop()
 	aggregate_pipeline.facet(facets.view());
 	logger->log_info(name(),
 	                 "Aggregate pipeline: %s",
-	                 to_json(aggregate_pipeline.view_deprecated()).c_str());
+	                 to_json(aggregate_pipeline.view_array()).c_str());
 	auto res = robot_memory->aggregate(aggregate_pipeline, collection);
 	for (auto doc : res) {
 		for (document::element ele : doc) {
