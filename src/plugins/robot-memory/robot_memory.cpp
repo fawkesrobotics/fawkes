@@ -826,7 +826,8 @@ RobotMemory::mutex_try_lock(const std::string &name, const std::string &identity
 		write_concern.majority(std::chrono::milliseconds(0));
 		collection.find_one_and_update(filter_doc.view(),
 		                               update_doc.view(),
-		                               options::find_one_and_update().upsert(true));
+		                               options::find_one_and_update().upsert(true).write_concern(
+		                                 write_concern));
 	}
 
 	// Continue to actually request the lock.
