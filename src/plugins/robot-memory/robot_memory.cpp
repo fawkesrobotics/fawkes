@@ -810,6 +810,26 @@ RobotMemory::mutex_try_lock(const std::string &name, const std::string &identity
 
 	// here we can add an $or to implement lock timeouts
 	using namespace bsoncxx::builder;
+
+	MutexLocker lock(mutex_);
+	auto        collection = client->database(cfg_coord_database_)[cfg_coord_mutex_collection_];
+
+	// First, create a new mutex document if it does not exist at all yet.
+	{
+		basic::document filter_doc;
+		filter_doc.append(basic::kvp("_id", name));
+		basic::document update_doc;
+		update_doc.append(basic::kvp("$setOnInsert", [](basic::sub_document subdoc) {
+			subdoc.append(basic::kvp("locked", false));
+		}));
+		auto write_concern = mongocxx::write_concern();
+		write_concern.majority(std::chrono::milliseconds(0));
+		collection.find_one_and_update(filter_doc.view(),
+		                               update_doc.view(),
+		                               options::find_one_and_update().upsert(true));
+	}
+
+	// Continue to actually request the lock.
 	basic::document filter_doc;
 	filter_doc.append(basic::kvp("_id", name));
 	if (!force) {
@@ -825,15 +845,13 @@ RobotMemory::mutex_try_lock(const std::string &name, const std::string &identity
 		subdoc.append(basic::kvp("locked-by", locked_by));
 	}));
 	try {
-		MutexLocker lock(mutex_);
-		collection  collection    = client->database(cfg_coord_database_)[cfg_coord_mutex_collection_];
-		auto        write_concern = mongocxx::write_concern();
+		auto write_concern = mongocxx::write_concern();
 		write_concern.majority(std::chrono::milliseconds(0));
 		auto new_doc =
 		  collection.find_one_and_update(filter_doc.view(),
 		                                 update_doc.view(),
 		                                 options::find_one_and_update()
-		                                   .upsert(true)
+		                                   .upsert(false)
 		                                   .return_document(options::return_document::k_after)
 		                                   .write_concern(write_concern));
 
@@ -853,8 +871,7 @@ RobotMemory::mutex_try_lock(const std::string &name, const std::string &identity
 			check_doc.append(basic::kvp("locked", true));
 			check_doc.append(basic::kvp("locked-by", locked_by));
 			MutexLocker lock(mutex_);
-			collection  collection = client->database(cfg_coord_database_)[cfg_coord_mutex_collection_];
-			auto        res        = collection.find_one(check_doc.view());
+			auto        res = collection.find_one(check_doc.view());
 			logger_->log_info(name_, "Checking whether mutex was acquired succeeded");
 			if (res) {
 				logger_->log_warn(name_,
