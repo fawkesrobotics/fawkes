@@ -32,6 +32,8 @@
   (assert (pddl-init-control (interface-id "pddl-gen")))
   (blackboard-open-reading "PddlPlannerInterface" "pddl-planner")
   (assert (pddl-init-control (interface-id "pddl-planner")))
+  (blackboard-open-reading "RLAgentGoalSelectionInterface" "goal-selection")
+  (assert (pddl-init-control (interface-id "goal-selection")))
 )
 
 (defrule pddl-init-check-if-writer-available
@@ -70,10 +72,12 @@
 (defrule pddl-init-pddl-interface
   ?pg <- (pddl-init-control (interface-id "pddl-gen") (has-writer TRUE))
   ?pp <- (pddl-init-control (interface-id "pddl-planner") (has-writer TRUE))
+  ?ph <- (pddl-init-control (interface-id "goal-selection") (has-writer TRUE))
   (registered-trigger "robmem.pddl-plan" ?)
   =>
   (retract ?pg)
   (retract ?pp)
+  (retract ?ph)
   (path-load "pddl.clp")
   (assert (ff-feature-loaded pddl_planner))
   (assert (executive-init-signal (id pddl-planner-initialized)))

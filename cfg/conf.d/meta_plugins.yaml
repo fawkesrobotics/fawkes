@@ -28,3 +28,19 @@ fawkes/meta_plugins:
     - clips-pddl-parser
     - skiller
     - clips-executive
+
+ # Meta plugin for the clips-executive with rl blocksworld agent integration
+  m-clips-rl-blocks:
+    - flite
+    - mongodb
+    - clips
+    - robot-memory
+    - clips_robot_memory
+    - pddl-robot-memory
+    - pddl-planner
+    - clips-pddl-parser
+    - skiller
+    - clips-executive
+    - rl-test
+    - clips_gym
+

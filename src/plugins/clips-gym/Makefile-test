@@ -1,0 +1,67 @@
+CC = g++
+IDIR=/usr/include/python3.9/
+LIBS=-lpython3.10
+CFLAGS=-O3 -Wall -shared -std=c++11 -fPIC $(python3 -m pybind11 --includes)#-c -I$(IDIR)
+#LDFLAGS= 
+
+# Specify the source files, the target files,
+# and the install directory
+SOURCES     = test.cpp
+OUTPUTFILE  = example.so
+
+
+OBJECTS=$(SOURCES:.cpp=.o)
+
+all: $(SOURCES) $(OUTPUTFILE)
+
+#set(BOOST_ROOT "$HOME/dev/boost_1_76_0")     
+# Build helloworld.so from helloworld.o,
+# subst is the search-and-replace function 
+$(OUTPUTFILE): $(OBJECTS)
+	$(CC) -shared -o example.so test.o -lpython3.10
+#	$(CC) $(LDFLAGS) $(LIBS) $(OBJECTS) -o $@ 
+#	mkdir -p $(INSTALLDIR)
+#	cp -p $(OUTPUTFILE) $(INSTALLDIR)
+
+.cpp.o:
+	$(CC) -fPIC -c -I/usr/include/python3.10/ test.cpp
+#	$(CC) -c -shared -fPIC $(CPPFLAGS) $< -o $@
+
+#$(subst .cpp,.o,$(SOURCES)) 
+#	$(CXX) -shared -fPIC $(LDFLAGS) -o $@ $(LIBS) $^
+
+.PHONY: install
+install:
+	mkdir -p $(INSTALLDIR)
+	cp -p $(OUTPUTFILE) $(INSTALLDIR)
+
+.PHONY: clean 
+clean:
+	for file in $(CLEANEXTS); do rm -f *.$$file; done
+
+
+
+# CC = g++
+# IDIR=/usr/include/python3.10/
+# LIBS=-lpython3.10
+# INCLUDE := $(shell python3 -m pybind11 --includes)
+# CFLAG := -O3 -Wall -shared -std=c++11 -fPIC -c #-I$(IDIR)
+# SUFFIX := $(shell python3-config --extension-suffix)
+# SOURCES = clips-gym-thread.cpp clips-gym-plugin.cpp
+# OUTPUTFILE = clips_gym.so
+# OBJECTS=$(SOURCES:.cpp=.o)
+# #demo:
+# #    c++ $(FLAG) $(INCLUDE) clips-gym-plugin.cpp clips-gym-thread.h clips-gym-thread.cpp -o clips_gym$(SUFFIX)
+# #.PHONY: all
+# #all: $(OUTPUTFILE)
+# #all:
+# #	c++ $(CFLAG) $(INCLUDE) $(OBJECTS) clips_gym.so 
+# all: $(SOURCES) $(OUTPUTFILE)
+# #set(BOOST_ROOT "$HOME/dev/boost_1_76_0")     
+# # Build helloworld.so from helloworld.o,
+# # subst is the search-and-replace function 
+# $(OUTPUTFILE): $(OBJECTS)
+# 	$(CC) $(CFLAG) $(INCLUDE) $(OBJECTS) -lpython3.10
+# #	$(CC) $(LDFLAGS) $(LIBS) $(OBJECTS) -o $@ 
+# #	mkdir -p $(INSTALLDIR)
+# #	cp -p $(OUTPUTFILE) $(INSTALLDIR)
