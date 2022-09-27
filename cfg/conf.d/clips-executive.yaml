@@ -156,10 +156,10 @@ clips-executive:
               # - lock-actions.clp
           - name: execution-monitoring
             files:
-              #- execmon/stalled-sequential-plan.clp
-              #- execmon/stalled-action.clp
-              #- execmon/temporal-missed-dispatch.clp
-              #- execmon/temporal-over-duration.clp
+              # - execmon/stalled-sequential-plan.clp
+              # - execmon/stalled-action.clp
+              # - execmon/temporal-missed-dispatch.clp
+              # - execmon/temporal-over-duration.clp
               - blocksworld/execution-monitoring.clp
 
       # Map plan actions to skill strings, used by skill action execution
@@ -170,10 +170,11 @@ clips-executive:
         say-goodbye: say{text="Good bye", wait=true}
         say-cleanup: say{text="Cleaning up", wait=true}
 
-        pick-up: say{text="pick-up action running pick ?(x)y with ?(r)y", wait=true} #pick-up action running pick ?(x)y
-        stack: say{text="stack action running stack ?(x)y on ?(y)y with ?(robot)y", wait=true}
-        unstack: say{text="unstack action running unstack ?(x)y of ?(y)y with ?(robot)y", wait=true}
-        put-down: say{text="put down action running putdown ?(x)y with ?(robot)y", wait=true}
+        pick-up: say{text="running pick ?(x)y with ?(r)y", wait=true}
+        # pick-up action running pick ?(x)y
+        stack: say{text="run stack ?(x)y on ?(y)y with ?(robot)y", wait=true}
+        unstack: say{text="rununstack ?(x)y of ?(y)y with ?(robot)y", wait=true}
+        put-down: say{text="running putdown ?(x)y with ?(robot)y", wait=true}
 
 
       # Map domain predicate names to world model fact IDs

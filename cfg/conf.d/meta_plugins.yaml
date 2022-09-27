@@ -29,7 +29,7 @@ fawkes/meta_plugins:
     - skiller
     - clips-executive
 
- # Meta plugin for the clips-executive with rl blocksworld agent integration
+  # Meta plugin for the clips-executive with rl blocksworld agent integration
   m-clips-rl-blocks:
     - flite
     - mongodb
@@ -43,4 +43,3 @@ fawkes/meta_plugins:
     - clips-executive
     - rl-test
     - clips_gym
-

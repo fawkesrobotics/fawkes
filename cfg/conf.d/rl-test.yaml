@@ -4,27 +4,26 @@
 doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/clips-agent
 ---
 rl-agent:
-  env_name: "blocks" #"blockstower"
+  env_name: "blocks"   # "blockstower"
 
   # Name of saved rl agent after training
   name: "MaskablePPOAgent_d"
-  
   # Directory where the rl agent is saved after training
   # And to look for trained agent files
-  dir: "@BASEDIR@/src/plugins/rl-test/rl-agent" #,"@BASEDIR@/testagent"]
+  dir: "@BASEDIR@/src/plugins/rl-test/rl-agent"   # ,"@BASEDIR@/testagent"]
 
-  # If set to true a new agent is created and trained and save at the 
+  # If set to true a new agent is created and trained and save at the
   # rl-agent-dirs with rl-agent-name.
   # Otherwise - if set to false - the rl-agent-name is loaded and executed
   training-mode: true
 
 python:
   # if trainings-mode is set to true the training script is executed
-  training-script: "TrainingClipsWorld.py" #"trainingRLAgent.py"
-  
+  training-script: "TrainingClipsWorld.py"    # "trainingRLAgent.py"
+
   # if trainings-mode is set to false the execution script is called
-  execution-script: "executingClipsWorld.py" #"executingRLAgent.py"
-  
+  execution-script: "executingClipsWorld.py"    # "executingRLAgent.py"
+
   # Directory where the python scripts are located
   dir: "@BASEDIR@/src/plugins/rl-test/rl-agent"
 
@@ -33,10 +32,10 @@ python:
   env-dir: "@BASEDIR@/src/plugins/clips-gym"
 
   env-script: "cx-custom-gym.py"
-  #training-dirs: ["@BASEDIR@/src/plugins/rl-test/rl-agent"] #,"@BASEDIR@/testagent"]
+  # training-dirs: ["@BASEDIR@/src/plugins/rl-test/rl-agent"]
 
 goal-space:
-  #Classname: params [Identifier - Typ]
+  # Classname: params [Identifier - Typ]
   TOWER-C1: {buttom: block, top: block}
   TOWER-C2: {blocks: block}
 
@@ -74,7 +73,7 @@ goal-space:
   # # the lock just due to an oversight.
   # steal-skiller-control: true
 
-  
+
   # Agent name. On startup the clips-agent will try to resolve a file named
   # <agent name>.clp. It must be in the CLIPS path directories.
   # agent: test
