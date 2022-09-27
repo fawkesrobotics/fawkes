@@ -22,7 +22,6 @@
 
 #include <core/plugin.h>
 
-
 /** @class CLIPS Gym plugin
  *  Interface to use the clips executive from a customized OpenAI Gym Environment in python
  *  @author Sonja Ginter
@@ -36,7 +35,7 @@ public:
      */
 	explicit ClipsGymPlugin(fawkes::Configuration *config) : Plugin(config)
 	{
-		thread_list.push_back(ClipsGymThread::getInstance());//new ClipsGymThread());
+		thread_list.push_back(ClipsGymThread::getInstance()); //new ClipsGymThread());
 	}
 };
 
