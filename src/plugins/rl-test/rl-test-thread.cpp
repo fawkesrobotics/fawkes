@@ -338,7 +338,7 @@ RLTestThread::executeRlAgent(std::string facts)
 void
 RLTestThread::init()
 {
-    std::cout << "Hello World!-from RLTestThread" << std::endl;
+    std::cout << "Init RLTestThread start" << std::endl;
     std::string rl_agent_name = config->get_string("/rl-agent/name");
     std::string rl_agent_dir = config->get_string("/rl-agent/dir");
     bool training_mode = config->get_bool("/rl-agent/training-mode");
@@ -347,7 +347,6 @@ RLTestThread::init()
     //setup interface
     rl_gs_interface = blackboard->open_for_writing<RLAgentGoalSelectionInterface>(
         "goal-selection");
-    //config->get_string("plugins/pddl-robot-memory/interface-name").c_str());
     rl_gs_interface->set_msg_id(0);
     rl_gs_interface->set_final(false);
     rl_gs_interface->write();
@@ -361,7 +360,7 @@ RLTestThread::init()
     //py::scoped_interpreter guard{};
 
 
-    std::cout << "Hello 2 From Test Thread" << std::endl;
+    std::cout << "Finished RLTestThread" << std::endl;
 
     startedTraining = false;
     //wakeup(); //activates any loop
@@ -370,7 +369,7 @@ RLTestThread::init()
 void
 RLTestThread::loop()
 {
-    std::cout << "In Loop " + goal << std::endl;
+    std::cout << "In RLTestThread Loop " + goal << std::endl;
     rl_gs_interface->set_final(true);
     rl_gs_interface->set_success(true);
     rl_gs_interface->set_next_select_goal("RL TEST GOAL FROM LOOP");
@@ -385,7 +384,7 @@ RLTestThread::loop()
     }
 
 
-    std::cout << "End Loop " << std::endl;
+    std::cout << "End RLTestThread Loop " << std::endl;
 }
 
 void
@@ -406,7 +405,7 @@ RLTestThread::bb_interface_message_received(Interface* interface,
         rl_gs_interface->write();
         if (std::string(msg->goal()) != "")
             goal = msg->goal();
-        wakeup(); //activates loop where the generation is done
+        //wakeup(); //activates loop where the generation is done
     }
     else {
         logger->log_error(name(), "Received unknown message of type %s, ignoring", message->type());
@@ -419,7 +418,7 @@ void
 RLTestThread::clips_context_init(const std::string& env_name,
     LockPtr<CLIPS::Environment>& clips)
 {
-    std::cout << "Hello World!-from RL clips_context_init\n" << std::endl;
+    std::cout << "Start RLTestThread clips_context_init\n" << std::endl;
 
     envs_[env_name] = clips;
     logger->log_info(name(), "Called to initialize environment %s", env_name.c_str());
@@ -462,19 +461,17 @@ RLTestThread::create_rl_env_state_from_facts(std::string env_name)
     std::cout << "In create rl env state from facts" << std::endl;
     fawkes::LockPtr<CLIPS::Environment> clips = getClipsEnv(env_name);
     clips.lock();
+    std::cout << "In create env state - locked clips" << std::endl;
     CLIPS::Fact::pointer fact = clips->get_facts();
     std::string env_state_string = "{";
     while (fact) {
         CLIPS::Template::pointer tmpl = fact->get_template();
-        //std::cout << "Template: " + tmpl->name() << std::endl;
-
         std::size_t found = tmpl->name().find("domain-fact");
         //std::size_t found2 = tmpl->name().find("wm-fact");//"predicate");
-        //std::size_t found3 = tmpl->name().find("goal");
+        //std::size_t found3 = tmpl->name().find("goal"); //"domain"
 
-        if (found != std::string::npos) //|| found2 !=std::string::npos ) //|| found3 !=std::string::npos)
+        if (found != std::string::npos)
         {
-            //if (tmpl->name()->contains("domain") || tmpl->name().contains("goal"))
             std::vector< std::string > 	slot_names = fact->slot_names();
             std::string fact_value = "";
             for (std::string s : slot_names)
@@ -486,21 +483,7 @@ RLTestThread::create_rl_env_state_from_facts(std::string env_name)
                 for (std::size_t i = 0; i < slot_values.size(); i++) //for(CLIPS::Value v: slot_values)
                 {
                     auto v = slot_values[i];
-                    switch (v.type()) {
-                    case CLIPS::TYPE_FLOAT:
-                        // std::cout << v.as_float() << std::endl;
-                        value += std::to_string(v.as_float());
-                        break;
-
-                    case CLIPS::TYPE_INTEGER:
-                        //std::cout << v.as_integer() << std::endl;
-                        value += std::to_string(v.as_integer());
-                        break;
-
-                    default:
-                        //std::cout << v.as_string() <<std::endl;
-                        value += v.as_string();
-                    }
+                    value += clipsValueToString(v);
                     if (slot_values.size() > 1 && i != (slot_values.size() - 1))//v != slot_values[slot_values.size()-1])
                     {
                         value += ",";
@@ -535,81 +518,52 @@ RLTestThread::rl_goal_selection(std::string env_name,
 {
     //get current env state from clips
     std::string facts = create_rl_env_state_from_facts(env_name); //todo save return value as obs
-    std::string nextAction = executeRlAgent(facts); //ToDo pass obs and save return value /selected goal in a fact/return it to clips
-    std::cout << nextAction << std::endl;
-    fawkes::LockPtr<CLIPS::Environment> clips = getClipsEnv(env_name);
-    clips.lock();
-    clips->evaluate("(printout t \"Finished executeRlAgent asserting fact with next action\" )");
+    bool training_mode = true;
+    if (!training_mode)
+    {
+        std::string nextAction = executeRlAgent(facts); //ToDo pass obs and save return value /selected goal in a fact/return it to clips
+        std::cout << nextAction << std::endl;
+        fawkes::LockPtr<CLIPS::Environment> clips = getClipsEnv(env_name);
+        clips.lock();
+        clips->evaluate("(printout t \"Finished executeRlAgent asserting fact with next action\" )");
 
-    CLIPS::Value v = CLIPS::Value(nextAction, CLIPS::TYPE_STRING);
-    CLIPS::Template::pointer temp = clips->get_template("rl-action-selection");//("rl-init-test-fact");
-    CLIPS::Fact::pointer fact = CLIPS::Fact::create(**clips, temp);
-    fact->set_slot("next-action", v);
-    clips->assert_fact(fact); //"(rl-init-test-fact )");
-    clips.unlock();
+        CLIPS::Value v = CLIPS::Value(nextAction, CLIPS::TYPE_STRING);
+        CLIPS::Template::pointer temp = clips->get_template("rl-action-selection");//("rl-init-test-fact");
+        CLIPS::Fact::pointer fact = CLIPS::Fact::create(**clips, temp);
+        fact->set_slot("next-action", v);
+        clips->assert_fact(fact); //"(rl-init-test-fact )");
+        clips.unlock();
+    }
+    else if (!startedTraining)
+    {
+        std::cout << "In rl_goal_selection - executing RL Agent is not active!" << std::endl;
+        trainingRlAgent();
+        startedTraining = true;
+    }
+    else
+    {
+        std::cout << "In rl_goal_selection - nothing to do" << std::endl;
+    }
 }
 
-void
-RLTestThread::clips_rl_extract_executable_facts(std::string env_name,
-    CLIPS::Value parent_goal_id,
-    std::string to)
+std::string
+RLTestThread::clipsValueToString(CLIPS::Value v)
 {
-    std::cout << "Hello World!-from clips_rl_extract_executable_facts\n" + to << std::endl;
-
-    fawkes::LockPtr<CLIPS::Environment> clips = getClipsEnv(env_name);
-    clips.lock();
-    clips->evaluate("(printout t \"Hello from extracting executable facts function\" crlf crlf)");
-    clips->assert_fact("(rl-init-test-fact)");
-    switch (parent_goal_id.type()) {
-    case CLIPS::TYPE_FLOAT: std::cout << "FLOAT" << std::endl; break;
-
-    case CLIPS::TYPE_INTEGER: std::cout << "INT" << std::endl;
+    std::string value = "";
+    switch (v.type()) {
+    case CLIPS::TYPE_FLOAT:
+        // std::cout << v.as_float() << std::endl;
+        value += std::to_string(v.as_float());
         break;
 
-    case CLIPS::TYPE_SYMBOL: std::cout << "SYMBOL" << std::endl; break;
+    case CLIPS::TYPE_INTEGER:
+        //std::cout << v.as_integer() << std::endl;
+        value += std::to_string(v.as_integer());
+        break;
 
     default:
-        std::cout << "UNKNOWN" << std::endl;
-        break;
+        //std::cout << v.as_string() <<std::endl;
+        value += v.as_string();
     }
-    //extracting child fact of (goal (class RL) (id ?parent-id)
-    //child goals have (slot parent (type SYMBOL)) == ?parent-id
-    /*std::cout << "Child goals of given parent: " << std::endl;
-    CLIPS::Fact::pointer fact = clips->get_facts();
-    while (fact) {
-        CLIPS::Template::pointer tmpl = fact->get_template();
-        if (tmpl->name() == "goal") {
-            std::vector< std::string > 	goal_slot_names = fact->slot_names();
-            for(std::string s: goal_slot_names)
-            {
-                std::cout << s << std::endl;
-                std::vector<CLIPS::Value> slot_values = fact->slot_value(s);
-                for(CLIPS::Value v: slot_values)
-                {
-                    std::cout << v.as_string() <<std::endl;
-                }
-            }
-
-            auto has_parent = std::find(std::begin(goal_slot_names),std::end(goal_slot_names) ,"parent");
-
-            if(has_parent!=std::end(goal_slot_names))
-            {
-
-                std::cout << "Hura! goal has a parent!" << std::endl;
-
-            }
-        }
-        fact = fact->next();
-    }*/
-
-    clips.unlock();
-
-
-    /*logger->log_warn(name(),
-                     "Environment %s tried to block edge %s--%s, "
-                     "which does not exist in graph",
-                     env_name.c_str(),
-                     from.c_str(),
-                     to.c_str());*/
+    return value;
 }
-

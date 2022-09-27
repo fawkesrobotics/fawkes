@@ -73,6 +73,7 @@ class ClipsWorld(gym.Env):
     fact_string = p.create_rl_env_state_from_facts()
     print("ClipsWorld reseived facts: ", fact_string)
     state = self.get_state_from_facts(fact_string)
+    print(state)
 
     # Initialize the agent at the right of the grid
     #self.agent_pos = self.grid_size - 1
