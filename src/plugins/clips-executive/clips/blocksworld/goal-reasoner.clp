@@ -21,12 +21,14 @@
 	 (goal-tree-assert-run-all AUTOMATIC-SUBGOAL
 		;(goal-tree-assert-run-parallel AUTOMATIC-SUBGOAL NONE
 		 ;(assert (goal (id (gensym*)) (class BLOCKS)))
-		(assert (goal (id (gensym*)) (class TOWER-C1) (params buttom a top c)))
+		;(assert (goal (id (gensym*)) (class TOWER-C1) (params buttom a top c)))
 		 ;(assert (goal (id (gensym*)) (class TOWER-C2) (params blocks (create$ b d e))))
 		;)
 		(goal-tree-assert-rl RL
 		   (assert (goal (id (gensym*)) (class TOWER-C1) (params buttom a top c)))
-		   (assert (goal (id (gensym*)) (class TOWER-C2) (params blocks (create$ b d e))))
+		   (assert (goal (id (gensym*)) (class TOWER-C1) (params buttom b top d)))
+		   (assert (goal (id (gensym*)) (class TOWER-C1) (params buttom e top d)))
+		   ;(assert (goal (id (gensym*)) (class TOWER-C2) (params blocks (create$ b d e))))
 		   ;(assert (goal (id (sym-cat RL-TEST- (gensym*))) (class RL)))
 		   ;(assert (goal (id (sym-cat FINALLY-SUCCEED- (gensym*))) (class PRINT)))
 		)
