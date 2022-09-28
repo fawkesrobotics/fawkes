@@ -27,7 +27,7 @@
 =>
 	(printout t crlf "Assert rl waiting" ?g crlf crlf)
 	(assert (rl-waiting))
-	(rl-loop-start)
+	;(rl-loop-start)
 )
 
 (defrule rl-waiting-retract

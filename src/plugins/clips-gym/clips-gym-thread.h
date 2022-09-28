@@ -1,22 +1,22 @@
 /***************************************************************************
- *  clips-gym-thread.h - 
+ *  clips-gym-thread.h -
  *
- *  Created: 
- *  Copyright  
+ *  Created:
+ *  Copyright
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
- *
- *  Read the full text in the LICENSE.GPL file in the doc directory.
- */
+  *  it under the terms of the GNU General Public License as published by
+  *  the Free Software Foundation; either version 2 of the License, or
+  *  (at your option) any later version.
+  *
+  *  This program is distributed in the hope that it will be useful,
+  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  *  GNU Library General Public License for more details.
+  *
+  *  Read the full text in the LICENSE.GPL file in the doc directory.
+  */
 
 #include <aspect/aspect_provider.h>
 
@@ -35,6 +35,7 @@
 //#include <boost/python.hpp>
 //namespace py = boost::python;
 #include <pybind11/embed.h>
+#include <pybind11/numpy.h>
 namespace py = pybind11;
 
 //#include <plugins/clips/aspect/clips.h>
@@ -45,8 +46,8 @@ namespace py = pybind11;
 #include <clipsmm.h>
 
 /* 						 public fawkes::AspectProviderAspect,
-					 	public fawkes::RobotMemoryAspect,
-					 	 */
+						public fawkes::RobotMemoryAspect,
+						 */
 
 class ClipsGymThread : public fawkes::Thread,
                        public fawkes::LoggingAspect,
@@ -70,6 +71,7 @@ public:
 
 	void        rl_loop_start(std::string env_name);
 	std::string create_rl_env_state_from_facts(); //std::string env_name);
+	//py::array create_rl_env_state_from_facts();
 
 	// Gym functions
 	void initCX();
@@ -103,7 +105,7 @@ private:
 	//fawkes::RLAgentGoalSelectionInterface *rl_gs_interface;
 
 	/*virtual bool  bb_interface_message_received(fawkes::Interface *interface,
-	                                                       fawkes::Message *  message) noexcept;*/
+														   fawkes::Message *  message) noexcept;*/
 
 	//fawkes::LockPtr<CLIPS::Environment> getClipsEnv();//std::string env_name);
 

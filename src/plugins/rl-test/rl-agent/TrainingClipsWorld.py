@@ -108,8 +108,10 @@ if __name__ == '__main__':
     # a new action_mask_fn kwarg, as it did in an earlier draft.
     model = MaskablePPO(MaskableActorCriticPolicy, env, verbose=1)
 
-    timesteps=5
-    print("Start trainig the agent - for {} timesteps".format(timesteps))
+    timesteps=10
+    print("Start trainig the rl agent - for {} timesteps".format(timesteps))
     model.learn(total_timesteps=timesteps)
-    #print ("Saving the agent at: ", file_name)
-    #model.save(file_name)
+    print("Finished training the rl agent")
+    print ("Saving the agent at: ", file_name)
+    model.save(file_name)
+

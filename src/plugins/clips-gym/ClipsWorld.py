@@ -19,6 +19,7 @@
   */"""
 
 import sys
+from tokenize import String
 sys.path.append("/home/sginter/Documents/fawkes/plugins")
 
 import clips_gym 
@@ -27,6 +28,7 @@ import numpy as np
 import gym
 from gym import spaces
 import inspect
+import ast
 
 class ClipsWorld(gym.Env):
   """
@@ -92,8 +94,11 @@ class ClipsWorld(gym.Env):
 
     fact_string = p.create_rl_env_state_from_facts()
     print("ClipsWorld reseived facts: ", fact_string)
-    state = self.get_state_from_facts(fact_string)
-    print(state)
+    raw_facts = ast.literal_eval(fact_string)
+    print("\nfacts: ", raw_facts)
+    state = self.get_state_from_facts(raw_facts)
+    print("New env state from facts: ",state)
+    
 
     # Initialize the agent at the right of the grid
     #self.agent_pos = self.grid_size - 1
@@ -101,12 +106,21 @@ class ClipsWorld(gym.Env):
     return state #np.array([self.n_obs]).astype(np.int_)
 
   def step(self, action):
+    print("ClipsWorld: step ", action)
     print("Clips_gym add: ", clips_gym.add(1, 2))  # use the default parameter value
     p = clips_gym.ClipsGymThread.getInstance()
     result = p.step("Test")
     print(result)
 
     #TODO check action valid (if not done - reward -1) (da durch action masking nur valide actions ausgesucht werden sollten, außer es gibt keine validen mehr)
+
+    # Create observation from clips
+    fact_string = p.create_rl_env_state_from_facts()
+    print("ClipsWorld reseived facts: ", fact_string)
+    raw_facts = ast.literal_eval(fact_string)
+    print("\nfacts: ", raw_facts)
+    state = self.get_state_from_facts(raw_facts)
+    print("New env state from facts: ",state)
 
     #  Flag that marks the termination of an episode
     # TODO if we use action masking check if there are valid action and switch to done if not
@@ -118,12 +132,14 @@ class ClipsWorld(gym.Env):
     # Optionally we can pass additional info, we are not using that for now
     info = {}
 
-    return np.array([self.n_obs]).astype(np.int_), reward, done, info
+    return state, reward, done, info
+    #return np.array([self.n_obs]).astype(np.int_), reward, done, info
 
   #Exposes a method called action_masks(), which returns masks for the wrapped env.
   # action_mask_fn: A function that takes a Gym environment and returns an action mask,
   #      or the name of such a method provided by the environment.
   def action_masks(self) -> np.ndarray:
+    print("ClipsWorld: action_masks")
   # Returns the action mask for the current env. 
   #def mask_fn(env: gym.Env) -> np.ndarray:
     p = clips_gym.ClipsGymThread.getInstance()
@@ -156,18 +172,26 @@ class ClipsWorld(gym.Env):
     pass
 
   def get_state_from_facts(self,obs_f):
+    print("ClipsWorld: in get_state_from_facts function")
     new_state = np.zeros(self.n_obs)
+    print("new state np array")
+    print("Obs space: ", self.obs_dict)
     for f in obs_f:
-      pos = self.obs_dict(f)
-      new_state[pos]=1
-    print("New env state from facts: ",new_state)
+      if self.inv_obs_dict.get(f) is not None:
+        pos = self.inv_obs_dict[f]
+        print(pos)
+        new_state[pos]=1
+      else:
+        print(f"No key: '{f}' in dict")
     return new_state
 
   def set_state_from_facts(self,obs_f):
+    print("ClipsWorld: set_state_from facts")
     new_state = np.zeros(self.n_obs)
     for f in obs_f:
-      pos = self.obs_dict(f)
-      new_state[pos]=1
+      if self.inv_obs_dict.get(f) is not None:
+        pos = self.inv_obs_dict[f]
+        new_state[pos]=1
     print("New env state from facts: ",new_state)
     self.state = new_state
   

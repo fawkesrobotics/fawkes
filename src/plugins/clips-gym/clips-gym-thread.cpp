@@ -6,17 +6,17 @@
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
-  *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
-  *  (at your option) any later version.
-  *
-  *  This program is distributed in the hope that it will be useful,
-  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *  GNU Library General Public License for more details.
-  *
-  *  Read the full text in the LICENSE.GPL file in the doc directory.
-  */
+   *  it under the terms of the GNU General Public License as published by
+   *  the Free Software Foundation; either version 2 of the License, or
+   *  (at your option) any later version.
+   *
+   *  This program is distributed in the hope that it will be useful,
+   *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+   *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   *  GNU Library General Public License for more details.
+   *
+   *  Read the full text in the LICENSE.GPL file in the doc directory.
+   */
 
 #include "clips-gym-thread.h"
 //#include "/home/sonja/MA-Testproject/rlblocksworld/src-cpp/testBoostPython.h"
@@ -104,16 +104,16 @@ ClipsGymThread::init()
 
 	//setup interface
 	/*rl_gs_interface = blackboard->open_for_writing<RLAgentGoalSelectionInterface>(
-      "goal-selection");
-      //config->get_string("plugins/pddl-robot-memory/interface-name").c_str());
-    rl_gs_interface->set_msg_id(0);
-    rl_gs_interface->set_final(false);
-    rl_gs_interface->write();
+	  "goal-selection");
+	  //config->get_string("plugins/pddl-robot-memory/interface-name").c_str());
+	rl_gs_interface->set_msg_id(0);
+	rl_gs_interface->set_final(false);
+	rl_gs_interface->write();
 
-    //setup interface listener
-    bbil_add_message_interface(rl_gs_interface);
-    blackboard->register_listener(this, BlackBoard::BBIL_FLAG_MESSAGES);
-    */
+	//setup interface listener
+	bbil_add_message_interface(rl_gs_interface);
+	blackboard->register_listener(this, BlackBoard::BBIL_FLAG_MESSAGES);
+	*/
 
 	std::cout << "Hello 2 From ClipsGymThread Thread" << std::endl;
 
@@ -153,27 +153,27 @@ ClipsGymThread::loop()
 	clips.unlock();
 
 	/*rl_gs_interface->set_final(true);
-    rl_gs_interface->set_success(true);
-    rl_gs_interface->set_next_select_goal("RL TEST GOAL FROM LOOP");
-    rl_gs_interface->write();
-    */
+	rl_gs_interface->set_success(true);
+	rl_gs_interface->set_next_select_goal("RL TEST GOAL FROM LOOP");
+	rl_gs_interface->write();
+	*/
 
 	/*try{
-        //py::object main_module = py::import("__main__");
-        //py::object
-        //main_namespace = main_module.attr("__dict__");
-        //py::object main_namespace = py::module_::import("__main__").attr("__dict__");
-        //py::object main_sys =
-        py::exec("import sys", main_namespace);
-        py::exec("import example", main_namespace);
-        py::exec("result = example.add(i=1, j=2)", main_namespace);
-        py::exec("print(\"Result py: \", result)", main_namespace);
-    }
-    catch(...)
-    {
-        PyErr_Print();
-        PyErr_Clear();
-    }*/
+		//py::object main_module = py::import("__main__");
+		//py::object
+		//main_namespace = main_module.attr("__dict__");
+		//py::object main_namespace = py::module_::import("__main__").attr("__dict__");
+		//py::object main_sys =
+		py::exec("import sys", main_namespace);
+		py::exec("import example", main_namespace);
+		py::exec("result = example.add(i=1, j=2)", main_namespace);
+		py::exec("print(\"Result py: \", result)", main_namespace);
+	}
+	catch(...)
+	{
+		PyErr_Print();
+		PyErr_Clear();
+	}*/
 
 	std::cout << "End Loop " << std::endl;
 	sleep(200);
@@ -216,10 +216,10 @@ ClipsGymThread::step(std::string next_goal)
 		clips.unlock();
 	}
 	/*
-        for (auto &s: g_splitted) {
-            std::cout << s << std::endl;
-        }
-    */
+		for (auto &s: g_splitted) {
+			std::cout << s << std::endl;
+		}
+	*/
 	clips->refresh_agenda();
 	clips->run();
 	std::string env_state = create_rl_env_state_from_facts();
@@ -383,14 +383,14 @@ ClipsGymThread::resetCX()
 py::str[]
 ClipsGymThread::generateActionSpace()
 {
-    std::cout << "In generate action space from rl-test.yaml" << std::endl;
-    //oder get bools siehe eclipse-clp/eclipse_thread.cpp:110:
-    std::string rl_agent_name = config->get_strings("/goal-space/name");
+	std::cout << "In generate action space from rl-test.yaml" << std::endl;
+	//oder get bools siehe eclipse-clp/eclipse_thread.cpp:110:
+	std::string rl_agent_name = config->get_strings("/goal-space/name");
 
-    //std::string rl_agent_dir = std::regex_replace(config->get_string("/rl-agent/dir"), std::regex("@BASEDIR@"), BASEDIR);
-    //std::cout << rl_agent_dir << std::endl;
+	//std::string rl_agent_dir = std::regex_replace(config->get_string("/rl-agent/dir"), std::regex("@BASEDIR@"), BASEDIR);
+	//std::cout << rl_agent_dir << std::endl;
 
-    goal-space:
+	goal-space:
   #Classname: params [Identifier - Typ]
   TOWER-C1: {buttom: block, top: block}
   TOWER-C2: {blocks: block}
@@ -409,13 +409,13 @@ ClipsGymThread::clips_context_init(const std::string &env_name, LockPtr<CLIPS::E
 	clips->evaluate("(printout t \"Hello from CLIPS aspect in ClipsGymThread \" crlf crlf)");
 	clips->assert_fact("(rl-init-test-fact)");
 	/*clips->add_function("rl-extract-executable-fact",
-                           sigc::slot<void, CLIPS::Value, std::string>(sigc::bind<0>(
-                          sigc::mem_fun(*this, &RLTestThread::clips_rl_extract_executable_facts),
-                          env_name)));*/
+						   sigc::slot<void, CLIPS::Value, std::string>(sigc::bind<0>(
+						  sigc::mem_fun(*this, &RLTestThread::clips_rl_extract_executable_facts),
+						  env_name)));*/
 	/*clips->add_function("rl-goal-selection-start",
-                                                 sigc::slot<void, CLIPS::Value, std::string>(sigc::bind<0>(
-                                                sigc::mem_fun(*this, &RLTestThread::rl_goal_selection),
-                                                env_name)));*/
+																	   sigc::slot<void, CLIPS::Value, std::string>(sigc::bind<0>(
+																	  sigc::mem_fun(*this, &RLTestThread::rl_goal_selection),
+																	  env_name)));*/
 
 	clips->add_function("rl-loop-start",
 	                    sigc::slot<void>(
@@ -502,7 +502,7 @@ ClipsGymThread::create_rl_env_state_from_facts() //std::string env_name)
 						value += ",";
 					}
 				}
-				std::cout << value << std::endl;
+				//std::cout << value << std::endl;
 				if (s == "name") {
 					env_state_string += "\"" + value + "(";
 				}
