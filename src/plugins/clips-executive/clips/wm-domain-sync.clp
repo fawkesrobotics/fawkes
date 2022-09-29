@@ -483,15 +483,14 @@
 	(modify ?wm (wm-fact-idx (fact-index ?new-wf)))
 )
 
-(defrule wm-sync-worldmodel-object-added
-  (declare (salience ?*SALIENCE-WM-SYNC-ADD*))
+(defrule wm-sync-worldmodel-objecs-changed
+  (declare (salience ?*SALIENCE-WM-SYNC-DEL*))
+
 	?wm <- (wm-sync-map-object-type (wm-fact-id ?id) (wm-fact-idx ?wf-idx) (domain-object-type ?type))
-	?wf <- (wm-fact (id ?id) (type SYMBOL) (is-list TRUE) (values $? ?name $?))
-	(not (domain-object (name ?name) (type ?type)))
+	?wf <- (wm-fact (id ?id) (type SYMBOL) (is-list TRUE) (values $?objs))
 	(test (> (fact-index ?wf) ?wf-idx))
 	=>
-	; While the rule checks if there is any object that is missing, the update might
-	; actually have added multiple objects with one update. Hence, check them all.
+	;add newly added objects
 	(bind ?objs (fact-slot-value ?wf values))
 	(foreach ?o ?objs
 		(if (not (any-factp ((?df domain-object))	(and (eq ?df:name ?o) (eq ?df:type ?type))))
@@ -500,19 +499,13 @@
 
 		)
 	)
-	(modify ?wm (wm-fact-idx (fact-index ?wf)))
-)
 
-(defrule wm-sync-worldmodel-object-removed
-  (declare (salience ?*SALIENCE-WM-SYNC-DEL*))
-	?wm <- (wm-sync-map-object-type (wm-fact-id ?id) (wm-fact-idx ?wf-idx) (domain-object-type ?type))
-	(domain-object (name ?name) (type ?type))
-	?wf <- (wm-fact (id ?id) (type SYMBOL) (is-list TRUE) (values $?objs&~:(member$ ?name ?objs)))
-	(test (> (fact-index ?wf) ?wf-idx))
-	=>
+	;remove objects that don't exis anymore
 	(delayed-do-for-all-facts ((?df domain-object))
     (and (eq ?df:type ?type) (not (member$ ?df:name ?objs)))
 		(retract ?df)
 	)
+
+
 	(modify ?wm (wm-fact-idx (fact-index ?wf)))
 )
