@@ -54,7 +54,7 @@ void
 PitchCalibration::calibrate()
 {
 	printf("Starting pitch angle calibration.\n");
-	float mean_z;
+	float mean_z = 0;
 	do {
 		laser_->read();
 		PointCloudPtr cloud = laser_to_pointcloud(*laser_);
