@@ -33,7 +33,7 @@ ifneq ($(PKGCONFIG),)
   HAVE_LIBKNI := $(if $(shell $(PKGCONFIG) --exists 'libkni3'; echo $${?/1/}),1,0)
 endif
 ifeq ($(HAVE_LIBKNI),1)
-  CFLAGS_LIBKNI  = -DHAVE_KNI $(shell $(PKGCONFIG) --cflags 'libkni3')
+  CFLAGS_LIBKNI  = -DHAVE_KNI $(shell $(PKGCONFIG) --cflags 'libkni3') -Wno-deprecated-declarations
   LDFLAGS_LIBKNI = $(shell $(PKGCONFIG) --libs 'libkni3')
 else
   WARN_TARGETS += warning_kni
