@@ -20,7 +20,7 @@
 
 import sys
 from tokenize import String
-sys.path.append("/home/sginter/Documents/fawkes/plugins")
+sys.path.append("~/fawkes/plugins")
 
 import clips_gym 
 

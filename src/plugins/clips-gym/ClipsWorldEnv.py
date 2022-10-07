@@ -20,7 +20,7 @@
 
 # #!usr/bin/env python
 import sys
-sys.path.append("/home/sginter/Documents/fawkes/plugins")
+sys.path.append("~/fawkes/plugins")
 
 
 # import clips_gym

@@ -25,7 +25,7 @@ import imageio
 import gym
 import pddlgym
 
-sys.path.append("/home/sginter/Documents/fawkes/src/plugins/clips-gym/")
+sys.path.append("~/fawkes/src/plugins/clips-gym/")
 # Wrapper for PDDLGym for discrete action and observation space
 #from PDDLExtension import BlocksWorld, LiteralSpace2, LiteralActionWrapper, LiteralObsWrapper
 from ClipsWorld import ClipsWorld#, LiteralSpace2, LiteralActionWrapper, LiteralObsWrapper
@@ -71,7 +71,7 @@ def mask_fn(env: gym.Env) -> np.ndarray:
 if __name__ == '__main__':
     render = None
  #   env_name = "blockstower"
-#    dir_path = "/home/sginter/Documents/fawkes/src/plugins/rl-test/rl-agent"
+#    dir_path = "~/fawkes/src/plugins/rl-test/rl-agent"
     print("In Training script")
     #print("Script: Config values for env_name and path: " + env_name + " " + dir_path)
     #print("Script: Config values for path: " + dir_path)

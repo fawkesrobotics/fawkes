@@ -73,7 +73,7 @@ def mask_fn(env: gym.Env) -> np.ndarray:
 if __name__ == '__main__':
     render = None
     env_name = "blocks" #"blockstower"
-    dir_path = "/home/sginter/Documents/fawkes/src/plugins/rl-test/rl-agent"
+    dir_path = "~/fawkes/src/plugins/rl-test/rl-agent"
 
     print("Config values for env_name and path: " + env_name + " " + dir_path)
     env = env_creator(env_name, dir_path, render)
@@ -94,7 +94,7 @@ if __name__ == '__main__':
     
     new_obs = env.observation(env.get_state())
     print("Env obs: ", new_obs)
-    #file_name = "/home/sginter/Documents/fawkes/src/plugins/rl-test/rl-agent/MaskablePPOAgent"
+    #file_name = "~/fawkes/src/plugins/rl-test/rl-agent/MaskablePPOAgent"
     print("Config Value agent file name: ", file_name)
     model = MaskablePPO.load(file_name, env=env)
 
