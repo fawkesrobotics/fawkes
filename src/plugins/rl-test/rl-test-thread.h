@@ -68,7 +68,7 @@ public:
 	virtual void loop();
 
 	// for CLIPSFeature
-	virtual void clips_context_init(const std::string                   &env_name,
+	virtual void clips_context_init(const std::string &                  env_name,
 	                                fawkes::LockPtr<CLIPS::Environment> &clips);
 	virtual void clips_context_destroyed(const std::string &env_name);
 
@@ -97,7 +97,7 @@ private:
 	std::string                            goal;
 
 	virtual bool bb_interface_message_received(fawkes::Interface *interface,
-	                                           fawkes::Message   *message) noexcept;
+	                                           fawkes::Message *  message) noexcept;
 
 	fawkes::LockPtr<CLIPS::Environment> getClipsEnv(std::string env_name);
 	void                                clips_rl_extract_executable_facts(std::string  env_name,

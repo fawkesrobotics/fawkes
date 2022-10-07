@@ -156,7 +156,8 @@ RLTestThread::trainingRlAgent()
 		py::str training_script_path = (py::str)(rl_agent_dir + "/" + training_script);
 		//py::exec_file(training_script_path, main_namespace, main_namespace);
 		auto result = py::eval_file(training_script_path, main_namespace);
-		std::cout << "DONE EVALUATING TRAINING SCRIPT - I should probably give feedback to clips" << std::endl;
+		std::cout << "DONE EVALUATING TRAINING SCRIPT - I should probably give feedback to clips"
+		          << std::endl;
 		py::print(result);
 		//py::str obs = (py::str) ("obs = [0., 1., 1., 1., 0., 1., 1., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1., 1., 1.,]");
 		//py::exec(obs, main_namespace);
@@ -172,13 +173,11 @@ RLTestThread::trainingRlAgent()
         exec_file(scriptname, main_namespace, main_namespace);
         std::cout << "executed file" << std::endl;
         */
-	}
-	catch(py::error_already_set &e) {
+	} catch (py::error_already_set &e) {
 		py::module::import("traceback").attr("print_exception")(e.type(), e.value(), e.trace());
 		std::cout << "PYTHON EXCEPTION:" << std::endl;
 		std::cout << e.what() << std::endl;
-	}
-	catch (...) {
+	} catch (...) {
 		PyErr_Print();
 		PyErr_Clear();
 	}
@@ -315,13 +314,11 @@ RLTestThread::executeRlAgent(std::string facts)
 		//py::str execution_script_path = (py::str) (execution_dir + "/"+ execution_script);
 		//py::exec_file(execution_script_path, main_namespace, main_namespace);
 
-	}
-	catch(py::error_already_set &e) {
+	} catch (py::error_already_set &e) {
 		py::module::import("traceback").attr("print_exception")(e.type(), e.value(), e.trace());
 		std::cout << "PYTHON EXCEPTION:" << std::endl;
 		std::cout << e.what() << std::endl;
-	} 
-	catch (...) {
+	} catch (...) {
 		PyErr_Print();
 		PyErr_Clear();
 	}
