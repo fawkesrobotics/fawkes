@@ -26,6 +26,7 @@
 #include <webview/request.h>
 
 #include <cerrno>
+#include <ctime>
 #include <microhttpd.h>
 #include <stdint.h>
 #include <unistd.h>

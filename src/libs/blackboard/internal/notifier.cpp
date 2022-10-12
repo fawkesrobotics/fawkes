@@ -376,10 +376,9 @@ BlackBoardNotifier::unregister_observer(BlackBoardInterfaceObserver *observer)
 	if (bbio_events_ > 0) {
 		BBioQueueEntry      e = std::make_pair((unsigned int)0, observer);
 		BBioQueue::iterator re;
-		while ((re = find_if(bbio_queue_.begin(),
-		                     bbio_queue_.end(),
-		                     bind2nd(std::not_equal_to<BBioQueueEntry>(), e)))
-		       != bbio_queue_.end()) {
+		while (
+		  (re = find_if(bbio_queue_.begin(), bbio_queue_.end(), [&e](const auto &o) { return o != e; }))
+		  != bbio_queue_.end()) {
 			// if there is an entry in the register queue, remove it!
 			if (re->second == observer) {
 				bbio_queue_.erase(re);
