@@ -107,7 +107,8 @@ class ClipsWorld(gym.Env):
     # Initialize the agent at the right of the grid
     #self.agent_pos = self.grid_size - 1
     # here we convert to float32 to make it more general (in case we want to use continuous actions)
-    return state #np.array([self.n_obs]).astype(np.int_)
+    return np.array(state).astype(np.int_)  #np.array(state).astype(np.int_)
+    #state #
 
   def step(self, action):
     print("ClipsWorld: step ", action)

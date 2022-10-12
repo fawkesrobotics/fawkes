@@ -19,6 +19,7 @@
   */"""
 
 import sys
+from tabnanny import verbose
 import numpy as np
 import os
 import imageio
@@ -36,6 +37,8 @@ from ClipsWorld import ClipsWorld#, LiteralSpace2, LiteralActionWrapper, Literal
 from sb3_contrib.common.maskable.policies import MaskableActorCriticPolicy
 from sb3_contrib.common.wrappers import ActionMasker
 from sb3_contrib.ppo_mask import MaskablePPO
+from stable_baselines3 import PPO
+from stable_baselines3.ppo.policies import MlpPolicy
 """ 
 def env_creator(env_name, dir_path, render):
     domain_file = os.path.join(dir_path, "{}.pddl".format(env_name))
@@ -67,6 +70,42 @@ def mask_fn(env: gym.Env) -> np.ndarray:
             valid_actions[i]=1
     #print("Valid Actions: ", valid_actions)
     return valid_actions
+
+def evaluate(model, num_episodes=5):
+    """
+    Evaluate a RL agent
+    :param model: (BaseRLModel object) the RL Agent
+    :param num_episodes: (int) number of episodes to evaluate it
+    :return: (float) Mean reward for the last num_episodes
+    """
+    # This function will only work for a single Environment
+    print("ClipsWorld start evaluate")
+    env = model.get_env()
+    all_episode_rewards = []
+    for i in range(num_episodes):
+        episode_rewards = []
+        done = False
+        obs = env.reset()
+        print("ClipsWorld: evaluate: obs: ", obs)
+        while not done:
+            # _states are only useful when using LSTM policies
+            print("ClipsWorld: evaluate before predict")
+            action, _states = model.predict(obs)
+            print("ClipsWorld: evaluate after predict ",action)
+            print(_states)
+            # here, action, rewards and dones are arrays
+            # because we are using vectorized env
+            print("ClipsWorld: before step")
+            obs, reward, done, info = env.step(action)
+            print("ClipsWorld: after step: ",obs, reward, done, info)
+            episode_rewards.append(reward)
+
+        all_episode_rewards.append(sum(episode_rewards))
+
+    mean_episode_reward = np.mean(all_episode_rewards)
+    print("Mean reward:", mean_episode_reward, "Num episodes:", num_episodes)
+
+    return mean_episode_reward
 
 if __name__ == '__main__':
     render = None
@@ -106,11 +145,16 @@ if __name__ == '__main__':
     # with ActionMasker. If the wrapper is detected, the masks are automatically
     # retrieved and used when learning. Note that MaskablePPO does not accept
     # a new action_mask_fn kwarg, as it did in an earlier draft.
-    model = MaskablePPO(MaskableActorCriticPolicy, env, verbose=1)
+    #model = MaskablePPO(MaskableActorCriticPolicy, env, verbose=1)
+    model = PPO(MlpPolicy, env, verbose=0)
 
-    timesteps=10
+    timesteps=5
     print("Start trainig the rl agent - for {} timesteps".format(timesteps))
-    model.learn(total_timesteps=timesteps)
+    #model.learn(total_timesteps=timesteps)
+    # Random Agent, before training
+    mean_reward_before_train = evaluate(model)
+    print("Mean reward: ",mean_reward_before_train)
+
     print("Finished training the rl agent")
     print ("Saving the agent at: ", file_name)
     model.save(file_name)
