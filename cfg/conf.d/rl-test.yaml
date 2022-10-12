@@ -30,7 +30,7 @@ python:
   # Directory where the python env script is located
   env-dir: "@BASEDIR@/src/plugins/clips-gym"
 
-  env-script: "ClipsWorldEnv.py"
+  env-script: "ClipsWorld.py"
   # training-dirs: ["@BASEDIR@/src/plugins/rl-test/rl-agent"]
 
   # Directory where the plugin binaries are located

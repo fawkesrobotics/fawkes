@@ -220,8 +220,8 @@ ClipsGymThread::step(std::string next_goal)
 			std::cout << s << std::endl;
 		}
 	*/
-	clips->refresh_agenda();
-	clips->run();
+	//clips->refresh_agenda();
+	//clips->run();
 	std::string env_state = create_rl_env_state_from_facts();
 
 	std::cout << "End Clips Gym Thread step function" << std::endl;
@@ -455,8 +455,13 @@ ClipsGymThread::create_rl_env_state_from_facts() //std::string env_name)
 {
 	std::cout << "In create rl env state from facts" << std::endl;
 	fawkes::LockPtr<CLIPS::Environment> clips = getClipsEnv();
+	//refcount
+	std::cout << "Clips pointer refcount: " << clips.refcount() << std::endl;
+	std::cout << current_thread_id() << " " << current_thread_name() << std::endl;
+
 	clips.lock();
 	std::cout << "Lock clips done" << std::endl;
+	std::cout << "Clips pointer refcount: " << clips.refcount() << std::endl;
 	CLIPS::Fact::pointer fact             = clips->get_facts();
 	std::string          env_state_string = "{";
 	while (fact) {
@@ -519,5 +524,10 @@ ClipsGymThread::create_rl_env_state_from_facts() //std::string env_name)
 	std::cout << env_state_string << std::endl;
 	std::cout << "Finished passing all facts " << std::endl;
 	clips.unlock();
+	std::cout << "Unlock clips done: Clips pointer refcount: " << clips.refcount() << std::endl;
+	/* }
+	else{
+		std::cout << "Clips-Gym-Thread: create env state from facts - FAILED to lock clips!";
+	} */
 	return env_state_string;
 }
