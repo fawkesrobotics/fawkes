@@ -86,18 +86,22 @@ class ClipsWorld(gym.Env):
     Important: the observation must be a numpy array
     :return: (np.array) 
     """
+    print("ClipsWorld: start reset function")
 
     #print("NOT IMPLEMENTED ",inspect.currentframe().f_code.co_name)
+    print("ClipsWorld: reset: before get ClipsGymThread instance")
     p = clips_gym.ClipsGymThread.getInstance()
     #result = p.resetCX()
-    print("Finished resetCX ")
+    print("ClipsWorld: reset: Finished resetCX ")
 
+    print("ClipsWorld: reset: call create_rl_env_state_from_facts")
     fact_string = p.create_rl_env_state_from_facts()
-    print("ClipsWorld reseived facts: ", fact_string)
+    print("ClipsWorld reset: reseived facts: ", fact_string)
     raw_facts = ast.literal_eval(fact_string)
     print("\nfacts: ", raw_facts)
     state = self.get_state_from_facts(raw_facts)
-    print("New env state from facts: ",state)
+    print("ClipsWorld: New env state from facts: ",state)
+    print("ClipsWorld: end reset function")
     
 
     # Initialize the agent at the right of the grid
@@ -179,10 +183,10 @@ class ClipsWorld(gym.Env):
     for f in obs_f:
       if self.inv_obs_dict.get(f) is not None:
         pos = self.inv_obs_dict[f]
-        print(pos)
+        #print(pos)
         new_state[pos]=1
-      else:
-        print(f"No key: '{f}' in dict")
+      #else:
+        #print(f"No key: '{f}' in dict")
     return new_state
 
   def set_state_from_facts(self,obs_f):

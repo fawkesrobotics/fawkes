@@ -524,8 +524,8 @@ RLTestThread::rl_goal_selection(std::string env_name, CLIPS::Value parent_goal_i
 	} else if (!startedTraining) {
 		std::cout << "In rl_goal_selection - executing RL Agent is not active!" << std::endl;
 		//trainingRlAgent();
-		std::future<bool> training_done = std::async(std::launch::async, trainingRlAgent, config);
-		startedTraining                 = true;
+		training_done   = std::async(std::launch::async, trainingRlAgent, config);
+		startedTraining = true;
 	} else {
 		std::cout << "In rl_goal_selection - nothing to do" << std::endl;
 	}

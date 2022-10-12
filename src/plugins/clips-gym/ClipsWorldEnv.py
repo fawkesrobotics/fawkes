@@ -21,9 +21,8 @@
 # #!usr/bin/env python
 import sys
 import os
-plugins_dir = os.path.normpath(os.path.join(os.path.dirname(__file__),'../../../plugins/'))
-print("In ClipsWorldEnv - add path: ", plugins_dir)
-sys.path.append(plugins_dir)#"~/fawkes/plugins")
+
+sys.path.append("~/fawkes/plugins")
 print("In ClipsWorldEnv - sys path: ", sys.path)
 
 # import clips_gym

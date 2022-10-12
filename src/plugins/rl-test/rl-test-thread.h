@@ -43,7 +43,7 @@ namespace py = pybind11;
 //#include <plugins/robot-memory/aspect/robot_memory_aspect.h>
 
 #include <clipsmm.h>
-
+#include <future>
 //
 
 //						 public fawkes::CLIPSFeature,
@@ -75,7 +75,8 @@ public:
 	//bool        trainingRlAgent();
 	std::string executeRlAgent(std::string facts);
 
-	bool startedTraining;
+	bool              startedTraining;
+	std::future<bool> training_done;
 	//py::object main_namespace;
 
 protected:
