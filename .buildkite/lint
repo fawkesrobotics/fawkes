@@ -60,6 +60,8 @@ set -o pipefail
 
 AUTHORS_FILE=
 
+# Re-enable once https://github.com/buildkite/agent/issues/1780 has been resolved.
+if false ; then
 echo "-> Getting committer information"
 if [[ "${BUILDKITE_REPO-}" =~ ^(https://|git@)github.com(/|:)([^/]+)/ ]]; then
 	COMMITTERS_REPO="git@github.com:${BASH_REMATCH[3]}/committers.git"
@@ -102,6 +104,7 @@ for line in $(cat $AUTHORS_FILE); do
 	AUTHOR_BRANCHES[${#AUTHOR_BRANCHES[*]}]="${AUTHOR[3]}"
 done
 IFS=$OIFS
+fi
 
 check_build_creator () {
 	for ((i=0; i<${#AUTHOR_NAME[@]}; i++)); do
@@ -297,6 +300,8 @@ check_yamllint()
 
 ### Main Program
 
+# Re-enable once https://github.com/buildkite/agent/issues/1780 has been resolved.
+if false ; then
 echo "-> Verifying build creator"
 AUTHOR_INDEX=$(check_build_creator)
 
@@ -305,6 +310,7 @@ check_branch_name $AUTHOR_INDEX
 
 echo "-> Verifying committer and author information for branch commits"
 check_commit_authors
+fi
 
 echo "-> Running gitlint to check commit messages"
 check_gitlint
