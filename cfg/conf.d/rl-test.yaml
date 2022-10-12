@@ -4,13 +4,13 @@
 doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/clips-agent
 ---
 rl-agent:
-  env_name: "blocks"   # "blockstower"
+  env_name: "blocks"  # "blockstower"
 
   # Name of saved rl agent after training
   name: "MaskablePPOAgent_d"
   # Directory where the rl agent is saved after training
   # And to look for trained agent files
-  dir: "@BASEDIR@/src/plugins/rl-test/rl-agent"   # ,"@BASEDIR@/testagent"]
+  dir: "@BASEDIR@/src/plugins/rl-test/rl-agent"  # ,"@BASEDIR@/testagent"]
 
   # If set to true a new agent is created and trained and save at the
   # rl-agent-dirs with rl-agent-name.
@@ -19,61 +19,24 @@ rl-agent:
 
 python:
   # if trainings-mode is set to true the training script is executed
-  training-script: "TrainingClipsWorld.py"    # "trainingRLAgent.py"
+  training-script: "TrainingClipsWorld.py"  # "trainingRLAgent.py"
 
   # if trainings-mode is set to false the execution script is called
-  execution-script: "executingClipsWorld.py"    # "executingRLAgent.py"
+  execution-script: "executingClipsWorld.py"  # "executingRLAgent.py"
 
   # Directory where the python scripts are located
   dir: "@BASEDIR@/src/plugins/rl-test/rl-agent"
 
-
   # Directory where the python env script is located
   env-dir: "@BASEDIR@/src/plugins/clips-gym"
 
-  env-script: "cx-custom-gym.py"
+  env-script: "ClipsWorldEnv.py"
   # training-dirs: ["@BASEDIR@/src/plugins/rl-test/rl-agent"]
+
+  # Directory where the plugin binaries are located
+  plugins-dir: "@BASEDIR@/plugins"
 
 goal-space:
   # Classname: params [Identifier - Typ]
   TOWER-C1: {buttom: block, top: block}
   TOWER-C2: {blocks: block}
-
-  # # If CLIPS debugging is enabled, certain rules and facts can be excluded
-  # # from watching, e.g. if they are showing up at too high frequencies or
-  # # are not of interest.
-  # unwatch-facts: ["time"]
-  # unwatch-rules: ["time-retract"]
-
-  # # If true, simulate skills (assuming they always succeed) instead of
-  # # actually executing the skills. The time indicates how long it should
-  # # take to declare success on skill execution. Note that this cannot
-  # # simulate side effects, like a called component writing to an interface
-  # skill-sim: true
-  # skill-sim-time: 2.0
-
-  # # debug level is a number of: 0 ~ none, 1 ~ minimal, 2 ~ more, 3 ~ maximum
-  # debug-level: 3
-
-  # # automatically pre-require redefine-warning feature? Enabling
-  # # this in the plugin instead of in the initial code (init.clp) is
-  # # beneficial because it already catches errors in said file.
-  # request-redefine-warning-feature: false
-
-  # # Automatically assert the (start) fact after successful initialization,
-  # # otherwise wait until the an enalble message has been received
-  # auto-start: true
-
-  # # If set to true, will trigger the assertion of a (time (now)) fact in
-  # # each loop. This can be used to trigger loop events in CLIPS.
-  # assert-time-each-loop: true
-
-  # # If set to true will force the acquisition of the skiller control.
-  # # This is particularly useful to kick an SkillGUI which is holding
-  # # the lock just due to an oversight.
-  # steal-skiller-control: true
-
-
-  # Agent name. On startup the clips-agent will try to resolve a file named
-  # <agent name>.clp. It must be in the CLIPS path directories.
-  # agent: test

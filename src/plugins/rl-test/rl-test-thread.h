@@ -6,17 +6,17 @@
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
-  *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
-  *  (at your option) any later version.
-  *
-  *  This program is distributed in the hope that it will be useful,
-  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *  GNU Library General Public License for more details.
-  *
-  *  Read the full text in the LICENSE.GPL file in the doc directory.
-  */
+   *  it under the terms of the GNU General Public License as published by
+   *  the Free Software Foundation; either version 2 of the License, or
+   *  (at your option) any later version.
+   *
+   *  This program is distributed in the hope that it will be useful,
+   *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+   *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   *  GNU Library General Public License for more details.
+   *
+   *  Read the full text in the LICENSE.GPL file in the doc directory.
+   */
 
 //#pragma once
 //#ifndef _PLUGINS_RL_TEST_THREAD_H_
@@ -68,11 +68,11 @@ public:
 	virtual void loop();
 
 	// for CLIPSFeature
-	virtual void clips_context_init(const std::string &                  env_name,
+	virtual void clips_context_init(const std::string                   &env_name,
 	                                fawkes::LockPtr<CLIPS::Environment> &clips);
 	virtual void clips_context_destroyed(const std::string &env_name);
 
-	void        trainingRlAgent();
+	//bool        trainingRlAgent();
 	std::string executeRlAgent(std::string facts);
 
 	bool startedTraining;
@@ -97,7 +97,7 @@ private:
 	std::string                            goal;
 
 	virtual bool bb_interface_message_received(fawkes::Interface *interface,
-	                                           fawkes::Message *  message) noexcept;
+	                                           fawkes::Message   *message) noexcept;
 
 	fawkes::LockPtr<CLIPS::Environment> getClipsEnv(std::string env_name);
 	void                                clips_rl_extract_executable_facts(std::string  env_name,

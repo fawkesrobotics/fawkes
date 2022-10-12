@@ -6,24 +6,26 @@
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
-  *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
-  *  (at your option) any later version.
-  *
-  *  This program is distributed in the hope that it will be useful,
-  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *  GNU Library General Public License for more details.
-  *
-  *  Read the full text in the LICENSE.GPL file in the doc directory.
-  */
+   *  it under the terms of the GNU General Public License as published by
+   *  the Free Software Foundation; either version 2 of the License, or
+   *  (at your option) any later version.
+   *
+   *  This program is distributed in the hope that it will be useful,
+   *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+   *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   *  GNU Library General Public License for more details.
+   *
+   *  Read the full text in the LICENSE.GPL file in the doc directory.
+   */
 
 #include "rl-test-thread.h"
 //#include "/home/sonja/MA-Testproject/rlblocksworld/src-cpp/testBoostPython.h"
+#include <chrono>
 #include <future>
 #include <iostream>
 #include <regex>
 #include <string>
+#include <thread>
 
 //for calling boost python from plugin
 //#define BOOST_BIND_GLOBAL_PLACEHOLDERS
@@ -61,9 +63,11 @@ RLTestThread::RLTestThread()
 {
 }
 
-void
-RLTestThread::trainingRlAgent()
+bool
+//RLTestThread::
+trainingRlAgent(Configuration *config)
 {
+	bool        is_done       = false;
 	std::string rl_agent_name = config->get_string("/rl-agent/name");
 	std::string rl_agent_dir =
 	  std::regex_replace(config->get_string("/rl-agent/dir"), std::regex("@BASEDIR@"), BASEDIR);
@@ -81,6 +85,9 @@ RLTestThread::trainingRlAgent()
 	std::string env_dir =
 	  std::regex_replace(config->get_string("/python/env-dir"), std::regex("@BASEDIR@"), BASEDIR);
 
+	std::string bin_plugins_dir =
+	  std::regex_replace(config->get_string("/python/plugins-dir"), std::regex("@BASEDIR@"), BASEDIR);
+
 	py::scoped_interpreter guard{};
 	//Py_Initialize();
 
@@ -89,24 +96,20 @@ RLTestThread::trainingRlAgent()
 	//PyRun_SimpleString("sys.path.append(\"/home/sonja/MA-Testproject/rlblocksworld/src-python\")");
 
 	try {
-		//py::object main_module = py::import("__main__");
-		//py::object
-		//main_namespace = main_module.attr("__dict__");
 		py::object main_namespace = py::module_::import("__main__").attr("__dict__");
-		//py::object main_sys =
 		py::exec("import sys", main_namespace);
-		//py::object main_print =
 		py::exec("print(\"Hello From python\")", main_namespace);
 
 		//necessary to include other python scripts - e.g. PDDLExtension
 		py::str sysPathAppend = (py::str)("sys.path.append(\"" + training_dir + "\")");
-		//py::object main_missingPath =
 		py::exec(sysPathAppend, main_namespace);
 
 		//necessary to include other python scripts - e.g. ClipsWorld
 		py::str sysPathAppend2 = (py::str)("sys.path.append(\"" + env_dir + "\")");
-		//py::object main_missingPath =
 		py::exec(sysPathAppend2, main_namespace);
+
+		py::str sysPathAppend3 = (py::str)("sys.path.append(\"" + bin_plugins_dir + "\")");
+		py::exec(sysPathAppend3, main_namespace);
 
 		py::exec("print(sys.path)");
 
@@ -159,6 +162,7 @@ RLTestThread::trainingRlAgent()
 		std::cout << "DONE EVALUATING TRAINING SCRIPT - I should probably give feedback to clips"
 		          << std::endl;
 		py::print(result);
+		is_done = true;
 		//py::str obs = (py::str) ("obs = [0., 1., 1., 1., 0., 1., 1., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1., 1., 1.,]");
 		//py::exec(obs, main_namespace);
 
@@ -168,11 +172,11 @@ RLTestThread::trainingRlAgent()
 		//py::str env_creation = (py::str) ("env = env_creator(\'blockstower\',\"" + rl_agent_dir + "\", True)");
 		//py::object env = py::exec(env_creation);
 		/*
-        std::cout << "adding path" << std::endl;
-        object main_missingPath = exec("sys.path.append(\"/home/tarikwork/rlblocksworld/src-python/\")", main_namespace);
-        exec_file(scriptname, main_namespace, main_namespace);
-        std::cout << "executed file" << std::endl;
-        */
+		std::cout << "adding path" << std::endl;
+		object main_missingPath = exec("sys.path.append(\"/home/tarikwork/rlblocksworld/src-python/\")", main_namespace);
+		exec_file(scriptname, main_namespace, main_namespace);
+		std::cout << "executed file" << std::endl;
+		*/
 	} catch (py::error_already_set &e) {
 		py::module::import("traceback").attr("print_exception")(e.type(), e.value(), e.trace());
 		std::cout << "PYTHON EXCEPTION:" << std::endl;
@@ -183,6 +187,7 @@ RLTestThread::trainingRlAgent()
 	}
 
 	//Py_Finalize();
+	return is_done;
 }
 
 std::string
@@ -367,12 +372,12 @@ RLTestThread::loop()
 	rl_gs_interface->set_next_select_goal("RL TEST GOAL FROM LOOP");
 	rl_gs_interface->write();
 
-	bool training_mode = config->get_bool("/rl-agent/training-mode");
+	//	bool training_mode = config->get_bool("/rl-agent/training-mode");
 
-	if (training_mode && !startedTraining) {
-		trainingRlAgent();
-		startedTraining = true;
-	}
+	/*if (training_mode && !startedTraining) {
+			trainingRlAgent();
+			startedTraining = true;
+		}*/
 
 	std::cout << "End RLTestThread Loop " << std::endl;
 }
@@ -414,9 +419,9 @@ RLTestThread::clips_context_init(const std::string &env_name, LockPtr<CLIPS::Env
 	clips->evaluate("(printout t \"Hello from CLIPS aspect in RL test plugin\" crlf crlf)");
 	clips->assert_fact("(rl-init-test-fact)");
 	/*clips->add_function("rl-extract-executable-fact",
-                           sigc::slot<void, CLIPS::Value, std::string>(sigc::bind<0>(
-                          sigc::mem_fun(*this, &RLTestThread::clips_rl_extract_executable_facts),
-                          env_name)));*/
+						   sigc::slot<void, CLIPS::Value, std::string>(sigc::bind<0>(
+						  sigc::mem_fun(*this, &RLTestThread::clips_rl_extract_executable_facts),
+						  env_name)));*/
 	clips->add_function("rl-goal-selection-start",
 	                    sigc::slot<void, CLIPS::Value, std::string>(
 	                      sigc::bind<0>(sigc::mem_fun(*this, &RLTestThread::rl_goal_selection),
@@ -518,8 +523,9 @@ RLTestThread::rl_goal_selection(std::string env_name, CLIPS::Value parent_goal_i
 		clips.unlock();
 	} else if (!startedTraining) {
 		std::cout << "In rl_goal_selection - executing RL Agent is not active!" << std::endl;
-		trainingRlAgent();
-		startedTraining = true;
+		//trainingRlAgent();
+		std::future<bool> training_done = std::async(std::launch::async, trainingRlAgent, config);
+		startedTraining                 = true;
 	} else {
 		std::cout << "In rl_goal_selection - nothing to do" << std::endl;
 	}
