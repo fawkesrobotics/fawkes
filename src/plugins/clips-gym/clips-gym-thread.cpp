@@ -85,7 +85,7 @@ PYBIND11_MODULE(clips_gym, m)
 
 	py::class_<ClipsGymThread>(m, "ClipsGymThread")
 	  .def(py::init<>())
-	  .def("getInstance", &ClipsGymThread::getInstance)
+	  .def("getInstance", &ClipsGymThread::getInstance, py::return_value_policy::reference)
 	  .def("step", &ClipsGymThread::step)
 	  .def("resetCX", &ClipsGymThread::resetCX)
 	  .def("create_rl_env_state_from_facts", &ClipsGymThread::create_rl_env_state_from_facts)
@@ -189,7 +189,7 @@ std::string
 ClipsGymThread::step(std::string next_goal)
 {
 	std::cout << "In ClipsGymThread step function" << std::endl;
-	std::cout << next_goal << std::endl;
+	std::cout << "next_goal from python: " << next_goal << std::endl;
 	//Transform string to goal
 	std::string n_goal = "TOWER-C1#b#d#";
 
@@ -213,6 +213,9 @@ ClipsGymThread::step(std::string next_goal)
 		std::this_thread::sleep_for(2000ms);
 		clips.lock();
 		clips->evaluate("(printout t \"In Sleeping Step Function \" crlf) ");
+
+		//TODO: check if is rl-waiting
+
 		clips.unlock();
 	}
 	/*
@@ -254,13 +257,16 @@ ClipsGymThread::getGoalId(std::string action)
 		std::size_t              found = tmpl->name().find("goal");
 
 		if (found != std::string::npos) {
-			std::vector<std::string> slot_names = fact->slot_names();
-			for (std::string s : slot_names) {
-				std::cout << s << std::endl;
-			}
-			bool        correct_goal_class = false;
-			bool        correct_params     = false;
-			std::string temp_id            = "";
+			/*
+			Slot names: id, class,type, sub-type, parent, mode, outcome, warning, error, message,
+						priority, params, meta, meta-fact, meta-template, required-resources, acquired-resources,
+						committed-to,verbosity,is-executable,
+			Class: TOWER-C1, params: buttom,b,top,d
+			*/
+			std::vector<std::string> slot_names         = fact->slot_names();
+			bool                     correct_goal_class = false;
+			bool                     correct_params     = false;
+			std::string              temp_id            = "";
 			for (std::string s : slot_names) {
 				allGoals += getClipsSlotValuesAsString(fact->slot_value(s));
 				if (s == "class") {
@@ -275,6 +281,7 @@ ClipsGymThread::getGoalId(std::string action)
 					std::string slot_values = getClipsSlotValuesAsString(fact->slot_value(s));
 					std::cout << "params: " + slot_values << std::endl;
 					for (std::string p : action_splitted) {
+						std::cout << "search for p: " << p << std::endl;
 						//todo
 						std::size_t found_param = slot_values.find(p);
 						if (found_param != std::string::npos) {
@@ -287,7 +294,7 @@ ClipsGymThread::getGoalId(std::string action)
 				}
 			}
 			if (correct_goal_class && correct_params) {
-				std::cout << "correct class and params!" << std::endl;
+				std::cout << "correct class and params! GoalID is: " << temp_id << std::endl;
 				goalID = temp_id;
 			}
 			allGoals += ", ";

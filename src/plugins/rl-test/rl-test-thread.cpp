@@ -56,7 +56,7 @@ constexpr char RLTestThread::cfg_prefix_[];
 //provider_inifin_(&rl_test_manager_)
 
 RLTestThread::RLTestThread()
-: Thread("RLTestThread", Thread::OPMODE_WAITFORWAKEUP),
+: Thread("RLTestThread", Thread::OPMODE_WAITFORWAKEUP), //Thread::OPMODE_CONTINUOUS),//
   BlackBoardInterfaceListener("RLTestThread"),
   CLIPSFeature("rl-test"),
   CLIPSFeatureAspect(this)
@@ -372,12 +372,23 @@ RLTestThread::loop()
 	rl_gs_interface->set_next_select_goal("RL TEST GOAL FROM LOOP");
 	rl_gs_interface->write();
 
-	//	bool training_mode = config->get_bool("/rl-agent/training-mode");
+	bool training_mode = config->get_bool("/rl-agent/training-mode");
 
-	/*if (training_mode && !startedTraining) {
-			trainingRlAgent();
-			startedTraining = true;
-		}*/
+	if (training_mode && !startedTraining) {
+		//trainingRlAgent();
+		training_done = std::async(std::launch::async, trainingRlAgent, config);
+
+		startedTraining = true;
+	} else if (training_mode && startedTraining) {
+		std::cout << "Check if training_done future is vailid" << std::endl;
+		std::cout << training_done.valid() << "\n" << std::endl;
+		int sec = 1000;
+		std::cout << "Wait for " << sec << " msec to check future.get" << std::endl;
+		std::future_status status = training_done.wait_for(std::chrono::milliseconds(sec));
+		if (status == std::future_status::ready) {
+			std::cout << "Future: " << training_done.get() << std::endl;
+		}
+	}
 
 	std::cout << "End RLTestThread Loop " << std::endl;
 }
