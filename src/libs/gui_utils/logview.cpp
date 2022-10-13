@@ -264,7 +264,7 @@ LogView::append_message(Logger::LogLevel log_level,
 {
 	const char *loglevel;
 	const char *timestr;
-	char	     *time = NULL;
+	char       *time = NULL;
 	Gdk::Color  color;
 	bool        set_foreground = false;
 	bool        set_background = false;
