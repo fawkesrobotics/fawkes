@@ -1458,7 +1458,7 @@ NavGraph::format_name(const char *format, ...)
 {
 	va_list arg;
 	va_start(arg, format);
-	char	     *tmp;
+	char       *tmp;
 	std::string rv;
 	if (vasprintf(&tmp, format, arg) != -1) {
 		rv = tmp;
