@@ -392,7 +392,7 @@ AmclThread::init()
 	pos3d_if_->set_frame(global_frame_id_.c_str());
 	pos3d_if_->write();
 
-	char	     *map_file = strdup(cfg_map_file_.c_str());
+	char       *map_file = strdup(cfg_map_file_.c_str());
 	std::string map_name = basename(map_file);
 	free(map_file);
 	std::string::size_type pos;

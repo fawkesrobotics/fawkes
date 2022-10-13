@@ -184,7 +184,7 @@ enqueue(map_t                         *map,
 void
 map_update_cspace(map_t *map, double max_occ_dist)
 {
-	unsigned char	              *marked;
+	unsigned char                *marked;
 	std::priority_queue<CellData> Q;
 
 	marked = new unsigned char[map->size_x * map->size_y];
