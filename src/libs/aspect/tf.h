@@ -71,7 +71,7 @@ protected: // members
 
 private:
 	Mode        tf_aspect_mode_;
-	char	     *tf_aspect_frame_id_;
+	char       *tf_aspect_frame_id_;
 	BlackBoard *tf_aspect_blackboard_;
 };
 
