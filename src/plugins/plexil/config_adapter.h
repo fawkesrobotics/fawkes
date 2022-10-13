@@ -38,8 +38,8 @@ public:
 	ConfigurationPlexilAdapter(PLEXIL::AdapterExecInterface &execInterface, pugi::xml_node const xml);
 
 	/// @cond DELETED
-	ConfigurationPlexilAdapter()                                   = delete;
-	ConfigurationPlexilAdapter(const ConfigurationPlexilAdapter &) = delete;
+	ConfigurationPlexilAdapter()                                              = delete;
+	ConfigurationPlexilAdapter(const ConfigurationPlexilAdapter &)            = delete;
 	ConfigurationPlexilAdapter &operator=(const ConfigurationPlexilAdapter &) = delete;
 	/// @endcond
 

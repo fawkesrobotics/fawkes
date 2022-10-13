@@ -205,17 +205,17 @@ GlobalStatePlexilAdapter::initialize()
 
 	namespace p = std::placeholders;
 	commands_   = {
-    {"global_set_int",
-     std::bind(&GlobalStatePlexilAdapter::global_set_value, this, p::_1, PLEXIL::INTEGER_TYPE)},
-    {"global_set_real",
-     std::bind(&GlobalStatePlexilAdapter::global_set_value, this, p::_1, PLEXIL::REAL_TYPE)},
-    {"global_set_bool",
-     std::bind(&GlobalStatePlexilAdapter::global_set_value, this, p::_1, PLEXIL::BOOLEAN_TYPE)},
-    {"global_set_string",
-     std::bind(&GlobalStatePlexilAdapter::global_set_value, this, p::_1, PLEXIL::STRING_TYPE)},
-    {"global_set_value",
-     std::bind(&GlobalStatePlexilAdapter::global_set_value, this, p::_1, PLEXIL::UNKNOWN_TYPE)},
-    {"global_print_all", std::bind(&GlobalStatePlexilAdapter::global_print_all, this, p::_1)},
+	    {"global_set_int",
+	     std::bind(&GlobalStatePlexilAdapter::global_set_value, this, p::_1, PLEXIL::INTEGER_TYPE)},
+	    {"global_set_real",
+	     std::bind(&GlobalStatePlexilAdapter::global_set_value, this, p::_1, PLEXIL::REAL_TYPE)},
+	    {"global_set_bool",
+	     std::bind(&GlobalStatePlexilAdapter::global_set_value, this, p::_1, PLEXIL::BOOLEAN_TYPE)},
+	    {"global_set_string",
+	     std::bind(&GlobalStatePlexilAdapter::global_set_value, this, p::_1, PLEXIL::STRING_TYPE)},
+	    {"global_set_value",
+	     std::bind(&GlobalStatePlexilAdapter::global_set_value, this, p::_1, PLEXIL::UNKNOWN_TYPE)},
+	    {"global_print_all", std::bind(&GlobalStatePlexilAdapter::global_print_all, this, p::_1)},
   };
 
 	for (const auto &c : commands_) {

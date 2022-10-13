@@ -52,8 +52,8 @@ public:
 	FawkesRemotePlexilAdapter(PLEXIL::AdapterExecInterface &execInterface, pugi::xml_node const xml);
 
 	/// @cond DELETED
-	FawkesRemotePlexilAdapter()                                  = delete;
-	FawkesRemotePlexilAdapter(const FawkesRemotePlexilAdapter &) = delete;
+	FawkesRemotePlexilAdapter()                                             = delete;
+	FawkesRemotePlexilAdapter(const FawkesRemotePlexilAdapter &)            = delete;
 	FawkesRemotePlexilAdapter &operator=(const FawkesRemotePlexilAdapter &) = delete;
 	/// @endcond
 

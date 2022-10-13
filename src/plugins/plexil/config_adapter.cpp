@@ -74,31 +74,31 @@ ConfigurationPlexilAdapter::initialize()
 
 	namespace p = std::placeholders;
 	commands_   = {
-    {"config_get_int_or_default",
-     std::bind(&ConfigurationPlexilAdapter::config_get_value_or_default,
+	    {"config_get_int_or_default",
+	     std::bind(&ConfigurationPlexilAdapter::config_get_value_or_default,
                this,
                p::_1,
                PLEXIL::INTEGER_TYPE)},
-    {"config_get_real_or_default",
-     std::bind(
+	    {"config_get_real_or_default",
+	     std::bind(
        &ConfigurationPlexilAdapter::config_get_value_or_default, this, p::_1, PLEXIL::REAL_TYPE)},
-    {"config_get_bool_or_default",
-     std::bind(&ConfigurationPlexilAdapter::config_get_value_or_default,
+	    {"config_get_bool_or_default",
+	     std::bind(&ConfigurationPlexilAdapter::config_get_value_or_default,
                this,
                p::_1,
                PLEXIL::BOOLEAN_TYPE)},
-    {"config_get_string_or_default",
-     std::bind(
+	    {"config_get_string_or_default",
+	     std::bind(
        &ConfigurationPlexilAdapter::config_get_value_or_default, this, p::_1, PLEXIL::STRING_TYPE)},
-    {"config_get_int",
-     std::bind(&ConfigurationPlexilAdapter::config_get_value, this, p::_1, PLEXIL::INTEGER_TYPE)},
-    {"config_get_real",
-     std::bind(&ConfigurationPlexilAdapter::config_get_value, this, p::_1, PLEXIL::REAL_TYPE)},
-    {"config_get_bool",
-     std::bind(&ConfigurationPlexilAdapter::config_get_value, this, p::_1, PLEXIL::BOOLEAN_TYPE)},
-    {"config_get_string",
-     std::bind(&ConfigurationPlexilAdapter::config_get_value, this, p::_1, PLEXIL::STRING_TYPE)},
-    {"config_exists", std::bind(&ConfigurationPlexilAdapter::config_exists, this, p::_1)},
+	    {"config_get_int",
+	     std::bind(&ConfigurationPlexilAdapter::config_get_value, this, p::_1, PLEXIL::INTEGER_TYPE)},
+	    {"config_get_real",
+	     std::bind(&ConfigurationPlexilAdapter::config_get_value, this, p::_1, PLEXIL::REAL_TYPE)},
+	    {"config_get_bool",
+	     std::bind(&ConfigurationPlexilAdapter::config_get_value, this, p::_1, PLEXIL::BOOLEAN_TYPE)},
+	    {"config_get_string",
+	     std::bind(&ConfigurationPlexilAdapter::config_get_value, this, p::_1, PLEXIL::STRING_TYPE)},
+	    {"config_exists", std::bind(&ConfigurationPlexilAdapter::config_exists, this, p::_1)},
   };
 
 	for (const auto &c : commands_) {

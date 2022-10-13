@@ -41,8 +41,8 @@ public:
 	ClockPlexilTimeAdapter(PLEXIL::AdapterExecInterface &execInterface, pugi::xml_node const xml);
 
 	/// @cond DELETED
-	ClockPlexilTimeAdapter()                               = delete;
-	ClockPlexilTimeAdapter(const ClockPlexilTimeAdapter &) = delete;
+	ClockPlexilTimeAdapter()                                          = delete;
+	ClockPlexilTimeAdapter(const ClockPlexilTimeAdapter &)            = delete;
 	ClockPlexilTimeAdapter &operator=(const ClockPlexilTimeAdapter &) = delete;
 	/// @endcond
 

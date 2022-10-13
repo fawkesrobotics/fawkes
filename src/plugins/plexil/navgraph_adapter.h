@@ -45,8 +45,8 @@ public:
 	NavGraphPlexilAdapter(PLEXIL::AdapterExecInterface &execInterface, pugi::xml_node const xml);
 
 	/// @cond DELETED
-	NavGraphPlexilAdapter()                              = delete;
-	NavGraphPlexilAdapter(const NavGraphPlexilAdapter &) = delete;
+	NavGraphPlexilAdapter()                                         = delete;
+	NavGraphPlexilAdapter(const NavGraphPlexilAdapter &)            = delete;
 	NavGraphPlexilAdapter &operator=(const NavGraphPlexilAdapter &) = delete;
 	/// @endcond
 

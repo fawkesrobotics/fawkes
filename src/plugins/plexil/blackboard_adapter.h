@@ -49,8 +49,8 @@ public:
 	BlackboardPlexilAdapter(PLEXIL::AdapterExecInterface &execInterface, pugi::xml_node const xml);
 
 	/// @cond DELETED
-	BlackboardPlexilAdapter()                                = delete;
-	BlackboardPlexilAdapter(const BlackboardPlexilAdapter &) = delete;
+	BlackboardPlexilAdapter()                                           = delete;
+	BlackboardPlexilAdapter(const BlackboardPlexilAdapter &)            = delete;
 	BlackboardPlexilAdapter &operator=(const BlackboardPlexilAdapter &) = delete;
 	/// @endcond
 
