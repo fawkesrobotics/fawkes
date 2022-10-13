@@ -141,7 +141,7 @@ private:
 
 	fawkes::CairoRobotDrawer *robot_drawer_;
 
-	VisualDisplay2D	                *visdisp_;
+	VisualDisplay2D                  *visdisp_;
 	fawkes::VisualDisplay2DInterface *visdisp_if_;
 };
 
