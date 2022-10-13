@@ -66,7 +66,7 @@ public:
 	fawkes::tf::Stamped<fawkes::tf::Point>
 	  base_point_odom; ///< last reference point (in odom frame) for line tracking
 	fawkes::tf::Transformer
-             *transformer;    ///< Transformer used to transform from input_frame_id_to odom
+	           *transformer;    ///< Transformer used to transform from input_frame_id_to odom
 	std::string input_frame_id; ///< Input frame ID of raw line infos (base_laser usually)
 	std::string
 	  tracking_frame_id; ///< Track lines relative to this frame (e.g. odom helps compensate movement)
