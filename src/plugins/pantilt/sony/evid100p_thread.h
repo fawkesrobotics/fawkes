@@ -117,7 +117,7 @@ private:
 
 	private:
 		fawkes::RefPtr<SonyEviD100PVisca> cam_;
-		fawkes::Logger		               *logger_;
+		fawkes::Logger                   *logger_;
 
 		fawkes::Mutex *power_mutex_;
 		bool           powered_;
