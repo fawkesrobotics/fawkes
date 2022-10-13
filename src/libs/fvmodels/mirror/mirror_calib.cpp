@@ -1205,7 +1205,7 @@ MirrorCalibTool::apply_median(unsigned char *src, unsigned char *dst, int width,
 void
 MirrorCalibTool::apply_min(unsigned char *src, unsigned char *dst, int width, int height)
 {
-	ROI	    *roi = ROI::full_image(width, height);
+	ROI      *roi = ROI::full_image(width, height);
 	FilterMin filter;
 	filter.set_src_buffer(src, roi, 0);
 	filter.set_dst_buffer(dst, roi);
@@ -2029,8 +2029,8 @@ MirrorCalibTool::draw_crosshair(unsigned char *yuv_buffer,
                                 int            height)
 {
 	const PolarAngle POSITIONS[]    = {normalize_rad(deg2rad(0.0f)),
-                                  normalize_rad(deg2rad(-120.0f)),
-                                  normalize_rad(deg2rad(120.0f))};
+	                                   normalize_rad(deg2rad(-120.0f)),
+	                                   normalize_rad(deg2rad(120.0f))};
 	const int        POSITION_COUNT = sizeof POSITIONS / sizeof(double);
 	CartesianImage   img(yuv_buffer,
                      width,
