@@ -39,7 +39,7 @@ public:
 	~LogFileDescriptorToLog();
 
 private:
-	void start_log(const char	                          *logname,
+	void start_log(const char                            *logname,
 	               Logger::LogLevel                       log_level,
 	               boost::asio::posix::stream_descriptor &sd,
 	               boost::asio::streambuf                &buf);
