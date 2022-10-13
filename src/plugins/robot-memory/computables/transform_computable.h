@@ -43,7 +43,7 @@ private:
 	std::list<bsoncxx::document::value> compute_transform(const bsoncxx::document::view &query,
 	                                                      const std::string             &collection);
 
-	RobotMemory	            *robot_memory_;
+	RobotMemory              *robot_memory_;
 	fawkes::Logger           *logger_;
 	fawkes::tf::Transformer  *tf_;
 	std::vector<Computable *> computables;
