@@ -259,7 +259,7 @@ BlackBoardNetworkHandler::loop()
 		case MSG_BB_DATA_CHANGED:
 		case MSG_BB_DATA_REFRESHED: {
 			bool            data_changed = msg->msgid() == MSG_BB_DATA_CHANGED;
-			void			     *payload      = msg->payload();
+			void           *payload      = msg->payload();
 			bb_idata_msg_t *dm           = (bb_idata_msg_t *)payload;
 			Uuid            dm_serial    = dm->serial;
 			if (interfaces_.find(dm_serial) != interfaces_.end()) {

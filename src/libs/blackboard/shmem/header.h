@@ -39,7 +39,7 @@ private:
 	typedef struct
 	{
 		unsigned int  version;         /**< version of the BB */
-		void		     *shm_addr;        /**< base addr of shared memory */
+		void         *shm_addr;        /**< base addr of shared memory */
 		chunk_list_t *free_list_head;  /**< offset of the free chunks list head */
 		chunk_list_t *alloc_list_head; /**< offset of the allocated chunks list head */
 	} BlackBoardSharedMemoryHeaderData;
@@ -58,8 +58,8 @@ public:
 	virtual size_t              data_size();
 	virtual SharedMemoryHeader *clone() const;
 	virtual bool                operator==(const fawkes::SharedMemoryHeader &s) const;
-	chunk_list_t	             *free_list_head();
-	chunk_list_t	             *alloc_list_head();
+	chunk_list_t               *free_list_head();
+	chunk_list_t               *alloc_list_head();
 	void                        set_free_list_head(chunk_list_t *flh);
 	void                        set_alloc_list_head(chunk_list_t *alh);
 
