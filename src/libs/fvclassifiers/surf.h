@@ -112,7 +112,7 @@ private:
 	int                                    obj_num_features_;
 
 	// Image objects
-	surf::Image	            *image_;
+	surf::Image              *image_;
 	std::vector<surf::Ipoint> img_features_;
 	int                       img_num_features_;
 
