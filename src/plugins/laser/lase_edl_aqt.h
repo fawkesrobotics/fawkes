@@ -162,7 +162,7 @@ private:
 	inline void append_to_msg(WORD word, TPCANMsg *msg);
 	inline void append_to_msg(BYTE byte, TPCANMsg *msg);
 	inline WORD get_word_from_msg(TPCANMsg *msg, int *index);
-	WORD	     *make_word_array(int count, ...);
+	WORD       *make_word_array(int count, ...);
 	int         compare_word_arrays(int count, WORD *a, WORD *b);
 	void        print_word_array(int count, WORD *a);
 	void        print_message(TPCANMsg *m);
