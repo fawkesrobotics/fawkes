@@ -89,7 +89,7 @@ InterfaceChecker::validValue(const std::string &type, const std::string &value)
 {
 	if (type.find("int") != std::string::npos) {
 		errno = 0;
-		char		     *endptr;
+		char         *endptr;
 		long long int rv = strtoll(value.c_str(), &endptr, 10);
 		if (((rv == LLONG_MIN) || (rv == LLONG_MAX)) && (errno == ERANGE)) {
 			throw fawkes::Exception("Could not convert value string '%s' to "
