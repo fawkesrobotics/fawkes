@@ -50,16 +50,16 @@ public:
 	InterfaceFieldIterator &operator+=(unsigned int i);
 	bool                    operator==(const InterfaceFieldIterator &fit) const;
 	bool                    operator!=(const InterfaceFieldIterator &fit) const;
-	const void	           *operator*() const;
+	const void             *operator*() const;
 	InterfaceFieldIterator &operator=(const InterfaceFieldIterator &fit);
 
 	interface_fieldtype_t   get_type() const;
-	const char	           *get_typename() const;
+	const char             *get_typename() const;
 	bool                    is_enum() const;
 	std::list<const char *> get_enum_valuenames() const;
-	const char	           *get_name() const;
-	const void	           *get_value() const;
-	const char	           *get_value_string(const char *array_sep = ", ");
+	const char             *get_name() const;
+	const void             *get_value() const;
+	const char             *get_value_string(const char *array_sep = ", ");
 	size_t                  get_length() const;
 	bool                    get_bool(unsigned int index = 0) const;
 	int8_t                  get_int8(unsigned int index = 0) const;
@@ -74,7 +74,7 @@ public:
 	double                  get_double(unsigned int index = 0) const;
 	uint8_t                 get_byte(unsigned int index = 0) const;
 	int32_t                 get_enum(unsigned int index = 0) const;
-	const char	           *get_enum_string(unsigned int index = 0) const;
+	const char             *get_enum_string(unsigned int index = 0) const;
 	bool                   *get_bools() const;
 	int8_t                 *get_int8s() const;
 	uint8_t                *get_uint8s() const;
@@ -88,7 +88,7 @@ public:
 	double                 *get_doubles() const;
 	uint8_t                *get_bytes() const;
 	int32_t                *get_enums() const;
-	const char	           *get_string() const;
+	const char             *get_string() const;
 
 	void set_bool(bool b, unsigned int index = 0);
 	void set_int8(int8_t i, unsigned int index = 0);

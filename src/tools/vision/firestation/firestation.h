@@ -158,7 +158,7 @@ private:
 	Gtk::ToolButton        *m_tbtn_save;
 	Gtk::ToolButton        *m_tbtn_close_camera;
 	Gtk::ToolButton        *m_tbtn_exit;
-	Gtk::Image	           *m_img_image;
+	Gtk::Image             *m_img_image;
 	Gtk::EventBox          *m_evt_image;
 	Gtk::TreeView          *m_trv_shm_image_ids;
 	Gtk::TreeView          *m_trv_fuse_services;
@@ -180,11 +180,11 @@ private:
 	Gtk::ToggleButton      *m_btn_mc_set_center;
 	Gtk::Button            *m_btn_mc_memorize;
 	Gtk::Button            *m_btn_mc_simulate_clicks;
-	Gtk::Scale	           *m_scl_mc_line;
+	Gtk::Scale             *m_scl_mc_line;
 	Gtk::Button            *m_btn_mc_load;
 	Gtk::Button            *m_btn_mc_save;
-	Gtk::Entry	           *m_ent_mc_dist;
-	Gtk::Entry	           *m_ent_mc_ori;
+	Gtk::Entry             *m_ent_mc_dist;
+	Gtk::Entry             *m_ent_mc_ori;
 
 	ShmColumnRecord              m_shm_columns;
 	Glib::RefPtr<Gtk::ListStore> m_shm_list_store;

@@ -125,7 +125,7 @@ private:
 
 	void run_proc(const char *file, const char *argv[], const char *envp[]);
 
-	void start_log(const char	                          *logname,
+	void start_log(const char                            *logname,
 	               fawkes::Logger::LogLevel               log_level,
 	               boost::asio::posix::stream_descriptor &sd,
 	               boost::asio::streambuf                &buf);

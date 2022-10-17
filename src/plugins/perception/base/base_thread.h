@@ -62,7 +62,7 @@ public:
 
 	virtual firevision::VisionMaster *vision_master();
 
-	virtual firevision::Camera	                           *
+	virtual firevision::Camera                             *
   register_for_camera(const char              *camera_string,
 	                                                fawkes::Thread          *thread,
 	                                                firevision::colorspace_t cspace = firevision::YUV422_PLANAR);

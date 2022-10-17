@@ -222,7 +222,7 @@ protected:
 	                       std::string   *error_string) const;
 
 	template <typename F>
-	int walk_to_top_parent(F	                         &f,
+	int walk_to_top_parent(F                           &f,
 	                       fawkes::Time                 time,
 	                       CompactFrameID               target_id,
 	                       CompactFrameID               source_id,

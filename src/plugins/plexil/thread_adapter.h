@@ -35,8 +35,8 @@ public:
 	ThreadNamePlexilAdapter(PLEXIL::AdapterExecInterface &execInterface, pugi::xml_node const xml);
 
 	/// @cond DELETED
-	ThreadNamePlexilAdapter()                                = delete;
-	ThreadNamePlexilAdapter(const ThreadNamePlexilAdapter &) = delete;
+	ThreadNamePlexilAdapter()                                           = delete;
+	ThreadNamePlexilAdapter(const ThreadNamePlexilAdapter &)            = delete;
 	ThreadNamePlexilAdapter &operator=(const ThreadNamePlexilAdapter &) = delete;
 	/// @endcond
 

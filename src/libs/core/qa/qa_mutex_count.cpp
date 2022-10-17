@@ -105,7 +105,7 @@ private:
 	string        s;
 	bool          sl;
 	unsigned int  slt;
-	Mutex	      *m;
+	Mutex        *m;
 	unsigned int *mc;
 	unsigned int *nmc;
 };

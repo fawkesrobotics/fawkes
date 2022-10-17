@@ -186,7 +186,7 @@ private:
 	bool do_erase_browsers;
 	bool do_reset_groups;
 
-	AvahiSimplePoll	                *simple_poll;
+	AvahiSimplePoll                  *simple_poll;
 	AvahiClient                      *client;
 	AvahiClientState                  client_state;
 	AvahiProtocol                     service_protocol;

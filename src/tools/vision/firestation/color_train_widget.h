@@ -117,9 +117,9 @@ private:
 	Gtk::SpinButton        *m_spbtn_cm_depth;
 	Gtk::SpinButton        *m_spbtn_cm_width;
 	Gtk::SpinButton        *m_spbtn_cm_height;
-	Gtk::Image	           *m_img_segmentation;
-	Gtk::Scale	           *m_scl_threshold;
-	Gtk::Scale	           *m_scl_min_prob;
+	Gtk::Image             *m_img_segmentation;
+	Gtk::Scale             *m_scl_threshold;
+	Gtk::Scale             *m_scl_min_prob;
 	Gtk::FileChooserDialog *m_fcd_filechooser;
 
 	Glib::Dispatcher m_signal_update_image;

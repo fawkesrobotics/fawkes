@@ -136,9 +136,9 @@ public:
 	operator=(pb_converter<ProtoT, IfaceT> &&o)
 	{
 		pb_convert::operator=(o);
-		this->interface_    = o.interface_;
-		o.interface_        = nullptr;
-		name_               = boost::core::demangle(typeid(*this).name());
+		this->interface_ = o.interface_;
+		o.interface_     = nullptr;
+		name_            = boost::core::demangle(typeid(*this).name());
 		return *this;
 	}
 

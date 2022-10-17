@@ -196,7 +196,7 @@ public:
 	static const unsigned int TIMESTR_SIZE;
 
 private:
-	Clock	      *clock_;
+	Clock        *clock_;
 	timeval       time_;
 	mutable char *timestr_;
 };

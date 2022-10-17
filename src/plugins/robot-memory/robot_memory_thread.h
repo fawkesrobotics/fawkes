@@ -75,7 +75,7 @@ protected:
 	}
 
 private:
-	RobotMemory	            *robot_memory;
+	RobotMemory              *robot_memory;
 	fawkes::RobotMemoryIniFin robot_memory_inifin_;
 	BlackboardComputable     *blackboard_computable;
 	TransformComputable      *transform_computable;

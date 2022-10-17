@@ -46,8 +46,8 @@ public:
 	                            pugi::xml_node const          xml);
 
 	/// @cond DELETED
-	BehaviorEnginePlexilAdapter()                                    = delete;
-	BehaviorEnginePlexilAdapter(const BehaviorEnginePlexilAdapter &) = delete;
+	BehaviorEnginePlexilAdapter()                                               = delete;
+	BehaviorEnginePlexilAdapter(const BehaviorEnginePlexilAdapter &)            = delete;
 	BehaviorEnginePlexilAdapter &operator=(const BehaviorEnginePlexilAdapter &) = delete;
 	/// @endcond
 

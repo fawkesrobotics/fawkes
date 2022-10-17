@@ -95,7 +95,7 @@ public:
 
 private:
 	Logger     *logger_;
-	char	     *component_;
+	char       *component_;
 	std::string buffer_;
 	std::string warn_buffer_;
 	std::string warn_filter_;

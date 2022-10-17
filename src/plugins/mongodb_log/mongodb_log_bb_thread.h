@@ -98,7 +98,7 @@ private:
 		std::string                  &database_;
 		fawkes::LockSet<std::string> &collections_;
 		const std::string             agent_name_;
-		fawkes::Time		             *now_;
+		fawkes::Time                 *now_;
 	};
 
 	fawkes::LockMap<std::string, InterfaceListener *> listeners_;

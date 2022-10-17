@@ -41,8 +41,8 @@ public:
 	ProtobufCommPlexilAdapter(PLEXIL::AdapterExecInterface &execInterface, pugi::xml_node const xml);
 
 	/// @cond DELETED
-	ProtobufCommPlexilAdapter()                                  = delete;
-	ProtobufCommPlexilAdapter(const ProtobufCommPlexilAdapter &) = delete;
+	ProtobufCommPlexilAdapter()                                             = delete;
+	ProtobufCommPlexilAdapter(const ProtobufCommPlexilAdapter &)            = delete;
 	ProtobufCommPlexilAdapter &operator=(const ProtobufCommPlexilAdapter &) = delete;
 	/// @endcond
 

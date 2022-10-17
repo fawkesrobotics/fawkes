@@ -47,7 +47,7 @@ public:
 
 private:
 	UserMap                &users_;
-	BlackBoard	           *bb_;
+	BlackBoard             *bb_;
 	Mutex                  *queue_lock_;
 	unsigned int            active_queue_;
 	std::queue<std::string> queues_[2];

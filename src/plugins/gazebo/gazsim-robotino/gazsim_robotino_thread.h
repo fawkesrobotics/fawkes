@@ -131,7 +131,7 @@ private:
 	int           gyro_buffer_index_new_;
 	int           gyro_buffer_index_delayed_;
 	fawkes::Time *gyro_timestamp_buffer_;
-	float	      *gyro_angle_buffer_;
+	float        *gyro_angle_buffer_;
 	float         gyro_delay_;
 	float         infrared_puck_sensor_dist_;
 	float         analog_in_left_;

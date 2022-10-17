@@ -79,11 +79,11 @@ BlackboardPlexilAdapter::initialize()
 
 	namespace p = std::placeholders;
 	commands_   = {{"BB_open_for_reading",
-                std::bind(&BlackboardPlexilAdapter::bb_open_for_reading, this, p::_1)},
-               {"BB_close", std::bind(&BlackboardPlexilAdapter::bb_close, this, p::_1)},
-               {"BB_read", std::bind(&BlackboardPlexilAdapter::bb_read, this, p::_1)},
-               {"BB_read_all", std::bind(&BlackboardPlexilAdapter::bb_read_all, this, p::_1)},
-               {"BB_print", std::bind(&BlackboardPlexilAdapter::bb_print, this, p::_1)}};
+	                std::bind(&BlackboardPlexilAdapter::bb_open_for_reading, this, p::_1)},
+	               {"BB_close", std::bind(&BlackboardPlexilAdapter::bb_close, this, p::_1)},
+	               {"BB_read", std::bind(&BlackboardPlexilAdapter::bb_read, this, p::_1)},
+	               {"BB_read_all", std::bind(&BlackboardPlexilAdapter::bb_read_all, this, p::_1)},
+	               {"BB_print", std::bind(&BlackboardPlexilAdapter::bb_print, this, p::_1)}};
 
 	std::vector<std::string> lookups = {"BB_changed",
 	                                    "BB_int",

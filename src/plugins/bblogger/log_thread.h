@@ -98,13 +98,13 @@ private:
 	bool        buffering_;
 	bool        flushing_;
 	size_t      data_size_;
-	char	     *scenario_;
-	char	     *filename_;
-	char	     *logdir_;
-	char	     *uid_;
+	char       *scenario_;
+	char       *filename_;
+	char       *logdir_;
+	char       *uid_;
 	std::string type_;
 	std::string id_;
-	FILE	     *f_data_;
+	FILE       *f_data_;
 
 	fawkes::Time *start_;
 	fawkes::Time *now_;

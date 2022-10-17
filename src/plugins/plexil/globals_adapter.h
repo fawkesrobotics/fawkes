@@ -39,8 +39,8 @@ public:
 	GlobalStatePlexilAdapter(PLEXIL::AdapterExecInterface &execInterface, pugi::xml_node const xml);
 
 	/// @cond DELETED
-	GlobalStatePlexilAdapter()                                 = delete;
-	GlobalStatePlexilAdapter(const GlobalStatePlexilAdapter &) = delete;
+	GlobalStatePlexilAdapter()                                            = delete;
+	GlobalStatePlexilAdapter(const GlobalStatePlexilAdapter &)            = delete;
 	GlobalStatePlexilAdapter &operator=(const GlobalStatePlexilAdapter &) = delete;
 	/// @endcond
 

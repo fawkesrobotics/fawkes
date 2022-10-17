@@ -233,7 +233,7 @@ PluginLoader::get_string_symbol(const char *plugin_name,
 {
 #ifdef HAVE_LIBELF
 	GElf_Ehdr elf_header;
-	Elf	    *elf;
+	Elf      *elf;
 
 	std::string module_name =
 	  plugin_base_dir_ + "/" + plugin_name + "." + d_->mm->get_module_file_extension();

@@ -150,7 +150,7 @@ CC *
 VisionMaster::register_for_raw_camera(const char *camera_string, fawkes::Thread *thread)
 {
 	Camera *camera = register_for_raw_camera(camera_string, thread);
-	CC	   *tcc    = dynamic_cast<CC *>(camera);
+	CC     *tcc    = dynamic_cast<CC *>(camera);
 	if (tcc) {
 		return tcc;
 	} else {

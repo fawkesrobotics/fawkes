@@ -118,8 +118,8 @@ public:
 	}
 
 private:
-	Logger	       *cl;
-	Logger	       *ml;
+	Logger         *cl;
+	Logger         *ml;
 	LoggerQAThread *t1;
 	LoggerQAThread *t2;
 	LoggerQAThread *t3;

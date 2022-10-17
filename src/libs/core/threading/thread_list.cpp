@@ -144,10 +144,10 @@ ThreadList &
 ThreadList::operator=(const ThreadList &tl)
 {
 	LockList<Thread *>::operator=(tl);
-	name_                       = strdup(tl.name_);
-	sealed_                     = tl.sealed_;
-	finalize_mutex_             = new Mutex();
-	wnw_barrier_                = NULL;
+	name_           = strdup(tl.name_);
+	sealed_         = tl.sealed_;
+	finalize_mutex_ = new Mutex();
+	wnw_barrier_    = NULL;
 	if (tl.wnw_barrier_ != NULL)
 		update_barrier();
 

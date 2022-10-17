@@ -35,8 +35,8 @@ public:
 	LoggingPlexilAdapter(PLEXIL::AdapterExecInterface &execInterface, pugi::xml_node const xml);
 
 	/// @cond DELETED
-	LoggingPlexilAdapter()                             = delete;
-	LoggingPlexilAdapter(const LoggingPlexilAdapter &) = delete;
+	LoggingPlexilAdapter()                                        = delete;
+	LoggingPlexilAdapter(const LoggingPlexilAdapter &)            = delete;
 	LoggingPlexilAdapter &operator=(const LoggingPlexilAdapter &) = delete;
 	/// @endcond
 

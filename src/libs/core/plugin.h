@@ -58,7 +58,7 @@ protected:
 	Configuration *config;
 
 private:
-	char	     *_name_alloc;
+	char       *_name_alloc;
 	const char *_name;
 };
 
