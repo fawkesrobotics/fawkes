@@ -255,29 +255,6 @@ RLTestThread::executeRlAgent(std::string facts)
 		py::str file_name = (py::str)("file_name = \"" + rl_agent_dir + "/" + rl_agent_name + "\"");
 		py::exec(file_name, main_namespace2);
 
-		//For TrainingClipsWorld.py
-		py::str action_space =
-		  (py::str)("action_space = ['TOWER-C1#a#b', 'TOWER-C1#a#c', 'TOWER-C1#a#d' , 'TOWER-C1#a#e']");
-		py::exec(action_space, main_namespace2);
-
-		std::string obs_string("obs_space = [");
-		obs_string +=
-		  "'clear(a:block)','clear(b:block)','clear(c:block)','clear(d:block)','clear(e:block)'";
-		obs_string += ",'handempty(robo1:robot)','handfull(robo1:robot)','holding(a:block)','holding(b:"
-		              "block)','holding(c:block)','holding(d:block)','holding(e:block)'";
-		obs_string += ",'on(a:block','b:block)','on(a:block','c:block)','on(a:block','d:block)','on(a:"
-		              "block','e:block)','on(b:block','a:block)','on(b:block','c:block)'";
-		obs_string += ",'on(b:block','d:block)','on(b:block','e:block)','on(c:block','a:block)','on(c:"
-		              "block','b:block)','on(c:block','d:block)','on(c:block','e:block)'";
-		obs_string += ",'on(d:block','a:block)','on(d:block','b:block)','on(d:block','c:block)','on(d:"
-		              "block','e:block)','on(e:block','a:block)','on(e:block','b:block)'";
-		obs_string += ",'on(e:block','c:block)','on(e:block','d:block)'";
-		obs_string += ",'ontable(a:block)', 'ontable(b:block)', 'ontable(c:block)', "
-		              "'ontable(d:block)', 'ontable(e:block)']";
-
-		py::str obs_space = (py::str)(obs_string);
-		py::exec(obs_space, main_namespace2);
-
 		//TODO maybe added to config - value of training timesteps
 		py::str timesteps = (py::str)("timesteps = 1000");
 		py::exec(timesteps, main_namespace2);
@@ -428,7 +405,6 @@ RLTestThread::clips_context_init(const std::string &env_name, LockPtr<CLIPS::Env
 
 	clips.lock();
 	clips->evaluate("(printout t \"Hello from CLIPS aspect in RL test plugin\" crlf crlf)");
-	clips->assert_fact("(rl-init-test-fact)");
 	/*clips->add_function("rl-extract-executable-fact",
 						   sigc::slot<void, CLIPS::Value, std::string>(sigc::bind<0>(
 						  sigc::mem_fun(*this, &RLTestThread::clips_rl_extract_executable_facts),

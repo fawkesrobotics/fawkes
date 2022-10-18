@@ -1,9 +1,10 @@
 (deffunction goal-tree-assert-rl (?class $?fact-addresses)
 	(bind ?id (sym-cat RL- ?class - (gensym*)))
 	(bind ?goal (assert (goal (id ?id) (class ?class) (sub-type RL-OF-SUBGOALS))))
+	(printout t "Added RL root goal: "?goal " class " ?class " id " ?id crlf)
 	(foreach ?f ?fact-addresses
 		(goal-tree-update-child ?f ?id (+ 1 (- (length$ ?fact-addresses) ?f-index)))
-		(printout t "Add child: " ?f " " ?id " " ?class " " ?f-index crlf crlf))
+		(printout t "Add child " ?f-index ": " ?f  crlf crlf))
 	(return ?goal)
 )
 
@@ -25,9 +26,9 @@
 		 ;(assert (goal (id (gensym*)) (class TOWER-C2) (params blocks (create$ b d e))))
 		;)
 		(goal-tree-assert-rl RL
-		   (assert (goal (id (gensym*)) (class TOWER-C1) (params buttom a top c)))
-		   (assert (goal (id (gensym*)) (class TOWER-C1) (params buttom b top d)))
-		   (assert (goal (id (gensym*)) (class TOWER-C1) (params buttom e top d)))
+		   (assert (goal (id (sym-cat TOWER-C1- (gensym*))) (class TOWER-C1) (params buttom a top c)))
+		   (assert (goal (id (sym-cat TOWER-C1- (gensym*))) (class TOWER-C1) (params buttom b top d)))
+		   (assert (goal (id (sym-cat TOWER-C1- (gensym*))) (class TOWER-C1) (params buttom e top d)))
 		   ;(assert (goal (id (gensym*)) (class TOWER-C2) (params blocks (create$ b d e))))
 		   ;(assert (goal (id (sym-cat RL-TEST- (gensym*))) (class RL)))
 		   ;(assert (goal (id (sym-cat FINALLY-SUCCEED- (gensym*))) (class PRINT)))

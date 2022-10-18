@@ -41,20 +41,34 @@ class ClipsWorld(gym.Env):
   #LEFT = 0
   #RIGHT = 1
 
-  def __init__(self, action_space_as_string_array=['action1'], obs_space_as_string_array=['obs1']):
+  def __init__(self):
     super(ClipsWorld, self).__init__()
-    sorted_actions = sorted(set(action_space_as_string_array))
-    sorted_obs = sorted(set(obs_space_as_string_array))
 
-    #action dict
+    #generate action space
+    print("ClipsWorld init: before generateActionSpace")
+    p = clips_gym.ClipsGymThread.getInstance()
+    action_space = p.generateActionSpace()
+    print("ClipsWorld init: after generateActionSpace\n action_space = ", action_space)
+
+    #generate observation space
+    print("ClipsWorld init: before generateObservationSpace")
+    obs_space = p.generateObservationSpace()
+    print("ClipsWorld init: after generateObservationSpace\n obs_space = ", obs_space)
+
+    sorted_actions = sorted(set(action_space)) #action_space_as_string_array))
+    sorted_obs = sorted(set(obs_space))#obs_space_as_string_array))
+
+    #action dict: key: number; value: goal
     set_keys = range(0,len(sorted_actions))
     self.action_dict = dict(zip(set_keys, sorted_actions))
+    #inv_action_dict: key: goal; value number
     self.inv_action_dict = (dict (zip (sorted_actions, set_keys)))
     print(self.action_dict)
 
-    #obs dict
+    #obs dict: key: number; value: facts
     set_keys_obs = range(0,len(sorted_obs))
     self.obs_dict = dict(zip(set_keys_obs, sorted_obs))
+    #inv_obs_dict: key: facts; value: number
     self.inv_obs_dict = (dict (zip (sorted_obs, set_keys_obs)))
     print(self.obs_dict)
 
@@ -111,11 +125,11 @@ class ClipsWorld(gym.Env):
     #state #
 
   def step(self, action):
-    print("ClipsWorld: step ", action)
-    print("Clips_gym add: ", clips_gym.add(1, 2))  # use the default parameter value
+    goal = self.action_dict[action]
+    print(f"ClipsWorld: step '{action}': '{goal}'")
     p = clips_gym.ClipsGymThread.getInstance()
-    result = p.step("Test")
-    print(result)
+    result = p.step(goal+"#")
+    print("ClipsWorld: p.step result: ", result)
 
     #TODO check action valid (if not done - reward -1) (da durch action masking nur valide actions ausgesucht werden sollten, außer es gibt keine validen mehr)
 

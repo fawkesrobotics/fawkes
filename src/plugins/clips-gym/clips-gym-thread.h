@@ -87,6 +87,9 @@ public:
 
 	static ClipsGymThread *getInstance();
 
+	py::list generateActionSpace();
+	py::list generateObservationSpace();
+
 protected:
 	virtual void
 	run()
@@ -113,7 +116,8 @@ private:
 	static ClipsGymThread *thread_instance;
 	static std::mutex      mutex;
 
-	std::vector<std::string> splitActionToGoalParams(std::string action);
-	std::string              getClipsSlotValuesAsString(std::vector<CLIPS::Value> slot_values);
+	std::vector<std::string>  splitActionToGoalParams(std::string action);
+	std::string               getClipsSlotValuesAsString(std::vector<CLIPS::Value> slot_values);
+	std::vector<std::string> *getClipsSlotValuesAsStringVector(std::vector<CLIPS::Value> slot_values);
 };
 //#endif

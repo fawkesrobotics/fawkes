@@ -89,7 +89,9 @@ PYBIND11_MODULE(clips_gym, m)
 	  .def("step", &ClipsGymThread::step)
 	  .def("resetCX", &ClipsGymThread::resetCX)
 	  .def("create_rl_env_state_from_facts", &ClipsGymThread::create_rl_env_state_from_facts)
-	  .def("getAllFormulatedGoals", &ClipsGymThread::getAllFormulatedGoals);
+	  .def("getAllFormulatedGoals", &ClipsGymThread::getAllFormulatedGoals)
+	  .def("generateActionSpace", &ClipsGymThread::generateActionSpace)
+	  .def("generateObservationSpace", &ClipsGymThread::generateObservationSpace);
 
 	//std::string step(std::string next_goal);
 
@@ -191,20 +193,20 @@ ClipsGymThread::step(std::string next_goal)
 	std::cout << "In ClipsGymThread step function" << std::endl;
 	std::cout << "next_goal from python: " << next_goal << std::endl;
 	//Transform string to goal
-	std::string n_goal = "TOWER-C1#b#d#";
+	//std::string n_goal = "TOWER-C1#b#d#";
 
-	std::string                         goalID = getGoalId(n_goal);
+	std::string                         goalID = getGoalId(next_goal);
 	fawkes::LockPtr<CLIPS::Environment> clips  = getClipsEnv();
 	clips.lock();
 
-	clips->evaluate(
-	  "(printout t \"Finished executeRlAgent asserting fact with next action\" crlf crlf)");
-	CLIPS::Value             v = CLIPS::Value(goalID, CLIPS::TYPE_SYMBOL); //CLIPS::TYPE_STRING);
-	CLIPS::Template::pointer temp =
-	  clips->get_template("rl-action-selection"); //("rl-init-test-fact");
+	clips->evaluate("(printout t \"In ClipsGymThread step: asserting fact with next action\" crlf)");
+	CLIPS::Value             v    = CLIPS::Value(goalID, CLIPS::TYPE_SYMBOL); //CLIPS::TYPE_STRING);
+	CLIPS::Template::pointer temp = clips->get_template("rl-action-selection");
+
 	CLIPS::Fact::pointer fact = CLIPS::Fact::create(**clips, temp);
 	fact->set_slot("next-action", v);
-	clips->assert_fact(fact); //"(rl-init-test-fact )");
+	clips->assert_fact(fact);
+
 	clips.unlock();
 	std::cout << "fact asserted, start running clips" << std::endl;
 
@@ -213,8 +215,25 @@ ClipsGymThread::step(std::string next_goal)
 		std::this_thread::sleep_for(2000ms);
 		clips.lock();
 		clips->evaluate("(printout t \"In Sleeping Step Function \" crlf) ");
+		CLIPS::Fact::pointer fact = clips->get_facts();
 
-		//TODO: check if is rl-waiting
+		while (fact) {
+			CLIPS::Template::pointer tmpl  = fact->get_template();
+			std::size_t              found = tmpl->name().find("rl-finished-goal");
+			if (found != std::string::npos) {
+				std::string goalID  = getClipsSlotValuesAsString(fact->slot_value("goal-id"));
+				std::string outcome = getClipsSlotValuesAsString(fact->slot_value("outcome"));
+				std::cout << "In ClipsGymThread step: Goal: " << goalID
+				          << " is evaluated with outcome: " << outcome << std::endl;
+				env_feedback = true;
+				fact->retract();
+				std::cout << "In ClipsGymThread step: after retracting rl-finished-goal fact" << std::endl;
+				break;
+			}
+			fact = fact->next();
+		}
+
+		//TODO: check outcome - set return 1 for completed and 0 otherwise
 
 		clips.unlock();
 	}
@@ -231,12 +250,48 @@ ClipsGymThread::step(std::string next_goal)
 	return env_state;
 }
 
+py::list
+ClipsGymThread::generateActionSpace()
+{
+	//TODO: implement generation based on clips goals
+	std::string space[] = {"TOWER-C1#buttom#a#top#c",
+	                       "TOWER-C1#buttom#b#top#d",
+	                       "TOWER-C1#buttom#e#top#d"}; //, "TOWER-C1#buttom#a#top#e"};
+
+	py::list action_space;
+	for (std::string s : space) {
+		action_space.append((py::str)s);
+	}
+	return action_space;
+}
+
+py::list
+ClipsGymThread::generateObservationSpace()
+{
+	//TODO: implement generation based on clips facts
+	std::string space[] = {"clear(a)",   "clear(b)",         "clear(c)",        "clear(d)",
+	                       "clear(e)",   "handempty(robo1)", "handfull(robo1)", "holding(a)",
+	                       "holding(b)", "holding(c)",       "holding(d)",      "holding(e)",
+	                       "on(a,b)",    "on(a,c)",          "on(a,d)",         "on(a,e)",
+	                       "on(b,a)",    "on(b,c)",          "on(b,d)",         "on(b,e)",
+	                       "on(c,a)",    "on(c,b)",          "on(c,d)",         "on(c,e)",
+	                       "on(d,a)",    "on(d,b)",          "on(d,c)",         "on(d,e)",
+	                       "on(e,a)",    "on(e,b)",          "on(e,c)",         "on(e,d)",
+	                       "ontable(a)", "ontable(b)",       "ontable(c)",      "ontable(d)",
+	                       "ontable(e)"};
+	py::list    obs_space;
+	for (std::string s : space) {
+		obs_space.append((py::str)s);
+	}
+	return obs_space;
+}
+
 std::vector<std::string>
 ClipsGymThread::splitActionToGoalParams(std::string action)
 {
 	std::vector<std::string> g_splitted;
 	std::string::size_type   begin = 0;
-	for (std::string::size_type end = 0; (end = action.find('#', end)) != std::string::npos; ++end) {
+	for (std::string::size_type end = 0; (end = action.find("#", end)) != std::string::npos; ++end) {
 		g_splitted.push_back(action.substr(begin, end - begin));
 		begin = end + 1;
 	}
@@ -246,12 +301,17 @@ ClipsGymThread::splitActionToGoalParams(std::string action)
 std::string
 ClipsGymThread::getGoalId(std::string action)
 {
-	std::vector<std::string>            action_splitted = splitActionToGoalParams(action);
-	fawkes::LockPtr<CLIPS::Environment> clips           = getClipsEnv();
+	std::cout << "ClipsGym: getGoalId of " << action << std::endl;
+	std::vector<std::string> action_splitted = splitActionToGoalParams(action);
+	std::cout << "ClipsGym: splitted action " << std::endl;
+	for (std::string s : action_splitted) {
+		std::cout << s << std::endl;
+	}
+	fawkes::LockPtr<CLIPS::Environment> clips = getClipsEnv();
 	clips.lock();
-	CLIPS::Fact::pointer fact     = clips->get_facts();
-	std::string          goalID   = "";
-	std::string          allGoals = "{";
+	CLIPS::Fact::pointer fact   = clips->get_facts();
+	std::string          goalID = "";
+	//std::string          allGoals = "{ ";
 	while (fact) {
 		CLIPS::Template::pointer tmpl  = fact->get_template();
 		std::size_t              found = tmpl->name().find("goal");
@@ -265,10 +325,10 @@ ClipsGymThread::getGoalId(std::string action)
 			*/
 			std::vector<std::string> slot_names         = fact->slot_names();
 			bool                     correct_goal_class = false;
-			bool                     correct_params     = false;
+			bool                     correct_params     = true;
 			std::string              temp_id            = "";
 			for (std::string s : slot_names) {
-				allGoals += getClipsSlotValuesAsString(fact->slot_value(s));
+				//allGoals += getClipsSlotValuesAsString(fact->slot_value(s));
 				if (s == "class") {
 					std::string slot_values = getClipsSlotValuesAsString(fact->slot_value(s));
 					std::cout << "Class: " + slot_values << std::endl;
@@ -279,29 +339,31 @@ ClipsGymThread::getGoalId(std::string action)
 				//TODO &&corret_goal_class
 				if (s == "params") {
 					std::string slot_values = getClipsSlotValuesAsString(fact->slot_value(s));
-					std::cout << "params: " + slot_values << std::endl;
-					for (std::string p : action_splitted) {
-						std::cout << "search for p: " << p << std::endl;
-						//todo
-						std::size_t found_param = slot_values.find(p);
+					std::cout << "params: " << slot_values << std::endl;
+					for (size_t i = 1; i < action_splitted.size(); i++) {
+						std::cout << "search for: " << action_splitted[i] << std::endl;
+						std::size_t found_param = slot_values.find(action_splitted[i]); //(p);
 						if (found_param != std::string::npos) {
-							correct_params = true;
+							correct_params = correct_params && true;
+						} else {
+							correct_params = correct_params && false;
 						}
 					}
 				}
 				if (s == "id") {
 					temp_id = getClipsSlotValuesAsString(fact->slot_value(s));
+					std::cout << "id: " << temp_id << std::endl;
 				}
 			}
 			if (correct_goal_class && correct_params) {
 				std::cout << "correct class and params! GoalID is: " << temp_id << std::endl;
 				goalID = temp_id;
 			}
-			allGoals += ", ";
+			//allGoals += "\n ";
 		}
 		fact = fact->next();
 	}
-	std::cout << allGoals << std::endl;
+	//std::cout << allGoals << std::endl;
 	std::cout << "Finished passing all goals" << std::endl;
 	clips.unlock();
 	return goalID;
@@ -333,6 +395,32 @@ ClipsGymThread::getClipsSlotValuesAsString(std::vector<CLIPS::Value> slot_values
 		    && i != (slot_values.size() - 1)) //v != slot_values[slot_values.size()-1])
 		{
 			value += ",";
+		}
+	}
+	return value;
+}
+
+std::vector<std::string> *
+ClipsGymThread::getClipsSlotValuesAsStringVector(std::vector<CLIPS::Value> slot_values)
+{
+	std::vector<std::string> *value = new std::vector<std::string>();
+	for (std::size_t i = 0; i < slot_values.size(); i++) //for(CLIPS::Value v: slot_values)
+	{
+		auto v = slot_values[i];
+		switch (v.type()) {
+		case CLIPS::TYPE_FLOAT:
+			// std::cout << v.as_float() << std::endl;
+			value->push_back(std::to_string(v.as_float()));
+			break;
+
+		case CLIPS::TYPE_INTEGER:
+			//std::cout << v.as_integer() << std::endl;
+			value->push_back(std::to_string(v.as_integer()));
+			break;
+
+		default:
+			//std::cout << v.as_string() <<std::endl;
+			value->push_back(v.as_string());
 		}
 	}
 	return value;
@@ -386,23 +474,6 @@ ClipsGymThread::resetCX()
 	std::cout << "Finished resetCX" << std::endl;
 	//CLIPS::Fact::pointer fact = clips->get_facts();
 }
-/*
-py::str[]
-ClipsGymThread::generateActionSpace()
-{
-	std::cout << "In generate action space from rl-test.yaml" << std::endl;
-	//oder get bools siehe eclipse-clp/eclipse_thread.cpp:110:
-	std::string rl_agent_name = config->get_strings("/goal-space/name");
-
-	//std::string rl_agent_dir = std::regex_replace(config->get_string("/rl-agent/dir"), std::regex("@BASEDIR@"), BASEDIR);
-	//std::cout << rl_agent_dir << std::endl;
-
-	goal-space:
-  #Classname: params [Identifier - Typ]
-  TOWER-C1: {buttom: block, top: block}
-  TOWER-C2: {blocks: block}
-   return py::str['goal1','goal2','goal3'];
-}*/
 
 void
 ClipsGymThread::clips_context_init(const std::string &env_name, LockPtr<CLIPS::Environment> &clips)
@@ -414,7 +485,6 @@ ClipsGymThread::clips_context_init(const std::string &env_name, LockPtr<CLIPS::E
 
 	clips.lock();
 	clips->evaluate("(printout t \"Hello from CLIPS aspect in ClipsGymThread \" crlf crlf)");
-	clips->assert_fact("(rl-init-test-fact)");
 	/*clips->add_function("rl-extract-executable-fact",
 						   sigc::slot<void, CLIPS::Value, std::string>(sigc::bind<0>(
 						  sigc::mem_fun(*this, &RLTestThread::clips_rl_extract_executable_facts),
