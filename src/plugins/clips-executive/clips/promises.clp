@@ -26,6 +26,14 @@
   (return (sym-cat ?goal @ ?agent))
 )
 
+(deffunction goal-agent-separate-goal (?goal-agent)
+  (return (sym-cat (sub-string 1 (- (str-index "@" ?goal-agent) 1) ?goal-agent)))
+)
+
+(deffunction goal-agent-separate-agent (?goal-agent)
+  (return (sym-cat (sub-string (+ 1 (str-index "@" ?goal-agent)) (str-length ?goal-agent) ?goal-agent)))
+)
+
 (deftemplate promise-time
   (slot usecs (type INTEGER))
 )
