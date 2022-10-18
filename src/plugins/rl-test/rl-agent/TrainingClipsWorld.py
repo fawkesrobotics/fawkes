@@ -116,19 +116,19 @@ if __name__ == '__main__':
     #print("Script: Config values for path: " + dir_path)
     print("Script: Creating env")
     
-    action_space = ['TOWER-C1#a#b', 'TOWER-C1#a#c', 'TOWER-C1#a#d' , 'TOWER-C1#a#e']
-    print(action_space)
+    # action_space = ['TOWER-C1#a#b', 'TOWER-C1#a#c', 'TOWER-C1#a#d' , 'TOWER-C1#a#e']
+    # print(action_space)
 
-    obs_space = ['clear(a)','clear(b)','clear(c)','clear(d)','clear(e)'\
-        ,'handempty(robo1)','handfull(robo1)','holding(a)','holding(b)','holding(c)','holding(d)','holding(e)'\
-        ,'on(a,b)','on(a,c)','on(a,d)','on(a,e)','on(b,a)','on(b,c)'\
-        ,'on(b,d)','on(b,e)','on(c,a)','on(c,b)','on(c,d)','on(c,e)'\
-        ,'on(d,a)','on(d,b)','on(d,c)','on(d,e)','on(e,a)','on(e,b)'\
-        ,'on(e,c)','on(e,d)','ontable(a)', 'ontable(b)', 'ontable(c)', 'ontable(d)', 'ontable(e)']
+    # obs_space = ['clear(a)','clear(b)','clear(c)','clear(d)','clear(e)'\
+    #     ,'handempty(robo1)','handfull(robo1)','holding(a)','holding(b)','holding(c)','holding(d)','holding(e)'\
+    #     ,'on(a,b)','on(a,c)','on(a,d)','on(a,e)','on(b,a)','on(b,c)'\
+    #     ,'on(b,d)','on(b,e)','on(c,a)','on(c,b)','on(c,d)','on(c,e)'\
+    #     ,'on(d,a)','on(d,b)','on(d,c)','on(d,e)','on(e,a)','on(e,b)'\
+    #     ,'on(e,c)','on(e,d)','ontable(a)', 'ontable(b)', 'ontable(c)', 'ontable(d)', 'ontable(e)']
     #print(obs_space)
     
     #env = env_creator(env_name, dir_path, render)
-    env = ClipsWorld(action_space, obs_space)# render='blocks_render')#,render) #, seed=0)
+    env = ClipsWorld()#(action_space, obs_space)# render='blocks_render')#,render) #, seed=0)
     
     #print("Env {} created".format(env_name))
     #obs = env.reset()

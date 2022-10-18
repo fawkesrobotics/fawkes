@@ -1,3 +1,8 @@
+(deftemplate rl-finished-goal
+	(slot goal-id (type SYMBOL));
+	(slot outcome (type SYMBOL));
+)
+
 
 ; #  Commit to goal (we "intend" it)
 (defrule blocks-goal-commit
@@ -23,6 +28,7 @@
 	?g <- (goal (id ?goal-id) (class BLOCKS|TOWER-C1|TOWER-C2) (mode FINISHED) (outcome COMPLETED))
 	=>
 	(printout t "Goal '" ?goal-id "' has been completed, evaluating" crlf)
+	(assert (rl-finished-goal (goal-id ?goal-id) (outcome COMPLETED)))
 	(modify ?g (mode EVALUATED))
 )
 
@@ -31,5 +37,6 @@
 	            (outcome ?outcome&FAILED|REJECTED))
 	=>
 	(printout t "Goal '" ?goal-id "' has failed (" ?outcome "), evaluating" crlf)
+	(assert (rl-finished-goal (goal-id ?goal-id) (outcome ?outcome)))
 	(modify ?g (mode EVALUATED))
 )
