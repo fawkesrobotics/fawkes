@@ -36,6 +36,7 @@
 /plugins/
 /plugins_*
 /warnings.txt
+/src/plugins/*/*.o
 
 # nodejs and Angular files
 /node_modules/
@@ -53,3 +54,6 @@
 *.log
 /buildstats.db
 
+# Python and VSCode files
+__pycache__/
+.vscode/
