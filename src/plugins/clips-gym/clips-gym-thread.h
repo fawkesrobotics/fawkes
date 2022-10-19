@@ -19,18 +19,20 @@
   */
 
 #include <aspect/aspect_provider.h>
-
-#include <chrono>
-#include <mutex>
-#include <thread>
-//#include <plugins/clips/aspect/clips_feature.h>
-
 #include <aspect/blackboard.h>
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
 #include <blackboard/interface_listener.h>
 #include <core/threading/thread.h>
 #include <plugins/clips/aspect/clips_feature.h>
+
+#include <chrono>
+#include <mutex>
+#include <thread>
+//#include <plugins/clips/aspect/clips.h>
+
+// for interaction with the CX
+#include <clipsmm.h>
 
 //#include <boost/python.hpp>
 //namespace py = boost::python;
@@ -39,16 +41,7 @@
 #include <pybind11/pybind11.h>
 namespace py = pybind11;
 
-//#include <plugins/clips/aspect/clips.h>
-//#include <plugins/robot-memory/aspect/robot_memory_aspect.h>
-
 #include "clips-observation-info.h"
-
-#include <clipsmm.h>
-
-/* 						 public fawkes::AspectProviderAspect,
-						public fawkes::RobotMemoryAspect,
-						 */
 
 class ClipsGymThread : public fawkes::Thread,
                        public fawkes::LoggingAspect,
@@ -70,25 +63,26 @@ public:
 	                                fawkes::LockPtr<CLIPS::Environment> &clips);
 	virtual void clips_context_destroyed(const std::string &env_name);
 
-	void        rl_loop_start(std::string env_name);
-	std::string create_rl_env_state_from_facts(); //std::string env_name);
-	//py::array create_rl_env_state_from_facts();
+	void rl_loop_start(std::string env_name);
 
-	// Gym functions
+	fawkes::LockPtr<CLIPS::Environment> getClipsEnv();
+
+	/*
+	* Pybind 11 Module functions
+	* - OpenAi Gym functions
+	*/
 	void initCX();
 	//ClipsObservationInfo step();
 	std::string step(std::string next_goal);
 	void        resetCX();
 
+	static ClipsGymThread *getInstance();
+	py::list               generateActionSpace();
+	py::list               generateObservationSpace();
+	std::string            create_rl_env_state_from_facts();
+
 	std::string              getGoalId(std::string action);
 	std::vector<std::string> getAllFormulatedGoals();
-
-	fawkes::LockPtr<CLIPS::Environment> getClipsEnv(); //std::string env_name);
-
-	static ClipsGymThread *getInstance();
-
-	py::list generateActionSpace();
-	py::list generateObservationSpace();
 
 protected:
 	virtual void
@@ -100,24 +94,16 @@ protected:
 private:
 	std::map<std::string, fawkes::LockPtr<CLIPS::Environment>> envs_;
 	std::string                                                clisp_env_name;
-	//CLIPS::Values clips_now();
-
-	//fawkes::ExecutionTimeEstimatorManager       rl_test_manager_;
-	//fawkes::ExecutionTimeEstimatorsAspectIniFin provider_inifin_;
 	constexpr static char cfg_prefix_[] = "/plugins/clips-gym/static/";
-
-	//fawkes::RLAgentGoalSelectionInterface *rl_gs_interface;
-
-	/*virtual bool  bb_interface_message_received(fawkes::Interface *interface,
-														   fawkes::Message *  message) noexcept;*/
-
-	//fawkes::LockPtr<CLIPS::Environment> getClipsEnv();//std::string env_name);
 
 	static ClipsGymThread *thread_instance;
 	static std::mutex      mutex;
 
+	//helper functions
 	std::vector<std::string>  splitActionToGoalParams(std::string action);
 	std::string               getClipsSlotValuesAsString(std::vector<CLIPS::Value> slot_values);
 	std::vector<std::string> *getClipsSlotValuesAsStringVector(std::vector<CLIPS::Value> slot_values);
+
+	void assertRlGoalSelectionFact(std::string goalID);
 };
 //#endif

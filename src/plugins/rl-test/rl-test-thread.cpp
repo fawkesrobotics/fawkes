@@ -19,7 +19,7 @@
    */
 
 #include "rl-test-thread.h"
-//#include "/home/sonja/MA-Testproject/rlblocksworld/src-cpp/testBoostPython.h"
+
 #include <chrono>
 #include <future>
 #include <iostream>
@@ -30,17 +30,12 @@
 //for calling boost python from plugin
 //#define BOOST_BIND_GLOBAL_PLACEHOLDERS
 
-#include <boost/bind/bind.hpp>
-//#include <boost/python.hpp>
-//#include <pybind11/embed.h>
-
 #include <core/threading/mutex_locker.h>
 
+#include <boost/bind/bind.hpp>
 #include <clipsmm.h>
 
 using namespace std;
-//using namespace boost::python;
-//namespace py = boost::python;
 
 using namespace fawkes;
 
@@ -52,9 +47,6 @@ using namespace fawkes;
 
 constexpr char RLTestThread::cfg_prefix_[];
 
-//AspectProviderAspect(&provider_inifin_)
-//provider_inifin_(&rl_test_manager_)
-
 RLTestThread::RLTestThread()
 : Thread("RLTestThread", Thread::OPMODE_WAITFORWAKEUP), //Thread::OPMODE_CONTINUOUS),//
   BlackBoardInterfaceListener("RLTestThread"),
@@ -63,37 +55,40 @@ RLTestThread::RLTestThread()
 {
 }
 
+std::string
+getConfigStringReplacedBasedir(Configuration *config, std::string configEntry)
+{
+	std::string config_value =
+	  std::regex_replace(config->get_string(configEntry), std::regex("@BASEDIR@"), BASEDIR);
+	return config_value;
+}
+
 bool
 //RLTestThread::
 trainingRlAgent(Configuration *config)
 {
 	bool        is_done       = false;
 	std::string rl_agent_name = config->get_string("/rl-agent/name");
-	std::string rl_agent_dir =
-	  std::regex_replace(config->get_string("/rl-agent/dir"), std::regex("@BASEDIR@"), BASEDIR);
+	std::string rl_agent_dir  = getConfigStringReplacedBasedir(config, "/rl-agent/dir");
+	//std::regex_replace(config->get_string("/rl-agent/dir"), std::regex("@BASEDIR@"), BASEDIR);
 	std::cout << rl_agent_dir << std::endl;
 	std::string training_script = config->get_string("/python/training-script");
-	std::string training_dir =
-	  std::regex_replace(config->get_string("/python/dir"), std::regex("@BASEDIR@"), BASEDIR);
+	std::string training_dir    = getConfigStringReplacedBasedir(config, "/python/dir");
+	//std::regex_replace(config->get_string("/python/dir"), std::regex("@BASEDIR@"), BASEDIR);
 
 	std::string env = config->get_string("/rl-agent/env_name");
 
 	std::string execution_script = config->get_string("/python/execution-script");
-	std::string execution_dir =
-	  std::regex_replace(config->get_string("/python/dir"), std::regex("@BASEDIR@"), BASEDIR);
+	std::string execution_dir    = getConfigStringReplacedBasedir(config, "/python/dir");
+	//std::regex_replace(config->get_string("/python/dir"), std::regex("@BASEDIR@"), BASEDIR);
 
-	std::string env_dir =
-	  std::regex_replace(config->get_string("/python/env-dir"), std::regex("@BASEDIR@"), BASEDIR);
+	std::string env_dir = getConfigStringReplacedBasedir(config, "/python/env-dir");
+	//std::regex_replace(config->get_string("/python/env-dir"), std::regex("@BASEDIR@"), BASEDIR);
 
-	std::string bin_plugins_dir =
-	  std::regex_replace(config->get_string("/python/plugins-dir"), std::regex("@BASEDIR@"), BASEDIR);
+	std::string bin_plugins_dir = getConfigStringReplacedBasedir(config, "/python/plugins-dir");
+	//std::regex_replace(config->get_string("/python/plugins-dir"), std::regex("@BASEDIR@"), BASEDIR);
 
 	py::scoped_interpreter guard{};
-	//Py_Initialize();
-
-	//const char *scriptname = "/home/sonja/MA-Testproject/rlblocksworld/src-python/TestSB3.py";
-
-	//PyRun_SimpleString("sys.path.append(\"/home/sonja/MA-Testproject/rlblocksworld/src-python\")");
 
 	try {
 		py::object main_namespace = py::module_::import("__main__").attr("__dict__");
@@ -127,7 +122,7 @@ trainingRlAgent(Configuration *config)
 		py::exec(file_name, main_namespace);
 
 		//For TrainingClipsWorld.py
-		py::str action_space =
+		/* 		py::str action_space =
 		  (py::str)("action_space = ['TOWER-C1#a#b', 'TOWER-C1#a#c', 'TOWER-C1#a#d' , 'TOWER-C1#a#e']");
 		py::exec(action_space, main_namespace);
 		py::exec("print(action_space)");
@@ -144,7 +139,7 @@ trainingRlAgent(Configuration *config)
 
 		py::str obs_space = (py::str)(obs);
 		py::exec(obs_space, main_namespace);
-		py::exec("print(obs_space)");
+		py::exec("print(obs_space)"); */
 
 		//TODO maybe added to config - value of training timesteps
 		py::str timesteps = (py::str)("timesteps = 1000");
@@ -163,20 +158,7 @@ trainingRlAgent(Configuration *config)
 		          << std::endl;
 		py::print(result);
 		is_done = true;
-		//py::str obs = (py::str) ("obs = [0., 1., 1., 1., 0., 1., 1., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1., 1., 1.,]");
-		//py::exec(obs, main_namespace);
 
-		//py::str execution_script_path = (py::str) (execution_dir + "/"+ execution_script);
-		//py::exec_file(execution_script_path, main_namespace, main_namespace);
-
-		//py::str env_creation = (py::str) ("env = env_creator(\'blockstower\',\"" + rl_agent_dir + "\", True)");
-		//py::object env = py::exec(env_creation);
-		/*
-		std::cout << "adding path" << std::endl;
-		object main_missingPath = exec("sys.path.append(\"/home/tarikwork/rlblocksworld/src-python/\")", main_namespace);
-		exec_file(scriptname, main_namespace, main_namespace);
-		std::cout << "executed file" << std::endl;
-		*/
 	} catch (py::error_already_set &e) {
 		py::module::import("traceback").attr("print_exception")(e.type(), e.value(), e.trace());
 		std::cout << "PYTHON EXCEPTION:" << std::endl;
@@ -186,7 +168,6 @@ trainingRlAgent(Configuration *config)
 		PyErr_Clear();
 	}
 
-	//Py_Finalize();
 	return is_done;
 }
 
@@ -216,16 +197,7 @@ RLTestThread::executeRlAgent(std::string facts)
 	//for pybind11
 	py::scoped_interpreter guard{};
 
-	//Py_Initialize();
-
-	//const char *scriptname = "/home/sonja/MA-Testproject/rlblocksworld/src-python/TestSB3.py";
-
-	//PyRun_SimpleString("sys.path.append(\"/home/sonja/MA-Testproject/rlblocksworld/src-python\")");
-
 	try {
-		//py::object main_module = py::import("__main__");
-		//py::object main_namespace2 = main_module.attr("__dict__");
-
 		py::object main_namespace2 = py::module_::import("__main__").attr("__dict__");
 		//py::object main_sys =
 		py::exec("import sys", main_namespace2);
@@ -286,16 +258,6 @@ RLTestThread::executeRlAgent(std::string facts)
 		selected_action = result;
 		std::cout << "\nResult: " + selected_action << std::endl;
 
-		//std::cout << "Training script: " + rl_agent_dir +"/"+ training_script << std::endl;
-		//py::str training_script_path = (py::str) (rl_agent_dir + "/"+ training_script);
-		//py::exec_file(training_script_path, main_namespace, main_namespace);
-
-		//py::str obs = (py::str) ("obs = [0., 1., 1., 1., 0., 1., 1., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1., 1., 1.,]");
-		//py::exec(obs, main_namespace);
-
-		//py::str execution_script_path = (py::str) (execution_dir + "/"+ execution_script);
-		//py::exec_file(execution_script_path, main_namespace, main_namespace);
-
 	} catch (py::error_already_set &e) {
 		py::module::import("traceback").attr("print_exception")(e.type(), e.value(), e.trace());
 		std::cout << "PYTHON EXCEPTION:" << std::endl;
@@ -329,10 +291,6 @@ RLTestThread::init()
 	//setup interface listener
 	bbil_add_message_interface(rl_gs_interface);
 	blackboard->register_listener(this, BlackBoard::BBIL_FLAG_MESSAGES);
-
-	//Py_Initialize();
-
-	//py::scoped_interpreter guard{};
 
 	std::cout << "Finished RLTestThread" << std::endl;
 
@@ -499,13 +457,13 @@ RLTestThread::rl_goal_selection(std::string env_name, CLIPS::Value parent_goal_i
 		std::cout << nextAction << std::endl;
 		fawkes::LockPtr<CLIPS::Environment> clips = getClipsEnv(env_name);
 		clips.lock();
-		clips->evaluate("(printout t \"Finished executeRlAgent asserting fact with next action\" )");
+		clips->evaluate("(printout t \"Finished executeRlAgent asserting fact with next goal\" )");
 
 		CLIPS::Value             v = CLIPS::Value(nextAction, CLIPS::TYPE_STRING);
 		CLIPS::Template::pointer temp =
-		  clips->get_template("rl-action-selection"); //("rl-init-test-fact");
+		  clips->get_template("rl-goal-selection"); //("rl-init-test-fact");
 		CLIPS::Fact::pointer fact = CLIPS::Fact::create(**clips, temp);
-		fact->set_slot("next-action", v);
+		fact->set_slot("next-goal-id", v);
 		clips->assert_fact(fact); //"(rl-init-test-fact )");
 		clips.unlock();
 	} else if (!startedTraining) {

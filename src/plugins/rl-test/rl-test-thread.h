@@ -24,8 +24,6 @@
 //#include <bsoncxx/document/value.hpp>
 
 #include <aspect/aspect_provider.h>
-//#include <plugins/clips/aspect/clips_feature.h>
-
 #include <aspect/blackboard.h>
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
@@ -39,18 +37,8 @@
 #include <pybind11/embed.h>
 namespace py = pybind11;
 
-//#include <plugins/clips/aspect/clips.h>
-//#include <plugins/robot-memory/aspect/robot_memory_aspect.h>
-
 #include <clipsmm.h>
 #include <future>
-//
-
-//						 public fawkes::CLIPSFeature,
-//                     	 public fawkes::CLIPSFeatureAspect
-/* 						 public fawkes::AspectProviderAspect,
-						public fawkes::RobotMemoryAspect,
-						 */
 
 class RLTestThread : public fawkes::Thread,
                      public fawkes::LoggingAspect,
@@ -77,7 +65,6 @@ public:
 
 	bool              startedTraining;
 	std::future<bool> training_done;
-	//py::object main_namespace;
 
 protected:
 	virtual void
@@ -88,14 +75,12 @@ protected:
 
 private:
 	std::map<std::string, fawkes::LockPtr<CLIPS::Environment>> envs_;
-	//CLIPS::Values clips_now();
 
-	//fawkes::ExecutionTimeEstimatorManager       rl_test_manager_;
-	//fawkes::ExecutionTimeEstimatorsAspectIniFin provider_inifin_;
 	constexpr static char cfg_prefix_[] = "/plugins/rl-test/static/";
 
 	fawkes::RLAgentGoalSelectionInterface *rl_gs_interface;
-	std::string                            goal;
+
+	std::string goal;
 
 	virtual bool bb_interface_message_received(fawkes::Interface *interface,
 	                                           fawkes::Message   *message) noexcept;

@@ -19,7 +19,7 @@
    */
 
 #include "clips-gym-thread.h"
-//#include "/home/sonja/MA-Testproject/rlblocksworld/src-cpp/testBoostPython.h"
+
 #include <iostream>
 #include <regex>
 #include <string>
@@ -46,9 +46,6 @@ using namespace fawkes;
  */
 
 constexpr char ClipsGymThread::cfg_prefix_[];
-
-//AspectProviderAspect(&provider_inifin_)
-//provider_inifin_(&rl_test_manager_)
 
 ClipsGymThread::ClipsGymThread()
 : Thread("ClipsGymThread", Thread::OPMODE_WAITFORWAKEUP), //OPMODE_CONTINUOUS),//
@@ -92,36 +89,17 @@ PYBIND11_MODULE(clips_gym, m)
 	  .def("getAllFormulatedGoals", &ClipsGymThread::getAllFormulatedGoals)
 	  .def("generateActionSpace", &ClipsGymThread::generateActionSpace)
 	  .def("generateObservationSpace", &ClipsGymThread::generateObservationSpace);
-
-	//std::string step(std::string next_goal);
-
-	//.def("getClipsEnv", &ClipsGymThread::getClipsEnv);
 }
 
 void
 ClipsGymThread::init()
 {
 	std::cout << "Hello World!-from ClipsGymThread" << std::endl;
-	//std::string clips_gym_name = config->get_string("/clips-gym/name");
 
-	//setup interface
-	/*rl_gs_interface = blackboard->open_for_writing<RLAgentGoalSelectionInterface>(
-	  "goal-selection");
-	  //config->get_string("plugins/pddl-robot-memory/interface-name").c_str());
-	rl_gs_interface->set_msg_id(0);
-	rl_gs_interface->set_final(false);
-	rl_gs_interface->write();
-
-	//setup interface listener
-	bbil_add_message_interface(rl_gs_interface);
-	blackboard->register_listener(this, BlackBoard::BBIL_FLAG_MESSAGES);
-	*/
-
-	std::cout << "Hello 2 From ClipsGymThread Thread" << std::endl;
-
-	//wakeup(); //activates any loop
+	//wakeup(); //activates loop
 }
 
+/* Checks if rl-waiting fact exists and sleeps */
 void
 ClipsGymThread::loop()
 {
@@ -133,15 +111,12 @@ ClipsGymThread::loop()
 
 	while (fact) {
 		CLIPS::Template::pointer tmpl = fact->get_template();
-		//std::cout << "Template: " + tmpl->name() << std::endl;
 
 		std::size_t found_pos = tmpl->name().find("rl-waiting");
 		//std::size_t found2 = tmpl->name().find("wm-fact");//"predicate");
 		//std::size_t found3 = tmpl->name().find("goal");
 
-		if (found_pos
-		    != std::string::npos) //|| found2 !=std::string::npos ) //|| found3 !=std::string::npos)
-		{
+		if (found_pos != std::string::npos) {
 			std::cout << "RL WAITING fact found in loop clips gym" << std::endl;
 			found_fact = true;
 		}
@@ -154,29 +129,6 @@ ClipsGymThread::loop()
 
 	clips.unlock();
 
-	/*rl_gs_interface->set_final(true);
-	rl_gs_interface->set_success(true);
-	rl_gs_interface->set_next_select_goal("RL TEST GOAL FROM LOOP");
-	rl_gs_interface->write();
-	*/
-
-	/*try{
-		//py::object main_module = py::import("__main__");
-		//py::object
-		//main_namespace = main_module.attr("__dict__");
-		//py::object main_namespace = py::module_::import("__main__").attr("__dict__");
-		//py::object main_sys =
-		py::exec("import sys", main_namespace);
-		py::exec("import example", main_namespace);
-		py::exec("result = example.add(i=1, j=2)", main_namespace);
-		py::exec("print(\"Result py: \", result)", main_namespace);
-	}
-	catch(...)
-	{
-		PyErr_Print();
-		PyErr_Clear();
-	}*/
-
 	std::cout << "End Loop " << std::endl;
 	sleep(200);
 }
@@ -184,7 +136,24 @@ ClipsGymThread::loop()
 void
 ClipsGymThread::finalize()
 {
-	//blackboard->close(rl_gs_interface);
+}
+
+void
+ClipsGymThread::assertRlGoalSelectionFact(std::string goalID)
+{
+	fawkes::LockPtr<CLIPS::Environment> clips = getClipsEnv();
+	clips.lock();
+
+	clips->evaluate("(printout t \"In ClipsGymThread assertRlGoalSelectionFact: next goal " + goalID
+	                + "\" crlf)");
+	CLIPS::Value             v    = CLIPS::Value(goalID, CLIPS::TYPE_SYMBOL); //CLIPS::TYPE_STRING);
+	CLIPS::Template::pointer temp = clips->get_template("rl-goal-selection");
+
+	CLIPS::Fact::pointer fact = CLIPS::Fact::create(**clips, temp);
+	fact->set_slot("next-goal-id", v);
+	clips->assert_fact(fact);
+
+	clips.unlock();
 }
 
 std::string
@@ -195,21 +164,12 @@ ClipsGymThread::step(std::string next_goal)
 	//Transform string to goal
 	//std::string n_goal = "TOWER-C1#b#d#";
 
-	std::string                         goalID = getGoalId(next_goal);
-	fawkes::LockPtr<CLIPS::Environment> clips  = getClipsEnv();
-	clips.lock();
-
-	clips->evaluate("(printout t \"In ClipsGymThread step: asserting fact with next action\" crlf)");
-	CLIPS::Value             v    = CLIPS::Value(goalID, CLIPS::TYPE_SYMBOL); //CLIPS::TYPE_STRING);
-	CLIPS::Template::pointer temp = clips->get_template("rl-action-selection");
-
-	CLIPS::Fact::pointer fact = CLIPS::Fact::create(**clips, temp);
-	fact->set_slot("next-action", v);
-	clips->assert_fact(fact);
-
-	clips.unlock();
+	std::string goalID = getGoalId(next_goal);
+	assertRlGoalSelectionFact(goalID);
 	std::cout << "fact asserted, start running clips" << std::endl;
 
+	fawkes::LockPtr<CLIPS::Environment> clips = getClipsEnv();
+	//Check frequently if the selected goal is evaluated
 	bool env_feedback = false;
 	while (!env_feedback) {
 		std::this_thread::sleep_for(2000ms);
@@ -225,6 +185,7 @@ ClipsGymThread::step(std::string next_goal)
 				std::string outcome = getClipsSlotValuesAsString(fact->slot_value("outcome"));
 				std::cout << "In ClipsGymThread step: Goal: " << goalID
 				          << " is evaluated with outcome: " << outcome << std::endl;
+				//TODO: check if goalID is the same
 				env_feedback = true;
 				fact->retract();
 				std::cout << "In ClipsGymThread step: after retracting rl-finished-goal fact" << std::endl;
@@ -237,13 +198,6 @@ ClipsGymThread::step(std::string next_goal)
 
 		clips.unlock();
 	}
-	/*
-		for (auto &s: g_splitted) {
-			std::cout << s << std::endl;
-		}
-	*/
-	//clips->refresh_agenda();
-	//clips->run();
 	std::string env_state = create_rl_env_state_from_facts();
 
 	std::cout << "End Clips Gym Thread step function" << std::endl;
@@ -297,6 +251,7 @@ ClipsGymThread::splitActionToGoalParams(std::string action)
 	}
 	return g_splitted;
 }
+
 //todo umbennennen getactionGoalIdMapping oder so
 std::string
 ClipsGymThread::getGoalId(std::string action)
@@ -328,7 +283,6 @@ ClipsGymThread::getGoalId(std::string action)
 			bool                     correct_params     = true;
 			std::string              temp_id            = "";
 			for (std::string s : slot_names) {
-				//allGoals += getClipsSlotValuesAsString(fact->slot_value(s));
 				if (s == "class") {
 					std::string slot_values = getClipsSlotValuesAsString(fact->slot_value(s));
 					std::cout << "Class: " + slot_values << std::endl;
@@ -336,7 +290,7 @@ ClipsGymThread::getGoalId(std::string action)
 						correct_goal_class = true;
 					}
 				}
-				//TODO &&corret_goal_class
+				//TODO: what about two goals mapping one action, or action mapping no goals
 				if (s == "params") {
 					std::string slot_values = getClipsSlotValuesAsString(fact->slot_value(s));
 					std::cout << "params: " << slot_values << std::endl;
@@ -359,11 +313,9 @@ ClipsGymThread::getGoalId(std::string action)
 				std::cout << "correct class and params! GoalID is: " << temp_id << std::endl;
 				goalID = temp_id;
 			}
-			//allGoals += "\n ";
 		}
 		fact = fact->next();
 	}
-	//std::cout << allGoals << std::endl;
 	std::cout << "Finished passing all goals" << std::endl;
 	clips.unlock();
 	return goalID;
@@ -373,8 +325,7 @@ std::string
 ClipsGymThread::getClipsSlotValuesAsString(std::vector<CLIPS::Value> slot_values)
 {
 	std::string value = "";
-	for (std::size_t i = 0; i < slot_values.size(); i++) //for(CLIPS::Value v: slot_values)
-	{
+	for (std::size_t i = 0; i < slot_values.size(); i++) {
 		auto v = slot_values[i];
 		switch (v.type()) {
 		case CLIPS::TYPE_FLOAT:
@@ -391,9 +342,7 @@ ClipsGymThread::getClipsSlotValuesAsString(std::vector<CLIPS::Value> slot_values
 			//std::cout << v.as_string() <<std::endl;
 			value += v.as_string();
 		}
-		if (slot_values.size() > 1
-		    && i != (slot_values.size() - 1)) //v != slot_values[slot_values.size()-1])
-		{
+		if (slot_values.size() > 1 && i != (slot_values.size() - 1)) {
 			value += ",";
 		}
 	}
@@ -404,8 +353,7 @@ std::vector<std::string> *
 ClipsGymThread::getClipsSlotValuesAsStringVector(std::vector<CLIPS::Value> slot_values)
 {
 	std::vector<std::string> *value = new std::vector<std::string>();
-	for (std::size_t i = 0; i < slot_values.size(); i++) //for(CLIPS::Value v: slot_values)
-	{
+	for (std::size_t i = 0; i < slot_values.size(); i++) {
 		auto v = slot_values[i];
 		switch (v.type()) {
 		case CLIPS::TYPE_FLOAT:
@@ -468,11 +416,10 @@ ClipsGymThread::resetCX()
 	//clips->clear(), clips->reset() haben zu coredumps geführt
 	clips.lock();
 	clips->assert_fact("(reset-domain-facts)");
-	//clips->refresh_agenda();
-	//clips->run();
 	clips.unlock();
+	//TODO add loop checking for reset done
+
 	std::cout << "Finished resetCX" << std::endl;
-	//CLIPS::Fact::pointer fact = clips->get_facts();
 }
 
 void
@@ -485,22 +432,12 @@ ClipsGymThread::clips_context_init(const std::string &env_name, LockPtr<CLIPS::E
 
 	clips.lock();
 	clips->evaluate("(printout t \"Hello from CLIPS aspect in ClipsGymThread \" crlf crlf)");
-	/*clips->add_function("rl-extract-executable-fact",
-						   sigc::slot<void, CLIPS::Value, std::string>(sigc::bind<0>(
-						  sigc::mem_fun(*this, &RLTestThread::clips_rl_extract_executable_facts),
-						  env_name)));*/
-	/*clips->add_function("rl-goal-selection-start",
-																	   sigc::slot<void, CLIPS::Value, std::string>(sigc::bind<0>(
-																	  sigc::mem_fun(*this, &RLTestThread::rl_goal_selection),
-																	  env_name)));*/
 
 	clips->add_function("rl-loop-start",
 	                    sigc::slot<void>(
 	                      sigc::bind<0>(sigc::mem_fun(*this, &ClipsGymThread::rl_loop_start),
 	                                    env_name)));
 
-	//clips->refresh_agenda();
-	//clips->run();
 	clips.unlock();
 }
 
@@ -520,15 +457,15 @@ ClipsGymThread::clips_context_destroyed(const std::string &env_name)
 }
 
 fawkes::LockPtr<CLIPS::Environment>
-ClipsGymThread::getClipsEnv() //std::string env_name)
+ClipsGymThread::getClipsEnv()
 {
-	fawkes::LockPtr<CLIPS::Environment> clips = envs_[clisp_env_name]; //envs_[env_name];
+	fawkes::LockPtr<CLIPS::Environment> clips = envs_[clisp_env_name];
 	return clips;
 }
 
 //ToDo return std::vector<string> literals
 std::string
-ClipsGymThread::create_rl_env_state_from_facts() //std::string env_name)
+ClipsGymThread::create_rl_env_state_from_facts()
 {
 	std::cout << "In create rl env state from facts" << std::endl;
 	fawkes::LockPtr<CLIPS::Environment> clips = getClipsEnv();
@@ -543,53 +480,26 @@ ClipsGymThread::create_rl_env_state_from_facts() //std::string env_name)
 	std::string          env_state_string = "{";
 	while (fact) {
 		CLIPS::Template::pointer tmpl = fact->get_template();
-		//std::cout << "Template: " + tmpl->name() << std::endl;
 
 		std::size_t found = tmpl->name().find("domain-fact");
 		//std::size_t found2 = tmpl->name().find("wm-fact");//"predicate");
 		//std::size_t found3 = tmpl->name().find("goal");
 
-		if (found
-		    != std::string::npos) //|| found2 !=std::string::npos ) //|| found3 !=std::string::npos)
-		{
-			//if (tmpl->name()->contains("domain") || tmpl->name().contains("goal"))
+		if (found != std::string::npos) {
 			std::vector<std::string> slot_names = fact->slot_names();
 			std::string              fact_value = "";
 			for (std::string s : slot_names) {
 				fact_value += " Slot " + s + ": ";
 				//std::cout << "Slot name: " + s << std::endl;
 				std::vector<CLIPS::Value> slot_values = fact->slot_value(s);
-				std::string               value       = "";
-				for (std::size_t i = 0; i < slot_values.size(); i++) //for(CLIPS::Value v: slot_values)
-				{
-					auto v = slot_values[i];
-					switch (v.type()) {
-					case CLIPS::TYPE_FLOAT:
-						// std::cout << v.as_float() << std::endl;
-						value += std::to_string(v.as_float());
-						break;
+				std::string               value       = getClipsSlotValuesAsString(slot_values);
 
-					case CLIPS::TYPE_INTEGER:
-						//std::cout << v.as_integer() << std::endl;
-						value += std::to_string(v.as_integer());
-						break;
-
-					default:
-						//std::cout << v.as_string() <<std::endl;
-						value += v.as_string();
-					}
-					if (slot_values.size() > 1
-					    && i != (slot_values.size() - 1)) //v != slot_values[slot_values.size()-1])
-					{
-						value += ",";
-					}
-				}
 				//std::cout << value << std::endl;
 				if (s == "name") {
 					env_state_string += "\"" + value + "(";
 				}
 				if (s == "param-values") {
-					env_state_string += value + ")\","; //value.substr(0, value.length()-2) + "),";
+					env_state_string += value + ")\",";
 				}
 				fact_value += " " + value;
 			}
@@ -602,9 +512,6 @@ ClipsGymThread::create_rl_env_state_from_facts() //std::string env_name)
 	std::cout << "Finished passing all facts " << std::endl;
 	clips.unlock();
 	std::cout << "Unlock clips done: Clips pointer refcount: " << clips.refcount() << std::endl;
-	/* }
-	else{
-		std::cout << "Clips-Gym-Thread: create env state from facts - FAILED to lock clips!";
-	} */
+
 	return env_state_string;
 }
