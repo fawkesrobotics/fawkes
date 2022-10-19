@@ -90,8 +90,6 @@ class ClipsWorld(gym.Env):
 
     #TODO add gametime, reward
     
-    #self.observation_space = spaces.Box(low=0, high=self.grid_size,
-    #                                    shape=(1,), dtype=np.float32)
 
   def reset(self):
     """
