@@ -63,28 +63,26 @@ class ClipsWorld(gym.Env):
     self.action_dict = dict(zip(set_keys, sorted_actions))
     #inv_action_dict: key: goal; value number
     self.inv_action_dict = (dict (zip (sorted_actions, set_keys)))
-    print(self.action_dict)
 
     #obs dict: key: number; value: facts
     set_keys_obs = range(0,len(sorted_obs))
     self.obs_dict = dict(zip(set_keys_obs, sorted_obs))
     #inv_obs_dict: key: facts; value: number
     self.inv_obs_dict = (dict (zip (sorted_obs, set_keys_obs)))
-    print(self.obs_dict)
-
+    
     # Define action and observation space
     # They must be gym.spaces objects
     # Example when using discrete actions, we have two: left and right
     self.n_actions = len(sorted_actions)
     self.action_space = spaces.Discrete(self.n_actions)
+    
     # The observation will be the coordinate of the agent
     # this can be described both by Discrete and Box space
     self.n_obs = len(sorted_obs)
     self.observation_space = gym.spaces.Box(0, 1, (self.n_obs,))
-    print(self.observation_space)
 
     try:
-      print(self.state)
+      print("self.state: ", self.state)
       self.state = np.zeros(self.n_obs)
       print(self.state)
     except:
