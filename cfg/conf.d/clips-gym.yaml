@@ -24,17 +24,17 @@ python:
   plugins-dir: "@BASEDIR@/plugins"
 
 goal-space:
+  # Classname: params [Identifier - Typ]
+  # TOWER-C1: {buttom: block, top: block}
+  # TOWER-C2: {blocks: block}
   # Goal Classnames
-  classes: ["TOWER-C1","TOWER-C2"]
+  classes: ["TOWER-C1", "TOWER-C2"]
 
 param-names:
-  TOWER-C1: ["buttom","top"]
-  TOWER-C2: ["buttom","middle","top"]
+  TOWER-C1: ["buttom", "top"]
+  TOWER-C2: ["buttom", "middle", "top"]
 
   param-types:
     buttom: block
     middle: block
     top: block
-  # Classname: params [Identifier - Typ]
-  #TOWER-C1: {buttom: block, top: block}
-  #TOWER-C2: {blocks: block}

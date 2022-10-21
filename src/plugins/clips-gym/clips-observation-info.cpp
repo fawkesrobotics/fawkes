@@ -29,7 +29,8 @@ ClipsObservationInfo::ClipsObservationInfo() //std::map<std::string, int> a_obse
 	//observation_space = a_observation_space;
 }
 
-ClipsObservationInfo::ClipsObservationInfo(std::string a_observation) //std::map<std::string, int> a_observation_space)
+ClipsObservationInfo::ClipsObservationInfo(
+  std::string a_observation) //std::map<std::string, int> a_observation_space)
 {
-	observation= a_observation;
+	observation = a_observation;
 }
