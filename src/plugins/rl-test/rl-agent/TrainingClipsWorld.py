@@ -136,7 +136,7 @@ if __name__ == '__main__':
     print("Observations: ", env.obs_dict)
     print("Observation space: ",env.observation_space)
     print("Action space: ",env.action_space)
-    print("Actions: ", env.action_dict)
+    #print("Actions: ", env.action_dict)
 
     #Mask environment
     #env = ActionMasker(env, mask_fn)  # Wrap to enable masking
@@ -145,17 +145,17 @@ if __name__ == '__main__':
     # with ActionMasker. If the wrapper is detected, the masks are automatically
     # retrieved and used when learning. Note that MaskablePPO does not accept
     # a new action_mask_fn kwarg, as it did in an earlier draft.
-    #model = MaskablePPO(MaskableActorCriticPolicy, env, verbose=1)
-    model = PPO(MlpPolicy, env, verbose=0)
+    model = MaskablePPO(MaskableActorCriticPolicy, env, verbose=1, n_steps=5)
+    #model = PPO(MlpPolicy, env, verbose=0)
 
-    timesteps=5
-    print("Start trainig the rl agent - for {} timesteps".format(timesteps))
-    #model.learn(total_timesteps=timesteps)
+    timesteps=40
+    print("\n\nStart trainig the rl agent - for {} timesteps ".format(timesteps))
+    model.learn(total_timesteps=timesteps,log_interval=1)
     # Random Agent, before training
-    mean_reward_before_train = evaluate(model)
-    print("Mean reward: ",mean_reward_before_train)
+    #mean_reward_before_train = evaluate(model)
+    #print("Mean reward: ",mean_reward_before_train)
 
-    print("Finished training the rl agent")
+    print("\n\n\nFinished training the rl agent\n\n\n")
     print ("Saving the agent at: ", file_name)
     model.save(file_name)
 

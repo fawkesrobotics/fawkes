@@ -29,6 +29,17 @@ import gym
 from gym import spaces
 import inspect
 import ast
+import pandas as pd
+from itertools import product
+
+def expand_grid(dictionary):
+   return pd.DataFrame([row for row in product(*dictionary.values())], 
+                       columns=dictionary.keys())
+
+
+#def generateActionSpace(clips_gym):
+		
+
 
 class ClipsWorld(gym.Env):
   """
@@ -49,6 +60,43 @@ class ClipsWorld(gym.Env):
     p = clips_gym.ClipsGymThread.getInstance()
     action_space = p.generateActionSpace()
     print("ClipsWorld init: after generateActionSpace\n action_space = ", action_space)
+
+    #-----------
+    #Get Goal Class list
+    goalClasses = p.getGoalClassList()
+    #for(std::string goalClass: goalClasses)
+    partial = {}
+
+    action_space_2=[];
+    
+    #goalClass = "TOWER-C1"
+    for goalClass in goalClasses:
+      #get key value map of param-name and param-type
+      mapParamNameType =  p.getParamsNameTypeMapOfGoal(goalClass)
+      print("clipsWorld: mapParamNameType ", mapParamNameType)
+
+      for x in mapParamNameType:
+        #print(x)
+      #For each param of the goal do:
+      #for key, value in mapParamNameType:
+        #print("Key: {} Value:{}", key, value)
+        #{buttom#a, buttom#b,...}	
+        
+        #paramNameDOComb = p.getParamNameDomainObjectsComb(key, value);
+        paramNameDOComb = p.getParamNameDomainObjectsComb(x,mapParamNameType[x]);
+        #print(paramNameDOComb)
+        partial[x]=	paramNameDOComb
+      
+      df = expand_grid(partial)
+      df = df.reindex(sorted(df.columns), axis=1)
+      #print(df)
+      df.insert(0,'Class', goalClass)
+      x = df.to_string(header=False,index=False,index_names=False).split('\n')
+      vals = ['#'.join(ele.split()) for ele in x]
+      action_space_2 += vals
+      
+    #-----------------------------------------
+    #action_space = action_space_2
 
     #generate observation space
     print("ClipsWorld init: before generateObservationSpace")
@@ -101,12 +149,12 @@ class ClipsWorld(gym.Env):
     #print("NOT IMPLEMENTED ",inspect.currentframe().f_code.co_name)
     print("ClipsWorld: reset: before get ClipsGymThread instance")
     p = clips_gym.ClipsGymThread.getInstance()
-    #result = p.resetCX()
+    result = p.resetCX()
     print("ClipsWorld: reset: Finished resetCX ")
 
     print("ClipsWorld: reset: call create_rl_env_state_from_facts")
     fact_string = p.create_rl_env_state_from_facts()
-    print("ClipsWorld reset: reseived facts: ", fact_string)
+    #print("ClipsWorld reset: reseived facts: ", fact_string)
     raw_facts = ast.literal_eval(fact_string)
     print("\nfacts: ", raw_facts)
     state = self.get_state_from_facts(raw_facts)
@@ -124,25 +172,41 @@ class ClipsWorld(gym.Env):
     goal = self.action_dict[action]
     print(f"ClipsWorld: step '{action}': '{goal}'")
     p = clips_gym.ClipsGymThread.getInstance()
-    result = p.step(goal+"#")
+    result = p.step(goal) #+"#")
     print("ClipsWorld: p.step result: ", result)
+    print("ClipsWorld: observation ", result.observation)
+    print("ClipsWorld: info ", result.info)
+    print("ClipsWorld: reward ", result.reward)
 
     #TODO check action valid (if not done - reward -1) (da durch action masking nur valide actions ausgesucht werden sollten, außer es gibt keine validen mehr)
 
     # Create observation from clips
-    fact_string = p.create_rl_env_state_from_facts()
-    print("ClipsWorld reseived facts: ", fact_string)
-    raw_facts = ast.literal_eval(fact_string)
+    #print("ClipsWorld reseived facts: ", fact_string)
+    raw_facts = ast.literal_eval(result.observation)#fact_string)
     print("\nfacts: ", raw_facts)
     state = self.get_state_from_facts(raw_facts)
     print("New env state from facts: ",state)
 
     #  Flag that marks the termination of an episode
     # TODO if we use action masking check if there are valid action and switch to done if not
-    done = False #bool(self.agent_pos == 0)
+    executableGoals = p.getAllFormulatedExecutableGoals()
+    print ("ClipsWorld: getAllFormulatedExecutableGoals {} length: ", executableGoals, len(executableGoals))
+    
+    done = False if len(executableGoals) else True #bool(self.agent_pos == 0)
+    print("\n\nClipsWorld: done ", done)
+    print("\n\n")
 
+    formulatedGoals = p.getAllFormulatedGoals()
     # Null reward everywhere except when reaching the goal (left of the grid)
-    reward = 1 #1 if self.agent_pos == 0 else 0
+    if not done:
+      #there are still executable goals (middle of the game)
+      reward = result.reward 
+    elif formulatedGoals:
+      # there are no executable goals, but game didn't finished
+      reward = -1
+    else:
+      # you won the game
+      reward = 10
 
     # Optionally we can pass additional info, we are not using that for now
     info = {}
@@ -154,13 +218,17 @@ class ClipsWorld(gym.Env):
   # action_mask_fn: A function that takes a Gym environment and returns an action mask,
   #      or the name of such a method provided by the environment.
   def action_masks(self) -> np.ndarray:
-    print("ClipsWorld: action_masks")
+    print("ClipsWorld: in action_masks")
   # Returns the action mask for the current env. 
   #def mask_fn(env: gym.Env) -> np.ndarray:
     p = clips_gym.ClipsGymThread.getInstance()
-    formulated_goals = p.getAllFormulatedGoals()
-    print(formulated_goals)
+    executable_goals = p.getAllFormulatedExecutableGoals()
+    print("ClipsWorld: action_masks executable goals: ", executable_goals)
+    
     valid_actions = np.zeros((self.n_actions), dtype=int)
+    for g in executable_goals:
+      pos = self.inv_action_dict[g]
+      valid_actions[pos]=1
     """     for i in range(0, self.n_actions):
         #check if action is valid
         a = env.env.actions[i]        
@@ -172,7 +240,7 @@ class ClipsWorld(gym.Env):
     #print("Valid Actions: ", valid_actions)
 
     #TODO clips_gym call get executable goals
-    print("NOT IMPLEMENTED ",inspect.currentframe().f_code.co_name)
+    #print("NOT IMPLEMENTED ",inspect.currentframe().f_code.co_name)
     return valid_actions
 
   def render(self, mode='console'):
@@ -189,8 +257,8 @@ class ClipsWorld(gym.Env):
   def get_state_from_facts(self,obs_f):
     print("ClipsWorld: in get_state_from_facts function")
     new_state = np.zeros(self.n_obs)
-    print("new state np array")
-    print("Obs space: ", self.obs_dict)
+    #print("new state np array")
+    #print("Obs space: ", self.obs_dict)
     for f in obs_f:
       if self.inv_obs_dict.get(f) is not None:
         pos = self.inv_obs_dict[f]

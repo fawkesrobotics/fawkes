@@ -25,15 +25,15 @@
 
 (defrule plan-tower-c2-expand
 	?g <- (goal (mode SELECTED) (id ?goal-id) (class TOWER-C2)
-				(params blocks $?blocks))
+				(params buttom ?buttom middle ?middle top ?top))
 	?r <- (domain-object (name robo1) (type robot))
 	;?c <- (domain-object (name c) (type block))
 	;?c <- (wm-fact (key domain object block) (values c))
 	=>
-	(printout t "Plan expand: robot " ?r " blocks " $?blocks crlf crlf)
-	(bind ?buttom (nth$ 1 $?blocks))
-	(bind ?middle (nth$ 2 $?blocks))
-	(bind ?top (nth$ 3 $?blocks))
+	(printout t "Plan expand: robot " ?r " "?buttom " " ?middle " " ?top crlf crlf);" blocks " $?blocks crlf crlf)
+	;(bind ?buttom (nth$ 1 $?blocks))
+	;(bind ?middle (nth$ 2 $?blocks))
+	;(bind ?top (nth$ 3 $?blocks))
 	(printout t "Blocks: " ?buttom " m: " ?middle " t: " ?top crlf)
 	(bind ?plan-id (sym-cat ?goal-id -PLAN))
 	(assert

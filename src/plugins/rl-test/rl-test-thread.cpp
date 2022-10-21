@@ -142,7 +142,7 @@ trainingRlAgent(Configuration *config)
 		py::exec("print(obs_space)"); */
 
 		//TODO maybe added to config - value of training timesteps
-		py::str timesteps = (py::str)("timesteps = 1000");
+		py::str timesteps = (py::str)("timesteps = 10"); //1000
 		py::exec(timesteps, main_namespace);
 
 		//printing python variables with config values
@@ -154,7 +154,7 @@ trainingRlAgent(Configuration *config)
 		py::str training_script_path = (py::str)(rl_agent_dir + "/" + training_script);
 		//py::exec_file(training_script_path, main_namespace, main_namespace);
 		auto result = py::eval_file(training_script_path, main_namespace);
-		std::cout << "DONE EVALUATING TRAINING SCRIPT - I should probably give feedback to clips"
+		std::cout << "\n\n\nDONE EVALUATING TRAINING SCRIPT - I should probably give feedback to clips\n\n\n"
 		          << std::endl;
 		py::print(result);
 		is_done = true;
@@ -311,11 +311,11 @@ RLTestThread::loop()
 
 	if (training_mode && !startedTraining) {
 		//trainingRlAgent();
-		training_done = std::async(std::launch::async, trainingRlAgent, config);
+		//training_done = std::async(std::launch::async, trainingRlAgent, config);
 
 		startedTraining = true;
 	} else if (training_mode && startedTraining) {
-		std::cout << "Check if training_done future is vailid" << std::endl;
+		std::cout << "\nLoop: Check if training_done future is vailid" << std::endl;
 		std::cout << training_done.valid() << "\n" << std::endl;
 		int sec = 1000;
 		std::cout << "Wait for " << sec << " msec to check future.get" << std::endl;
@@ -449,10 +449,10 @@ void
 RLTestThread::rl_goal_selection(std::string env_name, CLIPS::Value parent_goal_id, std::string to)
 {
 	//get current env state from clips
-	std::string facts = create_rl_env_state_from_facts(env_name); //todo save return value as obs
+	//std::string facts = create_rl_env_state_from_facts(env_name); //todo save return value as obs
 	bool        training_mode = true;
 	if (!training_mode) {
-		std::string nextAction = executeRlAgent(
+		/*std::string nextAction = executeRlAgent(
 		  facts); //ToDo pass obs and save return value /selected goal in a fact/return it to clips
 		std::cout << nextAction << std::endl;
 		fawkes::LockPtr<CLIPS::Environment> clips = getClipsEnv(env_name);
@@ -465,12 +465,22 @@ RLTestThread::rl_goal_selection(std::string env_name, CLIPS::Value parent_goal_i
 		CLIPS::Fact::pointer fact = CLIPS::Fact::create(**clips, temp);
 		fact->set_slot("next-goal-id", v);
 		clips->assert_fact(fact); //"(rl-init-test-fact )");
-		clips.unlock();
+		clips.unlock();*/
 	} else if (!startedTraining) {
 		std::cout << "In rl_goal_selection - executing RL Agent is not active!" << std::endl;
 		//trainingRlAgent();
 		training_done   = std::async(std::launch::async, trainingRlAgent, config);
 		startedTraining = true;
+	}
+	else if (training_mode && startedTraining) {
+		std::cout << "Check if training_done future is vailid " << training_done.valid()<< std::endl;
+		int sec = 10; //00;
+		std::cout << "Wait for " << sec << " msec to check future status" << std::endl;
+		std::future_status status = training_done.wait_for(std::chrono::milliseconds(sec));
+		if (status == std::future_status::ready) {
+			std::cout << "Future: " << training_done.get() << std::endl;
+			finalize();
+		}
 	} else {
 		std::cout << "In rl_goal_selection - nothing to do" << std::endl;
 	}

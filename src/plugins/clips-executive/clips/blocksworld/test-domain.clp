@@ -122,7 +122,7 @@
   (reset-domain-facts)
   ?f <- (domain-fact)
   =>
-	(printout t crlf "delete domain fact " ?f crlf crlf)
+	;(printout t crlf "delete domain fact " ?f crlf crlf)
   (retract ?f)  
 )
 
@@ -130,20 +130,35 @@
   (reset-domain-facts)
   ?g <- (goal)
   =>
-	(printout t crlf "delete goal " ?g crlf crlf)
+	;(printout t crlf "delete goal " ?g crlf crlf)
   (retract ?g)  
 )
 
 (defrule reset-domain
-  (reset-domain-facts)
+  ?r<-(reset-domain-facts)
   (not (domain-fact))
   (not (goal))
   ?d<- (domain-loaded)
 	?fl<-(domain-facts-loaded)
+  ?g <-(goals-loaded)
   =>
-	(printout t crlf "reset domain" crlf crlf)
+	(printout t crlf "reset domain running" crlf crlf)
   (retract ?d)
   (retract ?fl)
+  (retract ?r)
+  (retract ?g)
+  (assert (reset-domain-running))
+)
+
+(defrule reset-running
+  ?r <-(reset-domain-running)
+  (domain-loaded)
+	(domain-facts-loaded)
+  (goals-loaded)
+  =>
+	(printout t crlf "reset domain finish" crlf crlf)
+  (retract ?r)
+  (assert (reset-domain-finish))
 )
                                                                             
                                                                                 
