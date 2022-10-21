@@ -27,9 +27,9 @@
 #include <plugins/clips/aspect/clips_feature.h>
 
 #include <chrono>
+#include <map>
 #include <mutex>
 #include <thread>
-#include <map>
 //#include <plugins/clips/aspect/clips.h>
 
 // for interaction with the CX
@@ -37,13 +37,13 @@
 
 //#include <boost/python.hpp>
 //namespace py = boost::python;
+#include <pybind11/chrono.h>
+#include <pybind11/complex.h>
 #include <pybind11/embed.h>
+#include <pybind11/functional.h>
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
-#include <pybind11/complex.h>
 #include <pybind11/stl.h>
-#include <pybind11/functional.h>
-#include <pybind11/chrono.h>
 namespace py = pybind11;
 
 #include "clips-observation-info.h"
@@ -76,10 +76,10 @@ public:
 	* Pybind 11 Module functions
 	* - OpenAi Gym functions
 	*/
-	void initCX();
+	void                 initCX();
 	ClipsObservationInfo step(std::string next_goal);
 	//std::string step(std::string next_goal);
-	void        resetCX();
+	void resetCX();
 
 	static ClipsGymThread *getInstance();
 	py::list               generateActionSpace();
@@ -89,13 +89,11 @@ public:
 	std::string              getGoalId(std::string action);
 	std::vector<std::string> getAllFormulatedGoals();
 	std::vector<std::string> getAllFormulatedExecutableGoals();
-	
 
+	std::vector<std::string> getParamNameDomainObjectsComb(std::string param_name,
+	                                                       std::string param_type);
 
-	std::vector<std::string> 
-	 getParamNameDomainObjectsComb(std::string param_name, std::string param_type);
-
-	//std::map<std::string,std::string> 
+	//std::map<std::string,std::string>
 	py::dict getParamsNameTypeMapOfGoal(std::string goalClass);
 
 	py::list getGoalClassList();
@@ -114,23 +112,21 @@ private:
 
 	//TODO extra Klasse auslagern
 	std::map<std::string, std::vector<std::string>> paramTypeDomainObjectsMap;
-	std::vector<std::string> getDomainObjects(std::string a_type);
-	std::vector<std::string> getDomainModelObjectsFromCX(std::string a_type);
-
-
+	std::vector<std::string>                        getDomainObjects(std::string a_type);
+	std::vector<std::string>                        getDomainModelObjectsFromCX(std::string a_type);
 
 	static ClipsGymThread *thread_instance;
 	static std::mutex      mutex;
 
 	//helper functions
-	std::vector<std::string>  splitActionToGoalParams(std::string action);
-	std::string               getClipsSlotValuesAsString(std::vector<CLIPS::Value> slot_values);
+	std::vector<std::string> splitActionToGoalParams(std::string action);
+	std::string              getClipsSlotValuesAsString(std::vector<CLIPS::Value> slot_values);
 	//std::vector<std::string> *getClipsSlotValuesAsStringVector(std::vector<CLIPS::Value> slot_values);
 
 	void assertRlGoalSelectionFact(std::string goalID);
 
-	py::list expandGrid(std::map<std::string, std::vector<std::string>>map);//py::dict dictionary);
+	py::list expandGrid(std::map<std::string, std::vector<std::string>> map); //py::dict dictionary);
 
-	int resetCount=0;
+	int resetCount = 0;
 };
 //#endif

@@ -25,15 +25,15 @@
 class ClipsObservationInfo
 {
 public:
-	ClipsObservationInfo();//std::map<std::string, int> a_observation_space);
-   ClipsObservationInfo(std::string a_observation);
+	ClipsObservationInfo(); //std::map<std::string, int> a_observation_space);
+	ClipsObservationInfo(std::string a_observation);
 	//virtual ~ClipsObservationInfo();
 
-	//std::list<int> 
-   std::string observation;
-	int            reward;
-	bool           done;
-	std::string    info;
+	//std::list<int>
+	std::string observation;
+	int         reward;
+	bool        done;
+	std::string info;
 
 private:
 	//std::map<std::string, int> observation_space;
