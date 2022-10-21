@@ -3,19 +3,6 @@
 ---
 doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/clips-agent
 ---
-rl-agent:
-  env_name: "blocks"  # "blockstower"
-
-  # Name of saved rl agent after training
-  name: "MaskablePPOAgent_e"
-  # Directory where the rl agent is saved after training
-  # And to look for trained agent files
-  dir: "@BASEDIR@/src/plugins/rl-test/rl-agent"  # ,"@BASEDIR@/testagent"]
-
-  # If set to true a new agent is created and trained and save at the
-  # rl-agent-dirs with rl-agent-name.
-  # Otherwise - if set to false - the rl-agent-name is loaded and executed
-  training-mode: true
 
 python:
   # if trainings-mode is set to true the training script is executed
@@ -37,6 +24,17 @@ python:
   plugins-dir: "@BASEDIR@/plugins"
 
 goal-space:
+  # Goal Classnames
+  classes: ["TOWER-C1","TOWER-C2"]
+
+param-names:
+  TOWER-C1: ["buttom","top"]
+  TOWER-C2: ["buttom","middle","top"]
+
+  param-types:
+    buttom: block
+    middle: block
+    top: block
   # Classname: params [Identifier - Typ]
-  TOWER-C1: {buttom: block, top: block}
-  TOWER-C2: {blocks: block}
+  #TOWER-C1: {buttom: block, top: block}
+  #TOWER-C2: {blocks: block}

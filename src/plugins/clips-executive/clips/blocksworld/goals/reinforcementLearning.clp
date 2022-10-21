@@ -27,7 +27,10 @@
 )
 
 
-
+;TODO Check for mode if mode is FORMULATED then leaf it
+;TODO add function for mode EVALUATED or rejected to assert:
+;(printout t "Goal '" ?goal-id "' has failed (" ?outcome "), evaluating" crlf)
+;(assert (rl-finished-goal (goal-id ?goal-id) (outcome ?outcome) (result 0)))
 (defrule rl-clips-goal-selection
 	?r <- (rl-goal-selection (next-goal-id ?a))
 	?g <- (goal (id ?a) (mode ?m))
