@@ -145,10 +145,9 @@ if __name__ == '__main__':
     # with ActionMasker. If the wrapper is detected, the masks are automatically
     # retrieved and used when learning. Note that MaskablePPO does not accept
     # a new action_mask_fn kwarg, as it did in an earlier draft.
-    model = MaskablePPO(MaskableActorCriticPolicy, env, verbose=1, n_steps=5)
+    model = MaskablePPO(MaskableActorCriticPolicy, env, verbose=1, n_steps=3)
     #model = PPO(MlpPolicy, env, verbose=0)
 
-    timesteps=40
     print("\n\nStart trainig the rl agent - for {} timesteps ".format(timesteps))
     model.learn(total_timesteps=timesteps,log_interval=1)
     # Random Agent, before training
@@ -158,4 +157,6 @@ if __name__ == '__main__':
     print("\n\n\nFinished training the rl agent\n\n\n")
     print ("Saving the agent at: ", file_name)
     model.save(file_name)
+    
+    result = "Training completed! Model saved at: {0}".format(file_name)
 

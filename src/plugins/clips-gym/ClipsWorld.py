@@ -293,3 +293,16 @@ class ClipsWorld(gym.Env):
                     #literals.append(self._inverted_obs[value])
         #print(literals)
         #self.env.env.set_state(self.get_state().with_literals(literals))
+
+  def getCurrentObs(self):
+    print(f"ClipsWorld: getCurrentObs ")
+    p = clips_gym.ClipsGymThread.getInstance()
+    fact_string = p.create_rl_env_state_from_facts()
+    print("ClipsWorld: fact_string: ", fact_string)
+    raw_facts = ast.literal_eval(fact_string)
+    print("ClipsWorld: getCurrentObs facts: ", raw_facts)
+    state = self.get_state_from_facts(raw_facts)
+    print("ClipsWorld: getCurrentObs new env state: ",state)
+    return state
+
+    

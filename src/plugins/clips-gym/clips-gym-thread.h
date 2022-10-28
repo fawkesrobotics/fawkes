@@ -98,6 +98,8 @@ public:
 
 	py::list getGoalClassList();
 
+	void assertRlGoalSelectionFact(std::string goalID);
+
 protected:
 	virtual void
 	run()
@@ -107,7 +109,7 @@ protected:
 
 private:
 	std::map<std::string, fawkes::LockPtr<CLIPS::Environment>> envs_;
-	std::string                                                clisp_env_name;
+	std::string                                                clips_env_name;
 	constexpr static char cfg_prefix_[] = "/plugins/clips-gym/static/";
 
 	//TODO extra Klasse auslagern
@@ -122,8 +124,6 @@ private:
 	std::vector<std::string> splitActionToGoalParams(std::string action);
 	std::string              getClipsSlotValuesAsString(std::vector<CLIPS::Value> slot_values);
 	//std::vector<std::string> *getClipsSlotValuesAsStringVector(std::vector<CLIPS::Value> slot_values);
-
-	void assertRlGoalSelectionFact(std::string goalID);
 
 	py::list expandGrid(std::map<std::string, std::vector<std::string>> map); //py::dict dictionary);
 
