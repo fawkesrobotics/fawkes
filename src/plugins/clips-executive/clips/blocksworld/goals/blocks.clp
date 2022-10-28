@@ -78,6 +78,9 @@
 	(printout t "Goal '" ?goal-id "' has been completed, evaluating" crlf)
 	(assert (rl-finished-goal (goal-id ?goal-id) (outcome COMPLETED) (result 1)))
 	(modify ?g (mode EVALUATED))
+;	(assert (rl-waiting))
+
+;	(printout t "asserted rl-waiting" crlf )
 )
 
 (defrule tower-two-goal-evaluate-completed

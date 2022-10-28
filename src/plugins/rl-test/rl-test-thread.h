@@ -61,10 +61,21 @@ public:
 	virtual void clips_context_destroyed(const std::string &env_name);
 
 	//bool        trainingRlAgent();
-	std::string executeRlAgent(std::string facts);
 
-	bool              startedTraining;
+	bool startedTraining;
+
+	bool              startedExecution;
 	std::future<bool> training_done;
+
+	std::future<bool> goal_prediction_done;
+
+	std::string getGoalId(std::string action);
+	void        assertRlGoalSelectionFact(std::string goalID);
+	std::string create_rl_env_state_from_facts();
+
+	std::string getClipsSlotValuesAsString(std::vector<CLIPS::Value> slot_values);
+
+	std::string executeRlAgent(std::string fact_string);
 
 protected:
 	virtual void
@@ -74,6 +85,9 @@ protected:
 	}
 
 private:
+	//py::module_ sys;
+
+	std::string                                                clips_env_name;
 	std::map<std::string, fawkes::LockPtr<CLIPS::Environment>> envs_;
 
 	constexpr static char cfg_prefix_[] = "/plugins/rl-test/static/";
@@ -85,13 +99,22 @@ private:
 	virtual bool bb_interface_message_received(fawkes::Interface *interface,
 	                                           fawkes::Message   *message) noexcept;
 
-	fawkes::LockPtr<CLIPS::Environment> getClipsEnv(std::string env_name);
+	fawkes::LockPtr<CLIPS::Environment> getClipsEnv();
 	void                                clips_rl_extract_executable_facts(std::string  env_name,
 	                                                                      CLIPS::Value parent_goal_id,
 	                                                                      std::string  to);
-	void        rl_goal_selection(std::string env_name, CLIPS::Value parent_goal_id, std::string to);
-	std::string create_rl_env_state_from_facts(std::string env_name);
+	void rl_goal_selection(std::string env_name, CLIPS::Value parent_goal_id, std::string to);
 
-	std::string clipsValueToString(CLIPS::Value v);
+	/* config values*/
+	bool        cfg_training_mode;
+	std::string cfg_rl_agent_name;
+	std::string cfg_rl_agent_dir;
+	std::string cfg_python_dir; //location of execution and trainings-script
+	std::string cfg_execution_script;
+	std::string cfg_env_script;
+	std::string cfg_env_dir;
+	std::string cfg_bin_plugins_dir;
+
+	int count_startedExecution;
 };
 //#endif

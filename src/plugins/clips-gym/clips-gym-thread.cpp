@@ -104,7 +104,9 @@ PYBIND11_MODULE(clips_gym, m)
 	  .def("generateObservationSpace", &ClipsGymThread::generateObservationSpace)
 	  .def("getParamsNameTypeMapOfGoal", &ClipsGymThread::getParamsNameTypeMapOfGoal)
 	  .def("getParamNameDomainObjectsComb", &ClipsGymThread::getParamNameDomainObjectsComb)
-	  .def("getGoalClassList", &ClipsGymThread::getGoalClassList);
+	  .def("getGoalClassList", &ClipsGymThread::getGoalClassList)
+	  .def("assertRlGoalSelectionFact", &ClipsGymThread::assertRlGoalSelectionFact)
+	  .def("getGoalId", &ClipsGymThread::getGoalId);
 }
 
 void
@@ -545,17 +547,7 @@ ClipsGymThread::getParamsNameTypeMapOfGoal(std::string goalClass)
 
 	for (std::string param : params) {
 		std::string cfg_param = "/param-names/param-types/" + param;
-		std::cout << "is string: " << config->is_string(cfg_param) << std::endl;
-
-		/*if(config->is_list(cfg_param) == 1)
-		{
-			std::vector<std::string> type_list = config->get_strings(cfg_param);
-			mapParamsNameType.insert(std::pair<std::string, std::string>(param,p_splitted[1]));
-			for(std::string t: type_list)
-			{
-				std::cout << param <<": " <<t<< std::endl;
-			}
-		}*/
+		//std::cout << "is string: " << config->is_string(cfg_param) << std::endl;
 
 		std::string p_type = config->get_string(cfg_param);
 		std::cout << param << ": " << p_type << std::endl;
@@ -726,7 +718,7 @@ void
 ClipsGymThread::clips_context_init(const std::string &env_name, LockPtr<CLIPS::Environment> &clips)
 {
 	std::cout << "Hello World!-from ClipsGymThread clips_context_init\n" << std::endl;
-	clisp_env_name  = env_name;
+	clips_env_name  = env_name;
 	envs_[env_name] = clips;
 	logger->log_info(name(), "Called to initialize environment %s", env_name.c_str());
 
@@ -759,7 +751,7 @@ ClipsGymThread::clips_context_destroyed(const std::string &env_name)
 fawkes::LockPtr<CLIPS::Environment>
 ClipsGymThread::getClipsEnv()
 {
-	fawkes::LockPtr<CLIPS::Environment> clips = envs_[clisp_env_name];
+	fawkes::LockPtr<CLIPS::Environment> clips = envs_[clips_env_name];
 	return clips;
 }
 
@@ -827,17 +819,8 @@ ClipsGymThread::getDomainModelObjectsFromCX(std::string a_type)
 			if (obj_type == a_type) {
 				std::string name = getClipsSlotValuesAsString(fact->slot_value("name"));
 				domainObjects.push_back(name);
-				std::cout << obj_type << ": " << name << std::endl;
+				//std::cout << obj_type << ": " << name << std::endl;
 			}
-			/*std::vector<std::string> slot_names = fact->slot_names();
-			for(std::string s: slot_names)
-			{
-				//std::cout << "Slot name: " + s << std::endl;
-				std::vector<CLIPS::Value> slot_values = fact->slot_value(s);
-				std::string               value       = getClipsSlotValuesAsString(slot_values);
-
-				std::cout <<  " Slot " + s + ": "+value <<std::endl;
-			}*/
 		}
 		fact = fact->next();
 	}

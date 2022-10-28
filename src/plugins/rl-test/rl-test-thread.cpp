@@ -70,23 +70,17 @@ trainingRlAgent(Configuration *config)
 	bool        is_done       = false;
 	std::string rl_agent_name = config->get_string("/rl-agent/name");
 	std::string rl_agent_dir  = getConfigStringReplacedBasedir(config, "/rl-agent/dir");
-	//std::regex_replace(config->get_string("/rl-agent/dir"), std::regex("@BASEDIR@"), BASEDIR);
-	std::cout << rl_agent_dir << std::endl;
+	std::cout << "RL agent path: " << rl_agent_dir << std::endl;
 	std::string training_script = config->get_string("/python/training-script");
 	std::string training_dir    = getConfigStringReplacedBasedir(config, "/python/dir");
-	//std::regex_replace(config->get_string("/python/dir"), std::regex("@BASEDIR@"), BASEDIR);
 
-	std::string env = config->get_string("/rl-agent/env_name");
-
-	std::string execution_script = config->get_string("/python/execution-script");
-	std::string execution_dir    = getConfigStringReplacedBasedir(config, "/python/dir");
-	//std::regex_replace(config->get_string("/python/dir"), std::regex("@BASEDIR@"), BASEDIR);
-
-	std::string env_dir = getConfigStringReplacedBasedir(config, "/python/env-dir");
-	//std::regex_replace(config->get_string("/python/env-dir"), std::regex("@BASEDIR@"), BASEDIR);
-
+	std::string env             = config->get_string("/rl-agent/env_name");
+	std::string env_dir         = getConfigStringReplacedBasedir(config, "/python/env-dir");
 	std::string bin_plugins_dir = getConfigStringReplacedBasedir(config, "/python/plugins-dir");
-	//std::regex_replace(config->get_string("/python/plugins-dir"), std::regex("@BASEDIR@"), BASEDIR);
+
+	std::cout << "Rl-Test-Thread training RL agent before training -laps" << std::endl;
+	int training_laps = config->get_int("rl-agent/training-laps");
+	std::cout << "Rl-Test-Thread training RL agent after training -laps" << std::endl;
 
 	py::scoped_interpreter guard{};
 
@@ -121,28 +115,8 @@ trainingRlAgent(Configuration *config)
 		py::str file_name = (py::str)("file_name = \"" + rl_agent_dir + "/" + rl_agent_name + "\"");
 		py::exec(file_name, main_namespace);
 
-		//For TrainingClipsWorld.py
-		/* 		py::str action_space =
-		  (py::str)("action_space = ['TOWER-C1#a#b', 'TOWER-C1#a#c', 'TOWER-C1#a#d' , 'TOWER-C1#a#e']");
-		py::exec(action_space, main_namespace);
-		py::exec("print(action_space)");
-
-		std::string obs("obs_space = [");
-		obs += "'clear(a)','clear(b)','clear(c)','clear(d)','clear(e)'";
-		obs += ",'handempty(robo1)','handfull(robo1)','holding(a)','holding(b)','holding(c)','holding("
-		       "d)','holding(e)'";
-		obs += ",'on(a,b)','on(a,c)','on(a,d)','on(a,e)','on(b,a)','on(b,c)'";
-		obs += ",'on(b,d)','on(b,e)','on(c,a)','on(c,b)','on(c,d)','on(c,e)'";
-		obs += ",'on(d,a)','on(d,b)','on(d,c)','on(d,e)','on(e,a)','on(e,b)'";
-		obs += ",'on(e,c)','on(e,d)'";
-		obs += ",'ontable(a)', 'ontable(b)', 'ontable(c)', 'ontable(d)', 'ontable(e)']";
-
-		py::str obs_space = (py::str)(obs);
-		py::exec(obs_space, main_namespace);
-		py::exec("print(obs_space)"); */
-
-		//TODO maybe added to config - value of training timesteps
-		py::str timesteps = (py::str)("timesteps = 10"); //1000
+		//Value of training timesteps
+		py::str timesteps = (py::str)("timesteps = " + std::to_string(training_laps)); //1000
 		py::exec(timesteps, main_namespace);
 
 		//printing python variables with config values
@@ -154,9 +128,7 @@ trainingRlAgent(Configuration *config)
 		py::str training_script_path = (py::str)(rl_agent_dir + "/" + training_script);
 		//py::exec_file(training_script_path, main_namespace, main_namespace);
 		auto result = py::eval_file(training_script_path, main_namespace);
-		std::cout
-		  << "\n\n\nDONE EVALUATING TRAINING SCRIPT - I should probably give feedback to clips\n\n\n"
-		  << std::endl;
+		std::cout << "\n\n\nDONE EVALUATING TRAINING SCRIPT \n\n\n" << std::endl;
 		py::print(result);
 		is_done = true;
 
@@ -173,104 +145,68 @@ trainingRlAgent(Configuration *config)
 }
 
 std::string
-RLTestThread::executeRlAgent(std::string facts)
+RLTestThread::executeRlAgent(std::string fact_string)
 {
-	std::string rl_agent_name = config->get_string("/rl-agent/name");
-	std::string rl_agent_dir =
-	  std::regex_replace(config->get_string("/rl-agent/dir"), std::regex("@BASEDIR@"), BASEDIR);
-	std::cout << rl_agent_dir << std::endl;
-	std::string training_script = config->get_string("/python/training-script");
-	std::string training_dir =
-	  std::regex_replace(config->get_string("/python/dir"), std::regex("@BASEDIR@"), BASEDIR);
-
-	std::string env = config->get_string("/rl-agent/env_name");
-
-	std::string execution_script = config->get_string("/python/execution-script");
-	std::string execution_dir =
-	  std::regex_replace(config->get_string("/python/dir"), std::regex("@BASEDIR@"), BASEDIR);
-
-	std::string env_script = config->get_string("/python/env-script");
-	std::string env_dir =
-	  std::regex_replace(config->get_string("/python/env-dir"), std::regex("@BASEDIR@"), BASEDIR);
-
 	std::string selected_action = "";
 
-	//for pybind11
-	py::scoped_interpreter guard{};
+	//if (!Py_IsInitialized())
+	std::cout << "Initialising the Python interpreter" << std::endl;
+
+	py::initialize_interpreter();
 
 	try {
-		py::object main_namespace2 = py::module_::import("__main__").attr("__dict__");
-		//py::object main_sys =
-		py::exec("import sys", main_namespace2);
-		//py::object main_print =
-		py::exec("print(\"Hello from executing RL agent python\")", main_namespace2);
+		py::object py_scope = py::module_::import("__main__").attr("__dict__");
+		py::exec("import sys", py_scope);
 
-		//necessary to include other python scripts - e.g. PDDLExtension
-		py::str sysPathAppend = (py::str)("sys.path.append(\"" + training_dir + "\")");
-		//py::object main_missingPath =
-		py::exec(sysPathAppend, main_namespace2);
+		py::str sysPathAppend1 = (py::str)("sys.path.append(\"" + cfg_rl_agent_dir + "\")");
+		py::str sysPathAppend2 = (py::str)("sys.path.append(\"" + cfg_python_dir + "\")");
+		py::str sysPathAppend3 = (py::str)("sys.path.append(\"" + cfg_env_dir + "\")");
+		py::str sysPathAppend4 = (py::str)("sys.path.append(\"" + cfg_bin_plugins_dir + "\")");
 
-		//necessary to include other python scripts - e.g. ClipsWorld
-		py::str sysPathAppend2 = (py::str)("sys.path.append(\"" + env_dir + "\")");
-		//py::object main_missingPath =
-		py::exec(sysPathAppend2, main_namespace2);
+		py::exec(sysPathAppend1, py_scope);
+		py::exec(sysPathAppend2, py_scope);
+		py::exec(sysPathAppend3, py_scope);
+		py::exec(sysPathAppend4, py_scope);
+		py::exec("print(\"added config directories to sys.path\")");
+		py::exec("print(sys.path)"); //, py_scope);
 
-		//Add env name extracted from the config file to python
-		py::str env_name = (py::str)("env_name = \"" + env + "\"");
-		py::exec(env_name, main_namespace2);
+		std::cout << "RL Agent file: " + cfg_rl_agent_dir + "/" + cfg_rl_agent_name << std::endl;
+		py::str file_name =
+		  (py::str)("file_name = \"" + cfg_rl_agent_dir + "/" + cfg_rl_agent_name + "\"");
+		py::exec(file_name, py_scope); //main_namespace2);
 
-		//Add dir of env_name.pddl and problem.pddl extracted from the config file to python
-		py::str dir_path = (py::str)("dir_path = \"" + rl_agent_dir + "\"");
-		py::exec(dir_path, main_namespace2);
+		py::str obs = (py::str)("obs =" + fact_string);
+		py::exec(obs, py_scope);
+		py::exec("print(\"Current observation: \", obs)", py_scope);
 
-		//Adds dir + name, where the rl agent should be saved to python
-		std::cout << "RL Agent: " + rl_agent_dir + "/" + rl_agent_name << std::endl;
-		py::str file_name = (py::str)("file_name = \"" + rl_agent_dir + "/" + rl_agent_name + "\"");
-		py::exec(file_name, main_namespace2);
+		std::cout << "Execution script: " + cfg_python_dir + "/" + cfg_execution_script << std::endl;
+		py::str execution_script_path = (py::str)(cfg_python_dir + "/" + cfg_execution_script);
+		py::eval_file(execution_script_path, py_scope, py_scope);
 
-		//TODO maybe added to config - value of training timesteps
-		py::str timesteps = (py::str)("timesteps = 1000");
-		py::exec(timesteps, main_namespace2);
-
-		//printing python variables with config values
-		//main_print =
-		py::exec("print(\"Config values for env_name and path: \" + env_name + \" \" + dir_path)",
-		         main_namespace2);
-
-		//py::str obs = (py::str) ("obs = [0., 1., 1., 1., 0., 1., 1., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1., 1., 1.,]");
-		//py::exec(obs, main_namespace2);
-		py::str obs = (py::str)("obs =" + facts);
-		py::exec(obs, main_namespace2);
-		py::exec("print(obs)", main_namespace2);
-
-		std::cout << "Execution script: " + execution_dir + "/" + execution_script << std::endl;
-		py::str execution_script_path = (py::str)(execution_dir + "/" + execution_script);
-		//py::exec_file(execution_script_path, main_namespace2, main_namespace2);
-		py::eval_file(execution_script_path, main_namespace2);
-
-		//py::exec("result = env.env.actions[action]", main_namespace2);
-		//py::object main_print2 =
-		py::exec("print(\"Result py: \", result)", main_namespace2);
-
-		//extract form boost python
-		//selected_action = py::extract<std::string>(main_namespace2["result"]);
-		//pybind11
-		auto result     = main_namespace2["result"].cast<std::string>();
+		py::exec("print(\"Result py: \", result)", py_scope);
+		auto result     = py_scope["result"].cast<std::string>();
 		selected_action = result;
+
 		std::cout << "\nResult: " + selected_action << std::endl;
 
 	} catch (py::error_already_set &e) {
 		py::module::import("traceback").attr("print_exception")(e.type(), e.value(), e.trace());
 		std::cout << "PYTHON EXCEPTION:" << std::endl;
 		std::cout << e.what() << std::endl;
+	} catch (const std::runtime_error &re) {
+		std::cout << "PYTHON EXCEPTION:" << std::endl;
+		std::cout << re.what() << std::endl;
 	} catch (...) {
 		PyErr_Print();
 		PyErr_Clear();
 	}
+	std::cout << "In executeRlAgent - after pycode run " << selected_action << std::endl;
 
-	//Py_Finalize();
+	py::finalize_interpreter();
+	//std::cout << "pybind 11 interpreter finalized" <<std::endl;
 
-	std::cout << "Finished rl agent execution" << std::endl;
+	std::cout << "In executeRlAgent - after interpreter finalized: " << selected_action << std::endl;
+
 	return selected_action;
 }
 
@@ -278,12 +214,22 @@ void
 RLTestThread::init()
 {
 	std::cout << "Init RLTestThread start" << std::endl;
-	std::string rl_agent_name = config->get_string("/rl-agent/name");
-	std::string rl_agent_dir  = config->get_string("/rl-agent/dir");
-	bool        training_mode = config->get_bool("/rl-agent/training-mode");
-	std::cout << rl_agent_dir + rl_agent_name + " " + std::to_string(training_mode) << std::endl;
 
-	//setup interface
+	/* Reading config values */
+	cfg_rl_agent_name    = config->get_string("/rl-agent/name");
+	cfg_rl_agent_dir     = getConfigStringReplacedBasedir(config, "/rl-agent/dir");
+	cfg_python_dir       = getConfigStringReplacedBasedir(config, "/python/dir");
+	cfg_env_dir          = getConfigStringReplacedBasedir(config, "/python/env-dir");
+	cfg_bin_plugins_dir  = getConfigStringReplacedBasedir(config, "/python/plugins-dir");
+	cfg_execution_script = config->get_string("/python/execution-script");
+	cfg_env_script       = config->get_string("/python/env-script");
+	cfg_training_mode    = config->get_bool("/rl-agent/training-mode");
+
+	std::cout << "Reading config values done: "
+	          << cfg_rl_agent_dir + cfg_rl_agent_name + " " + std::to_string(cfg_training_mode)
+	          << std::endl;
+
+	//setup blackboard interface
 	rl_gs_interface = blackboard->open_for_writing<RLAgentGoalSelectionInterface>("goal-selection");
 	rl_gs_interface->set_msg_id(0);
 	rl_gs_interface->set_final(false);
@@ -295,35 +241,60 @@ RLTestThread::init()
 
 	std::cout << "Finished RLTestThread" << std::endl;
 
-	startedTraining = false;
+	startedTraining  = false;
+	startedExecution = false;
+
 	//wakeup(); //activates any loop
 }
 
 void
 RLTestThread::loop()
 {
-	std::cout << "In RLTestThread Loop " + goal << std::endl;
+	std::cout << "In RLTestThread Loop " << std::endl;
 	rl_gs_interface->set_final(true);
 	rl_gs_interface->set_success(true);
 	rl_gs_interface->set_next_select_goal("RL TEST GOAL FROM LOOP");
 	rl_gs_interface->write();
+	std::future<std::string> execution_done;
 
-	bool training_mode = config->get_bool("/rl-agent/training-mode");
+	std::cout << "cfg_training_mode: " << cfg_training_mode << " started exection count "
+	          << count_startedExecution << std::endl;
 
-	if (training_mode && !startedTraining) {
-		//trainingRlAgent();
-		//training_done = std::async(std::launch::async, trainingRlAgent, config);
+	if (!cfg_training_mode && count_startedExecution < 2) {
+		/* Using the rl agent to predict the next goal */
+		std::cout << "RlTestThread: in loop start execution mode" << std::endl;
+		std::string fact_string = create_rl_env_state_from_facts();
+		//fact_string = "{'said(bob#hello)', 'stack(e#b)', 'stack(c#d)', 'stack(e#d)', 'ontable(b)', 'ontable(e)', 'unstack(d)', 'stack(d#a)', 'stack(a#e)', 'stack(b#d)', 'stack(d#b)', 'clear(e)', 'handempty(robo1)', 'stack(d#c)', 'ontable(a)', 'stack(b#e)', 'stack(e#a)', 'stack(c#b)', 'stack(a#c)', 'putdown(e)', 'pickup(a)', 'stack(e#c)', 'pickup(d)', 'unstack(a)', 'pickup(b)', 'clear(b)', 'stack(b#a)', 'stack(c#a)', 'putdown(d)', 'stack(d#e)', 'stack(b#c)', 'unstack(c)', 'stack(a#b)', 'putdown(a)', 'ontable(d)', 'clear(c)', 'putdown(c)', 'ontable(c)', 'clear(d)', 'clear(a)', 'unstack(b)', 'putdown(b)', 'stack(c#e)', 'pickup(c)', 'pickup(e)', 'unstack(e)', 'stack(a#d)'}";
 
+		auto action = executeRlAgent(fact_string);
+		std::cout << "executeRlAgent returned: " << action << std::endl;
+		if (action != "") {
+			auto goal_id = getGoalId(action);
+			std::cout << "GetGoalID: " << goal_id << std::endl;
+			assertRlGoalSelectionFact(goal_id);
+		}
+		//execution_done   = std::async(std::launch::async, executeRlAgent, config, count_startedExecution);
+
+		count_startedExecution++;
+		std::cout << "RlTestThread in rl_goal_selection started async execution thread " << std::endl;
+	} else if (cfg_training_mode && !startedTraining) {
+		/* Training RL agent */
+		std::cout << "RlTestThread: rl_goal_selection - executing RL Agent is not active!" << std::endl;
+		training_done   = std::async(std::launch::async, trainingRlAgent, config);
 		startedTraining = true;
-	} else if (training_mode && startedTraining) {
-		std::cout << "\nLoop: Check if training_done future is vailid" << std::endl;
-		std::cout << training_done.valid() << "\n" << std::endl;
-		int sec = 1000;
-		std::cout << "Wait for " << sec << " msec to check future.get" << std::endl;
+	} else if (cfg_training_mode && startedTraining) {
+		/* Checking if training completed */
+		std::cout << "Check if training_done future is vailid " << training_done.valid() << std::endl;
+		int sec = 10; //00;
+		std::cout << "Wait for " << sec << " msec to check future status" << std::endl;
 		std::future_status status = training_done.wait_for(std::chrono::milliseconds(sec));
 		if (status == std::future_status::ready) {
 			std::cout << "Future: " << training_done.get() << std::endl;
+			finalize();
 		}
+	} else {
+		std::cout << "Finalize Plugin!\n\n" << std::endl;
+		finalize();
 	}
 
 	std::cout << "End RLTestThread Loop " << std::endl;
@@ -333,12 +304,14 @@ void
 RLTestThread::finalize()
 {
 	//Py_Finalize();
+	py::finalize_interpreter();
 	blackboard->close(rl_gs_interface);
 }
 
 bool
 RLTestThread::bb_interface_message_received(Interface *interface, fawkes::Message *message) noexcept
 {
+	std::cout << "In bb_interface_message_received " << std::endl;
 	if (message->is_of_type<RLAgentGoalSelectionInterface::GSelectionMessage>()) {
 		RLAgentGoalSelectionInterface::GSelectionMessage *msg =
 		  (RLAgentGoalSelectionInterface::GSelectionMessage *)message;
@@ -347,7 +320,7 @@ RLTestThread::bb_interface_message_received(Interface *interface, fawkes::Messag
 		rl_gs_interface->write();
 		if (std::string(msg->goal()) != "")
 			goal = msg->goal();
-		//wakeup(); //activates loop where the generation is done
+		wakeup(); //activates loop where the generation is done
 	} else {
 		logger->log_error(name(), "Received unknown message of type %s, ignoring", message->type());
 	}
@@ -358,23 +331,22 @@ void
 RLTestThread::clips_context_init(const std::string &env_name, LockPtr<CLIPS::Environment> &clips)
 {
 	std::cout << "Start RLTestThread clips_context_init\n" << std::endl;
-
+	clips_env_name  = env_name;
 	envs_[env_name] = clips;
 	logger->log_info(name(), "Called to initialize environment %s", env_name.c_str());
 
 	clips.lock();
 	clips->evaluate("(printout t \"Hello from CLIPS aspect in RL test plugin\" crlf crlf)");
-	/*clips->add_function("rl-extract-executable-fact",
-						   sigc::slot<void, CLIPS::Value, std::string>(sigc::bind<0>(
-						  sigc::mem_fun(*this, &RLTestThread::clips_rl_extract_executable_facts),
-						  env_name)));*/
-	clips->add_function("rl-goal-selection-start",
+
+	/*clips->add_function("rl-goal-selection-start",
 	                    sigc::slot<void, CLIPS::Value, std::string>(
 	                      sigc::bind<0>(sigc::mem_fun(*this, &RLTestThread::rl_goal_selection),
-	                                    env_name)));
+	                                    env_name)));*/
 
-	//clips->refresh_agenda();
-	//clips->run();
+	if (!cfg_training_mode) {
+		clips->assert_fact("(execution-mode)");
+	}
+
 	clips.unlock();
 }
 
@@ -386,93 +358,25 @@ RLTestThread::clips_context_destroyed(const std::string &env_name)
 }
 
 fawkes::LockPtr<CLIPS::Environment>
-RLTestThread::getClipsEnv(std::string env_name)
+RLTestThread::getClipsEnv()
 {
-	fawkes::LockPtr<CLIPS::Environment> clips = envs_[env_name];
+	fawkes::LockPtr<CLIPS::Environment> clips = envs_[clips_env_name];
 	return clips;
-}
-
-//ToDo return std::vector<string> literals
-std::string
-RLTestThread::create_rl_env_state_from_facts(std::string env_name)
-{
-	std::cout << "In create rl env state from facts" << std::endl;
-	fawkes::LockPtr<CLIPS::Environment> clips = getClipsEnv(env_name);
-	clips.lock();
-	std::cout << "In create env state - locked clips" << std::endl;
-	CLIPS::Fact::pointer fact             = clips->get_facts();
-	std::string          env_state_string = "{";
-	while (fact) {
-		CLIPS::Template::pointer tmpl  = fact->get_template();
-		std::size_t              found = tmpl->name().find("domain-fact");
-		//std::size_t found2 = tmpl->name().find("wm-fact");//"predicate");
-		//std::size_t found3 = tmpl->name().find("goal"); //"domain"
-
-		if (found != std::string::npos) {
-			std::vector<std::string> slot_names = fact->slot_names();
-			std::string              fact_value = "";
-			for (std::string s : slot_names) {
-				fact_value += " Slot " + s + ": ";
-				//std::cout << "Slot name: " + s << std::endl;
-				std::vector<CLIPS::Value> slot_values = fact->slot_value(s);
-				std::string               value       = "";
-				for (std::size_t i = 0; i < slot_values.size(); i++) //for(CLIPS::Value v: slot_values)
-				{
-					auto v = slot_values[i];
-					value += clipsValueToString(v);
-					if (slot_values.size() > 1
-					    && i != (slot_values.size() - 1)) //v != slot_values[slot_values.size()-1])
-					{
-						value += ",";
-					}
-				}
-
-				if (s == "name") {
-					env_state_string += "\"" + value + "(";
-				}
-				if (s == "param-values") {
-					env_state_string += value + ")\","; //value.substr(0, value.length()-2) + "),";
-				}
-				fact_value += " " + value;
-			}
-			//std::cout << fact_value <<std::endl;
-		}
-		fact = fact->next();
-	}
-	env_state_string = env_state_string.substr(0, env_state_string.length() - 1) + "}";
-	std::cout << env_state_string << std::endl;
-	std::cout << "Finished passing all facts " << std::endl;
-	clips.unlock();
-	return env_state_string;
 }
 
 void
 RLTestThread::rl_goal_selection(std::string env_name, CLIPS::Value parent_goal_id, std::string to)
 {
-	//get current env state from clips
-	//std::string facts = create_rl_env_state_from_facts(env_name); //todo save return value as obs
-	bool training_mode = true;
-	if (!training_mode) {
-		/*std::string nextAction = executeRlAgent(
-		  facts); //ToDo pass obs and save return value /selected goal in a fact/return it to clips
-		std::cout << nextAction << std::endl;
-		fawkes::LockPtr<CLIPS::Environment> clips = getClipsEnv(env_name);
-		clips.lock();
-		clips->evaluate("(printout t \"Finished executeRlAgent asserting fact with next goal\" )");
-
-		CLIPS::Value             v = CLIPS::Value(nextAction, CLIPS::TYPE_STRING);
-		CLIPS::Template::pointer temp =
-		  clips->get_template("rl-goal-selection"); //("rl-init-test-fact");
-		CLIPS::Fact::pointer fact = CLIPS::Fact::create(**clips, temp);
-		fact->set_slot("next-goal-id", v);
-		clips->assert_fact(fact); //"(rl-init-test-fact )");
-		clips.unlock();*/
-	} else if (!startedTraining) {
-		std::cout << "In rl_goal_selection - executing RL Agent is not active!" << std::endl;
-		//trainingRlAgent();
+	std::cout << "RlTestThread: in rl_goal_selection" << std::endl;
+	std::cout << "cfg_training_mode: " << cfg_training_mode << " started exection "
+	          << startedExecution << std::endl;
+	if (cfg_training_mode && !startedTraining) {
+		/* Training RL agent */
+		std::cout << "RlTestThread: rl_goal_selection - executing RL Agent is not active!" << std::endl;
 		training_done   = std::async(std::launch::async, trainingRlAgent, config);
 		startedTraining = true;
-	} else if (training_mode && startedTraining) {
+	} else if (cfg_training_mode && startedTraining) {
+		/* Checking if training completed */
 		std::cout << "Check if training_done future is vailid " << training_done.valid() << std::endl;
 		int sec = 10; //00;
 		std::cout << "Wait for " << sec << " msec to check future status" << std::endl;
@@ -486,24 +390,147 @@ RLTestThread::rl_goal_selection(std::string env_name, CLIPS::Value parent_goal_i
 	}
 }
 
+/*
+* Functions from clips-gym
+* TODO: extract to utility class or merge rl-test and clips-gym plugin
+*/
+
 std::string
-RLTestThread::clipsValueToString(CLIPS::Value v)
+RLTestThread::create_rl_env_state_from_facts()
+{
+	std::cout << "In create rl env state from facts" << std::endl;
+	fawkes::LockPtr<CLIPS::Environment> clips = getClipsEnv();
+	//refcount
+	std::cout << "Clips pointer refcount: " << clips.refcount() << std::endl;
+	std::cout << current_thread_id() << " " << current_thread_name() << std::endl;
+
+	clips.lock();
+	std::cout << "Lock clips done" << std::endl;
+	std::cout << "Clips pointer refcount: " << clips.refcount() << std::endl;
+	CLIPS::Fact::pointer fact             = clips->get_facts();
+	std::string          env_state_string = "{";
+	while (fact) {
+		CLIPS::Template::pointer tmpl = fact->get_template();
+
+		std::size_t found = tmpl->name().find("domain-fact");
+
+		if (found != std::string::npos) {
+			/*std::vector<std::string> slot_names = fact->slot_names();
+			std::string              fact_value = "";
+			for (std::string s : slot_names) {
+				fact_value += " Slot " + s + ": ";
+				//std::cout << "Slot name: " + s << std::endl;
+				std::vector<CLIPS::Value> slot_values = fact->slot_value(s);
+				std::string               value       = getClipsSlotValuesAsString(slot_values);
+
+				//std::cout << value << std::endl;
+				if (s == "name") {
+					env_state_string += "\"" + value + "(";
+				}
+				if (s == "param-values") {
+					env_state_string += value + ")\",";
+				}
+				fact_value += " " + value;
+			}*/
+
+			std::string fact_name         = getClipsSlotValuesAsString(fact->slot_value("name"));
+			std::string fact_param_values = getClipsSlotValuesAsString(fact->slot_value("param-values"));
+			env_state_string += "\"" + fact_name + "(" + fact_param_values + ")\",";
+
+			//std::cout << fact_value <<std::endl;
+		}
+		fact = fact->next();
+	}
+	env_state_string = env_state_string.substr(0, env_state_string.length() - 1) + "}";
+	std::cout << env_state_string << std::endl;
+	std::cout << "Finished passing all facts " << std::endl;
+	clips.unlock();
+	std::cout << "Unlock clips done: Clips pointer refcount: " << clips.refcount() << std::endl;
+
+	return env_state_string;
+}
+
+std::string
+RLTestThread::getGoalId(std::string action)
+{
+	std::cout << "RLTestThread: getGoalId of " << action << std::endl;
+
+	fawkes::LockPtr<CLIPS::Environment> clips = getClipsEnv();
+	clips.lock();
+	CLIPS::Fact::pointer fact   = clips->get_facts();
+	std::string          goalID = "";
+	while (fact) {
+		CLIPS::Template::pointer tmpl  = fact->get_template();
+		std::size_t              found = tmpl->name().find("goal");
+
+		if (found != std::string::npos) {
+			/*
+			Slot names: id, class,type, sub-type, parent, mode, outcome, warning, error, message,
+						priority, params, meta, meta-fact, meta-template, required-resources, acquired-resources,
+						committed-to,verbosity,is-executable,
+			Class: TOWER-C1, params: buttom,b,top,d
+			*/
+			std::string current_class  = getClipsSlotValuesAsString(fact->slot_value("class"));
+			std::string current_params = getClipsSlotValuesAsString(fact->slot_value("params"));
+
+			std::string current_action = current_class + "#" + current_params;
+			std::cout << "current action: " << current_action << std::endl;
+			if (current_action == action) {
+				goalID = getClipsSlotValuesAsString(fact->slot_value("id"));
+				std::cout << "correct class and params! GoalID is: " << goalID << std::endl;
+				break;
+			}
+		}
+		fact = fact->next();
+	}
+	std::cout << "Finished passing all goals" << std::endl;
+	clips.unlock();
+	return goalID;
+}
+
+std::string
+RLTestThread::getClipsSlotValuesAsString(std::vector<CLIPS::Value> slot_values)
 {
 	std::string value = "";
-	switch (v.type()) {
-	case CLIPS::TYPE_FLOAT:
-		// std::cout << v.as_float() << std::endl;
-		value += std::to_string(v.as_float());
-		break;
+	for (std::size_t i = 0; i < slot_values.size(); i++) {
+		auto v = slot_values[i];
+		switch (v.type()) {
+		case CLIPS::TYPE_FLOAT:
+			// std::cout << v.as_float() << std::endl;
+			value += std::to_string(v.as_float());
+			break;
 
-	case CLIPS::TYPE_INTEGER:
-		//std::cout << v.as_integer() << std::endl;
-		value += std::to_string(v.as_integer());
-		break;
+		case CLIPS::TYPE_INTEGER:
+			//std::cout << v.as_integer() << std::endl;
+			value += std::to_string(v.as_integer());
+			break;
 
-	default:
-		//std::cout << v.as_string() <<std::endl;
-		value += v.as_string();
+		default:
+			//std::cout << v.as_string() <<std::endl;
+			value += v.as_string();
+		}
+		if (slot_values.size() > 1 && i != (slot_values.size() - 1)) {
+			value += "#";
+		}
 	}
 	return value;
+}
+
+void
+RLTestThread::assertRlGoalSelectionFact(std::string goalID)
+{
+	fawkes::LockPtr<CLIPS::Environment> clips = getClipsEnv();
+	clips.lock();
+
+	clips->evaluate("(printout t \"In RLTestThread assertRlGoalSelectionFact: next goal " + goalID
+	                + "\" crlf)");
+	CLIPS::Value             v    = CLIPS::Value(goalID, CLIPS::TYPE_SYMBOL); //CLIPS::TYPE_STRING);
+	CLIPS::Template::pointer temp = clips->get_template("rl-goal-selection");
+
+	CLIPS::Fact::pointer fact = CLIPS::Fact::create(**clips, temp);
+	fact->set_slot("next-goal-id", v);
+	clips->assert_fact(fact);
+
+	clips.unlock();
+	std::cout << "assertRlGoalSelectionFact done" << std::endl;
 }

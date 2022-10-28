@@ -15,7 +15,10 @@ rl-agent:
   # If set to true a new agent is created and trained and save at the
   # rl-agent-dirs with rl-agent-name.
   # Otherwise - if set to false - the rl-agent-name is loaded and executed
-  training-mode: true
+  training-mode: false
+
+  # Number of time the env reaches a final state
+  training-laps: 15
 
 python:
   # if trainings-mode is set to true the training script is executed
