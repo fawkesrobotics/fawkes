@@ -149,10 +149,12 @@ RLTestThread::executeRlAgent(std::string fact_string)
 {
 	std::string selected_action = "";
 
-	//if (!Py_IsInitialized())
-	std::cout << "Initialising the Python interpreter" << std::endl;
+	PyThreadState *py_inter = Py_NewInterpreter();
+	if (!Py_IsInitialized()) {
+		std::cout << "Initialising the Python interpreter" << std::endl;
 
-	py::initialize_interpreter();
+		//py::initialize_interpreter();
+	}
 
 	try {
 		py::object py_scope = py::module_::import("__main__").attr("__dict__");
@@ -168,7 +170,7 @@ RLTestThread::executeRlAgent(std::string fact_string)
 		py::exec(sysPathAppend3, py_scope);
 		py::exec(sysPathAppend4, py_scope);
 		py::exec("print(\"added config directories to sys.path\")");
-		py::exec("print(sys.path)"); //, py_scope);
+		py::exec("print(sys.path)", py_scope);
 
 		std::cout << "RL Agent file: " + cfg_rl_agent_dir + "/" + cfg_rl_agent_name << std::endl;
 		py::str file_name =
@@ -180,11 +182,13 @@ RLTestThread::executeRlAgent(std::string fact_string)
 		py::exec("print(\"Current observation: \", obs)", py_scope);
 
 		std::cout << "Execution script: " + cfg_python_dir + "/" + cfg_execution_script << std::endl;
-		py::str execution_script_path = (py::str)(cfg_python_dir + "/" + cfg_execution_script);
-		py::eval_file(execution_script_path, py_scope, py_scope);
+		py::str    execution_script_path = (py::str)(cfg_python_dir + "/" + cfg_execution_script);
+		py::object temp                  = py::eval_file(execution_script_path, py_scope, py_scope);
 
 		py::exec("print(\"Result py: \", result)", py_scope);
-		auto result     = py_scope["result"].cast<std::string>();
+
+		auto result = py_scope["result"].cast<std::string>();
+		//auto result     = py_scope["result"].cast<std::string>();
 		selected_action = result;
 
 		std::cout << "\nResult: " + selected_action << std::endl;
@@ -202,7 +206,8 @@ RLTestThread::executeRlAgent(std::string fact_string)
 	}
 	std::cout << "In executeRlAgent - after pycode run " << selected_action << std::endl;
 
-	py::finalize_interpreter();
+	Py_EndInterpreter(py_inter);
+	//py::finalize_interpreter();
 	//std::cout << "pybind 11 interpreter finalized" <<std::endl;
 
 	std::cout << "In executeRlAgent - after interpreter finalized: " << selected_action << std::endl;
@@ -239,11 +244,11 @@ RLTestThread::init()
 	bbil_add_message_interface(rl_gs_interface);
 	blackboard->register_listener(this, BlackBoard::BBIL_FLAG_MESSAGES);
 
-	std::cout << "Finished RLTestThread" << std::endl;
+	startedTraining        = false;
+	startedExecution       = false;
+	count_startedExecution = 0;
 
-	startedTraining  = false;
-	startedExecution = false;
-
+	std::cout << "Finished RLTestThread init" << std::endl;
 	//wakeup(); //activates any loop
 }
 
@@ -260,13 +265,21 @@ RLTestThread::loop()
 	std::cout << "cfg_training_mode: " << cfg_training_mode << " started exection count "
 	          << count_startedExecution << std::endl;
 
-	if (!cfg_training_mode && count_startedExecution < 2) {
+	if (!cfg_training_mode && count_startedExecution < 3) {
 		/* Using the rl agent to predict the next goal */
 		std::cout << "RlTestThread: in loop start execution mode" << std::endl;
-		std::string fact_string = create_rl_env_state_from_facts();
-		//fact_string = "{'said(bob#hello)', 'stack(e#b)', 'stack(c#d)', 'stack(e#d)', 'ontable(b)', 'ontable(e)', 'unstack(d)', 'stack(d#a)', 'stack(a#e)', 'stack(b#d)', 'stack(d#b)', 'clear(e)', 'handempty(robo1)', 'stack(d#c)', 'ontable(a)', 'stack(b#e)', 'stack(e#a)', 'stack(c#b)', 'stack(a#c)', 'putdown(e)', 'pickup(a)', 'stack(e#c)', 'pickup(d)', 'unstack(a)', 'pickup(b)', 'clear(b)', 'stack(b#a)', 'stack(c#a)', 'putdown(d)', 'stack(d#e)', 'stack(b#c)', 'unstack(c)', 'stack(a#b)', 'putdown(a)', 'ontable(d)', 'clear(c)', 'putdown(c)', 'ontable(c)', 'clear(d)', 'clear(a)', 'unstack(b)', 'putdown(b)', 'stack(c#e)', 'pickup(c)', 'pickup(e)', 'unstack(e)', 'stack(a#d)'}";
+		//std::string fact_string = create_rl_env_state_from_facts();
 
-		auto action = executeRlAgent(fact_string);
+		py_guard = PyGuard::getInstance();
+		std::cout << "PyGilState: " << PyGILState_Check() << std::endl;
+		//fact_string = "{'said(bob#hello)', 'stack(e#b)', 'stack(c#d)', 'stack(e#d)', 'ontable(b)', 'ontable(e)', 'unstack(d)', 'stack(d#a)', 'stack(a#e)', 'stack(b#d)', 'stack(d#b)', 'clear(e)', 'handempty(robo1)', 'stack(d#c)', 'ontable(a)', 'stack(b#e)', 'stack(e#a)', 'stack(c#b)', 'stack(a#c)', 'putdown(e)', 'pickup(a)', 'stack(e#c)', 'pickup(d)', 'unstack(a)', 'pickup(b)', 'clear(b)', 'stack(b#a)', 'stack(c#a)', 'putdown(d)', 'stack(d#e)', 'stack(b#c)', 'unstack(c)', 'stack(a#b)', 'putdown(a)', 'ontable(d)', 'clear(c)', 'putdown(c)', 'ontable(c)', 'clear(d)', 'clear(a)', 'unstack(b)', 'putdown(b)', 'stack(c#e)', 'pickup(c)', 'pickup(e)', 'unstack(e)', 'stack(a#d)'}";
+		if (count_startedExecution == 0) {
+			PyGuard::getInstance()->loadConfig(config);
+			PyGuard::getInstance()->loadEnv();
+		}
+		py_guard->print();
+		auto action = py_guard->predict();
+		//auto action = "TOWER-C1#buttom#a#top#c";
 		std::cout << "executeRlAgent returned: " << action << std::endl;
 		if (action != "") {
 			auto goal_id = getGoalId(action);
@@ -293,8 +306,9 @@ RLTestThread::loop()
 			finalize();
 		}
 	} else {
-		std::cout << "Finalize Plugin!\n\n" << std::endl;
-		finalize();
+		std::cout << "Nothing to do!" << std::endl;
+		//delete py_guard;
+		//finalize();
 	}
 
 	std::cout << "End RLTestThread Loop " << std::endl;
@@ -415,24 +429,6 @@ RLTestThread::create_rl_env_state_from_facts()
 		std::size_t found = tmpl->name().find("domain-fact");
 
 		if (found != std::string::npos) {
-			/*std::vector<std::string> slot_names = fact->slot_names();
-			std::string              fact_value = "";
-			for (std::string s : slot_names) {
-				fact_value += " Slot " + s + ": ";
-				//std::cout << "Slot name: " + s << std::endl;
-				std::vector<CLIPS::Value> slot_values = fact->slot_value(s);
-				std::string               value       = getClipsSlotValuesAsString(slot_values);
-
-				//std::cout << value << std::endl;
-				if (s == "name") {
-					env_state_string += "\"" + value + "(";
-				}
-				if (s == "param-values") {
-					env_state_string += value + ")\",";
-				}
-				fact_value += " " + value;
-			}*/
-
 			std::string fact_name         = getClipsSlotValuesAsString(fact->slot_value("name"));
 			std::string fact_param_values = getClipsSlotValuesAsString(fact->slot_value("param-values"));
 			env_state_string += "\"" + fact_name + "(" + fact_param_values + ")\",";
@@ -524,7 +520,7 @@ RLTestThread::assertRlGoalSelectionFact(std::string goalID)
 
 	clips->evaluate("(printout t \"In RLTestThread assertRlGoalSelectionFact: next goal " + goalID
 	                + "\" crlf)");
-	CLIPS::Value             v    = CLIPS::Value(goalID, CLIPS::TYPE_SYMBOL); //CLIPS::TYPE_STRING);
+	CLIPS::Value             v    = CLIPS::Value(goalID, CLIPS::TYPE_SYMBOL);
 	CLIPS::Template::pointer temp = clips->get_template("rl-goal-selection");
 
 	CLIPS::Fact::pointer fact = CLIPS::Fact::create(**clips, temp);
