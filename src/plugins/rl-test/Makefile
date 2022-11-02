@@ -35,7 +35,7 @@ LIBS_rl_test = fawkescore fawkesutils fawkesaspects fawkesbaseapp \
 #boost_python310 \
 
 IDIR+=/usr/include/python3.10/ #/home/sonja/.local/lib/python3.9/
-CFLAGS+=$(python3 -m pybind11 --includes) -c -I$(IDIR) $(pyton3-config --extension-suffix) #-c -I$(IDIR)
+CFLAGS+=$(python3 -m pybind11 --includes) -c -I$(IDIR) $(pyton3-config --extension-suffix) -Wno-error #-c -I$(IDIR)
 
 LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):~/.local/lib/python3.10/
 LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/Documents/rlblocksworld/src-python/

@@ -56,7 +56,7 @@ import re
 from pddlgym.rendering.blocks import render as blocks_render
 #from .blocks import render as blocks_render
 
-class ClipsWorld(PDDLEnv):
+class ClipsWorldEnv(PDDLEnv):
 
     
     def __init__(self, domain_file, problem_dir, render):

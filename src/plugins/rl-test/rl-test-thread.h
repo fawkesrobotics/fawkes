@@ -32,6 +32,8 @@
 #include <interfaces/RLAgentGoalSelectionInterface.h>
 #include <plugins/clips/aspect/clips_feature.h>
 
+#include <py-guard.h>
+
 //#include <boost/python.hpp>
 //namespace py = boost::python;
 #include <pybind11/embed.h>
@@ -85,16 +87,15 @@ protected:
 	}
 
 private:
-	//py::module_ sys;
+	//py::object py_scope;
+	PyGuard    *py_guard;
+	std::string goal;
+	std::string clips_env_name;
 
-	std::string                                                clips_env_name;
+	fawkes::RLAgentGoalSelectionInterface                     *rl_gs_interface;
 	std::map<std::string, fawkes::LockPtr<CLIPS::Environment>> envs_;
 
 	constexpr static char cfg_prefix_[] = "/plugins/rl-test/static/";
-
-	fawkes::RLAgentGoalSelectionInterface *rl_gs_interface;
-
-	std::string goal;
 
 	virtual bool bb_interface_message_received(fawkes::Interface *interface,
 	                                           fawkes::Message   *message) noexcept;

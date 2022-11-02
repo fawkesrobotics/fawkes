@@ -25,7 +25,7 @@ python:
   training-script: "TrainingClipsWorld.py"  # "trainingRLAgent.py"
 
   # if trainings-mode is set to false the execution script is called
-  execution-script: "executingClipsWorld.py"  # "executingRLAgent.py"
+  execution-script: "InitClipsWorld.py"  # "executingClipsWorld.py"
 
   # Directory where the python scripts are located
   dir: "@BASEDIR@/src/plugins/rl-test/rl-agent"
