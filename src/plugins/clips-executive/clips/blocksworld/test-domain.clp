@@ -54,6 +54,7 @@
     (domain-object (name c) (type block))
 	  (domain-object (name d) (type block))
 	  (domain-object (name e) (type block))
+	  (domain-object (name f) (type block))
     (domain-object (name robo1) (type robot))
 
     (domain-fact (name clear) (param-values a))
@@ -61,12 +62,14 @@
     (domain-fact (name clear) (param-values c)) 
     (domain-fact (name clear) (param-values d))
     (domain-fact (name clear) (param-values e))  
+    (domain-fact (name clear) (param-values f))  
 
     (domain-fact (name ontable) (param-values a)) 
     (domain-fact (name ontable) (param-values b)) 
     (domain-fact (name ontable) (param-values c)) 
     (domain-fact (name ontable) (param-values d)) 
     (domain-fact (name ontable) (param-values e)) 
+    (domain-fact (name ontable) (param-values f)) 
     
     (domain-fact (name handempty) (param-values robo1)) 
         
@@ -76,44 +79,59 @@
     (domain-fact (name pickup) (param-values c)) 
     (domain-fact (name pickup) (param-values d)) 
     (domain-fact (name pickup) (param-values e)) 
+    (domain-fact (name pickup) (param-values f)) 
 
     (domain-fact (name putdown) (param-values a))
     (domain-fact (name putdown) (param-values b)) 
     (domain-fact (name putdown) (param-values c)) 
     (domain-fact (name putdown) (param-values d)) 
     (domain-fact (name putdown) (param-values e)) 
+    (domain-fact (name putdown) (param-values f)) 
 
     (domain-fact (name unstack) (param-values a))
     (domain-fact (name unstack) (param-values b)) 
     (domain-fact (name unstack) (param-values c)) 
     (domain-fact (name unstack) (param-values d)) 
     (domain-fact (name unstack) (param-values e)) 
+    (domain-fact (name unstack) (param-values f)) 
 
     (domain-fact (name stack) (param-values a b))
     (domain-fact (name stack) (param-values a c)) 
     (domain-fact (name stack) (param-values a d)) 
     (domain-fact (name stack) (param-values a e)) 
+    (domain-fact (name stack) (param-values a f)) 
 
     (domain-fact (name stack) (param-values b a))
     (domain-fact (name stack) (param-values b c)) 
     (domain-fact (name stack) (param-values b d)) 
-    (domain-fact (name stack) (param-values b e))
+    (domain-fact (name stack) (param-values b e)) 
+    (domain-fact (name stack) (param-values b f))
 
     (domain-fact (name stack) (param-values c a))
     (domain-fact (name stack) (param-values c b)) 
     (domain-fact (name stack) (param-values c d)) 
     (domain-fact (name stack) (param-values c e)) 
+    (domain-fact (name stack) (param-values c f)) 
 
     (domain-fact (name stack) (param-values d a))
     (domain-fact (name stack) (param-values d b)) 
     (domain-fact (name stack) (param-values d c)) 
     (domain-fact (name stack) (param-values d e))  
+    (domain-fact (name stack) (param-values d f))  
 
 
     (domain-fact (name stack) (param-values e a))
     (domain-fact (name stack) (param-values e b)) 
     (domain-fact (name stack) (param-values e c)) 
     (domain-fact (name stack) (param-values e d))
+    (domain-fact (name stack) (param-values e f))
+
+
+    (domain-fact (name stack) (param-values f a))
+    (domain-fact (name stack) (param-values f b)) 
+    (domain-fact (name stack) (param-values f c)) 
+    (domain-fact (name stack) (param-values f d))
+    (domain-fact (name stack) (param-values f e))
 	 (domain-facts-loaded)
 	)
 )
