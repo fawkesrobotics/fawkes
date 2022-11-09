@@ -22,10 +22,19 @@
 	 ;(goal-tree-assert-run-all AUTOMATIC-SUBGOAL
 		
 		;(goal-tree-assert-rl RL
-		   (assert (goal (id (sym-cat TOWER-C1- (gensym*))) (class TOWER-C1) (params buttom a top c) (is-executable TRUE) ))
-		   (assert (goal (id (sym-cat TOWER-C1- (gensym*))) (class TOWER-C1) (params buttom b top d) (is-executable TRUE) ))
-		   (assert (goal (id (sym-cat TOWER-C1- (gensym*))) (class TOWER-C1) (params buttom e top d) (is-executable TRUE) ))
-		   (assert (goal (id (sym-cat TOWER-C2- (gensym*))) (class TOWER-C2) (params buttom b middle d top e ) (is-executable TRUE) ))
+		   
+		   (assert (goal (id (sym-cat TOWER-C1- (gensym*))) (class TOWER-C1) (params buttom b top f) (is-executable TRUE) ))
+		   (assert (goal (id (sym-cat TOWER-C1- (gensym*))) (class TOWER-C1) (params buttom d top a) (is-executable TRUE) ))
+		   (assert (goal (id (sym-cat TOWER-C1- (gensym*))) (class TOWER-C1) (params buttom c top e) (is-executable TRUE) ))
+		   
+		   (assert (goal (id (sym-cat TOWER-C2- (gensym*))) (class TOWER-C2) (params buttom f middle e top a ) (is-executable TRUE) ))
+		   (assert (goal (id (sym-cat TOWER-C2- (gensym*))) (class TOWER-C2) (params buttom c middle b top d ) (is-executable TRUE) ))
+		   
+		   ;(assert (goal (id (sym-cat TOWER-C1- (gensym*))) (class TOWER-C1) (params buttom a top c) (is-executable TRUE) ))
+		   ;(assert (goal (id (sym-cat TOWER-C1- (gensym*))) (class TOWER-C1) (params buttom b top d) (is-executable TRUE) ))
+		   ;(assert (goal (id (sym-cat TOWER-C1- (gensym*))) (class TOWER-C1) (params buttom e top d) (is-executable TRUE) ))
+		   ;(assert (goal (id (sym-cat TOWER-C2- (gensym*))) (class TOWER-C2) (params buttom b middle d top e ) (is-executable TRUE) ))
+		   
 		   ;(assert (goal (id (sym-cat TOWER-C2- (gensym*))) (class TOWER-C2) (params blocks (create$ b d e))))
 		   ;(assert (goal (id (sym-cat RL-TEST- (gensym*))) (class RL)))
 		   ;(assert (goal (id (sym-cat FINALLY-SUCCEED- (gensym*))) (class PRINT)))

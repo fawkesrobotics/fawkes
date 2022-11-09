@@ -71,7 +71,7 @@ class ClipsWorld(gym.Env):
     
     #goalClass = "TOWER-C1"
     for goalClass in goalClasses:
-      #get key value map of param-name and param-type
+      #get key value map of param-name and param-type (buttom - block)
       mapParamNameType =  p.getParamsNameTypeMapOfGoal(goalClass)
       print("clipsWorld: mapParamNameType ", mapParamNameType)
 
@@ -83,7 +83,7 @@ class ClipsWorld(gym.Env):
         #{buttom#a, buttom#b,...}	
         
         #paramNameDOComb = p.getParamNameDomainObjectsComb(key, value);
-        paramNameDOComb = p.getParamNameDomainObjectsComb(x,mapParamNameType[x]);
+        paramNameDOComb = p.getParamNameDomainObjectsComb(x,mapParamNameType[x])
         #print(paramNameDOComb)
         partial[x]=	paramNameDOComb
       
@@ -96,12 +96,60 @@ class ClipsWorld(gym.Env):
       action_space_2 += vals
       
     #-----------------------------------------
-    #action_space = action_space_2
+    action_space = action_space_2
+
+    print("ClipsWorld init: after generateActionSpace\n action_space = ", action_space)
 
     #generate observation space
     print("ClipsWorld init: before generateObservationSpace")
     obs_space = p.generateObservationSpace()
-    print("ClipsWorld init: after generateObservationSpace\n obs_space = ", obs_space)
+
+    #-----------------------------------------
+    
+
+    obs_space_2=[];
+    
+    # Key: predicateName Value:ParamName-Type-Dict
+    domainPredicatesDict = p.getDomainPredicates()
+    # predicate = "ontable"
+    for predicate in domainPredicatesDict:
+      predicateParamsObjectComb = {}
+      print("ClipsWorld: predicate ", predicate)
+      #get key value map of param-name and param-type (buttom - block)
+      mapParamNameType =  domainPredicatesDict[predicate]
+      #print("clipsWorld: mapParamNameType ", mapParamNameType)
+      if not mapParamNameType:
+        continue
+
+      for x in mapParamNameType:
+        #For each param of the predicate do:
+        #{buttom#a, buttom#b,...}	
+        #paramNameDOComb = p.getParamNameDomainObjectsComb(x,domainPredicatesDict[predicate][x]) #mapParamNameType[x]);
+        paramNameDOComb = p.getDomainObjects(mapParamNameType[x])
+        if not paramNameDOComb:
+          continue
+        #print(paramNameDOComb)
+        predicateParamsObjectComb[x]=	paramNameDOComb
+      
+      #print(predicateParamsObjectComb)
+      obs_df = expand_grid(predicateParamsObjectComb)
+      #print(obs_df)
+      #obs_df = obs_df.reindex(sorted(obs_df.columns), axis=1)
+      #print(df)
+      obs_df.insert(0,'(','(')
+      obs_df.insert(len(obs_df.columns),')',')')
+      obs_df.insert(0,'Predicate', predicate)
+      #print(obs_df)
+      obs_str = obs_df.to_string(header=False,index=False,index_names=False).split('\n')
+      vals = ['#'.join(ele.split()) for ele in obs_str]
+      vals = [w.replace('#(#','(') for w in vals]
+      vals = [w.replace('#)',')') for w in vals]
+      obs_space_2 += vals
+
+      obs_space = obs_space_2
+    #-----------------------------------------
+
+    print("ClipsWorld init: after generateObservationSpace\n obs_space = ", obs_space_2)
 
     sorted_actions = sorted(set(action_space)) #action_space_as_string_array))
     sorted_obs = sorted(set(obs_space))#obs_space_as_string_array))
@@ -130,9 +178,8 @@ class ClipsWorld(gym.Env):
     self.observation_space = gym.spaces.Box(0, 1, (self.n_obs,))
 
     try:
-      print("self.state: ", self.state)
       self.state = np.zeros(self.n_obs)
-      print(self.state)
+      print("self.state: ", self.state)
     except:
       print("State problem")
 

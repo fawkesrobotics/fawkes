@@ -106,7 +106,9 @@ PYBIND11_MODULE(clips_gym, m)
 	  .def("getParamNameDomainObjectsComb", &ClipsGymThread::getParamNameDomainObjectsComb)
 	  .def("getGoalClassList", &ClipsGymThread::getGoalClassList)
 	  .def("assertRlGoalSelectionFact", &ClipsGymThread::assertRlGoalSelectionFact)
-	  .def("getGoalId", &ClipsGymThread::getGoalId);
+	  .def("getGoalId", &ClipsGymThread::getGoalId)
+	  .def("getDomainPredicates", &ClipsGymThread::getDomainPredicates)
+	  .def("getDomainObjects", &ClipsGymThread::getDomainObjects);
 }
 
 void
@@ -348,36 +350,6 @@ ClipsGymThread::generateActionSpace()
 		std::cout << s << std::endl;
 	}
 
-	/*		
-	std::map<std::string, std::vector<std::string>>possibleGoalsPartStrings;
-	//py::dict possibleGoalsPartStrings;
-
-	//Get Goal Class list
-	std::vector<std::string> goalClasses = config->get_strings("/goal-space/classes");
-	//TOWER-C1: {buttom: block, top: block}
-	//for(std::string goalClass: goalClasses)
-	//{
-		std::string goalClass = goalClasses[0];
-		std::cout << "ClipsGymThread generateActionSpace goal class:" << goalClass << std::endl;
-		//get key value map of param-name and param-type
-		std::map<std::string, std::string> mapParamNameType = getParamsNameTypeMapOfGoal(goalClass);
-		//For each param of the goal do:
-		for(std::pair<std::string, std::string> pair: mapParamNameType)
-		{
-			//{buttom#a, buttom#b,...}	
-			std::vector<std::string> 
-			paramNameDOComb = getParamNameDomainObjectsComb(pair.first, pair.second);
-			//possibleGoalsPartStrings.push_back(paramNameDOComb);
-			std::cout << "generateActionSpace " << paramNameDOComb[0] <<std::endl;
-			possibleGoalsPartStrings.insert(std::pair<std::string, std::vector<std::string>>(pair.first,paramNameDOComb));
-			//possibleGoalsPartStrings[(py::str)pair.first] = py::cast(paramNameDOComb);
-		}
-	//std::cout << "generateActionSpace " <<(std::string) (((py::list)possibleGoalsPartStrings["buttom"])[0])<<std::endl;
-	//}
-
-	auto goal_space = expandGrid(possibleGoalsPartStrings);
-	*/
-
 	//TODO: implement generation based on clips goals
 	std::string space[] = {"TOWER-C1#buttom#a#top#c",
 	                       "TOWER-C1#buttom#b#top#d",
@@ -460,44 +432,6 @@ ClipsGymThread::getGoalId(std::string action)
 				std::cout << "correct class and params! GoalID is: " << goalID << std::endl;
 				break;
 			}
-
-			/*
-			std::vector<std::string> slot_names         = fact->slot_names();
-			bool                     correct_goal_class = false;
-			bool                     correct_params     = true;
-			std::string              temp_id            = "";
-			for (std::string s : slot_names) {
-				if (s == "class") {
-					std::string slot_values = getClipsSlotValuesAsString(fact->slot_value(s));
-					std::cout << "Class: " + slot_values << std::endl;
-					if (action_splitted[0] == slot_values) {
-						correct_goal_class = true;
-					}
-				}
-				//TODO: what about two goals mapping one action, or action mapping no goals
-				if (s == "params") {
-					std::string slot_values = getClipsSlotValuesAsString(fact->slot_value(s));
-					std::cout << "params: " << slot_values << std::endl;
-					for (size_t i = 1; i < action_splitted.size(); i++) {
-						//std::cout << "search for: " << action_splitted[i] << std::endl;
-						std::size_t found_param = slot_values.find(action_splitted[i]); //(p);
-						if (found_param != std::string::npos) {
-							correct_params = correct_params && true;
-						} else {
-							correct_params = correct_params && false;
-						}
-					}
-				}
-				if (s == "id") {
-					temp_id = getClipsSlotValuesAsString(fact->slot_value(s));
-					std::cout << "id: " << temp_id << std::endl;
-				}
-			}
-			if (correct_goal_class && correct_params) {
-				std::cout << "correct class and params! GoalID is: " << temp_id << std::endl;
-				goalID = temp_id;
-			}
-			*/
 		}
 		fact = fact->next();
 	}
@@ -556,47 +490,8 @@ ClipsGymThread::getParamsNameTypeMapOfGoal(std::string goalClass)
 		mapParamsNameType[(py::str)param] = (py::str)p_type;
 	}
 
-	//=new std::map<std::string, std::string>();
-	/*std::string::size_type   begin = 0;
-	for(std::string p:params)
-	{
-		std::cout << "ClipsGymThread params:" << p << std::endl;
-		std::vector<std::string> p_splitted; // = new std::vector<std::string>();
-		for (std::string::size_type end = 0; (end = p.find(":", end)) != std::string::npos; ++end) {
-			std::string temp = p.substr(begin, end - begin);
-			p_splitted.push_back(temp);
-			std::cout <<temp<<std::endl;
-			begin = end + 1;
-		}
-		mapParamsNameType.insert(std::pair<std::string, std::string>(p_splitted[0],p_splitted[1]));
-	}*/
 	return mapParamsNameType;
 }
-
-/* std::vector<std::string> *
-ClipsGymThread::getParamsValues(std::vector<CLIPS::Value> slot_values, std::string goalClass)
-{
-	std::vector<std::string> keys = getParamsKeysOfGoal(goalClass);
-	std::map<std::string, std::string> *paramsMap = new std::map<std::string, std::string>();
-	for (std::size_t i = 0; i < slot_values.size(); i++) {
-		auto v = slot_values[i];
-		switch (v.type()) {
-		case CLIPS::TYPE_FLOAT:
-			value->push_back(std::to_string(v.as_float()));
-			break;
-
-		case CLIPS::TYPE_INTEGER:
-			//std::cout << v.as_integer() << std::endl;
-			value->push_back(std::to_string(v.as_integer()));
-			break;
-
-		default:
-			//std::cout << v.as_string() <<std::endl;
-			value->push_back(v.as_string());
-		}
-	}
-	return value;
-} */
 
 std::vector<std::string>
 ClipsGymThread::getAllFormulatedGoals()
@@ -826,6 +721,42 @@ ClipsGymThread::getDomainModelObjectsFromCX(std::string a_type)
 	}
 	clips.unlock();
 	return domainObjects;
+}
+
+//std::vector<std::string>
+py::dict
+ClipsGymThread::getDomainPredicates()
+{
+	std::cout << "ClipsGymThread: getDomainPredicates start" << std::endl;
+	fawkes::LockPtr<CLIPS::Environment> clips = getClipsEnv();
+	std::vector<std::string>            domainObjects; //= new std::vector<std::string>();
+	clips.lock();
+	CLIPS::Fact::pointer fact = clips->get_facts();
+	py::dict             mapPredicateParams;
+	while (fact) {
+		CLIPS::Template::pointer tmpl  = fact->get_template();
+		std::size_t              found = tmpl->name().find("domain-predicate");
+
+		if (found != std::string::npos) {
+			std::string name = getClipsSlotValuesAsString(fact->slot_value("name"));
+
+			std::vector<CLIPS::Value> param_names = fact->slot_value("param-names");
+			std::vector<CLIPS::Value> param_types = fact->slot_value("param-types");
+			py::dict                  mapParamsNameType;
+			for (size_t i = 0; i < param_names.size(); i++) {
+				py::str param  = (py::str)(param_names[i].as_string());
+				py::str p_type = (py::str)(param_types[i].as_string());
+				//std::vector<std::string> domain_objects = getDomainObjects(clips_type.as_string());
+				mapParamsNameType[param] = p_type;
+			}
+			mapPredicateParams[(py::str)name] = mapParamsNameType;
+			std::cout << "Predicate: " << name << std::endl;
+		}
+		fact = fact->next();
+	}
+	clips.unlock();
+	py::print(mapPredicateParams);
+	return mapPredicateParams;
 }
 
 //ToDo return std::vector<string> literals

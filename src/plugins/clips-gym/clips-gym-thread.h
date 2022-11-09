@@ -95,10 +95,12 @@ public:
 
 	//std::map<std::string,std::string>
 	py::dict getParamsNameTypeMapOfGoal(std::string goalClass);
+	py::dict getDomainPredicates();
 
 	py::list getGoalClassList();
 
-	void assertRlGoalSelectionFact(std::string goalID);
+	void                     assertRlGoalSelectionFact(std::string goalID);
+	std::vector<std::string> getDomainObjects(std::string a_type);
 
 protected:
 	virtual void
@@ -114,8 +116,9 @@ private:
 
 	//TODO extra Klasse auslagern
 	std::map<std::string, std::vector<std::string>> paramTypeDomainObjectsMap;
-	std::vector<std::string>                        getDomainObjects(std::string a_type);
-	std::vector<std::string>                        getDomainModelObjectsFromCX(std::string a_type);
+	//std::vector<std::string>                        getDomainObjects(std::string a_type);
+	std::vector<std::string> getDomainModelObjectsFromCX(std::string a_type);
+	//std::vector<std::string> getDomainPredicates();
 
 	static ClipsGymThread *thread_instance;
 	static std::mutex      mutex;

@@ -18,8 +18,8 @@
 	?g <- (goal (id ?goal-id) (class TOWER-C1) (mode FORMULATED) (is-executable ?executable&TRUE)
 			    (params buttom ?b
 						top ?t))
-	(not (domain-fact (name ontable) (param-values ?b)))
-	(not (domain-fact (name ontable) (param-values ?t)))
+	(or(not (domain-fact (name ontable) (param-values ?b)))
+	(not (domain-fact (name ontable) (param-values ?t))))
 	=>
 	(printout t "Goal '" ?goal-id "' is NOT executable" crlf)
 	(modify ?g (is-executable FALSE))
@@ -44,9 +44,9 @@
 						middle ?m
 						top ?t))
 
-	(not (domain-fact (name ontable) (param-values ?b)))
+	(or (not (domain-fact (name ontable) (param-values ?b)))
 	(not (domain-fact (name ontable) (param-values ?m)))
-	(not (domain-fact (name ontable) (param-values ?t)))
+	(not (domain-fact (name ontable) (param-values ?t))))
 	=>
 	(printout t "Goal '" ?goal-id "' is NOT executable" crlf)
 	(modify ?g (is-executable FALSE))
