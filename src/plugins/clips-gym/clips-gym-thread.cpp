@@ -63,6 +63,7 @@ std::mutex      ClipsGymThread::mutex;
 ClipsGymThread *
 ClipsGymThread::getInstance()
 {
+	std::cout << "ClipsGymThread: getInstance start" << std::endl;
 	std::lock_guard<std::mutex> lock(mutex);
 	if (thread_instance == nullptr) {
 		thread_instance = new ClipsGymThread();

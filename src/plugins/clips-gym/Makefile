@@ -56,7 +56,7 @@ LDFLAGS+=-L.~/Documents/rlblocksworld/src-cpp/
 OBJS_clips_gym = clips-observation-info.o  clips-gym-plugin.o clips-gym-thread.o #$@ -I$(IDIR) $(LIBS)
 
 OBJS_all = $(OBJS_clips_gym)
-PLUGINS_all = $(PLUGINDIR)/clips_gym.so
+PLUGINS_all = $(PLUGINDIR)/clips-gym.so
 
 export PATH+=$(PLUGINDIR)
 

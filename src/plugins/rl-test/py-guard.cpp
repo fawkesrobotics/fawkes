@@ -200,5 +200,6 @@ PyGuard::predict()
 
 PyGuard::~PyGuard()
 {
+	std::cout << "\t\t\t\tDeleting PyGuard" << std::endl;
 	py::finalize_interpreter();
 }
