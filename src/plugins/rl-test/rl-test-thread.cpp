@@ -60,6 +60,10 @@ getConfigStringReplacedBasedir(Configuration *config, std::string configEntry)
 {
 	std::string config_value =
 	  std::regex_replace(config->get_string(configEntry), std::regex("@BASEDIR@"), BASEDIR);
+
+	config_value = std::regex_replace(config->get_string(configEntry),
+	                                  std::regex("@FAWKES_BASEDIR@"),
+	                                  FAWKES_BASEDIR);
 	return config_value;
 }
 
@@ -289,15 +293,16 @@ RLTestThread::loop()
 		//execution_done   = std::async(std::launch::async, executeRlAgent, config, count_startedExecution);
 
 		count_startedExecution++;
-		std::cout << "RlTestThread in rl_goal_selection started async execution thread " << std::endl;
+		//std::cout << "RlTestThread in loop started async execution thread " << std::endl;
 	} else if (cfg_training_mode && !startedTraining) {
 		/* Training RL agent */
-		std::cout << "RlTestThread: rl_goal_selection - executing RL Agent is not active!" << std::endl;
+		std::cout << "RlTestThread: loop - executing RL Agent is not active!" << std::endl;
 		training_done   = std::async(std::launch::async, trainingRlAgent, config);
 		startedTraining = true;
 	} else if (cfg_training_mode && startedTraining) {
 		/* Checking if training completed */
-		std::cout << "Check if training_done future is vailid " << training_done.valid() << std::endl;
+		std::cout << "RlTestThread loop: Check if training_done future is vailid "
+		          << training_done.valid() << std::endl;
 		int sec = 10; //00;
 		std::cout << "Wait for " << sec << " msec to check future status" << std::endl;
 		std::future_status status = training_done.wait_for(std::chrono::milliseconds(sec));
@@ -318,7 +323,8 @@ void
 RLTestThread::finalize()
 {
 	//Py_Finalize();
-	py::finalize_interpreter();
+	//py::finalize_interpreter();
+	//delete py_guard;
 	blackboard->close(rl_gs_interface);
 }
 
