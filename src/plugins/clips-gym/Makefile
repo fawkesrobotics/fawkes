@@ -35,7 +35,7 @@ LIBS_clips_gym = fawkescore fawkesutils fawkesaspects fawkesbaseapp \
 
 IDIR+=/usr/include/python3.10/ #/home/sonja/.local/lib/python3.9/
 #CFLAGS+=$(python3 -m pybind11 --includes) -c -I$(IDIR) #$(pyton3-config --extension-suffix) #-c -I$(IDIR)
-CFLAGS=-O3 -Wall -shared -std=c++11 -fPIC $(python3 -m pybind11 --includes) -c -I$(IDIR)
+CFLAGS=-O3 -Wall -shared -std=c++11 -fPIC $(python3 -m pybind11 --includes) -Wno-error -c -I$(IDIR)
 
 LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):~/.local/lib/python3.10/
 LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/Documents/rlblocksworld/src-python/
@@ -56,7 +56,7 @@ LDFLAGS+=-L.~/Documents/rlblocksworld/src-cpp/
 OBJS_clips_gym = clips-observation-info.o  clips-gym-plugin.o clips-gym-thread.o #$@ -I$(IDIR) $(LIBS)
 
 OBJS_all = $(OBJS_clips_gym)
-PLUGINS_all = $(PLUGINDIR)/clips-gym.so
+PLUGINS_all = $(PLUGINDIR)/clips_gym.so
 
 export PATH+=$(PLUGINDIR)
 
