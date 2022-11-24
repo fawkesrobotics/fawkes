@@ -20,7 +20,6 @@
 
 import sys
 from tokenize import String
-sys.path.append("~/fawkes/plugins")
 
 import clips_gym 
 
@@ -64,6 +63,7 @@ class ClipsWorld(gym.Env):
     #-----------
     #Get Goal Class list
     goalClasses = p.getGoalClassList()
+    print("ClipsWorld: goalClasses: ", goalClasses)
     #for(std::string goalClass: goalClasses)
     partial = {}
 
@@ -91,14 +91,18 @@ class ClipsWorld(gym.Env):
       df = df.reindex(sorted(df.columns), axis=1)
       #print(df)
       df.insert(0,'Class', goalClass)
+      #print("DataFrame: ", df)
       x = df.to_string(header=False,index=False,index_names=False).split('\n')
       vals = ['#'.join(ele.split()) for ele in x]
+      #print(vals)
       action_space_2 += vals
       
     #-----------------------------------------
+    p.log('Actionspace: '+' '.join(action_space_2[:20])+ ' '.join(action_space_2[-20:]))
+    p.log('Actionspace size: '+str(len(action_space_2)))
     action_space = action_space_2
 
-    print("ClipsWorld init: after generateActionSpace\n action_space = ", action_space)
+    #print("ClipsWorld init: after generateActionSpace\n action_space = ", action_space)
 
     #generate observation space
     print("ClipsWorld init: before generateObservationSpace")
@@ -114,7 +118,7 @@ class ClipsWorld(gym.Env):
     # predicate = "ontable"
     for predicate in domainPredicatesDict:
       predicateParamsObjectComb = {}
-      print("ClipsWorld: predicate ", predicate)
+      #print("ClipsWorld: predicate ", predicate)
       #get key value map of param-name and param-type (buttom - block)
       mapParamNameType =  domainPredicatesDict[predicate]
       #print("clipsWorld: mapParamNameType ", mapParamNameType)
@@ -130,6 +134,7 @@ class ClipsWorld(gym.Env):
           continue
         #print(paramNameDOComb)
         predicateParamsObjectComb[x]=	paramNameDOComb
+        break
       
       #print(predicateParamsObjectComb)
       obs_df = expand_grid(predicateParamsObjectComb)
@@ -148,8 +153,10 @@ class ClipsWorld(gym.Env):
 
       obs_space = obs_space_2
     #-----------------------------------------
+    p.log('Observationspace: '+' '.join(obs_space_2[:10]))
+    p.log('Observationspace size: '+str(len(obs_space_2)))
 
-    print("ClipsWorld init: after generateObservationSpace\n obs_space = ", obs_space_2)
+    #print("ClipsWorld init: after generateObservationSpace\n obs_space = ", obs_space_2)
 
     sorted_actions = sorted(set(action_space)) #action_space_as_string_array))
     sorted_obs = sorted(set(obs_space))#obs_space_as_string_array))
@@ -203,10 +210,10 @@ class ClipsWorld(gym.Env):
     fact_string = p.create_rl_env_state_from_facts()
     #print("ClipsWorld reset: reseived facts: ", fact_string)
     raw_facts = ast.literal_eval(fact_string)
-    print("\nfacts: ", raw_facts)
+    #print("\nfacts: ", raw_facts)
     state = self.get_state_from_facts(raw_facts)
-    print("ClipsWorld: New env state from facts: ",state)
-    print("ClipsWorld: end reset function")
+    #print("ClipsWorld: New env state from facts: ",state)
+    p.log("ClipsWorld: end reset function")
     
 
     # Initialize the agent at the right of the grid
@@ -273,10 +280,12 @@ class ClipsWorld(gym.Env):
     print("ClipsWorld: action_masks executable goals: ", executable_goals)
     
     valid_actions = np.zeros((self.n_actions), dtype=int)
+    print("ClipsWorld: action_masks size: {0} {1}".format(len(valid_actions), valid_actions[:5]))
     for g in executable_goals:
-      pos = self.inv_action_dict[g]
-      valid_actions[pos]=1
-    """     for i in range(0, self.n_actions):
+      pos = self.inv_action_dict.get(g)
+      if (pos is not None):
+        valid_actions[pos]=1
+        """     for i in range(0, self.n_actions):
         #check if action is valid
         a = env.env.actions[i]        
         s = env.env.unwrapped._state       

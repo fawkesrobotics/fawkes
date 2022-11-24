@@ -26,7 +26,7 @@ import imageio
 import gym
 import pddlgym
 
-sys.path.append("~/fawkes/src/plugins/clips-gym/")
+#sys.path.append("~/fawkes/src/plugins/clips-gym/")
 # Wrapper for PDDLGym for discrete action and observation space
 #from PDDLExtension import BlocksWorld, LiteralSpace2, LiteralActionWrapper, LiteralObsWrapper
 from ClipsWorld import ClipsWorld#, LiteralSpace2, LiteralActionWrapper, LiteralObsWrapper
@@ -57,7 +57,7 @@ def env_creator(env_name, dir_path, render):
     print(env)
     return env """
 
-# Returns the action mask for the current env. 
+""" # Returns the action mask for the current env. 
 def mask_fn(env: gym.Env) -> np.ndarray:
     valid_actions = np.zeros((env.action_space.n), dtype=int)
     for i in range(0, env.action_space.n):
@@ -69,7 +69,7 @@ def mask_fn(env: gym.Env) -> np.ndarray:
         if v:
             valid_actions[i]=1
     #print("Valid Actions: ", valid_actions)
-    return valid_actions
+    return valid_actions """
 
 def evaluate(model, num_episodes=5):
     """
@@ -133,9 +133,9 @@ if __name__ == '__main__':
     #print("Env {} created".format(env_name))
     #obs = env.reset()
     
-    print("Observations: ", env.obs_dict)
-    print("Observation space: ",env.observation_space)
-    print("Action space: ",env.action_space)
+    #print("Observations: ", env.obs_dict[:5])
+    #print("Observation space: ",env.observation_space[:5])
+    #print("Action space: ",env.action_space[:5])
     #print("Actions: ", env.action_dict)
 
     #Mask environment

@@ -102,6 +102,10 @@ public:
 	void                     assertRlGoalSelectionFact(std::string goalID);
 	std::vector<std::string> getDomainObjects(std::string a_type);
 
+	void log(std::string log_msg);
+
+	std::map<std::string, py::dict> goalClassParamsAndParamTypeMap;
+
 protected:
 	virtual void
 	run()
@@ -130,6 +134,8 @@ private:
 
 	py::list expandGrid(std::map<std::string, std::vector<std::string>> map); //py::dict dictionary);
 
-	int resetCount = 0;
+	std::string getParamsClipsSlotValuesOfGoalAsString(std::string               goalClass,
+	                                                   std::vector<CLIPS::Value> slot_values);
+	//int resetCount = 0;
 };
 //#endif

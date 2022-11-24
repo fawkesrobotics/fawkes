@@ -61,9 +61,7 @@ getConfigStringReplacedBasedir(Configuration *config, std::string configEntry)
 	std::string config_value =
 	  std::regex_replace(config->get_string(configEntry), std::regex("@BASEDIR@"), BASEDIR);
 
-	config_value = std::regex_replace(config->get_string(configEntry),
-	                                  std::regex("@FAWKES_BASEDIR@"),
-	                                  FAWKES_BASEDIR);
+	config_value = std::regex_replace(config_value, std::regex("@FAWKES_BASEDIR@"), FAWKES_BASEDIR);
 	return config_value;
 }
 
@@ -322,9 +320,14 @@ RLTestThread::loop()
 void
 RLTestThread::finalize()
 {
-	//Py_Finalize();
+	Py_Finalize();
 	//py::finalize_interpreter();
 	//delete py_guard;
+
+	//clips.lock();
+	//clips->assert_fact("(executive-finalize)");
+	//clips.unlock();
+
 	blackboard->close(rl_gs_interface);
 }
 
@@ -365,6 +368,8 @@ RLTestThread::clips_context_init(const std::string &env_name, LockPtr<CLIPS::Env
 
 	if (!cfg_training_mode) {
 		clips->assert_fact("(execution-mode)");
+	} else {
+		clips->assert_fact("(no-reset-on-training-start)");
 	}
 
 	clips.unlock();
