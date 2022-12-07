@@ -32,6 +32,7 @@
 
 #include <boost/bind/bind.hpp>
 #include <clipsmm.h>
+//#include "goalAction.h"
 
 //#include "clips-observation-info.h"
 
@@ -89,6 +90,19 @@ PYBIND11_MODULE(clips_gym, m)
 	  .def_readonly("reward", &ClipsObservationInfo::reward)
 	  .def_readonly("done", &ClipsObservationInfo::done)
 	  .def_readonly("info", &ClipsObservationInfo::info);
+
+	py::class_<Param>(m, "Param")
+		.def(py::init<const string, const string>())
+		.def("getParamString", &Param::getParamString);
+
+	//.def(py::init([](string name, string value){return new Param(name, value);}))
+	//.def(py::init([](string name){return new GoalAction(name);}))
+			
+	py::class_<GoalAction>(m, "Goal")
+		.def(py::init<const string>())
+		.def("setParams", &GoalAction::setParams)
+		.def("getParamsString", &GoalAction::getParamsString)
+		.def("getGoalString", &GoalAction::getGoalString);
 	/* std::list<int> observation;
 	int            reward;
 	bool           done;
@@ -222,8 +236,11 @@ ClipsGymThread::step(std::string next_goal)
 	obs_info.reward               = 0;
 	//Transform string to goal
 	//std::string n_goal = "TOWER-C1#b#d#";
+	//std::string goalID = getGoalId(next_goal);
 
-	std::string goalID = getGoalId(next_goal);
+	std::string goalID= GoalActionUtil::getGoalIdByString(currentExecutableGoals, next_goal);
+
+
 	if (goalID == "") {
 		std::cout << "Goal id not found!" << std::endl;
 		std::string env_state = create_rl_env_state_from_facts();
@@ -356,10 +373,29 @@ ClipsGymThread::generateActionSpace()
 	}
 
 	//TODO: implement generation based on clips goals
-	std::string space[] = {"TOWER-C1#buttom#a#top#c",
+	/*std::string space[] = {"TOWER-C1#buttom#a#top#c",
 	                       "TOWER-C1#buttom#b#top#d",
 	                       "TOWER-C1#buttom#e#top#d",
 	                       "TOWER-C2#buttom#b#middle#d#top#e"}; //, "TOWER-C1#buttom#a#top#e"};
+*/
+	std::string space [] = {
+		"ENTER-FIELD#",
+		"BUFFER-CAP#cap-color#CAP_BLACK",
+ "BUFFER-CAP#cap-color#CAP_GREY",
+ "BUFFER-CAP#cap-color#CAP_NONE",
+ "DISCARD#wp-loc#C-BS",
+ "DISCARD#wp-loc#C-CS1",
+ "DISCARD#wp-loc#C-CS2",
+ "DISCARD#wp-loc#C-DS",
+ "DISCARD#wp-loc#C-RS1",
+ "DISCARD#wp-loc#C-RS2",
+ "DISCARD#wp-loc#C-SS",
+  "MOUNT-RING#ring-color#RING_BLUE",
+ "MOUNT-RING#ring-color#RING_GREEN",
+ "MOUNT-RING#ring-color#RING_NONE",
+ "MOUNT-RING#ring-color#RING_ORANGE",
+ "MOUNT-RING#RING_YELLOW", 
+	};
 
 	py::list action_space;
 	for (std::string s : space) {
@@ -490,6 +526,33 @@ ClipsGymThread::getClipsSlotValuesAsString(std::vector<CLIPS::Value> slot_values
 	return value;
 }
 
+void
+ClipsGymThread::filterParams( GoalAction* goal)
+{
+	std::cout << "param string before " << goal->getParamsString() << std::endl;
+    py::dict paramNameType = getParamsNameTypeMapOfGoal(goal->getClass());
+
+	auto getType = paramNameType.attr("get");
+    
+    auto params = goal->getParams();
+    //auto filtered = std::erase_if(params, [](Param p){ return (paramNameType.attr("get")(p) == py::none);} );
+    
+	auto iterator = std::remove_if(params->begin(), params->end(),[&](const Param& p)
+		{
+		auto n = getType(p.name, "");
+		//std::cout << "Filter Params " << n << std::endl;
+		//logger->log_info(name(), "RL: filterParams %s", );
+		//params->remove_if([&](const Param& p){
+		return (getType(p.name).is(py::none()));
+		
+	});
+	params->erase(iterator, params->end());
+
+	//std::cout << "Filter Params: " << goal->getParamsString() << std::endl;
+    //goal.setParams(&params);
+    
+}
+
 std::string
 ClipsGymThread::getParamsClipsSlotValuesOfGoalAsString(std::string               goalClass,
                                                        std::vector<CLIPS::Value> slot_values)
@@ -529,6 +592,36 @@ ClipsGymThread::getParamsClipsSlotValuesOfGoalAsString(std::string              
 
 	return paramsChain;
 }
+
+static string
+getClipsValueString(CLIPS::Value v)
+{
+    std::string value ="";
+    switch (v.type()) {
+		case CLIPS::TYPE_FLOAT: value = std::to_string(v.as_float()); break;
+		case CLIPS::TYPE_INTEGER: value = std::to_string(v.as_integer()); break;
+		default: value = v.as_string();
+		}
+    return value;
+}
+
+std::list<Param>
+ClipsGymThread::extractGoalParamsFromClipsValues(std::vector<CLIPS::Value> slot_values)
+{
+    std::list<Param> params;
+    for (std::size_t i = 0; i + 1 < slot_values.size(); i++) {
+		//std::string value = "";
+		//auto        v     = slot_values[i];
+        std::string p_name = getClipsValueString(slot_values[i]);
+        std::string p_value = getClipsValueString(slot_values[i+1]);
+		Param p = Param(p_name, p_value);
+        i++;
+		//values_as_string.push_back(v);
+        params.push_back(p);
+	}
+    return params;
+}
+
 
 //get key value map of param-name and param-type
 //std::map<std::string,std::string>
@@ -604,7 +697,8 @@ ClipsGymThread::getAllFormulatedGoals()
 	return maskedGoals;
 }
 
-std::vector<std::string>
+//std::vector<std::string>
+std::vector<GoalAction>
 ClipsGymThread::getAllFormulatedExecutableGoals()
 {
 	std::cout << "In ClipsGymThread get all executable goals" << std::endl;
@@ -613,7 +707,8 @@ ClipsGymThread::getAllFormulatedExecutableGoals()
 	clips.lock();
 	CLIPS::Fact::pointer fact = clips->get_facts();
 	//std::string              goalID = "";
-	std::vector<std::string> maskedGoals;
+	//std::vector<std::string> maskedGoals;
+	std::vector<GoalAction> maskedGoals;
 	while (fact) {
 		CLIPS::Template::pointer tmpl  = fact->get_template();
 		std::size_t              found = tmpl->name().find("goal");
@@ -623,20 +718,40 @@ ClipsGymThread::getAllFormulatedExecutableGoals()
 			std::string is_executable = getClipsSlotValuesAsString(fact->slot_value("is-executable"));
 			//std::cout << slot_values << std::endl;
 			if (mode == "FORMULATED" && is_executable == "TRUE") {
+
 				std::string goal_class = getClipsSlotValuesAsString(fact->slot_value("class"));
-				//std::cout << goal_class << std::endl;
+				py::list allowed_classes = getGoalClassList();
+				auto vec = allowed_classes.cast<std::vector<std::string>>();
+				std::vector<std::string>::iterator loc =
+		  			std::find(vec.begin(), vec.end(), goal_class);
+				if (loc == vec.end())
+				{
+					std::cout << "not in List" <<goal_class << std::endl;
+					
+				}
+				else{
+				std::string goal_id = getClipsSlotValuesAsString(fact->slot_value("id"));
+				GoalAction goal = GoalAction(goal_class, goal_id);
+
+				std::list params = extractGoalParamsFromClipsValues(fact->slot_value("params"));
+				goal.setParams(params);
+
+				filterParams(&goal);
+				std::cout << "Params String " <<goal.getParamsString()<< std::endl;
 
 				//std::string goal_params = getClipsSlotValuesAsString(fact->slot_value("params"));
 				std::cout << "ClipsGymThread getAllFormulated Executable Goals: "
 				             "getParamsClipsSlotVlauesOfGoalAsString"
 				          << std::endl;
-				std::string goal_params =
-				  getParamsClipsSlotValuesOfGoalAsString(goal_class, fact->slot_value("params"));
+				//std::string goal_params =
+				 // getParamsClipsSlotValuesOfGoalAsString(goal_class, fact->slot_value("params"));
 
 				//std::cout << goal_params << std::endl;
-				maskedGoals.push_back(goal_class + "#" + goal_params);
+				//maskedGoals.push_back(goal_class + "#" + goal_params);
+				maskedGoals.push_back(goal);
 
-				logger->log_info(name(), "RL: %s%s%s", goal_class.c_str(), "#", goal_params.c_str());
+				logger->log_info(name(), "RL: %s", goal_class.c_str()); //"#", goal_params.c_str());
+				}
 			}
 		}
 		fact = fact->next();
@@ -644,6 +759,8 @@ ClipsGymThread::getAllFormulatedExecutableGoals()
 	//std::cout<<maskedGoals <<std::endl;
 	std::cout << "Finished passing all executable goals" << std::endl;
 	clips.unlock();
+
+	currentExecutableGoals = maskedGoals;
 
 	return maskedGoals;
 }
@@ -803,8 +920,7 @@ ClipsGymThread::getDomainModelObjectsFromCX(std::string a_type)
 			if (obj_type == a_type) {
 				std::string obj_name = getClipsSlotValuesAsString(fact->slot_value("name"));
 				domainObjects.push_back(obj_name);
-				logger->log_info(name(), "RL: domain-object %s", obj_name.c_str());
-				std::cout << obj_type << ": " << obj_name << std::endl;
+				//logger->log_info(name(), "RL: domain-object %s", obj_name.c_str());
 			}
 		}
 		fact = fact->next();

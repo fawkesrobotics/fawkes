@@ -59,7 +59,7 @@ class ClipsWorld(gym.Env):
     p = clips_gym.ClipsGymThread.getInstance()
     action_space = p.generateActionSpace()
     print("ClipsWorld init: after generateActionSpace\n action_space = ", action_space)
-
+    """ 
     #-----------
     #Get Goal Class list
     goalClasses = p.getGoalClassList()
@@ -75,7 +75,14 @@ class ClipsWorld(gym.Env):
       mapParamNameType =  p.getParamsNameTypeMapOfGoal(goalClass)
       print("clipsWorld: mapParamNameType ", mapParamNameType)
 
-      for x in mapParamNameType:
+      if not mapParamNameType:
+        c = (goalClass + "#").replace(" ","")
+        p.log('GoalClass without params: ' + c)
+        action_space_2 += c
+        continue;
+
+
+      for pair in sorted(mapParamNameType.items()):
         #print(x)
       #For each param of the goal do:
       #for key, value in mapParamNameType:
@@ -83,9 +90,10 @@ class ClipsWorld(gym.Env):
         #{buttom#a, buttom#b,...}	
         
         #paramNameDOComb = p.getParamNameDomainObjectsComb(key, value);
-        paramNameDOComb = p.getParamNameDomainObjectsComb(x,mapParamNameType[x])
+        paramNameDOComb = p.getParamNameDomainObjectsComb(pair[0], pair[1]) #x,mapParamNameType[x])
         #print(paramNameDOComb)
-        partial[x]=	paramNameDOComb
+        #partial[x]=	paramNameDOComb
+        partial[pair[0]] = paramNameDOComb
       
       df = expand_grid(partial)
       df = df.reindex(sorted(df.columns), axis=1)
@@ -98,10 +106,10 @@ class ClipsWorld(gym.Env):
       action_space_2 += vals
       
     #-----------------------------------------
-    p.log('Actionspace: '+' '.join(action_space_2[:20])+ ' '.join(action_space_2[-20:]))
+    p.log('Actionspace: '+' '.join(action_space_2[:10])+ ' '.join(action_space_2[-10:]))
     p.log('Actionspace size: '+str(len(action_space_2)))
     action_space = action_space_2
-
+    """
     #print("ClipsWorld init: after generateActionSpace\n action_space = ", action_space)
 
     #generate observation space
@@ -228,7 +236,7 @@ class ClipsWorld(gym.Env):
     p = clips_gym.ClipsGymThread.getInstance()
     result = p.step(goal) #+"#")
     print("ClipsWorld: p.step result: ", result)
-    print("ClipsWorld: observation ", result.observation)
+    #print("ClipsWorld: observation ", result.observation)
     print("ClipsWorld: info ", result.info)
     print("ClipsWorld: reward ", result.reward)
 
@@ -237,7 +245,7 @@ class ClipsWorld(gym.Env):
     # Create observation from clips
     #print("ClipsWorld reseived facts: ", fact_string)
     raw_facts = ast.literal_eval(result.observation)#fact_string)
-    print("\nfacts: ", raw_facts)
+    #print("\nfacts: ", raw_facts)
     state = self.get_state_from_facts(raw_facts)
     print("New env state from facts: ",state)
 
@@ -277,13 +285,18 @@ class ClipsWorld(gym.Env):
   #def mask_fn(env: gym.Env) -> np.ndarray:
     p = clips_gym.ClipsGymThread.getInstance()
     executable_goals = p.getAllFormulatedExecutableGoals()
-    print("ClipsWorld: action_masks executable goals: ", executable_goals)
-    
+    print("ClipsWorld: action_masks executable goals: ")
+    import json
+    p.log(json.dumps(self.inv_action_dict))
+
     valid_actions = np.zeros((self.n_actions), dtype=int)
     print("ClipsWorld: action_masks size: {0} {1}".format(len(valid_actions), valid_actions[:5]))
     for g in executable_goals:
-      pos = self.inv_action_dict.get(g)
+      goal = g.getGoalString()
+      p.log("Executable goal: "+goal)
+      pos = self.inv_action_dict.get(goal)
       if (pos is not None):
+        print(pos)
         valid_actions[pos]=1
         """     for i in range(0, self.n_actions):
         #check if action is valid

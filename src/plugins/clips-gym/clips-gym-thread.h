@@ -47,6 +47,7 @@
 namespace py = pybind11;
 
 #include "clips-observation-info.h"
+#include "goalAction.h"
 
 class ClipsGymThread : public fawkes::Thread,
                        public fawkes::LoggingAspect,
@@ -88,7 +89,8 @@ public:
 
 	std::string              getGoalId(std::string action);
 	std::vector<std::string> getAllFormulatedGoals();
-	std::vector<std::string> getAllFormulatedExecutableGoals();
+	//std::vector<std::string> getAllFormulatedExecutableGoals();
+	std::vector<GoalAction> getAllFormulatedExecutableGoals();
 
 	std::vector<std::string> getParamNameDomainObjectsComb(std::string param_name,
 	                                                       std::string param_type);
@@ -98,6 +100,9 @@ public:
 	py::dict getDomainPredicates();
 
 	py::list getGoalClassList();
+
+
+	void filterParams(GoalAction* goal);
 
 	void                     assertRlGoalSelectionFact(std::string goalID);
 	std::vector<std::string> getDomainObjects(std::string a_type);
@@ -137,5 +142,12 @@ private:
 	std::string getParamsClipsSlotValuesOfGoalAsString(std::string               goalClass,
 	                                                   std::vector<CLIPS::Value> slot_values);
 	//int resetCount = 0;
+
+
+	std::list<Param> extractGoalParamsFromClipsValues(std::vector<CLIPS::Value> slot_values);
+
+
+	std::vector<GoalAction> currentExecutableGoals;
+	
 };
 //#endif

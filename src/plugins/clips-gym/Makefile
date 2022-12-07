@@ -53,7 +53,7 @@ LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/Documents/rlblocksworld/src-python/
 LDFLAGS+=-L.~/Documents/rlblocksworld/src-cpp/
 
 #OBJS_clips_gym = $(patsubst %.cpp,%.o,$(subst $(SRCDIR) -DBOOST_PYTHON_STATIC_LIB/,,$(wildcard $(SRCDIR)/*.cpp)))
-OBJS_clips_gym = clips-observation-info.o  clips-gym-plugin.o clips-gym-thread.o #$@ -I$(IDIR) $(LIBS)
+OBJS_clips_gym = clips-observation-info.o goalAction.o clips-gym-plugin.o clips-gym-thread.o #$@ -I$(IDIR) $(LIBS)
 
 OBJS_all = $(OBJS_clips_gym)
 PLUGINS_all = $(PLUGINDIR)/clips_gym.so
