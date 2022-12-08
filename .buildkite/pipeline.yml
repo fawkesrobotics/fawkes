@@ -39,7 +39,7 @@ steps:
       - .buildkite/annotate
     artifact_paths:
       - tests.out.d/**/*
-    timeout_in_minutes: 45
+    timeout_in_minutes: 20
     plugins:
       - *merged-pr-plugin
       - compono/podman#main:
