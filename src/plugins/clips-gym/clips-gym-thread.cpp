@@ -774,12 +774,14 @@ ClipsGymThread::resetCX()
 	fawkes::LockPtr<CLIPS::Environment> clips = getClipsEnv();
 	//clips->clear(), clips->reset() haben zu coredumps geführt
 	clips.lock();
-	clips->assert_fact("(reset-domain-facts)");
+
+	clips->assert_fact("(reset-game (stage STAGE-0))");
+	//clips->assert_fact("(reset-domain-facts)");
 	clips.unlock();
 	//TODO add loop checking for reset done
 
 	bool env_feedback = false;
-	int  max_time     = 25; //seconds
+	int  max_time     = 35; //seconds
 	int  elapsed_time = 0;
 	while (!env_feedback && elapsed_time < max_time) {
 		int time = 4; //sec
@@ -790,7 +792,8 @@ ClipsGymThread::resetCX()
 
 		while (fact) {
 			CLIPS::Template::pointer tmpl  = fact->get_template();
-			std::size_t              found = tmpl->name().find("reset-domain-finish");
+			std::size_t              found = tmpl->name().find("reset-game-finished");
+			//std::size_t              found = tmpl->name().find("reset-domain-finish");
 			if (found != std::string::npos) {
 				std::cout << "In ClipsGymThread reset completed!!! \n" << std::endl;
 				fact->retract();
