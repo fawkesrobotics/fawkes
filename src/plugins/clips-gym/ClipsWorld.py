@@ -232,13 +232,13 @@ class ClipsWorld(gym.Env):
 
   def step(self, action):
     goal = self.action_dict[action]
-    print(f"ClipsWorld: step '{action}': '{goal}'")
     p = clips_gym.ClipsGymThread.getInstance()
+    p.log(f"ClipsWorld: step '{action}': '{goal}'")
     result = p.step(goal) #+"#")
     print("ClipsWorld: p.step result: ", result)
     #print("ClipsWorld: observation ", result.observation)
-    print("ClipsWorld: info ", result.info)
-    print("ClipsWorld: reward ", result.reward)
+    p.log(f"ClipsWorld: info  '{result.info}'")
+    p.log(f"ClipsWorld: reward '{result.reward}'")
 
     #TODO check action valid (if not done - reward -1) (da durch action masking nur valide actions ausgesucht werden sollten, außer es gibt keine validen mehr)
 
@@ -254,21 +254,25 @@ class ClipsWorld(gym.Env):
     executableGoals = p.getAllFormulatedExecutableGoals()
     print ("ClipsWorld: getAllFormulatedExecutableGoals {} length: ", executableGoals, len(executableGoals))
     
-    done = False if len(executableGoals) else True #bool(self.agent_pos == 0)
-    print("\n\nClipsWorld: done ", done)
-    print("\n\n")
-
-    formulatedGoals = p.getAllFormulatedGoals()
-    # Null reward everywhere except when reaching the goal (left of the grid)
-    if not done:
-      #there are still executable goals (middle of the game)
-      reward = result.reward 
-    elif formulatedGoals:
+    time_sec =  p.getRefboxGameTime()
+    print(f"Time: '{time_sec}'")
+    game_time = 120 #in sec = normally 1200
+    reward = 1 
+    if time_sec >= game_time:
+      # game over (e.g. if over 300 points you might won the game - extra check with refbox necessary / no logic for game extension!)
+      done = True
+      reward = result.reward + 10
+    elif not executableGoals and time_sec < game_time:
       # there are no executable goals, but game didn't finished
-      reward = -1
+      done = False
+      reward = 0
     else:
-      # you won the game
-      reward = 10
+      #there are still executable goals (middle of the game)
+      done = False
+      reward = result.reward
+    #done = False if len(executableGoals) else True #bool(self.agent_pos == 0)
+    p.log(f"\n\nClipsWorld: done '{done}' reward {reward}\n")
+    
 
     # Optionally we can pass additional info, we are not using that for now
     info = {}

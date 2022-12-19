@@ -101,8 +101,8 @@ public:
 
 	py::list getGoalClassList();
 
-
-	void filterParams(GoalAction* goal);
+	void        filterParams(GoalAction *goal);
+	std::string getGoalIdByString(std::vector<GoalAction> goals, std::string goal_str);
 
 	void                     assertRlGoalSelectionFact(std::string goalID);
 	std::vector<std::string> getDomainObjects(std::string a_type);
@@ -110,6 +110,8 @@ public:
 	void log(std::string log_msg);
 
 	std::map<std::string, py::dict> goalClassParamsAndParamTypeMap;
+
+	int getRefboxGameTime();
 
 protected:
 	virtual void
@@ -143,11 +145,8 @@ private:
 	                                                   std::vector<CLIPS::Value> slot_values);
 	//int resetCount = 0;
 
-
 	std::list<Param> extractGoalParamsFromClipsValues(std::vector<CLIPS::Value> slot_values);
 
-
 	std::vector<GoalAction> currentExecutableGoals;
-	
 };
 //#endif

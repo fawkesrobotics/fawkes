@@ -72,17 +72,9 @@ ClipsGymThread::getInstance()
 	return thread_instance;
 }
 
-int
-add(int i, int j)
-{
-	return i + j + 5;
-}
-
 PYBIND11_MODULE(clips_gym, m)
 {
 	m.doc() = "pybind11 example plugin"; // optional module docstring
-
-	m.def("add", &add, "A function that adds two numbers");
 
 	py::class_<ClipsObservationInfo>(m, "ClipsObservationInfo")
 	  .def(py::init<>())
@@ -92,17 +84,17 @@ PYBIND11_MODULE(clips_gym, m)
 	  .def_readonly("info", &ClipsObservationInfo::info);
 
 	py::class_<Param>(m, "Param")
-		.def(py::init<const string, const string>())
-		.def("getParamString", &Param::getParamString);
+	  .def(py::init<const string, const string>())
+	  .def("getParamString", &Param::getParamString);
 
 	//.def(py::init([](string name, string value){return new Param(name, value);}))
 	//.def(py::init([](string name){return new GoalAction(name);}))
-			
+
 	py::class_<GoalAction>(m, "Goal")
-		.def(py::init<const string>())
-		.def("setParams", &GoalAction::setParams)
-		.def("getParamsString", &GoalAction::getParamsString)
-		.def("getGoalString", &GoalAction::getGoalString);
+	  .def(py::init<const string>())
+	  .def("setParams", &GoalAction::setParams)
+	  .def("getParamsString", &GoalAction::getParamsString)
+	  .def("getGoalString", &GoalAction::getGoalString);
 	/* std::list<int> observation;
 	int            reward;
 	bool           done;
@@ -124,6 +116,7 @@ PYBIND11_MODULE(clips_gym, m)
 	  .def("getGoalId", &ClipsGymThread::getGoalId)
 	  .def("getDomainPredicates", &ClipsGymThread::getDomainPredicates)
 	  .def("getDomainObjects", &ClipsGymThread::getDomainObjects)
+	  .def("getRefboxGameTime", &ClipsGymThread::getRefboxGameTime)
 	  .def("log", &ClipsGymThread::log);
 }
 
@@ -238,8 +231,7 @@ ClipsGymThread::step(std::string next_goal)
 	//std::string n_goal = "TOWER-C1#b#d#";
 	//std::string goalID = getGoalId(next_goal);
 
-	std::string goalID= GoalActionUtil::getGoalIdByString(currentExecutableGoals, next_goal);
-
+	std::string goalID = getGoalIdByString(currentExecutableGoals, next_goal);
 
 	if (goalID == "") {
 		std::cout << "Goal id not found!" << std::endl;
@@ -255,7 +247,7 @@ ClipsGymThread::step(std::string next_goal)
 	fawkes::LockPtr<CLIPS::Environment> clips = getClipsEnv();
 	//Check frequently if the selected goal is evaluated
 	bool env_feedback = false;
-	int  max_time     = 20; //seconds
+	int  max_time     = 60; //seconds
 	int  elapsed_time = 0;
 	while (!env_feedback && elapsed_time < max_time) {
 		int time = 5; //sec
@@ -302,56 +294,6 @@ ClipsGymThread::step(std::string next_goal)
 }
 
 py::list
-ClipsGymThread::expandGrid(
-  std::map<std::string, std::vector<std::string>> map) //py::dict dictionary)
-{
-	py::list expandGridEntriey;
-	//py::scoped_interpreter guard{};
-	try {
-		//py::object main_namespace = py::module_::import("__main__").attr("__dict__");
-		//py::exec("import sys", main_namespace);
-		//py::exec("print(\"Hello From python\")", main_namespace);
-
-		py::object sys = py::module_::import("sys");
-		py::exec("print(\"Hello From python - 1\")");
-
-		//To Do guard
-		//from itertools import product
-		py::object product    = py::module_::import("itertools").attr("product");
-		py::object pd         = py::module_::import("pandas");
-		py::object dataFrame  = pd.attr("DataFrame");
-		py::object dictionary = py::cast(map);
-
-		py::exec("print(\"Hello From python - 2 \")");
-		py::exec("print(\"Hello From python - 2 - \", dictionary)", py::globals(), dictionary);
-
-		py::exec(R"( df =  DataFrame([row for row in product(*dictionary.values())], 
-						columns=dictionary.keys()))",
-		         py::globals(),
-		         dictionary); //, dictionary);
-
-		py::exec("print(\"Hello From python - 3 - \", df)");
-		py::exec(R"( x = df.to_string(header = False, index = False, index_names=False).split('\n') )");
-
-		py::exec("print(\"Hello From python - 4 \")");
-		py::exec(
-		  R"( expandGridEntriey = ['#', join(col.split()) for col in x] )"); //, expandGridEntriey);
-		//df.apply(lambda row: row[bla]+ )
-
-		py::exec("print(\"Hello From python - 5\")");
-		py::exec("print(expandGridEntriey)"); //,expandGridEntriey);
-	} catch (py::error_already_set &e) {
-		py::module::import("traceback").attr("print_exception")(e.type(), e.value(), e.trace());
-		std::cout << "PYTHON EXCEPTION:" << std::endl;
-		std::cout << e.what() << std::endl;
-	} catch (...) {
-		PyErr_Print();
-		PyErr_Clear();
-	}
-	return expandGridEntriey;
-}
-
-py::list
 ClipsGymThread::getGoalClassList()
 {
 	std::vector<std::string> goalClasses = config->get_strings("/goal-space/classes");
@@ -378,24 +320,34 @@ ClipsGymThread::generateActionSpace()
 	                       "TOWER-C1#buttom#e#top#d",
 	                       "TOWER-C2#buttom#b#middle#d#top#e"}; //, "TOWER-C1#buttom#a#top#e"};
 */
-	std::string space [] = {
-		"ENTER-FIELD#",
-		"BUFFER-CAP#cap-color#CAP_BLACK",
- "BUFFER-CAP#cap-color#CAP_GREY",
- "BUFFER-CAP#cap-color#CAP_NONE",
- "DISCARD#wp-loc#C-BS",
- "DISCARD#wp-loc#C-CS1",
- "DISCARD#wp-loc#C-CS2",
- "DISCARD#wp-loc#C-DS",
- "DISCARD#wp-loc#C-RS1",
- "DISCARD#wp-loc#C-RS2",
- "DISCARD#wp-loc#C-SS",
-  "MOUNT-RING#ring-color#RING_BLUE",
- "MOUNT-RING#ring-color#RING_GREEN",
- "MOUNT-RING#ring-color#RING_NONE",
- "MOUNT-RING#ring-color#RING_ORANGE",
- "MOUNT-RING#RING_YELLOW", 
-	};
+	std::string space[] = {"ENTER-FIELD#",
+	                       "BUFFER-CAP#cap-color#CAP_BLACK",
+	                       "BUFFER-CAP#cap-color#CAP_GREY",
+	                       "MOUNT-CAP#wp-loc#C-BS",
+	                       "MOUNT-CAP#wp-loc#C-CS1",
+	                       "MOUNT-CAP#wp-loc#C-CS2",
+	                       "MOUNT-CAP#wp-loc#C-RS1",
+	                       "MOUNT-CAP#wp-loc#C-RS2",
+	                       "MOUNT-CAP#wp-loc#C-SS",
+	                       "DISCARD#wp-loc#C-BS",
+	                       "DISCARD#wp-loc#C-CS1",
+	                       "DISCARD#wp-loc#C-CS2",
+	                       "DISCARD#wp-loc#C-DS",
+	                       "DISCARD#wp-loc#C-RS1",
+	                       "DISCARD#wp-loc#C-RS2",
+	                       "DISCARD#wp-loc#C-SS",
+	                       "PAY-FOR-RINGS-WITH-BASE#target-mps#C-RS1",
+	                       "PAY-FOR-RINGS-WITH-BASE#target-mps#C-RS2",
+	                       "PAY-FOR-RINGS-WITH-CAP-CARRIER#target-mps#C-RS1",
+	                       "PAY-FOR-RINGS-WITH-CAP-CARRIER#target-mps#C-RS2",
+	                       "PAY-FOR-RINGS-WITH-CARRIER-FROM-SHELF#target-mps#C-RS1",
+	                       "PAY-FOR-RINGS-WITH-CARRIER-FROM-SHELF#target-mps#C-RS2",
+	                       "MOUNT-RING#ring-color#RING_BLUE",
+	                       "MOUNT-RING#ring-color#RING_GREEN",
+	                       "MOUNT-RING#ring-color#RING_NONE",
+	                       "MOUNT-RING#ring-color#RING_ORANGE",
+	                       "MOUNT-RING#ring-color#RING_YELLOW",
+	                       "DELIVER#"};
 
 	py::list action_space;
 	for (std::string s : space) {
@@ -527,30 +479,42 @@ ClipsGymThread::getClipsSlotValuesAsString(std::vector<CLIPS::Value> slot_values
 }
 
 void
-ClipsGymThread::filterParams( GoalAction* goal)
+ClipsGymThread::filterParams(GoalAction *goal)
 {
 	std::cout << "param string before " << goal->getParamsString() << std::endl;
-    py::dict paramNameType = getParamsNameTypeMapOfGoal(goal->getClass());
+	py::dict paramNameType = getParamsNameTypeMapOfGoal(goal->getClass());
 
 	auto getType = paramNameType.attr("get");
-    
-    auto params = goal->getParams();
-    //auto filtered = std::erase_if(params, [](Param p){ return (paramNameType.attr("get")(p) == py::none);} );
-    
-	auto iterator = std::remove_if(params->begin(), params->end(),[&](const Param& p)
-		{
+
+	auto params = goal->getParams();
+	//auto filtered = std::erase_if(params, [](Param p){ return (paramNameType.attr("get")(p) == py::none);} );
+
+	auto iterator = std::remove_if(params->begin(), params->end(), [&](const Param &p) {
 		auto n = getType(p.name, "");
 		//std::cout << "Filter Params " << n << std::endl;
 		//logger->log_info(name(), "RL: filterParams %s", );
 		//params->remove_if([&](const Param& p){
 		return (getType(p.name).is(py::none()));
-		
 	});
 	params->erase(iterator, params->end());
 
 	//std::cout << "Filter Params: " << goal->getParamsString() << std::endl;
-    //goal.setParams(&params);
-    
+	//goal.setParams(&params);
+}
+
+std::string
+ClipsGymThread::getGoalIdByString(std::vector<GoalAction> goals, std::string goal_str)
+{
+	logger->log_info(name(), "getGoalIdByString %s", goal_str.c_str());
+	for (GoalAction g : goals) {
+		logger->log_info(name(), "Before filter: %s", g.getGoalString().c_str());
+		filterParams(&g);
+		logger->log_info(name(), "After filter: %s", g.getGoalString().c_str());
+		if (g.getGoalString() == goal_str) {
+			return g.getId();
+		}
+	}
+	return "";
 }
 
 std::string
@@ -596,32 +560,31 @@ ClipsGymThread::getParamsClipsSlotValuesOfGoalAsString(std::string              
 static string
 getClipsValueString(CLIPS::Value v)
 {
-    std::string value ="";
-    switch (v.type()) {
-		case CLIPS::TYPE_FLOAT: value = std::to_string(v.as_float()); break;
-		case CLIPS::TYPE_INTEGER: value = std::to_string(v.as_integer()); break;
-		default: value = v.as_string();
-		}
-    return value;
+	std::string value = "";
+	switch (v.type()) {
+	case CLIPS::TYPE_FLOAT: value = std::to_string(v.as_float()); break;
+	case CLIPS::TYPE_INTEGER: value = std::to_string(v.as_integer()); break;
+	default: value = v.as_string();
+	}
+	return value;
 }
 
 std::list<Param>
 ClipsGymThread::extractGoalParamsFromClipsValues(std::vector<CLIPS::Value> slot_values)
 {
-    std::list<Param> params;
-    for (std::size_t i = 0; i + 1 < slot_values.size(); i++) {
+	std::list<Param> params;
+	for (std::size_t i = 0; i + 1 < slot_values.size(); i++) {
 		//std::string value = "";
 		//auto        v     = slot_values[i];
-        std::string p_name = getClipsValueString(slot_values[i]);
-        std::string p_value = getClipsValueString(slot_values[i+1]);
-		Param p = Param(p_name, p_value);
-        i++;
+		std::string p_name  = getClipsValueString(slot_values[i]);
+		std::string p_value = getClipsValueString(slot_values[i + 1]);
+		Param       p       = Param(p_name, p_value);
+		i++;
 		//values_as_string.push_back(v);
-        params.push_back(p);
+		params.push_back(p);
 	}
-    return params;
+	return params;
 }
-
 
 //get key value map of param-name and param-type
 //std::map<std::string,std::string>
@@ -697,6 +660,60 @@ ClipsGymThread::getAllFormulatedGoals()
 	return maskedGoals;
 }
 
+int
+ClipsGymThread::getRefboxGameTime()
+{
+	fawkes::LockPtr<CLIPS::Environment> clips = getClipsEnv();
+	clips.lock();
+	CLIPS::Fact::pointer fact = clips->get_facts();
+	int                  sec  = 0;
+	while (fact) {
+		CLIPS::Template::pointer tmpl = fact->get_template();
+		//(wm-fact (id "/refbox/game-time") (key refbox game-time) (type UINT) (is-list TRUE) (value nil) (values 68 239942.0))
+		std::size_t found = tmpl->name().find("wm-fact");
+
+		if (found != std::string::npos) {
+			std::string key = getClipsSlotValuesAsString(fact->slot_value("key"));
+			if (key == "refbox#game-time") {
+				logger->log_info(name(), "get refbox game-time key: %s", key.c_str());
+				std::vector<CLIPS::Value> slot_values = fact->slot_value("values");
+				//Normal game 20min = 1200 sec - extension by 5 more min -  25min = 1500sec
+
+				if (slot_values.size() > 0) {
+					auto v = slot_values.at(0);
+					logger->log_info(name(), "value type %d", v.type());
+					switch (v.type()) {
+					case CLIPS::TYPE_FLOAT: {
+						std::cout << "v is float" << std::endl;
+						float clips_time = v.as_float();
+						sec              = static_cast<int>(clips_time);
+					} break;
+					case CLIPS::TYPE_INTEGER: {
+						std::cout << "v is int" << std::endl;
+						sec = int(v.as_integer());
+					} break;
+						/*case CLIPS::TYPE_SYMBOL:
+					case CLIPS::TYPE_STRING:
+					case CLIPS::TYPE_EXTERNAL_ADDRESS:
+					case CLIPS::TYPE_INSTANCE_ADDRESS:
+					case CLIPS::TYPE_INSTANCE_NAME:*/
+					default:
+						//sec = std::stoi(v.as_string());
+						sec = 4;
+						std::cout << "Clips value " << v.as_string() << std::endl;
+					}
+				}
+				logger->log_info(name(), "Refbox game time %i sec", sec);
+				break;
+			}
+		}
+
+		fact = fact->next();
+	}
+	clips.unlock();
+	return sec;
+}
+
 //std::vector<std::string>
 std::vector<GoalAction>
 ClipsGymThread::getAllFormulatedExecutableGoals()
@@ -716,48 +733,48 @@ ClipsGymThread::getAllFormulatedExecutableGoals()
 		if (found != std::string::npos) {
 			std::string mode          = getClipsSlotValuesAsString(fact->slot_value("mode"));
 			std::string is_executable = getClipsSlotValuesAsString(fact->slot_value("is-executable"));
+
+			if (mode == "FORMULATED" && is_executable == "FALSE") {
+				std::string goal_id = getClipsSlotValuesAsString(fact->slot_value("id"));
+				logger->log_info(name(), "Goal is not executable: %s", goal_id.c_str());
+			}
 			//std::cout << slot_values << std::endl;
 			if (mode == "FORMULATED" && is_executable == "TRUE") {
+				std::string goal_class      = getClipsSlotValuesAsString(fact->slot_value("class"));
+				py::list    allowed_classes = getGoalClassList();
+				auto        vec             = allowed_classes.cast<std::vector<std::string>>();
+				std::vector<std::string>::iterator loc = std::find(vec.begin(), vec.end(), goal_class);
+				if (loc == vec.end()) {
+					logger->log_info(name(), "not in List %s", goal_class.c_str());
+				} else {
+					std::string goal_id = getClipsSlotValuesAsString(fact->slot_value("id"));
+					GoalAction  goal    = GoalAction(goal_class, goal_id);
 
-				std::string goal_class = getClipsSlotValuesAsString(fact->slot_value("class"));
-				py::list allowed_classes = getGoalClassList();
-				auto vec = allowed_classes.cast<std::vector<std::string>>();
-				std::vector<std::string>::iterator loc =
-		  			std::find(vec.begin(), vec.end(), goal_class);
-				if (loc == vec.end())
-				{
-					std::cout << "not in List" <<goal_class << std::endl;
-					
-				}
-				else{
-				std::string goal_id = getClipsSlotValuesAsString(fact->slot_value("id"));
-				GoalAction goal = GoalAction(goal_class, goal_id);
+					std::list params = extractGoalParamsFromClipsValues(fact->slot_value("params"));
+					goal.setParams(params);
 
-				std::list params = extractGoalParamsFromClipsValues(fact->slot_value("params"));
-				goal.setParams(params);
+					filterParams(&goal);
+					std::cout << "Params String " << goal.getParamsString() << std::endl;
 
-				filterParams(&goal);
-				std::cout << "Params String " <<goal.getParamsString()<< std::endl;
+					//std::string goal_params = getClipsSlotValuesAsString(fact->slot_value("params"));
+					std::cout << "ClipsGymThread getAllFormulated Executable Goals: "
+					             "getParamsClipsSlotVlauesOfGoalAsString"
+					          << std::endl;
+					//std::string goal_params =
+					// getParamsClipsSlotValuesOfGoalAsString(goal_class, fact->slot_value("params"));
 
-				//std::string goal_params = getClipsSlotValuesAsString(fact->slot_value("params"));
-				std::cout << "ClipsGymThread getAllFormulated Executable Goals: "
-				             "getParamsClipsSlotVlauesOfGoalAsString"
-				          << std::endl;
-				//std::string goal_params =
-				 // getParamsClipsSlotValuesOfGoalAsString(goal_class, fact->slot_value("params"));
+					//std::cout << goal_params << std::endl;
+					//maskedGoals.push_back(goal_class + "#" + goal_params);
+					maskedGoals.push_back(goal);
 
-				//std::cout << goal_params << std::endl;
-				//maskedGoals.push_back(goal_class + "#" + goal_params);
-				maskedGoals.push_back(goal);
-
-				logger->log_info(name(), "RL: %s", goal_class.c_str()); //"#", goal_params.c_str());
+					logger->log_info(name(), "RL: %s", goal_class.c_str()); //"#", goal_params.c_str());
 				}
 			}
 		}
 		fact = fact->next();
 	}
 	//std::cout<<maskedGoals <<std::endl;
-	std::cout << "Finished passing all executable goals" << std::endl;
+	logger->log_info(name(), "RL: Finished passing all executable goals");
 	clips.unlock();
 
 	currentExecutableGoals = maskedGoals;
@@ -781,7 +798,7 @@ ClipsGymThread::resetCX()
 	//TODO add loop checking for reset done
 
 	bool env_feedback = false;
-	int  max_time     = 35; //seconds
+	int  max_time     = 45; //seconds
 	int  elapsed_time = 0;
 	while (!env_feedback && elapsed_time < max_time) {
 		int time = 4; //sec
@@ -795,7 +812,7 @@ ClipsGymThread::resetCX()
 			std::size_t              found = tmpl->name().find("reset-game-finished");
 			//std::size_t              found = tmpl->name().find("reset-domain-finish");
 			if (found != std::string::npos) {
-				std::cout << "In ClipsGymThread reset completed!!! \n" << std::endl;
+				logger->log_info(name(), "\nIn ClipsGymThread reset completed!!! \n");
 				fact->retract();
 				env_feedback = true;
 				break;
