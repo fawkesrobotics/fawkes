@@ -32,6 +32,7 @@ getConfigStringReplacedBasedirT(fawkes::Configuration *config, std::string confi
 {
 	std::string config_value =
 	  std::regex_replace(config->get_string(configEntry), std::regex("@BASEDIR@"), BASEDIR);
+	config_value = std::regex_replace(config_value, std::regex("@FAWKES_BASEDIR@"), FAWKES_BASEDIR);
 	return config_value;
 }
 

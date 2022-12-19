@@ -20,61 +20,56 @@
 
 #include <list>
 #include <map>
-#include <vector>
 #include <string>
+#include <vector>
 
 class Param
 {
 public:
-    Param(const std::string name,const std::string value);
+	Param(const std::string name, const std::string value);
 
-    Param(const std::string name,const std::string type,const std::string value);
+	Param(const std::string name, const std::string type, const std::string value);
 
-    std::string getParamString();
+	std::string getParamString();
 
-    bool operator < (const Param& param) const
-    {
-        return name < param.name;
-    }
+	bool
+	operator<(const Param &param) const
+	{
+		return name < param.name;
+	}
 
-    std::string name;
-    std::string type;
-    std::string value;
+	std::string name;
+	std::string type;
+	std::string value;
+
 private:
-    
-
-
 };
-
 
 class GoalAction
 {
 public:
-	//GoalAction(); 
-    GoalAction(const std::string classname);
+	//GoalAction();
+	GoalAction(const std::string classname);
 	GoalAction(const std::string classname, const std::string id);
-    void setParams(const std::list<Param> aParams);
-    void addParam(const Param aParam);
+	void setParams(const std::list<Param> aParams);
+	void addParam(const Param aParam);
 
-    std::string getClass();
-    std::string getId();
-    std::list<Param>* getParams();
+	std::string       getClass();
+	std::string       getId();
+	std::list<Param> *getParams();
 
-	
-    std::string getGoalString();
-    std::string getParamsString();
-    std::list<Param> getSortedParams();
-    
-   
+	std::string      getGoalString();
+	std::string      getParamsString();
+	std::list<Param> getSortedParams();
+
 private:
-	std::string class_name;
-	std::string id="";
-    std::list<Param> params={};
+	std::string      class_name;
+	std::string      id     = "";
+	std::list<Param> params = {};
 };
 
-namespace GoalActionUtil
-{
-     const
-    std::string getGoalIdByString(std::vector<GoalAction> goals, std::string goal_str);
+namespace GoalActionUtil {
+//const
+//std::string getGoalIdByString(std::vector<GoalAction> goals, std::string goal_str);
 
-}
+} // namespace GoalActionUtil

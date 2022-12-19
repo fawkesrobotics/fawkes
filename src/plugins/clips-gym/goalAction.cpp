@@ -27,24 +27,23 @@ using namespace std;
 
 Param::Param(const string a_name, const string a_value)
 {
-    name = a_name;
-    value = a_value;
+	name  = a_name;
+	value = a_value;
 }
 
 Param::Param(const string a_name, const string a_type, const string a_value)
 {
-    name = a_name;
-    type = a_type;
-    value = a_value;
+	name  = a_name;
+	type  = a_type;
+	value = a_value;
 }
 
 std::string
 Param::getParamString()
 {
-    string temp = name + '#' + value;
-    return temp;
+	string temp = name + '#' + value;
+	return temp;
 }
-
 
 GoalAction::GoalAction(const string a_classname)
 {
@@ -54,59 +53,65 @@ GoalAction::GoalAction(const string a_classname)
 GoalAction::GoalAction(const string a_classname, const string a_id)
 {
 	class_name = a_classname;
-    id = a_id;
+	id         = a_id;
 }
 
 void
 GoalAction::setParams(const list<Param> aParams)
 {
-    params= aParams;
+	params = aParams;
 }
 
 void
 GoalAction::addParam(const Param aParam)
 {
-    params.push_back(aParam);
+	params.push_back(aParam);
 }
 
+std::string
+GoalAction::getClass()
+{
+	return class_name;
+}
+std::string
+GoalAction::getId()
+{
+	return id;
+}
+std::list<Param> *
+GoalAction::getParams()
+{
+	return &params;
+}
 
-    std::string GoalAction::getClass(){
-        return class_name;
-    }
-    std::string GoalAction::getId()
-    { return id;}
-    std::list<Param>* GoalAction::getParams()
-    { return &params;}
-
-list<Param> 
+list<Param>
 GoalAction::getSortedParams()
 {
-    params.sort();
-    return params;
+	params.sort();
+	return params;
 }
 
 string
 GoalAction::getParamsString()
 {
-    params.sort();
-    string paramsString = "";
+	params.sort();
+	string paramsString = "";
 
-    for(Param& p: params)
-    {
-        paramsString += p.getParamString();
-    }
+	for (Param &p : params) {
+		paramsString += p.getParamString();
+	}
 
-    return paramsString;
+	return paramsString;
 }
 
 string
 GoalAction::getGoalString()
 {
-    string goalString = class_name + '#' + getParamsString();
-    return goalString;
+	string goalString = class_name + '#' + getParamsString();
+	return goalString;
 }
 
-const
+/*const
 std::string 
 GoalActionUtil::getGoalIdByString(std::vector<GoalAction> goals, std::string goal_str)
 {
@@ -118,9 +123,4 @@ GoalActionUtil::getGoalIdByString(std::vector<GoalAction> goals, std::string goa
         }
     }
     return "";
-}
-
-
-
-
-
+}*/
