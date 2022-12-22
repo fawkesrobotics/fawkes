@@ -264,6 +264,7 @@ class ClipsWorld(gym.Env):
       reward = result.reward + 10
     elif not executableGoals and time_sec < game_time:
       # there are no executable goals, but game didn't finished
+      p.clipsGymSleep(500) #time in milliseconds
       done = False
       reward = 0
     else:

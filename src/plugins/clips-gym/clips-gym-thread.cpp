@@ -117,6 +117,7 @@ PYBIND11_MODULE(clips_gym, m)
 	  .def("getDomainPredicates", &ClipsGymThread::getDomainPredicates)
 	  .def("getDomainObjects", &ClipsGymThread::getDomainObjects)
 	  .def("getRefboxGameTime", &ClipsGymThread::getRefboxGameTime)
+	  .def("clipsGymSleep", &ClipsGymThread::clipsGymSleep)
 	  .def("log", &ClipsGymThread::log);
 }
 
@@ -217,6 +218,13 @@ ClipsGymThread::assertRlGoalSelectionFact(std::string goalID)
 	clips->assert_fact(fact);
 
 	clips.unlock();
+}
+
+void
+ClipsGymThread::clipsGymSleep(int milliseconds)
+{
+	logger->log_info(name(), "ClipsGym Sleeping for %i ms", milliseconds);
+	std::this_thread::sleep_for(milliseconds * 1ms);
 }
 
 //std::string

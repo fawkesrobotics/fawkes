@@ -113,6 +113,8 @@ public:
 
 	int getRefboxGameTime();
 
+	void clipsGymSleep(int milliseconds);
+
 protected:
 	virtual void
 	run()
