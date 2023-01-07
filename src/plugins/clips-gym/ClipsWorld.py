@@ -255,8 +255,8 @@ class ClipsWorld(gym.Env):
     print ("ClipsWorld: getAllFormulatedExecutableGoals {} length: ", executableGoals, len(executableGoals))
     
     time_sec =  p.getRefboxGameTime()
-    print(f"Time: '{time_sec}'")
-    game_time = 120 #in sec = normally 1200
+    p.log(f"ClipsWorld: Time: '{time_sec}'")
+    game_time = 1200 #180 #in sec = normally 1200
     reward = 1 
     if time_sec >= game_time:
       # game over (e.g. if over 300 points you might won the game - extra check with refbox necessary / no logic for game extension!)

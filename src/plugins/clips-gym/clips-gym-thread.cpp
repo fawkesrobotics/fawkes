@@ -255,10 +255,10 @@ ClipsGymThread::step(std::string next_goal)
 	fawkes::LockPtr<CLIPS::Environment> clips = getClipsEnv();
 	//Check frequently if the selected goal is evaluated
 	bool env_feedback = false;
-	int  max_time     = 60; //seconds
+	int  max_time     = 45; //seconds 60 without speedup
 	int  elapsed_time = 0;
 	while (!env_feedback && elapsed_time < max_time) {
-		int time = 5; //sec
+		int time = 1; //5 sec
 		std::this_thread::sleep_for(time * 1000ms);
 		clips.lock();
 		clips->evaluate("(printout t \"In Sleeping Step Function \" crlf) ");
@@ -352,10 +352,10 @@ ClipsGymThread::generateActionSpace()
 	                       "PAY-FOR-RINGS-WITH-CARRIER-FROM-SHELF#target-mps#C-RS2",
 	                       "MOUNT-RING#ring-color#RING_BLUE",
 	                       "MOUNT-RING#ring-color#RING_GREEN",
-	                       "MOUNT-RING#ring-color#RING_NONE",
 	                       "MOUNT-RING#ring-color#RING_ORANGE",
 	                       "MOUNT-RING#ring-color#RING_YELLOW",
-	                       "DELIVER#"};
+	                       "DELIVER#",
+						   "WAIT-NOTHING-EXECUTABLE#"};
 
 	py::list action_space;
 	for (std::string s : space) {
@@ -806,10 +806,10 @@ ClipsGymThread::resetCX()
 	//TODO add loop checking for reset done
 
 	bool env_feedback = false;
-	int  max_time     = 45; //seconds
+	int  max_time     = 45; //seconds 45 without speedup
 	int  elapsed_time = 0;
 	while (!env_feedback && elapsed_time < max_time) {
-		int time = 4; //sec
+		int time = 1; //4 sec without speedup
 		std::this_thread::sleep_for(time * 1000ms);
 		clips.lock();
 		clips->evaluate("(printout t \"In Sleeping RESET Function \" crlf) ");
