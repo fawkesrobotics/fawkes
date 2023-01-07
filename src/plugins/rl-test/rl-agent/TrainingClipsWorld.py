@@ -31,7 +31,7 @@ import pddlgym
 #from PDDLExtension import BlocksWorld, LiteralSpace2, LiteralActionWrapper, LiteralObsWrapper
 from ClipsWorld import ClipsWorld#, LiteralSpace2, LiteralActionWrapper, LiteralObsWrapper
 
-
+from stable_baselines3.common.logger import configure
 
 #Action Masking
 from sb3_contrib.common.maskable.policies import MaskableActorCriticPolicy
@@ -112,6 +112,10 @@ if __name__ == '__main__':
  #   env_name = "blockstower"
 #    dir_path = "~/fawkes/src/plugins/rl-test/rl-agent"
     print("In Training script")
+    
+    tmp_path = dir_path +"/sb3_log/"
+    print(f"Path: {tmp_path}")
+    sb3_logger = configure(tmp_path, ["stdout", "csv"])
     #print("Script: Config values for env_name and path: " + env_name + " " + dir_path)
     #print("Script: Config values for path: " + dir_path)
     print("Script: Creating env")
@@ -147,6 +151,9 @@ if __name__ == '__main__':
     # a new action_mask_fn kwarg, as it did in an earlier draft.
     model = MaskablePPO(MaskableActorCriticPolicy, env, verbose=1, n_steps=3)
     #model = PPO(MlpPolicy, env, verbose=0)
+
+    print("Set logger")
+    model.set_logger(sb3_logger)
 
     print("\n\nStart trainig the rl agent - for {} timesteps ".format(timesteps))
     model.learn(total_timesteps=timesteps,log_interval=1)
