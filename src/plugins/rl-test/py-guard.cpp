@@ -199,6 +199,33 @@ PyGuard::predict()
 	return action_str;
 }
 
+std::string
+PyGuard::getGoalId()
+{
+	std::string goalId_str = "";
+	try {
+		py::exec("print(\"PyGuard getGoalId start\")", py_scope);
+		//py_sope["obs"] = fact_string;
+		py::exec("id = env.getGoalIdOfAction(goal)", py_scope);
+		py::exec("print(\"PyGuard id: \",id)", py_scope);
+
+		goalId_str = py_scope["id"].cast<std::string>();
+
+	} catch (py::error_already_set &e) {
+		py::module::import("traceback").attr("print_exception")(e.type(), e.value(), e.trace());
+		std::cout << "PYTHON EXCEPTION:" << std::endl;
+		std::cout << e.what() << std::endl;
+	} catch (const std::runtime_error &re) {
+		std::cout << "PYTHON EXCEPTION:" << std::endl;
+		std::cout << re.what() << std::endl;
+	} catch (...) {
+		PyErr_Print();
+		PyErr_Clear();
+	}
+	std::cout << "PyGuard finished getGoalId" << std::endl;
+	return goalId_str;
+}
+
 PyGuard::~PyGuard()
 {
 	std::cout << "\t\t\t\tDeleting PyGuard" << std::endl;

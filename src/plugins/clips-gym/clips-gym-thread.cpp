@@ -114,6 +114,7 @@ PYBIND11_MODULE(clips_gym, m)
 	  .def("getGoalClassList", &ClipsGymThread::getGoalClassList)
 	  .def("assertRlGoalSelectionFact", &ClipsGymThread::assertRlGoalSelectionFact)
 	  .def("getGoalId", &ClipsGymThread::getGoalId)
+	  .def("getGoalIdByString", &ClipsGymThread::getGoalIdByString)
 	  .def("getDomainPredicates", &ClipsGymThread::getDomainPredicates)
 	  .def("getDomainObjects", &ClipsGymThread::getDomainObjects)
 	  .def("getRefboxGameTime", &ClipsGymThread::getRefboxGameTime)
@@ -355,7 +356,7 @@ ClipsGymThread::generateActionSpace()
 	                       "MOUNT-RING#ring-color#RING_ORANGE",
 	                       "MOUNT-RING#ring-color#RING_YELLOW",
 	                       "DELIVER#",
-						   "WAIT-NOTHING-EXECUTABLE#"};
+	                       "WAIT-NOTHING-EXECUTABLE#"};
 
 	py::list action_space;
 	for (std::string s : space) {
@@ -515,9 +516,9 @@ ClipsGymThread::getGoalIdByString(std::vector<GoalAction> goals, std::string goa
 {
 	logger->log_info(name(), "getGoalIdByString %s", goal_str.c_str());
 	for (GoalAction g : goals) {
-		logger->log_info(name(), "Before filter: %s", g.getGoalString().c_str());
+		//logger->log_info(name(), "Before filter: %s", g.getGoalString().c_str());
 		filterParams(&g);
-		logger->log_info(name(), "After filter: %s", g.getGoalString().c_str());
+		//logger->log_info(name(), "After filter: %s", g.getGoalString().c_str());
 		if (g.getGoalString() == goal_str) {
 			return g.getId();
 		}
