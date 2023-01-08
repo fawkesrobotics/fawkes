@@ -35,6 +35,7 @@ public:
 	void            loadEnv();
 	void            print();
 	std::string     predict();
+	std::string     getGoalId();
 
 protected:
 	PyGuard();

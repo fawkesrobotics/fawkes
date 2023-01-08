@@ -264,10 +264,11 @@ RLTestThread::loop()
 	rl_gs_interface->write();
 	std::future<std::string> execution_done;
 
+	int maxStartedExecutionCount = 500;
 	std::cout << "cfg_training_mode: " << cfg_training_mode << " started exection count "
 	          << count_startedExecution << std::endl;
 
-	if (!cfg_training_mode && count_startedExecution < 3) {
+	if (!cfg_training_mode && count_startedExecution < maxStartedExecutionCount) {
 		/* Using the rl agent to predict the next goal */
 		std::cout << "RlTestThread: in loop start execution mode" << std::endl;
 		//std::string fact_string = create_rl_env_state_from_facts();
@@ -284,7 +285,8 @@ RLTestThread::loop()
 		//auto action = "TOWER-C1#buttom#a#top#c";
 		std::cout << "executeRlAgent returned: " << action << std::endl;
 		if (action != "") {
-			auto goal_id = getGoalId(action);
+			auto goal_id = py_guard->getGoalId();
+			//auto goal_id = getGoalId(action);
 			std::cout << "GetGoalID: " << goal_id << std::endl;
 			assertRlGoalSelectionFact(goal_id);
 		}

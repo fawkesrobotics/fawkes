@@ -379,4 +379,11 @@ class ClipsWorld(gym.Env):
     print("ClipsWorld: getCurrentObs new env state: ",state)
     return state
 
+  def getGoalIdOfAction(self, discrete_action):
+    p = clips_gym.ClipsGymThread.getInstance()
+    p.log(f"ClipsWorld: getGoalIdOfAction ")
+    executableGoals = p.getAllFormulatedExecutableGoals()
+    goal_id = p.getGoalIdByString(executableGoals, discrete_action)
+    p.log(f"ClipsWorld: action {discrete_action} maps goal {goal_id} ")
+    return goal_id
     
