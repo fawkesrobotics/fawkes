@@ -30,6 +30,9 @@ import inspect
 import ast
 import pandas as pd
 from itertools import product
+from stable_baselines3.common.monitor import ResultsWriter
+import time
+from typing import List
 
 def expand_grid(dictionary):
    return pd.DataFrame([row for row in product(*dictionary.values())], 
@@ -191,6 +194,16 @@ class ClipsWorld(gym.Env):
     # this can be described both by Discrete and Box space
     self.n_obs = len(sorted_obs)
     self.observation_space = gym.spaces.Box(0, 1, (self.n_obs,))
+    
+    #logging
+    self.t_start = time.time()
+    self.results_writer = ResultsWriter()
+    p.log(f"MonitorWriter: {self.results_writer.__dir__}")
+    self.rewards: List[float] = []
+    self.episode_returns: List[float] = []
+    self.episode_lengths: List[int] = []
+    self.episode_times: List[float] = []
+    self.total_steps = 0
 
     try:
       self.state = np.zeros(self.n_obs)
@@ -198,7 +211,7 @@ class ClipsWorld(gym.Env):
     except:
       print("State problem")
 
-    #TODO add gametime, reward
+    #TODO add gametime
     
 
   def reset(self):
@@ -216,19 +229,35 @@ class ClipsWorld(gym.Env):
 
     print("ClipsWorld: reset: call create_rl_env_state_from_facts")
     fact_string = p.create_rl_env_state_from_facts()
-    #print("ClipsWorld reset: reseived facts: ", fact_string)
     raw_facts = ast.literal_eval(fact_string)
-    #print("\nfacts: ", raw_facts)
     state = self.get_state_from_facts(raw_facts)
-    #print("ClipsWorld: New env state from facts: ",state)
+    
+    self.rewards = []
+    self.needs_reset = False
     p.log("ClipsWorld: end reset function")
     
-
-    # Initialize the agent at the right of the grid
-    #self.agent_pos = self.grid_size - 1
-    # here we convert to float32 to make it more general (in case we want to use continuous actions)
-    return np.array(state).astype(np.int_)  #np.array(state).astype(np.int_)
+    return np.array(state).astype(np.int_)
     #state #
+
+  def logOnEpisodeEnd(self):
+    #observation, reward, done, info = self.env.step(action)
+    
+    self.needs_reset = True
+    ep_rew = sum(self.rewards)
+    ep_len = len(self.rewards)
+    p = clips_gym.ClipsGymThread.getInstance()
+    p.log(f"\n\nClipsWorld: logOnEpisodeEnd Reward:{ep_rew} Length: {ep_len}\n\n")
+    ep_info = {"r": ep_rew, "l": ep_len, "t": round(time.time() - self.t_start, 6)}
+    #for key in self.info_keywords:
+    #    ep_info[key] = info[key]
+    self.episode_returns.append(ep_rew)
+    self.episode_lengths.append(ep_len)
+    self.episode_times.append(time.time() - self.t_start)
+    #ep_info.update(self.current_reset_info)
+    if self.results_writer:
+        self.results_writer.write_row(ep_info)
+    #info["episode"] = ep_info
+      
 
   def step(self, action):
     goal = self.action_dict[action]
@@ -243,7 +272,6 @@ class ClipsWorld(gym.Env):
     #TODO check action valid (if not done - reward -1) (da durch action masking nur valide actions ausgesucht werden sollten, außer es gibt keine validen mehr)
 
     # Create observation from clips
-    #print("ClipsWorld reseived facts: ", fact_string)
     raw_facts = ast.literal_eval(result.observation)#fact_string)
     #print("\nfacts: ", raw_facts)
     state = self.get_state_from_facts(raw_facts)
@@ -257,28 +285,32 @@ class ClipsWorld(gym.Env):
     time_sec =  p.getRefboxGameTime()
     p.log(f"ClipsWorld: Time: '{time_sec}'")
     game_time = 1200 #180 #in sec = normally 1200
-    reward = 1 
+
     if time_sec >= game_time:
       # game over (e.g. if over 300 points you might won the game - extra check with refbox necessary / no logic for game extension!)
       done = True
-      reward = result.reward + 10
+      
     elif not executableGoals and time_sec < game_time:
       # there are no executable goals, but game didn't finished
       p.clipsGymSleep(500) #time in milliseconds
       done = False
-      reward = 0
     else:
       #there are still executable goals (middle of the game)
       done = False
-      reward = result.reward
-    #done = False if len(executableGoals) else True #bool(self.agent_pos == 0)
-    p.log(f"\n\nClipsWorld: done '{done}' reward {reward}\n")
     
-
+    step_reward = result.reward - sum(self.rewards)
+    #done = False if len(executableGoals) else True 
+    p.log(f"\n\nClipsWorld: done '{done}' step reward {step_reward} total reward {sum(self.rewards)+step_reward}\n")
+    
     # Optionally we can pass additional info, we are not using that for now
     info = {}
 
-    return state, reward, done, info
+    self.rewards.append(step_reward)
+    if done:
+      self.logOnEpisodeEnd()
+    self.total_steps += 1
+
+    return state, step_reward, done, info
     #return np.array([self.n_obs]).astype(np.int_), reward, done, info
 
   #Exposes a method called action_masks(), which returns masks for the wrapped env.
@@ -303,19 +335,15 @@ class ClipsWorld(gym.Env):
       if (pos is not None):
         print(pos)
         valid_actions[pos]=1
-        """     for i in range(0, self.n_actions):
-        #check if action is valid
-        a = env.env.actions[i]        
-        s = env.env.unwrapped._state       
-        v = env.env.unwrapped._action_valid_test(s,a)
-       
-        if v:
-            valid_actions[i]=1 """
-    #print("Valid Actions: ", valid_actions)
-
-    #TODO clips_gym call get executable goals
-    #print("NOT IMPLEMENTED ",inspect.currentframe().f_code.co_name)
     return valid_actions
+
+  def close(self) -> None:
+    """
+    Closes the environment
+    """
+    super().close()
+    if self.results_writer is not None:
+        self.results_writer.close()
 
   def render(self, mode='console'):
     if mode != 'console':
