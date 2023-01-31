@@ -356,7 +356,8 @@ ClipsGymThread::generateActionSpace()
 	                       "MOUNT-RING#ring-color#RING_ORANGE",
 	                       "MOUNT-RING#ring-color#RING_YELLOW",
 	                       "DELIVER#",
-	                       "WAIT-NOTHING-EXECUTABLE#"};
+	                       "WAIT-NOTHING-EXECUTABLE#",
+	                       "MOVE-OUT-OF-WAY#"};
 
 	py::list action_space;
 	for (std::string s : space) {
