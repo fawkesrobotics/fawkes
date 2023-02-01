@@ -112,6 +112,7 @@ public:
 	std::map<std::string, py::dict> goalClassParamsAndParamTypeMap;
 
 	int getRefboxGameTime();
+	std::string getRefboxGamePhase();
 
 	void clipsGymSleep(int milliseconds);
 

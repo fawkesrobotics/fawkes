@@ -118,6 +118,7 @@ PYBIND11_MODULE(clips_gym, m)
 	  .def("getDomainPredicates", &ClipsGymThread::getDomainPredicates)
 	  .def("getDomainObjects", &ClipsGymThread::getDomainObjects)
 	  .def("getRefboxGameTime", &ClipsGymThread::getRefboxGameTime)
+	  .def("getRefboxGamePhase", &ClipsGymThread::getRefboxGamePhase)
 	  .def("clipsGymSleep", &ClipsGymThread::clipsGymSleep)
 	  .def("log", &ClipsGymThread::log);
 }
@@ -258,6 +259,7 @@ ClipsGymThread::step(std::string next_goal)
 	bool env_feedback = false;
 	int  max_time     = 45; //seconds 60 without speedup
 	int  elapsed_time = 0;
+	bool check_for_game_over = false;
 	while (!env_feedback && elapsed_time < max_time) {
 		int time = 1; //5 sec
 		std::this_thread::sleep_for(time * 1000ms);
@@ -268,6 +270,7 @@ ClipsGymThread::step(std::string next_goal)
 		while (fact) {
 			CLIPS::Template::pointer tmpl  = fact->get_template();
 			std::size_t              found = tmpl->name().find("rl-finished-goal");
+			std::size_t              wm_fact = tmpl->name().find("wm-fact");
 			if (found != std::string::npos) {
 				std::string goalID  = getClipsSlotValuesAsString(fact->slot_value("goal-id"));
 				std::string outcome = getClipsSlotValuesAsString(fact->slot_value("outcome"));
@@ -285,13 +288,28 @@ ClipsGymThread::step(std::string next_goal)
 				std::cout << "In ClipsGymThread step: after retracting rl-finished-goal fact" << std::endl;
 				break;
 			}
+			else if (check_for_game_over && wm_fact != std::string::npos)
+			{
+				//(wm-fact (id "/refbox/phase") (key refbox phase) (type UNKNOWN) (is-list FALSE) (value POST_GAME) (values))
+				std::string key = getClipsSlotValuesAsString(fact->slot_value("key"));
+				std::string value = getClipsSlotValuesAsString(fact->slot_value("value"));
+				//key: refbox#phase id:/refbox/phase value: PRODUCTION
+				if(key == "refbox#phase" && (value =="POST_GAME" || value == "SETUP"))
+				{
+					obs_info.info = "Game Over";
+					logger->log_info(name(), "Step Function: %s %s Game Over", key.c_str(), value.c_str());
+					env_feedback = true;
+					break;
+				}
+			}
 			fact = fact->next();
 		}
 
 		//TODO: check outcome - set return 1 for completed and 0 otherwise
-
+		
 		clips.unlock();
 		elapsed_time += time;
+		check_for_game_over = true;
 	}
 	std::string env_state = create_rl_env_state_from_facts();
 
@@ -722,6 +740,35 @@ ClipsGymThread::getRefboxGameTime()
 	}
 	clips.unlock();
 	return sec;
+}
+
+
+
+std::string
+ClipsGymThread::getRefboxGamePhase()
+{
+	fawkes::LockPtr<CLIPS::Environment> clips = getClipsEnv();
+	clips.lock();
+	CLIPS::Fact::pointer fact = clips->get_facts();
+	std::string phase = "None";
+	while (fact) {
+		CLIPS::Template::pointer tmpl = fact->get_template();
+		//(wm-fact (id "/refbox/game-time") (key refbox game-time) (type UINT) (is-list TRUE) (value nil) (values 68 239942.0))
+		std::size_t found = tmpl->name().find("wm-fact");
+
+		if (found != std::string::npos) {
+			std::string key = getClipsSlotValuesAsString(fact->slot_value("key"));
+			if (key == "refbox#phase") {
+				phase = getClipsSlotValuesAsString(fact->slot_value("value"));
+				logger->log_info(name(), "get refbox phase %s", phase.c_str());
+				break;
+			}
+		}
+
+		fact = fact->next();
+	}
+	clips.unlock();
+	return phase;
 }
 
 //std::vector<std::string>

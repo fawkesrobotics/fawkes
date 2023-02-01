@@ -283,10 +283,12 @@ class ClipsWorld(gym.Env):
     print ("ClipsWorld: getAllFormulatedExecutableGoals {} length: ", executableGoals, len(executableGoals))
     
     time_sec =  p.getRefboxGameTime()
-    p.log(f"ClipsWorld: Time: '{time_sec}'")
+    phase = p.getRefboxGamePhase()
+
+    p.log(f"ClipsWorld: Time: '{time_sec}' Phase: '{phase}'")
     game_time = 1200 #180 #in sec = normally 1200
 
-    if time_sec >= game_time:
+    if phase == 'POST_GAME' or time_sec > game_time+100:
       # game over (e.g. if over 300 points you might won the game - extra check with refbox necessary / no logic for game extension!)
       done = True
       
@@ -299,6 +301,8 @@ class ClipsWorld(gym.Env):
       done = False
     
     step_reward = result.reward - sum(self.rewards)
+    if result.info == "Game Over" and result.reward == 0:
+      step_reward = 0
     #done = False if len(executableGoals) else True 
     p.log(f"\n\nClipsWorld: done '{done}' step reward {step_reward} total reward {sum(self.rewards)+step_reward}\n")
     
