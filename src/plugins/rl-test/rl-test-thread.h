@@ -107,6 +107,7 @@ private:
 	void rl_goal_selection(std::string env_name, CLIPS::Value parent_goal_id, std::string to);
 
 	/* config values*/
+	bool        cfg_rl_agent_active;
 	bool        cfg_training_mode;
 	std::string cfg_rl_agent_name;
 	std::string cfg_rl_agent_dir;
