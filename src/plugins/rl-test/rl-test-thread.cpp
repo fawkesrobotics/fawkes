@@ -223,6 +223,7 @@ RLTestThread::init()
 	std::cout << "Init RLTestThread start" << std::endl;
 
 	/* Reading config values */
+	cfg_rl_agent_active  = config->get_bool("/rl-agent/active");
 	cfg_rl_agent_name    = config->get_string("/rl-agent/name");
 	cfg_rl_agent_dir     = getConfigStringReplacedBasedir(config, "/rl-agent/dir");
 	cfg_python_dir       = getConfigStringReplacedBasedir(config, "/python/dir");
@@ -250,6 +251,10 @@ RLTestThread::init()
 	startedExecution       = false;
 	count_startedExecution = 0;
 
+	logger->log_info(name(),
+	                 "Goal selection with reinforcement learning is active: %s",
+	                 std::to_string(cfg_rl_agent_active).c_str());
+
 	std::cout << "Finished RLTestThread init" << std::endl;
 	//wakeup(); //activates any loop
 }
@@ -268,54 +273,55 @@ RLTestThread::loop()
 	std::cout << "cfg_training_mode: " << cfg_training_mode << " started exection count "
 	          << count_startedExecution << std::endl;
 
-	if (!cfg_training_mode && count_startedExecution < maxStartedExecutionCount) {
-		/* Using the rl agent to predict the next goal */
-		std::cout << "RlTestThread: in loop start execution mode" << std::endl;
-		//std::string fact_string = create_rl_env_state_from_facts();
+	if (cfg_rl_agent_active) {
+		if (!cfg_training_mode && count_startedExecution < maxStartedExecutionCount) {
+			/* Using the rl agent to predict the next goal */
+			std::cout << "RlTestThread: in loop start execution mode" << std::endl;
+			//std::string fact_string = create_rl_env_state_from_facts();
 
-		py_guard = PyGuard::getInstance();
-		std::cout << "PyGilState: " << PyGILState_Check() << std::endl;
-		//fact_string = "{'said(bob#hello)', 'stack(e#b)', 'stack(c#d)', 'stack(e#d)', 'ontable(b)', 'ontable(e)', 'unstack(d)', 'stack(d#a)', 'stack(a#e)', 'stack(b#d)', 'stack(d#b)', 'clear(e)', 'handempty(robo1)', 'stack(d#c)', 'ontable(a)', 'stack(b#e)', 'stack(e#a)', 'stack(c#b)', 'stack(a#c)', 'putdown(e)', 'pickup(a)', 'stack(e#c)', 'pickup(d)', 'unstack(a)', 'pickup(b)', 'clear(b)', 'stack(b#a)', 'stack(c#a)', 'putdown(d)', 'stack(d#e)', 'stack(b#c)', 'unstack(c)', 'stack(a#b)', 'putdown(a)', 'ontable(d)', 'clear(c)', 'putdown(c)', 'ontable(c)', 'clear(d)', 'clear(a)', 'unstack(b)', 'putdown(b)', 'stack(c#e)', 'pickup(c)', 'pickup(e)', 'unstack(e)', 'stack(a#d)'}";
-		if (count_startedExecution == 0) {
-			PyGuard::getInstance()->loadConfig(config);
-			PyGuard::getInstance()->loadEnv();
-		}
-		py_guard->print();
-		auto action = py_guard->predict();
-		//auto action = "TOWER-C1#buttom#a#top#c";
-		std::cout << "executeRlAgent returned: " << action << std::endl;
-		if (action != "") {
-			auto goal_id = py_guard->getGoalId();
-			//auto goal_id = getGoalId(action);
-			std::cout << "GetGoalID: " << goal_id << std::endl;
-			assertRlGoalSelectionFact(goal_id);
-		}
-		//execution_done   = std::async(std::launch::async, executeRlAgent, config, count_startedExecution);
+			py_guard = PyGuard::getInstance();
+			std::cout << "PyGilState: " << PyGILState_Check() << std::endl;
+			//fact_string = "{'said(bob#hello)', 'stack(e#b)', 'stack(c#d)', 'stack(e#d)', 'ontable(b)', 'ontable(e)', 'unstack(d)', 'stack(d#a)', 'stack(a#e)', 'stack(b#d)', 'stack(d#b)', 'clear(e)', 'handempty(robo1)', 'stack(d#c)', 'ontable(a)', 'stack(b#e)', 'stack(e#a)', 'stack(c#b)', 'stack(a#c)', 'putdown(e)', 'pickup(a)', 'stack(e#c)', 'pickup(d)', 'unstack(a)', 'pickup(b)', 'clear(b)', 'stack(b#a)', 'stack(c#a)', 'putdown(d)', 'stack(d#e)', 'stack(b#c)', 'unstack(c)', 'stack(a#b)', 'putdown(a)', 'ontable(d)', 'clear(c)', 'putdown(c)', 'ontable(c)', 'clear(d)', 'clear(a)', 'unstack(b)', 'putdown(b)', 'stack(c#e)', 'pickup(c)', 'pickup(e)', 'unstack(e)', 'stack(a#d)'}";
+			if (count_startedExecution == 0) {
+				PyGuard::getInstance()->loadConfig(config);
+				PyGuard::getInstance()->loadEnv();
+			}
+			py_guard->print();
+			auto action = py_guard->predict();
+			//auto action = "TOWER-C1#buttom#a#top#c";
+			std::cout << "executeRlAgent returned: " << action << std::endl;
+			if (action != "") {
+				auto goal_id = py_guard->getGoalId();
+				//auto goal_id = getGoalId(action);
+				std::cout << "GetGoalID: " << goal_id << std::endl;
+				assertRlGoalSelectionFact(goal_id);
+			}
+			//execution_done   = std::async(std::launch::async, executeRlAgent, config, count_startedExecution);
 
-		count_startedExecution++;
-		//std::cout << "RlTestThread in loop started async execution thread " << std::endl;
-	} else if (cfg_training_mode && !startedTraining) {
-		/* Training RL agent */
-		std::cout << "RlTestThread: loop - executing RL Agent is not active!" << std::endl;
-		training_done   = std::async(std::launch::async, trainingRlAgent, config);
-		startedTraining = true;
-	} else if (cfg_training_mode && startedTraining) {
-		/* Checking if training completed */
-		std::cout << "RlTestThread loop: Check if training_done future is vailid "
-		          << training_done.valid() << std::endl;
-		int sec = 10; //00;
-		std::cout << "Wait for " << sec << " msec to check future status" << std::endl;
-		std::future_status status = training_done.wait_for(std::chrono::milliseconds(sec));
-		if (status == std::future_status::ready) {
-			std::cout << "Future: " << training_done.get() << std::endl;
-			finalize();
+			count_startedExecution++;
+			//std::cout << "RlTestThread in loop started async execution thread " << std::endl;
+		} else if (cfg_training_mode && !startedTraining) {
+			/* Training RL agent */
+			std::cout << "RlTestThread: loop - executing RL Agent is not active!" << std::endl;
+			training_done   = std::async(std::launch::async, trainingRlAgent, config);
+			startedTraining = true;
+		} else if (cfg_training_mode && startedTraining) {
+			/* Checking if training completed */
+			std::cout << "RlTestThread loop: Check if training_done future is vailid "
+			          << training_done.valid() << std::endl;
+			int sec = 10; //00;
+			std::cout << "Wait for " << sec << " msec to check future status" << std::endl;
+			std::future_status status = training_done.wait_for(std::chrono::milliseconds(sec));
+			if (status == std::future_status::ready) {
+				std::cout << "Future: " << training_done.get() << std::endl;
+				finalize();
+			}
+		} else {
+			std::cout << "Nothing to do!" << std::endl;
+			//delete py_guard;
+			//finalize();
 		}
-	} else {
-		std::cout << "Nothing to do!" << std::endl;
-		//delete py_guard;
-		//finalize();
 	}
-
 	std::cout << "End RLTestThread Loop " << std::endl;
 }
 
@@ -368,10 +374,12 @@ RLTestThread::clips_context_init(const std::string &env_name, LockPtr<CLIPS::Env
 	                      sigc::bind<0>(sigc::mem_fun(*this, &RLTestThread::rl_goal_selection),
 	                                    env_name)));*/
 
-	if (!cfg_training_mode) {
+	if (cfg_rl_agent_active && !cfg_training_mode) {
 		clips->assert_fact("(execution-mode)");
-	} else {
+	} else if (cfg_rl_agent_active && cfg_training_mode) {
 		clips->assert_fact("(no-reset-on-training-start)");
+	} else {
+		clips->assert_fact("(goal-selection-via-rl-inactive)");
 	}
 
 	clips.unlock();
