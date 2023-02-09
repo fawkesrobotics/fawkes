@@ -257,12 +257,17 @@ ClipsGymThread::step(std::string next_goal)
 	fawkes::LockPtr<CLIPS::Environment> clips = getClipsEnv();
 	//Check frequently if the selected goal is evaluated
 	bool env_feedback = false;
-	int  max_time     = 45; //seconds 60 without speedup
+	float  speed     = config->get_float("/env/speed");
+	float  max_time     = config->get_float("/env/step/max_time"); //60 sec without speedup
+	float  wait_time     = config->get_float("/env/step/wait_time"); //5 sec
+	if (speed != 0.0 || speed != 1.0)
+	{
+		wait_time = wait_time / speed;
+	}
 	int  elapsed_time = 0;
 	bool check_for_game_over = false;
 	while (!env_feedback && elapsed_time < max_time) {
-		int time = 1; //5 sec
-		std::this_thread::sleep_for(time * 1000ms);
+		std::this_thread::sleep_for(wait_time * 1000ms);
 		clips.lock();
 		clips->evaluate("(printout t \"In Sleeping Step Function \" crlf) ");
 		CLIPS::Fact::pointer fact = clips->get_facts();
@@ -308,7 +313,7 @@ ClipsGymThread::step(std::string next_goal)
 		//TODO: check outcome - set return 1 for completed and 0 otherwise
 		
 		clips.unlock();
-		elapsed_time += time;
+		elapsed_time += wait_time;
 		check_for_game_over = true;
 	}
 	std::string env_state = create_rl_env_state_from_facts();
@@ -854,12 +859,18 @@ ClipsGymThread::resetCX()
 	clips.unlock();
 	//TODO add loop checking for reset done
 
+	float  speed     = config->get_float("/env/speed");
+	float  max_time     = config->get_float("/env/resetCX/max_time"); //45 sec without speedup
+	float  wait_time     = config->get_float("/env/resetCX/wait_time"); //4 sec
+	if (speed != 0.0 || speed != 1.0)
+	{
+		wait_time = wait_time / speed;
+	}
+
 	bool env_feedback = false;
-	int  max_time     = 45; //seconds 45 without speedup
 	int  elapsed_time = 0;
 	while (!env_feedback && elapsed_time < max_time) {
-		int time = 1; //4 sec without speedup
-		std::this_thread::sleep_for(time * 1000ms);
+		std::this_thread::sleep_for(wait_time * 1000ms);
 		clips.lock();
 		clips->evaluate("(printout t \"In Sleeping RESET Function \" crlf) ");
 		CLIPS::Fact::pointer fact = clips->get_facts();
@@ -880,7 +891,7 @@ ClipsGymThread::resetCX()
 		//TODO: check outcome - set return 1 for completed and 0 otherwise
 
 		clips.unlock();
-		elapsed_time += time;
+		elapsed_time += wait_time;
 	}
 
 	logger->log_info(name(), "RL: Finished resetCX");
