@@ -256,15 +256,14 @@ ClipsGymThread::step(std::string next_goal)
 
 	fawkes::LockPtr<CLIPS::Environment> clips = getClipsEnv();
 	//Check frequently if the selected goal is evaluated
-	bool env_feedback = false;
-	float  speed     = config->get_float("/env/speed");
-	float  max_time     = config->get_float("/env/step/max_time"); //60 sec without speedup
-	float  wait_time     = config->get_float("/env/step/wait_time"); //5 sec
-	if (speed != 0.0 || speed != 1.0)
-	{
+	bool  env_feedback = false;
+	float speed        = config->get_float("/env/speed");
+	float max_time     = config->get_float("/env/step/max_time");  //60 sec without speedup
+	float wait_time    = config->get_float("/env/step/wait_time"); //5 sec
+	if (speed != 0.0 || speed != 1.0) {
 		wait_time = wait_time / speed;
 	}
-	int  elapsed_time = 0;
+	int  elapsed_time        = 0;
 	bool check_for_game_over = false;
 	while (!env_feedback && elapsed_time < max_time) {
 		std::this_thread::sleep_for(wait_time * 1000ms);
@@ -273,8 +272,8 @@ ClipsGymThread::step(std::string next_goal)
 		CLIPS::Fact::pointer fact = clips->get_facts();
 
 		while (fact) {
-			CLIPS::Template::pointer tmpl  = fact->get_template();
-			std::size_t              found = tmpl->name().find("rl-finished-goal");
+			CLIPS::Template::pointer tmpl    = fact->get_template();
+			std::size_t              found   = tmpl->name().find("rl-finished-goal");
 			std::size_t              wm_fact = tmpl->name().find("wm-fact");
 			if (found != std::string::npos) {
 				std::string goalID  = getClipsSlotValuesAsString(fact->slot_value("goal-id"));
@@ -292,15 +291,12 @@ ClipsGymThread::step(std::string next_goal)
 				fact->retract();
 				std::cout << "In ClipsGymThread step: after retracting rl-finished-goal fact" << std::endl;
 				break;
-			}
-			else if (check_for_game_over && wm_fact != std::string::npos)
-			{
+			} else if (check_for_game_over && wm_fact != std::string::npos) {
 				//(wm-fact (id "/refbox/phase") (key refbox phase) (type UNKNOWN) (is-list FALSE) (value POST_GAME) (values))
-				std::string key = getClipsSlotValuesAsString(fact->slot_value("key"));
+				std::string key   = getClipsSlotValuesAsString(fact->slot_value("key"));
 				std::string value = getClipsSlotValuesAsString(fact->slot_value("value"));
 				//key: refbox#phase id:/refbox/phase value: PRODUCTION
-				if(key == "refbox#phase" && (value =="POST_GAME" || value == "SETUP"))
-				{
+				if (key == "refbox#phase" && (value == "POST_GAME" || value == "SETUP")) {
 					obs_info.info = "Game Over";
 					logger->log_info(name(), "Step Function: %s %s Game Over", key.c_str(), value.c_str());
 					env_feedback = true;
@@ -352,7 +348,7 @@ ClipsGymThread::generateActionSpace()
 	                       "TOWER-C1#buttom#e#top#d",
 	                       "TOWER-C2#buttom#b#middle#d#top#e"}; //, "TOWER-C1#buttom#a#top#e"};
 */
-	std::string space[] = {"ENTER-FIELD#",
+	std::string space[] = {"ENTER-FIELD",
 	                       "BUFFER-CAP#cap-color#CAP_BLACK",
 	                       "BUFFER-CAP#cap-color#CAP_GREY",
 	                       "MOUNT-CAP#wp-loc#C-BS",
@@ -374,13 +370,21 @@ ClipsGymThread::generateActionSpace()
 	                       "PAY-FOR-RINGS-WITH-CAP-CARRIER#target-mps#C-RS2",
 	                       "PAY-FOR-RINGS-WITH-CARRIER-FROM-SHELF#target-mps#C-RS1",
 	                       "PAY-FOR-RINGS-WITH-CARRIER-FROM-SHELF#target-mps#C-RS2",
-	                       "MOUNT-RING#ring-color#RING_BLUE",
-	                       "MOUNT-RING#ring-color#RING_GREEN",
-	                       "MOUNT-RING#ring-color#RING_ORANGE",
-	                       "MOUNT-RING#ring-color#RING_YELLOW",
-	                       "DELIVER#",
-	                       "WAIT-NOTHING-EXECUTABLE#",
-	                       "MOVE-OUT-OF-WAY#"};
+	                       "MOUNT-RING#ring-color#RING_BLUE#wp-loc#C-BS",
+	                       "MOUNT-RING#ring-color#RING_BLUE#wp-loc#C-RS1",
+	                       "MOUNT-RING#ring-color#RING_BLUE#wp-loc#C-RS2",
+	                       "MOUNT-RING#ring-color#RING_GREEN#wp-loc#C-BS",
+	                       "MOUNT-RING#ring-color#RING_GREEN#wp-loc#C-RS1",
+	                       "MOUNT-RING#ring-color#RING_GREEN#wp-loc#C-RS2",
+	                       "MOUNT-RING#ring-color#RING_ORANGE#wp-loc#C-BS",
+	                       "MOUNT-RING#ring-color#RING_ORANGE#wp-loc#C-RS1",
+	                       "MOUNT-RING#ring-color#RING_ORANGE#wp-loc#C-RS2",
+	                       "MOUNT-RING#ring-color#RING_YELLOW#wp-loc#C-BS",
+	                       "MOUNT-RING#ring-color#RING_YELLOW#wp-loc#C-RS1",
+	                       "MOUNT-RING#ring-color#RING_YELLOW#wp-loc#C-RS2",
+	                       "DELIVER",
+	                       "WAIT-NOTHING-EXECUTABLE",
+	                       "MOVE-OUT-OF-WAY"};
 
 	py::list action_space;
 	for (std::string s : space) {
@@ -747,15 +751,13 @@ ClipsGymThread::getRefboxGameTime()
 	return sec;
 }
 
-
-
 std::string
 ClipsGymThread::getRefboxGamePhase()
 {
 	fawkes::LockPtr<CLIPS::Environment> clips = getClipsEnv();
 	clips.lock();
-	CLIPS::Fact::pointer fact = clips->get_facts();
-	std::string phase = "None";
+	CLIPS::Fact::pointer fact  = clips->get_facts();
+	std::string          phase = "None";
 	while (fact) {
 		CLIPS::Template::pointer tmpl = fact->get_template();
 		//(wm-fact (id "/refbox/game-time") (key refbox game-time) (type UINT) (is-list TRUE) (value nil) (values 68 239942.0))
@@ -816,12 +818,11 @@ ClipsGymThread::getAllFormulatedExecutableGoals()
 					goal.setParams(params);
 
 					filterParams(&goal);
-					std::cout << "Params String " << goal.getParamsString() << std::endl;
+					std::cout << "Params String of goal action after Filter" << goal.getParamsString()
+					          << std::endl;
 
 					//std::string goal_params = getClipsSlotValuesAsString(fact->slot_value("params"));
-					std::cout << "ClipsGymThread getAllFormulated Executable Goals: "
-					             "getParamsClipsSlotVlauesOfGoalAsString"
-					          << std::endl;
+
 					//std::string goal_params =
 					// getParamsClipsSlotValuesOfGoalAsString(goal_class, fact->slot_value("params"));
 
@@ -829,7 +830,9 @@ ClipsGymThread::getAllFormulatedExecutableGoals()
 					//maskedGoals.push_back(goal_class + "#" + goal_params);
 					maskedGoals.push_back(goal);
 
-					logger->log_info(name(), "RL: %s", goal_class.c_str()); //"#", goal_params.c_str());
+					logger->log_info(name(),
+					                 "RL: %s",
+					                 goal.getGoalString().c_str()); //"#", goal_params.c_str());
 				}
 			}
 		}
@@ -859,11 +862,10 @@ ClipsGymThread::resetCX()
 	clips.unlock();
 	//TODO add loop checking for reset done
 
-	float  speed     = config->get_float("/env/speed");
-	float  max_time     = config->get_float("/env/resetCX/max_time"); //45 sec without speedup
-	float  wait_time     = config->get_float("/env/resetCX/wait_time"); //4 sec
-	if (speed != 0.0 || speed != 1.0)
-	{
+	float speed     = config->get_float("/env/speed");
+	float max_time  = config->get_float("/env/resetCX/max_time");  //45 sec without speedup
+	float wait_time = config->get_float("/env/resetCX/wait_time"); //4 sec
+	if (speed != 0.0 || speed != 1.0) {
 		wait_time = wait_time / speed;
 	}
 

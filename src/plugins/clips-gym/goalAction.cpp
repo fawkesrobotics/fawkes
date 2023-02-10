@@ -98,7 +98,7 @@ GoalAction::getParamsString()
 	string paramsString = "";
 
 	for (Param &p : params) {
-		paramsString += p.getParamString();
+		paramsString +="#"+ p.getParamString();
 	}
 
 	return paramsString;
@@ -107,7 +107,7 @@ GoalAction::getParamsString()
 string
 GoalAction::getGoalString()
 {
-	string goalString = class_name + '#' + getParamsString();
+	string goalString = class_name + getParamsString();
 	return goalString;
 }
 
