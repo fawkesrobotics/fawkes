@@ -312,6 +312,10 @@ ClipsGymThread::step(std::string next_goal)
 		elapsed_time += wait_time;
 		check_for_game_over = true;
 	}
+	if(!env_feedback)
+	{
+		logger->log_error(name(),"Ending step function without finished goal!!!");
+	}
 	std::string env_state = create_rl_env_state_from_facts();
 
 	std::cout << "End Clips Gym Thread step function" << std::endl;
@@ -857,7 +861,7 @@ ClipsGymThread::resetCX()
 	//clips->clear(), clips->reset() haben zu coredumps geführt
 	clips.lock();
 
-	clips->assert_fact("(reset-game (stage STAGE-0))");
+	clips->assert_fact("(reset-game (stage STAGE-0) (stage-time (time)) )");
 	//clips->assert_fact("(reset-domain-facts)");
 	clips.unlock();
 	//TODO add loop checking for reset done
