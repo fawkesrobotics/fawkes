@@ -289,10 +289,15 @@ class ClipsWorld(gym.Env):
     game_time = 1200 #180 #in sec = normally 1200
 
     if phase == 'POST_GAME' or time_sec > game_time+100:
+      p.log(f"ClipsWorld: Done: due to POST_GAME or TIME")
       # game over (e.g. if over 300 points you might won the game - extra check with refbox necessary / no logic for game extension!)
       done = True
-      
+    elif len(self.rewards) > 200 and sum(self.rewards) < 100:
+      p.log(f"ClipsWorld: Done: due to rewards len over 200 and sum rewards < 100")
+      # due to a machine reset some workpieces are lost
+      done = True
     elif not executableGoals and time_sec < game_time:
+      p.log(f"ClipsWorld: no executable goals found - sleeping for 500 milliseconds")
       # there are no executable goals, but game didn't finished
       p.clipsGymSleep(500) #time in milliseconds
       done = False

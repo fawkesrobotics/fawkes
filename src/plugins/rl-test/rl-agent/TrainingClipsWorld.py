@@ -39,7 +39,7 @@ from sb3_contrib.common.wrappers import ActionMasker
 from sb3_contrib.ppo_mask import MaskablePPO
 from stable_baselines3 import PPO
 from stable_baselines3.ppo.policies import MlpPolicy
-from stable_baselines3.common.callbacks import StopTrainingOnMaxEpisodes
+from stable_baselines3.common.callbacks import StopTrainingOnMaxEpisodes, CheckpointCallback
 from stable_baselines3.common.monitor import Monitor
 """ 
 def env_creator(env_name, dir_path, render):
@@ -116,6 +116,7 @@ if __name__ == '__main__':
     print("In Training script")
     
     tmp_path = dir_path +"/sb3_log/"
+    agent_tmp_path = dir_path+"/checkpoint_agent/"
     print(f"Path: {tmp_path}")
     sb3_logger = configure(tmp_path, ["stdout", "csv", "log"])
     #print("Script: Config values for env_name and path: " + env_name + " " + dir_path)
@@ -123,7 +124,10 @@ if __name__ == '__main__':
     print("Script: Creating env")
     
     callback_max_episodes = StopTrainingOnMaxEpisodes(max_episodes=10, verbose=1)
+
+    checkpoint_callback = CheckpointCallback(save_freq=200,save_path=agent_tmp_path)
     
+                            
     # action_space = ['TOWER-C1#a#b', 'TOWER-C1#a#c', 'TOWER-C1#a#d' , 'TOWER-C1#a#e']
     # print(action_space)
 
@@ -180,7 +184,7 @@ if __name__ == '__main__':
     model.set_logger(sb3_logger)
 
     print("\n\nStart trainig the rl agent - for {} timesteps ".format(timesteps))
-    model.learn(total_timesteps=timesteps,log_interval=1, callback=callback_max_episodes)
+    model.learn(total_timesteps=timesteps,log_interval=1, callback=[callback_max_episodes,checkpoint_callback])
     # Random Agent, before training
     #mean_reward_before_train = evaluate(model)
     #print("Mean reward: ",mean_reward_before_train)
