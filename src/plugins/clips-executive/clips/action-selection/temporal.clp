@@ -19,7 +19,7 @@
   (goal (id ?goal-id) (mode DISPATCHED) (committed-to ?plan-id))
   (plan (id ?plan-id) (goal-id ?goal-id) (type TEMPORAL) (start-time $?start-time))
   ?pa <- (plan-action (goal-id ?goal-id) (plan-id ?plan-id) (id ?id)
-                      (state FORMULATED) (executable TRUE)
+                      (state FORMULATED)
                       (dispatch-time ?dt&:(timeout ?now ?start-time ?dt)))
  =>
   (modify ?pa (state PENDING) (start-time ?now))
