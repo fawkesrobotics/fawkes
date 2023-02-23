@@ -292,7 +292,7 @@ class ClipsWorld(gym.Env):
       p.log(f"ClipsWorld: Done: due to POST_GAME or TIME")
       # game over (e.g. if over 300 points you might won the game - extra check with refbox necessary / no logic for game extension!)
       done = True
-    elif len(self.rewards) > 200 and sum(self.rewards) < 100:
+    elif len(self.rewards) >= 149 and sum(self.rewards) < 100:
       p.log(f"ClipsWorld: Done: due to rewards len over 200 and sum rewards < 100")
       # due to a machine reset some workpieces are lost
       done = True
