@@ -11,7 +11,7 @@
   (goal (id ?goal-id) (mode DISPATCHED) (committed-to ?plan-id))
   (plan (id ?plan-id) (goal-id ?goal-id) (type SEQUENTIAL))
   ?pa <- (plan-action (goal-id ?goal-id) (plan-id ?plan-id) (id ?id)
-                      (state FORMULATED) (executable TRUE))
+                      (state FORMULATED))
   (not (plan-action (goal-id ?goal-id) (plan-id ?plan-id) (state ~FORMULATED&~FINAL)))
   (not (plan-action (goal-id ?goal-id) (plan-id ?plan-id) (state FORMULATED) (id ?oid&:(< ?oid ?id))))
  =>
