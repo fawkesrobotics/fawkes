@@ -1,0 +1,32 @@
+if(HAVE_GUI)
+  add_library(
+    fawkesgui_utils SHARED
+    service_model.cpp
+    connection_dispatcher.cpp
+    service_chooser_dialog.cpp
+    interface_chooser_dialog.cpp
+    twolines_cellrenderer.cpp
+    logview.cpp
+    interface_dispatcher.cpp
+    avahi_dispatcher.cpp
+    multi_interface_chooser_dialog.cpp
+    service_selector_cbe.cpp
+    plugin_tree_view.cpp
+    robot/drawer.cpp
+    robot/allemaniacs_athome.cpp)
+  depend_on_gui(fawkesgui_utils)
+  target_link_libraries(
+    fawkesgui_utils
+    stdc++
+    m
+    fawkescore
+    fawkesnetcomm
+    fawkesblackboard
+    fawkesinterface
+    fawkesplugin
+    fawkeslogging
+    fawkesnetwork_logger
+    fawkesutils)
+else()
+  message(WARNING "Not building gui_utils")
+endif()

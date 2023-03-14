@@ -1,0 +1,11 @@
+pkg_check_modules(libxml libxml++-2.6)
+pkg_check_modules(glibmm-2.4 glibmm-2.4>=2.46)
+
+function(depend_on_libxml target)
+  target_compile_options(${target} PRIVATE ${libxml_CFLAGS} -DHAVE_LIBXMLPP)
+  target_link_libraries(${target} ${libxml_LDFLAGS})
+  if(glibmm-2.4_FOUND)
+    target_compile_options(${target} PRIVATE -Wno-deprecated-declarations)
+    target_compile_features(${target} PRIVATE cxx_std_11)
+  endif()
+endfunction()
