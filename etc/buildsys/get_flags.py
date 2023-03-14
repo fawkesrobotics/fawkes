@@ -81,7 +81,7 @@ def generate_dummy_package(package_name):
         dummy_cpp.write(DUMMY_CPP)
 
     subprocess.call(f"cd {tmp_ws_dir}; rm -rf build/dummy_for_{package_name}_flags/; rm -rf install/dummy_for_{package_name}_flags", shell=True)
-    subprocess.call(f"cd {tmp_ws_dir}; source {ros2_workspace}/install/setup.bash; colcon build --packages-select dummy_for_{package_name}_flags > /dev/null 2>&1", shell=True)
+    subprocess.call(f"cd {tmp_ws_dir}; source {ros2_workspace}/ros2/setup.bash; colcon build --packages-select dummy_for_{package_name}_flags > /dev/null 2>&1", shell=True)
     
 
 def main(argv):

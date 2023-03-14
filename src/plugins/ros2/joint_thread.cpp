@@ -95,20 +95,20 @@ ROS2JointThread::bb_interface_created(const char *type, const char *id) throw()
 
 void
 ROS2JointThread::bb_interface_writer_removed(Interface *  interface,
-                                            unsigned int instance_serial) throw()
+                                            Uuid instance_serial) noexcept
 {
 	conditional_close(interface);
 }
 
 void
 ROS2JointThread::bb_interface_reader_removed(Interface *  interface,
-                                            unsigned int instance_serial) throw()
+                                            Uuid instance_serial) noexcept
 {
 	conditional_close(interface);
 }
 
 void
-ROS2JointThread::conditional_close(Interface *interface) throw()
+ROS2JointThread::conditional_close(Interface *interface) noexcept
 {
 	// Verify it's a JointInterface
 	JointInterface *jiface = dynamic_cast<JointInterface *>(interface);

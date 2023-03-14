@@ -70,11 +70,11 @@ public:
 	virtual void bb_interface_created(const char *type, const char *id) throw();
 
 	// for BlackBoardInterfaceListener
-	virtual void bb_interface_data_refreshed(fawkes::Interface *interface) throw();
+	virtual void bb_interface_data_refreshed(fawkes::Interface *interface) noexcept;
 	virtual void bb_interface_writer_removed(fawkes::Interface *interface,
-	                                         unsigned int       instance_serial) throw();
+	                                         fawkes::Uuid       instance_serial) noexcept;
 	virtual void bb_interface_reader_removed(fawkes::Interface *interface,
-	                                         unsigned int       instance_serial) throw();
+	                                         fawkes::Uuid       instance_serial) noexcept;
 
 private:
 	void tf_message_cb_dynamic(const tf2_msgs::msg::TFMessage::SharedPtr msg);

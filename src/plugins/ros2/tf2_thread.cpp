@@ -211,20 +211,20 @@ ROS2TF2Thread::bb_interface_created(const char *type, const char *id) throw()
 
 void
 ROS2TF2Thread::bb_interface_writer_removed(fawkes::Interface *interface,
-                                         unsigned int       instance_serial) throw()
+                                           fawkes::Uuid       instance_serial) noexcept
 {
 	conditional_close(interface);
 }
 
 void
 ROS2TF2Thread::bb_interface_reader_removed(fawkes::Interface *interface,
-                                         unsigned int       instance_serial) throw()
+                                           fawkes::Uuid       instance_serial) noexcept
 {
 	conditional_close(interface);
 }
 
 void
-ROS2TF2Thread::conditional_close(Interface *interface) throw()
+ROS2TF2Thread::conditional_close(Interface *interface) noexcept
 {
 	// Verify it's a TransformInterface
 	TransformInterface *tfif = dynamic_cast<TransformInterface *>(interface);
