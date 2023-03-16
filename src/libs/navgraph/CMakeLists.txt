@@ -27,8 +27,9 @@ if(NAVGRAPH_FOUND)
   depend_on_navgraph(fawkesnavgraph)
   target_link_libraries(fawkesnavgraph stdc++ m fawkescore fawkesutils)
   if(LUA_FOUND)
-    generate_tolua(fawkesnavgraph_tolua navgraph_node.tolua navgraph.tolua)
-    add_library(fawkesnavgraph_tolua SHARED fawkesnavgraph_tolua.cpp)
+    generate_tolua(fawkesnavgraph navgraph_node.tolua navgraph.tolua)
+    add_library(fawkesnavgraph_tolua SHARED
+                ${CMAKE_CURRENT_BINARY_DIR}/fawkesnavgraph_tolua.cpp)
     depend_on_lua(fawkesnavgraph_tolua)
     target_link_libraries(fawkesnavgraph_tolua fawkescore fawkesutils
                           fawkesnavgraph)
