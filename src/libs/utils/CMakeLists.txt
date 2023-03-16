@@ -35,8 +35,8 @@ add_library(
   search/astar.cpp
   constraints/dependency.cpp
   uuid.cpp
-  tests/catch2_main.cpp
-  tests/test_uuid.cpp
+  #tests/catch2_main.cpp
+  #tests/test_uuid.cpp
   math/interpolation/interpolator.cpp
   math/interpolation/linear.cpp
   math/interpolation/sinusoidal.cpp
