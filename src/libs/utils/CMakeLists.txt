@@ -66,6 +66,7 @@ generate_tolua(fawkesutils time/clock.tolua time/time.tolua
                kalman/kalman_1d.tolua)
 add_library(fawkesutils_tolua SHARED fawkesutils_tolua.cpp)
 depend_on_lua(fawkesutils_tolua)
+depend_on_lua(fawkesutils)
 target_link_libraries(fawkesutils_tolua fawkescore fawkesutils)
 
 pkg_check_modules(libmagic libmagic)
