@@ -67,20 +67,7 @@ if(libxml_FOUND)
       ObjectPositionInterface.xml
       TestInterface.xml
       SpeechRecognitionInterface.xml)
-      get_filename_component(if_name ${interface} NAME_WLE)
-      add_custom_command(
-        OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/${if_name}.tolua
-               ${CMAKE_CURRENT_SOURCE_DIR}/${if_name}.h
-               ${CMAKE_CURRENT_SOURCE_DIR}/${if_name}.cpp
-        COMMAND ffifacegen -d ${CMAKE_CURRENT_SOURCE_DIR}
-                ${CMAKE_CURRENT_SOURCE_DIR}/${interface}
-        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${interface})
-      include(lua)
-      generate_tolua(${if_name} ${if_name}.tolua)
-      add_library(${if_name} SHARED ${if_name}_tolua.cpp
-                                    ${CMAKE_CURRENT_SOURCE_DIR}/${if_name}.cpp)
-      target_link_libraries(${if_name} fawkescore fawkesutils fawkesinterface)
-      # target_link_libraries(fawkesutils_tolua fawkescore fawkesutils)
+      generate_interface_from_xml(${interface})
     endforeach()
 
   else()

@@ -1,0 +1,1 @@
+generate_interface_from_xml(LaserClusterInterface.xml)
