@@ -1,6 +1,7 @@
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/plugins)
 set(CMAKE_SHARED_MODULE_PREFIX "")
-# add_subdirectory(laser) add_subdirectory(imu)
+add_subdirectory(laser)
+# add_subdirectory(imu)
 add_subdirectory(flite)
 # add_subdirectory(festival) add_subdirectory(joystick)
 # add_subdirectory(openrave) add_subdirectory(katana) add_subdirectory(jaco)
