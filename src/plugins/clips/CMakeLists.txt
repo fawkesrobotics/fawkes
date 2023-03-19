@@ -1,4 +1,4 @@
-set(PLUGIN_clips CACHE BOOL ON)
+set(PLUGIN_clips ON CACHE BOOL ON)
 
 if(PLUGIN_clips)
   add_subdirectory(aspect)
