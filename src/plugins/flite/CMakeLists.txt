@@ -1,4 +1,6 @@
-set(PLUGIN_flite CACHE BOOL ON)
+set(PLUGIN_flite
+    ON
+    CACHE BOOL ON)
 
 if(PLUGIN_flite)
   find_path(FLITE_ROOT flite/flite.h PATH_SUFFIXES include)
@@ -36,5 +38,5 @@ if(PLUGIN_flite)
     endif()
   endif()
 else()
-  message("Skip building flite plugin")
+  message(STATUS "Skip building disabled flite plugin")
 endif()
