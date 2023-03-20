@@ -39,6 +39,23 @@ add_compile_options(
   -DBUILDTYPE=\"${BUILD_TYPE}\"
   -DSOEXT=\"so\")
 # if(NOT CMAKE_CXX_STANDARD) set(CMAKE_CXX_STANDARD 17) endif()
+
+function(set_output_directory_plugins)
+  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY
+      ${PROJECT_SOURCE_DIR}/plugins
+      PARENT_SCOPE)
+endfunction()
+
+function(set_output_directory_libs)
+  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY
+      ${CMAKE_BINARY_DIR}/src/libs/
+      PARENT_SCOPE)
+endfunction()
+
+function(unset_output_directory)
+  unset(CMAKE_LIBRARY_OUTPUT_DIRECTORY PARENT_SCOPE)
+endfunction()
+
 add_subdirectory(src)
 # add_subdirectory(src/libs) add_subdirectory(src/plugins)
 # add_subdirectory(src/mainapp) add_subdirectory(src/tools)

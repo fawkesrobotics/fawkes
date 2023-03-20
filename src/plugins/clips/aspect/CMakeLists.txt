@@ -1,3 +1,5 @@
+unset_output_directory()
+
 add_library(
   fawkesclipsaspect SHARED
   clips.cpp

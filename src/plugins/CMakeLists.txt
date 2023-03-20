@@ -1,4 +1,5 @@
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/plugins)
+set_output_directory_plugins()
+
 set(CMAKE_SHARED_MODULE_PREFIX "")
 include_directories(${PROJECT_SOURCE_DIR}/src)
 add_subdirectory(laser)
