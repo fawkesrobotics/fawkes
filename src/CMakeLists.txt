@@ -1,3 +1,4 @@
+include(utils)
 include(ros)
 include(yamlcpp)
 include(eigen3)
