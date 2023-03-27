@@ -1,6 +1,6 @@
 pkg_check_modules(roscpp roscpp)
 if(roscpp_FOUND)
-	set(ROS_FOUND 1)
+  set(ROS_FOUND 1)
 endif()
 function(depend_on_ros target)
   target_compile_options(${target} PUBLIC -DHAVE_ROS)
