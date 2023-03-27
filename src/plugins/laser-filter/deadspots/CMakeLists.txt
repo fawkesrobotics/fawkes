@@ -18,5 +18,5 @@ if(EXECUTABLE_fflaser_deadspots)
     Laser360Interface
     Laser720Interface)
 else()
-  message(STATUS "Skip building disabled fflaser_deadspots executable")
+  executable_disabled_message(fflaser_deadspots)
 endif()

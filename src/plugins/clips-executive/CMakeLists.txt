@@ -20,5 +20,5 @@ if(PLUGIN_clips-executive)
     fawkesclipsaspect)
 
 else()
-  message("Skip building clips-executive plugin")
+  plugin_disabled_message(clips-executive)
 endif()

@@ -1,4 +1,6 @@
-set(PLUGIN_clips-executive-rest-api CACHE BOOL ON)
+set(PLUGIN_clips-executive-rest-api
+    ON
+    CACHE BOOL ON)
 if(PLUGIN_clips-executive-rest-api)
   list(FIND CMAKE_CXX_COMPILE_FEATURES "cxx_std_17" _index)
   if(${_index} GREATER -1)
@@ -15,5 +17,5 @@ if(PLUGIN_clips-executive-rest-api)
     message("Omitting clips-executive-rest-api (C++ 17 required)")
   endif()
 else()
-  message("Skip building clips-executive-rest-api plugin")
+  plugin_disabled_message(clips-executive-rest-api)
 endif()

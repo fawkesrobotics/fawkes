@@ -1,4 +1,6 @@
-set(PLUGIN_clips-rest-api CACHE BOOL ON)
+set(PLUGIN_clips-rest-api
+    ON
+    CACHE BOOL ON)
 if(PLUGIN_clips-rest-api)
   list(FIND CMAKE_CXX_COMPILE_FEATURES "cxx_std_20" _index)
   if(${_index} GREATER -1)
@@ -14,5 +16,5 @@ if(PLUGIN_clips-rest-api)
     message("Omitting clips-rest-api (C++ 17 required)")
   endif()
 else()
-  message("Skip building clips-rest-api plugin")
+  plugin_disabled_message(clips-rest-api)
 endif()

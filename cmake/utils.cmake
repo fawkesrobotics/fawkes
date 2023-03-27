@@ -80,3 +80,11 @@ endfunction()
 function(unset_output_directory)
   unset(CMAKE_LIBRARY_OUTPUT_DIRECTORY PARENT_SCOPE)
 endfunction()
+
+function(plugin_disabled_message plugin)
+  message(STATUS "Skip building disabled ${plugin} plugin")
+endfunction()
+
+function(executable_disabled_message exe)
+  message(STATUS "Skip building disabled ${exe} executable")
+endfunction()

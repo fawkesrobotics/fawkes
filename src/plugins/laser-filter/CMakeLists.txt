@@ -53,5 +53,5 @@ if(PLUGIN_laser-filter)
   endif()
 
 else()
-  message(STATUS "Skip building disabled laser-filter plugin")
+  plugin_disabled_message(laser-filter)
 endif()
