@@ -21,42 +21,13 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   # Set the possible values of build type for cmake-gui
   set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release"
                                                "MinSizeRel" "RelWithDebInfo")
+
 endif()
-# TODO: use compile_definitions instead
-add_compile_options(
-  -DBASEDIR=\"${PROJECT_SOURCE_DIR}\"
-  -DFAWKES_BASEDIR=\"${PROJECT_SOURCE_DIR}\"
-  -DBINDIR=\"${BINDIR}\"
-  -DLIBDIR=\"${CMAKE_BINARY_DIR}/src/libs/\"
-  -DPLUGINDIR=\"${FAWKES_PLUGIN_DIR}\"
-  -DIFACEDIR=\"${FAWKES_INTERFACE_DIR}\"
-  -DCONFDIR=\"${PROJECT_SOURCE_DIR}/cfg\"
-  -DUSERDIR=\".fawkes\"
-  -DLOGDIR=\"${PROJECT_SOURCE_DIR}/log\"
-  -DRESDIR=\"${PROJECT_SOURCE_DIR}/res\"
-  -DTMPDIR=\"/tmp\"
-  -DSRCDIR=\"${PROJECT_SOURCE_DIR}/src\"
-  -DBUILDTYPE=\"${BUILD_TYPE}\"
-  -DSOEXT=\"so\")
-# if(NOT CMAKE_CXX_STANDARD) set(CMAKE_CXX_STANDARD 17) endif()
 
-function(set_output_directory_plugins)
-  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY
-      ${PROJECT_SOURCE_DIR}/plugins
-      PARENT_SCOPE)
-endfunction()
 
-function(set_output_directory_libs)
-  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY
-      ${CMAKE_BINARY_DIR}/src/libs/
-      PARENT_SCOPE)
-endfunction()
-
-function(unset_output_directory)
-  unset(CMAKE_LIBRARY_OUTPUT_DIRECTORY PARENT_SCOPE)
-endfunction()
 
 add_subdirectory(src)
+set_common_properties_of_targets(all_targets)
 # add_subdirectory(src/libs) add_subdirectory(src/plugins)
 # add_subdirectory(src/mainapp) add_subdirectory(src/tools)
 # if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
