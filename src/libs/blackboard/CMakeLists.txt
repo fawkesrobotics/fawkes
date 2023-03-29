@@ -36,8 +36,6 @@ add_library(
 target_link_libraries(fawkesblackboard fawkescore fawkesutils fawkesnetcomm
                       fawkeslogging fawkesinterface)
 
-generate_tolua(fawkesblackboard blackboard.tolua)
-add_library(fawkesblackboard_tolua SHARED fawkesblackboard_tolua.cpp)
-target_link_libraries(fawkesblackboard_tolua fawkescore fawkesutils
-                      fawkesblackboard)
-depend_on_lua(fawkesblackboard_tolua)
+set(LUA_SOURCES blackboard.tolua)
+set(LUA_LINK_LIBS fawkescore fawkesutils fawkesblackboard)
+generate_lua_lib(fawkesblackboard "${LUA_SOURCES}" "${LUA_LINK_LIBS}")

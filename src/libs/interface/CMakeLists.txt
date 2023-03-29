@@ -6,8 +6,7 @@ target_include_directories(
   PUBLIC
   interface)
 find_package(PkgConfig REQUIRED)
-include(lua)
-generate_tolua(fawkesinterface interface.tolua message.tolua
-               message_queue.tolua)
-add_library(fawkesinterface_tolua SHARED fawkesinterface_tolua.cpp)
+set(LUA_SOURCES interface.tolua message.tolua message_queue.tolua)
+set(LUA_LINK_LIBS)
+generate_lua_lib(fawkesinterface "${LUA_SOURCES}" "${LUA_LINK_LIBS}")
 depend_on_lua(fawkesinterface_tolua)

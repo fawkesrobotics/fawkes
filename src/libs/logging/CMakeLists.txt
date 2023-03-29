@@ -16,8 +16,8 @@ find_package(Boost REQUIRED COMPONENTS system)
 find_package(PkgConfig REQUIRED)
 include(lua)
 generate_tolua(fawkeslogging component.tolua)
-add_library(fawkeslogging_tolua SHARED fawkeslogging_tolua.cpp)
-depend_on_lua(fawkeslogging_tolua)
+set(LUA_SOURCES component.tolua)
+generate_lua_lib(fawkeslogging "${LUA_SOURCES}" "")
 
 target_link_libraries(fawkeslogging pthread stdc++ fawkescore
                       ${Boost_SYSTEM_LIBRARY})

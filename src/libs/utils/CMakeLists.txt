@@ -60,14 +60,10 @@ add_library(
 target_compile_features(fawkesutils PUBLIC cxx_std_11)
 # TODO BOOST
 find_package(Boost REQUIRED COMPONENTS system)
-
-include(lua)
-generate_tolua(fawkesutils time/clock.tolua time/time.tolua
-               kalman/kalman_1d.tolua)
-add_library(fawkesutils_tolua SHARED fawkesutils_tolua.cpp)
-depend_on_lua(fawkesutils_tolua)
+set(LUA_SOURCES time/clock.tolua time/time.tolua kalman/kalman_1d.tolua)
+set(LUA_LINK_LIBS fawkescore fawkesutils)
+generate_lua_lib(fawkesutils "${LUA_SOURCES}" "${LUA_LINK_LIBS}")
 depend_on_lua(fawkesutils)
-target_link_libraries(fawkesutils_tolua fawkescore fawkesutils)
 
 pkg_check_modules(libmagic libmagic)
 if(libmagic_FOUND)

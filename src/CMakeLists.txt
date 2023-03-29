@@ -1,5 +1,6 @@
 include(utils)
 include(ros)
+include(lua)
 include(yamlcpp)
 include(eigen3)
 include(pcl)
