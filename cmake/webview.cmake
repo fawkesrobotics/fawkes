@@ -1,7 +1,7 @@
 pkg_check_modules(LIBMICROHTTPD libmicrohttpd)
 pkg_check_modules(RAPIDJSON RapidJSON)
 
-function(check_webview_deps WEBVIEW_FOUND)
+function(check_webview_deps)
   if(LIBMICROHTTPD_FOUND AND RAPIDJSON_FOUND)
     set(WEBVIEW_FOUND
         1
@@ -11,10 +11,10 @@ function(check_webview_deps WEBVIEW_FOUND)
         0
         PARENT_SCOPE)
     if(NOT LIBMICROHTTPD_FOUND)
-      message(WARNING "libmicrohttpd dependency missing")
+      message(WARNING "webview: libmicrohttpd dependency missing")
     endif()
     if(NOT RAPIDJSON_FOUND)
-      message(WARNING "rapidjson[-devel] dependency missing")
+      message(WARNING "webview: rapidjson[-devel] dependency missing")
     endif()
   endif()
 endfunction()

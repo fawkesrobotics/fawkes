@@ -1,6 +1,3 @@
-set(WEBVIEW_FOUND 0)
-check_webview_deps(WEBVIEW_FOUND)
-
 if(WEBVIEW_FOUND)
   add_library(
     fawkeswebview SHARED
@@ -24,5 +21,5 @@ if(WEBVIEW_FOUND)
   depend_on_webview(fawkeswebview)
   target_link_libraries(fawkeswebview fawkescore fawkesutils fawkeslogging)
 else()
-  message(WARNING "Skipped due to missing dependencies")
+  build_skipped_message(webview "webview dependencencies")
 endif()
