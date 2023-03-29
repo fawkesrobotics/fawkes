@@ -1,6 +1,6 @@
-pkg_check_modules(LUA lua-5.1)
+pkg_check_modules(LUA REQUIRED lua-5.1)
 
-find_program(TOLUAPP tolua++)
+find_program(TOLUAPP REQUIRED tolua++)
 
 function(depend_on_lua target)
   set(LUADIR $(PROJECT_SOURCE_DIR)/src/lua)
