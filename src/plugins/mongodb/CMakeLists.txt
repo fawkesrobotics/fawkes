@@ -32,7 +32,7 @@ if(PLUGIN_mongodb OR PLUGIN_mongodb-rrd)
             pthread
             ${Boost_LIBRARIES})
           target_compile_features(mongodb PUBLIC cxx_std_11)
-          target_include_directories(mongodb PUBLIC ${Boost_LIBRARIES})
+          target_include_directories(mongodb PUBLIC ${Boost_INCLUDE_DIRS})
         endif()
         if(PLUGIN_mongodb-rrd)
           add_library(mongodb-rrd MODULE mongorrd_plugin.cpp
