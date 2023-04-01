@@ -4,8 +4,10 @@ set(PLUGIN_clips-rest-api
 if(PLUGIN_clips-rest-api)
   if(CPP_17_FOUND)
     if(WEBVIEW_FOUND)
-      add_library(clips-rest-api MODULE clips-rest-api.cpp
-                                        clips-rest-api-plugin.cpp)
+      add_library(
+        clips-rest-api MODULE
+        clips-rest-api.cpp clips-rest-api-plugin.cpp model/Environment.cpp
+        model/Fact.cpp model/SlotValue.cpp)
 
       depend_on_webview(clips-rest-api)
 
