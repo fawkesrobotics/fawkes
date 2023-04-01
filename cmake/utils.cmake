@@ -37,22 +37,24 @@ macro(set_common_properties_of_targets_recursive targets dir)
     PROPERTY BUILDSYSTEM_TARGETS)
   list(APPEND ${targets} ${current_targets})
   foreach(target ${current_targets})
-    target_compile_definitions(
-      ${target}
-      PRIVATE SRCDIR=\"${dir}\"
-              BASEDIR=\"${PROJECT_SOURCE_DIR}\"
-              FAWKES_BASEDIR=\"${PROJECT_SOURCE_DIR}\"
-              BINDIR=\"${BINDIR}\"
-              LIBDIR=\"${CMAKE_BINARY_DIR}/src/libs/\"
-              PLUGINDIR=\"${FAWKES_PLUGIN_DIR}\"
-              IFACEDIR=\"${FAWKES_INTERFACE_DIR}\"
-              CONFDIR=\"${PROJECT_SOURCE_DIR}/cfg\"
-              USERDIR=\".fawkes\"
-              LOGDIR=\"${PROJECT_SOURCE_DIR}/log\"
-              RESDIR=\"${PROJECT_SOURCE_DIR}/res\"
-              TMPDIR=\"/tmp\"
-              BUILDTYPE=\"${BUILD_TYPE}\"
-              SOEXT=\"so\")
+    if(NOT ${target} IN_LIST FAWKES_CUSTOM_TARGETS)
+      target_compile_definitions(
+        ${target}
+        PRIVATE SRCDIR=\"${dir}\"
+                BASEDIR=\"${PROJECT_SOURCE_DIR}\"
+                FAWKES_BASEDIR=\"${PROJECT_SOURCE_DIR}\"
+                BINDIR=\"${BINDIR}\"
+                LIBDIR=\"${CMAKE_BINARY_DIR}/src/libs/\"
+                PLUGINDIR=\"${FAWKES_PLUGIN_DIR}\"
+                IFACEDIR=\"${FAWKES_INTERFACE_DIR}\"
+                CONFDIR=\"${PROJECT_SOURCE_DIR}/cfg\"
+                USERDIR=\".fawkes\"
+                LOGDIR=\"${PROJECT_SOURCE_DIR}/log\"
+                RESDIR=\"${PROJECT_SOURCE_DIR}/res\"
+                TMPDIR=\"/tmp\"
+                BUILDTYPE=\"${BUILD_TYPE}\"
+                SOEXT=\"so\")
+    endif()
   endforeach()
 endmacro()
 
