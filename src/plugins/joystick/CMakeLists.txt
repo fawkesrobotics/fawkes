@@ -48,10 +48,9 @@ else()
 endif()
 
 if(PLUGIN_ffjoystick)
-  add_library(
-    ffjoystick MODULE
-    ffjoystick.cpp acquisition_thread.cpp remote_bb_poster.cpp bb_handler.cpp
-    force_feedback.cpp act_thread.cpp)
+  add_executable(
+    ffjoystick ffjoystick.cpp acquisition_thread.cpp remote_bb_poster.cpp
+               bb_handler.cpp force_feedback.cpp act_thread.cpp)
   target_link_libraries(
     ffjoystick
     stdc++
@@ -68,8 +67,8 @@ else()
 endif()
 
 if(PLUGIN_ffkbjoystick)
-  add_library(ffkbjoystick MODULE ffkbjoystick.cpp remote_bb_poster.cpp
-                                  bb_handler.cpp)
+  add_executable(ffkbjoystick ffkbjoystick.cpp remote_bb_poster.cpp
+                              bb_handler.cpp)
   target_link_libraries(
     ffkbjoystick
     stdc++
