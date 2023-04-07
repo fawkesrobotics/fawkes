@@ -24,9 +24,9 @@ function(generate_tolua target)
            ${INTERFACE_PREFIX}${target}_tolua.cpp
     COMMAND
       /bin/sh -c
-      "${PROJECT_SOURCE_DIR}/etc/scripts/./tolua_generate.sh ${CMAKE_CURRENT_BINARY_DIR} ${INTERFACE_PREFIX}${target} ${PROJECT_SOURCE_DIR}/src/lua/fawkes/toluaext.lua ${PROJECT_SOURCE_DIR}/doc/headers/lichead_c.GPL_WRE ${CMAKE_CURRENT_SOURCE_DIR} ${FILES}"
+      "${FAWKES_CORE_DIR}/etc/scripts/./tolua_generate.sh ${CMAKE_CURRENT_BINARY_DIR} ${INTERFACE_PREFIX}${target} ${PROJECT_SOURCE_DIR}/src/lua/fawkes/toluaext.lua ${PROJECT_SOURCE_DIR}/doc/headers/lichead_c.GPL_WRE ${CMAKE_CURRENT_SOURCE_DIR} ${FILES}"
     VERBATIM
-    DEPENDS ${ARGN} ${PROJECT_SOURCE_DIR}/etc/scripts/tolua_generate.sh)
+    DEPENDS ${ARGN} ${FAWKES_CORE_DIR}/etc/scripts/tolua_generate.sh)
 endfunction()
 
 function(generate_lua_lib target sources link_libs)
