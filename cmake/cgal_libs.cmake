@@ -3,7 +3,7 @@ find_package(CGAL)
 pkg_check_modules(GMP gmp)
 pkg_check_modules(MPFR mpfr)
 
-function(check_cgal_libs_deps CGAL_LIBS_FOUND)
+function(check_cgal_libs_deps)
   if(CGAL_FOUND
      AND GMP_FOUND
      AND MPFR_FOUND

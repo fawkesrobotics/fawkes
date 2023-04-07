@@ -1,7 +1,7 @@
 include(eigen3)
 include(yamlcpp)
 
-function(check_navgraph_deps NAVGRAPH_FOUND)
+function(check_navgraph_deps)
   if(YAMLCPP_FOUND AND EIGEN3_FOUND)
     set(NAVGRAPH_FOUND
         1
