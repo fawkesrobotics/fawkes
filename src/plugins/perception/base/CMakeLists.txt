@@ -4,8 +4,8 @@ set(PLUGIN_fv-base
 
 if(PLUGIN_fv-base)
 
-  add_library(fv-base MODULE acquisition_thread.cpp aqt_vision_threads.cpp
-                             aqt_vision_threads.cpp aqt_vision_threads.cpp)
+  add_library(fv-base MODULE fvbase_plugin.cpp base_thread.cpp
+                             acquisition_thread.cpp aqt_vision_threads.cpp)
 
   depend_on_fvconf(fv-base)
 
