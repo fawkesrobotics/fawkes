@@ -15,14 +15,14 @@ if(PLUGIN_navgraph-generator)
       build_skipped_message("navgraph-generator visualization-features"
                             "ros-visualization_msgs-devel")
     endif()
-    check_deps_pcl_extra_libs(navgraph-generator sample_consensus segmentation
-                              filters surface search)
+    check_deps_pcl_extra_libs(sample_consensus segmentation filters surface
+                              search)
     if(NOT PCL_WARNING)
-      add_library(navgraph MODULE ${SOURCES})
+      add_library(navgraph-generator MODULE ${SOURCES})
       depend_on_navgraph(navgraph-generator)
       depend_on_tf(navgraph-generator)
       depend_on_pcl(navgraph-generator)
-      depend_on_cgal(navgraph-generator)
+      depend_on_cgal_libs(navgraph-generator)
 
       target_link_libraries(
         navgraph-generator
@@ -34,9 +34,9 @@ if(PLUGIN_navgraph-generator)
         fawkesnavgraph
         fawkes_amcl_utils
         fawkes_amcl_map
-        fakwesnavgraphaspect
+        fawkesnavgraphaspect
         fawkesnavgraphgenerators
-        NavGraphGenreatorInterface)
+        NavGraphGeneratorInterface)
 
       depend_on_pcl_extra_libs(navgraph-generator sample_consensus segmentation
                                filters surface search)
