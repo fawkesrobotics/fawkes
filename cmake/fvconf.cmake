@@ -33,6 +33,16 @@ pkg_check_modules(OPENCV opencv)
 if(NOT OPENCV_FOUND)
   message(WARNING "opencv[-devel] dependency missing")
 endif()
+if(EXISTS "${CMAKE_SYSROOT}/usr/include/linux/videodev.h")
+  set(V4L1_CAM_FOUND
+      ON
+      CACHE BOOL "v4l 1 support")
+endif()
+if(EXISTS "${CMAKE_SYSROOT}/usr/include/linux/videodev2.h")
+  set(V4L2_CAM_FOUND
+      ON
+      CACHE BOOL "v4l 2 support")
+endif()
 
 # This replaces the VISION_CFLAGS and VISION_LDFLAGS
 function(depend_on_fvconf target)
@@ -55,6 +65,12 @@ function(depend_on_fvconf target)
   if(LIBV4L2_FOUND)
     target_compile_options(${target} PUBLIC -DHAVE_LIBV4L2 ${LIBV4L2_CFLAGS})
     target_link_libraries(${target} ${LIBV4L2_LDFLAGS})
+  endif()
+  if(V4L1_CAM_FOUND)
+    target_compile_definitions(${target} PUBLIC HAVE_V4L1_CAM)
+  endif()
+  if(V4L2_CAM_FOUND)
+    target_compile_definitions(${target} PUBLIC HAVE_V4L2_CAM)
   endif()
   if(LIBPNG_FOUND)
     target_compile_options(${target} PUBLIC -DHAVE_LIBPNG ${LIBPNG_CFLAGS})

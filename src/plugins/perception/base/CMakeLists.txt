@@ -1,16 +1,16 @@
-set(PLUGIN_fv-base
+set(PLUGIN_fvbase
     ON
     CACHE BOOL ON)
 
-if(PLUGIN_fv-base)
+if(PLUGIN_fvbase)
 
-  add_library(fv-base MODULE fvbase_plugin.cpp base_thread.cpp
+  add_library(fvbase MODULE fvbase_plugin.cpp base_thread.cpp
                              acquisition_thread.cpp aqt_vision_threads.cpp)
 
-  depend_on_fvconf(fv-base)
+  depend_on_fvconf(fvbase)
 
   target_link_libraries(
-    fv-base
+    fvbase
     fawkescore
     fawkesutils
     fawkesaspects
@@ -21,5 +21,5 @@ if(PLUGIN_fv-base)
     SwitchInterface)
 
 else()
-  plugin_disabled_message(fv-base)
+  plugin_disabled_message(fvbase)
 endif()

@@ -3,14 +3,13 @@ list(
   APPEND
   fvclassifiers_SOURCES
   qualifiers.cpp
-  # qa/qa_siftppclassifier.cpp
-  # qa/qa_facesclassifier.cpp qa/qa_surfclassifier.cpp qa/qa_siftclassifier.cpp
+  # qa/qa_siftppclassifier.cpp qa/qa_facesclassifier.cpp
+  # qa/qa_surfclassifier.cpp qa/qa_siftclassifier.cpp
   square_shrinker.cpp
   simple.cpp
   classifier.cpp
   multi_color.cpp
-  # sift.cpp # outdated
-  # surf.cpp # outdated siftpp.cpp # outdated
+  # sift.cpp # outdated surf.cpp # outdated siftpp.cpp # outdated
   gradient.cpp
   shrinker.cpp
   border_shrinker.cpp)

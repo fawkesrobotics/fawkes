@@ -19,7 +19,7 @@ set(PLUGIN_ros-laserscan
 set(PLUGIN_ros-odometry
     ON
     CACHE BOOL ON)
-set(PLUGIN_ros-cmdval
+set(PLUGIN_ros-cmdvel
     ON
     CACHE BOOL ON)
 set(PLUGIN_ros-navigator

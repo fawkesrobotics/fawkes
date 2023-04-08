@@ -33,11 +33,10 @@ else()
       "Omitting firewire bumblebee3 and pike cams (libdc1394[-devel] not installed)"
   )
 endif()
-
-if(LIBV4L2_FOUND)
+if(V4L2_CAM_FOUND)
   list(APPEND fvcams_SOURCES v4l2.cpp v4l.cpp)
 else()
-  message(WARNING "Omitting V4l2 support (libv4l[-devel] not installed)")
+  message(WARNING "Omitting V4l2 support (v4l2 not found)")
 endif()
 
 add_library(fvcams SHARED ${fvcams_SOURCES})

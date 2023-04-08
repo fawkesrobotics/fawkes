@@ -6,7 +6,7 @@ if(PLUGIN_imu)
 
   set(SOURCES imu_plugin.cpp acquisition_thread.cpp sensor_thread.cpp)
 
-  find_package(Boost COMPONENTS thread asio system)
+  find_package(Boost COMPONENTS thread system)
   if(Boost_FOUND)
     list(APPEND SOURCES imu_cruizcore_xg1010.cpp)
     set(CRUIZCORE 1)
