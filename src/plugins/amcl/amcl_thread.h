@@ -18,8 +18,6 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#define HAVE_ROS 1
-
 #ifndef _PLUGINS_AMCL_AMCL_THREAD_H_
 #define _PLUGINS_AMCL_AMCL_THREAD_H_
 
@@ -64,7 +62,7 @@ class Mutex;
 }
 
 #ifdef HAVE_ROS
-class AmclROS2Thread;
+class AmclROSThread;
 #endif
 
 class AmclThread : public fawkes::Thread,
@@ -79,7 +77,7 @@ class AmclThread : public fawkes::Thread,
 {
 public:
 #ifdef HAVE_ROS
-	AmclThread(AmclROS2Thread *ros_thread);
+	AmclThread(AmclROSThread *ros_thread);
 #else
 	AmclThread();
 #endif
@@ -214,7 +212,7 @@ private:
 #endif
 
 #ifdef HAVE_ROS
-	AmclROS2Thread *rt_;
+	AmclROSThread *rt_;
 #endif
 };
 
