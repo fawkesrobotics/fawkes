@@ -20,44 +20,38 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "amcl_thread.h"
+#include "amcl2_thread.h"
 
 #include <core/plugin.h>
-#ifdef HAVE_ROS
-#	include "amcl_utils.h"
-#	include "ros_thread.h"
-#endif
+#include "amcl_utils.h"
+#include "ros2_thread.h"
 
 using namespace fawkes;
 
 /** Adaptive Monte Carlo Localization plugin.
  * @author Tim Niemueller
  */
-class AmclPlugin : public fawkes::Plugin
+class Amcl2Plugin : public fawkes::Plugin
 {
 public:
 	/** Constructor.
    * @param config Fawkes configuration
    */
-	explicit AmclPlugin(Configuration *config) : Plugin(config)
+	explicit Amcl2Plugin(Configuration *config) : Plugin(config)
 	{
-#ifdef HAVE_ROS
-		AmclROSThread *rt          = NULL;
+		AmclROS2Thread *rt          = NULL;
 		bool           ros_enabled = true;
 		try {
 			ros_enabled = config->get_bool(AMCL_CFG_PREFIX "ros/enable");
 		} catch (Exception &e) {
 		} // ignore, use default
 		if (ros_enabled) {
-			rt = new AmclROSThread();
+			rt = new AmclROS2Thread();
 			thread_list.push_back(rt);
 		}
-		thread_list.push_back(new AmclThread(rt));
-#else
-		thread_list.push_back(new AmclThread());
-#endif
+		thread_list.push_back(new Amcl2Thread(rt));
 	}
 };
 
 PLUGIN_DESCRIPTION("Adaptive Monte Carlo Localization")
-EXPORT_PLUGIN(AmclPlugin)
+EXPORT_PLUGIN(Amcl2Plugin)

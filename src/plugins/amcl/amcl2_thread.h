@@ -61,11 +61,9 @@ namespace fawkes {
 class Mutex;
 }
 
-#ifdef HAVE_ROS
-class AmclROSThread;
-#endif
+class AmclROS2Thread;
 
-class AmclThread : public fawkes::Thread,
+class Amcl2Thread : public fawkes::Thread,
                    public fawkes::ClockAspect,
                    public fawkes::LoggingAspect,
                    public fawkes::ConfigurableAspect,
@@ -76,12 +74,8 @@ class AmclThread : public fawkes::Thread,
 
 {
 public:
-#ifdef HAVE_ROS
-	AmclThread(AmclROSThread *ros_thread);
-#else
-	AmclThread();
-#endif
-	virtual ~AmclThread();
+	Amcl2Thread(AmclROS2Thread *ros_thread);
+	virtual ~Amcl2Thread();
 
 	virtual void init();
 	virtual void loop();
@@ -211,9 +205,7 @@ private:
 	static std::vector<std::pair<int, int>> free_space_indices;
 #endif
 
-#ifdef HAVE_ROS
-	AmclROSThread *rt_;
-#endif
+	AmclROS2Thread *rt_;
 };
 
 #endif

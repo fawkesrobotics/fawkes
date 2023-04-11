@@ -23,6 +23,9 @@
 set(PLUGIN_amcl
     ON
     CACHE BOOL "Build amcl plugin")
+set(PLUGIN_amcl2
+    ON
+    CACHE BOOL "Build amcl2 plugin")
 set(PLUGIN_map-lasergen
     ON
     CACHE BOOL "Build map-lasergen plugin")
@@ -79,6 +82,37 @@ if(PLUGIN_map-lasergen)
 else()
   plugin_disabled_message(map-lasergen)
 endif()
+
+if(PLUGIN_amcl2)
+  add_library(amcl2 MODULE amcl2_plugin.cpp amcl2_thread.cpp)
+  depend_on_tf(amcl2)
+  set(ROS_LIBS geometry_msgs nav_msgs)
+  if(ROS_2_FOUND)
+    target_sources(amcl2 PRIVATE ros2_thread.cpp)
+    depend_on_ros2(amcl2)
+    depend_on_ros2_libs(amcl2 "${ROS_LIBS}")
+  endif()
+  target_compile_definitions(amcl2 PUBLIC USE_ASSERT_EXCEPTION USE_MAP_PUB)
+  target_link_libraries(
+    amcl2
+    fawkescore
+    fawkesutils
+    fawkesaspects
+    fawkesinterface
+    fawkesblackboard
+    fawkesbaseapp
+    Laser360Interface
+    Position3DInterface
+    LocalizationInterface
+    fawkes_amcl_pf
+    fawkes_amcl_map
+    fawkes_amcl_sensors
+    fawkes_amcl_utils
+    fawkestf)
+else()
+  plugin_disabled_message(amcl2)
+endif()
+
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}")
 include(libs)
