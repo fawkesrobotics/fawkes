@@ -23,6 +23,7 @@ if(TF_FOUND)
   target_compile_features(fawkestf PUBLIC cxx_std_11)
 
   target_compile_options(fawkestf PUBLIC ${TF_CFLAGS})
+  target_compile_definitions(fawkestf PUBLIC -DBT_INFINITY -DBT_USE_DOUBLE_PRECISION -DBT_EULER_DEFAULT_ZYX)
   set(LUA_SOURCES tf.tolua)
   set(LUA_LINK_LIBS fawkescore fawkesutils fawkestf ${TF_LDFLAGS})
   generate_lua_lib(fawkestf "${LUA_SOURCES}" "${LUA_LINK_LIBS}")
