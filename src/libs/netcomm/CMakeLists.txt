@@ -1,8 +1,6 @@
 include_directories(libs)
-set(fawkesnetcomm_SOURCES)
-list(
-  APPEND
-  fawkesnetcomm_SOURCES
+add_library(
+  fawkesnetcomm SHARED
   service_discovery/dummy_service_browser.cpp
   service_discovery/service_browser.cpp
   service_discovery/service.cpp
@@ -40,22 +38,16 @@ list(
   crypto/encrypt.cpp
   crypto/decrypt.cpp)
 
-find_package(PkgConfig REQUIRED)
-
-pkg_check_modules(avahi-client avahi-client)
-if(${avahi-client_FOUND})
-  list(APPEND fawkesnetcomm_SOURCES dns-sd/avahi_thread.cpp
-       dns-sd/avahi_resolver_handler.cpp)
-  add_library(fawkesnetcomm SHARED ${fawkesnetcomm_SOURCES})
-  target_compile_options(fawkesnetcomm PUBLIC ${avahi-client_CFLAGS}
-                                              -DHAVE_AVAHI)
-  target_link_libraries(fawkesnetcomm ${avahi-client_LDFLAGS})
+optional_depend_on_pkgconfig_libs(fawkesnetcomm avahi-client avahi_dep_found)
+if(avahi_dep_found)
+  target_sources(fawkesnetcomm PRIVATE dns-sd/avahi_thread.cpp
+                                       dns-sd/avahi_resolver_handler.cpp)
+  target_compile_definitions(fawkesnetcomm PUBLIC HAVE_AVAHI)
 else()
-  add_library(fawkesnetcomm SHARED ${fawkesnetcomm_SOURCES})
-  message("Omitting mDNS/DNS-SD support (Avahi not installed)")
+  build_skipped_message(fawkesnetcomm
+                        "Omitting mDNS/DNS-SD support (Avahi not installed)")
 endif()
 
-include(libcrypto)
 depend_on_libcrypto(fawkesnetcomm)
 target_link_libraries(fawkesnetcomm stdc++ m fawkescore fawkesutils)
 target_include_directories(fawkesnetcomm PUBLIC netcomm)

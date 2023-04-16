@@ -1,4 +1,3 @@
-include_directories(libs)
 add_library(
   fawkesutils SHARED
   sub_process/proc.cpp
@@ -58,32 +57,29 @@ add_library(
   system/fam.cpp
   kalman/kalman_1d.cpp)
 target_compile_features(fawkesutils PUBLIC cxx_std_11)
-# TODO BOOST
-find_package(Boost REQUIRED COMPONENTS system)
+
 set(LUA_SOURCES time/clock.tolua time/time.tolua kalman/kalman_1d.tolua)
 set(LUA_LINK_LIBS fawkescore fawkesutils)
 generate_lua_lib(fawkesutils "${LUA_SOURCES}" "${LUA_LINK_LIBS}")
 depend_on_lua(fawkesutils)
 
-pkg_check_modules(libmagic libmagic)
-if(libmagic_FOUND)
-  target_compile_options(fawkesutils PUBLIC -DHAVE_LIBMAGIC)
-  target_compile_options(fawkesutils PUBLIC ${libmagic_CFLAGS})
-  target_link_libraries(fawkesutils ${libmagic_LDFLAGS})
+optional_depend_on_pkgconfig_libs(fawkesutils libmagic libmagic_dep_found)
+if(libmagic_dep_found)
+  target_compile_definitions(fawkesutils PUBLIC HAVE_LIBMAGIC)
 else()
-  message(
-    WARNING
-      "Restricted file type detection support (file[-devel] (libmagic)) not installed"
+  build_skipped_message(
+    fwakesutils
+    "Restricted file type detection support (file[-devel] (libmagic)) not installed"
   )
 endif()
-pkg_check_modules(libdaemon libdaemon)
-if(libdaemon_FOUND)
-  target_compile_options(fawkesutils PUBLIC ${libdaemon_CFLAGS})
-  target_link_libraries(fawkesutils ${libdaemon_LDFLAGS})
-else()
-  message(
-    WARNING "Sub-process cannot close all file handles (libdaemon not found)")
+
+optional_depend_on_pkgconfig_libs(fawkesutils libdaemon libdaemon_dep_found)
+if(NOT libdaemon_dep_found)
+  build_skipped_message(
+    fwakesutils
+    "Sub-process cannot close all file handles (libdaemon not found)")
 endif()
+
 target_link_libraries(
   fawkesutils
   pthread
@@ -94,7 +90,9 @@ target_link_libraries(
   fawkeslogging
   dl
   pthread
-  uuid
-  ${Boost_SYSTEM_LIBRARY})
+  uuid)
+
+depend_on_boost_libs(fawkesutils system)
+
 target_include_directories(fawkesutils PUBLIC core)
-target_compile_options(fawkesutils PUBLIC -DHAVE_EXECINFO -DHAVE_INOTIFY)
+target_compile_definitions(fawkesutils PUBLIC HAVE_EXECINFO HAVE_INOTIFY)

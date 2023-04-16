@@ -7,7 +7,6 @@ if(PLUGIN_ffplugin)
 
   target_link_libraries(ffplugin stdc++ fawkescore fawkesutils fawkesnetcomm
                         fawkesplugin)
-
 else()
-
+  executable_skipped_message(ffplugin)
 endif()

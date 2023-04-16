@@ -1,7 +1,5 @@
-set(fvcams_SOURCES)
-list(
-  APPEND
-  fvcams_SOURCES
+add_library(
+  fvcams SHARED
   # kinect.cpp # was never built?
   factory.cpp
   # qa/qa_fwcam.cpp
@@ -25,20 +23,14 @@ list(
   fileloader.cpp
   shmem.cpp)
 
-if(LIBDC1394_FOUND)
-  list(APPEND fvcams_SOURCES firewire.cpp bumblebee2.cpp pike.cpp)
-else()
-  message(
-    WARNING
-      "Omitting firewire bumblebee3 and pike cams (libdc1394[-devel] not installed)"
-  )
-endif()
-if(V4L2_CAM_FOUND)
-  list(APPEND fvcams_SOURCES v4l2.cpp v4l.cpp)
-else()
-  message(WARNING "Omitting V4l2 support (v4l2 not found)")
+optional_depend_on_pkgconfig_libs(fvcams libdc1394-2 libdc1394_dep_found)
+if(libdc1394_dep_found)
+  target_sources(fvcams PRIVATE firewire.cpp bumblebee2.cpp pike.cpp)
 endif()
 
-add_library(fvcams SHARED ${fvcams_SOURCES})
+optional_depend_on_pkgconfig_libs(fvcams libv4l2 libv4l2_dep_found)
+if(libv4l2_dep_found)
+  target_sources(fvcams PRIVATE v4l2.cpp v4l.cpp)
+endif()
 depend_on_fvconf(fvcams)
 target_link_libraries(fvcams fawkescore fawkesutils fvutils fawkeslogging)

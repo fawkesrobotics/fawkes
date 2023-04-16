@@ -22,5 +22,5 @@ if(PLUGIN_clips-agent)
   # install(FILES clips/init.clp clips/skills.clp)
 
 else()
-  message("Skip building clips-agent plugin")
+  plugin_disabled_message(clips-agent)
 endif()

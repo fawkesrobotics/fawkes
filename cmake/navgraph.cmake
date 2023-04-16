@@ -1,23 +1,7 @@
 include(eigen3)
 include(yamlcpp)
 
-function(check_navgraph_deps)
-  if(YAMLCPP_FOUND AND EIGEN3_FOUND)
-    set(NAVGRAPH_FOUND
-        1
-        PARENT_SCOPE)
-  else()
-    set(NAVGRAPH_FOUND
-        0
-        PARENT_SCOPE)
-    if(NOT YAMLCPP_FOUND)
-      message(WARNING "yaml-cpp[-devel] dependency missing")
-    endif()
-    if(NOT EIGEN3_FOUND)
-      message(WARNING "eigen3 dependency missing")
-    endif()
-  endif()
-endfunction()
+set(navgraph_deps ${yamlcpp_deps};${eigen3_deps})
 
 function(depend_on_navgraph target)
   depend_on_yamlcpp(${target})

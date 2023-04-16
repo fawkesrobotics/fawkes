@@ -1,7 +1,5 @@
-set(fvmodels_SOURCES)
-list(
-  APPEND
-  fvmodels_SOURCES
+add_library(
+  fvmodels SHARED
   relative_position/box_relative.cpp
   relative_position/ball_trigo.cpp
   relative_position/relativepositionmodel.cpp
@@ -38,18 +36,18 @@ list(
   shape/rht_lines.cpp
   shape/circle.cpp)
 
+depend_on_fvconf(fvmodels)
+
 if(OPENCV_FOUND)
-  list(APPEND fvmodels_SOURCES mirror/mirror_calib.cpp)
+  target_sources(fvmodels PRIVATE mirror/mirror_calib.cpp)
 endif()
 
-if(TF_FOUND)
-  list(APPEND fvmodels_SOURCES relative_position/position_to_pixel.cpp)
-endif()
-
-add_library(fvmodels SHARED ${fvmodels_SOURCES})
-if(TF_FOUND)
+optional_depend_on_pkgconfig_libs(fvmodels "${tf_deps}" tf_deps_found)
+if(tf_deps_found)
+  target_sources(fvmodels PRIVATE relative_position/position_to_pixel.cpp)
   depend_on_tf(fvmodels)
   target_link_libraries(fvmodels fawkestf)
+  build_depends_on(fvmodels fawkestf)
 endif()
-depend_on_fvconf(fvmodels)
+
 target_link_libraries(fvmodels fawkescore fawkesutils fvfilters)

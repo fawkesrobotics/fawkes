@@ -3,21 +3,19 @@ set(PLUGIN_imu
     CACHE BOOL ON)
 
 if(PLUGIN_imu)
+  add_library(imu MODULE imu_plugin.cpp acquisition_thread.cpp
+                         sensor_thread.cpp)
 
-  set(SOURCES imu_plugin.cpp acquisition_thread.cpp sensor_thread.cpp)
+  optional_depend_on_boost_libs(imu "thread;system" boost_deps_found)
+  if(boost_deps_found)
 
-  find_package(Boost COMPONENTS thread system)
-  if(Boost_FOUND)
-    list(APPEND SOURCES imu_cruizcore_xg1010.cpp)
-    set(CRUIZCORE 1)
-  endif()
-  add_library(imu MODULE ${SOURCES})
-  if(CRUIZCORE)
+    target_sources(imu PRIVATE imu_cruizcore_xg1010.cpp)
     target_link_libraries(imu ${Boost_LIBRARIES})
     target_include_directories(imu PRIVATE ${Boost_INCLUDE_DIRS})
     depend_on_tf(imu)
     target_compile_definitions(imu PUBLIC HAVE_CRUIZCORE)
   endif()
+
   target_link_libraries(
     imu
     m
@@ -28,6 +26,7 @@ if(PLUGIN_imu)
     fawkesblackboard
     fawkesinterface
     IMUInterface)
+
 else()
   plugin_disabled_message("imu")
 endif()

@@ -1,10 +1,11 @@
-pkg_check_modules(EIGEN3 eigen3)
+set(eigen3_deps "eigen3")
 
 function(depend_on_eigen3 target)
+  depend_on_pkgconfig_libs(${target} eigen3)
   target_compile_options(
-    ${target} PUBLIC ${EIGEN3_CFLAGS} -DHAVE_EIGEN3 -DEIGEN_USE_NEW_STDVECTOR
+    ${target} PUBLIC -DHAVE_EIGEN3 -DEIGEN_USE_NEW_STDVECTOR
                      -DEIGEN_YES_I_KNOW_SPARSE_MODULE_IS_NOT_STABLE_YET)
-  target_link_libraries(${target} ${EIGEN3_LDFLAGS} tolua++)
+  target_link_libraries(${target} tolua++)
   if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     target_compile_options(${target} PRIVATE -Wno-deprecated-register)
   endif()

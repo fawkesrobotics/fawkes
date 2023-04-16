@@ -2,14 +2,12 @@ set(PLUGIN_laser-filter
     ON
     CACHE BOOL ON)
 add_subdirectory(deadspots)
+add_subdirectory(interfaces)
 
 if(PLUGIN_laser-filter)
-  add_subdirectory(interfaces)
 
-  set(laser-filter_SOURCES)
-  list(
-    APPEND
-    laser-filter_SOURCES
+  add_library(
+    laser-filter MODULE
     filter_thread.cpp
     filters/deadspots.cpp
     filters/cascade.cpp
@@ -25,15 +23,14 @@ if(PLUGIN_laser-filter)
     filters/copy.cpp
     filters/max_circle.cpp
     laser_filter_plugin.cpp)
-  if(TF_FOUND)
-    list(APPEND laser-filter_SOURCES filters/projection.cpp)
+  optional_depend_on_pkgconfig_libs(laser-filter "${tf_deps}" tf_deps_found)
+  if(tf_deps_found)
+    target_sources(laser-filter PRIVATE filters/projection.cpp)
+    depend_on_tf(laser-filter)
   else()
-    message(
-      WARNING
-        "Omitting projection filter of laser-filter plugin bullet[-devel] dependency missing"
-    )
+    build_skipped_message("projection filter of laser-filter plugin"
+                          "${tf_deps}")
   endif()
-  add_library(laser-filter MODULE ${laser-filter_SOURCES})
   target_link_libraries(
     laser-filter
     m
@@ -48,9 +45,6 @@ if(PLUGIN_laser-filter)
     Laser720Interface
     Laser1080Interface
     LaserBoxFilterInterface)
-  if(TF_FOUND)
-    depend_on_tf(laser-filter)
-  endif()
 
 else()
   plugin_disabled_message(laser-filter)

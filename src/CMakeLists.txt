@@ -1,4 +1,3 @@
-check_webview_deps()
 include_directories(libs)
 add_subdirectory(libs)
 include_directories(.)

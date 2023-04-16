@@ -1,7 +1,5 @@
-set(fvutils_SOURCES)
-list(
-  APPEND
-  fvutils_SOURCES
+add_library(
+  fvutils SHARED
   writers/png.cpp
   writers/compressed.cpp
   writers/fvraw.cpp
@@ -69,42 +67,42 @@ list(
   readers/pnm.cpp
   system/camargp.cpp)
 if(PCL_FOUND)
-  list(APPEND fvutils_SOURCES adapters/pcl.cpp)
+  target_sources(fvutils PRIVATE adapters/pcl.cpp)
 else()
-  message(WARNING "Omitting PCL adapter (pcl[-devel] not installed)")
+  build_skipped_message("fvutils PCL adapter" "pcl[-devel]")
 endif()
-if(LIBJPEG_FOUND)
-  list(APPEND fvutils_SOURCES compression/jpeg_compressor_libjpeg.cpp
-       compression/jpeg_decompressor.cpp writers/jpeg.cpp readers/jpeg.cpp)
+optional_depend_on_pkgconfig_libs(fvutils libjpeg libjpeg_dep_found)
+if(libjpeg_dep_found)
+  target_sources(
+    fvutils
+    PRIVATE compression/jpeg_compressor_libjpeg.cpp
+            compression/jpeg_decompressor.cpp writers/jpeg.cpp readers/jpeg.cpp)
 else()
-  message(WARNING "Omitting JPEG support (No libjpeg[-devel] installed)")
+  build_skipped_message("fvutils JPEG support" "libjpeg[-devel]")
 endif()
-if(LIBPNG_FOUND)
-  list(APPEND fvutils_SOURCES readers/png.cpp writers/writer.cpp)
+optional_depend_on_pkgconfig_libs(fvutils libpng libpng_dep_found)
+if(libpng_dep_found)
+  target_sources(fvutils PRIVATE readers/png.cpp writers/writer.cpp)
 else()
-  message(WARNING "Omitting PNG support (No libpng[-devel] installed)")
-endif()
-
-if(OPENCV_FOUND)
-  list(APPEND fvutils_SOURCES adapters/cvmatadapter.cpp # something about
-                                                        # opencv2?!
-  )
-else()
-  message(
-    WARNING
-      "Omitting OpenCV dependent stuff in the fvutils (No opencv[-devel] installed)"
-  )
+  build_skipped_message("fvutils PNG support" "libpng[-devel]")
 endif()
 
-add_library(fvutils SHARED ${fvutils_SOURCES})
+optional_depend_on_pkgconfig_libs(fvutils opencv opencv_dep_found)
+if(opencv_dep_found)
+  target_sources(fvutils PRIVATE adapters/cvmatadapter.cpp)
+else()
+  build_skipped_message("fvutils OpenCV support" "opencv[-devel]")
+endif()
+
 depend_on_fvconf(fvutils)
 target_compile_options(
   fvutils PUBLIC -Wno-unknown-pragmas -Wno-deprecated-declarations
-                 -Wno-oerloaded-virtual)
+                 -Wno-overloaded-virtual)
 target_link_libraries(fvutils fawkescore fawkesutils fawkesnetcomm
                       fawkeslogging)
 
 if(PCL_FOUND)
   depend_on_pcl(fvutils)
+  build_depends_on(fvutils fawkespcl_utils)
   target_link_libraries(fvutils fawkespcl_utils)
 endif()

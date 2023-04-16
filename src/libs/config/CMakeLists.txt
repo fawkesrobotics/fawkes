@@ -22,9 +22,8 @@ depend_on_yamlcpp(fawkesconfig)
 target_link_libraries(fawkesconfig stdc++ fawkescore fawkesutils fawkesnetcomm
                       fawkeslogging)
 
-pkg_check_modules(sqlite3 REQUIRED sqlite3)
-target_compile_options(fawkesconfig PUBLIC -DHAVE_SQLITE ${sqlite3_CFLAGS})
-target_link_libraries(fawkesconfig ${sqlite3_LDFLAGS})
+depend_on_pkgconfig_libs(fawkesconfig sqlite3)
+target_compile_options(fawkesconfig PUBLIC -DHAVE_SQLITE)
 
 set(LUA_SOURCES config.tolua)
 set(LUA_LINK_LIBS fawkescore fawkesconfig)

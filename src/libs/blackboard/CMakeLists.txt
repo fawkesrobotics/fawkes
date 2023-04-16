@@ -32,7 +32,6 @@ add_library(
   blackboard.cpp
   ownership.cpp)
 
-# TODO: link to std++ is missing from binary?!
 target_link_libraries(fawkesblackboard fawkescore fawkesutils fawkesnetcomm
                       fawkeslogging fawkesinterface)
 

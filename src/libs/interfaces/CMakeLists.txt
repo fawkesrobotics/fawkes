@@ -1,82 +1,72 @@
-include(libxmlpp)
-include(libcrypto)
-if(libxml_FOUND)
-  if(ENCRYPTION_SUPPORT)
+add_executable(
+  ffifacegen
+  generator/checker.cpp
+  generator/parser.cpp
+  generator/pseudomap.cpp
+  generator/main.cpp
+  generator/enum_constant.cpp
+  generator/tolua_generator.cpp
+  generator/constant.cpp
+  generator/message.cpp
+  generator/field.cpp
+  generator/cpp_generator.cpp
+  generator/digest.cpp)
 
-    add_executable(
-      ffifacegen
-      generator/checker.cpp
-      generator/parser.cpp
-      generator/pseudomap.cpp
-      generator/main.cpp
-      generator/enum_constant.cpp
-      generator/tolua_generator.cpp
-      generator/constant.cpp
-      generator/message.cpp
-      generator/field.cpp
-      generator/cpp_generator.cpp
-      generator/digest.cpp)
-    depend_on_libxml(ffifacegen)
-    depend_on_libcrypto(ffifacegen)
-    # TODO automate tolua includes?!
-    target_link_libraries(
-      ffifacegen
-      stdc++
-      fawkescore
-      fawkesutils
-      fawkesinterface
-      fawkesinterface_tolua
-      fawkesutils_tolua)
+depend_on_libxml(ffifacegen)
+depend_on_libcrypto(ffifacegen)
 
-    foreach(
-      interface
-      Position2DTrackInterface.xml
-      GripperInterface.xml
-      HumanSkeletonInterface.xml
-      GameStateInterface.xml
-      KeyValueInterface.xml
-      MotorInterface.xml
-      Laser1080Interface.xml
-      OpenraveRobotMemoryInterface.xml
-      CameraControlInterface.xml
-      LocalizationInterface.xml
-      Position3DInterface.xml
-      TransformInterface.xml
-      FacialExpressionInterface.xml
-      ProtobufPeerInterface.xml
-      HumanoidMotionInterface.xml
-      SoccerPenaltyInterface.xml
-      NavPathInterface.xml
-      Laser720Interface.xml
-      SwitchInterface.xml
-      SkillerInterface.xml
-      BatteryInterface.xml
-      FacerInterface.xml
-      JoystickInterface.xml
-      VisualDisplay2DInterface.xml
-      JointInterface.xml
-      Laser360Interface.xml
-      LedInterface.xml
-      EclipseDebuggerInterface.xml
-      IMUInterface.xml
-      NavigatorInterface.xml
-      KickerInterface.xml
-      DynamicReconfigureInterface.xml
-      SpeechSynthInterface.xml
-      ExitSimulationInterface.xml
-      ObjectPositionInterface.xml
-      TestInterface.xml
-      SpeechRecognitionInterface.xml)
-      generate_interface_from_xml(${interface})
-    endforeach()
+target_link_libraries(
+  ffifacegen
+  stdc++
+  fawkescore
+  fawkesutils
+  fawkesinterface
+  fawkesinterface_tolua
+  fawkesutils_tolua)
 
-  else()
-    message(
-      WARNING "Omitting interface generator (openssl[-devel] not installed)")
-  endif()
+get_target_property(ffifacegen_skipped ffifacegen EXCLUDE_FROM_DEFAULT_BUILD)
+if(NOT ffifacegen_skipped)
+  foreach(
+    interface
+    Position2DTrackInterface.xml
+    GripperInterface.xml
+    HumanSkeletonInterface.xml
+    GameStateInterface.xml
+    KeyValueInterface.xml
+    MotorInterface.xml
+    Laser1080Interface.xml
+    OpenraveRobotMemoryInterface.xml
+    CameraControlInterface.xml
+    LocalizationInterface.xml
+    Position3DInterface.xml
+    TransformInterface.xml
+    FacialExpressionInterface.xml
+    ProtobufPeerInterface.xml
+    HumanoidMotionInterface.xml
+    SoccerPenaltyInterface.xml
+    NavPathInterface.xml
+    Laser720Interface.xml
+    SwitchInterface.xml
+    SkillerInterface.xml
+    BatteryInterface.xml
+    FacerInterface.xml
+    JoystickInterface.xml
+    VisualDisplay2DInterface.xml
+    JointInterface.xml
+    Laser360Interface.xml
+    LedInterface.xml
+    EclipseDebuggerInterface.xml
+    IMUInterface.xml
+    NavigatorInterface.xml
+    KickerInterface.xml
+    DynamicReconfigureInterface.xml
+    SpeechSynthInterface.xml
+    ExitSimulationInterface.xml
+    ObjectPositionInterface.xml
+    TestInterface.xml
+    SpeechRecognitionInterface.xml)
+    generate_interface_from_xml(${interface})
+  endforeach()
 else()
-  message(
-    WARNING "Omitting interface generator (libxml++[-devel] not installed)")
+  build_skipped_message(interfaces ffifacegen)
 endif()
-# $(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)Interfaces cannot be
-# generated$(TNORMAL)"

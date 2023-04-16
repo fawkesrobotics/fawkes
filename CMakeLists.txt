@@ -1,7 +1,10 @@
 if(NOT FAWKES_DIR)
-cmake_minimum_required(VERSION 3.5)
-project(fawkes)
-# make local cmake modules available
+  cmake_minimum_required(VERSION 3.5)
+  project(fawkes)
+  set(FAWKES_DEPENDENCIES_CHECKED
+      ""
+      CACHE INTERNAL "")
+  # make local cmake modules available
 endif()
 set(FAWKES_CORE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${FAWKES_CORE_DIR}/cmake")
@@ -9,7 +12,7 @@ include(base)
 
 add_subdirectory(src)
 if(NOT FAWKES_DIR)
-set_common_properties_of_targets(all_targets)
+  set_common_properties_of_targets(all_targets)
 endif()
 # add_subdirectory(src/libs) add_subdirectory(src/plugins)
 # add_subdirectory(src/mainapp) add_subdirectory(src/tools)

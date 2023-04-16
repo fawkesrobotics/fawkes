@@ -1,7 +1,5 @@
-set(fawkesaspects_SOURCES)
-list(
-  APPEND
-  fawkesaspects_SOURCES
+add_library(
+  fawkesaspects SHARED
   syncpoint.cpp
   logging.cpp
   plugin_director.cpp
@@ -43,29 +41,26 @@ list(
   logger.cpp)
 
 if(PCL_FOUND)
-  list(APPEND fawkesaspects_SOURCES pointcloud.cpp inifins/pointcloud.cpp)
-endif()
-
-if(TF_FOUND)
-  list(APPEND fawkesaspects_SOURCES tf.cpp inifins/tf.cpp)
-endif()
-if(WEBVIEW_FOUND)
-  list(APPEND fawkesaspects_SOURCES webview.cpp inifins/webview.cpp)
-endif()
-
-add_library(fawkesaspects SHARED ${fawkesaspects_SOURCES})
-if(TF_FOUND)
-  target_compile_options(fawkesaspects PUBLIC ${TF_CFLAGS})
-  target_link_libraries(fawkesaspects ${TF_LDFLAGS} fawkestf)
-endif()
-if(PCL_FOUND)
+  target_sources(fawkesaspects PRIVATE pointcloud.cpp inifins/pointcloud.cpp)
   depend_on_pcl(fawkesaspects)
   target_link_libraries(fawkesaspects fawkespcl_utils)
 endif()
-if(WEBVIEW_FOUND)
+
+optional_depend_on_pkgconfig_libs(fawkesaspects "${tf_deps}" tf_deps_found)
+if(tf_deps_found)
+  target_sources(fawkesaspects PRIVATE tf.cpp inifins/tf.cpp)
+  depend_on_tf(fawkesaspects)
+  target_link_libraries(fawkesaspects fawkestf)
+endif()
+
+optional_depend_on_pkgconfig_libs(fawkesaspects "${webview_deps}"
+                                  webview_deps_found)
+if(webview_deps_found)
+  target_sources(fawkesaspects PRIVATE webview.cpp inifins/webview.cpp)
   depend_on_webview(fawkesaspects)
   target_link_libraries(fawkesaspects fawkeswebview)
 endif()
+
 target_link_libraries(
   fawkesaspects
   fawkescore

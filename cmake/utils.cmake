@@ -1,23 +1,116 @@
-function(check_deps_extra_libs libs)
-  set(EXTRA_LIBS_WARNING)
+if(NOT WIN32)
+  string(ASCII 27 Esc)
+  set(ColourReset "${Esc}[m")
+  set(ColourBold "${Esc}[1m")
+  set(Red "${Esc}[31m")
+  set(Green "${Esc}[32m")
+  set(Yellow "${Esc}[33m")
+  set(Blue "${Esc}[34m")
+  set(Magenta "${Esc}[35m")
+  set(Cyan "${Esc}[36m")
+  set(White "${Esc}[37m")
+  set(BoldRed "${Esc}[1;31m")
+  set(BoldGreen "${Esc}[1;32m")
+  set(BoldYellow "${Esc}[1;33m")
+  set(BoldBlue "${Esc}[1;34m")
+  set(BoldMagenta "${Esc}[1;35m")
+  set(BoldCyan "${Esc}[1;36m")
+  set(BoldWhite "${Esc}[1;37m")
+endif()
+
+function(optional_depend_on_boost_libs target libs success)
+  set(${success}
+      1
+      PARENT_SCOPE)
   foreach(lib ${libs})
-    if(NOT ${lib}_FOUND)
-      pkg_check_modules(${lib} ${lib})
-      if(NOT ${lib}_FOUND)
-        list(APPEND EXTRA_LIBS_WARNING "${lib} dependency missing")
-      endif()
+    string(TOUPPER ${lib} COMPONENT)
+    set(TMP_LIST)
+    list(APPEND TMP_LIST ${FAWKES_DEPENDENCIES_CHECKED})
+    if(NOT "boost_${lib}" IN_LIST TMP_LIST)
+      find_package(Boost COMPONENTS ${lib})
+      remember_dependency(boost_${lib})
+    endif()
+    if(Boost_${COMPONENT}_FOUND)
+      target_link_libraries(${target} ${Boost_${COMPONENT}_LIBRARIES})
+    else()
+      set(${success}
+          0
+          PARENT_SCOPE)
     endif()
   endforeach()
-  set(EXTRA_LIBS_WARNING
-      ${EXTRA_LIBS_WARNING}
-      PARENT_SCOPE)
+  target_include_directories(${target} PUBLIC ${Boost_INCLUDE_DIR})
 endfunction()
 
-function(depend_on_extra_libs target libs)
+function(disable_target target)
+  set_target_properties(${target} PROPERTIES EXCLUDE_FROM_ALL 1
+                                             EXCLUDE_FROM_DEFAULT_BUILD 1)
+endfunction()
+
+function(build_depends_on target other-target)
+  if($<TARGET_PROPERTY:${other-target},EXCLUDE_FROM_ALL>)
+    disable_target(${target})
+    build_skipped_message(${target} "target ${other-target}")
+
+  endif()
+endfunction()
+
+function(depend_on_boost_libs target libs)
   foreach(lib ${libs})
+    string(TOUPPER ${lib} COMPONENT)
+    set(TMP_LIST)
+    list(APPEND TMP_LIST ${FAWKES_DEPENDENCIES_CHECKED})
+    if(NOT "boost_${lib}" IN_LIST TMP_LIST)
+      find_package(Boost COMPONENTS ${lib})
+      remember_dependency(boost_${lib})
+    endif()
+    if(Boost_${COMPONENT}_FOUND)
+      target_link_libraries(${target} ${Boost_${COMPONENT}_LIBRARIES})
+    else()
+      set_target_properties(${target} PROPERTIES EXCLUDE_FROM_ALL 1
+                                                 EXCLUDE_FROM_DEFAULT_BUILD 1)
+      target_skipped_message(${target} ${lib})
+    endif()
+  endforeach()
+  target_include_directories(${target} PUBLIC ${Boost_INCLUDE_DIR})
+endfunction()
+
+function(depend_on_pkgconfig_libs target libs)
+  foreach(lib ${libs})
+    set(TMP_LIST)
+    list(APPEND TMP_LIST ${FAWKES_DEPENDENCIES_CHECKED})
+    if(NOT ${lib} IN_LIST TMP_LIST)
+      pkg_check_modules(${lib} QUIET ${lib})
+      remember_dependency(${lib})
+    endif()
     if(${lib}_FOUND)
       target_link_libraries(${target} ${${lib}_LDFLAGS})
       target_compile_options(${target} PUBLIC ${${lib}_CFLAGS})
+    else()
+      set_target_properties(${target} PROPERTIES EXCLUDE_FROM_ALL 1
+                                                 EXCLUDE_FROM_DEFAULT_BUILD 1)
+      target_skipped_message(${target} ${lib})
+    endif()
+  endforeach()
+endfunction()
+
+function(optional_depend_on_pkgconfig_libs target libs success)
+  set(${success}
+      1
+      PARENT_SCOPE)
+  set(TMP_LIST)
+  list(APPEND TMP_LIST ${FAWKES_DEPENDENCIES_CHECKED})
+  foreach(lib ${libs})
+    if(NOT ${lib} IN_LIST TMP_LIST)
+      pkg_check_modules(${lib} QUIET ${lib})
+      remember_dependency(${lib})
+    endif()
+    if(${lib}_FOUND)
+      target_link_libraries(${target} ${${lib}_LDFLAGS})
+      target_compile_options(${target} PUBLIC ${${lib}_CFLAGS})
+    else()
+      set(${success}
+          0
+          PARENT_SCOPE)
     endif()
   endforeach()
 endfunction()
@@ -67,6 +160,12 @@ function(set_common_properties_of_targets var)
       PARENT_SCOPE)
 endfunction()
 
+function(remember_dependency dep)
+  set(FAWKES_DEPENDENCIES_CHECKED
+      "${dep};${FAWKES_DEPENDENCIES_CHECKED}"
+      CACHE INTERNAL "")
+endfunction()
+
 function(set_output_directory_plugins)
   set(CMAKE_LIBRARY_OUTPUT_DIRECTORY
       ${PROJECT_SOURCE_DIR}/plugins
@@ -84,15 +183,25 @@ function(unset_output_directory)
 endfunction()
 
 function(plugin_disabled_message plugin)
-  message(STATUS "Skip building disabled ${plugin} plugin")
+  message(
+    STATUS "${BoldGreen}Skip building disabled ${plugin} plugin${ColourReset}")
 endfunction()
 
 function(build_skipped_message component reason)
-  message(WARNING "Omitting ${component} (${reason} required)")
+  message(
+    STATUS
+      "${BoldWhite}Omitting ${component} (${reason} required)${ColourReset}")
+endfunction()
+
+function(target_skipped_message component reason)
+  message(
+    STATUS
+      "${BoldMagenta}Omitting ${component} (${reason} required)${ColourReset}")
 endfunction()
 
 function(executable_disabled_message exe)
-  message(STATUS "Skip building disabled ${exe} executable")
+  message(
+    STATUS "${BoldBlue}Skip building disabled ${exe} executable${ColorReset}")
 endfunction()
 list(FIND CMAKE_CXX_COMPILE_FEATURES "cxx_std_11" _index)
 if(${_index} GREATER -1)

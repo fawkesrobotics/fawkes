@@ -1,2 +1,1 @@
 generate_interface_from_xml(NavGraphGeneratorInterface.xml)
-

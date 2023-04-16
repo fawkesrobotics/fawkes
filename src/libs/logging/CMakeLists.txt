@@ -11,10 +11,9 @@ add_library(
   component.cpp
   logger.cpp
   fd_redirect.cpp)
-# TODO BOOST
-find_package(Boost REQUIRED COMPONENTS system)
-find_package(PkgConfig REQUIRED)
-include(lua)
+
+depend_on_boost_libs(fawkeslogging system)
+
 generate_tolua(fawkeslogging component.tolua)
 set(LUA_SOURCES component.tolua)
 generate_lua_lib(fawkeslogging "${LUA_SOURCES}" "")

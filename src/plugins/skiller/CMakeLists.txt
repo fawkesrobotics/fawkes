@@ -9,19 +9,17 @@ add_subdirectory(rest-api)
 add_subdirectory(consoletool)
 
 if(PLUGIN_skiller)
-  set(SOURCES skiller_feature.cpp exec_thread.cpp skiller_plugin.cpp)
+  add_library(skiller MODULE skiller_feature.cpp exec_thread.cpp
+                             skiller_plugin.cpp)
 
-  set(NAVGRAPH_FOUND)
-  check_navgraph_deps(NAVGRAPH_FOUND)
-  if(NAVGRAPH_FOUND)
-    list(APPEND SOURCES skiller_navgraph_feature.cpp)
-  else()
-    message(INFO "Skipping skiller navgraph feature")
-  endif()
-  add_library(skiller MODULE ${SOURCES})
-  if(NAVGRAPH_FOUND)
+  optional_depend_on_pkgconfig_libs(skiller "${navgraph_deps}"
+                                    navgraph_deps_found)
+  if(navgraph_deps_found)
+    target_sources(skiller PRIVATE skiller_navgraph_feature.cpp)
     target_link_libraries(skiller fawkesnavgraphaspect)
     target_compile_definitions(skiller PUBLIC HAVE_NAVGRAPH)
+  else()
+    build_skipped_message("skiller navgraph feature" "navgraph dependencies")
   endif()
   target_link_libraries(
     skiller

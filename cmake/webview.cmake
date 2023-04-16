@@ -1,27 +1,8 @@
-pkg_check_modules(LIBMICROHTTPD libmicrohttpd)
-pkg_check_modules(RAPIDJSON RapidJSON)
-
-function(check_webview_deps)
-  if(LIBMICROHTTPD_FOUND AND RAPIDJSON_FOUND)
-    set(WEBVIEW_FOUND
-        1
-        PARENT_SCOPE)
-  else()
-    set(WEBVIEW_FOUND
-        0
-        PARENT_SCOPE)
-    if(NOT LIBMICROHTTPD_FOUND)
-      message(WARNING "webview: libmicrohttpd dependency missing")
-    endif()
-    if(NOT RAPIDJSON_FOUND)
-      message(WARNING "webview: rapidjson[-devel] dependency missing")
-    endif()
-  endif()
-endfunction()
+set(webview_deps "libmicrohttpd;RapidJSON")
 
 function(depend_on_webview target)
-  target_link_libraries(${target} ${LIBMICROHTTPD_LDFLAGS} ${RAPIDJOSN_LDFLAGS})
-  target_compile_options(${target} PRIVATE ${LIBMICROHTTPD_CFLAGS}
+  target_link_libraries(${target} ${libmicrohttpd_LDFLAGS} ${RAPIDJOSN_LDFLAGS})
+  target_compile_options(${target} PRIVATE ${libmicrohttpd_CFLAGS}
                                            ${RAPIDJOSN_CFLAGS})
   target_compile_definitions(${target} PUBLIC HAVE_WEBVIEW)
 endfunction()
