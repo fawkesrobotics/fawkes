@@ -23,6 +23,7 @@
 set(PLUGIN_ros2
     ON
     CACHE BOOL ON)
+
 set(PLUGIN_ros2-talkerpub
     ON
     CACHE BOOL ON)
@@ -74,10 +75,9 @@ set(PLUGIN_ros2-clock
 set(PLUGIN_ros2-imu
     ON
     CACHE BOOL ON)
-
 add_subdirectory(aspect)
-if(PLUGIN_ros2)
 
+if(PLUGIN_ros2)
   add_library(ros2 MODULE ros2_plugin.cpp node_thread.cpp)
   depend_on_ros2(ros2)
   depend_on_ros2_libs(ros2 "rmw;rosidl_typesupport_interface;rcl_interfaces")
@@ -125,6 +125,7 @@ if(PLUGIN_ros2-tf2)
     fawkestf
     TransformInterface)
   optional_depend_on_ros2_libs(ros2-tf tf2 tfs_deps_found)
+
   if(tf2_deps_found)
     target_compile_definitions(ros2-tf PUBLIC HAVE_TF2_MSGS)
   else()
@@ -272,6 +273,7 @@ else()
 endif()
 
 set(ros2-navigator_DEPS move_base_msgs dynamic_reconfigure actionlib)
+
 if(PLUGIN_ros2-navigator)
   add_library(ros2-navigator MODULE navigator_plugin.cpp navigator_thread.cpp)
   target_link_libraries(ros2-navigator ${Boost_THREAD_LIBRARY})

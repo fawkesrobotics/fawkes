@@ -44,20 +44,24 @@ function(depend_on_ros2 target)
                       "rclcpp;rmw;rosidl_typesupport_interface;rcl_interfaces")
   target_compile_definitions(${target} PUBLIC HAVE_ROS2
                                               BOOST_BIND_GLOBAL_PLACEHOLDERS)
+  target_compile_options(${target} PUBLIC -Wno-unknown-pragmas
+                                          -Wno-deprecated-declarations)
 endfunction()
 
 function(depend_on_ros2_libs target libs)
   if(BUILD_WITH_ROS_2 AND ROS_2_FOUND)
     depend_on_find_package_libs(${target} "${libs}")
     foreach(lib ${libs})
-      message(WARNING "${lib}: ${${lib}_INCLUDE_DIRS}/${lib}")
       target_include_directories(
-        ${target} PUBLIC "/usr/lib64/ros2/include${${lib}_INCLUDE_DIRS}/${lib}")
+        ${target} PUBLIC "/usr/lib64/ros2/include${${lib}_INCLUDE_DIRS}/")
 
       if("${lib}" STREQUAL "std_msgs")
-        # message(WARNING "std_msgs: ${${lib}_INCLUDE_DIRS}/${lib}")
         target_include_directories(${target}
                                    PUBLIC ${${lib}_INCLUDE_DIRS}/${lib})
+      endif()
+      if("${lib}" STREQUAL "image_transport")
+        target_include_directories(${target}
+                                   PUBLIC "/usr/lib64/ros2/include/${lib}")
       endif()
     endforeach()
   else()
