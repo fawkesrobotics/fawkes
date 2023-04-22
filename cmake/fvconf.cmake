@@ -63,17 +63,17 @@ function(depend_on_fvconf target)
     build_skipped_message("${target} opencv features" "opencv[-devel]")
   endif()
 
-  if(libv4l2_dep_found)
-    target_compile_definitions(${target} PUBLIC HAVE_LIBV4L2)
-  else()
-    build_skipped_message("${target} video4linux support" "libv4l[-devel]")
-  endif()
-
   if(V4L1_CAM_FOUND)
     target_compile_definitions(${target} PUBLIC HAVE_V4L1_CAM)
   endif()
   if(V4L2_CAM_FOUND)
     target_compile_definitions(${target} PUBLIC HAVE_V4L2_CAM)
+  endif()
+
+  if(libv4l2_dep_found)
+    target_compile_definitions(${target} PUBLIC HAVE_LIBV4L2)
+  else()
+    build_skipped_message("${target} video4linux support" "libv4l[-devel]")
   endif()
 
   if(libpng_dep_found)
