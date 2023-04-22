@@ -56,7 +56,7 @@ function(depend_on_pcl_extra_libs target libs)
   foreach(pcl_lib ${libs})
     list(APPEND PCL_LIBS pcl_${pcl_lib}${PCL_SUFFIX})
   endforeach()
-  depend_on_pkgconfig_libs(${target} ${PCL_LIBS})
+  depend_on_pkgconfig_libs(${target} "${PCL_LIBS}")
 endfunction()
 
 # TODO link against ros std_msgs!?
