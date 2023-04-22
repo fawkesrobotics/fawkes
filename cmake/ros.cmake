@@ -56,8 +56,9 @@ endfunction()
 
 function(optional_depend_on_ros_libs target libs success)
   if(BUILD_WITH_ROS_1 AND ROS_1_FOUND)
-    optional_depend_on_pkgconfig_libs(${target} ${libs} success)
-    if(success)
+    optional_depend_on_pkgconfig_libs(${target} ${libs} local_success)
+
+    if(local_success)
       set(${success}
           1
           PARENT_SCOPE)
