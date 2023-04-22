@@ -123,7 +123,7 @@ if(PLUGIN_ros-tf)
     fawkesrosaspect
     fawkestf
     TransformInterface)
-  optional_depend_on_ros_libs(ros-tf tf2 tfs_deps_found)
+  optional_depend_on_ros_libs(ros-tf tf2 tf2_deps_found)
   if(tf2_deps_found)
     target_compile_definitions(ros-tf PUBLIC HAVE_TF2_MSGS)
   else()

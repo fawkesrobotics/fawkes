@@ -45,7 +45,7 @@ if(PLUGIN_navgraph)
     fawkestf
     fawkesnavgraphaspect)
 
-  if(ROS_FOUND)
+  if(ROS_1_FOUND)
     depend_on_ros(navgraph)
     optional_depend_on_ros_libs(navgraph visualization_msgs
                                 visualization_msgs_dep_found)
