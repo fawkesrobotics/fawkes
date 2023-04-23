@@ -24,7 +24,19 @@ add_library(
   fawkesbaseapp SHARED thread_manager.cpp timing_thread.cpp main_thread.cpp
                        daemonize.cpp init_options.cpp run.cpp)
 
-target_link_libraries(fawkesbaseapp fawkesnetcomm fawkesnetwork_logger)
+target_link_libraries(
+  fawkesbaseapp
+  stdc++
+  pthread
+  fawkescore
+  fawkesutils
+  fawkesconfig
+  fawkesplugin
+  fawkesaspects
+  fawkeslogging
+  fawkessyncpoint
+  fawkesnetcomm
+  fawkesnetwork_logger)
 
 depend_on_boost_libs(fawkesbaseapp system)
 
