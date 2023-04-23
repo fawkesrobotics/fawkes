@@ -48,8 +48,8 @@ if(PLUGIN_navgraph-generator)
     fawkesnavgraphgenerators
     NavGraphGeneratorInterface)
 
-  depend_on_pcl_extra_libs(navgraph-generator sample_consensus segmentation
-                           filters surface search)
+  depend_on_pcl_extra_libs(
+    navgraph-generator "sample_consensus;segmentation;filters;surface;search")
 
   if(ROS_1_FOUND)
     depend_on_ros(navgraph-generator)
