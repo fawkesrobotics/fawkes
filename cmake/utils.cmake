@@ -149,13 +149,16 @@ function(depend_on_find_package_libs target libs)
       set(${lib}_FOUND
           ${${lib}_FOUND}
           CACHE BOOL "")
-      target_link_libraries(${target} ${${lib}_LINK_LIBRARIES})
+      set(${lib}_LIBRARIES
+          ${${lib}_LIBRARIES}
+          CACHE STRING "")
       set(${lib}_INCLUDE_DIRS
           ${${lib}_INCLUDE_DIRS}
           CACHE STRING "")
       set(${lib}_CFLAGS
           ${${lib}_CFLAGS}
           CACHE STRING "")
+      target_link_libraries(${target} ${${lib}_LIBRARIES})
       target_include_directories(${target} PUBLIC ${${lib}_INCLUDE_DIRS})
       target_compile_options(${target} PUBLIC ${${lib}_CFLAGS})
     else()
