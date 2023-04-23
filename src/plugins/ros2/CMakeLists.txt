@@ -218,7 +218,7 @@ endif()
 if(PLUGIN_ros2-odometry)
   add_library(ros2-odometry MODULE odometry_plugin.cpp odometry_thread.cpp)
   depend_on_ros2(ros2-odometry)
-  depend_on_ros2_libs(ros2-odometry nav_msgs)
+  depend_on_ros2_libs(ros2-odometry "nav_msgs;rosidl_typesupport_cpp")
   target_link_libraries(
     ros2-odometry
     m
@@ -272,12 +272,13 @@ else()
   plugin_disabled_message(ros2-dynamic-reconfigure)
 endif()
 
-set(ros2-navigator_DEPS move_base_msgs dynamic_reconfigure actionlib)
+set(ros2-navigator_DEPS nav2_msgs rclcpp_action)
 
 if(PLUGIN_ros2-navigator)
   add_library(ros2-navigator MODULE navigator_plugin.cpp navigator_thread.cpp)
   target_link_libraries(ros2-navigator ${Boost_THREAD_LIBRARY})
   depend_on_ros2(ros2-navigator)
+  depend_on_tf(ros2-navigator)
   depend_on_boost_libs(ros2-navigator thread)
   depend_on_ros2_libs(ros2-navigator "${ros2-navigator_DEPS}")
   target_link_libraries(
@@ -290,29 +291,30 @@ if(PLUGIN_ros2-navigator)
     fawkesblackboard
     fawkesinterface
     fawkesros2aspect
+    Position3DInterface
     NavigatorInterface)
 else()
   plugin_disabled_message(ros2-navigator)
 endif()
 
-if(PLUGIN_ros2-move-base)
-  add_library(ros2-move-base MODULE move_base_plugin.cpp move_base_thread.cpp)
-  depend_on_ros2(ros2-move-base)
-  depend_on_ros2_libs(ros2-move-base "${ros2-navigator_DEPS}")
-  target_link_libraries(ros2-move-base ${Boost_THREAD_LIBRARY})
-  target_link_libraries(
-    ros2-move-base
-    fawkescore
-    fawkesutils
-    fawkesaspects
-    fawkesblackboard
-    fawkesinterface
-    fawkestf
-    fawkesros2aspect
-    NavigatorInterface)
-else()
-  plugin_disabled_message(ros2-move-base)
-endif()
+#if(PLUGIN_ros2-move-base)
+#  add_library(ros2-move-base MODULE move_base_plugin.cpp move_base_thread.cpp)
+#  depend_on_ros2(ros2-move-base)
+#  depend_on_ros2_libs(ros2-move-base "${ros2-navigator_DEPS}")
+#  target_link_libraries(ros2-move-base ${Boost_THREAD_LIBRARY})
+#  target_link_libraries(
+#    ros2-move-base
+#    fawkescore
+#    fawkesutils
+#    fawkesaspects
+#    fawkesblackboard
+#    fawkesinterface
+#    fawkestf
+#    fawkesros2aspect
+#    NavigatorInterface)
+#else()
+#  plugin_disabled_message(ros2-move-base)
+#endif()
 
 if(PLUGIN_ros2-navgraph-breakout)
   add_library(ros2-navgraph-breakout MODULE navgraph_breakout_plugin.cpp
