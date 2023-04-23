@@ -27,7 +27,7 @@ set(PLUGIN_ros2
 set(PLUGIN_ros2-talkerpub
     ON
     CACHE BOOL ON)
-set(PLUGIN_ros2-tf
+set(PLUGIN_ros2-tf2
     ON
     CACHE BOOL ON)
 set(PLUGIN_ros2-pcl
@@ -111,11 +111,11 @@ endif()
 
 if(PLUGIN_ros2-tf2)
   add_library(ros2-tf2 MODULE tf2_plugin.cpp tf2_thread.cpp)
-  depend_on_ros2(ros2-tf)
-  depend_on_tf(ros2-tf)
-  depend_on_ros2_libs(ros2-tf "tf2;tf2_msgs")
+  depend_on_ros2(ros2-tf2)
+  depend_on_tf(ros2-tf2)
+  depend_on_ros2_libs(ros2-tf2 "tf2;tf2_msgs")
   target_link_libraries(
-    ros2-tf
+    ros2-tf2
     fawkescore
     fawkesutils
     fawkesaspects
@@ -124,7 +124,7 @@ if(PLUGIN_ros2-tf2)
     fawkesros2aspect
     fawkestf
     TransformInterface)
-  optional_depend_on_ros2_libs(ros2-tf tf2 tfs_deps_found)
+  depend_on_ros2_libs(ros2-tf2 tf2 tfs_deps_found)
 
   if(tf2_deps_found)
     target_compile_definitions(ros2-tf PUBLIC HAVE_TF2_MSGS)
@@ -132,7 +132,7 @@ if(PLUGIN_ros2-tf2)
     build_skipped_message("ros2-tf tf2 support" "ros2-tf2[-devel]")
   endif()
 else()
-  plugin_disabled_message(ros2-tf)
+  plugin_disabled_message(ros2-tf2)
 endif()
 
 # if(PLUGIN_ros2-pcl) add_library(ros2-pcl MODULE pcl_plugin.cpp pcl_thread.cpp)
