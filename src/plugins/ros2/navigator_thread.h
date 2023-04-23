@@ -85,7 +85,7 @@ private:
 
 //	rclcpp_action::Client<NavigateToPose>::SharedPtr client_ptr_;
 
-	void responseCb(std::shared_future<rclcpp_action::ClientGoalHandle<NavigateToPose>::SharedPtr> future);
+	void responseCb(rclcpp_action::ClientGoalHandle<NavigateToPose>::SharedPtr future);
 	void feedbackCb(rclcpp_action::ClientGoalHandle<NavigateToPose>::SharedPtr,
 				const std::shared_ptr<const NavigateToPose::Feedback> feedback);
 	void resultCb(const rclcpp_action::ClientGoalHandle<NavigateToPose>::WrappedResult &result);
