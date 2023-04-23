@@ -89,6 +89,9 @@ function(depend_on_fvconf target)
   endif()
 
   if(libdc1394_dep_found)
+    set(FIREWIRE_CAM_FOUND
+        1
+        PARENT_SCOPE)
     target_compile_definitions(
       ${target} PUBLIC HAVE_FIREWIRE_CAM HAVE_BUMBLEBEE2_CAM HAVE_PIKE_CAM)
   else()

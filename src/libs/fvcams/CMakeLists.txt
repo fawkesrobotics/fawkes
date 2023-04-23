@@ -45,14 +45,12 @@ add_library(
   fileloader.cpp
   shmem.cpp)
 
-optional_depend_on_pkgconfig_libs(fvcams libdc1394-2 libdc1394_dep_found)
-if(libdc1394_dep_found)
+depend_on_fvconf(fvcams)
+if(FIREWIRE_CAM_FOUND)
   target_sources(fvcams PRIVATE firewire.cpp bumblebee2.cpp pike.cpp)
 endif()
 
-optional_depend_on_pkgconfig_libs(fvcams libv4l2 libv4l2_dep_found)
-if(libv4l2_dep_found)
+if(V4L2_CAM_FOUND)
   target_sources(fvcams PRIVATE v4l2.cpp v4l.cpp)
 endif()
-depend_on_fvconf(fvcams)
 target_link_libraries(fvcams fawkescore fawkesutils fvutils fawkeslogging)
