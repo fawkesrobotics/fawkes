@@ -192,21 +192,18 @@ ROS2NavigatorThread::send_goal()
 	send_goal_options.result_callback = std::bind(&ROS2NavigatorThread::resultCb, this, std::placeholders::_1);
 	ac_->async_send_goal(goal_, send_goal_options);
 
-	auto goal_handle_future = ac_->async_send_goal(goal_, send_goal_options);
-
 	nav_if_->set_final(false);
 	nav_if_->set_error_code(0);
 	nav_if_->write();
-	goal_handle_ = goal_handle_future.get();
 
 	cmd_sent_ = true;
 }
 
 // Called once when the goal becomes active
 void
-ROS2NavigatorThread::responseCb(std::shared_future<rclcpp_action::ClientGoalHandle<NavigateToPose>::SharedPtr> future)
+ROS2NavigatorThread::responseCb(rclcpp_action::ClientGoalHandle<NavigateToPose>::SharedPtr future)
 {
-  goal_handle_ = future.get();
+  goal_handle_ = future;
   if (!goal_handle_) {
   	logger->log_error(name(), "Goal was rejected by server");
   } else {
