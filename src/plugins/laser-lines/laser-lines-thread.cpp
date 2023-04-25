@@ -86,6 +86,9 @@ LaserLinesThread::init()
 		if (cfg_moving_avg_enabled_) {
 			line_avg_ifs_.resize(cfg_max_num_lines_, NULL);
 		}
+		if (cfg_transform_to_frame_enabled_) {
+			line_transformed_ifs_.resize(cfg_max_num_lines_, NULL);
+		}
 		//2.2:open interfaces for writing
 		for (unsigned int i = 0; i < cfg_max_num_lines_; ++i) {
 			//2.2.1:create id name /laser-lines/(i+1)
@@ -100,6 +103,10 @@ LaserLinesThread::init()
 				if (cfg_moving_avg_enabled_) {
 					line_avg_ifs_[i] =
 					  blackboard->open_for_writing<LaserLineInterface>((id + "/moving_avg").c_str());
+				}
+				if (cfg_transform_to_frame_enabled_) {
+					line_transformed_ifs_[i] = blackboard->open_for_writing<LaserLineInterface>(
+					  (id + "/to_" + cfg_transform_to_frame_id_).c_str());
 				}
 			}
 		}
@@ -121,6 +128,9 @@ LaserLinesThread::init()
 			blackboard->close(line_ifs_[i]);
 			if (cfg_moving_avg_enabled_) {
 				blackboard->close(line_avg_ifs_[i]);
+			}
+			if (cfg_transform_to_frame_enabled_) {
+				blackboard->close(line_transformed_ifs_[i]);
 			}
 		}
 		blackboard->close(switch_if_);
@@ -167,6 +177,9 @@ LaserLinesThread::finalize()
 		blackboard->close(line_ifs_[i]);
 		if (cfg_moving_avg_enabled_) {
 			blackboard->close(line_avg_ifs_[i]);
+		}
+		if (cfg_transform_to_frame_enabled_) {
+			blackboard->close(line_transformed_ifs_[i]);
 		}
 	}
 	blackboard->close(switch_if_);
@@ -260,6 +273,8 @@ LaserLinesThread::read_config()
 	cfg_cluster_quota_          = config->get_float(CFG_PREFIX "line_cluster_quota");
 	cfg_moving_avg_enabled_     = config->get_bool(CFG_PREFIX "moving_avg_enabled");
 	cfg_moving_avg_window_size_ = config->get_uint(CFG_PREFIX "moving_avg_window_size");
+	cfg_transform_to_frame_enabled_ = config->get_bool(CFG_PREFIX "transform_to_frame_enabled");
+	cfg_transform_to_frame_id_      = config->get_string(CFG_PREFIX "transform_to_frame_id");
 
 	cfg_switch_tolerance_ = config->get_float(CFG_PREFIX "switch_tolerance");
 
@@ -310,6 +325,8 @@ LaserLinesThread::update_lines(std::vector<LineInfo> &linfos)
 		TrackedLineInfo tl(tf_listener,
 		                   finput_->header.frame_id,
 		                   cfg_tracking_frame_id_,
+		                   cfg_transform_to_frame_id_,
+		                   cfg_transform_to_frame_enabled_,
 		                   cfg_switch_tolerance_,
 		                   cfg_moving_avg_enabled_ ? cfg_moving_avg_window_size_ : 0,
 		                   logger,
@@ -387,13 +404,25 @@ LaserLinesThread::publish_known_lines()
 			if (cfg_moving_avg_enabled_) {
 				set_empty_interface(line_avg_ifs_[line_if_idx]);
 			}
+			if (cfg_transform_to_frame_enabled_) {
+				set_empty_interface(line_transformed_ifs_[line_if_idx]);
+			}
 		} else {
 			known_lines_[known_line_idx].interface_idx = line_if_idx;
 			const TrackedLineInfo &info                = known_lines_[known_line_idx];
-			set_interface(line_if_idx, line_ifs_[line_if_idx], false, info, finput_->header.frame_id);
+			set_interface(
+			  line_if_idx, line_ifs_[line_if_idx], false, false, info, finput_->header.frame_id);
 			if (cfg_moving_avg_enabled_) {
 				set_interface(
-				  line_if_idx, line_avg_ifs_[line_if_idx], true, info, finput_->header.frame_id);
+				  line_if_idx, line_avg_ifs_[line_if_idx], true, false, info, finput_->header.frame_id);
+			}
+			if (cfg_transform_to_frame_enabled_) {
+				set_interface(line_if_idx,
+				              line_transformed_ifs_[line_if_idx],
+				              false,
+				              true,
+				              info,
+				              cfg_transform_to_frame_id_);
 			}
 		}
 	}
@@ -424,10 +453,11 @@ void
 LaserLinesThread::set_interface(unsigned int                idx,
                                 fawkes::LaserLineInterface *iface,
                                 bool                        moving_average,
+                                bool                        to_frame,
                                 const TrackedLineInfo      &tinfo,
                                 const std::string          &frame_id)
 {
-	const LineInfo &info = moving_average ? tinfo.smooth : tinfo.raw;
+	const LineInfo &info = moving_average ? tinfo.smooth : to_frame ? tinfo.transformed : tinfo.raw;
 
 	iface->set_visibility_history(tinfo.visibility_history);
 
@@ -451,12 +481,13 @@ LaserLinesThread::set_interface(unsigned int                idx,
 	fawkes::Time now(clock);
 	std::string  frame_name_1, frame_name_2;
 	char        *tmp;
-	std::string  avg = moving_average ? "avg_" : "";
-	if (asprintf(&tmp, "laser_line_%s%u_e1", avg.c_str(), idx + 1) != -1) {
+	std::string  avg         = moving_average ? "avg_" : "";
+	std::string  transformed = to_frame ? "transformed_" : "";
+	if (asprintf(&tmp, "laser_line_%s%s%u_e1", avg.c_str(), transformed.c_str(), idx + 1) != -1) {
 		frame_name_1 = tmp;
 		free(tmp);
 	}
-	if (asprintf(&tmp, "laser_line_%s%u_e2", avg.c_str(), idx + 1) != -1) {
+	if (asprintf(&tmp, "laser_line_%s%s%u_e2", avg.c_str(), transformed.c_str(), idx + 1) != -1) {
 		frame_name_2 = tmp;
 		free(tmp);
 	}

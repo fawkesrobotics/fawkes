@@ -63,11 +63,17 @@ public:
 	int visibility_history; ///< visibility history of this line, negative for "no sighting"
 	LineInfo raw;           ///< the latest geometry of this line, i.e. unfiltered
 	LineInfo smooth;        ///< moving-average geometry of this line (cf. length of history buffer)
+	LineInfo
+	  transformed; ///< the latest geometry of this line, i.e. unfiltered - in fixed frame (i.e. map)
 	fawkes::tf::Stamped<fawkes::tf::Point>
 	  base_point_odom; ///< last reference point (in odom frame) for line tracking
+	fawkes::tf::Stamped<fawkes::tf::Point>
+	  base_point_fixed; ///< last reference point (in odom frame) for line tracking
 	fawkes::tf::Transformer
 	           *transformer;    ///< Transformer used to transform from input_frame_id_to odom
 	std::string input_frame_id; ///< Input frame ID of raw line infos (base_laser usually)
+	std::string fixed_frame_id; ///< Input frame ID of raw line infos (base_laser usually)
+	bool        transform_to_fixed_frame; ///< Whether to transform the line to the fixed_frame
 	std::string
 	  tracking_frame_id; ///< Track lines relative to this frame (e.g. odom helps compensate movement)
 	float cfg_switch_tolerance; ///< Configured line jitter threshold
@@ -81,6 +87,8 @@ public:
 	TrackedLineInfo(fawkes::tf::Transformer *tfer,
 	                const std::string       &input_frame_id,
 	                const std::string       &tracking_frame_id,
+	                const std::string       &fixed_frame_id,
+	                bool                     transform_to_fixed_frame,
 	                float                    cfg_switch_tolerance,
 	                unsigned int             cfg_moving_avg_len,
 	                fawkes::Logger          *logger,
@@ -89,6 +97,10 @@ public:
 	btScalar distance(const LineInfo &linfo) const;
 	void     update(LineInfo &new_linfo);
 	void     not_visible_update();
+	bool     transform_point_to_frame(const Eigen::Vector3f &in_point,
+	                                  Eigen::Vector3f       &out_point,
+	                                  const std::string     &from_frame,
+	                                  const std::string     &to_frame);
 };
 
 #endif

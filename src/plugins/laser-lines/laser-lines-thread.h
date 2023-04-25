@@ -126,6 +126,7 @@ private:
 	void set_interface(unsigned int                idx,
 	                   fawkes::LaserLineInterface *iface,
 	                   bool                        moving_average,
+	                   bool                        transformed,
 	                   const TrackedLineInfo      &tinfo,
 	                   const std::string          &frame_id = "");
 
@@ -152,6 +153,7 @@ private:
 
 	std::vector<fawkes::LaserLineInterface *> line_ifs_;
 	std::vector<fawkes::LaserLineInterface *> line_avg_ifs_;
+	std::vector<fawkes::LaserLineInterface *> line_transformed_ifs_;
 	std::vector<TrackedLineInfo>              known_lines_;
 
 	fawkes::SwitchInterface *switch_if_;
@@ -173,6 +175,8 @@ private:
 	float        cfg_max_dist_;
 	bool         cfg_moving_avg_enabled_;
 	unsigned int cfg_moving_avg_window_size_;
+	bool         cfg_transform_to_frame_enabled_;
+	std::string  cfg_transform_to_frame_id_;
 	std::string  cfg_tracking_frame_id_;
 
 	unsigned int loop_count_;
