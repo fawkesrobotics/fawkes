@@ -1,5 +1,5 @@
 /***************************************************************************
- *  ros_thread.cpp - Thread to interact with ROS for amcl plugin
+ *  ros2_thread.cpp - Thread to interact with ROS 2 for amcl plugin
  *
  *  Created: Mon Jun 22 17:46:40 2015
  *  Copyright  2012  Tim Niemueller [www.niemueller.de]
@@ -21,10 +21,6 @@
 #ifndef _PLUGINS_AMCL_ROS_THREAD_H_
 #define _PLUGINS_AMCL_ROS_THREAD_H_
 
-//#ifndef HAVE_ROS
-//#	error "ROS integration requires ROS support of system"
-//#endif
-
 #include "amcl_thread.h"
 #include "map/map.h"
 #include "pf/pf.h"
@@ -44,7 +40,7 @@ namespace fawkes {
 class Mutex;
 }
 
-class AmclThread;
+class Amcl2Thread;
 
 class AmclROS2Thread : public fawkes::Thread,
                       public fawkes::LoggingAspect,

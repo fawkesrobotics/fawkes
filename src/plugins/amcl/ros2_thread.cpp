@@ -1,5 +1,5 @@
 /***************************************************************************
- *  ros_thread.cpp - Thread to interact with ROS for amcl plugin
+ *  ros2_thread.cpp - Thread to interact with ROS 2 for amcl plugin
  *
  *  Created: Mon Jun 22 17:50:24 2015
  *  Copyright  2012-2015  Tim Niemueller [www.niemueller.de]
@@ -22,7 +22,7 @@
  * Copyright (c) 2008, Willow Garage, Inc.
  */
 
-#include "ros_thread.h"
+#include "ros2_thread.h"
 
 #include <rclcpp/rclcpp.hpp>
 

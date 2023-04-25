@@ -1,5 +1,5 @@
 /***************************************************************************
- *  amcl_thread.cpp - Thread to perform localization
+ *  amcl2_thread.cpp - Thread to perform localization
  *
  *  Created: Wed May 16 16:04:41 2012
  *  Copyright  2012-2015  Tim Niemueller [www.niemueller.de]
@@ -27,10 +27,10 @@
  * Copyright (c) 2008, Willow Garage, Inc.
  */
 
-#include "amcl_thread.h"
+#include "amcl2_thread.h"
 
 #include "amcl_utils.h"
-#include "ros_thread.h"
+#include "ros2_thread.h"
 
 #include <baseapp/run.h>
 #include <core/threading/mutex.h>
@@ -67,19 +67,19 @@ angle_diff(double a, double b)
 		return (d2);
 }
 
-/** @class AmclThread "amcl_thread.h"
+/** @class Amcl2Thread "amcl_thread.h"
  * Thread to perform Adaptive Monte Carlo Localization.
  * @author Tim Niemueller
  */
 
-std::vector<std::pair<int, int>> AmclThread::free_space_indices;
+std::vector<std::pair<int, int>> Amcl2Thread::free_space_indices;
 
 /** Constructor. */
-AmclThread::AmclThread(AmclROS2Thread *ros_thread)
-: Thread("AmclThread", Thread::OPMODE_WAITFORWAKEUP),
+Amcl2Thread::Amcl2Thread(AmclROS2Thread *ros_thread)
+: Thread("Amcl2Thread", Thread::OPMODE_WAITFORWAKEUP),
   BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PROCESS),
   TransformAspect(TransformAspect::BOTH_DEFER_PUBLISHER),
-  BlackBoardInterfaceListener("AmclThread")
+  BlackBoardInterfaceListener("Amcl2Thread")
 {
 	map_        = NULL;
 	conf_mutex_ = new Mutex();
@@ -87,13 +87,13 @@ AmclThread::AmclThread(AmclROS2Thread *ros_thread)
 }
 
 /** Destructor. */
-AmclThread::~AmclThread()
+Amcl2Thread::~Amcl2Thread()
 {
 	delete conf_mutex_;
 }
 
 void
-AmclThread::init()
+Amcl2Thread::init()
 {
 	map_ = NULL;
 
@@ -295,10 +295,10 @@ AmclThread::init()
 	               max_particles_,
 	               alpha_slow_,
 	               alpha_fast_,
-	               (pf_init_model_fn_t)AmclThread::uniform_pose_generator,
+	               (pf_init_model_fn_t)Amcl2Thread::uniform_pose_generator,
 	               (void *)map_);
 
-	pf_init_model(pf_, (pf_init_model_fn_t)AmclThread::uniform_pose_generator, (void *)map_);
+	pf_init_model(pf_, (pf_init_model_fn_t)Amcl2Thread::uniform_pose_generator, (void *)map_);
 
 	pf_->pop_err = pf_err_;
 	pf_->pop_z   = pf_z_;
@@ -401,7 +401,7 @@ AmclThread::init()
 }
 
 void
-AmclThread::loop()
+Amcl2Thread::loop()
 {
 	laser_if_->read();
 
@@ -851,7 +851,7 @@ AmclThread::loop()
 }
 
 void
-AmclThread::finalize()
+Amcl2Thread::finalize()
 {
 	blackboard->unregister_listener(this);
 	bbil_remove_message_interface(loc_if_);
@@ -873,7 +873,7 @@ AmclThread::finalize()
 }
 
 bool
-AmclThread::get_odom_pose(tf::Stamped<tf::Pose> &odom_pose,
+Amcl2Thread::get_odom_pose(tf::Stamped<tf::Pose> &odom_pose,
                           double                &x,
                           double                &y,
                           double                &yaw,
@@ -903,7 +903,7 @@ AmclThread::get_odom_pose(tf::Stamped<tf::Pose> &odom_pose,
 }
 
 bool
-AmclThread::set_laser_pose()
+Amcl2Thread::set_laser_pose()
 {
 	//logger->log_debug(name(), "Transform 1");
 
@@ -973,7 +973,7 @@ AmclThread::set_laser_pose()
 }
 
 void
-AmclThread::apply_initial_pose()
+Amcl2Thread::apply_initial_pose()
 {
 	if (initial_pose_hyp_ != NULL && map_ != NULL) {
 		logger->log_info(name(),
@@ -999,7 +999,7 @@ AmclThread::apply_initial_pose()
 }
 
 pf_vector_t
-AmclThread::uniform_pose_generator(void *arg)
+Amcl2Thread::uniform_pose_generator(void *arg)
 {
 	map_t *map = (map_t *)arg;
 #if NEW_UNIFORM_SAMPLING
@@ -1033,7 +1033,7 @@ AmclThread::uniform_pose_generator(void *arg)
 }
 
 void
-AmclThread::set_initial_pose(const std::string  &frame_id,
+Amcl2Thread::set_initial_pose(const std::string  &frame_id,
                              const fawkes::Time &msg_time,
                              const tf::Pose     &pose,
                              const double       *covariance)
@@ -1112,7 +1112,7 @@ AmclThread::set_initial_pose(const std::string  &frame_id,
 }
 
 bool
-AmclThread::bb_interface_message_received(Interface *interface, Message *message) noexcept
+Amcl2Thread::bb_interface_message_received(Interface *interface, Message *message) noexcept
 {
 	LocalizationInterface::SetInitialPoseMessage *ipm =
 	  dynamic_cast<LocalizationInterface::SetInitialPoseMessage *>(message);

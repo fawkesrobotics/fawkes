@@ -63,7 +63,7 @@ class Mutex;
 
 class AmclROS2Thread;
 
-class AmclThread : public fawkes::Thread,
+class Amcl2Thread : public fawkes::Thread,
                    public fawkes::ClockAspect,
                    public fawkes::LoggingAspect,
                    public fawkes::ConfigurableAspect,
@@ -74,8 +74,8 @@ class AmclThread : public fawkes::Thread,
 
 {
 public:
-	AmclThread(AmclROS2Thread *ros_thread);
-	virtual ~AmclThread();
+	Amcl2Thread(AmclROS2Thread *ros_thread);
+	virtual ~Amcl2Thread();
 
 	virtual void init();
 	virtual void loop();

@@ -20,24 +20,24 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "amcl_thread.h"
+#include "amcl2_thread.h"
 
 #include <core/plugin.h>
 #include "amcl_utils.h"
-#include "ros_thread.h"
+#include "ros2_thread.h"
 
 using namespace fawkes;
 
 /** Adaptive Monte Carlo Localization plugin.
  * @author Tim Niemueller
  */
-class AmclPlugin : public fawkes::Plugin
+class Amcl2Plugin : public fawkes::Plugin
 {
 public:
 	/** Constructor.
    * @param config Fawkes configuration
    */
-	explicit AmclPlugin(Configuration *config) : Plugin(config)
+	explicit Amcl2Plugin(Configuration *config) : Plugin(config)
 	{
 		AmclROS2Thread *rt          = NULL;
 		bool           ros_enabled = true;
@@ -49,7 +49,7 @@ public:
 			rt = new AmclROS2Thread();
 			thread_list.push_back(rt);
 		}
-		thread_list.push_back(new AmclThread(rt));
+		thread_list.push_back(new Amcl2Thread(rt));
 	}
 };
 
