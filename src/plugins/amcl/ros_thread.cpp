@@ -179,14 +179,14 @@ AmclROSThread::initial_pose_received(const geometry_msgs::PoseWithCovarianceStam
 {
 	fawkes::Time msg_time(msg->header.stamp.sec, msg->header.stamp.nsec / 1000);
 
-	const double *covariance    = msg.pose.covariance.data();
-	const double  rotation[]    = {msg.pose.pose.orientation.x,
-                             msg.pose.pose.orientation.y,
-                             msg.pose.pose.orientation.z,
-                             msg.pose.pose.orientation.w};
-	const double  translation[] = {msg.pose.pose.position.x,
-                                msg.pose.pose.position.y,
-                                msg.pose.pose.position.z};
+	const double *covariance    = msg->pose.covariance.data();
+	const double  rotation[]    = {msg->pose.pose.orientation.x,
+                             msg->pose.pose.orientation.y,
+                             msg->pose.pose.orientation.z,
+                             msg->pose.pose.orientation.w};
+	const double  translation[] = {msg->pose.pose.position.x,
+                                msg->pose.pose.position.y,
+                                msg->pose.pose.position.z};
 
 	std::string frame = msg->header.frame_id;
 	if (!frame.empty() && frame[0] == '/')
