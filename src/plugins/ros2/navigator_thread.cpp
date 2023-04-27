@@ -33,7 +33,7 @@ using namespace fawkes;
  */
 ROS2NavigatorThread::ROS2NavigatorThread(std::string &cfg_prefix)
 : Thread("ROS2NavigatorThread", Thread::OPMODE_CONTINUOUS),
-//  BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT),
+  //  BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT),
   cfg_prefix_(cfg_prefix)
 {
 }
@@ -65,7 +65,7 @@ ROS2NavigatorThread::init()
 	ac_ = rclcpp_action::create_client<NavigateToPose>(node_handle, "navigate_to_pose");
 
 	cmd_sent_          = false;
-  goal_handle_       = nullptr;
+	goal_handle_       = nullptr;
 	connected_history_ = false;
 	nav_if_->set_final(true);
 	nav_if_->write();
@@ -73,9 +73,8 @@ ROS2NavigatorThread::init()
 
 	ac_init_checktime_ = new fawkes::Time(clock);
 
-//	node_handle->declare_parameter(cfg_dynreconf_path_ + "/" + cfg_dynreconf_trans_vel_name_);
-//	node_handle->declare_parameter(cfg_dynreconf_path_ + "/" + cfg_dynreconf_rot_vel_name_);
-
+	//	node_handle->declare_parameter(cfg_dynreconf_path_ + "/" + cfg_dynreconf_trans_vel_name_);
+	//	node_handle->declare_parameter(cfg_dynreconf_path_ + "/" + cfg_dynreconf_rot_vel_name_);
 }
 
 void
@@ -88,73 +87,74 @@ ROS2NavigatorThread::finalize()
 		logger->log_error(name(), "Closing interface failed!");
 		logger->log_error(name(), e);
 	}
-//	delete ac_;
+	//	delete ac_;
 	delete ac_init_checktime_;
 }
 
 void
 ROS2NavigatorThread::check_status()
 {
-//	TODO: allow setting of variables accordingly!
+	//	TODO: allow setting of variables accordingly!
 	bool write = false;
 
 	if (cmd_sent_) {
-//	  logger->log_info(name(), "goal_handle_->get_status() = %i", goal_handle_->get_status());
-		if (goal_handle_ != nullptr && goal_handle_->get_status() == rclcpp_action::GoalStatus::STATUS_SUCCEEDED) {
-//		if (static_cast<rclcpp_action::ResultCode>(goal_handle_->get_status()) == rclcpp_action::ResultCode::SUCCEEDED) {
+		//	  logger->log_info(name(), "goal_handle_->get_status() = %i", goal_handle_->get_status());
+		if (goal_handle_ != nullptr
+		    && goal_handle_->get_status() == rclcpp_action::GoalStatus::STATUS_SUCCEEDED) {
+			//		if (static_cast<rclcpp_action::ResultCode>(goal_handle_->get_status()) == rclcpp_action::ResultCode::SUCCEEDED) {
 			nav_if_->set_final(true);
-      pose_if_->read();
+			pose_if_->read();
 
-//  		logger->log_info(name(), "Finished successfully");
-  
-  		// Check if we reached the goal
-  		fawkes::tf::Quaternion q_base_rotation;
-  		q_base_rotation.setX(pose_if_->rotation(0));
-  		q_base_rotation.setY(pose_if_->rotation(1));
-  		q_base_rotation.setZ(pose_if_->rotation(2));
-  		q_base_rotation.setW(pose_if_->rotation(3));
-  
-  		double base_position_x   = pose_if_->translation(0);
-  		double base_position_y   = pose_if_->translation(1);
-  		double base_position_yaw = fawkes::tf::get_yaw(q_base_rotation);
-  
-  		double diff_x   = fabs(base_position_x - goal_position_x);
-  		double diff_y   = fabs(base_position_y - goal_position_y);
-  		double diff_yaw = normalize_mirror_rad(base_position_yaw - goal_position_yaw);
-  
-  		if (diff_x >= goal_tolerance_trans || diff_y >= goal_tolerance_trans
-  		    || diff_yaw >= goal_tolerance_yaw) {
-  			nav_if_->set_error_code(NavigatorInterface::ERROR_OBSTRUCTION);
-  		} else {
-  			nav_if_->set_error_code(NavigatorInterface::ERROR_NONE);
-  		}
-//			// Check if we reached the goal
-//			fawkes::tf::Quaternion q_base_rotation;
-//			q_base_rotation.setX(base_position.pose.orientation.x);
-//			q_base_rotation.setY(base_position.pose.orientation.y);
-//			q_base_rotation.setZ(base_position.pose.orientation.z);
-//			q_base_rotation.setW(base_position.pose.orientation.w);
-//
-//			double base_position_x   = base_position.pose.position.x;
-//			double base_position_y   = base_position.pose.position.y;
-//			double base_position_yaw = fawkes::tf::get_yaw(q_base_rotation);
-//
-//			double diff_x   = fabs(base_position_x - goal_position_x);
-//			double diff_y   = fabs(base_position_y - goal_position_y);
-//			double diff_yaw = normalize_mirror_rad(base_position_yaw - goal_position_yaw);
-//
-//			if (diff_x >= goal_tolerance_trans || diff_y >= goal_tolerance_trans
-//			    || diff_yaw >= goal_tolerance_yaw) {
-//				nav_if_->set_error_code(NavigatorInterface::ERROR_OBSTRUCTION);
-//			} else {
-//				nav_if_->set_error_code(NavigatorInterface::ERROR_NONE);
-//			}
+			//  		logger->log_info(name(), "Finished successfully");
+
+			// Check if we reached the goal
+			fawkes::tf::Quaternion q_base_rotation;
+			q_base_rotation.setX(pose_if_->rotation(0));
+			q_base_rotation.setY(pose_if_->rotation(1));
+			q_base_rotation.setZ(pose_if_->rotation(2));
+			q_base_rotation.setW(pose_if_->rotation(3));
+
+			double base_position_x   = pose_if_->translation(0);
+			double base_position_y   = pose_if_->translation(1);
+			double base_position_yaw = fawkes::tf::get_yaw(q_base_rotation);
+
+			double diff_x   = fabs(base_position_x - goal_position_x);
+			double diff_y   = fabs(base_position_y - goal_position_y);
+			double diff_yaw = normalize_mirror_rad(base_position_yaw - goal_position_yaw);
+
+			if (diff_x >= goal_tolerance_trans || diff_y >= goal_tolerance_trans
+			    || diff_yaw >= goal_tolerance_yaw) {
+				nav_if_->set_error_code(NavigatorInterface::ERROR_OBSTRUCTION);
+			} else {
+				nav_if_->set_error_code(NavigatorInterface::ERROR_NONE);
+			}
+			//			// Check if we reached the goal
+			//			fawkes::tf::Quaternion q_base_rotation;
+			//			q_base_rotation.setX(base_position.pose.orientation.x);
+			//			q_base_rotation.setY(base_position.pose.orientation.y);
+			//			q_base_rotation.setZ(base_position.pose.orientation.z);
+			//			q_base_rotation.setW(base_position.pose.orientation.w);
+			//
+			//			double base_position_x   = base_position.pose.position.x;
+			//			double base_position_y   = base_position.pose.position.y;
+			//			double base_position_yaw = fawkes::tf::get_yaw(q_base_rotation);
+			//
+			//			double diff_x   = fabs(base_position_x - goal_position_x);
+			//			double diff_y   = fabs(base_position_y - goal_position_y);
+			//			double diff_yaw = normalize_mirror_rad(base_position_yaw - goal_position_yaw);
+			//
+			//			if (diff_x >= goal_tolerance_trans || diff_y >= goal_tolerance_trans
+			//			    || diff_yaw >= goal_tolerance_yaw) {
+			//				nav_if_->set_error_code(NavigatorInterface::ERROR_OBSTRUCTION);
+			//			} else {
+			//				nav_if_->set_error_code(NavigatorInterface::ERROR_NONE);
+			//			}
 			nav_if_->write();
 		} else if (goal_handle_->get_status() == rclcpp_action::GoalStatus::STATUS_CANCELED) {
 			nav_if_->set_final(true);
 			nav_if_->set_error_code(NavigatorInterface::ERROR_UNKNOWN_PLACE);
 		} else if (goal_handle_->get_status() == rclcpp_action::GoalStatus::STATUS_ABORTED) {
-//		} else if (static_cast<rclcpp_action::ResultCode>(goal_handle_->get_status()) == rclcpp_action::ResultCode::ABORTED) {
+			//		} else if (static_cast<rclcpp_action::ResultCode>(goal_handle_->get_status()) == rclcpp_action::ResultCode::ABORTED) {
 			nav_if_->set_final(true);
 			nav_if_->set_error_code(NavigatorInterface::ERROR_PATH_GEN_FAIL);
 		} else {
@@ -169,11 +169,12 @@ ROS2NavigatorThread::check_status()
 
 void
 ROS2NavigatorThread::send_goal()
-{	
-  // Ensure that all previous goals were stopped.
-  logger->log_info(name(), "Send a new goal!");
-//  stop_goals();
+{
+	// Ensure that all previous goals were stopped.
+	logger->log_info(name(), "Send a new goal!");
+	//  stop_goals();
 	auto goal_ = NavigateToPose::Goal();
+	result_    = rclcpp_action::ClientGoalHandle<NavigateToPose>::WrappedResult();
 	//get goal from Navigation interface
 	goal_.pose.header.frame_id = nav_if_->target_frame();
 	goal_.pose.header.stamp    = node_handle->get_clock()->now();
@@ -186,11 +187,32 @@ ROS2NavigatorThread::send_goal()
 	goal_.pose.pose.orientation.z = q.z();
 	goal_.pose.pose.orientation.w = q.w();
 
+	goal_result_available_ = false;
 	auto send_goal_options = rclcpp_action::Client<NavigateToPose>::SendGoalOptions();
-	send_goal_options.goal_response_callback = std::bind(&ROS2NavigatorThread::responseCb, this, std::placeholders::_1);
-	send_goal_options.feedback_callback = std::bind(&ROS2NavigatorThread::feedbackCb, this, std::placeholders::_1, std::placeholders::_2);
-	send_goal_options.result_callback = std::bind(&ROS2NavigatorThread::resultCb, this, std::placeholders::_1);
-	ac_->async_send_goal(goal_, send_goal_options);
+	send_goal_options.result_callback =
+	  [this](rclcpp_action::ClientGoalHandle<NavigateToPose>::WrappedResult result) {
+		  if (future_goal_handle_) {
+			  logger->log_error(name(), "Goal was rejected by server");
+			  return;
+		  }
+		  logger->log_info(name(), "Goal accepted by server, waiting for result");
+		  // TODO(#1652): a work around until rcl_action interface is updated
+		  // if goal ids are not matched, the older goal call this callback so ignore the result
+		  // if matched, it must be processed (including aborted)
+		  if (goal_handle_->get_goal_id() == result.goal_id) {
+			  goal_result_available_ = true;
+			  result_                = result;
+		  }
+	  };
+	send_goal_options.feedback_callback =
+	  [this](rclcpp_action::ClientGoalHandle<NavigateToPose>::SharedPtr,
+	         const std::shared_ptr<const NavigateToPose::Feedback> feedback) {
+		  base_position = feedback->current_pose;
+	  };
+	future_goal_handle_ = std::make_shared<
+	  std::shared_future<rclcpp_action::ClientGoalHandle<NavigateToPose>::SharedPtr>>(
+	  ac_->async_send_goal(goal_, send_goal_options));
+	//time_goal_sent_ = node_->now();
 
 	nav_if_->set_final(false);
 	nav_if_->set_error_code(0);
@@ -198,149 +220,6 @@ ROS2NavigatorThread::send_goal()
 
 	cmd_sent_ = true;
 }
-
-// Called once when the goal becomes active
-void
-ROS2NavigatorThread::responseCb(rclcpp_action::ClientGoalHandle<NavigateToPose>::SharedPtr future)
-{
-  goal_handle_ = future;
-  if (!goal_handle_) {
-  	logger->log_error(name(), "Goal was rejected by server");
-  } else {
-  	logger->log_info(name(), "Goal accepted by server, waiting for result");
-  }
-}
-
-// Called every time feedback is received for the goal
-void
-ROS2NavigatorThread::feedbackCb(rclcpp_action::ClientGoalHandle<NavigateToPose>::SharedPtr,
-				const std::shared_ptr<const NavigateToPose::Feedback> feedback)
-{
-	base_position = feedback->current_pose;
-}
-
-void
-ROS2NavigatorThread::resultCb(const rclcpp_action::ClientGoalHandle<NavigateToPose>::WrappedResult &result)
-{
-//		if (goal_handle_->get_status() == rclcpp_action::GoalStatus::STATUS_SUCCEEDED) {
-////		if (static_cast<rclcpp_action::ResultCode>(goal_handle_->get_status()) == rclcpp_action::ResultCode::SUCCEEDED) {
-//		} else if (goal_handle_->get_status() == rclcpp_action::GoalStatus::STATUS_CANCELED) {
-//			nav_if_->set_final(true);
-//			nav_if_->set_error_code(NavigatorInterface::ERROR_UNKNOWN_PLACE);
-//		} else if (goal_handle_->get_status() == rclcpp_action::GoalStatus::STATUS_ABORTED) {
-////		} else if (static_cast<rclcpp_action::ResultCode>(goal_handle_->get_status()) == rclcpp_action::ResultCode::ABORTED) {
-//			nav_if_->set_final(true);
-//			nav_if_->set_error_code(NavigatorInterface::ERROR_PATH_GEN_FAIL);
-//		} else {
-//			nav_if_->set_final(false);
-//			nav_if_->set_error_code(0);
-//		}
-//		write = true;
-//	nav_if_->set_final(true);
-//  pose_if_->read();
-//	switch (result.code) {
-//		case rclcpp_action::ResultCode::SUCCEEDED:
-//      {
-//  			logger->log_info(name(), "Finished successfully");
-//  
-//  			// Check if we reached the goal
-//  			fawkes::tf::Quaternion q_base_rotation;
-//  			q_base_rotation.setX(pose_if_->rotation(0));
-//  			q_base_rotation.setY(pose_if_->rotation(1));
-//  			q_base_rotation.setZ(pose_if_->rotation(2));
-//  			q_base_rotation.setW(pose_if_->rotation(3));
-//  
-//  			double base_position_x   = pose_if_->translation(0);
-//  			double base_position_y   = pose_if_->translation(1);
-//  			double base_position_yaw = fawkes::tf::get_yaw(q_base_rotation);
-//  
-//  			double diff_x   = fabs(base_position_x - goal_position_x);
-//  			double diff_y   = fabs(base_position_y - goal_position_y);
-//  			double diff_yaw = normalize_mirror_rad(base_position_yaw - goal_position_yaw);
-//  
-//  			if (diff_x >= goal_tolerance_trans || diff_y >= goal_tolerance_trans
-//  			    || diff_yaw >= goal_tolerance_yaw) {
-//  				nav_if_->set_error_code(NavigatorInterface::ERROR_OBSTRUCTION);
-//  			} else {
-//  				nav_if_->set_error_code(NavigatorInterface::ERROR_NONE);
-//  			}
-//  			break;
-//      }
-//		case rclcpp_action::ResultCode::ABORTED:
-//      {
-//			  logger->log_error(name(), "Goal was aborted");
-//			  nav_if_->set_final(true);
-//			  nav_if_->set_error_code(NavigatorInterface::ERROR_PATH_GEN_FAIL);
-//			  break;
-//      }
-//		case rclcpp_action::ResultCode::CANCELED:
-//      {
-//			  logger->log_warn(name(), "Goal was canceled");
-//			  nav_if_->set_final(true);
-//			  nav_if_->set_error_code(NavigatorInterface::ERROR_UNKNOWN_PLACE);
-//			  break;
-//      }
-//		default:
-//      {
-//			  logger->log_error(name(), "Unknown result code");
-//			  break;
-//      }
-//	}
-//  nav_if_->write();
-//  cmd_sent_ = false;
-//  goal_handle_ = nullptr;
-}
-
-//bool
-//ROS2NavigatorThread::set_dynreconf_value(const std::string &path, const float value)
-//{
-//	//TODO: find work around with ROS2 parameter system
-//	/*dynreconf_double_param.name  = path;
-//	dynreconf_double_param.value = value;
-//	dynreconf_conf.doubles.push_back(dynreconf_double_param);
-//	dynreconf_srv_req.config = dynreconf_conf;
-//
-//	if (!ros::service::call(cfg_dynreconf_path_ + "/set_parameters",
-//	                        dynreconf_srv_req,
-//	                        dynreconf_srv_resp)) {
-//		logger->log_error(name(),
-//		                  "Error in setting dynreconf value %s to %f in path %s",
-//		                  path.c_str(),
-//		                  value,
-//		                  cfg_dynreconf_path_.c_str());
-//		dynreconf_conf.doubles.clear();
-//		return false;
-//	} else {
-//		logger->log_info(name(), "Setting %s to %f", path.c_str(), value);
-//		dynreconf_conf.doubles.clear();
-//		return true;
-//	}*/
-//}
-
-//bool
-//Ros2NavigatorThread::set_dynreconf_value(const std::string &path, const float value)
-//{
-//	dynreconf_double_param.name  = path;
-//	dynreconf_double_param.value = value;
-//	dynreconf_conf.doubles.push_back(dynreconf_double_param);
-//	dynreconf_srv_req.config = dynreconf_conf;
-//
-//	if (!ros::service::call(cfg_dynreconf_path_ + "/set_parameters",
-//	                        dynreconf_srv_req,
-//	                        dynreconf_srv_resp)) {
-//		logger->log_error(name(),
-//		                  "Error in setting dynreconf value %s to %f in path %s",
-//		                  path.c_str(),
-//		                  value,
-//		                  cfg_dynreconf_path_.c_str());
-//		dynreconf_conf.doubles.clear();
-//		return false;
-//	} else {
-//		logger->log_info(name(), "Setting %s to %f", path.c_str(), value);
-//		dynreconf_conf.doubles.clear();
-//		return true;
-//	}
-//}
 
 void
 ROS2NavigatorThread::stop_goals()
@@ -356,10 +235,10 @@ ROS2NavigatorThread::loop()
 		fawkes::Time now(clock);
 		if (now - ac_init_checktime_ >= 5.0) {
 			// action client never connected, yet. Re-create to avoid stale client.
-//			delete ac_;
+			//			delete ac_;
 			// TODO: check for actual name of "nav2" actionserver
 			ac_ = rclcpp_action::create_client<NavigateToPose>(node_handle, "navigate_to_pose");
-//			ac_ = new Nav2Client(node_handle, "nav2");
+			//			ac_ = new Nav2Client(node_handle, "nav2");
 			ac_init_checktime_->stamp();
 		}
 		if (!nav_if_->msgq_empty()) {
@@ -372,10 +251,10 @@ ROS2NavigatorThread::loop()
 		}
 
 		if (connected_history_) {
-//			delete ac_;
+			//			delete ac_;
 			ac_ = rclcpp_action::create_client<NavigateToPose>(node_handle, "navigate_to_pose");
-//			ac_                = new Nav2Client(node_handle, "nav2");
-//			ac_                = new MoveBaseClient("move_base", false);
+			//			ac_                = new Nav2Client(node_handle, "nav2");
+			//			ac_                = new MoveBaseClient("move_base", false);
 			connected_history_ = false;
 		}
 
@@ -566,7 +445,7 @@ ROS2NavigatorThread::loop()
 				nav_if_->set_msgid(msg->id());
 				nav_if_->write();
 
-//				set_dynreconf_value(cfg_dynreconf_trans_vel_name_, msg->max_velocity());
+				//				set_dynreconf_value(cfg_dynreconf_trans_vel_name_, msg->max_velocity());
 
 				send_goal();
 			}
@@ -578,7 +457,7 @@ ROS2NavigatorThread::loop()
 				nav_if_->set_msgid(msg->id());
 				nav_if_->write();
 
-//				set_dynreconf_value(cfg_dynreconf_rot_vel_name_, msg->max_rotation());
+				//				set_dynreconf_value(cfg_dynreconf_rot_vel_name_, msg->max_rotation());
 
 				send_goal();
 			}
@@ -598,19 +477,19 @@ ROS2NavigatorThread::loop()
 
 		check_status();
 	}
-  usleep(100000);
+	usleep(100000);
 }
 
 void
 ROS2NavigatorThread::load_config()
 {
 	try {
-//		cfg_dynreconf_path_           = config->get_string(cfg_prefix_ + "/dynreconf/path");
-//		cfg_dynreconf_trans_vel_name_ = config->get_string(cfg_prefix_ + "/dynreconf/trans_vel_name");
-//		cfg_dynreconf_rot_vel_name_   = config->get_string(cfg_prefix_ + "/dynreconf/rot_vel_name");
-		cfg_fixed_frame_              = config->get_string("/frames/fixed");
-		cfg_ori_tolerance_            = config->get_float(cfg_prefix_ + "/ori_tolerance");
-		cfg_trans_tolerance_          = config->get_float(cfg_prefix_ + "/trans_tolerance");
+		//		cfg_dynreconf_path_           = config->get_string(cfg_prefix_ + "/dynreconf/path");
+		//		cfg_dynreconf_trans_vel_name_ = config->get_string(cfg_prefix_ + "/dynreconf/trans_vel_name");
+		//		cfg_dynreconf_rot_vel_name_   = config->get_string(cfg_prefix_ + "/dynreconf/rot_vel_name");
+		cfg_fixed_frame_     = config->get_string("/frames/fixed");
+		cfg_ori_tolerance_   = config->get_float(cfg_prefix_ + "/ori_tolerance");
+		cfg_trans_tolerance_ = config->get_float(cfg_prefix_ + "/trans_tolerance");
 
 		logger->log_info(name(), "fixed frame: %s", cfg_fixed_frame_.c_str());
 
