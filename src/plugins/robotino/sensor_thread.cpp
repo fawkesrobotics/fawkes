@@ -111,18 +111,13 @@ RobotinoSensorThread::loop()
 
 		batt_if_->set_voltage(data.bat_voltage);
 		batt_if_->set_current(data.bat_current);
-		logger->log_info(name(),
-		                 "BATTERY LEVEL AT: %f and %f and %f",
-		                 data.bat_absolute_soc,
-		                 data.bat_current,
-		                 data.bat_voltage);
 		batt_if_->set_absolute_soc(data.bat_absolute_soc);
 		batt_if_->write();
 
 		if (data.bat_voltage < 18000) {
 			std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
 
-			std::chrono::duration<double> elapsed_seconds = last_battery_warning - now;
+			std::chrono::duration<double> elapsed_seconds = now- last_battery_warning;
 			if (elapsed_seconds.count() > 300) {
 				last_battery_warning = std::chrono::system_clock::now();
 
