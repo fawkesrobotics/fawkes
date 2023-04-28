@@ -67,6 +67,9 @@ RobotinoSensorThread::init()
 	sens_if_ = NULL;
 	imu_if_  = NULL;
 
+	std::chrono::duration<int, std::ratio<60 * 60 * 24>> one_day(1);
+	last_battery_warning = std::chrono::system_clock::now() - one_day;
+
 	batt_if_ = blackboard->open_for_writing<BatteryInterface>("Robotino");
 	sens_if_ = blackboard->open_for_writing<RobotinoSensorInterface>("Robotino");
 
@@ -105,6 +108,30 @@ RobotinoSensorThread::loop()
 		batt_if_->set_current(data.bat_current);
 		batt_if_->set_absolute_soc(data.bat_absolute_soc);
 		batt_if_->write();
+
+		if (data.bat_voltage < 17200) {
+			if(battery_counter > 100) {
+				battery_counter = 0;
+				std::chrono::system_clock::time_point now = std::chrono::system_clock::now();	
+
+				std::chrono::duration<double> elapsed_seconds = now- last_battery_warning;
+				if (elapsed_seconds.count() > 300) {
+					last_battery_warning = std::chrono::system_clock::now();
+
+					logger->log_warn(
+					  name(),
+					  "BATTERY LEVEL ARE LOW. Battery is currently supplying %f mV to the system",
+					  data.bat_voltage);
+					//To send the notification to all ssh clients there has to be a shared DBUS over ssh
+					//See https://nikhilism.com/post/2023/remote-dbus-notifications/ for mor informations
+					std::system("notify-send -u critical -i battery-low -t 10000 \"$(hostname)\" \"Battery is running low!\"");
+				}
+			} else {
+				battery_counter++;
+			}
+		} else {
+			battery_counter = 0;
+		}
 
 		if (cfg_enable_gyro_) {
 			if (data.imu_enabled) {
