@@ -72,6 +72,9 @@ RobotinoSensorThread::init()
 	sens_if_ = NULL;
 	imu_if_  = NULL;
 
+	std::chrono::duration<int, std::ratio<60 * 60 * 24>> one_day(1);
+	last_battery_warning = std::chrono::system_clock::now() - one_day;
+
 	batt_if_ = blackboard->open_for_writing<BatteryInterface>("Robotino");
 	sens_if_ = blackboard->open_for_writing<RobotinoSensorInterface>("Robotino");
 
@@ -108,8 +111,28 @@ RobotinoSensorThread::loop()
 
 		batt_if_->set_voltage(data.bat_voltage);
 		batt_if_->set_current(data.bat_current);
+		logger->log_info(name(),
+		                 "BATTERY LEVEL AT: %f and %f and %f",
+		                 data.bat_absolute_soc,
+		                 data.bat_current,
+		                 data.bat_voltage);
 		batt_if_->set_absolute_soc(data.bat_absolute_soc);
 		batt_if_->write();
+
+		if (data.bat_voltage < 18000) {
+			std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+
+			std::chrono::duration<double> elapsed_seconds = last_battery_warning - now;
+			if (elapsed_seconds.count() > 300) {
+				last_battery_warning = std::chrono::system_clock::now();
+
+				logger->log_warn(
+				  name(),
+				  "BATTERY LEVEL ARE LOW. Battery is currently supplying %f mV to the system",
+				  data.bat_voltage);
+				std::system("wall 'WARNING THE BATTERY LEVE IS LOW'");
+			}
+		}
 
 		if (cfg_enable_gyro_) {
 			if (data.imu_enabled) {
