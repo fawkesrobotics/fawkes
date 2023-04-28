@@ -125,7 +125,7 @@ RobotinoSensorThread::loop()
 				  name(),
 				  "BATTERY LEVEL ARE LOW. Battery is currently supplying %f mV to the system",
 				  data.bat_voltage);
-				std::system("wall 'WARNING THE BATTERY LEVE IS LOW'");
+				std::system("wall 'WARNING: THE BATTERY LEVEL IS LOW!'");
 			}
 		}
 
