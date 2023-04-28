@@ -73,7 +73,6 @@ protected:
 	}
 
 private:
-	void check_status();
 	void send_goal();
 	void stop_goals();
 	void load_config();
@@ -93,8 +92,7 @@ private:
 	Nav2Client                                                     ac_;
 	NavigateToPose::Goal                                           goal_;
 	GoalHandleNav2::SharedPtr                                      goal_handle_;
-	std::shared_ptr<std::shared_future<GoalHandleNav2::SharedPtr>> future_goal_handle_;
-	bool                                                           cmd_sent_;
+	std::shared_future<GoalHandleNav2::SharedPtr>                  future_goal_handle_;
 	bool                                                           goal_result_available_;
 	bool                                                           connected_history_;
 	rclcpp::Clock                                                  ros_clock_;

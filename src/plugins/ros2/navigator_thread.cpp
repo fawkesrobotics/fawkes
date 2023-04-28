@@ -64,11 +64,10 @@ ROS2NavigatorThread::init()
 	//tell the action client that we want to spin a thread by default
 	ac_ = rclcpp_action::create_client<NavigateToPose>(node_handle, "navigate_to_pose");
 
-	cmd_sent_          = false;
 	goal_handle_       = nullptr;
 	connected_history_ = false;
-	nav_if_->set_final(true);
-	nav_if_->write();
+	//nav_if_->set_final(false);
+	//nav_if_->write();
 	load_config();
 
 	ac_init_checktime_ = new fawkes::Time(clock);
@@ -92,85 +91,12 @@ ROS2NavigatorThread::finalize()
 }
 
 void
-ROS2NavigatorThread::check_status()
-{
-	//	TODO: allow setting of variables accordingly!
-	bool write = false;
-
-	if (cmd_sent_) {
-		//	  logger->log_info(name(), "goal_handle_->get_status() = %i", goal_handle_->get_status());
-		if (goal_handle_ != nullptr
-		    && goal_handle_->get_status() == rclcpp_action::GoalStatus::STATUS_SUCCEEDED) {
-			//		if (static_cast<rclcpp_action::ResultCode>(goal_handle_->get_status()) == rclcpp_action::ResultCode::SUCCEEDED) {
-			nav_if_->set_final(true);
-			pose_if_->read();
-
-			//  		logger->log_info(name(), "Finished successfully");
-
-			// Check if we reached the goal
-			fawkes::tf::Quaternion q_base_rotation;
-			q_base_rotation.setX(pose_if_->rotation(0));
-			q_base_rotation.setY(pose_if_->rotation(1));
-			q_base_rotation.setZ(pose_if_->rotation(2));
-			q_base_rotation.setW(pose_if_->rotation(3));
-
-			double base_position_x   = pose_if_->translation(0);
-			double base_position_y   = pose_if_->translation(1);
-			double base_position_yaw = fawkes::tf::get_yaw(q_base_rotation);
-
-			double diff_x   = fabs(base_position_x - goal_position_x);
-			double diff_y   = fabs(base_position_y - goal_position_y);
-			double diff_yaw = normalize_mirror_rad(base_position_yaw - goal_position_yaw);
-
-			if (diff_x >= goal_tolerance_trans || diff_y >= goal_tolerance_trans
-			    || diff_yaw >= goal_tolerance_yaw) {
-				nav_if_->set_error_code(NavigatorInterface::ERROR_OBSTRUCTION);
-			} else {
-				nav_if_->set_error_code(NavigatorInterface::ERROR_NONE);
-			}
-			//			// Check if we reached the goal
-			//			fawkes::tf::Quaternion q_base_rotation;
-			//			q_base_rotation.setX(base_position.pose.orientation.x);
-			//			q_base_rotation.setY(base_position.pose.orientation.y);
-			//			q_base_rotation.setZ(base_position.pose.orientation.z);
-			//			q_base_rotation.setW(base_position.pose.orientation.w);
-			//
-			//			double base_position_x   = base_position.pose.position.x;
-			//			double base_position_y   = base_position.pose.position.y;
-			//			double base_position_yaw = fawkes::tf::get_yaw(q_base_rotation);
-			//
-			//			double diff_x   = fabs(base_position_x - goal_position_x);
-			//			double diff_y   = fabs(base_position_y - goal_position_y);
-			//			double diff_yaw = normalize_mirror_rad(base_position_yaw - goal_position_yaw);
-			//
-			//			if (diff_x >= goal_tolerance_trans || diff_y >= goal_tolerance_trans
-			//			    || diff_yaw >= goal_tolerance_yaw) {
-			//				nav_if_->set_error_code(NavigatorInterface::ERROR_OBSTRUCTION);
-			//			} else {
-			//				nav_if_->set_error_code(NavigatorInterface::ERROR_NONE);
-			//			}
-			nav_if_->write();
-		} else if (goal_handle_->get_status() == rclcpp_action::GoalStatus::STATUS_CANCELED) {
-			nav_if_->set_final(true);
-			nav_if_->set_error_code(NavigatorInterface::ERROR_UNKNOWN_PLACE);
-		} else if (goal_handle_->get_status() == rclcpp_action::GoalStatus::STATUS_ABORTED) {
-			//		} else if (static_cast<rclcpp_action::ResultCode>(goal_handle_->get_status()) == rclcpp_action::ResultCode::ABORTED) {
-			nav_if_->set_final(true);
-			nav_if_->set_error_code(NavigatorInterface::ERROR_PATH_GEN_FAIL);
-		} else {
-			nav_if_->set_final(false);
-			nav_if_->set_error_code(0);
-		}
-		write = true;
-	}
-	if (write)
-		nav_if_->write();
-}
-
-void
 ROS2NavigatorThread::send_goal()
 {
-	// Ensure that all previous goals were stopped.
+	// reset interface
+	nav_if_->set_final(false);
+	nav_if_->set_error_code(0);
+	nav_if_->write();
 	logger->log_info(name(), "Send a new goal!");
 	//  stop_goals();
 	auto goal_ = NavigateToPose::Goal();
@@ -191,40 +117,104 @@ ROS2NavigatorThread::send_goal()
 	auto send_goal_options = rclcpp_action::Client<NavigateToPose>::SendGoalOptions();
 	send_goal_options.result_callback =
 	  [this](rclcpp_action::ClientGoalHandle<NavigateToPose>::WrappedResult result) {
-		  if (future_goal_handle_) {
-			  logger->log_error(name(), "Goal was rejected by server");
-			  return;
+		  if (!future_goal_handle_.valid()) {
+			  nav_if_->set_final(true);
+			  nav_if_->set_error_code(NavigatorInterface::ERROR_UNKNOWN_PLACE);
+			  nav_if_->write();
 		  }
 		  logger->log_info(name(), "Goal accepted by server, waiting for result");
-		  // TODO(#1652): a work around until rcl_action interface is updated
-		  // if goal ids are not matched, the older goal call this callback so ignore the result
-		  // if matched, it must be processed (including aborted)
-		  if (goal_handle_->get_goal_id() == result.goal_id) {
-			  goal_result_available_ = true;
-			  result_                = result;
-		  }
+		  //goal_handle_ = future_goal_handle_.get();
+		  //logger->log_info(name(), "Goal DONE");
+	  };
+	send_goal_options.goal_response_callback =
+	  [this](
+	    std::shared_ptr<rclcpp_action::ClientGoalHandle<nav2_msgs::action::NavigateToPose>> handle) {
+		  logger->log_warn(name(), "goal handle callback received");
+		  // do we need to check the handle->get_goal_id() to match the actually started goal?
+		  goal_result_available_ = true;
+		  ac_->async_get_result(
+		    handle, [this](rclcpp_action::ClientGoalHandle<NavigateToPose>::WrappedResult result) {
+			    switch (result.code) {
+			    case rclcpp_action::ResultCode::SUCCEEDED: {
+				    goal_handle_ = future_goal_handle_.get();
+				    if (!goal_handle_) {
+					    throw std::runtime_error("Goal was rejected by the action server");
+				    }
+				    pose_if_->read();
+
+				    //  		logger->log_info(name(), "Finished successfully");
+
+				    // Check if we reached the goal
+				    fawkes::tf::Quaternion q_base_rotation;
+				    q_base_rotation.setX(pose_if_->rotation(0));
+				    q_base_rotation.setY(pose_if_->rotation(1));
+				    q_base_rotation.setZ(pose_if_->rotation(2));
+				    q_base_rotation.setW(pose_if_->rotation(3));
+
+				    double base_position_x   = pose_if_->translation(0);
+				    double base_position_y   = pose_if_->translation(1);
+				    double base_position_yaw = fawkes::tf::get_yaw(q_base_rotation);
+
+				    double diff_x   = fabs(base_position_x - goal_position_x);
+				    double diff_y   = fabs(base_position_y - goal_position_y);
+				    double diff_yaw = normalize_mirror_rad(base_position_yaw - goal_position_yaw);
+
+				    // Check if we reached the goal
+				    //fawkes::tf::Quaternion q_base_rotation;
+				    //q_base_rotation.setX(base_position.pose.orientation.x);
+				    //q_base_rotation.setY(base_position.pose.orientation.y);
+				    //q_base_rotation.setZ(base_position.pose.orientation.z);
+				    //q_base_rotation.setW(base_position.pose.orientation.w);
+
+				    //double base_position_x   = base_position.pose.position.x;
+				    //double base_position_y   = base_position.pose.position.y;
+				    //double base_position_yaw = fawkes::tf::get_yaw(q_base_rotation);
+
+				    //double diff_x   = fabs(base_position_x - goal_position_x);
+				    //double diff_y   = fabs(base_position_y - goal_position_y);
+				    //double diff_yaw = normalize_mirror_rad(base_position_yaw - goal_position_yaw);
+				    //if (diff_x >= goal_tolerance_trans || diff_y >= goal_tolerance_trans
+				    //    || diff_yaw >= goal_tolerance_yaw) {
+				    //} else {
+				    nav_if_->set_final(true);
+				    nav_if_->set_error_code(NavigatorInterface::ERROR_NONE);
+				    nav_if_->write();
+				    //}
+			    } break;
+
+			    case rclcpp_action::ResultCode::ABORTED: {
+				    nav_if_->set_final(true);
+				    nav_if_->set_error_code(NavigatorInterface::ERROR_PATH_GEN_FAIL);
+				    nav_if_->write();
+			    } break;
+
+			    case rclcpp_action::ResultCode::CANCELED: {
+				    nav_if_->set_final(true);
+				    nav_if_->set_error_code(NavigatorInterface::ERROR_UNKNOWN_PLACE);
+				    nav_if_->write();
+			    } break;
+			    deafult : {
+				    logger->log_error(name(), "Unknown result code received");
+				    nav_if_->set_final(true);
+				    nav_if_->set_error_code(NavigatorInterface::ERROR_UNKNOWN_PLACE);
+				    nav_if_->write();
+			    } break;
+			    }
+		    });
 	  };
 	send_goal_options.feedback_callback =
 	  [this](rclcpp_action::ClientGoalHandle<NavigateToPose>::SharedPtr,
 	         const std::shared_ptr<const NavigateToPose::Feedback> feedback) {
 		  base_position = feedback->current_pose;
 	  };
-	future_goal_handle_ = std::make_shared<
-	  std::shared_future<rclcpp_action::ClientGoalHandle<NavigateToPose>::SharedPtr>>(
-	  ac_->async_send_goal(goal_, send_goal_options));
-	//time_goal_sent_ = node_->now();
-
-	nav_if_->set_final(false);
-	nav_if_->set_error_code(0);
-	nav_if_->write();
-
-	cmd_sent_ = true;
+	future_goal_handle_ = ac_->async_send_goal(goal_, send_goal_options);
 }
 
 void
 ROS2NavigatorThread::stop_goals()
 {
 	//cancel all existing goals and send Goal={0/0/0}
+	logger->log_warn(name(), "stop goals called");
 	ac_->async_cancel_all_goals();
 }
 
@@ -232,6 +222,7 @@ void
 ROS2NavigatorThread::loop()
 {
 	if (!ac_->action_server_is_ready()) {
+		logger->log_warn(name(), "Action server not ready");
 		fawkes::Time now(clock);
 		if (now - ac_init_checktime_ >= 5.0) {
 			// action client never connected, yet. Re-create to avoid stale client.
@@ -255,6 +246,7 @@ ROS2NavigatorThread::loop()
 			ac_ = rclcpp_action::create_client<NavigateToPose>(node_handle, "navigate_to_pose");
 			//			ac_                = new Nav2Client(node_handle, "nav2");
 			//			ac_                = new MoveBaseClient("move_base", false);
+			logger->log_warn(name(), "History disconnectd");
 			connected_history_ = false;
 		}
 
@@ -265,7 +257,7 @@ ROS2NavigatorThread::loop()
 			// stop
 			if (NavigatorInterface::StopMessage *msg = nav_if_->msgq_first_safe(msg)) {
 				if (msg->msgid() == 0 || msg->msgid() == nav_if_->msgid()) {
-					logger->log_info(name(), "Stop message received");
+					logger->log_warn(name(), "Stop message received");
 					nav_if_->set_dest_x(0);
 					nav_if_->set_dest_y(0);
 					nav_if_->set_dest_ori(0);
@@ -474,8 +466,6 @@ ROS2NavigatorThread::loop()
 
 			nav_if_->msgq_pop();
 		} // while
-
-		check_status();
 	}
 	usleep(100000);
 }
