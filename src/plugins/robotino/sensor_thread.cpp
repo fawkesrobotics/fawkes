@@ -114,19 +114,26 @@ RobotinoSensorThread::loop()
 		batt_if_->set_absolute_soc(data.bat_absolute_soc);
 		batt_if_->write();
 
-		if (data.bat_voltage < 18000) {
-			std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+		if (data.bat_voltage < 17200) {
+			if(battery_counter > 100) {
+				battery_counter = 0;
+				std::chrono::system_clock::time_point now = std::chrono::system_clock::now();	
 
-			std::chrono::duration<double> elapsed_seconds = now- last_battery_warning;
-			if (elapsed_seconds.count() > 300) {
-				last_battery_warning = std::chrono::system_clock::now();
+				std::chrono::duration<double> elapsed_seconds = now- last_battery_warning;
+				if (elapsed_seconds.count() > 300) {
+					last_battery_warning = std::chrono::system_clock::now();
 
-				logger->log_warn(
-				  name(),
-				  "BATTERY LEVEL ARE LOW. Battery is currently supplying %f mV to the system",
-				  data.bat_voltage);
-				std::system("wall 'WARNING: THE BATTERY LEVEL IS LOW!'");
+					logger->log_warn(
+					  name(),
+					  "BATTERY LEVEL ARE LOW. Battery is currently supplying %f mV to the system",
+					  data.bat_voltage);
+					std::system("wall 'WARNING: THE BATTERY LEVEL IS LOW!'");
+				}
+			} else {
+				batter_counter++;
 			}
+		} else {
+			battery_counter = 0;
 		}
 
 		if (cfg_enable_gyro_) {

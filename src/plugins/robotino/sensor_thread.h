@@ -79,6 +79,7 @@ private: // methods
 private: // members
 	RobotinoComThread *com_;
 
+	int				      battery_counter = 0;
 	bool                                  cfg_enable_gyro_;
 	std::string                           cfg_imu_iface_id_;
 	std::chrono::system_clock::time_point last_battery_warning;
