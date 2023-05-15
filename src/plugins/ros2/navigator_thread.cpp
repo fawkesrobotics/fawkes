@@ -215,7 +215,11 @@ ROS2NavigatorThread::stop_goals()
 {
 	//cancel all existing goals and send Goal={0/0/0}
 	logger->log_warn(name(), "stop goals called");
-	ac_->async_cancel_all_goals();
+	auto future_canceled = ac_->async_cancel_all_goals();
+	future_canceled.wait();
+	nav_if_->set_final(true);
+	nav_if_->write();
+	logger->log_warn(name(), "stop goals finished");
 }
 
 void
