@@ -28,4 +28,6 @@ source $SCRIPT_PATH/environment.sh
 set -euo pipefail
 
 # Build software
-$MAKE -j$NPROC all gui BUILDSTATS=1
+mkdir build; cd build
+cmake ..
+$MAKE -j$NPROC BUILDSTATS=1
