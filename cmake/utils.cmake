@@ -152,7 +152,10 @@ macro(set_common_properties_of_targets_recursive targets dir)
     PROPERTY BUILDSYSTEM_TARGETS)
   list(APPEND ${targets} ${current_targets})
   foreach(target ${current_targets})
-    if(NOT ${target} IN_LIST FAWKES_CUSTOM_TARGETS)
+    get_target_property(type ${target} TYPE)
+    if(${type} MATCHES "MODULE_LIBRARY"
+       OR ${type} MATCHES "SHARED_LIBRARY"
+       OR ${type} MATCHES "EXECUTABLE")
       target_compile_definitions(
         ${target}
         PRIVATE SRCDIR=\"${dir}\"

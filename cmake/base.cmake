@@ -27,10 +27,6 @@ find_package(PkgConfig REQUIRED)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${FAWKES_CORE_DIR}/cmake")
 set(CMAKE_BUILD_TYPE "Debug")
 
-# these targets are excluded from the set_common_properties_of_targets command
-set(FAWKES_CUSTOM_TARGETS ${FAWKES_CUSTOM_TARGETS} deploy flash_arduino
-                          uninstall fawkes_uninstall)
-
 # TODO: .ts generation of rest-api plugins (see old Makefiles in rest-api dirs)
 # This is not urgent, as the generated stuff is already in git this was handled
 # through rest-api.mk add_custom_target(restapi-generate echo
