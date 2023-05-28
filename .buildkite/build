@@ -30,4 +30,12 @@ set -euo pipefail
 # Build software
 mkdir build; cd build
 cmake ..
+echo "-> Running 'make doxygen' to check for warnings"
+$MAKE -j$NPROC doxygen
+if [ -s doxywarnings.txt ]; then
+  cat doxywarnings.txt
+  exit 1
+else
+  echo "No warnings, good job!"
+fi
 $MAKE -j$NPROC BUILDSTATS=1
