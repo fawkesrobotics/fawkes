@@ -18,7 +18,6 @@
 
 set -e
 set -u
-
 GOOD_LICENSES=("GPL-2+" "GPL-3" "BSD-3-clause" "BSD-3-clause and/or GPL-2+")
 is_good_license () {
   local good_license
@@ -51,5 +50,11 @@ check_files () {
     return 0
   fi
 }
-
-check_files $@
+if [ $# -eq 0 ]
+  then
+    echo "No arguments supplied, running on source tree"
+    INPUT=$(git ls-files --full-name {\*.{h,cpp,py},\*CMakeLists.txt} | awk "{ print \"$(git rev-parse --show-toplevel)/\"\$1 }" | git check-attr --stdin ignore-license-check | awk '$3 != "set" { print $1; }' | tr -d ':')
+    check_files "$INPUT"
+  else
+    check_files $@
+fi
