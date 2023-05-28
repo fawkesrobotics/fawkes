@@ -20,5 +20,25 @@
 #
 # *****************************************************************************
 
-add_subdirectory(plugin)
-add_subdirectory(battery_monitor)
+set(EXECUTABLE_ffbatterymon
+    ON
+    CACHE BOOL ON)
+
+if(EXECUTABLE_ffbatterymon)
+  add_executable(ffbatterymon main.cpp battery_monitor_treeview.cpp
+                              battery_monitor.cpp)
+  depend_on_pkgconfig_libs(ffbatterymon "ncurses;readline")
+  depend_on_gui(ffbatterymon)
+  target_link_libraries(
+    ffbatterymon
+    stdc++
+    fawkescore
+    fawkesconfig
+    fawkesnetcomm
+    fawkesgui_utils
+    fawkesblackboard
+    fawkesinterface
+    BatteryInterface)
+else()
+  executable_disabled_message(ffbatterymon)
+endif()
