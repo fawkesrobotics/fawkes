@@ -55,6 +55,7 @@ add_library(
   # tests/test_wait_condition.cpp
   # tests/test_circular_buffer.cpp
 )
+add_subdirectory(tests)
 target_link_libraries(fawkescore pthread stdc++ m rt)
 target_include_directories(fawkescore PUBLIC core)
 target_compile_options(fawkescore PUBLIC -DHAVE_EXECINFO)
