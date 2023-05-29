@@ -10,7 +10,7 @@
 }
 
 .ff-nav-item-button {
-  border-radius: $baseline-grid / 4;
+  border-radius: $baseline-grid * 0.25;
   display: block;
   font-weight: $regular-font-weight;
   height: 5.5 * $baseline-grid;
