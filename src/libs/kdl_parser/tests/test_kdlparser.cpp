@@ -20,7 +20,7 @@
  */
 
 #include <gtest/gtest.h>
-#include <libs/kdl_parser/kdl_parser.h>
+#include <kdl_parser/kdl_parser.h>
 
 #include <kdl/tree.hpp>
 #include <string>

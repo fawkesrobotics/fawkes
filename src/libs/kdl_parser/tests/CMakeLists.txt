@@ -20,12 +20,11 @@
 #
 # *****************************************************************************
 
-add_subdirectory(tests)
-add_library(
-  fawkeskdl_parser SHARED
-  # tests/test_kdlparser.cpp
-  model.cpp kdl_parser.cpp)
-target_link_libraries(fawkeskdl_parser fawkescore)
-depend_on_kdl_parser(fawkeskdl_parser)
-depend_on_eigen3(fawkeskdl_parser)
-target_compile_features(fawkeskdl_parser PUBLIC cxx_std_11)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+
+if(GTest_FOUND)
+  add_executable(test_kdlparser test_kdlparser.cpp)
+  target_link_libraries(test_kdlparser stdc++ fawkeskdl_parser GTest::gtest
+                        GTest::gtest_main)
+  add_test(NAME Kdlparser COMMAND test_kdlparser)
+endif()
