@@ -19,7 +19,7 @@
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # *****************************************************************************
-
+add_subdirectory(tests)
 add_library(
   fawkesutils SHARED
   sub_process/proc.cpp
