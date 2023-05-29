@@ -335,9 +335,11 @@ export class GoalListComponent implements OnInit, OnDestroy, AfterViewInit {
 
   create_goals_graph() {
     let graph = 'digraph {\n' +
-      '  graph [fontsize=10];\n' +
-      '  node [fontsize=10];\n' +
-      '  edge [fontsize=10];\n\n';
+      '  graph [fontsize=9];\n' +
+      '  node [fontsize=9];\n' +
+      '  edge [fontsize=9];\n\n'+
+      '  rankdir=LR\n';//+              //Arrange Graph from left to right
+     // '  landscape=true\n';          //Putout graph in landscape mode
     if (! this.goals) {
       graph += '  "no goals"';
     } else {
@@ -370,32 +372,32 @@ export class GoalListComponent implements OnInit, OnDestroy, AfterViewInit {
         }
 
         let node_label = `<table border="0" cellspacing="2"><tr><td colspan="2" align="center"><b>${g.id}</b></td></tr>`;
-        node_label += `<tr><td align="left"><font color="#444444">Mode:</font></td>` +
-          `<td align="left"><font color="#444444">${this.icon_tooltip(g)}</font></td></tr>`;
+        // node_label += `<tr><td align="left"><font color="#444444">Mode:</font></td>` +
+        //   `<td align="left"><font color="#444444">${this.icon_tooltip(g)}</font></td></tr>`;
 
-        if (g['class'] && g['class'] !== '') {
-          node_label += `<tr><td align="left"><font color="#444444">Class:</font></td>` +
-            `<td align="left"><font color="#444444">${g['class']}</font></td></tr>`;
-        }
-        if (g['sub-type'] && g['sub-type'] !== '') {
-          node_label += `<tr><td align="left"><font color="#444444">Sub-type:</font></td>` +
-            `<td align="left"><font color="#444444">${g['sub-type']}</font></td></tr>`;
-        }
-        if (g.priority > 0) {
-          node_label += `<tr><td align="left"><font color="#444444">Priority:</font></td>` +
-            `<td align="left"><font color="#444444">${g.priority}</font></td></tr>`;
-        }
-        if (g['sub-type'] && g['sub-type'] === 'RETRY-SUBGOAL') {
-          if (g.parameters.length === 2 && g.parameters[0] === 'max-tries' &&
-              g.meta.length === 2 && g.meta[0] === 'num-tries') {
-            node_label += `<tr><td align="left"><font color="#444444">Tries:</font></td>` +
-              `<td align="left"><font color="#444444">${g.meta[1]}/${g.parameters[1]}</font></td></tr>`;
-          }
-        }
-        if (g['parameters'] && g['parameters'].length > 0) {
-          node_label += `<tr><td align="left"><font color="#444444">Params:</font></td>` +
-            `<td align="left"><font color="#444444">${g['parameters'].join(' ')}</font></td></tr>`;
-        }
+        // if (g['class'] && g['class'] !== '') {
+        //   node_label += `<tr><td align="left"><font color="#444444">Class:</font></td>` +
+        //     `<td align="left"><font color="#444444">${g['class']}</font></td></tr>`;
+        //}
+        // if (g['sub-type'] && g['sub-type'] !== '') {
+        //   node_label += `<tr><td align="left"><font color="#444444">Sub-type:</font></td>` +
+        //     `<td align="left"><font color="#444444">${g['sub-type']}</font></td></tr>`;
+        // }
+        // if (g.priority > 0) {
+        //   node_label += `<tr><td align="left"><font color="#444444">Priority:</font></td>` +
+        //     `<td align="left"><font color="#444444">${g.priority}</font></td></tr>`;
+        // }
+        // if (g['sub-type'] && g['sub-type'] === 'RETRY-SUBGOAL') {
+        //   if (g.parameters.length === 2 && g.parameters[0] === 'max-tries' &&
+        //       g.meta.length === 2 && g.meta[0] === 'num-tries') {
+        //     node_label += `<tr><td align="left"><font color="#444444">Tries:</font></td>` +
+        //       `<td align="left"><font color="#444444">${g.meta[1]}/${g.parameters[1]}</font></td></tr>`;
+        //   }
+        // }
+        // if (g['parameters'] && g['parameters'].length > 0) {
+        //   node_label += `<tr><td align="left"><font color="#444444">Params:</font></td>` +
+        //     `<td align="left"><font color="#444444">${g['parameters'].join(' ')}</font></td></tr>`;
+        //}
         if (g['error'] && g['error'].length > 0) {
           node_label += `<tr><td align="left"><font color="#444444">Error:</font></td>` +
             `<td align="left"><font color="#ff0000">${g['error'].join(' ')}</font></td></tr>`;
@@ -424,7 +426,12 @@ export class GoalListComponent implements OnInit, OnDestroy, AfterViewInit {
             `<td align="left"><font color="${res_color}">${g['acquired-resources'].join(', ')}</font></td></tr>`;
         }
         node_label += '</table>';
-
+//TODO lable raus
+//TODO Graphviz schmaler so das auf einen bild passt
+//schnellen print ohne make
+//ansonsten make deploy in fawkes/src/plugins/webview/frontend
+//goalclass reicht
+//ordnerstruktur
         graph += `  "${g.id}" [label=<${node_label}>, tooltip="${g.id}", href="/clips-executive/goal/${g.id}", shape=${shape}`;
         if (color !== '') {
           graph += `, style="filled", fillcolor="${color}"`;
@@ -441,7 +448,8 @@ export class GoalListComponent implements OnInit, OnDestroy, AfterViewInit {
             `    label="${p.plan_id}";\n` +
             `    style=filled; fillcolor="#efefef";\n` +
             `    node [shape=invhouse,style=filled];\n` +
-            `    edge [labelangle=290,labeldistance=6.0,labeljust=l];\n`;
+            `    edge [labelangle=290,labeldistance=6.0,labeljust=l];\n`+
+            '  rankdir=LR\n';
           let prev = p.goal_id;
           for (const a of p.plan.actions) {
             let bgcolor = '#ffffff';
@@ -481,7 +489,7 @@ export class GoalListComponent implements OnInit, OnDestroy, AfterViewInit {
 
             prev = `${p.goal_id}__${p.plan_id}__${a.id}`;
           }
-          graph += '  }\n';
+          graph += ' }\n';
         }
       }
     }
