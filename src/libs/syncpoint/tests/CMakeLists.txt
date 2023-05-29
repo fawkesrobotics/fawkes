@@ -20,9 +20,19 @@
 #
 # *****************************************************************************
 
-add_subdirectory(tests)
-add_library(
-  fawkessyncpoint SHARED syncpoint.cpp syncpoint_manager.cpp syncpoint_call.cpp
-                         syncpoint_call_stats.cpp # tests/test_syncpoint.cpp
-)
-target_link_libraries(fawkessyncpoint fawkescore fawkesutils)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+
+if(GTest_FOUND)
+  add_executable(test_syncpoint test_syncpoint.cpp)
+  target_link_libraries(
+    test_syncpoint
+    stdc++
+    fawkescore
+    fawkesutils
+    fawkessyncpoint
+    fawkeslogging
+    pthread
+    GTest::gtest
+    GTest::gtest_main)
+  add_test(NAME Syncpoint COMMAND test_syncpoint)
+endif()

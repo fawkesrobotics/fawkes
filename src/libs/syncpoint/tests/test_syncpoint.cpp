@@ -30,11 +30,11 @@
 #include <core/threading/mutex_locker.h>
 #include <core/threading/wait_condition.h>
 #include <core/utils/refptr.h>
-#include <libs/syncpoint/exceptions.h>
-#include <libs/syncpoint/syncpoint.h>
-#include <libs/syncpoint/syncpoint_manager.h>
 #include <logging/cache.h>
 #include <logging/multi.h>
+#include <syncpoint/exceptions.h>
+#include <syncpoint/syncpoint.h>
+#include <syncpoint/syncpoint_manager.h>
 #include <sys/time.h>
 
 #include <atomic>
