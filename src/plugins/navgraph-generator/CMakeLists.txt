@@ -22,7 +22,7 @@
 
 set(PLUGIN_navgraph-generator
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build navgraph-generator plugin")
 
 add_subdirectory(interfaces)
 

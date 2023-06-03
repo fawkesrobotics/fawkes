@@ -22,7 +22,7 @@
 
 set(PLUGIN_clips-robot-memory
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build clips-robot-memory plugin")
 
 if(PLUGIN_clips-robot-memory)
   add_library(

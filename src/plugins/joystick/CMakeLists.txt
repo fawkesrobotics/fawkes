@@ -22,19 +22,19 @@
 
 set(PLUGIN_joystick
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build joystick plugin")
 
 set(PLUGIN_joystick-teleop
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build joystick-teleop plugin")
 
 set(PLUGIN_ffjoystick
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build ffjoystick plguin")
 
 set(PLUGIN_ffkbjoystick
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build ffkbjoystick plugin")
 
 if(PLUGIN_joystick)
   add_library(

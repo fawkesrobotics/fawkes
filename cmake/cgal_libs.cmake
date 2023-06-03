@@ -21,7 +21,7 @@
 # *****************************************************************************
 
 function(depend_on_cgal_libs target)
-  if(NOT CGAL IN_LIST FAWKES_DEPENDENCIES_CHECKED)
+  if(NOT CGAL IN_LIST _FAWKES_DEPENDENCIES_CHECKED)
     find_package(CGAL)
     remember_dependency(CGAL)
   endif()

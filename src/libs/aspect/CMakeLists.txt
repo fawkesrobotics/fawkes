@@ -68,16 +68,16 @@ if(PCL_FOUND)
   target_link_libraries(fawkesaspects fawkespcl_utils)
 endif()
 
-optional_depend_on_pkgconfig_libs(fawkesaspects "${tf_deps}" tf_deps_found)
-if(tf_deps_found)
+optional_depend_on_pkgconfig_libs(fawkesaspects "${TF_DEPS}" TF_DEPS_FOUND)
+if(TF_DEPS_FOUND)
   target_sources(fawkesaspects PRIVATE tf.cpp inifins/tf.cpp)
   depend_on_tf(fawkesaspects)
   target_link_libraries(fawkesaspects fawkestf)
 endif()
 
-optional_depend_on_pkgconfig_libs(fawkesaspects "${webview_deps}"
-                                  webview_deps_found)
-if(webview_deps_found)
+optional_depend_on_pkgconfig_libs(fawkesaspects "${WEBVIEW_DEPS}"
+                                  WEBVIEW_DEPS_FOUND)
+if(WEBVIEW_DEPS_FOUND)
   target_sources(fawkesaspects PRIVATE webview.cpp inifins/webview.cpp)
   depend_on_webview(fawkesaspects)
   target_link_libraries(fawkesaspects fawkeswebview)

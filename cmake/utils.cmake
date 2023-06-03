@@ -22,22 +22,22 @@
 
 if(NOT WIN32)
   string(ASCII 27 Esc)
-  set(ColourReset "${Esc}[m")
-  set(ColourBold "${Esc}[1m")
-  set(Red "${Esc}[31m")
-  set(Green "${Esc}[32m")
-  set(Yellow "${Esc}[33m")
-  set(Blue "${Esc}[34m")
-  set(Magenta "${Esc}[35m")
-  set(Cyan "${Esc}[36m")
-  set(White "${Esc}[37m")
-  set(BoldRed "${Esc}[1;31m")
-  set(BoldGreen "${Esc}[1;32m")
-  set(BoldYellow "${Esc}[1;33m")
-  set(BoldBlue "${Esc}[1;34m")
-  set(BoldMagenta "${Esc}[1;35m")
-  set(BoldCyan "${Esc}[1;36m")
-  set(BoldWhite "${Esc}[1;37m")
+  set(COLOR_RESET "${Esc}[m")
+  set(COLOR_BOLD "${Esc}[1m")
+  set(RED "${Esc}[31m")
+  set(GREEN "${Esc}[32m")
+  set(YELLOW "${Esc}[33m")
+  set(BLUE "${Esc}[34m")
+  set(MAGENTA "${Esc}[35m")
+  set(CYAN "${Esc}[36m")
+  set(WHITE "${Esc}[37m")
+  set(BOLD_RED "${Esc}[1;31m")
+  set(BOLD_GREEN "${Esc}[1;32m")
+  set(BOLD_YELLOW "${Esc}[1;33m")
+  set(BOLD_BLUE "${Esc}[1;34m")
+  set(BOLD_MAGENTA "${Esc}[1;35m")
+  set(BOLD_CYAN "${Esc}[1;36m")
+  set(BOLD_WHITE "${Esc}[1;37m")
 endif()
 
 function(optional_depend_on_boost_libs target libs success)
@@ -46,9 +46,9 @@ function(optional_depend_on_boost_libs target libs success)
       PARENT_SCOPE)
   foreach(lib ${libs})
     string(TOUPPER ${lib} COMPONENT)
-    set(TMP_LIST)
-    list(APPEND TMP_LIST ${FAWKES_DEPENDENCIES_CHECKED})
-    if(NOT "boost_${lib}" IN_LIST TMP_LIST)
+    set(tmp_list)
+    list(APPEND tmp_list ${_FAWKES_DEPENDENCIES_CHECKED})
+    if(NOT "boost_${lib}" IN_LIST tmp_list)
       find_package(Boost COMPONENTS ${lib})
       remember_dependency(boost_${lib})
     endif()
@@ -68,10 +68,10 @@ function(disable_target target)
                                              EXCLUDE_FROM_DEFAULT_BUILD 1)
 endfunction()
 
-function(build_depends_on target other-target)
-  if($<TARGET_PROPERTY:${other-target},EXCLUDE_FROM_ALL>)
+function(build_depends_on target other_target)
+  if($<TARGET_PROPERTY:${other_target},EXCLUDE_FROM_ALL>)
     disable_target(${target})
-    build_skipped_message(${target} "target ${other-target}")
+    build_skipped_message(${target} "target ${other_target}")
 
   endif()
 endfunction()
@@ -79,9 +79,9 @@ endfunction()
 function(depend_on_boost_libs target libs)
   foreach(lib ${libs})
     string(TOUPPER ${lib} COMPONENT)
-    set(TMP_LIST)
-    list(APPEND TMP_LIST ${FAWKES_DEPENDENCIES_CHECKED})
-    if(NOT "boost_${lib}" IN_LIST TMP_LIST)
+    set(tmp_list)
+    list(APPEND tmp_list ${_FAWKES_DEPENDENCIES_CHECKED})
+    if(NOT "boost_${lib}" IN_LIST tmp_list)
       find_package(Boost COMPONENTS ${lib})
       remember_dependency(boost_${lib})
     endif()
@@ -98,9 +98,9 @@ endfunction()
 
 function(depend_on_pkgconfig_libs target libs)
   foreach(lib ${libs})
-    set(TMP_LIST)
-    list(APPEND TMP_LIST ${FAWKES_DEPENDENCIES_CHECKED})
-    if(NOT ${lib} IN_LIST TMP_LIST)
+    set(tmp_list)
+    list(APPEND tmp_list ${_FAWKES_DEPENDENCIES_CHECKED})
+    if(NOT ${lib} IN_LIST tmp_list)
       pkg_check_modules(${lib} QUIET ${lib})
       remember_dependency(${lib})
     endif()
@@ -119,10 +119,10 @@ function(optional_depend_on_pkgconfig_libs target libs success)
   set(${success}
       1
       PARENT_SCOPE)
-  set(TMP_LIST)
-  list(APPEND TMP_LIST ${FAWKES_DEPENDENCIES_CHECKED})
+  set(tmp_list)
+  list(APPEND tmp_list ${_FAWKES_DEPENDENCIES_CHECKED})
   foreach(lib ${libs})
-    if(NOT ${lib} IN_LIST TMP_LIST)
+    if(NOT ${lib} IN_LIST tmp_list)
       pkg_check_modules(${lib} QUIET ${lib})
       remember_dependency(${lib})
     endif()
@@ -137,13 +137,13 @@ function(optional_depend_on_pkgconfig_libs target libs success)
   endforeach()
 endfunction()
 
-macro(set_common_properties_of_targets_recursive targets dir)
+macro(SET_COMMON_PROPERTIES_OF_TARGETS_RECUCURSIVE targets dir)
   get_property(
     subdirectories
     DIRECTORY ${dir}
     PROPERTY SUBDIRECTORIES)
   foreach(subdir ${subdirectories})
-    set_common_properties_of_targets_recursive(${targets} ${subdir})
+    set_common_properties_of_targets_recucursive(${targets} ${subdir})
   endforeach()
 
   get_property(
@@ -178,16 +178,16 @@ endmacro()
 
 function(set_common_properties_of_targets var)
   set(targets)
-  set_common_properties_of_targets_recursive(targets
-                                             ${CMAKE_CURRENT_SOURCE_DIR})
+  set_common_properties_of_targets_recucursive(targets
+                                               ${CMAKE_CURRENT_SOURCE_DIR})
   set(${var}
       ${targets}
       PARENT_SCOPE)
 endfunction()
 
 function(remember_dependency dep)
-  set(FAWKES_DEPENDENCIES_CHECKED
-      "${dep};${FAWKES_DEPENDENCIES_CHECKED}"
+  set(_FAWKES_DEPENDENCIES_CHECKED
+      "${dep};${_FAWKES_DEPENDENCIES_CHECKED}"
       CACHE INTERNAL "")
 endfunction()
 
@@ -209,24 +209,24 @@ endfunction()
 
 function(plugin_disabled_message plugin)
   message(
-    STATUS "${BoldGreen}Skip building disabled ${plugin} plugin${ColourReset}")
+    STATUS "${BOLD_GREEN}Skip building disabled ${plugin} plugin${COLOR_RESET}")
 endfunction()
 
 function(build_skipped_message component reason)
   message(
     STATUS
-      "${BoldWhite}Omitting ${component} (${reason} required)${ColourReset}")
+      "${BOLD_WHITE}Omitting ${component} (${reason} required)${COLOR_RESET}")
 endfunction()
 
 function(target_skipped_message component reason)
   message(
     STATUS
-      "${BoldMagenta}Omitting ${component} (${reason} required)${ColourReset}")
+      "${BOLD_MAGENTA}Omitting ${component} (${reason} required)${COLOR_RESET}")
 endfunction()
 
 function(executable_disabled_message exe)
   message(
-    STATUS "${BoldBlue}Skip building disabled ${exe} executable${ColorReset}")
+    STATUS "${BOLD_BLUE}Skip building disabled ${exe} executable${ColorReset}")
 endfunction()
 list(FIND CMAKE_CXX_COMPILE_FEATURES "cxx_std_11" _index)
 if(${_index} GREATER -1)
@@ -244,3 +244,14 @@ list(FIND CMAKE_CXX_COMPILE_FEATURES "cxx_std_20" _index)
 if(${_index} GREATER -1)
   set(CPP_20_FOUND 1)
 endif()
+
+function(depend_on_cpp_version target version)
+  if(${CPP_${lib}_FOUND})
+    target_link_libraries(${target} ${${lib}_LDFLAGS})
+    target_compile_features(${target} PRIVATE cxx_std_${version})
+  else()
+    set_target_properties(${target} PROPERTIES EXCLUDE_FROM_ALL 1
+                                               EXCLUDE_FROM_DEFAULT_BUILD 1)
+    target_skipped_message(${target} "C++ ${version}")
+  endif()
+endfunction()

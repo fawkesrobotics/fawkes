@@ -22,7 +22,7 @@
 
 set(PLUGIN_laser-pointclouds
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build laser-pointclouds plugin")
 
 if(PLUGIN_laser-pointclouds)
 

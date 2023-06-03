@@ -22,10 +22,11 @@
 
 set(PLUGIN_amcl
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build amcl plugin")
 set(PLUGIN_map-lasergen
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build map-lasergen plugin")
+
 if(PLUGIN_amcl)
   add_library(amcl MODULE amcl_plugin.cpp amcl_thread.cpp)
   depend_on_tf(amcl)

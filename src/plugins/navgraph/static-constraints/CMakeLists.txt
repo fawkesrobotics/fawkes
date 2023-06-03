@@ -22,7 +22,7 @@
 
 set(PLUGIN_navgraph-static-constraints
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build navgraph-static-constraints plugin")
 
 if(PLUGIN_navgraph-static-constraints)
 

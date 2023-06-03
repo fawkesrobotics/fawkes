@@ -22,7 +22,7 @@
 
 set(PLUGIN_laser
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build laser plugin")
 if(PLUGIN_laser)
   add_library(laser MODULE laser_plugin.cpp acquisition_thread.cpp
                            sensor_thread.cpp)

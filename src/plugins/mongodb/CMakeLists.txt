@@ -22,14 +22,14 @@
 
 set(PLUGIN_mongodb
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build mongodb plugin")
 
 add_subdirectory(interfaces)
 add_subdirectory(aspect)
 
 set(PLUGIN_mongodb-rrd
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build mongodb-rrd plugin")
 
 if(PLUGIN_mongodb)
   add_library(

@@ -23,7 +23,7 @@
 include(eigen3)
 include(yamlcpp)
 
-set(navgraph_deps ${yamlcpp_deps};${eigen3_deps})
+set(NAVGRAPH_DEPS ${YAMLCPP_DEPS};${EIGEN3_DEPS})
 
 function(depend_on_navgraph target)
   depend_on_yamlcpp(${target})

@@ -22,7 +22,7 @@
 
 set(PLUGIN_skiller
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build skiller plugin")
 set(SKILLER_TIMETRACKING
     OFF
     CACHE BOOL "set to enable time tracking for skiller")
@@ -34,9 +34,9 @@ if(PLUGIN_skiller)
   add_library(skiller MODULE skiller_feature.cpp exec_thread.cpp
                              skiller_plugin.cpp)
 
-  optional_depend_on_pkgconfig_libs(skiller "${navgraph_deps}"
-                                    navgraph_deps_found)
-  if(navgraph_deps_found)
+  optional_depend_on_pkgconfig_libs(skiller "${NAVGRAPH_DEPS}"
+                                    NAVGRAPH_DEPS_FOUND)
+  if(NAVGRAPH_DEPS_FOUND)
     target_sources(skiller PRIVATE skiller_navgraph_feature.cpp)
     target_link_libraries(skiller fawkesnavgraphaspect)
     target_compile_definitions(skiller PUBLIC HAVE_NAVGRAPH)

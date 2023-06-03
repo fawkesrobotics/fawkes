@@ -22,7 +22,7 @@
 
 set(PLUGIN_clips-executive
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build clips-executive plugin")
 
 if(PLUGIN_clips-executive)
   add_subdirectory(rest-api)

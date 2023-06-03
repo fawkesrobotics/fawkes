@@ -22,7 +22,7 @@
 
 set(PLUGIN_imu
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build imu plugin")
 
 if(PLUGIN_imu)
   add_library(imu MODULE imu_plugin.cpp acquisition_thread.cpp

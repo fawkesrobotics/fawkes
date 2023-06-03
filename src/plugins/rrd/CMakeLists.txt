@@ -22,7 +22,7 @@
 
 set(PLUGIN_rrd
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build rrd plugin")
 add_subdirectory(aspect)
 
 if(PLUGIN_rrd)

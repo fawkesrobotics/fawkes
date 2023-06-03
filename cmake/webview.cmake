@@ -20,7 +20,7 @@
 #
 # *****************************************************************************
 
-set(webview_deps "libmicrohttpd;RapidJSON")
+set(WEBVIEW_DEPS "libmicrohttpd;RapidJSON")
 
 function(depend_on_webview target)
   target_link_libraries(${target} ${libmicrohttpd_LDFLAGS} ${RAPIDJOSN_LDFLAGS})

@@ -22,7 +22,7 @@
 
 set(PLUGIN_fvbase
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build fvbase plugin")
 
 if(PLUGIN_fvbase)
 

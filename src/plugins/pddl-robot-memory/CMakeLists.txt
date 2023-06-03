@@ -22,7 +22,7 @@
 
 set(PLUGIN_pddl-robot-memory
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build pddl-robot-memory plugin")
 
 find_package(Boost COMPONENTS system filesystem)
 

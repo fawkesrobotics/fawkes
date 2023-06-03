@@ -22,7 +22,7 @@
 
 set(PLUGIN_bbsync
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build bbsync plugin")
 add_subdirectory(interfaces)
 if(PLUGIN_bbsync)
   add_library(bbsync MODULE bbsync_plugin.cpp sync_listener.cpp sync_thread.cpp

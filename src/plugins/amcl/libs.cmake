@@ -22,6 +22,8 @@
 
 function(add_amcl_extra_libs)
   # Additional standalone libraries built from within this plugin
+
+  # cmake-lint: disable=C0103
   set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
   set(CMAKE_SHARED_MODULE_PREFIX "lib")
   add_subdirectory(pf)

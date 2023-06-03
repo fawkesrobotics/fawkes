@@ -22,7 +22,7 @@
 
 set(PLUGIN_flite
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build flite plugin")
 
 if(PLUGIN_flite)
   find_path(FLITE_ROOT flite/flite.h PATH_SUFFIXES include)

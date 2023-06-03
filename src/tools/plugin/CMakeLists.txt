@@ -20,15 +20,15 @@
 #
 # *****************************************************************************
 
-set(PLUGIN_ffplugin
+set(EXECUTABLE_ffplugin
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build ffplugin executable")
 
-if(PLUGIN_ffplugin)
+if(EXECUTABLE_ffplugin)
   add_executable(ffplugin main.cpp plugin_tool.cpp)
 
   target_link_libraries(ffplugin stdc++ fawkescore fawkesutils fawkesnetcomm
                         fawkesplugin)
 else()
-  executable_skipped_message(ffplugin)
+  executable_disabled_message(ffplugin)
 endif()

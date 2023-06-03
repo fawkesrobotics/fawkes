@@ -22,8 +22,8 @@
 
 set(PLUGIN_laser-lines
     ON
-    CACHE BOOL ON)
-set(laser-lines_PCL_LIBS sample_consensus segmentation filters surface search)
+    CACHE BOOL "Build laser-lines plugin")
+set(LASER-LINES_PCL_LIBS sample_consensus segmentation filters surface search)
 
 add_subdirectory(interfaces)
 
@@ -41,7 +41,7 @@ if(PLUGIN_laser-lines)
                                                 _LARGE_FILES)
   depend_on_tf(laser-lines)
   depend_on_pcl(laser-lines)
-  depend_on_pcl_extra_libs(laser-lines "${laser-lines_PCL_LIBS}")
+  depend_on_pcl_extra_libs(laser-lines "${LASER-LINES_PCL_LIBS}")
   target_link_libraries(
     laser-lines
     fawkescore

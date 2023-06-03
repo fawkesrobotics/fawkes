@@ -26,9 +26,11 @@ add_custom_target(
   COMMAND npm run build
   COMMAND mkdir -p ${FAWKES_RES_DIR}/webview
   COMMAND cp -a dist/* ${FAWKES_RES_DIR}/webview/
-  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+  COMMENT "Deploy the fawkes webview")
 
 add_custom_target(
   clean-deploy
   rm -rd ${FAWKES_RES_DIR}/webview/* || true
-  COMMAND rm -rd ${CMAKE_CURRENT_SOURCE_DIR}/node_modules || true)
+  COMMAND rm -rd ${CMAKE_CURRENT_SOURCE_DIR}/node_modules || true
+  COMMENT "Revert the steps of the deploy target")

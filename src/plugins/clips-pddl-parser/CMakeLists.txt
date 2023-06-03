@@ -22,7 +22,7 @@
 
 set(PLUGIN_clips-pddl-parser
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build clips-pddl-parser plugin")
 
 if(PLUGIN_clips-pddl-parser)
   add_library(

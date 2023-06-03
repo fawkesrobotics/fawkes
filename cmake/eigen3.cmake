@@ -20,7 +20,7 @@
 #
 # *****************************************************************************
 
-set(eigen3_deps "eigen3")
+set(EIGEN3_DEPS "eigen3")
 
 function(depend_on_eigen3 target)
   depend_on_pkgconfig_libs(${target} eigen3)

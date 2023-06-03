@@ -20,25 +20,25 @@
 #
 # *****************************************************************************
 
-set(urg_gbx_deps "flexiport;hokuyoaist")
+set(URG_GBX_DEPS "flexiport;hokuyoaist")
 function(depend_on_laser target)
-  optional_depend_on_pkgconfig_libs(${target} "${urg_gbx_deps}"
-                                    urg_gbx_deps_found)
-  optional_depend_on_pkgconfig_libs(${target} libudev libudev_dep_found)
-  optional_depend_on_pkgconfig_libs(${target} libusb-1.0 libusb-1.0_dep_found)
-  if(urg_gbx_deps_found)
+  optional_depend_on_pkgconfig_libs(${target} "${URG_GBX_DEPS}"
+                                    URG_GBX_DEPS_FOUND)
+  optional_depend_on_pkgconfig_libs(${target} libudev LIBUDEV_DEP_FOUND)
+  optional_depend_on_pkgconfig_libs(${target} libusb-1.0 LIBUSB-1.0_DEP_FOUND)
+  if(URG_GBX_DEPS_FOUND)
     target_compile_definitions(${target} PUBLIC HAVE_URG_GBX)
     set(URG_GBX_FOUND
         1
         PARENT_SCOPE)
   endif()
-  if(libudev_dep_found)
+  if(LIBUDEV_DEP_FOUND)
     target_compile_definitions(${target} PUBLIC HAVE_LIBUDEV)
     set(LIBUDEV_FOUND
         1
         PARENT_SCOPE)
   endif()
-  if(libusb-1.0_dep_found)
+  if(LIBUSB-1.0_DEP_FOUND)
     target_compile_definitions(${target} PUBLIC HAVE_LIBUSB)
     set(LIBUSB_FOUND
         1

@@ -22,7 +22,7 @@
 
 set(PLUGIN_clips-protobuf
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build clips-protobuf plugin")
 
 if(PLUGIN_clips-protobuf)
   add_library(clips-protobuf MODULE clips-protobuf-plugin.cpp

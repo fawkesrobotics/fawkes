@@ -22,7 +22,7 @@
 
 set(PLUGIN_robot-memory
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build robot-memory plugin")
 
 add_subdirectory(interfaces)
 add_subdirectory(aspect)

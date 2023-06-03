@@ -22,7 +22,7 @@
 
 set(PLUGIN_webview
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build webview plugin")
 
 if(PLUGIN_webview)
   add_library(
@@ -51,14 +51,14 @@ if(PLUGIN_webview)
 
   depend_on_boost_libs(webview filesystem)
 
-  optional_depend_on_pkgconfig_libs(webview ${tf_deps} tf_deps_found)
-  if(tf_deps_found)
+  optional_depend_on_pkgconfig_libs(webview ${TF_DEPS} TF_DEPS_FOUND)
+  if(TF_DEPS_FOUND)
     target_sources(webview PRIVATE tf-rest-api/tf-rest-api.cpp
                                    tf-rest-api/model/TransformsGraph.cpp)
     depend_on_tf(webview)
     target_link_libraries(webview fawkestf)
   else()
-    build_skipped_message("webview transform support" "${tf_deps}")
+    build_skipped_message("webview transform support" "${TF_DEPS}")
   endif()
 
   optional_depend_on_pkgconfig_libs(webview libjpeg libjpeg_dep_found)

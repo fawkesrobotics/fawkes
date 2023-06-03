@@ -22,58 +22,58 @@
 
 set(PLUGIN_ros
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build ros plugin")
 set(PLUGIN_ros-talkerpub
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build ros-talkerpub plugin")
 set(PLUGIN_ros-tf
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build ros-tf plugin")
 set(PLUGIN_ros-pcl
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build ros-pcl plugin")
 set(PLUGIN_ros-images
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build ros-images plugin")
 set(PLUGIN_ros-laserscan
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build ros-laserscan plugin")
 set(PLUGIN_ros-odometry
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build ros-odometry plugin")
 set(PLUGIN_ros-cmdvel
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build ros-cmdvel plugin")
 set(PLUGIN_ros-navigator
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build ros-navigator plugin")
 set(PLUGIN_ros-dynamic-reconfigure
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build ros-dynamic-reconfigure plugin")
 set(PLUGIN_ros-navgraph-breakout
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build ros-navgraph-breakout plugin")
 set(PLUGIN_ros-joint
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build ros-joint plugin")
 set(PLUGIN_ros-robot-description
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build ros-robot-description plugin")
 set(PLUGIN_ros-move-base
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build ros-move-base plugin")
 set(PLUGIN_ros-skiller
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build ros-skiller plugin")
 set(PLUGIN_ros-position-3d
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build ros-position-3d plugin")
 set(PLUGIN_ros-clock
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build ros-clock plugin")
 set(PLUGIN_ros-imu
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build ros-imu plugin")
 
 add_subdirectory(aspect)
 if(PLUGIN_ros)
@@ -282,13 +282,13 @@ else()
   plugin_disabled_message(ros-dynamic-reconfigure)
 endif()
 
-set(ros-navigator_DEPS move_base_msgs dynamic_reconfigure actionlib)
+set(ROS_NAVIGATOR_DEPS move_base_msgs dynamic_reconfigure actionlib)
 if(PLUGIN_ros-navigator)
   add_library(ros-navigator MODULE navigator_plugin.cpp navigator_thread.cpp)
   target_link_libraries(ros-navigator ${Boost_THREAD_LIBRARY})
   depend_on_ros(ros-navigator)
   depend_on_boost_libs(ros-navigator thread)
-  depend_on_ros_libs(ros-navigator "${ros-navigator_DEPS}")
+  depend_on_ros_libs(ros-navigator "${ROS_NAVIGATOR_DEPS}")
   target_link_libraries(
     ros-navigator
     m
@@ -307,7 +307,7 @@ endif()
 if(PLUGIN_ros-move-base)
   add_library(ros-move-base MODULE move_base_plugin.cpp move_base_thread.cpp)
   depend_on_ros(ros-move-base)
-  depend_on_ros_libs(ros-move-base "${ros-navigator_DEPS}")
+  depend_on_ros_libs(ros-move-base "${ROS_NAVIGATOR_DEPS}")
   target_link_libraries(ros-move-base ${Boost_THREAD_LIBRARY})
   target_link_libraries(
     ros-move-base

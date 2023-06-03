@@ -22,7 +22,7 @@
 
 set(PLUGIN_clips-agent
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build clips-agent plugin")
 
 if(PLUGIN_clips-agent)
 

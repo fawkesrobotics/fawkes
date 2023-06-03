@@ -22,7 +22,7 @@
 
 set(PLUGIN_fvretriever
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build fvretriever plugin")
 
 if(PLUGIN_fvretriever)
   add_library(fvretriever MODULE fvretriever_plugin.cpp retriever_thread.cpp)

@@ -22,8 +22,8 @@
 
 set(PLUGIN_laser-cluster
     ON
-    CACHE BOOL ON)
-set(laser-cluster_PCL_LIBS sample_consensus segmentation filters surface search)
+    CACHE BOOL "Build laser-cluster plugin")
+set(LASER_CLUSTER_PCL_LIBS sample_consensus segmentation filters surface search)
 
 if(PLUGIN_laser-cluster)
   add_subdirectory(interfaces)
@@ -31,7 +31,7 @@ if(PLUGIN_laser-cluster)
                                    laser-cluster-thread.cpp)
   depend_on_pcl(laser-cluster)
   depend_on_tf(laser-cluster)
-  depend_on_pcl_extra_libs(laser-cluster "${laser-cluster_PCL_LIBS}")
+  depend_on_pcl_extra_libs(laser-cluster "${LASER_CLUSTER_PCL_LIBS}")
   target_compile_features(laser-cluster PUBLIC cxx_std_11)
   target_link_libraries(
     laser-cluster

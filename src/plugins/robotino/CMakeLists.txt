@@ -22,8 +22,7 @@
 
 set(PLUGIN_robotino
     ON
-    CACHE BOOL ON)
-
+    CACHE BOOL "Build robotino plugin")
 if(PLUGIN_robotino)
   find_package(Boost COMPONENTS thread filesystem)
   add_subdirectory(interfaces)
@@ -44,8 +43,8 @@ if(PLUGIN_robotino)
   target_link_libraries(robotino ${Boost_LIBRARIES})
   target_include_directories(robotino PUBLIC ${Boost_INCLUDE_DIRS})
 
-  optional_depend_on_pkgconfig_libs(robotino "${tf_deps}" tf_deps_found)
-  if(tf_deps_found)
+  optional_depend_on_pkgconfig_libs(robotino "${TF_DEPS}" TF_DEPS_FOUND)
+  if(TF_DEPS_FOUND)
     depend_on_tf(robotino)
     set_source_files_properties(
       sensor_thread.cpp PROPERTIES COMPILE_OPTIONS

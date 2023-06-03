@@ -22,7 +22,7 @@
 
 set(PLUGIN_clips
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build clips plugin")
 
 if(PLUGIN_clips)
   add_subdirectory(aspect)

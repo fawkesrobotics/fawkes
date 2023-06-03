@@ -22,7 +22,7 @@
 
 set(PLUGIN_fvfountain
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build fvfountain plugin")
 
 if(PLUGIN_fvfountain)
   add_library(fvfountain MODULE fountain_plugin.cpp fountain_thread.cpp)

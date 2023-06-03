@@ -22,7 +22,7 @@
 
 set(PLUGIN_static-transforms
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build static-transforms plugin")
 
 if(PLUGIN_static-transforms)
 

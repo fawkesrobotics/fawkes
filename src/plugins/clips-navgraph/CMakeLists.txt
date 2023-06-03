@@ -22,7 +22,7 @@
 
 set(PLUGIN_clips-navgraph
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build clips-navgraph plugin")
 
 if(PLUGIN_clips-navgraph)
   if(CPP_11_FOUND)

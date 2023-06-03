@@ -22,7 +22,7 @@
 
 set(PLUGIN_skiller-rest-api
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build skiller-rest-api plugin")
 if(PLUGIN_skiller-rest-api)
   add_library(
     skiller-rest-api MODULE

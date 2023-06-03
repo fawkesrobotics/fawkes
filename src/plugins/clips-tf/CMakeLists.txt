@@ -22,7 +22,7 @@
 
 set(PLUGIN_clips-tf
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build clips-tf plugin")
 
 if(PLUGIN_clips-tf)
   add_library(clips-tf MODULE clips_tf_plugin.cpp clips_tf_thread.cpp)

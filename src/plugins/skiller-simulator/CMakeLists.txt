@@ -22,7 +22,7 @@
 
 set(PLUGIN_skiller-simulator
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build skiller-simulator plugin")
 
 if(PLUGIN_skiller-simulator)
   if(CPP_17_FOUND)

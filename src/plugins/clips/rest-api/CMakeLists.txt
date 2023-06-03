@@ -22,7 +22,7 @@
 
 set(PLUGIN_clips-rest-api
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build clips-rest-api plugin")
 if(PLUGIN_clips-rest-api)
   add_library(
     clips-rest-api MODULE

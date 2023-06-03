@@ -22,7 +22,7 @@
 
 set(PLUGIN_laser-filter
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build laser-filter plugin")
 add_subdirectory(deadspots)
 add_subdirectory(interfaces)
 
@@ -45,13 +45,13 @@ if(PLUGIN_laser-filter)
     filters/copy.cpp
     filters/max_circle.cpp
     laser_filter_plugin.cpp)
-  optional_depend_on_pkgconfig_libs(laser-filter "${tf_deps}" tf_deps_found)
-  if(tf_deps_found)
+  optional_depend_on_pkgconfig_libs(laser-filter "${TF_DEPS}" TF_DEPS_FOUND)
+  if(TF_DEPS_FOUND)
     target_sources(laser-filter PRIVATE filters/projection.cpp)
     depend_on_tf(laser-filter)
   else()
     build_skipped_message("projection filter of laser-filter plugin"
-                          "${tf_deps}")
+                          "${TF_DEPS}")
   endif()
   target_link_libraries(
     laser-filter

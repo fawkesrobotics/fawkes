@@ -22,7 +22,7 @@
 
 set(PLUGIN_pddl-planner
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build pddl-planner plugin")
 
 add_subdirectory(interfaces)
 

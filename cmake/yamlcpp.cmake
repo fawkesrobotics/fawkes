@@ -20,7 +20,7 @@
 #
 # *****************************************************************************
 
-set(yamlcpp_deps "yaml-cpp")
+set(YAMLCPP_DEPS "yaml-cpp")
 function(depend_on_yamlcpp target)
   target_compile_options(${target} PUBLIC -DHAVE_YAMLCPP ${yaml-cpp_CFLAGS})
   target_link_libraries(${target} ${yaml-cpp_LDFLAGS})

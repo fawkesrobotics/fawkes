@@ -22,7 +22,7 @@
 
 set(PLUGIN_navgraph
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build navgraph plugin")
 
 add_subdirectory(static-constraints)
 if(PLUGIN_navgraph)
