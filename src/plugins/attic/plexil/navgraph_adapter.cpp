@@ -89,9 +89,9 @@ NavGraphPlexilAdapter::initialize()
 
 	namespace p = std::placeholders;
 	commands_   = {
-	    {"navgraph_get_nodes", std::bind(&NavGraphPlexilAdapter::navgraph_get_nodes, this, p::_1)},
-	    {"navgraph_cost_to", std::bind(&NavGraphPlexilAdapter::navgraph_cost_to, this, p::_1)},
-	    {"navgraph_cost_between",
+    {"navgraph_get_nodes", std::bind(&NavGraphPlexilAdapter::navgraph_get_nodes, this, p::_1)},
+    {"navgraph_cost_to", std::bind(&NavGraphPlexilAdapter::navgraph_cost_to, this, p::_1)},
+    {"navgraph_cost_between",
 	     std::bind(&NavGraphPlexilAdapter::navgraph_cost_between, this, p::_1)},
   };
 
