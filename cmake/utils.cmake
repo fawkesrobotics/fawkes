@@ -228,6 +228,18 @@ function(executable_disabled_message exe)
   message(
     STATUS "${BOLD_BLUE}Skip building disabled ${exe} executable${ColorReset}")
 endfunction()
+
+function(cmake_not_implemented target)
+  add_custom_target(
+    ${target} ALL
+    ${CMAKE_COMMAND} -E cmake_echo_color --yellow --bold
+    "target ${target} cannot be built by cmake yet"
+    COMMAND exit 1
+    COMMENT
+      "Dummy target to indicate components that are not built through cmake yet"
+    VERBATIM)
+endfunction()
+
 list(FIND CMAKE_CXX_COMPILE_FEATURES "cxx_std_11" _index)
 if(${_index} GREATER -1)
   set(CPP_11_FOUND 1)
