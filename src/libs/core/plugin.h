@@ -70,7 +70,9 @@ typedef Plugin *(*PluginFactoryFunc)(fawkes::Configuration *);
 
 /** Plugin destructor function for the shared library.
  * Do not use directly, rather use the EXPORT_PLUGIN macro.
+ * @cond Doxygen_Suppress
  * @param plugin plugin to destroy
+ * @endcond
  * @relates fawkes::Plugin
  */
 typedef void (*PluginDestroyFunc)(Plugin *plugin);

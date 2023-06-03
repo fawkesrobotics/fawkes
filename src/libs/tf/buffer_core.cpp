@@ -854,7 +854,6 @@ BufferCore::create_connectivity_error_string(CompactFrameID source_frame,
 	                   + "' because they are not part of the same tree."
 	                   + "Tf has two or more unconnected trees.");
 }
-/// @endcond
 
 /** A way to see what frames have been cached.
  * Useful for debugging

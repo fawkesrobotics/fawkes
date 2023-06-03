@@ -13,6 +13,10 @@
 #
 #*****************************************************************************
 
+ifndef BUILD_LEGACY
+$(error The legacy buildsystem is outdated, run with BUILD_LEGACY=1 to ignore this)
+exit 1
+endif
 ifndef __buildsys_config_mk_
 $(error config.mk must be included before base.mk)
 endif
@@ -28,4 +32,3 @@ ifneq ($(OBJDIR),$(notdir $(CURDIR)))
 else
   include $(BUILDSYSDIR)/rules.mk
 endif
-

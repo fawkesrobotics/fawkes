@@ -22,7 +22,7 @@ fawkes/meta_plugins:
     - mongodb
     - clips
     - robot-memory
-    - clips_robot_memory
+    - clips-robot-memory
     - pddl-robot-memory
     - pddl-planner
     - clips-pddl-parser

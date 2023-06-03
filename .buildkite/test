@@ -27,6 +27,7 @@ source $SCRIPT_PATH/environment.sh
 # Error out on any error in the script, pipes etc.
 set -euo pipefail
 
+cd build
 # Run tests
 $MAKE -j$NPROC test
 $MAKE integration-test

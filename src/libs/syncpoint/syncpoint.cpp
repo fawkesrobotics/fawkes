@@ -127,7 +127,7 @@ SyncPoint::operator==(const SyncPoint &other) const
  * @return true if the identifier of the SyncPoint matches the given string
  */
 bool
-SyncPoint::operator==(const string &other) const
+SyncPoint::operator==(const std::string &other) const
 {
 	return identifier_ == other;
 }
