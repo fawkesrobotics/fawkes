@@ -33,6 +33,8 @@ if(NOT FAWKES_DIR)
 endif()
 
 add_subdirectory(src)
+add_subdirectory(etc)
+
 if(NOT FAWKES_DIR)
   set_common_properties_of_targets(all_targets)
 endif()

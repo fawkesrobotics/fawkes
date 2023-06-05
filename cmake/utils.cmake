@@ -240,6 +240,28 @@ function(cmake_not_implemented target)
     VERBATIM)
 endfunction()
 
+function(create_symlink source destination)
+  get_filename_component(target ${source} NAME)
+  create_symlink_custom_target(${target} ${source} ${destination}/${target})
+endfunction()
+
+function(create_symlink_custom_target target source destination)
+  add_custom_target(
+    ${target} ALL
+    COMMAND ${CMAKE_COMMAND} -E true
+    COMMENT "Target ${target} for symlink")
+  get_filename_component(source_name ${source} NAME)
+
+  add_custom_command(
+    TARGET ${target}
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E create_symlink
+            ${CMAKE_CURRENT_SOURCE_DIR}/${source} ${destination}
+    COMMENT
+      "${BOLD_BLUE}Created symlink: ${CMAKE_CURRENT_SOURCE_DIR}/${target} -> ${destination}${COLOR_RESET}"
+  )
+endfunction()
+
 list(FIND CMAKE_CXX_COMPILE_FEATURES "cxx_std_11" _index)
 if(${_index} GREATER -1)
   set(CPP_11_FOUND 1)
