@@ -280,8 +280,7 @@ if(${_index} GREATER -1)
 endif()
 
 function(depend_on_cpp_version target version)
-  if(${CPP_${lib}_FOUND})
-    target_link_libraries(${target} ${${lib}_LDFLAGS})
+  if(${CPP_${version}_FOUND})
     target_compile_features(${target} PRIVATE cxx_std_${version})
   else()
     set_target_properties(${target} PROPERTIES EXCLUDE_FROM_ALL 1
