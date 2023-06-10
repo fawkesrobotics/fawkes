@@ -26,7 +26,7 @@ remember_dependency(yaml-cpp)
 pkg_check_modules(libelf REQUIRED libelf)
 remember_dependency(libelf)
 
-find_package(Boost COMPONENTS system thread filesystem)
+find_package(Boost COMPONENTS system thread filesystem chrono)
 if(Boost_SYSTEM_FOUND AND Boost_THREAD_FOUND)
   set(SICK_TIM55X_BOOST_DEPS_FOUND
       1
