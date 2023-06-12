@@ -130,6 +130,7 @@ private:
 	bool        save_images_;
 	size_t      name_it_;
 	uint        rgb_error_counter_ = 0;
+	std::string serial_no_;
 };
 
 #endif

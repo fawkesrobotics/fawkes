@@ -30,3 +30,7 @@ realsense2:
   device_options:
     # Laser power from 0 - 15 as integer
     laser_power: 15
+
+  # set Serial Number to select device if more than one connected
+  serial_no: ""
+

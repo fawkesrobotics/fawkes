@@ -66,6 +66,8 @@ Realsense2Thread::init()
 	rgb_frame_rate_ = config->get_int_or_default((cfg_prefix + "frame_rate").c_str(), 30);
 	save_images_    = config->get_bool_or_default((cfg_prefix + "save_images").c_str(), false);
 
+	serial_no_ = config->get_string_or_default((cfg_prefix + "serial_no").c_str(), "");
+
 	if (cfg_use_switch_) {
 		logger->log_info(name(), "Switch enabled");
 	} else {
@@ -219,6 +221,7 @@ Realsense2Thread::start_camera()
 			return false;
 		}
 		rs2::config config;
+		config.enable_device(rs_device_.get_info(RS2_CAMERA_INFO_SERIAL_NUMBER));
 		config.enable_stream(RS2_STREAM_DEPTH, RS2_FORMAT_Z16, frame_rate_);
 		rs2::pipeline_profile rs_pipeline_profile_ = rs_pipe_->start(config);
 		auto                  depth_stream =
@@ -237,6 +240,7 @@ Realsense2Thread::start_camera()
 		                 frame_rate_);
 
 		rs2::config rgb_rs_config;
+		rgb_rs_config.enable_device(rs_device_.get_info(RS2_CAMERA_INFO_SERIAL_NUMBER));
 		rgb_rs_config.enable_stream(
 		  RS2_STREAM_COLOR, image_width_, image_height_, RS2_FORMAT_RGB8, rgb_frame_rate_);
 		rs2::pipeline_profile rgb_rs_pipeline_profile_ = rgb_rs_pipe_->start(rgb_rs_config);
@@ -294,26 +298,34 @@ Realsense2Thread::get_camera(rs2::device &dev)
 			return false;
 		} else {
 			logger->log_info(name(), "found devices: %d", devlist.size());
-			if (devlist.front().is<rs400::advanced_mode>()) {
-				dev = devlist.front().as<rs400::advanced_mode>();
-			} else {
-				dev = devlist.front();
-			}
+			for (size_t i = 0; i < devlist.size(); i++) {
+				if (devlist[i].is<rs400::advanced_mode>()) {
+					dev = devlist[i].as<rs400::advanced_mode>();
+				} else {
+					dev = devlist[i];
+				}
 
-			std::string dev_name = "Unknown Device";
-			if (dev.supports(RS2_CAMERA_INFO_NAME)) {
-				dev_name = dev.get_info(RS2_CAMERA_INFO_NAME);
-			} else {
-				logger->log_info(name(), "RS2Option RS2_CAMERA_INFO_NAME not supported %d", 1);
-			}
+				std::string dev_name = "Unknown Device";
+				if (dev.supports(RS2_CAMERA_INFO_NAME)) {
+					dev_name = dev.get_info(RS2_CAMERA_INFO_NAME);
+				} else {
+					logger->log_info(name(), "RS2Option RS2_CAMERA_INFO_NAME not supported %d", 1);
+				}
 
-			std::string dev_sn = "########";
-			if (dev.supports(RS2_CAMERA_INFO_SERIAL_NUMBER)) {
-				dev_sn = std::string("#") + rs_device_.get_info(RS2_CAMERA_INFO_SERIAL_NUMBER);
-			} else {
-				logger->log_info(name(), "RS2Option RS2_CAMERA_INFO_SERIAL_NUMBER not supported");
+				std::string dev_sn = "########";
+				if (dev.supports(RS2_CAMERA_INFO_SERIAL_NUMBER)) {
+					dev_sn = std::string("#") + rs_device_.get_info(RS2_CAMERA_INFO_SERIAL_NUMBER);
+					logger->log_info(name(), "found device with serial number: %s", dev_sn.c_str());
+					if(strcmp(rs_device_.get_info(RS2_CAMERA_INFO_SERIAL_NUMBER), serial_no_.c_str()) == 0){
+						logger->log_info(name(), "matched device with serial number: %s", dev_sn.c_str());
+						logger->log_info(name(), "Camera Name: %s, SN: %s", dev_name.c_str(), dev_sn.c_str());
+						return true;
+					}
+				} else {
+					logger->log_info(name(), "RS2Option RS2_CAMERA_INFO_SERIAL_NUMBER not supported");
+				}
 			}
-			logger->log_info(name(), "Camera Name: %s, SN: %s", dev_name.c_str(), dev_sn.c_str());
+			logger->log_warn(name(), "No device with serial number %s found, returning last device in list", serial_no_.c_str());
 			return true;
 		}
 	} catch (const rs2::error &e) {
