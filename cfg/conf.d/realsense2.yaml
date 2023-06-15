@@ -33,4 +33,3 @@ realsense2:
 
   # set Serial Number to select device if more than one connected
   serial_no: ""
-
