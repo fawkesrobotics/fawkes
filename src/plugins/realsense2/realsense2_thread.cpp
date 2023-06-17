@@ -312,8 +312,9 @@ Realsense2Thread::get_camera(rs2::device &dev)
 					logger->log_info(name(), "RS2Option RS2_CAMERA_INFO_NAME not supported %d", 1);
 				}
 
-				std::string dev_sn = "########";
+				
 				if (dev.supports(RS2_CAMERA_INFO_SERIAL_NUMBER)) {
+					std::string dev_sn = "########";
 					dev_sn = std::string("#") + rs_device_.get_info(RS2_CAMERA_INFO_SERIAL_NUMBER);
 					logger->log_info(name(), "found device with serial number: %s", dev_sn.c_str());
 					if(strcmp(rs_device_.get_info(RS2_CAMERA_INFO_SERIAL_NUMBER), serial_no_.c_str()) == 0){
