@@ -23,9 +23,10 @@
 set(PLUGIN_robotino
     ON
     CACHE BOOL "Build robotino plugin")
+add_subdirectory(interfaces)
+
 if(PLUGIN_robotino)
   find_package(Boost COMPONENTS thread filesystem)
-  add_subdirectory(interfaces)
 
   add_library(
     robotino MODULE robotino_plugin.cpp com_thread.cpp sensor_thread.cpp

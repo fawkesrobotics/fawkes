@@ -1,0 +1,9 @@
+version: "3.4"
+services:
+
+  fawkes:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: base_image
+
