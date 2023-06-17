@@ -37,11 +37,11 @@ endfunction()
 function(generate_tolua target)
   string(REPLACE ";" " " FILES "${ARGN}")
   add_custom_command(
-    OUTPUT ${INTERFACE_PREFIX}${target}_tolua.pkg
-           ${INTERFACE_PREFIX}${target}_tolua.cpp
+    OUTPUT ${interface_prefix}${target}_tolua.pkg
+           ${interface_prefix}${target}_tolua.cpp
     COMMAND
       /bin/sh -c
-      "${FAWKES_CORE_DIR}/etc/scripts/./tolua_generate.sh ${CMAKE_CURRENT_BINARY_DIR} ${INTERFACE_PREFIX}${target} ${PROJECT_SOURCE_DIR}/src/lua/fawkes/toluaext.lua ${PROJECT_SOURCE_DIR}/doc/headers/lichead_c.GPL_WRE ${CMAKE_CURRENT_SOURCE_DIR} ${FILES}"
+      "${FAWKES_CORE_DIR}/etc/scripts/./tolua_generate.sh ${CMAKE_CURRENT_BINARY_DIR} ${interface_prefix}${target} ${PROJECT_SOURCE_DIR}/src/lua/fawkes/toluaext.lua ${PROJECT_SOURCE_DIR}/doc/headers/lichead_c.GPL_WRE ${CMAKE_CURRENT_SOURCE_DIR} ${FILES}"
     VERBATIM
     DEPENDS ${ARGN} ${FAWKES_CORE_DIR}/etc/scripts/tolua_generate.sh
     COMMENT "Generate tolua bindings for ${target}")
@@ -60,6 +60,7 @@ endfunction()
 
 function(generate_interface_from_xml interface)
   get_filename_component(if_name ${interface} NAME_WLE)
+  set(interface_prefix interfaces_)
   add_custom_command(
     OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/${if_name}.tolua
            ${CMAKE_CURRENT_SOURCE_DIR}/${if_name}.h
@@ -69,7 +70,7 @@ function(generate_interface_from_xml interface)
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${interface}
     COMMENT "Generate c++ code and tolua bindings for ${if_name}")
   generate_tolua(${if_name} ${if_name}.tolua)
-  add_library(${if_name}_tolua SHARED ${if_name}_tolua.cpp)
+  add_library(${if_name}_tolua SHARED ${interface_prefix}${if_name}_tolua.cpp)
   depend_on_lua(${if_name}_tolua)
   set_target_properties(
     ${if_name}_tolua
