@@ -25,8 +25,9 @@ set(PLUGIN_laser-cluster
     CACHE BOOL "Build laser-cluster plugin")
 set(LASER_CLUSTER_PCL_LIBS sample_consensus segmentation filters surface search)
 
+add_subdirectory(interfaces)
+
 if(PLUGIN_laser-cluster)
-  add_subdirectory(interfaces)
   add_library(laser-cluster MODULE laser-cluster-plugin.cpp
                                    laser-cluster-thread.cpp)
   depend_on_pcl(laser-cluster)
