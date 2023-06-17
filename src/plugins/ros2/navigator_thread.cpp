@@ -180,20 +180,58 @@ ROS2NavigatorThread::send_goal()
 				    nav_if_->set_error_code(NavigatorInterface::ERROR_NONE);
 				    nav_if_->write();
 				    //}
+				    std::stringstream ss;
+				    for (std::size_t i = 0; i < 16; i++) {
+					    if (i != 0) {
+						    ss << ", ";
+					    }
+					    ss << "0x" << std::hex << static_cast<int>(result.goal_id[i]);
+				    }
+				    logger->log_warn(name(), ("Succeeded goal with id: " + ss.str()).c_str());
+
+				    auto val = result.result;
 			    } break;
 
 			    case rclcpp_action::ResultCode::ABORTED: {
 				    nav_if_->set_final(true);
 				    nav_if_->set_error_code(NavigatorInterface::ERROR_PATH_GEN_FAIL);
 				    nav_if_->write();
+				    std::stringstream ss;
+				    for (std::size_t i = 0; i < 16; i++) {
+					    if (i != 0) {
+						    ss << ", ";
+					    }
+					    ss << "0x" << std::hex << static_cast<int>(result.goal_id[i]);
+				    }
+				    logger->log_warn(name(), ("Aborted goal with id: " + ss.str()).c_str());
+
+				    auto val = result.result;
+
 			    } break;
 
 			    case rclcpp_action::ResultCode::CANCELED: {
 				    nav_if_->set_final(true);
 				    nav_if_->set_error_code(NavigatorInterface::ERROR_UNKNOWN_PLACE);
 				    nav_if_->write();
+				    std::stringstream ss;
+				    for (std::size_t i = 0; i < 16; i++) {
+					    if (i != 0) {
+						    ss << ", ";
+					    }
+					    ss << "0x" << std::hex << static_cast<int>(result.goal_id[i]);
+				    }
+				    logger->log_warn(name(), ("Canceled goal with id: " + ss.str()).c_str());
+
+				    auto val = result.result;
 			    } break;
-			    deafult : {
+			    default: {
+				    std::stringstream ss;
+				    for (std::size_t i = 0; i < 16; i++) {
+					    if (i != 0) {
+						    ss << ", ";
+					    }
+					    ss << "0x" << std::hex << static_cast<int>(result.goal_id[i]);
+				    }
 				    logger->log_error(name(), "Unknown result code received");
 				    nav_if_->set_final(true);
 				    nav_if_->set_error_code(NavigatorInterface::ERROR_UNKNOWN_PLACE);
