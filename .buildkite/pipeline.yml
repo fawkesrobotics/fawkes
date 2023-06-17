@@ -31,13 +31,6 @@ steps:
             - SSH_DEPLOY_PRIVKEY_COMMITTERS
 
   - wait
-  - label: ":fedora: Build :docker:"
-    plugins:
-      - *merged-pr-plugin
-      - docker-compose#v4.12.0:
-          build: fawkes
-
-  - wait
 
   - label: ":fedora: test"
     artifact_paths:
