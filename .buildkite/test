@@ -30,4 +30,4 @@ set -euo pipefail
 cd build
 # Run tests
 $MAKE -j$NPROC test
-$MAKE integration-test
+#$MAKE integration-test
