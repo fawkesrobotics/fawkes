@@ -91,9 +91,7 @@ private:
 	fawkes::Position3DInterface                                   *pose_if_;
 	Nav2Client                                                     ac_;
 	NavigateToPose::Goal                                           goal_;
-	GoalHandleNav2::SharedPtr                                      goal_handle_;
 	std::shared_future<GoalHandleNav2::SharedPtr>                  future_goal_handle_;
-	bool                                                           goal_result_available_;
 	bool                                                           connected_history_;
 	rclcpp::Clock                                                  ros_clock_;
 	rclcpp_action::ClientGoalHandle<NavigateToPose>::WrappedResult result_;
