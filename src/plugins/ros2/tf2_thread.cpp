@@ -369,7 +369,7 @@ ROS2TF2Thread::publish_transform_to_fawkes(const geometry_msgs::msg::TransformSt
 		try {
 			ros2_frames_.push_back(std::string("/tf/") + child_frame_id);
 			tf_add_publisher("%s", child_frame_id.c_str());
-			tf_publishers[ts.child_frame_id]->send_transform(st, static_tf);
+			tf_publishers[child_frame_id]->send_transform(st, static_tf);
 		} catch (Exception &e) {
 			ros2_frames_.pop_back();
 			logger->log_warn(name(),
