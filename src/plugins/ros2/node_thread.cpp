@@ -120,6 +120,5 @@ ROS2NodeThread::loop()
 {
 	if (!cfg_async_spinning_) {
 		rclcpp::spin_some(node_handle);
-    usleep(100000);
 	}
 }
