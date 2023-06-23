@@ -230,9 +230,11 @@ check_commit_authors () {
 			error_exit "Invalid committer email address '$CE' in commit $HASH."
 		fi
 		if [[ $VALID_AN == 0 ]]; then
+	    echo $AUTHOR_NAME
 			error_exit "Invalid author name '$AN' in commit $HASH."
 		fi
 		if [ $VALID_CN == 0 ]; then
+	    echo $AUTHOR_NAME
 			error_exit "Invalid committer name '$AN' in commit $HASH."
 		fi
 	done
