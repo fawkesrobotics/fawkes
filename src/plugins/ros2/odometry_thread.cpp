@@ -57,7 +57,7 @@ ROS2OdometryThread::init()
 	}
 	motor_if_ = blackboard->open_for_reading<MotorInterface>(motor_if_id.c_str());
 	pub_      = node_handle->create_publisher<nav_msgs::msg::Odometry>("odom", 10);
-  logger->log_info(name(), "done");
+	logger->log_info(name(), "done");
 }
 
 void
@@ -77,18 +77,18 @@ ROS2OdometryThread::publish_odom()
 	odom.pose.pose.position.x = (double)motor_if_->odometry_position_x();
 	odom.pose.pose.position.y = (double)motor_if_->odometry_position_y();
 	odom.pose.pose.position.z = 0.0;
-	std::copy(odom_covariance_.begin(), odom_covariance_.end() , std::begin(odom.pose.covariance));
-	fawkes::tf::Quaternion    q(motor_if_->odometry_orientation(), 0, 0);
-	odom.pose.pose.orientation.x                = q.x();
-	odom.pose.pose.orientation.y                = q.y();
-	odom.pose.pose.orientation.z                = q.z();
-	odom.pose.pose.orientation.w                = q.w();
+	std::copy(odom_covariance_.begin(), odom_covariance_.end(), std::begin(odom.pose.covariance));
+	fawkes::tf::Quaternion q(motor_if_->odometry_orientation(), 0, 0);
+	odom.pose.pose.orientation.x = q.x();
+	odom.pose.pose.orientation.y = q.y();
+	odom.pose.pose.orientation.z = q.z();
+	odom.pose.pose.orientation.w = q.w();
 	//Motion
 	odom.child_frame_id        = cfg_base_frame_id_;
 	odom.twist.twist.linear.x  = (double)motor_if_->vx();
 	odom.twist.twist.linear.y  = (double)motor_if_->vy();
 	odom.twist.twist.angular.z = (double)motor_if_->omega();
-	std::copy(odom_covariance_.begin(), odom_covariance_.end() , std::begin(odom.twist.covariance));
+	std::copy(odom_covariance_.begin(), odom_covariance_.end(), std::begin(odom.twist.covariance));
 	pub_->publish(odom);
 }
 

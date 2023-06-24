@@ -27,6 +27,7 @@
 #include <aspect/logging.h>
 #include <core/threading/thread.h>
 #include <plugins/ros2/aspect/ros2.h>
+
 #include <rclcpp/rclcpp.hpp>
 #include <rosgraph_msgs/msg/clock.hpp>
 
@@ -35,11 +36,11 @@ class TimeWait;
 }
 
 class ROS2ClockThread : public fawkes::Thread,
-                       public fawkes::LoggingAspect,
-                       public fawkes::ConfigurableAspect,
-                       public fawkes::BlackBoardAspect,
-                       public fawkes::ClockAspect,
-                       public fawkes::ROS2Aspect
+                        public fawkes::LoggingAspect,
+                        public fawkes::ConfigurableAspect,
+                        public fawkes::BlackBoardAspect,
+                        public fawkes::ClockAspect,
+                        public fawkes::ROS2Aspect
 {
 public:
 	ROS2ClockThread();
@@ -61,8 +62,8 @@ private:
 
 private:
 	rclcpp::Publisher<rosgraph_msgs::msg::Clock>::SharedPtr pub_;
-	bool           set_local_;
-	unsigned int   cfg_freq_;
+	bool                                                    set_local_;
+	unsigned int                                            cfg_freq_;
 
 	fawkes::TimeWait *time_wait_;
 };

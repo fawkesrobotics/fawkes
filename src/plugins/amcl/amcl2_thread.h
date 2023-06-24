@@ -64,13 +64,13 @@ class Mutex;
 class AmclROS2Thread;
 
 class Amcl2Thread : public fawkes::Thread,
-                   public fawkes::ClockAspect,
-                   public fawkes::LoggingAspect,
-                   public fawkes::ConfigurableAspect,
-                   public fawkes::BlockedTimingAspect,
-                   public fawkes::BlackBoardAspect,
-                   public fawkes::TransformAspect,
-                   public fawkes::BlackBoardInterfaceListener
+                    public fawkes::ClockAspect,
+                    public fawkes::LoggingAspect,
+                    public fawkes::ConfigurableAspect,
+                    public fawkes::BlockedTimingAspect,
+                    public fawkes::BlackBoardAspect,
+                    public fawkes::TransformAspect,
+                    public fawkes::BlackBoardInterfaceListener
 
 {
 public:

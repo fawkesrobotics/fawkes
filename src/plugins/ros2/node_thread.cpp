@@ -23,6 +23,7 @@
 #include "node_thread.h"
 
 #include <utils/system/hostinfo.h>
+
 #include <rclcpp/executors/multi_threaded_executor.hpp>
 
 using namespace fawkes;
@@ -38,7 +39,7 @@ using namespace fawkes;
 /** Constructor. */
 ROS2NodeThread::ROS2NodeThread()
 : Thread("ROS2NodeThread", Thread::OPMODE_CONTINUOUS),
-//  BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_POST_LOOP),
+  //  BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_POST_LOOP),
   AspectProviderAspect(&ros2_aspect_inifin_)
 {
 }
@@ -63,9 +64,9 @@ ROS2NodeThread::init()
 	} catch (Exception &e) {
 	} // ignored, use default
 
-	int         argc      = 1;
-	const char *argv[]    = {"fawkes"};
-		rclcpp::init(argc, (char **)argv);
+	int         argc   = 1;
+	const char *argv[] = {"fawkes"};
+	rclcpp::init(argc, (char **)argv);
 
 	std::string node_name = config->get_string_or_default("/ros2/node-name", "fawkes");
 
@@ -74,17 +75,16 @@ ROS2NodeThread::init()
 		node_name = hinfo.short_name();
 	}
 
-        std::string ros_namespace = config->get_string_or_default("/ros2/namespace", "");
+	std::string ros_namespace = config->get_string_or_default("/ros2/namespace", "");
 
 	if (ros_namespace == "$HOSTNAME") {
 		HostInfo hinfo;
-                // namespace must not contain characters other than alphanumerics, '_', or '/'
-                ros_namespace = hinfo.short_name();
-                std::regex ros_namespace_pattern("[^A-Za-z0-9_]");
-             
-                // write the results to an output iterator
-                ros_namespace = std::regex_replace(ros_namespace,
-                                                   ros_namespace_pattern, "");
+		// namespace must not contain characters other than alphanumerics, '_', or '/'
+		ros_namespace = hinfo.short_name();
+		std::regex ros_namespace_pattern("[^A-Za-z0-9_]");
+
+		// write the results to an output iterator
+		ros_namespace = std::regex_replace(ros_namespace, ros_namespace_pattern, "");
 
 		ros_namespace = std::string("/") + ros_namespace;
 	}
@@ -99,12 +99,14 @@ ROS2NodeThread::init()
 
 	bool yield_before_execute = true;
 
-	mult_executor = new rclcpp::executors::MultiThreadedExecutor(
-				rclcpp::ExecutorOptions(), 2u, yield_before_execute);
+	mult_executor = new rclcpp::executors::MultiThreadedExecutor(rclcpp::ExecutorOptions(),
+	                                                             2u,
+	                                                             yield_before_execute);
 
 	if (cfg_async_spinning_) {
 		mult_executor->add_node(node_handle);
-		std::thread executor_thread(std::bind(&rclcpp::executors::MultiThreadedExecutor::spin, mult_executor));
+		std::thread executor_thread(
+		  std::bind(&rclcpp::executors::MultiThreadedExecutor::spin, mult_executor));
 	}
 }
 

@@ -27,11 +27,10 @@
 //#include <aspect/aspect.h>
 #include <aspect/configurable.h>
 #include <core/utils/lockptr.h>
-#include <rclcpp/rclcpp.hpp>
 #include <utils/system/hostinfo.h>
+
+#include <rclcpp/rclcpp.hpp>
 #include <regex>
-
-
 
 namespace fawkes {
 
@@ -45,7 +44,7 @@ class ROS2Aspect : public virtual Aspect
 public:
 	ROS2Aspect();
 	virtual ~ROS2Aspect();
-	void add_tf_prefix(std::string & frame_id);
+	void add_tf_prefix(std::string &frame_id);
 
 protected:
 	rclcpp::Node::SharedPtr node_handle;
@@ -53,9 +52,9 @@ protected:
 private:
 	void init_ROS2Aspect(rclcpp::Node::SharedPtr node_handle);
 	void finalize_ROS2Aspect();
-//	bool tf_prefix_enabled_;
-//	std::string cfg_tf_prefix_;
-//	std::vector<std::string> cfg_tf_prefix_exclusions_;
+	//	bool tf_prefix_enabled_;
+	//	std::string cfg_tf_prefix_;
+	//	std::vector<std::string> cfg_tf_prefix_exclusions_;
 };
 
 } // end namespace fawkes

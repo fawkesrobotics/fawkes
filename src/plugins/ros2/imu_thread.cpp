@@ -33,7 +33,8 @@ using namespace fawkes;
 
 /** Constructor. */
 ROS2IMUThread::ROS2IMUThread()
-: Thread("ROS2IMUThread", Thread::OPMODE_WAITFORWAKEUP), BlackBoardInterfaceListener("ROS2IMUThread")
+: Thread("ROS2IMUThread", Thread::OPMODE_WAITFORWAKEUP),
+  BlackBoardInterfaceListener("ROS2IMUThread")
 {
 }
 

@@ -28,19 +28,20 @@
 #include <core/threading/thread.h>
 #include <core/utils/lockptr.h>
 #include <plugins/ros2/aspect/ros2.h>
-#include <rclcpp/rclcpp.hpp>
-#include <nav_msgs/msg/odometry.hpp>
+
 #include <boost/array.hpp>
+#include <nav_msgs/msg/odometry.hpp>
+#include <rclcpp/rclcpp.hpp>
 namespace fawkes {
 class MotorInterface;
 }
 
 class ROS2OdometryThread : public fawkes::Thread,
-                          public fawkes::BlockedTimingAspect,
-                          public fawkes::LoggingAspect,
-                          public fawkes::ConfigurableAspect,
-                          public fawkes::BlackBoardAspect,
-                          public fawkes::ROS2Aspect
+                           public fawkes::BlockedTimingAspect,
+                           public fawkes::LoggingAspect,
+                           public fawkes::ConfigurableAspect,
+                           public fawkes::BlackBoardAspect,
+                           public fawkes::ROS2Aspect
 {
 public:
 	ROS2OdometryThread();
@@ -61,11 +62,11 @@ private:
 	void publish_odom();
 
 private:
-	fawkes::MotorInterface * motor_if_;
+	fawkes::MotorInterface                               *motor_if_;
 	rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr pub_;
-	std::string              cfg_odom_frame_id_;
-	std::string              cfg_base_frame_id_;
-	boost::array<double, 36> odom_covariance_;
+	std::string                                           cfg_odom_frame_id_;
+	std::string                                           cfg_base_frame_id_;
+	boost::array<double, 36>                              odom_covariance_;
 };
 
 #endif

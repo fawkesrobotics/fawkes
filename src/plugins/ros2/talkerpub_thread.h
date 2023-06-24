@@ -31,16 +31,16 @@
 #include <core/utils/lockptr.h>
 #include <plugins/ros2/aspect/ros2.h>
 
+#include <rclcpp/publisher.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/string.hpp>
-#include <rclcpp/publisher.hpp>
 
 class ROS2TalkerPubThread : public fawkes::Thread,
-                           public fawkes::BlockedTimingAspect,
-                           public fawkes::LoggingAspect,
-                           public fawkes::ConfigurableAspect,
-                           public fawkes::ClockAspect,
-                           public fawkes::ROS2Aspect
+                            public fawkes::BlockedTimingAspect,
+                            public fawkes::LoggingAspect,
+                            public fawkes::ConfigurableAspect,
+                            public fawkes::ClockAspect,
+                            public fawkes::ROS2Aspect
 {
 public:
 	ROS2TalkerPubThread();

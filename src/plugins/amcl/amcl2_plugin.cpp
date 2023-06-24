@@ -21,10 +21,10 @@
  */
 
 #include "amcl2_thread.h"
-
-#include <core/plugin.h>
 #include "amcl_utils.h"
 #include "ros2_thread.h"
+
+#include <core/plugin.h>
 
 using namespace fawkes;
 
@@ -40,7 +40,7 @@ public:
 	explicit Amcl2Plugin(Configuration *config) : Plugin(config)
 	{
 		AmclROS2Thread *rt          = NULL;
-		bool           ros_enabled = true;
+		bool            ros_enabled = true;
 		try {
 			ros_enabled = config->get_bool(AMCL_CFG_PREFIX "ros/enable");
 		} catch (Exception &e) {

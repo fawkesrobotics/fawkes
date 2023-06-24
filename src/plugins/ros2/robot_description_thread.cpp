@@ -21,9 +21,8 @@
 
 #include "robot_description_thread.h"
 
-#include <rclcpp/rclcpp.hpp>
-
 #include <fstream>
+#include <rclcpp/rclcpp.hpp>
 
 using namespace fawkes;
 using namespace std;

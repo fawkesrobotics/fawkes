@@ -21,7 +21,6 @@
 
 #include "position_3d_thread.h"
 
-
 using namespace fawkes;
 
 #define CFG_PREFIX "/ros/position-3d/"
@@ -102,15 +101,15 @@ ROS2Position3DThread::bb_interface_created(const char *type, const char *id) thr
 }
 
 void
-ROS2Position3DThread::bb_interface_writer_removed(Interface *  interface,
-                                                 unsigned int instance_serial) throw()
+ROS2Position3DThread::bb_interface_writer_removed(Interface   *interface,
+                                                  unsigned int instance_serial) throw()
 {
 	conditional_close(interface);
 }
 
 void
-ROS2Position3DThread::bb_interface_reader_removed(Interface *  interface,
-                                                 unsigned int instance_serial) throw()
+ROS2Position3DThread::bb_interface_reader_removed(Interface   *interface,
+                                                  unsigned int instance_serial) throw()
 {
 	conditional_close(interface);
 }

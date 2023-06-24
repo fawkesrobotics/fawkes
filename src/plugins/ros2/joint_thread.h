@@ -40,11 +40,11 @@
 #include <sensor_msgs/msg/joint_state.hpp>
 
 class ROS2JointThread : public fawkes::Thread,
-                       public fawkes::LoggingAspect,
-                       public fawkes::BlackBoardAspect,
-                       public fawkes::ROS2Aspect,
-                       public fawkes::BlackBoardInterfaceObserver,
-                       public fawkes::BlackBoardInterfaceListener
+                        public fawkes::LoggingAspect,
+                        public fawkes::BlackBoardAspect,
+                        public fawkes::ROS2Aspect,
+                        public fawkes::BlackBoardInterfaceObserver,
+                        public fawkes::BlackBoardInterfaceListener
 {
 public:
 	ROS2JointThread();
@@ -65,7 +65,7 @@ private:
 
 private:
 	rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr ros2_pub_;
-	std::list<fawkes::JointInterface *> ifs_;
+	std::list<fawkes::JointInterface *>                        ifs_;
 };
 
 #endif

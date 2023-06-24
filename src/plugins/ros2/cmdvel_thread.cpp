@@ -20,8 +20,9 @@
 
 #include "cmdvel_thread.h"
 
-#include <geometry_msgs/msg/twist.hpp>
 #include <interfaces/MotorInterface.h>
+
+#include <geometry_msgs/msg/twist.hpp>
 #include <rclcpp/rclcpp.hpp>
 
 //using namespace ros;
@@ -42,7 +43,8 @@ ROS2CmdVelThread::init()
 {
 	std::string motor_if_id = config->get_string("/ros2/cmdvel/motor_interface_id");
 	motor_if_               = blackboard->open_for_reading<MotorInterface>(motor_if_id.c_str());
-	sub_                    = node_handle->create_subscription<geometry_msgs::msg::Twist>("cmd_vel", 1, std::bind(&ROS2CmdVelThread::twist_msg_cb, this, _1));
+	sub_                    = node_handle->create_subscription<geometry_msgs::msg::Twist>(
+    "cmd_vel", 1, std::bind(&ROS2CmdVelThread::twist_msg_cb, this, _1));
 }
 
 void

@@ -37,16 +37,16 @@
 #include <list>
 
 // from ROS
-#include <rclcpp/rclcpp.hpp>
 #include <fawkes_msgs/msg/position3_d.hpp>
+#include <rclcpp/rclcpp.hpp>
 
 class ROS2Position3DThread : public fawkes::Thread,
-                            public fawkes::ConfigurableAspect,
-                            public fawkes::LoggingAspect,
-                            public fawkes::BlackBoardAspect,
-                            public fawkes::ROS2Aspect,
-                            public fawkes::BlackBoardInterfaceObserver,
-                            public fawkes::BlackBoardInterfaceListener
+                             public fawkes::ConfigurableAspect,
+                             public fawkes::LoggingAspect,
+                             public fawkes::BlackBoardAspect,
+                             public fawkes::ROS2Aspect,
+                             public fawkes::BlackBoardInterfaceObserver,
+                             public fawkes::BlackBoardInterfaceListener
 {
 public:
 	ROS2Position3DThread();
@@ -67,8 +67,8 @@ private:
 
 private:
 	rclcpp::Publisher<fawkes_msgs::msg::Position3D>::SharedPtr ros2_pub_;
-	std::list<fawkes::Position3DInterface *> ifs_;
-	std::string                              cfg_ros_topic_;
+	std::list<fawkes::Position3DInterface *>                   ifs_;
+	std::string                                                cfg_ros_topic_;
 };
 
 #endif

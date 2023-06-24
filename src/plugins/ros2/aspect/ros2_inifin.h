@@ -26,8 +26,8 @@
 
 #include <aspect/inifins/inifin.h>
 #include <plugins/ros2/aspect/ros2.h>
-#include <rclcpp/rclcpp.hpp>
 
+#include <rclcpp/rclcpp.hpp>
 
 namespace fawkes {
 
@@ -43,7 +43,7 @@ public:
 
 private:
 	rclcpp::Node::SharedPtr node_handle_;
-	std::string tf_prefix_;
+	std::string             tf_prefix_;
 };
 
 } // end namespace fawkes

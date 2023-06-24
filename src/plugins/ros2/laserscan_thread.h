@@ -37,23 +37,22 @@
 #include <utils/time/time.h>
 
 #include <list>
-#include <queue>
 #include <memory>
+#include <queue>
 using std::placeholders::_1;
 
 //ROS2
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/laser_scan.hpp>
 
-
 class ROS2LaserScanThread : public fawkes::Thread,
-                           public fawkes::LoggingAspect,
-                           public fawkes::ConfigurableAspect,
-                           public fawkes::BlockedTimingAspect,
-                           public fawkes::BlackBoardAspect,
-                           public fawkes::ROS2Aspect,
-                           public fawkes::BlackBoardInterfaceObserver,
-                           public fawkes::BlackBoardInterfaceListener
+                            public fawkes::LoggingAspect,
+                            public fawkes::ConfigurableAspect,
+                            public fawkes::BlockedTimingAspect,
+                            public fawkes::BlackBoardAspect,
+                            public fawkes::ROS2Aspect,
+                            public fawkes::BlackBoardInterfaceObserver,
+                            public fawkes::BlackBoardInterfaceListener
 {
 public:
 	ROS2LaserScanThread();
@@ -74,7 +73,8 @@ public:
 	                                 fawkes::Uuid       instance_serial) noexcept override;
 
 private:
-	void        laser_scan_message_cb(std::shared_ptr<const sensor_msgs::msg::LaserScan> msg, const rclcpp::MessageInfo &msg_info);
+	void        laser_scan_message_cb(std::shared_ptr<const sensor_msgs::msg::LaserScan> msg,
+	                                  const rclcpp::MessageInfo                         &msg_info);
 	void        conditional_close(fawkes::Interface *interface) noexcept;
 	std::string topic_name(const char *if_id, const char *suffix);
 
@@ -97,22 +97,23 @@ private:
 	typedef struct
 	{
 		rclcpp::Publisher<sensor_msgs::msg::LaserScan>::SharedPtr pub;
-		sensor_msgs::msg::LaserScan msg;
+		sensor_msgs::msg::LaserScan                               msg;
 	} PublisherInfo;
 	/// @endcond
 	std::map<std::string, PublisherInfo> pubs_;
 
-        std::string     cfg_tf_prefix_;
+	std::string cfg_tf_prefix_;
 
-	fawkes::Mutex *                                             ls_msg_queue_mutex_;
-	unsigned int                                                active_queue_;
-	std::queue<std::pair<std::shared_ptr<const sensor_msgs::msg::LaserScan>, const rclcpp::MessageInfo> > ls_msg_queues_[2];
+	fawkes::Mutex *ls_msg_queue_mutex_;
+	unsigned int   active_queue_;
+	std::queue<
+	  std::pair<std::shared_ptr<const sensor_msgs::msg::LaserScan>, const rclcpp::MessageInfo>>
+	  ls_msg_queues_[2];
 
 	std::map<std::string, fawkes::Laser360Interface *> ls360_wifs_;
 
 	fawkes::Mutex *seq_num_mutex_;
 	unsigned int   seq_num_;
-
 };
 
 #endif

@@ -21,7 +21,6 @@
 
 #include "joint_thread.h"
 
-
 using namespace fawkes;
 
 /** @class ROS2JointThread "joint_thread.h"
@@ -94,15 +93,13 @@ ROS2JointThread::bb_interface_created(const char *type, const char *id) throw()
 }
 
 void
-ROS2JointThread::bb_interface_writer_removed(Interface *  interface,
-                                            Uuid instance_serial) noexcept
+ROS2JointThread::bb_interface_writer_removed(Interface *interface, Uuid instance_serial) noexcept
 {
 	conditional_close(interface);
 }
 
 void
-ROS2JointThread::bb_interface_reader_removed(Interface *  interface,
-                                            Uuid instance_serial) noexcept
+ROS2JointThread::bb_interface_reader_removed(Interface *interface, Uuid instance_serial) noexcept
 {
 	conditional_close(interface);
 }

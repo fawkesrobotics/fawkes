@@ -37,20 +37,20 @@
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl_utils/pcl_adapter.h>
 #include <plugins/ros2/aspect/ros2.h>
-#include <rclcpp/rclcpp.hpp>
-#include <sensor_msgs/msg/point_cloud2.hpp>
 #include <utils/time/time.h>
 
 #include <list>
 #include <queue>
+#include <rclcpp/rclcpp.hpp>
+#include <sensor_msgs/msg/point_cloud2.hpp>
 
 class ROS2PointCloudThread : public fawkes::Thread,
-                            public fawkes::ClockAspect,
-                            public fawkes::LoggingAspect,
-                            public fawkes::ConfigurableAspect,
-                            public fawkes::BlockedTimingAspect,
-                            public fawkes::PointCloudAspect,
-                            public fawkes::ROSAspect
+                             public fawkes::ClockAspect,
+                             public fawkes::LoggingAspect,
+                             public fawkes::ConfigurableAspect,
+                             public fawkes::BlockedTimingAspect,
+                             public fawkes::PointCloudAspect,
+                             public fawkes::ROSAspect
 {
 public:
 	ROS2PointCloudThread();
@@ -74,7 +74,7 @@ private:
 	void fawkes_pointcloud_publish_to_ros();
 	void fawkes_pointcloud_search();
 	void ros_pointcloud_on_data_msg(const sensor_msgs::msg::PointCloud2ConstPtr &msg,
-	                                const std::string &                     topic_name);
+	                                const std::string                           &topic_name);
 
 	template <typename PointT>
 	void
@@ -105,8 +105,8 @@ private:
 	typedef struct
 	{
 		rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pub;
-		sensor_msgs::msg::PointCloud2 msg;
-		fawkes::Time             last_sent;
+		sensor_msgs::msg::PointCloud2                               msg;
+		fawkes::Time                                                last_sent;
 	} PublisherInfo;
 	/// @endcond
 	std::map<std::string, PublisherInfo> fawkes_pubs_; // the list and ref of topics from fawkes->ros

@@ -63,7 +63,7 @@ ROS2ClockThread::publish_clock()
 	rosgraph_msgs::msg::Clock clock_msg;
 
 	fawkes::Time now(clock);
-	clock_msg.clock.sec  = now.get_sec();
+	clock_msg.clock.sec     = now.get_sec();
 	clock_msg.clock.nanosec = now.get_usec() * 1000;
 
 	pub_->publish(clock_msg);

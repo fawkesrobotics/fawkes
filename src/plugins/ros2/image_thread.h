@@ -28,24 +28,24 @@
 #include <aspect/logging.h>
 #include <core/threading/mutex.h>
 #include <core/threading/thread.h>
-#include <image_transport/image_transport.hpp>
 #include <plugins/ros2/aspect/ros2.h>
-#include <sensor_msgs/msg/image.hpp>
-#include <rclcpp/rclcpp.hpp>
 
+#include <image_transport/image_transport.hpp>
 #include <list>
 #include <queue>
+#include <rclcpp/rclcpp.hpp>
+#include <sensor_msgs/msg/image.hpp>
 
 namespace firevision {
 class SharedMemoryImageBuffer;
 }
 
 class ROS2ImagesThread : public fawkes::Thread,
-                        public fawkes::ClockAspect,
-                        public fawkes::LoggingAspect,
-                        public fawkes::ConfigurableAspect,
-                        public fawkes::BlockedTimingAspect,
-                        public fawkes::ROS2Aspect
+                         public fawkes::ClockAspect,
+                         public fawkes::LoggingAspect,
+                         public fawkes::ConfigurableAspect,
+                         public fawkes::BlockedTimingAspect,
+                         public fawkes::ROS2Aspect
 {
 public:
 	ROS2ImagesThread();
@@ -72,7 +72,7 @@ private:
 	typedef struct
 	{
 		image_transport::Publisher           pub;
-		sensor_msgs::msg::Image                   msg;
+		sensor_msgs::msg::Image              msg;
 		fawkes::Time                         last_sent;
 		firevision::SharedMemoryImageBuffer *img;
 	} PublisherInfo;
@@ -80,8 +80,8 @@ private:
 	std::map<std::string, PublisherInfo> pubs_;
 
 	image_transport::ImageTransport *it_;
-	fawkes::Time *                   last_update_;
-	fawkes::Time *                   now_;
+	fawkes::Time                    *last_update_;
+	fawkes::Time                    *now_;
 };
 
 #endif

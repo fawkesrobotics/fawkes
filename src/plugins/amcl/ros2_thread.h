@@ -29,12 +29,12 @@
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
 #include <core/threading/thread.h>
-#include <geometry_msgs/msg/pose_with_covariance_stamped.hpp>
-#include <geometry_msgs/msg/pose_array.hpp>
-#include <nav_msgs/msg/occupancy_grid.hpp>
-
 #include <interfaces/LocalizationInterface.h>
 #include <plugins/ros2/aspect/ros2.h>
+
+#include <geometry_msgs/msg/pose_array.hpp>
+#include <geometry_msgs/msg/pose_with_covariance_stamped.hpp>
+#include <nav_msgs/msg/occupancy_grid.hpp>
 
 namespace fawkes {
 class Mutex;
@@ -43,10 +43,10 @@ class Mutex;
 class Amcl2Thread;
 
 class AmclROS2Thread : public fawkes::Thread,
-                      public fawkes::LoggingAspect,
-                      public fawkes::ConfigurableAspect,
-                      public fawkes::BlackBoardAspect,
-                      public fawkes::ROS2Aspect
+                       public fawkes::LoggingAspect,
+                       public fawkes::ConfigurableAspect,
+                       public fawkes::BlackBoardAspect,
+                       public fawkes::ROS2Aspect
 {
 public:
 	AmclROS2Thread();
@@ -78,10 +78,10 @@ private:
 
 	fawkes::LocalizationInterface *loc_if_;
 
-	rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr  pose_pub_;
-	rclcpp::Publisher<geometry_msgs::msg::PoseArray>::SharedPtr  particlecloud_pub_;
-	rclcpp::Subscription<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr  initial_pose_sub_;
-	rclcpp::Publisher<nav_msgs::msg::OccupancyGrid>::SharedPtr  map_pub_;
+	rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr    pose_pub_;
+	rclcpp::Publisher<geometry_msgs::msg::PoseArray>::SharedPtr                    particlecloud_pub_;
+	rclcpp::Subscription<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr initial_pose_sub_;
+	rclcpp::Publisher<nav_msgs::msg::OccupancyGrid>::SharedPtr                     map_pub_;
 };
 
 #endif

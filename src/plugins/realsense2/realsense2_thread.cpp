@@ -312,12 +312,11 @@ Realsense2Thread::get_camera(rs2::device &dev)
 					logger->log_info(name(), "RS2Option RS2_CAMERA_INFO_NAME not supported %d", 1);
 				}
 
-				
 				if (dev.supports(RS2_CAMERA_INFO_SERIAL_NUMBER)) {
 					std::string dev_sn = "########";
 					dev_sn = std::string("#") + rs_device_.get_info(RS2_CAMERA_INFO_SERIAL_NUMBER);
 					logger->log_info(name(), "found device with serial number: %s", dev_sn.c_str());
-					if(strcmp(rs_device_.get_info(RS2_CAMERA_INFO_SERIAL_NUMBER), serial_no_.c_str()) == 0){
+					if (strcmp(rs_device_.get_info(RS2_CAMERA_INFO_SERIAL_NUMBER), serial_no_.c_str()) == 0) {
 						logger->log_info(name(), "matched device with serial number: %s", dev_sn.c_str());
 						logger->log_info(name(), "Camera Name: %s, SN: %s", dev_name.c_str(), dev_sn.c_str());
 						return true;
@@ -326,7 +325,9 @@ Realsense2Thread::get_camera(rs2::device &dev)
 					logger->log_info(name(), "RS2Option RS2_CAMERA_INFO_SERIAL_NUMBER not supported");
 				}
 			}
-			logger->log_warn(name(), "No device with serial number %s found, returning last device in list", serial_no_.c_str());
+			logger->log_warn(name(),
+			                 "No device with serial number %s found, returning last device in list",
+			                 serial_no_.c_str());
 			return true;
 		}
 	} catch (const rs2::error &e) {

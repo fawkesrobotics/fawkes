@@ -30,27 +30,27 @@
 #include <aspect/tf.h>
 #include <core/threading/thread.h>
 #include <interfaces/NavigatorInterface.h>
-#include <move_base_msgs/msg/move_base_action.hpp>
 #include <move_base_msgs/msg/MoveBaseActionGoal.h>
 #include <move_base_msgs/msg/MoveBaseGoal.h>
 #include <plugins/ros2/aspect/ros2.h>
-#include <rclcpp/rclcpp.hpp>
-#include <geometry_msgs/msg/pose_stamped.hpp>
 #include <tf/types.h>
 
 #include <cmath>
+#include <geometry_msgs/msg/pose_stamped.hpp>
+#include <move_base_msgs/msg/move_base_action.hpp>
+#include <rclcpp/rclcpp.hpp>
 
 namespace fawkes {
 class NavigatorInterface;
 }
 
 class ROS2MoveBaseThread : public fawkes::Thread,
-                          public fawkes::BlockedTimingAspect,
-                          public fawkes::LoggingAspect,
-                          public fawkes::BlackBoardAspect,
-                          public fawkes::ConfigurableAspect,
-                          public fawkes::TransformAspect,
-                          public fawkes::ROS2Aspect
+                           public fawkes::BlockedTimingAspect,
+                           public fawkes::LoggingAspect,
+                           public fawkes::BlackBoardAspect,
+                           public fawkes::ConfigurableAspect,
+                           public fawkes::TransformAspect,
+                           public fawkes::ROS2Aspect
 {
 public:
 	ROS2MoveBaseThread();
@@ -79,9 +79,9 @@ private:
 	fawkes::NavigatorInterface *nav_colli_if_;
 	fawkes::NavigatorInterface *nav_if_;
 
-	MoveBaseServer *as_colli_;
-	MoveBaseServer *as_navgraph_;
-	ros::Subscription<>::SharedPtr sub_colli_;
+	MoveBaseServer                   *as_colli_;
+	MoveBaseServer                   *as_navgraph_;
+	ros::Subscription<>::SharedPtr    sub_colli_;
 	rclcpp::Subscription<>::SharedPtr sub_navgraph_;
 
 	//MoveBaseServer::GoalHandle as_goal_;

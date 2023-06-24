@@ -22,7 +22,6 @@
 
 #include "talkerpub_thread.h"
 
-
 using namespace fawkes;
 
 /** @class ROS2TalkerPubThread "talkerpub_thread.h"

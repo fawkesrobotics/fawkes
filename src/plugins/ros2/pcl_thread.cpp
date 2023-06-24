@@ -98,7 +98,7 @@ ROS2PointCloudThread::ros_pointcloud_search()
 
 	// get all ROS topics
 	std::map<std::string, std::vector<std::string>> ros_topics;
-	
+
 	ros_topics = node_handle->get_topc_names_and_types();
 	if (!ros_topics) {
 		logger->log_info(name(), "Coulnd't get available ROS topics");
@@ -154,10 +154,11 @@ ROS2PointCloudThread::ros_pointcloud_search()
 		if (!exists) {
 			logger->log_info(name(), "Pointcloud %s is now available from ROS", ros_topic.c_str());
 			ros_pointcloud_available_.push_back(ros_topic);
-			ros_pointcloud_subs_[ros_topic] = node_handle->create_subscription<sensor_msgs::msg::PointCloud2>(
-			  ros_topic,
-			  1,
-			  boost::bind(&ROS2PointCloudThread::ros_pointcloud_on_data_msg, this, _1, ros_topic));
+			ros_pointcloud_subs_[ros_topic] =
+			  node_handle->create_subscription<sensor_msgs::msg::PointCloud2>(
+			    ros_topic,
+			    1,
+			    boost::bind(&ROS2PointCloudThread::ros_pointcloud_on_data_msg, this, _1, ros_topic));
 		}
 	}
 }
@@ -249,7 +250,7 @@ ROS2PointCloudThread::fawkes_pointcloud_publish_to_ros()
 		PublisherInfo &pi = p->second;
 		if (pi.pub.getNumSubscribers() > 0 && pcl_manager->exists_pointcloud(p->first.c_str())) {
 			unsigned int width, height;
-			void *       point_data;
+			void        *point_data;
 			size_t       point_size, num_points;
 			fawkes::Time time;
 			fawkes::Time now(time);
@@ -286,7 +287,7 @@ ROS2PointCloudThread::fawkes_pointcloud_publish_to_ros()
 
 void
 ROS2PointCloudThread::ros_pointcloud_on_data_msg(const sensor_msgs::msg::PointCloud2ConstPtr &msg,
-                                                const std::string &                     topic_name)
+                                                 const std::string &topic_name)
 {
 	// if this is the first time, I need the meta infos, what point-type is send
 	if (!pcl_manager->exists_pointcloud(topic_name.c_str())) {

@@ -87,7 +87,9 @@ ROS2MoveBaseThread::init()
 	                     /* auto_start */ false);
 
 	sub_colli_ = rosnode->subscribe<geometry_msgs::PoseStamped>(
-	  "move_base_simple/goal_colli", 1, boost::bind(&ROS2MoveBaseThread::message_cb, this, _1, COLLI));
+	  "move_base_simple/goal_colli",
+	  1,
+	  boost::bind(&ROS2MoveBaseThread::message_cb, this, _1, COLLI));
 	sub_navgraph_ = rosnode->subscribe<geometry_msgs::PoseStamped>(
 	  "move_base_simple/goal", 1, boost::bind(&ROS2MoveBaseThread::message_cb, this, _1, NAVGRAPH));
 }

@@ -30,9 +30,9 @@
 #include <string>
 
 class ROS2RobotDescriptionThread : public fawkes::Thread,
-                                  public fawkes::ConfigurableAspect,
-                                  public fawkes::LoggingAspect,
-                                  public fawkes::ROS2Aspect
+                                   public fawkes::ConfigurableAspect,
+                                   public fawkes::LoggingAspect,
+                                   public fawkes::ROS2Aspect
 {
 public:
 	ROS2RobotDescriptionThread();

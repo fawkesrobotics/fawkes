@@ -36,27 +36,27 @@
 #include <plugins/ros2/aspect/ros2.h>
 
 #include <list>
-#include <queue>
 #include <memory>
+#include <queue>
 using std::placeholders::_1;
 
-#include <rclcpp/rclcpp.hpp>
-#include <tf2_msgs/msg/tf_message.hpp>
-#include <geometry_msgs/msg/transform_stamped.hpp>
-#include <geometry_msgs/msg/vector3.hpp>
 #include <geometry_msgs/msg/quaternion.hpp>
 #include <geometry_msgs/msg/transform.hpp>
+#include <geometry_msgs/msg/transform_stamped.hpp>
+#include <geometry_msgs/msg/vector3.hpp>
+#include <rclcpp/rclcpp.hpp>
+#include <tf2_msgs/msg/tf_message.hpp>
 
 class ROS2TF2Thread : public fawkes::Thread,
-                    public fawkes::ClockAspect,
-                    public fawkes::LoggingAspect,
-                    public fawkes::ConfigurableAspect,
-                    public fawkes::BlockedTimingAspect,
-                    public fawkes::BlackBoardAspect,
-                    public fawkes::TransformAspect,
-                    public fawkes::ROS2Aspect,
-                    public fawkes::BlackBoardInterfaceObserver,
-                    public fawkes::BlackBoardInterfaceListener
+                      public fawkes::ClockAspect,
+                      public fawkes::LoggingAspect,
+                      public fawkes::ConfigurableAspect,
+                      public fawkes::BlockedTimingAspect,
+                      public fawkes::BlackBoardAspect,
+                      public fawkes::TransformAspect,
+                      public fawkes::ROS2Aspect,
+                      public fawkes::BlackBoardInterfaceObserver,
+                      public fawkes::BlackBoardInterfaceListener
 {
 public:
 	ROS2TF2Thread();
@@ -84,9 +84,9 @@ private:
 	void conditional_close(fawkes::Interface *interface) throw();
 	void publish_static_transforms_to_ros2();
 	void publish_transform_to_fawkes(const geometry_msgs::msg::TransformStamped &ts,
-	                                 bool                                   static_tf = false);
+	                                 bool                                        static_tf = false);
 	geometry_msgs::msg::TransformStamped create_transform_stamped(fawkes::TransformInterface *tfif,
-	                                                         const fawkes::Time *        time = NULL);
+	                                                              const fawkes::Time *time = NULL);
 
 	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
 protected:
@@ -97,27 +97,27 @@ protected:
 	}
 
 private:
-	bool		cfg_use_tf2_;
-	bool		cfg_use_namespace_;
-	std::string	cfg_tf_prefix_;
-	std::vector<std::string>	cfg_tf_prefix_exclusions_;
-	float		cfg_update_interval_;
+	bool                     cfg_use_tf2_;
+	bool                     cfg_use_namespace_;
+	std::string              cfg_tf_prefix_;
+	std::vector<std::string> cfg_tf_prefix_exclusions_;
+	float                    cfg_update_interval_;
 
-	bool		tf_prefix_enabled_;
+	bool tf_prefix_enabled_;
 
 	std::list<std::string>                  ros2_frames_;
 	std::list<fawkes::TransformInterface *> tfifs_;
 
 	rclcpp::Subscription<tf2_msgs::msg::TFMessage>::SharedPtr sub_tf_;
 	rclcpp::Subscription<tf2_msgs::msg::TFMessage>::SharedPtr sub_static_tf_;
-	rclcpp::Publisher<tf2_msgs::msg::TFMessage>::SharedPtr  pub_tf_;
-	rclcpp::Publisher<tf2_msgs::msg::TFMessage>::SharedPtr  pub_static_tf_;
+	rclcpp::Publisher<tf2_msgs::msg::TFMessage>::SharedPtr    pub_tf_;
+	rclcpp::Publisher<tf2_msgs::msg::TFMessage>::SharedPtr    pub_static_tf_;
 
-	fawkes::Mutex *                       tf_msg_queue_mutex_;
-	unsigned int                          active_queue_;
+	fawkes::Mutex                                                  *tf_msg_queue_mutex_;
+	unsigned int                                                    active_queue_;
 	std::queue<std::pair<bool, tf2_msgs::msg::TFMessage::ConstPtr>> tf2_msg_queues_[2];
-	fawkes::Mutex *seq_num_mutex_;
-	unsigned int   seq_num_;
+	fawkes::Mutex                                                  *seq_num_mutex_;
+	unsigned int                                                    seq_num_;
 
 	fawkes::Time *last_update_;
 };

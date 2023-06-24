@@ -29,6 +29,7 @@
 #include <core/threading/thread.h>
 #include <interfaces/DynamicReconfigureInterface.h>
 #include <plugins/ros2/aspect/ros2.h>
+
 #include <rclcpp/rclcpp.hpp>
 
 namespace fawkes {
@@ -36,11 +37,11 @@ class DynamicReconfigureInterface;
 }
 
 class ROS2DynamicReconfigurePlugin : public fawkes::Thread,
-                                    public fawkes::BlockedTimingAspect,
-                                    public fawkes::LoggingAspect,
-                                    public fawkes::BlackBoardAspect,
-                                    public fawkes::ConfigurableAspect,
-                                    public fawkes::ROS2Aspect
+                                     public fawkes::BlockedTimingAspect,
+                                     public fawkes::LoggingAspect,
+                                     public fawkes::BlackBoardAspect,
+                                     public fawkes::ConfigurableAspect,
+                                     public fawkes::ROS2Aspect
 {
 public:
 	ROS2DynamicReconfigurePlugin();

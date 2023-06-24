@@ -24,6 +24,7 @@
 #include <core/threading/mutex_locker.h>
 #include <fvutils/color/conversions.h>
 #include <fvutils/ipc/shm_image.h>
+
 #include <sensor_msgs/image_encodings.hpp>
 
 using namespace fawkes;
@@ -153,7 +154,7 @@ ROS2ImagesThread::update_images()
 
 void
 ROS2ImagesThread::get_sets(std::set<std::string> &missing_images,
-                          std::set<std::string> &unbacked_images)
+                           std::set<std::string> &unbacked_images)
 {
 	std::set<std::string>                          published_images;
 	std::map<std::string, PublisherInfo>::iterator p;
@@ -164,7 +165,7 @@ ROS2ImagesThread::get_sets(std::set<std::string> &missing_images,
 	}
 
 	std::set<std::string>              image_buffers;
-	SharedMemoryImageBufferHeader *    h    = new SharedMemoryImageBufferHeader();
+	SharedMemoryImageBufferHeader     *h    = new SharedMemoryImageBufferHeader();
 	SharedMemory::SharedMemoryIterator i    = SharedMemory::find(FIREVISION_SHM_IMAGE_MAGIC_TOKEN, h);
 	SharedMemory::SharedMemoryIterator endi = SharedMemory::end();
 

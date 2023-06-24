@@ -83,7 +83,7 @@ Amcl2Thread::Amcl2Thread(AmclROS2Thread *ros_thread)
 {
 	map_        = NULL;
 	conf_mutex_ = new Mutex();
-	rt_ = ros_thread;
+	rt_         = ros_thread;
 }
 
 /** Destructor. */
@@ -874,11 +874,11 @@ Amcl2Thread::finalize()
 
 bool
 Amcl2Thread::get_odom_pose(tf::Stamped<tf::Pose> &odom_pose,
-                          double                &x,
-                          double                &y,
-                          double                &yaw,
-                          const fawkes::Time    *t,
-                          const std::string     &f)
+                           double                &x,
+                           double                &y,
+                           double                &yaw,
+                           const fawkes::Time    *t,
+                           const std::string     &f)
 {
 	// Get the robot's pose
 	tf::Stamped<tf::Pose> ident(tf::Transform(tf::Quaternion(0, 0, 0, 1), tf::Vector3(0, 0, 0)),
@@ -1034,9 +1034,9 @@ Amcl2Thread::uniform_pose_generator(void *arg)
 
 void
 Amcl2Thread::set_initial_pose(const std::string  &frame_id,
-                             const fawkes::Time &msg_time,
-                             const tf::Pose     &pose,
-                             const double       *covariance)
+                              const fawkes::Time &msg_time,
+                              const tf::Pose     &pose,
+                              const double       *covariance)
 {
 	MutexLocker lock(conf_mutex_);
 	if (frame_id == "") {

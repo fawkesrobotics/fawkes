@@ -263,7 +263,7 @@ TwoLinesCellRenderer::render_vfunc(const Glib::RefPtr<Gdk::Drawable> &window,
 		Pango::FontDescription font2("sans 10");
 #	else
 		Glib::RefPtr<Gtk::Style> style = widget.get_style();
-		Pango::FontDescription font2 = style->get_font();
+		Pango::FontDescription   font2 = style->get_font();
 #	endif
 		font2.set_size((int)roundf(Pango::SCALE_SMALL * font2.get_size()));
 		layout2->set_font_description(font2);

@@ -28,14 +28,15 @@
 #include <core/threading/thread.h>
 #include <interfaces/IMUInterface.h>
 #include <plugins/ros2/aspect/ros2.h>
+
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/imu.hpp>
 class ROS2IMUThread : public fawkes::Thread,
-                     public fawkes::ConfigurableAspect,
-                     public fawkes::LoggingAspect,
-                     public fawkes::ROS2Aspect,
-                     public fawkes::BlackBoardAspect,
-                     public fawkes::BlackBoardInterfaceListener
+                      public fawkes::ConfigurableAspect,
+                      public fawkes::LoggingAspect,
+                      public fawkes::ROS2Aspect,
+                      public fawkes::BlackBoardAspect,
+                      public fawkes::BlackBoardInterfaceListener
 {
 public:
 	ROS2IMUThread();
@@ -47,8 +48,8 @@ public:
 	virtual void bb_interface_data_refreshed(fawkes::Interface *interface) throw();
 
 private:
-	rclcpp::Publisher<sensor_msgs::msg::Imu>::SharedPtr        ros2_pub_;
-	fawkes::IMUInterface *iface_;
+	rclcpp::Publisher<sensor_msgs::msg::Imu>::SharedPtr ros2_pub_;
+	fawkes::IMUInterface                               *iface_;
 };
 
 #endif /* PLUGINS_ROS_IMU_THREAD_H__ */

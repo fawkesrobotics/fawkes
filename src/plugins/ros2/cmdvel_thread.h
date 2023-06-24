@@ -27,8 +27,9 @@
 #include <aspect/logging.h>
 #include <core/threading/thread.h>
 #include <core/utils/lockptr.h>
-#include <geometry_msgs/msg/twist.hpp>
 #include <plugins/ros2/aspect/ros2.h>
+
+#include <geometry_msgs/msg/twist.hpp>
 #include <rclcpp/rclcpp.hpp>
 
 namespace fawkes {
@@ -36,10 +37,10 @@ class MotorInterface;
 }
 
 class ROS2CmdVelThread : public fawkes::Thread,
-                        public fawkes::LoggingAspect,
-                        public fawkes::ConfigurableAspect,
-                        public fawkes::BlackBoardAspect,
-                        public fawkes::ROS2Aspect
+                         public fawkes::LoggingAspect,
+                         public fawkes::ConfigurableAspect,
+                         public fawkes::BlackBoardAspect,
+                         public fawkes::ROS2Aspect
 {
 public:
 	ROS2CmdVelThread();
@@ -58,14 +59,13 @@ protected:
 	}
 
 private:
-	void stop();                                         //stops all Motors
+	void stop();                                               //stops all Motors
 	void send_transrot(float vx, float vy, float omega) const; //sends Controls to the Motors
 	void twist_msg_cb(const geometry_msgs::msg::Twist::SharedPtr msg) const;
 
 private:
-	fawkes::MotorInterface *motor_if_;
-	rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr	 sub_;
-	
+	fawkes::MotorInterface                                    *motor_if_;
+	rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr sub_;
 };
 
 #endif
