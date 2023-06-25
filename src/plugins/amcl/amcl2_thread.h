@@ -108,40 +108,40 @@ private:
 private:
 	fawkes::Mutex *conf_mutex_;
 
-	std::string cfg_map_file_;
-	float       cfg_resolution_;
-	float       cfg_origin_x_;
-	float       cfg_origin_y_;
-	float       cfg_origin_theta_;
-	float       cfg_occupied_thresh_;
-	float       cfg_free_thresh_;
-	bool        cfg_read_init_cov_;
-	bool        cfg_buffer_enable_;
-	bool        cfg_buffer_debug_;
-	bool        cfg_use_latest_odom_;
+	std::string cfg_map_file_        = "";
+	float       cfg_resolution_      = 0.;
+	float       cfg_origin_x_        = 0.;
+	float       cfg_origin_y_        = 0.;
+	float       cfg_origin_theta_    = 0.;
+	float       cfg_occupied_thresh_ = 0.;
+	float       cfg_free_thresh_     = 0.;
+	bool        cfg_read_init_cov_   = false;
+	bool        cfg_buffer_enable_   = false;
+	bool        cfg_buffer_debug_    = false;
+	bool        cfg_use_latest_odom_ = false;
 
 	std::string cfg_laser_ifname_;
 	std::string cfg_pose_ifname_;
 
-	unsigned int map_width_;
-	unsigned int map_height_;
-	bool         laser_pose_set_;
+	unsigned int map_width_      = 0;
+	unsigned int map_height_     = 0;
+	bool         laser_pose_set_ = false;
 
 	fawkes::tf::Transform latest_tf_;
 
 	amcl::odom_model_t  odom_model_type_;
 	amcl::laser_model_t laser_model_type_;
 
-	int max_beams_, min_particles_, max_particles_;
+	int max_beams_, min_particles_, max_particles_ = 0;
 
-	bool   sent_first_transform_;
-	bool   latest_tf_valid_;
+	bool   sent_first_transform_ = false;
+	bool   latest_tf_valid_      = false;
 	map_t *map_;
 	pf_t  *pf_;
-	int    resample_count_;
+	int    resample_count_ = 0;
 
-	double       save_pose_period_;
-	double       transform_tolerance_;
+	double       save_pose_period_    = 0.;
+	double       transform_tolerance_ = 0.;
 	fawkes::Time save_pose_last_time;
 
 	fawkes::Laser360Interface     *laser_if_;
@@ -149,51 +149,51 @@ private:
 	fawkes::LocalizationInterface *loc_if_;
 
 	amcl_hyp_t *initial_pose_hyp_;
-	bool        first_map_received_;
-	bool        first_reconfigure_call_;
+	bool        first_map_received_     = false;
+	bool        first_reconfigure_call_ = false;
 
 	// Particle filter
-	double      pf_err_, pf_z_;
-	bool        pf_init_;
+	double      pf_err_, pf_z_ = 0.;
+	bool        pf_init_ = false;
 	pf_vector_t pf_odom_pose_;
-	double      laser_min_range_;
-	double      laser_max_range_;
+	double      laser_min_range_ = 0.;
+	double      laser_max_range_ = 0.;
 
 	amcl::AMCLOdom  *odom_;
 	amcl::AMCLLaser *laser_;
-	bool             laser_update_;
-	bool             laser_buffered_;
+	bool             laser_update_   = false;
+	bool             laser_buffered_ = false;
 
 	fawkes::Time last_cloud_pub_time;
 	fawkes::Time last_laser_received_ts_;
 	double       last_covariance_[36];
 
-	float        alpha1_;
-	float        alpha2_;
-	float        alpha3_;
-	float        alpha4_;
-	float        alpha5_;
-	float        z_hit_;
-	float        z_short_;
-	float        z_max_;
-	float        z_rand_;
-	float        sigma_hit_;
-	float        lambda_short_;
-	float        laser_likelihood_max_dist_;
-	float        d_thresh_;
-	float        a_thresh_;
-	float        t_thresh_;
-	float        alpha_slow_;
-	float        alpha_fast_;
+	float        alpha1_                    = 0.;
+	float        alpha2_                    = 0.;
+	float        alpha3_                    = 0.;
+	float        alpha4_                    = 0.;
+	float        alpha5_                    = 0.;
+	float        z_hit_                     = 0.;
+	float        z_short_                   = 0.;
+	float        z_max_                     = 0.;
+	float        z_rand_                    = 0.;
+	float        sigma_hit_                 = 0.;
+	float        lambda_short_              = 0.;
+	float        laser_likelihood_max_dist_ = 0.;
+	float        d_thresh_                  = 0.;
+	float        a_thresh_                  = 0.;
+	float        t_thresh_                  = 0.;
+	float        alpha_slow_                = 0.;
+	float        alpha_fast_                = 0.;
 	float        init_pose_[3];
 	float        init_cov_[3];
-	float        angle_increment_;
-	float        angle_min_;
-	unsigned int angle_min_idx_;
-	unsigned int angle_max_idx_;
-	unsigned int angle_range_;
+	float        angle_increment_ = 0.;
+	float        angle_min_       = 0.;
+	unsigned int angle_min_idx_   = 0;
+	unsigned int angle_max_idx_   = 0;
+	unsigned int angle_range_     = 0;
 
-	unsigned int resample_interval_;
+	unsigned int resample_interval_ = 0;
 
 	fawkes::Time *last_move_time_;
 
