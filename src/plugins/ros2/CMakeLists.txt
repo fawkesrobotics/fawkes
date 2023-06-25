@@ -22,59 +22,55 @@
 
 set(PLUGIN_ros2
     ON
-    CACHE BOOL ON)
-
+    CACHE BOOL "Build ros2 plugin")
 set(PLUGIN_ros2-talkerpub
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build ros2-talkerpub plugin")
 set(PLUGIN_ros2-tf2
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build ros2-tf2 plugin")
 set(PLUGIN_ros2-pcl
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build ros2-pcl plugin")
 set(PLUGIN_ros2-images
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build ros2-images plugin")
 set(PLUGIN_ros2-laserscan
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build ros2-laserscan plugin")
 set(PLUGIN_ros2-odometry
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build ros2-odometry plugin")
 set(PLUGIN_ros2-cmdvel
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build ros2-cmdvel plugin")
 set(PLUGIN_ros2-navigator
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build ros2-navigator plugin")
 set(PLUGIN_ros2-dynamic-reconfigure
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build ros2-dynamic-reconfigure plugin")
 set(PLUGIN_ros2-navgraph-breakout
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build ros2-navgraph-breakout plugin")
 set(PLUGIN_ros2-joint
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build ros2-joint plugin")
 set(PLUGIN_ros2-robot-description
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build ros2-robot-description plugin")
 set(PLUGIN_ros2-move-base
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build ros2-move-base plugin")
 set(PLUGIN_ros2-skiller
     ON
-    CACHE BOOL ON)
-set(PLUGIN_ros2-position-3d
-    ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build ros2-skiller plugin")
 set(PLUGIN_ros2-clock
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build ros2-clock plugin")
 set(PLUGIN_ros2-imu
     ON
-    CACHE BOOL ON)
+    CACHE BOOL "Build ros2-imu plugin")
 add_subdirectory(aspect)
 
 if(PLUGIN_ros2)
@@ -134,13 +130,6 @@ if(PLUGIN_ros2-tf2)
 else()
   plugin_disabled_message(ros2-tf2)
 endif()
-
-# if(PLUGIN_ros2-pcl) add_library(ros2-pcl MODULE pcl_plugin.cpp pcl_thread.cpp)
-# depend_on_ros2(ros2-pcl) depend_on_pcl(ros2-pcl) depend_on_ros2_libs(ros2-pcl
-# "sensor_msgs;pcl_conversions;sensor_msgs") target_link_libraries( ros2-pcl
-# fawkescore fawkesutils fawkesaspects fawkesblackboard fawkesinterface
-# fawkesros2aspect fawkestf fawkespcl_utils) else()
-# plugin_disabled_message(ros2-pcl) endif()
 
 if(PLUGIN_ros2-images)
   add_library(ros2-images MODULE image_plugin.cpp image_thread.cpp)
@@ -323,24 +312,6 @@ if(PLUGIN_ros2-navgraph-breakout)
     NavigatorInterface)
 else()
   plugin_disabled_message(ros2-navgraph-breakout)
-endif()
-
-if(PLUGIN_ros2-position-3d)
-  add_library(ros2-position-3d MODULE position_3d_thread.cpp
-                                      position_3d_plugin.cpp)
-  depend_on_ros2(ros2-position-3d)
-  depend_on_ros2_libs(ros2-position-3d fawkes_msgs)
-  target_link_libraries(
-    ros2-position-3d
-    fawkescore
-    fawkesutils
-    fawkesaspects
-    fawkesblackboard
-    fawkesinterface
-    fawkesros2aspect
-    Position3DInterface)
-else()
-  plugin_disabled_message(ros2-position-3d)
 endif()
 
 if(PLUGIN_ros2-skiller)
