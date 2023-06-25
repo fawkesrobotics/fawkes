@@ -62,7 +62,7 @@ private:
 	void publish_odom();
 
 private:
-	fawkes::MotorInterface                               *motor_if_;
+	fawkes::MotorInterface                               *motor_if_ = nullptr;
 	rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr pub_;
 	std::string                                           cfg_odom_frame_id_;
 	std::string                                           cfg_base_frame_id_;
