@@ -50,9 +50,6 @@ set(PLUGIN_ros2-navigator
 set(PLUGIN_ros2-dynamic-reconfigure
     ON
     CACHE BOOL "Build ros2-dynamic-reconfigure plugin")
-set(PLUGIN_ros2-navgraph-breakout
-    ON
-    CACHE BOOL "Build ros2-navgraph-breakout plugin")
 set(PLUGIN_ros2-joint
     ON
     CACHE BOOL "Build ros2-joint plugin")
@@ -281,34 +278,6 @@ if(PLUGIN_ros2-navigator)
     NavigatorInterface)
 else()
   plugin_disabled_message(ros2-navigator)
-endif()
-
-# if(PLUGIN_ros2-move-base) add_library(ros2-move-base MODULE
-# move_base_plugin.cpp move_base_thread.cpp) depend_on_ros2(ros2-move-base)
-# depend_on_ros2_libs(ros2-move-base "${ROS_2_NAVIGATOR_DEPS}")
-# target_link_libraries(ros2-move-base ${Boost_THREAD_LIBRARY})
-# target_link_libraries( ros2-move-base fawkescore fawkesutils fawkesaspects
-# fawkesblackboard fawkesinterface fawkestf fawkesros2aspect NavigatorInterface)
-# else() plugin_disabled_message(ros2-move-base) endif()
-
-if(PLUGIN_ros2-navgraph-breakout)
-  add_library(ros2-navgraph-breakout MODULE navgraph_breakout_plugin.cpp
-                                            navgraph_breakout_thread.cpp)
-  depend_on_ros2(ros2-navgraph-breakout)
-  depend_on_ros2_libs(ros2-navgraph-breakout fawkes_msgs)
-  target_link_libraries(
-    ros2-navgraph-breakout
-    m
-    pthread
-    fawkescore
-    fawkesutils
-    fawkesaspects
-    fawkesblackboard
-    fawkesinterface
-    fawkesros2aspect
-    NavigatorInterface)
-else()
-  plugin_disabled_message(ros2-navgraph-breakout)
 endif()
 
 if(PLUGIN_ros2-clock)
