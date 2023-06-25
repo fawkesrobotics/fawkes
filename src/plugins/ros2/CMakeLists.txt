@@ -62,9 +62,6 @@ set(PLUGIN_ros2-robot-description
 set(PLUGIN_ros2-move-base
     ON
     CACHE BOOL "Build ros2-move-base plugin")
-set(PLUGIN_ros2-skiller
-    ON
-    CACHE BOOL "Build ros2-skiller plugin")
 set(PLUGIN_ros2-clock
     ON
     CACHE BOOL "Build ros2-clock plugin")
@@ -312,23 +309,6 @@ if(PLUGIN_ros2-navgraph-breakout)
     NavigatorInterface)
 else()
   plugin_disabled_message(ros2-navgraph-breakout)
-endif()
-
-if(PLUGIN_ros2-skiller)
-  add_library(ros2-skiller MODULE skiller_plugin.cpp skiller_thread.cpp)
-  depend_on_ros2(ros2-skiller)
-  depend_on_ros2_libs(ros2-skiller "fawkes_msgs;actionlib")
-  target_link_libraries(
-    ros2-skiller
-    fawkescore
-    ros2-navgraph-breakouts
-    fawkesaspects
-    fawkesblackboard
-    fawkesinterface
-    fawkesros2aspect
-    SkillerInterface)
-else()
-  plugin_disabled_message(ros2-skiller)
 endif()
 
 if(PLUGIN_ros2-clock)
