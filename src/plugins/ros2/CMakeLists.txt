@@ -29,9 +29,6 @@ set(PLUGIN_ros2-talkerpub
 set(PLUGIN_ros2-tf2
     ON
     CACHE BOOL "Build ros2-tf2 plugin")
-set(PLUGIN_ros2-pcl
-    ON
-    CACHE BOOL "Build ros2-pcl plugin")
 set(PLUGIN_ros2-images
     ON
     CACHE BOOL "Build ros2-images plugin")
