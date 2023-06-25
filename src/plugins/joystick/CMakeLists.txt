@@ -28,13 +28,13 @@ set(PLUGIN_joystick-teleop
     ON
     CACHE BOOL "Build joystick-teleop plugin")
 
-set(PLUGIN_ffjoystick
+set(EXECUTABLE_ffjoystick
     ON
-    CACHE BOOL "Build ffjoystick plguin")
+    CACHE BOOL "Build ffjoystick tool")
 
-set(PLUGIN_ffkbjoystick
+set(EXECUTABLE_ffkbjoystick
     ON
-    CACHE BOOL "Build ffkbjoystick plugin")
+    CACHE BOOL "Build ffkbjoystick tool")
 
 if(PLUGIN_joystick)
   add_library(
@@ -69,7 +69,7 @@ else()
   plugin_disabled_message(joystick-teleop)
 endif()
 
-if(PLUGIN_ffjoystick)
+if(EXECUTABLE_ffjoystick)
   add_executable(
     ffjoystick ffjoystick.cpp acquisition_thread.cpp remote_bb_poster.cpp
                bb_handler.cpp force_feedback.cpp act_thread.cpp)
@@ -85,10 +85,10 @@ if(PLUGIN_ffjoystick)
     fawkeslogging
     JoystickInterface)
 else()
-  plugin_disabled_message(ffjoystick)
+  executable_disabled_message(ffjoystick)
 endif()
 
-if(PLUGIN_ffkbjoystick)
+if(EXECUTABLE_ffkbjoystick)
   add_executable(ffkbjoystick ffkbjoystick.cpp remote_bb_poster.cpp
                               bb_handler.cpp)
   target_link_libraries(
@@ -103,5 +103,5 @@ if(PLUGIN_ffkbjoystick)
     fawkeslogging
     JoystickInterface)
 else()
-  plugin_disabled_message(ffkbjoystick)
+  executable_disabled_message(ffkbjoystick)
 endif()

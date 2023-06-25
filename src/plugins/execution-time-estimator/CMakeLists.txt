@@ -20,11 +20,11 @@
 #
 # *****************************************************************************
 
-set(PLUGIN_execution-time-executor
+set(PLUGIN_execution-time-estimator
     ON
     CACHE BOOL "Build execution-time-estimator plugin")
 
-if(PLUGIN_execution-time-executor)
+if(PLUGIN_execution-time-estimator)
   add_library(
     execution-time-estimator MODULE
     execution_time_estimator_plugin.cpp execution_time_estimator_thread.cpp

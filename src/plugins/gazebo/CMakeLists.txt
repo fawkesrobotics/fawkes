@@ -20,9 +20,4 @@
 #
 # *****************************************************************************
 
-set(PLUGIN_asp
-    OFF
-    CACHE BOOL "Build asp plugin")
-if(PLUGIN_asp)
-  cmake_not_implemented(asp)
-endif()
+add_subdirectory(gazsim-comm)
