@@ -90,6 +90,18 @@
 	(retract ?sf ?pe)
 )
 
+(defrule skill-action-failed-inactive-interface
+	?pa <- (plan-action (goal-id ?goal-id) (plan-id ?plan-id) (id ?id) (skiller ?skiller) (action-name ?action-name) (state RUNNING))
+	(SkillerInterface (id ?skiller) (status S_INACTIVE))
+	?pe <- (skill-action-execinfo (goal-id ?goal-id) (plan-id ?plan-id)
+	                              (action-id ?id) (skill-id ?skill-id) (skiller ?skiller))
+	?sf <- (skill (id ?skill-id) (skiller ?skiller))
+	=>
+	(printout warn "Execution of " ?action-name " on " ?skiller " FAILED (SKillerInterface status inactive during running)" crlf)
+	(modify ?pa (state EXECUTION-FAILED) (error-msg "SkillerInterface status inactive during running action"))
+	(retract ?sf ?pe)
+)
+
 (defrule skill-action-cancel-if-action-does-not-exist
 	?pe <- (skill-action-execinfo (goal-id ?goal-id) (plan-id ?plan-id)
 	                              (action-id ?id) (skill-id ?skill-id) (skiller ?skiller))
