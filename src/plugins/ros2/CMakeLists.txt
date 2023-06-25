@@ -53,9 +53,6 @@ set(PLUGIN_ros2-joint
 set(PLUGIN_ros2-robot-description
     ON
     CACHE BOOL "Build ros2-robot-description plugin")
-set(PLUGIN_ros2-move-base
-    ON
-    CACHE BOOL "Build ros2-move-base plugin")
 set(PLUGIN_ros2-clock
     ON
     CACHE BOOL "Build ros2-clock plugin")
