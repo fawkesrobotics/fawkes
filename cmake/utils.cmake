@@ -137,6 +137,40 @@ function(optional_depend_on_pkgconfig_libs target libs success)
   endforeach()
 endfunction()
 
+function(depend_on_find_package_libs target libs)
+  # We need to disable style linting of cache variables for ${lib}_ vars
+  # cmake-lint: disable=C0103
+  foreach(lib ${libs})
+    set(tmp_list)
+    list(APPEND tmp_list ${FAWKES_DEPENDENCIES_CHECKED})
+    if(NOT ${lib} IN_LIST tmp_list)
+      find_package(${lib})
+      remember_dependency(${lib})
+    endif()
+    if(${lib}_FOUND)
+      set(${lib}_FOUND
+          ${${lib}_FOUND}
+          CACHE BOOL "")
+      set(${lib}_LIBRARIES
+          ${${lib}_LIBRARIES}
+          CACHE STRING "")
+      set(${lib}_INCLUDE_DIRS
+          ${${lib}_INCLUDE_DIRS}
+          CACHE STRING "")
+      set(${lib}_CFLAGS
+          ${${lib}_CFLAGS}
+          CACHE STRING "")
+      target_link_libraries(${target} ${${lib}_LIBRARIES})
+      target_include_directories(${target} PUBLIC ${${lib}_INCLUDE_DIRS})
+      target_compile_options(${target} PUBLIC ${${lib}_CFLAGS})
+    else()
+      set_target_properties(${target} PROPERTIES EXCLUDE_FROM_ALL 1
+                                                 EXCLUDE_FROM_DEFAULT_BUILD 1)
+      target_skipped_message(${target} ${lib})
+    endif()
+  endforeach()
+endfunction()
+
 macro(SET_COMMON_PROPERTIES_OF_TARGETS_RECUCURSIVE targets dir)
   get_property(
     subdirectories

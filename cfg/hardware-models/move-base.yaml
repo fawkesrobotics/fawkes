@@ -1,5 +1,6 @@
 %YAML 1.2
 %TAG ! tag:fawkesrobotics.org,cfg/
+---
 move-base:
   states:
     - INIT
