@@ -1,7 +1,7 @@
 # *****************************************************************************
 # CMake Build System for Fawkes
 # -------------------
-# Copyright (C) 2023 by Tarik Viehmann and Daniel Swoboda
+# Copyright (C) 2023 by Tarik Viehmann
 #
 # *****************************************************************************
 #
@@ -20,4 +20,15 @@
 #
 # *****************************************************************************
 
-add_subdirectory(gazsim-comm)
+set(PLUGIN_gazsim-comm
+    ON
+    CACHE BOOL "Build gazsim-comm plugin")
+
+if(PLUGIN_gazsim-comm)
+  add_library(gazsim-comm MODULE gazsim_comm_plugin.cpp gazsim_comm_thread.cpp)
+  depend_on_boost_libs(gazsim-comm system)
+  depend_on_protobuf_comm(gazsim-comm)
+  target_link_libraries(gazsim-comm fawkescore fawkesaspects)
+else()
+  plugin_disabled_message("gazsim-comm")
+endif()
