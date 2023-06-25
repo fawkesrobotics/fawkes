@@ -20,6 +20,8 @@
 #
 # *****************************************************************************
 
+unset_output_directory()
+
 add_library(fawkesros2aspect SHARED ros2.cpp ros2_inifin.cpp)
 target_link_libraries(fawkesros2aspect stdc++ fawkescore fawkesaspects
                       fawkesutils)
