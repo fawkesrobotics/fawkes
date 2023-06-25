@@ -138,10 +138,12 @@ function(optional_depend_on_pkgconfig_libs target libs success)
 endfunction()
 
 function(depend_on_find_package_libs target libs)
+  # We need to disable style linting of cache variables for ${lib}_ vars
+  # cmake-lint: disable=C0103
   foreach(lib ${libs})
-    set(TMP_LIST)
-    list(APPEND TMP_LIST ${FAWKES_DEPENDENCIES_CHECKED})
-    if(NOT ${lib} IN_LIST TMP_LIST)
+    set(tmp_list)
+    list(APPEND tmp_list ${FAWKES_DEPENDENCIES_CHECKED})
+    if(NOT ${lib} IN_LIST tmp_list)
       find_package(${lib})
       remember_dependency(${lib})
     endif()
