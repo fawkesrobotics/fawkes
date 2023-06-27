@@ -139,6 +139,7 @@ SkillerSimulatorExecutionThread::loop()
 				skiller_if_->set_error("");
 				skiller_if_->set_msgid(m->id());
 				skiller_if_->set_status(SkillerInterface::S_INACTIVE);
+				write_interface = true;
 			} else {
 				std::string sender = m->sender_thread_name();
 				if (sender == "Unknown") {
