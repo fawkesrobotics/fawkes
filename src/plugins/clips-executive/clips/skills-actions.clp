@@ -60,7 +60,7 @@
 	                    (action-name ?action-name) (state WAITING) (skiller ?skiller))
 	?pe <- (skill-action-execinfo (goal-id ?goal-id) (plan-id ?plan-id)
 	                              (action-id ?id) (skill-id ?skill-id) (skiller ?skiller))
-	(skill (id ?skill-id) (status S_RUNNING))
+	(skill (id ?skill-id) (status S_RUNNING) (skiller ?skiller))
 	=>
 	(printout t "Action " ?action-name " is running" crlf)
 	(modify ?pa (state RUNNING))
