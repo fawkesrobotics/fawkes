@@ -9,7 +9,7 @@
 
 (defrule action-selection-temporal-zerotime
   (goal (id ?goal-id) (mode DISPATCHED) (committed-to ?plan-id))
-  ?p <- (plan (id ?plan-id) (goal-id ?goal-id) (type TEMPORAL) (start-time 0 0))
+  ?p <- (plan (id ?plan-id) (goal-id ?goal-id) (type TEMPORAL) (start-time 0 0) (suspended FALSE))
  =>
   (modify ?p (start-time (now)))
 )
@@ -17,7 +17,7 @@
 (defrule action-selection-temporal-select
   (time $?now)
   (goal (id ?goal-id) (mode DISPATCHED) (committed-to ?plan-id))
-  (plan (id ?plan-id) (goal-id ?goal-id) (type TEMPORAL) (start-time $?start-time))
+  (plan (id ?plan-id) (goal-id ?goal-id) (type TEMPORAL) (start-time $?start-time) (suspended FALSE))
   ?pa <- (plan-action (goal-id ?goal-id) (plan-id ?plan-id) (id ?id)
                       (state FORMULATED)
                       (dispatch-time ?dt&:(timeout ?now ?start-time ?dt)))

@@ -13,6 +13,8 @@
 	(slot cost (type FLOAT))
 	(slot type (type SYMBOL))
 	(multislot start-time (type INTEGER) (cardinality 2 2) (default 0 0))
+	(slot suspended (type SYMBOL) (allowed-values TRUE FALSE) (default FALSE))
+	(slot suspension-reason (type SYMBOL) (default nil))
 )
 
 ; TODO: Rename slots
