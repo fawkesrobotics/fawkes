@@ -117,8 +117,6 @@ PYBIND11_MODULE(clips_gym, m)
 	  .def("getGoalIdByString", &ClipsGymThread::getGoalIdByString)
 	  .def("getDomainPredicates", &ClipsGymThread::getDomainPredicates)
 	  .def("getDomainObjects", &ClipsGymThread::getDomainObjects)
-	  .def("getRefboxGameTime", &ClipsGymThread::getRefboxGameTime)
-	  .def("getRefboxGamePhase", &ClipsGymThread::getRefboxGamePhase)
 	  .def("clipsGymSleep", &ClipsGymThread::clipsGymSleep)
 	  .def("log", &ClipsGymThread::log);
 }
@@ -307,14 +305,13 @@ ClipsGymThread::step(std::string next_goal)
 		}
 
 		//TODO: check outcome - set return 1 for completed and 0 otherwise
-		
+
 		clips.unlock();
 		elapsed_time += wait_time;
 		check_for_game_over = true;
 	}
-	if(!env_feedback)
-	{
-		logger->log_error(name(),"Ending step function without finished goal!!!");
+	if (!env_feedback) {
+		logger->log_error(name(), "Ending step function without finished goal!!!");
 	}
 	std::string env_state = create_rl_env_state_from_facts();
 
@@ -456,9 +453,10 @@ ClipsGymThread::getGoalId(std::string action)
 
 	logger->log_info(name(), "RL: found goals / actions:");
 	while (fact) {
-		CLIPS::Template::pointer tmpl  = fact->get_template();
-		std::size_t              found = tmpl->name().find("goal");
-		std::size_t              meta  = tmpl->name().find("goal-meta");
+		CLIPS::Template::pointer tmpl = fact->get_template();
+		// TODO: this can be improved
+		std::size_t found = tmpl->name().find("goal");
+		std::size_t meta  = tmpl->name().find("goal-meta");
 		if (found != std::string::npos && meta == std::string::npos) {
 			/*
 			Slot names: id, class,type, sub-type, parent, mode, outcome, warning, error, message,
@@ -701,87 +699,6 @@ ClipsGymThread::getAllFormulatedGoals()
 	return maskedGoals;
 }
 
-int
-ClipsGymThread::getRefboxGameTime()
-{
-	fawkes::LockPtr<CLIPS::Environment> clips = getClipsEnv();
-	clips.lock();
-	CLIPS::Fact::pointer fact = clips->get_facts();
-	int                  sec  = 0;
-	while (fact) {
-		CLIPS::Template::pointer tmpl = fact->get_template();
-		//(wm-fact (id "/refbox/game-time") (key refbox game-time) (type UINT) (is-list TRUE) (value nil) (values 68 239942.0))
-		std::size_t found = tmpl->name().find("wm-fact");
-
-		if (found != std::string::npos) {
-			std::string key = getClipsSlotValuesAsString(fact->slot_value("key"));
-			if (key == "refbox#game-time") {
-				logger->log_info(name(), "get refbox game-time key: %s", key.c_str());
-				std::vector<CLIPS::Value> slot_values = fact->slot_value("values");
-				//Normal game 20min = 1200 sec - extension by 5 more min -  25min = 1500sec
-
-				if (slot_values.size() > 0) {
-					auto v = slot_values.at(0);
-					logger->log_info(name(), "value type %d", v.type());
-					switch (v.type()) {
-					case CLIPS::TYPE_FLOAT: {
-						std::cout << "v is float" << std::endl;
-						float clips_time = v.as_float();
-						sec              = static_cast<int>(clips_time);
-					} break;
-					case CLIPS::TYPE_INTEGER: {
-						std::cout << "v is int" << std::endl;
-						sec = int(v.as_integer());
-					} break;
-						/*case CLIPS::TYPE_SYMBOL:
-					case CLIPS::TYPE_STRING:
-					case CLIPS::TYPE_EXTERNAL_ADDRESS:
-					case CLIPS::TYPE_INSTANCE_ADDRESS:
-					case CLIPS::TYPE_INSTANCE_NAME:*/
-					default:
-						//sec = std::stoi(v.as_string());
-						sec = 4;
-						std::cout << "Clips value " << v.as_string() << std::endl;
-					}
-				}
-				logger->log_info(name(), "Refbox game time %i sec", sec);
-				break;
-			}
-		}
-
-		fact = fact->next();
-	}
-	clips.unlock();
-	return sec;
-}
-
-std::string
-ClipsGymThread::getRefboxGamePhase()
-{
-	fawkes::LockPtr<CLIPS::Environment> clips = getClipsEnv();
-	clips.lock();
-	CLIPS::Fact::pointer fact  = clips->get_facts();
-	std::string          phase = "None";
-	while (fact) {
-		CLIPS::Template::pointer tmpl = fact->get_template();
-		//(wm-fact (id "/refbox/game-time") (key refbox game-time) (type UINT) (is-list TRUE) (value nil) (values 68 239942.0))
-		std::size_t found = tmpl->name().find("wm-fact");
-
-		if (found != std::string::npos) {
-			std::string key = getClipsSlotValuesAsString(fact->slot_value("key"));
-			if (key == "refbox#phase") {
-				phase = getClipsSlotValuesAsString(fact->slot_value("value"));
-				logger->log_info(name(), "get refbox phase %s", phase.c_str());
-				break;
-			}
-		}
-
-		fact = fact->next();
-	}
-	clips.unlock();
-	return phase;
-}
-
 //std::vector<std::string>
 std::vector<GoalAction>
 ClipsGymThread::getAllFormulatedExecutableGoals()
@@ -882,8 +799,8 @@ ClipsGymThread::resetCX()
 		CLIPS::Fact::pointer fact = clips->get_facts();
 
 		while (fact) {
-			CLIPS::Template::pointer tmpl  = fact->get_template();
-			std::size_t              found = tmpl->name().find("reset-game-finished");
+			CLIPS::Template::pointer tmpl = fact->get_template();
+			std::size_t found             = tmpl->name().find("reset-game-finished"); // TODO: rename this
 			//std::size_t              found = tmpl->name().find("reset-domain-finish");
 			if (found != std::string::npos) {
 				logger->log_info(name(), "\nIn ClipsGymThread reset completed!!! \n");
