@@ -19,26 +19,25 @@
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # *****************************************************************************
-find_package(Python3 COMPONENTS Interpreter Development)
-find_package(pybind11 CONFIG)
 
 set(PLUGIN_clips-gym
     ON
     CACHE BOOL "Build clips-gym")
-
+message(
+  "------------------------------------- Pyhton interpreter found: ${Python3_INCLUDE_DIRS}  ${Python3_LIBRARIES}"
+)
 if(PLUGIN_clips-gym)
-  add_library(clips-gym MODULE clips-gym-plugin.cpp clips-gym-thread.cpp
-                               clips-observation-info.cpp goalAction.cpp)
+  add_library(clips-gym-thread SHARED clips-gym-thread.cpp
+                                      clips-observation-info.cpp goalAction.cpp)
+  depend_on_clipsmm(clips-gym-thread)
+  depend_on_cpp_version(clips-gym-thread 17)
+  target_include_directories(clips-gym-thread PRIVATE ${Python3_INCLUDE_DIRS})
 
-  depend_on_clipsmm(clips-gym)
-  depend_on_cpp_version(clips-gym 17)
-  target_link_libraries(clips-gym pybind11::headers)
-
-  # required for pybind11
-  set_target_properties(clips-gym PROPERTIES CXX_VISIBILITY_PRESET hidden)
-
+  # required for pybind11 set_target_properties(clips-gym-thread PROPERTIES
+  # CXX_VISIBILITY_PRESET hidden) target_link_options(clips-gym-thread PRIVATE
+  # ${Python3_LINK_OPTIONS})
   target_link_libraries(
-    clips-gym
+    clips-gym-thread
     fawkescore
     fawkesutils
     fawkesaspects
@@ -47,7 +46,19 @@ if(PLUGIN_clips-gym)
     fawkesinterface
     fawkesclipsaspect
     fawkeslogging
-    Python3::Module)
+    ${Python3_LIBRARIES}
+    Python3::Python
+    pybind11::headers)
+  add_library(clips-gym MODULE clips-gym-plugin.cpp)
+
+  depend_on_clipsmm(clips-gym)
+  depend_on_cpp_version(clips-gym 17)
+  target_include_directories(clips-gym PRIVATE ${Python3_INCLUDE_DIRS})
+
+  # required for pybind11 set_target_properties(clips-gym PROPERTIES
+  # CXX_VISIBILITY_PRESET hidden) target_link_options(clips-gym PRIVATE
+  # ${Python3_LINK_OPTIONS})
+  target_link_libraries(clips-gym clips-gym-thread)
 else()
   plugin_disabled_message("clips-gym")
 endif()

@@ -19,34 +19,9 @@
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # *****************************************************************************
-add_subdirectory(interfaces)
-set(PLUGIN_clips-executive-rl
-    ON
-    CACHE BOOL "Build clips-executive-rl")
 
-if(PLUGIN_clips-executive-rl)
-  add_library(clips-executive-rl MODULE clips-executive-rl-plugin.cpp
-                                        rl-test-thread.cpp py-guard.cpp)
-  depend_on_cpp_version(clips-executive-rl 17)
-  target_link_libraries(clips-executive-rl pybind11::headers)
-  depend_on_clipsmm(clips-executive-rl)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
+                      /usr/share/cmake/Modules/FindPython.cmake)
 
-  # required for pybind11 set_target_properties(clips-executive-rl PROPERTIES
-  # CXX_VISIBILITY_PRESET hidden)
-
-  # TODO: rlblocksworld includes? target_link_options(clips-executive-rl PRIVATE
-  # ${Python3_LINK_OPTIONS})
-
-  target_link_libraries(
-    clips-executive-rl
-    fawkescore
-    fawkesutils
-    fawkesaspects
-    fawkesblackboard
-    fawkesinterface
-    fawkesclipsaspect
-    RLAgentGoalSelectionInterface
-    Python3::Python)
-else()
-  plugin_disabled_message("clips-executive-rl")
-endif()
+find_package(Python3 COMPONENTS Interpreter Development)
+find_package(pybind11 CONFIG)

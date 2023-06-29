@@ -111,7 +111,7 @@ public:
 
 	std::map<std::string, py::dict> goalClassParamsAndParamTypeMap;
 
-	int getRefboxGameTime();
+	int         getRefboxGameTime();
 	std::string getRefboxGamePhase();
 
 	void clipsGymSleep(int milliseconds);
@@ -123,7 +123,7 @@ protected:
 		Thread::run();
 	}
 
-private:
+protected:
 	std::map<std::string, fawkes::LockPtr<CLIPS::Environment>> envs_;
 	std::string                                                clips_env_name;
 	constexpr static char cfg_prefix_[] = "/plugins/clips-gym/static/";
