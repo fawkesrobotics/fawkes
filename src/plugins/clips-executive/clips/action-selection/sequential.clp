@@ -9,7 +9,7 @@
 
 (defrule action-selection-sequential-select
   (goal (id ?goal-id) (mode DISPATCHED) (committed-to ?plan-id))
-  (plan (id ?plan-id) (goal-id ?goal-id) (type SEQUENTIAL))
+  (plan (id ?plan-id) (goal-id ?goal-id) (type SEQUENTIAL) (suspended FALSE))
   ?pa <- (plan-action (goal-id ?goal-id) (plan-id ?plan-id) (id ?id)
                       (state FORMULATED))
   (not (plan-action (goal-id ?goal-id) (plan-id ?plan-id) (state ~FORMULATED&~FINAL)))
