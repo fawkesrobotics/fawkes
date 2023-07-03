@@ -37,14 +37,9 @@ using namespace fawkes;
  */
 
 /// taken from Robotino API2 DistanceSensorImpl.hpp
-const std::vector<std::pair<double, double>> VOLTAGE_TO_DIST_DPS = {{0.3, 0.41},
-                                                                    {0.39, 0.35},
-                                                                    {0.41, 0.30},
-                                                                    {0.5, 0.25},
-                                                                    {0.75, 0.18},
-                                                                    {0.8, 0.16},
-                                                                    {0.95, 0.14},
-                                                                    {1.05, 0.12},
+const std::vector<std::pair<double, double>> VOLTAGE_TO_DIST_DPS = {{0.3, 1.0},
+                                                                    {1.05, 1.0},
+                                                                    {1.11, 0.12},
                                                                     {1.3, 0.10},
                                                                     {1.4, 0.09},
                                                                     {1.55, 0.08},
