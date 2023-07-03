@@ -1,11 +1,10 @@
 
 /***************************************************************************
- *  laserscan_thread.cpp - Thread to exchange laser scans
+ *  laserscan_thread.cpp - Thread to exchange IR Sensor data
  *
- *  Created: Tue May 29 19:41:18 2012
- *  Copyright  2011-2012  Tim Niemueller [www.niemueller.de]
+ *  Created: Mon Jul 03 13:41:18 2012
+ *  Copyright  2023  Shantanu Chivate, Tim Wendt
  ****************************************************************************/
-
 /*  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
@@ -42,26 +41,24 @@ ROS2IrScanThread::ROS2IrScanThread()
 void
 ROS2IrScanThread::init()
 {
-		sens_if_= blackboard->open_for_reading<RobotinoSensorInterface>("Robotino");
+	sens_if_= blackboard->open_for_reading<RobotinoSensorInterface>("Robotino");
 
-		sens_if_->read();
+	sens_if_->read();
 
-		std::string topname = "IrSensor_Scan";
+	std::string topname = "IrSensor_Scan";
 
-		pi.pub = node_handle->create_publisher<sensor_msgs::msg::LaserScan>(topname, 1);
+	pi.pub = node_handle->create_publisher<sensor_msgs::msg::LaserScan>(topname, 1);
 
-		// logger->log_info(name(), "Publishing laser scan %s at %s", (*i360)->uid(), topname.c_str());
+	pi.msg.header.frame_id = config->get_string("/hardware/robotino/base_frame");
+	pi.msg.angle_min       = 0;
+	pi.msg.angle_max       = 2 * M_PI;
+	pi.msg.angle_increment = 0.68;
+	pi.msg.scan_time = 0.1;
+	pi.msg.range_min = 0.02;
+	pi.msg.range_max = 0.12;
 
-		pi.msg.header.frame_id = config->get_string("/hardware/robotino/base_frame");
-		pi.msg.angle_min       = 0;
-		pi.msg.angle_max       = 2 * M_PI;
-		pi.msg.angle_increment = 0.68;
-		pi.msg.scan_time = 0.1;
-		pi.msg.range_min = 0.02;
-		pi.msg.range_max = 0.12;
-
-		blackboard->register_listener(this);
-	}
+	blackboard->register_listener(this);
+}
 
 
 void
@@ -69,15 +66,6 @@ ROS2IrScanThread::finalize()
 {
 	blackboard->unregister_listener(this);
 	blackboard->close(sens_if_);
-
-	// std::map<std::string, PublisherInfo>::iterator p;
-	// for (p = pubs_.begin(); p != pubs_.end(); ++p) {}
-
-	// std::list<Laser360Interface *>::iterator i360;
-	// for (i360 = ls360_ifs_.begin(); i360 != ls360_ifs_.end(); ++i360) {
-	// 	blackboard->close(*i360);
-	// }
-	// ls360_ifs_.clear();
 }
 
 
@@ -99,9 +87,3 @@ ROS2IrScanThread::bb_interface_data_refreshed(fawkes::Interface *interface) noex
 	pi.pub->publish(pi.msg);
 	
 }
-
-/** Callback function for ROS laser scan message subscription.
- * @param msg incoming message
- * std::shared_ptr<const sensor_msgs::msg::LaserScan>, const rclcpp::MessageInfo
- */
-
