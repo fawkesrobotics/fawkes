@@ -37,7 +37,7 @@ using namespace fawkes;
  */
 
 /// taken from Robotino API2 DistanceSensorImpl.hpp
-const std::vector<std::pair<double, double>> VOLTAGE_TO_DIST_DPS = {{0.3, 1.0},
+const std::vector<std::pair<double, double>> VOLTAGE_TO_DIST_DPS = {{0.0, 1.0},
                                                                     {1.05, 1.0},
                                                                     {1.11, 0.12},
                                                                     {1.3, 0.10},
@@ -45,7 +45,7 @@ const std::vector<std::pair<double, double>> VOLTAGE_TO_DIST_DPS = {{0.3, 1.0},
                                                                     {1.55, 0.08},
                                                                     {1.8, 0.07},
                                                                     {2.35, 0.05},
-                                                                    {2.55, 0.04}};
+                                                                    {10.55, 0.04}};
 
 /** Constructor.
  * @param com_thread communication thread to trigger for writing data
@@ -151,8 +151,34 @@ RobotinoSensorThread::update_distances(float *voltages)
 	float        dist_m[NUM_IR_SENSORS];
 	const size_t num_dps = VOLTAGE_TO_DIST_DPS.size();
 
-	// for (int i = 0; i < NUM_IR_SENSORS; ++i) {
-	// }
+	for (int i = 0; i < NUM_IR_SENSORS; ++i) {
+		for (size_t j = 0; j < num_dps - 1; ++j) {
+			// This determines two points, l(eft) and r(ight) that are
+			// defined by voltage (x coord) and distance (y coord). We
+			// assume a linear progression between two adjacent points,
+			// i.e. between l and r. We then do the following:
+			// 1. Find two adjacent voltage values lv and rv where
+			//    the voltage lies inbetween
+			// 2. Interpolate by calculating the line parameters
+			//    m = dd/dv, x = voltage - lv and b = ld.
+			// cf. http://www.acroname.com/robotics/info/articles/irlinear/irlinear.html
+
+			const double lv = VOLTAGE_TO_DIST_DPS[j].first;
+			const double rv = VOLTAGE_TO_DIST_DPS[j + 1].first;
+
+			if ((voltages[i] >= lv) && (voltages[i] < rv)) {
+				const double ld = VOLTAGE_TO_DIST_DPS[j].second;
+				const double rd = VOLTAGE_TO_DIST_DPS[j + 1].second;
+
+				double dv = rv - lv;
+				double dd = rd - ld;
+
+				// Linear interpolation between
+				dist_m[i] = (dd / dv) * (voltages[i] - lv) + ld;
+				break;
+			}
+		}
+	}
 
 	sens_if_->set_distance(dist_m);
 }

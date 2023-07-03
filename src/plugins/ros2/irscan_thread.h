@@ -44,13 +44,12 @@ using std::placeholders::_1;
 #include <sensor_msgs/msg/laser_scan.hpp>
 
 class ROS2IrScanThread : public fawkes::Thread,
-                            public fawkes::LoggingAspect,
-                            public fawkes::ConfigurableAspect,
-                            public fawkes::BlockedTimingAspect,
-                            public fawkes::BlackBoardAspect,
-                            public fawkes::ROS2Aspect,
-                            public fawkes::BlackBoardInterfaceObserver,
-                            public fawkes::BlackBoardInterfaceListener
+                         public fawkes::LoggingAspect,
+                         public fawkes::ConfigurableAspect,
+                         public fawkes::BlockedTimingAspect,
+                         public fawkes::BlackBoardAspect,
+                         public fawkes::ROS2Aspect,
+                         public fawkes::BlackBoardInterfaceListener
 {
 public:
 	ROS2IrScanThread();
@@ -58,8 +57,8 @@ public:
 	virtual void init();
 	virtual void finalize();
 	// for BlackBoardInterfaceListener
-	void bb_interface_data_refreshed(fawkes::Interface *interface) noexcept override;
-	
+	virtual void bb_interface_data_refreshed(fawkes::Interface *interface) throw() override;
+
 protected:
 	virtual void
 	run()
@@ -68,19 +67,10 @@ protected:
 	}
 
 private:
-	
 	fawkes::RobotinoSensorInterface *sens_if_;
-	
-	/// @cond INTERNALS
-	typedef struct
-	{
-		rclcpp::Publisher<sensor_msgs::msg::LaserScan>::SharedPtr pub;
-		sensor_msgs::msg::LaserScan                               msg;
-	} PublisherInfo;
-	/// @endcond
-	PublisherInfo pi;
-	std::map<std::string, PublisherInfo> pubs_;
 
+	rclcpp::Publisher<sensor_msgs::msg::LaserScan>::SharedPtr pub;
+	sensor_msgs::msg::LaserScan                               msg;
 };
 
 #endif
