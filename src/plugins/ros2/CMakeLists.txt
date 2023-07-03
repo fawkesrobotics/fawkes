@@ -35,6 +35,9 @@ set(PLUGIN_ros2-images
 set(PLUGIN_ros2-laserscan
     ON
     CACHE BOOL "Build ros2-laserscan plugin")
+set(PLUGIN_ros2-irscan
+    ON
+    CACHE BOOL "Build ros2-irscan plugin")
 set(PLUGIN_ros2-odometry
     ON
     CACHE BOOL "Build ros2-odometry plugin")
@@ -155,6 +158,25 @@ if(PLUGIN_ros2-laserscan)
     Laser1080Interface)
 else()
   plugin_disabled_message(ros2-laserscan)
+endif()
+
+if(PLUGIN_ros2-irscan)
+  add_library(ros2-irscan MODULE irscan_plugin.cpp irscan_thread.cpp)
+  depend_on_ros2(ros2-irscan)
+  depend_on_ros2_libs(ros2-irscan sensor_msgs)
+  target_link_libraries(
+    ros2-irscan
+    m
+    fawkescore
+    fawkesutils
+    fawkesaspects
+    fawkesblackboard
+    fawkesinterface
+    fawkesros2aspect
+    fvutils
+    RobotinoSensorInterface)
+else()
+  plugin_disabled_message(ros2-irscan)
 endif()
 
 if(PLUGIN_ros2-joint)
