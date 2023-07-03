@@ -63,7 +63,7 @@ protected:
 	}
 
 private:
-	fawkes::RobotinoSensorInterface *sens_if_;
+	fawkes::RobotinoSensorInterface *sens_if_ = nullptr;
 
 	rclcpp::Publisher<sensor_msgs::msg::LaserScan>::SharedPtr pub;
 	sensor_msgs::msg::LaserScan                               msg;
