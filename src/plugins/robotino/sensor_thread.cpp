@@ -156,37 +156,8 @@ RobotinoSensorThread::update_distances(float *voltages)
 	float        dist_m[NUM_IR_SENSORS];
 	const size_t num_dps = VOLTAGE_TO_DIST_DPS.size();
 
-	for (int i = 0; i < NUM_IR_SENSORS; ++i) {
-		dist_m[i] = 0.;
-		// find the two enclosing data points
-
-		for (size_t j = 0; j < num_dps - 1; ++j) {
-			// This determines two points, l(eft) and r(ight) that are
-			// defined by voltage (x coord) and distance (y coord). We
-			// assume a linear progression between two adjacent points,
-			// i.e. between l and r. We then do the following:
-			// 1. Find two adjacent voltage values lv and rv where
-			//    the voltage lies inbetween
-			// 2. Interpolate by calculating the line parameters
-			//    m = dd/dv, x = voltage - lv and b = ld.
-			// cf. http://www.acroname.com/robotics/info/articles/irlinear/irlinear.html
-
-			const double lv = VOLTAGE_TO_DIST_DPS[j].first;
-			const double rv = VOLTAGE_TO_DIST_DPS[j + 1].first;
-
-			if ((voltages[i] >= lv) && (voltages[i] < rv)) {
-				const double ld = VOLTAGE_TO_DIST_DPS[j].second;
-				const double rd = VOLTAGE_TO_DIST_DPS[j + 1].second;
-
-				double dv = rv - lv;
-				double dd = rd - ld;
-
-				// Linear interpolation between
-				dist_m[i] = (dd / dv) * (voltages[i] - lv) + ld;
-				break;
-			}
-		}
-	}
+	// for (int i = 0; i < NUM_IR_SENSORS; ++i) {
+	// }
 
 	sens_if_->set_distance(dist_m);
 }
