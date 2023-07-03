@@ -1,10 +1,9 @@
 
 /***************************************************************************
- *  laserscan_plugin.cpp - Exchange laser scans between Fawkes and ROS
+ *  irscan_plugin.cpp - Exchange irsensor data between Fawkes and ROS
  *
- *  Created: Tue May 29 19:30:47 2012
- *  Copyright  2011-2012  Tim Niemueller [www.niemueller.de]
- *
+ *  Created: Mon Jul 03 13:41:18 2012
+ *  Copyright  2023 Saurabh Borse, Tim Wendt
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

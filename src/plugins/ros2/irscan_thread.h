@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  laserscan_thread.h - Thread to exchange laser scans
+ *  laserscan_thread.cpp - Thread to exchange IR Sensor data
  *
- *  Created: Tue May 29 19:32:39 2012
- *  Copyright  2011-2012  Tim Niemueller [www.niemueller.de]
+ *  Created: Mon Jul 03 13:41:18 2012
+ *  Copyright  2023 Saurabh Borse, Tim Wendt
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -19,8 +19,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef _PLUGINS_ROS_LASERSCAN_THREAD_H_
-#define _PLUGINS_ROS_LASERSCAN_THREAD_H_
+#ifndef _PLUGINS_ROS_IRSCANNER_THREAD_H_
+#define _PLUGINS_ROS_IRSCANNER_THREAD_H_
 
 #include <aspect/blackboard.h>
 #include <aspect/blocked_timing.h>
@@ -49,10 +49,8 @@ class ROS2IrScanThread : public fawkes::Thread,
 {
 public:
 	ROS2IrScanThread();
-	virtual ~ROS2IrScanThread();
 
 	virtual void init();
-	virtual void loop();
 	virtual void finalize();
 	// for BlackBoardInterfaceListener
 	void bb_interface_data_refreshed(fawkes::Interface *interface) noexcept override;
