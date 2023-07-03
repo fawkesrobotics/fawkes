@@ -37,7 +37,7 @@ using namespace fawkes;
  */
 
 /// taken from Robotino API2 DistanceSensorImpl.hpp
-const std::vector<std::pair<double, double>> VOLTAGE_TO_DIST_DPS = {{0.3, 1.0},
+const std::vector<std::pair<double, double>> VOLTAGE_TO_DIST_DPS = {{0.0, 1.0},
                                                                     {1.05, 1.0},
                                                                     {1.11, 0.12},
                                                                     {1.3, 0.10},
@@ -45,7 +45,7 @@ const std::vector<std::pair<double, double>> VOLTAGE_TO_DIST_DPS = {{0.3, 1.0},
                                                                     {1.55, 0.08},
                                                                     {1.8, 0.07},
                                                                     {2.35, 0.05},
-                                                                    {2.55, 0.04}};
+                                                                    {10.55, 0.04}};
 
 /** Constructor.
  * @param com_thread communication thread to trigger for writing data
@@ -152,9 +152,8 @@ RobotinoSensorThread::update_distances(float *voltages)
 	const size_t num_dps = VOLTAGE_TO_DIST_DPS.size();
 
 	for (int i = 0; i < NUM_IR_SENSORS; ++i) {
-		dist_m[i] = 0.;
+		dist_m[i] = 1.0;
 		// find the two enclosing data points
-
 		for (size_t j = 0; j < num_dps - 1; ++j) {
 			// This determines two points, l(eft) and r(ight) that are
 			// defined by voltage (x coord) and distance (y coord). We

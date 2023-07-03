@@ -53,8 +53,8 @@ public:
 	virtual void init();
 	virtual void finalize();
 	// for BlackBoardInterfaceListener
-	void bb_interface_data_refreshed(fawkes::Interface *interface) noexcept override;
-	
+	virtual void bb_interface_data_refreshed(fawkes::Interface *interface) throw() override;
+
 protected:
 	virtual void
 	run()
@@ -63,19 +63,10 @@ protected:
 	}
 
 private:
-	
 	fawkes::RobotinoSensorInterface *sens_if_;
-	
-	/// @cond INTERNALS
-	typedef struct
-	{
-		rclcpp::Publisher<sensor_msgs::msg::LaserScan>::SharedPtr pub;
-		sensor_msgs::msg::LaserScan                               msg;
-	} PublisherInfo;
-	/// @endcond
-	PublisherInfo pi;
-	std::map<std::string, PublisherInfo> pubs_;
 
+	rclcpp::Publisher<sensor_msgs::msg::LaserScan>::SharedPtr pub;
+	sensor_msgs::msg::LaserScan                               msg;
 };
 
 #endif

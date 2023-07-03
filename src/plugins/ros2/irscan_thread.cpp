@@ -21,6 +21,7 @@
 #include "irscan_thread.h"
 
 #include <interfaces/RobotinoSensorInterface.h>
+
 #include <limits>
 
 using namespace fawkes;
@@ -41,25 +42,25 @@ ROS2IrScanThread::ROS2IrScanThread()
 void
 ROS2IrScanThread::init()
 {
-	sens_if_= blackboard->open_for_reading<RobotinoSensorInterface>("Robotino");
+	sens_if_ = blackboard->open_for_reading<RobotinoSensorInterface>("Robotino");
 
 	sens_if_->read();
 
 	std::string topname = "IrSensor_Scan";
 
-	pi.pub = node_handle->create_publisher<sensor_msgs::msg::LaserScan>(topname, 1);
+	pub = node_handle->create_publisher<sensor_msgs::msg::LaserScan>(topname, 1);
 
-	pi.msg.header.frame_id = config->get_string("/hardware/robotino/base_frame");
-	pi.msg.angle_min       = 0;
-	pi.msg.angle_max       = 2 * M_PI;
-	pi.msg.angle_increment = 0.68;
-	pi.msg.scan_time = 0.1;
-	pi.msg.range_min = 0.02;
-	pi.msg.range_max = 0.12;
+	msg.header.frame_id = config->get_string_or_default("/ros2/tf/tf_prefix", "") + "base_link";
+	msg.angle_min       = 0;
+	msg.angle_max       = 2 * M_PI;
+	msg.angle_increment = 0.68;
+	msg.scan_time       = 0.1;
+	msg.range_min       = 0.02;
+	msg.range_max       = 0.12;
 
+	bbil_add_data_interface(sens_if_);
 	blackboard->register_listener(this);
 }
-
 
 void
 ROS2IrScanThread::finalize()
@@ -68,22 +69,22 @@ ROS2IrScanThread::finalize()
 	blackboard->close(sens_if_);
 }
 
-
 void
-ROS2IrScanThread::bb_interface_data_refreshed(fawkes::Interface *interface) noexcept
+ROS2IrScanThread::bb_interface_data_refreshed(fawkes::Interface *interface) throw()
 {
-	RobotinoSensorInterface  *sensor_data_msg  = dynamic_cast<RobotinoSensorInterface *>(interface);
-	if(!sensor_data_msg)
-	return;
+	RobotinoSensorInterface *sensor_data_msg = dynamic_cast<RobotinoSensorInterface *>(interface);
+	if (!sensor_data_msg)
+		return;
 
 	sensor_data_msg->read();
 
-	PublisherInfo               &pi  = pubs_[interface->uid()];
-	sensor_msgs::msg::LaserScan &msg = pi.msg;
 	const Time *time = sensor_data_msg->timestamp();
-	msg.header.stamp    = rclcpp::Time(time->get_sec(), time->get_nsec());
-	memcpy(&msg.ranges[0], sensor_data_msg->distance(), 9 * sizeof(float));
-
-	pi.pub->publish(pi.msg);
-	
+	msg.header.stamp = rclcpp::Time(time->get_sec(), time->get_nsec());
+	msg.ranges.assign(sensor_data_msg->distance(), sensor_data_msg->distance() + 9);
+	for (uint8_t i = 0; i < 9; ++i) {
+		if (msg.ranges[i] < 1) {
+			msg.ranges[i] = msg.ranges[i] + 0.225f;
+		}
+	}
+	pub->publish(msg);
 }
