@@ -22,6 +22,7 @@
 #ifndef _PLUGINS_CLIPS_TF_CLIPS_TF_THREAD_H_
 #define _PLUGINS_CLIPS_TF_CLIPS_TF_THREAD_H_
 
+#include <aspect/clock.h>
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
 #include <aspect/tf.h>
@@ -31,6 +32,7 @@
 #include <clipsmm.h>
 
 class ClipsTFThread : public fawkes::Thread,
+                      public fawkes::ClockAspect,
                       public fawkes::LoggingAspect,
                       public fawkes::ConfigurableAspect,
                       public fawkes::TransformAspect,
@@ -89,6 +91,14 @@ private:
 	                                      CLIPS::Values time,
 	                                      CLIPS::Values translation,
 	                                      CLIPS::Values rotation_quat);
+	CLIPS::Values clips_tf_add_publisher(std::string frame);
+	CLIPS::Values clips_tf_publish_pose_static(std::string parent,
+	                                           std::string frame,
+	                                           double      yaw,
+	                                           double      x,
+	                                           double      y);
+	CLIPS::Values
+	clips_tf_publish_pose(std::string parent, std::string frame, double yaw, double x, double y);
 
 private:
 	std::map<std::string, fawkes::LockPtr<CLIPS::Environment>> envs_;

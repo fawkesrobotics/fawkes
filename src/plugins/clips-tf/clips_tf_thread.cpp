@@ -33,6 +33,7 @@ ClipsTFThread::ClipsTFThread()
 : Thread("ClipsTFThread", Thread::OPMODE_WAITFORWAKEUP),
   CLIPSFeature("tf"),
   CLIPSFeatureAspect(this),
+  TransformAspect(TransformAspect::BOTH_DEFER_PUBLISHER),
   debug_(true)
 {
 }
@@ -97,6 +98,15 @@ ClipsTFThread::clips_context_init(const std::string &env_name, LockPtr<CLIPS::En
 	  sigc::
 	    slot<CLIPS::Values, std::string, std::string, CLIPS::Values, CLIPS::Values, CLIPS::Values>(
 	      sigc::mem_fun(*this, &ClipsTFThread::clips_tf_transform_pose)));
+	clips->add_function("tf-add-publisher",
+	                    sigc::slot<CLIPS::Values, std::string>(
+	                      sigc::mem_fun(*this, &ClipsTFThread::clips_tf_add_publisher)));
+	clips->add_function("tf-publish-pose-static",
+	                    sigc::slot<CLIPS::Values, std::string, std::string, double, double, double>(
+	                      sigc::mem_fun(*this, &ClipsTFThread::clips_tf_publish_pose_static)));
+	clips->add_function("tf-publish-pose",
+	                    sigc::slot<CLIPS::Values, std::string, std::string, double, double, double>(
+	                      sigc::mem_fun(*this, &ClipsTFThread::clips_tf_publish_pose)));
 
 	clips.unlock();
 }
@@ -440,4 +450,55 @@ ClipsTFThread::validate_quat(const CLIPS::Values &quat)
 		}
 	}
 	return true;
+}
+
+CLIPS::Values
+ClipsTFThread::clips_tf_add_publisher(std::string frame)
+{
+	auto tf_it = tf_publishers.find(frame);
+	if (tf_it == tf_publishers.end()) {
+		tf_add_publisher(frame.c_str());
+		return CLIPS::Values(1, CLIPS::Value("TRUE", CLIPS::TYPE_SYMBOL));
+	}
+	return CLIPS::Values(1, CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL));
+}
+
+CLIPS::Values
+ClipsTFThread::clips_tf_publish_pose_static(std::string parent,
+                                            std::string frame,
+                                            double      yaw,
+                                            double      x,
+                                            double      y)
+{
+	auto tf_it = tf_publishers.find(frame);
+	if (tf_it == tf_publishers.end()) {
+		return CLIPS::Values(1, CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL));
+	} else {
+		fawkes::Time   now(clock);
+		tf::Quaternion q = tf::create_quaternion_from_yaw(yaw);
+		tf::Transform  t(q, tf::Vector3(x, y, 0));
+		tf_it->second->send_transform(t, now, parent, frame, true);
+	}
+
+	return CLIPS::Values(1, CLIPS::Value("TRUE", CLIPS::TYPE_SYMBOL));
+}
+
+CLIPS::Values
+ClipsTFThread::clips_tf_publish_pose(std::string parent,
+                                     std::string frame,
+                                     double      yaw,
+                                     double      x,
+                                     double      y)
+{
+	auto tf_it = tf_publishers.find(frame);
+	if (tf_it == tf_publishers.end()) {
+		return CLIPS::Values(1, CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL));
+	} else {
+		fawkes::Time   now(clock);
+		tf::Quaternion q = tf::create_quaternion_from_yaw(yaw);
+		tf::Transform  t(q, tf::Vector3(x, y, 0));
+		tf_it->second->send_transform(t, now, parent, frame);
+	}
+
+	return CLIPS::Values(1, CLIPS::Value("TRUE", CLIPS::TYPE_SYMBOL));
 }
