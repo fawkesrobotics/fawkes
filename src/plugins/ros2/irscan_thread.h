@@ -31,9 +31,8 @@
 #include <plugins/ros2/aspect/ros2.h>
 #include <utils/time/time.h>
 
-#include <list>
+#include <vector>
 #include <memory>
-#include <queue>
 using std::placeholders::_1;
 
 //ROS2
@@ -65,8 +64,9 @@ protected:
 private:
 	fawkes::RobotinoSensorInterface *sens_if_ = nullptr;
 
-	rclcpp::Publisher<sensor_msgs::msg::Range>::SharedPtr pub;
-	sensor_msgs::msg::Range                               msg;
+	std::vector<rclcpp::Publisher<sensor_msgs::msg::Range>::SharedPtr> pubs_;
+	std::vector<std::string> tops_;
+	sensor_msgs::msg::Range    msg;
 };
 
 #endif

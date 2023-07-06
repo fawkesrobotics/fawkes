@@ -63,6 +63,12 @@ ROS2IrScanThread::init()
 
 	sens_if_ = blackboard->open_for_reading<RobotinoSensorInterface>("Robotino");
 	sens_if_->read();
+    
+
+	for (uint8_t i = 0; i < 9; ++i) {	
+			tops_.push_back("Ir_Sensor_range"+i);	
+			pubs_.push_back(node_handle->create_publisher<sensor_msgs::msg::Range>(tops_[i], 1));
+	}
 
 	msg.header.frame_id = config->get_string_or_default("/ros2/tf/tf_prefix", "") + "base_link";
 	//msg.INFRARED = 1;
@@ -97,9 +103,7 @@ ROS2IrScanThread::bb_interface_data_refreshed(fawkes::Interface *interface) thro
 	for (uint8_t i = 0; i < 9; ++i) {
 		if (sensor_data_msg->distance(i) < 1) {
 			msg.range = sensor_data_msg->distance(i) + 0.225f;
-			std::string topname = "IrSensor_Range_"+i;
-			pub = node_handle->create_publisher<sensor_msgs::msg::Range>(topname, 1);
-			pub->publish(msg);
+			pubs_[i]->publish(msg);
 		}
 	}
 	
