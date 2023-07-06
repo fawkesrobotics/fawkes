@@ -66,7 +66,7 @@ ROS2IrScanThread::init()
     
 
 	for (uint8_t i = 0; i < 9; ++i) {	
-			tops_.push_back("Ir_Sensor_range"+i);	
+			tops_.push_back("Ir_Sensor_range_"+std::to_string(i));	
 			pubs_.push_back(node_handle->create_publisher<sensor_msgs::msg::Range>(tops_[i], 1));
 	}
 
