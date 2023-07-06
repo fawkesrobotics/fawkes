@@ -42,21 +42,34 @@ ROS2IrScanThread::ROS2IrScanThread()
 void
 ROS2IrScanThread::init()
 {
-	sens_if_ = blackboard->open_for_reading<RobotinoSensorInterface>("Robotino");
+	// sens_if_ = blackboard->open_for_reading<RobotinoSensorInterface>("Robotino");
 
+	// sens_if_->read();
+
+	// std::string topname = "IrSensor_Scan";
+
+	// pub = node_handle->create_publisher<sensor_msgs::msg::LaserScan>(topname, 1);
+
+	// msg.header.frame_id = config->get_string_or_default("/ros2/tf/tf_prefix", "") + "base_link";
+	// msg.angle_min       = 0;
+	// msg.angle_max       = 2 * M_PI;
+	// msg.angle_increment = 0.68;
+	// msg.scan_time       = 0.1;
+	// msg.range_min       = 0.02;
+	// msg.range_max       = 0.12;
+
+	// bbil_add_data_interface(sens_if_);
+	// blackboard->register_listener(this);
+
+	sens_if_ = blackboard->open_for_reading<RobotinoSensorInterface>("Robotino");
 	sens_if_->read();
 
-	std::string topname = "IrSensor_Scan";
-
-	pub = node_handle->create_publisher<sensor_msgs::msg::LaserScan>(topname, 1);
-
 	msg.header.frame_id = config->get_string_or_default("/ros2/tf/tf_prefix", "") + "base_link";
-	msg.angle_min       = 0;
-	msg.angle_max       = 2 * M_PI;
-	msg.angle_increment = 0.68;
-	msg.scan_time       = 0.1;
-	msg.range_min       = 0.02;
-	msg.range_max       = 0.12;
+	//msg.INFRARED = 1;
+	msg.radiation_type = sensor_msgs::msg::Range::INFRARED;
+	msg.field_of_view   = 0;
+	msg.min_range       = 0.04;
+	msg.max_range       = 0.10;
 
 	bbil_add_data_interface(sens_if_);
 	blackboard->register_listener(this);
@@ -80,11 +93,14 @@ ROS2IrScanThread::bb_interface_data_refreshed(fawkes::Interface *interface) thro
 
 	const Time *time = sensor_data_msg->timestamp();
 	msg.header.stamp = rclcpp::Time(time->get_sec(), time->get_nsec());
-	msg.ranges.assign(sensor_data_msg->distance(), sensor_data_msg->distance() + 9);
+	//msg.range.assign(sensor_data_msg->distance(), sensor_data_msg->distance() + 9);
 	for (uint8_t i = 0; i < 9; ++i) {
-		if (msg.ranges[i] < 1) {
-			msg.ranges[i] = msg.ranges[i] + 0.225f;
+		if (sensor_data_msg->distance(i) < 1) {
+			msg.range = sensor_data_msg->distance(i) + 0.225f;
+			std::string topname = "IrSensor_Range_"+i;
+			pub = node_handle->create_publisher<sensor_msgs::msg::Range>(topname, 1);
+			pub->publish(msg);
 		}
 	}
-	pub->publish(msg);
+	
 }

@@ -38,7 +38,7 @@ using std::placeholders::_1;
 
 //ROS2
 #include <rclcpp/rclcpp.hpp>
-#include <sensor_msgs/msg/laser_scan.hpp>
+#include <sensor_msgs/msg/range.hpp>
 
 class ROS2IrScanThread : public fawkes::Thread,
                             public fawkes::ConfigurableAspect,
@@ -65,8 +65,8 @@ protected:
 private:
 	fawkes::RobotinoSensorInterface *sens_if_ = nullptr;
 
-	rclcpp::Publisher<sensor_msgs::msg::LaserScan>::SharedPtr pub;
-	sensor_msgs::msg::LaserScan                               msg;
+	rclcpp::Publisher<sensor_msgs::msg::Range>::SharedPtr pub;
+	sensor_msgs::msg::Range                               msg;
 };
 
 #endif
