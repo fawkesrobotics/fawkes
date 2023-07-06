@@ -243,6 +243,9 @@ ROS2NavigatorThread::send_goal()
 	    std::shared_ptr<rclcpp_action::ClientGoalHandle<nav2_msgs::action::NavigateToPose>> handle) {
 		  if (!handle) {
 			  logger->log_error(name(), "goal handle rejected by server");
+			  nav_if_->set_final(true);
+			  nav_if_->set_error_code(NavigatorInterface::ERROR_UNKNOWN_PLACE);
+			  nav_if_->write();
 			  return;
 		  } else {
 			  logger->log_info(name(), "goal handle accepted by server");
