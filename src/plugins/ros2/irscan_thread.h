@@ -64,7 +64,7 @@ protected:
 private:
 	fawkes::RobotinoSensorInterface *sens_if_ = nullptr;
 	
-	rclcpp::Publisher<sensor_msgs::msg::Range>::SharedPtr> pub;
+	rclcpp::Publisher<sensor_msgs::msg::Range>::SharedPtr pub;
 	//std::vector<rclcpp::Publisher<sensor_msgs::msg::Range>::SharedPtr> pubs_;
 	//std::vector<std::string> tops_;
 	sensor_msgs::msg::Range    msg;

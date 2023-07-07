@@ -64,7 +64,7 @@ ROS2IrScanThread::init()
 	sens_if_ = blackboard->open_for_reading<RobotinoSensorInterface>("Robotino");
 	sens_if_->read();
     
-	std::string topname = "Ir_Sensor_Range"
+	std::string topname = "Ir_Sensor_Range";
 	pub=node_handle->create_publisher<sensor_msgs::msg::Range>(topname,1);
 
 	//for (uint8_t i = 0; i < 9; ++i) {	
