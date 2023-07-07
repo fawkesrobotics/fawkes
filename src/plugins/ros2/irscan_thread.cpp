@@ -75,7 +75,7 @@ ROS2IrScanThread::init()
 	msg.header.frame_id = config->get_string_or_default("/ros2/tf/tf_prefix", "") + "base_link";
 	//msg.INFRARED = 1;
 	msg.radiation_type = sensor_msgs::msg::Range::INFRARED;
-	msg.field_of_view   = 0;
+	msg.field_of_view   = 2*M_PI;
 	msg.min_range       = 0.04;
 	msg.max_range       = 0.10;
 
