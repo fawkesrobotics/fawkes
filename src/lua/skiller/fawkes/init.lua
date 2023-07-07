@@ -196,6 +196,7 @@ end
 
 function publish_skill_status()
 	 local old_status = skiller_if:status()
+	 skiller_if:set_status(old_status)
 
 	 local old_time 	= skiller_if:status_timestamp()
 	 local new_status = skillenv.get_overall_status()
