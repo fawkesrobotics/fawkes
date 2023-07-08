@@ -50,10 +50,10 @@ using namespace fawkes;
 
 constexpr char ClipsGymThread::cfg_prefix_[];
 
-ClipsGymThread::ClipsGymThread()
-: Thread("ClipsGymThread", Thread::OPMODE_WAITFORWAKEUP), //OPMODE_CONTINUOUS),//
-  BlackBoardInterfaceListener("ClipsGymThread"),
-  CLIPSFeature("clips_gym"),
+ClipsGymThread::ClipsGymThread(const char* thread_name = "ClipsGymThread", const char* feature_name = "clips-gym")
+: Thread(thread_name, Thread::OPMODE_WAITFORWAKEUP), //OPMODE_CONTINUOUS),//
+  BlackBoardInterfaceListener(thread_name),
+  CLIPSFeature(feature_name),
   CLIPSFeatureAspect(this)
 {
 }

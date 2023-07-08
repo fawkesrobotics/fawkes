@@ -58,7 +58,7 @@ class ClipsGymThread : public fawkes::Thread,
                        public fawkes::CLIPSFeatureAspect
 {
 public:
-	ClipsGymThread();
+	ClipsGymThread(const char*, const char*);
 
 	void         init() override;
 	virtual void finalize();
