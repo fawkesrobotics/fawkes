@@ -24,7 +24,7 @@ import os
 import imageio
 import gym
 
-sys.path.append("~/fawkes/src/plugins/clips-gym/")
+sys.path.append("~/fawkes/src/plugins/clips_gym/")
 sys.path.append("~/fawkes/plugins")
 
 # Wrapper for PDDLGym for discrete action and observation space

@@ -50,7 +50,7 @@ constexpr char RLTestThread::cfg_prefix_[];
 RLTestThread::RLTestThread()
 : Thread("RLTestThread", Thread::OPMODE_WAITFORWAKEUP), //Thread::OPMODE_CONTINUOUS),//
   BlackBoardInterfaceListener("RLTestThread"),
-  CLIPSFeature("rl-test"),
+  CLIPSFeature("clips-executive-rl"),
   CLIPSFeatureAspect(this)
 {
 }
@@ -426,8 +426,8 @@ RLTestThread::rl_goal_selection(std::string env_name, CLIPS::Value parent_goal_i
 }
 
 /*
-* Functions from clips-gym
-* TODO: extract to utility class or merge rl-test and clips-gym plugin
+* Functions from clips_gym
+* TODO: extract to utility class or merge rl-test and clips_gym plugin
 */
 
 std::string

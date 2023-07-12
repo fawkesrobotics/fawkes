@@ -1,5 +1,5 @@
 /***************************************************************************
- *  clips-gym-thread.h -
+ *  clips_gym_thread.h -
  *
  *  Created:
  *  Copyright
@@ -126,7 +126,7 @@ protected:
 protected:
 	std::map<std::string, fawkes::LockPtr<CLIPS::Environment>> envs_;
 	std::string                                                clips_env_name;
-	constexpr static char cfg_prefix_[] = "/plugins/clips-gym/static/";
+	constexpr static char cfg_prefix_[] = "/plugins/clips_gym/static/";
 
 	//TODO extra Klasse auslagern
 	std::map<std::string, std::vector<std::string>> paramTypeDomainObjectsMap;

@@ -1,5 +1,5 @@
 /***************************************************************************
- *  clips-gym-thread.cpp -
+ *  clips_gym_thread.cpp -
  *
  *  Created:
  *  Copyright
@@ -18,7 +18,7 @@
    *  Read the full text in the LICENSE.GPL file in the doc directory.
    */
 
-#include "clips-gym-thread.h"
+#include "clips_gym_thread.h"
 
 #include <iostream>
 #include <regex>
@@ -50,7 +50,7 @@ using namespace fawkes;
 
 constexpr char ClipsGymThread::cfg_prefix_[];
 
-ClipsGymThread::ClipsGymThread(const char* thread_name = "ClipsGymThread", const char* feature_name = "clips-gym")
+ClipsGymThread::ClipsGymThread(const char* thread_name = "ClipsGymThread", const char* feature_name = "clips_gym")
 : Thread(thread_name, Thread::OPMODE_WAITFORWAKEUP), //OPMODE_CONTINUOUS),//
   BlackBoardInterfaceListener(thread_name),
   CLIPSFeature(feature_name),

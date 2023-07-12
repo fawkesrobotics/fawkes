@@ -20,24 +20,24 @@
 #
 # *****************************************************************************
 
-set(PLUGIN_clips-gym
+set(PLUGIN_clips_gym
     ON
-    CACHE BOOL "Build clips-gym")
+    CACHE BOOL "Build clips_gym")
 message(
   "------------------------------------- Pyhton interpreter found: ${Python3_INCLUDE_DIRS}  ${Python3_LIBRARIES}"
 )
-if(PLUGIN_clips-gym)
-  add_library(clips-gym-thread SHARED clips-gym-thread.cpp
+if(PLUGIN_clips_gym)
+  add_library(clips_gym_thread SHARED clips_gym_thread.cpp
                                       clips-observation-info.cpp goalAction.cpp)
-  depend_on_clipsmm(clips-gym-thread)
-  depend_on_cpp_version(clips-gym-thread 17)
-  target_include_directories(clips-gym-thread PRIVATE ${Python3_INCLUDE_DIRS})
+  depend_on_clipsmm(clips_gym_thread)
+  depend_on_cpp_version(clips_gym_thread 17)
+  target_include_directories(clips_gym_thread PRIVATE ${Python3_INCLUDE_DIRS})
 
-  # required for pybind11 set_target_properties(clips-gym-thread PROPERTIES
-  # CXX_VISIBILITY_PRESET hidden) target_link_options(clips-gym-thread PRIVATE
+  # required for pybind11 set_target_properties(clips_gym_thread PROPERTIES
+  # CXX_VISIBILITY_PRESET hidden) target_link_options(clips_gym_thread PRIVATE
   # ${Python3_LINK_OPTIONS})
   target_link_libraries(
-    clips-gym-thread
+    clips_gym_thread
     fawkescore
     fawkesutils
     fawkesaspects
@@ -49,16 +49,16 @@ if(PLUGIN_clips-gym)
     ${Python3_LIBRARIES}
     Python3::Python
     pybind11::headers)
-  add_library(clips-gym MODULE clips-gym-plugin.cpp)
+  add_library(clips_gym MODULE clips_gym_plugin.cpp)
 
-  depend_on_clipsmm(clips-gym)
-  depend_on_cpp_version(clips-gym 17)
-  target_include_directories(clips-gym PRIVATE ${Python3_INCLUDE_DIRS})
+  depend_on_clipsmm(clips_gym)
+  depend_on_cpp_version(clips_gym 17)
+  target_include_directories(clips_gym PRIVATE ${Python3_INCLUDE_DIRS})
 
-  # required for pybind11 set_target_properties(clips-gym PROPERTIES
-  # CXX_VISIBILITY_PRESET hidden) target_link_options(clips-gym PRIVATE
+  # required for pybind11 set_target_properties(clips_gym PROPERTIES
+  # CXX_VISIBILITY_PRESET hidden) target_link_options(clips_gym PRIVATE
   # ${Python3_LINK_OPTIONS})
-  target_link_libraries(clips-gym clips-gym-thread)
+  target_link_libraries(clips_gym clips_gym_thread)
 else()
-  plugin_disabled_message("clips-gym")
+  plugin_disabled_message("clips_gym")
 endif()

@@ -18,7 +18,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "clips-gym-thread.h"
+#include "clips_gym_thread.h"
 
 #include <core/plugin.h>
 

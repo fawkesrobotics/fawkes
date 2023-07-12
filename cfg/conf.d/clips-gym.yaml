@@ -12,10 +12,10 @@ python:
   execution-script: "executingClipsWorld.py"  # "executingRLAgent.py"
 
   # Directory where the python scripts are located
-  dir: "@BASEDIR@/src/plugins/rl-test/rl-agent"
+  dir: "@BASEDIR@/src/plugins/clips-executive-rl/rl-agent"
 
   # Directory where the python env script is located
-  env-dir: "@BASEDIR@/src/plugins/clips-gym"
+  env-dir: "@BASEDIR@/src/plugins/clips_gym"
 
   env-script: "ClipsWorld.py"
   # training-dirs: ["@BASEDIR@/src/plugins/rl-test/rl-agent"]

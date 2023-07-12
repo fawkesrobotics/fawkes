@@ -78,8 +78,8 @@ clips-executive:
             files: ["BATCH|robmem-wait-init.clp"]
             wait-for: robmem-initialized
           - name: robot_memory
-          - name: rl-test
-          - name: clips-gym
+          - name: clips-executive-rl
+          - name: clips_gym
 
           # - name: navgraph
           # - name: robmem-wait
