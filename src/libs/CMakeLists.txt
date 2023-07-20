@@ -51,3 +51,4 @@ add_subdirectory(syncpoint)
 # add_subdirectory(googletest) empty
 add_subdirectory(protoboard)
 add_subdirectory(execution_time_estimator)
+add_subdirectory(clips_gym)
