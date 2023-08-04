@@ -39,6 +39,9 @@ python:
   # Directory where the plugin binaries are located
   plugins-dir: "@BASEDIR@/plugins"
 
+  # Directory where the library binaries are located
+  lib-dir: "@BASEDIR@/lib"
+
 goal-space:
   # Classname: params [Identifier - Typ]
   TOWER-C1: {buttom: block, top: block}

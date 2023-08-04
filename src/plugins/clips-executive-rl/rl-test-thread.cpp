@@ -79,6 +79,7 @@ trainingRlAgent(Configuration *config)
 	std::string env             = config->get_string("/rl-agent/env_name");
 	std::string env_dir         = getConfigStringReplacedBasedir(config, "/python/env-dir");
 	std::string bin_plugins_dir = getConfigStringReplacedBasedir(config, "/python/plugins-dir");
+	std::string bin_lib_dir = getConfigStringReplacedBasedir(config, "/python/lib-dir");
 
 	std::cout << "Rl-Test-Thread training RL agent before training -laps" << std::endl;
 	int training_laps = config->get_int("rl-agent/training-laps");
@@ -101,6 +102,9 @@ trainingRlAgent(Configuration *config)
 
 		py::str sysPathAppend3 = (py::str)("sys.path.append(\"" + bin_plugins_dir + "\")");
 		py::exec(sysPathAppend3, main_namespace);
+
+		py::str sysPathAppend4 = (py::str)("sys.path.append(\"" + bin_lib_dir + "\")");
+		py::exec(sysPathAppend4, main_namespace);
 
 		py::exec("print(sys.path)");
 
@@ -166,11 +170,13 @@ RLTestThread::executeRlAgent(std::string fact_string)
 		py::str sysPathAppend2 = (py::str)("sys.path.append(\"" + cfg_python_dir + "\")");
 		py::str sysPathAppend3 = (py::str)("sys.path.append(\"" + cfg_env_dir + "\")");
 		py::str sysPathAppend4 = (py::str)("sys.path.append(\"" + cfg_bin_plugins_dir + "\")");
+		py::str sysPathAppend5 = (py::str)("sys.path.append(\"" + cfg_bin_lib_dir + "\")");
 
 		py::exec(sysPathAppend1, py_scope);
 		py::exec(sysPathAppend2, py_scope);
 		py::exec(sysPathAppend3, py_scope);
 		py::exec(sysPathAppend4, py_scope);
+		py::exec(sysPathAppend5, py_scope);
 		py::exec("print(\"added config directories to sys.path\")");
 		py::exec("print(sys.path)", py_scope);
 
@@ -229,6 +235,7 @@ RLTestThread::init()
 	cfg_python_dir       = getConfigStringReplacedBasedir(config, "/python/dir");
 	cfg_env_dir          = getConfigStringReplacedBasedir(config, "/python/env-dir");
 	cfg_bin_plugins_dir  = getConfigStringReplacedBasedir(config, "/python/plugins-dir");
+	cfg_bin_lib_dir  = getConfigStringReplacedBasedir(config, "/python/lib-dir");
 	cfg_execution_script = config->get_string("/python/execution-script");
 	cfg_env_script       = config->get_string("/python/env-script");
 	cfg_training_mode    = config->get_bool("/rl-agent/training-mode");

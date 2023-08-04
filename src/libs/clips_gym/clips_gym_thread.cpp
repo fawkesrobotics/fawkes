@@ -71,6 +71,49 @@ ClipsGymThread::getInstance()
 	return thread_instance;
 }
 
+PYBIND11_MODULE(libfawkes_clips_gym, m)
+{
+	m.doc() = "pybind11 example plugin"; // optional module docstring
+
+	py::class_<ClipsObservationInfo>(m, "ClipsObservationInfo")
+	  .def(py::init<>())
+	  .def_readonly("observation", &ClipsObservationInfo::observation)
+	  .def_readonly("reward", &ClipsObservationInfo::reward)
+	  .def_readonly("done", &ClipsObservationInfo::done)
+	  .def_readonly("info", &ClipsObservationInfo::info);
+
+	py::class_<Param>(m, "Param")
+	  .def(py::init<const string, const string>())
+	  .def("getParamString", &Param::getParamString);
+
+	py::class_<GoalAction>(m, "Goal")
+	  .def(py::init<const string>())
+	  .def("setParams", &GoalAction::setParams)
+	  .def("getParamsString", &GoalAction::getParamsString)
+	  .def("getGoalString", &GoalAction::getGoalString);
+
+	py::class_<ClipsGymThread>(m, "ClipsGymThread")
+	  .def(py::init<>())
+	  .def("getInstance", &ClipsGymThread::getInstance, py::return_value_policy::reference)
+	  .def("step", &ClipsGymThread::step)
+	  .def("resetCX", &ClipsGymThread::resetCX)
+	  .def("create_rl_env_state_from_facts", &ClipsGymThread::create_rl_env_state_from_facts)
+	  .def("getAllFormulatedGoals", &ClipsGymThread::getAllFormulatedGoals)
+	  .def("getAllFormulatedExecutableGoals", &ClipsGymThread::getAllFormulatedExecutableGoals)
+	  .def("generateActionSpace", &ClipsGymThread::generateActionSpace)
+	  .def("generateObservationSpace", &ClipsGymThread::generateObservationSpace)
+	  .def("getParamsNameTypeMapOfGoal", &ClipsGymThread::getParamsNameTypeMapOfGoal)
+	  .def("getParamNameDomainObjectsComb", &ClipsGymThread::getParamNameDomainObjectsComb)
+	  .def("getGoalClassList", &ClipsGymThread::getGoalClassList)
+	  .def("assertRlGoalSelectionFact", &ClipsGymThread::assertRlGoalSelectionFact)
+	  .def("getGoalId", &ClipsGymThread::getGoalId)
+	  .def("getGoalIdByString", &ClipsGymThread::getGoalIdByString)
+	  .def("getDomainPredicates", &ClipsGymThread::getDomainPredicates)
+	  .def("getDomainObjects", &ClipsGymThread::getDomainObjects)
+	  .def("clipsGymSleep", &ClipsGymThread::clipsGymSleep)
+	  .def("log", &ClipsGymThread::log);
+}
+
 
 void
 ClipsGymThread::init()

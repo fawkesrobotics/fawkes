@@ -116,6 +116,7 @@ private:
 	std::string cfg_env_script;
 	std::string cfg_env_dir;
 	std::string cfg_bin_plugins_dir;
+	std::string cfg_bin_lib_dir;
 
 	int count_startedExecution;
 };
