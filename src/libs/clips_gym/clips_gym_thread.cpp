@@ -540,9 +540,9 @@ ClipsGymThread::getGoalIdByString(std::vector<GoalAction> goals, std::string goa
 {
 	logger->log_info(name(), "getGoalIdByString %s", goal_str.c_str());
 	for (GoalAction g : goals) {
-		//logger->log_info(name(), "Before filter: %s", g.getGoalString().c_str());
+		logger->log_info(name(), "Before filter: %s", g.getGoalString().c_str());
 		filterParams(&g);
-		//logger->log_info(name(), "After filter: %s", g.getGoalString().c_str());
+		logger->log_info(name(), "After filter: %s", g.getGoalString().c_str());
 		if (g.getGoalString() == goal_str) {
 			return g.getId();
 		}
