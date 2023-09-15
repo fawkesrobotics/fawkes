@@ -85,7 +85,7 @@ public:
    * @param n node to get distance to
    * @return distance */
 	float
-	distance(const NavGraphNode &n)
+	distance(const NavGraphNode &n) const
 	{
 		return sqrtf(powf(x_ - n.x_, 2) + powf(y_ - n.y_, 2));
 	}
@@ -95,7 +95,7 @@ public:
    * @param y point Y coordinate
    * @return distance */
 	float
-	distance(float x, float y)
+	distance(float x, float y) const
 	{
 		return sqrtf(powf(x_ - x, 2) + powf(y_ - y, 2));
 	}
