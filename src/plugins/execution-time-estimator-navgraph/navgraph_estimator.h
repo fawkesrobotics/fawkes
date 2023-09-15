@@ -22,10 +22,12 @@
 
 #include "interfaces/Position3DInterface.h"
 
+#include <aspect/blackboard.h>
 #include <config/config.h>
 #include <execution_time_estimator/aspect/execution_time_estimator.h>
 #include <navgraph/navgraph.h>
 
+#include <future>
 #include <string>
 #include <vector>
 
@@ -35,17 +37,26 @@ class NavGraphEstimator : public ExecutionTimeEstimator
 public:
 	NavGraphEstimator(LockPtr<NavGraph>  navgraph,
 	                  Configuration     *config,
-	                  const std::string &cfg_prefix);
+	                  const std::string &cfg_prefix,
+	                  BlackBoard        *blackboard);
+	~NavGraphEstimator();
 	float get_execution_time(const Skill &skill) override;
 	bool  can_provide_exec_time(const Skill &skill) const override;
+	void  start_execute(const Skill &skill) override;
+	void  update_pose_along_path(const Skill &skill);
 	std::pair<SkillerInterface::SkillStatusEnum, std::string>
 	end_execute(const Skill &skill) override;
 
 private:
-	LockPtr<NavGraph>           navgraph_;
-	float                       last_pose_x_;
-	float                       last_pose_y_;
-	const Property<std::string> source_names_;
-	const Property<std::string> dest_names_;
+	LockPtr<NavGraph>            navgraph_;
+	float                        last_pose_x_;
+	float                        last_pose_y_;
+	float                        curr_duration_;
+	const Property<std::string>  source_names_;
+	const Property<std::string>  dest_names_;
+	std::future<void>            pose_publisher_;
+	fawkes::Position3DInterface *pos3d_if_;
+	BlackBoard                  *blackboard_;
+	bool                         publish_pose_;
 };
 } // namespace fawkes

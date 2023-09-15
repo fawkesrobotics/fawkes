@@ -34,14 +34,33 @@ namespace fawkes {
  */
 NavGraphEstimator::NavGraphEstimator(LockPtr<NavGraph>  navgraph,
                                      Configuration     *config,
-                                     const std::string &cfg_prefix)
+                                     const std::string &cfg_prefix,
+                                     BlackBoard        *blackboard)
 : ExecutionTimeEstimator(config, cfg_prefix),
   navgraph_(navgraph),
   source_names_(config_, cfg_prefix_, "start", ""),
-  dest_names_(config_, cfg_prefix_, "target")
+  dest_names_(config_, cfg_prefix_, "target"),
+  blackboard_(blackboard)
 {
-	last_pose_x_ = config->get_float_or_default("plugins/amcl/init_pose_x", 0);
-	last_pose_y_ = config->get_float_or_default("plugins/amcl/init_pose_y", 0);
+	last_pose_x_                 = config->get_float_or_default("plugins/amcl/init_pose_x", 0);
+	last_pose_y_                 = config->get_float_or_default("plugins/amcl/init_pose_y", 0);
+	std::string cfg_pose_if_name = config->get_string("plugins/amcl/pose_interface_id");
+	publish_pose_ =
+	  config->get_bool_or_default("plugins/execution-time-estimator/navgraph/pose-update", true);
+	if (publish_pose_) {
+		pos3d_if_ = blackboard_->open_for_writing<Position3DInterface>(cfg_pose_if_name.c_str());
+		pos3d_if_->set_frame(config->get_string("/frames/fixed").c_str());
+		double trans[3] = {last_pose_x_, last_pose_y_, 0};
+		pos3d_if_->set_translation(trans);
+		pos3d_if_->write();
+	}
+}
+
+NavGraphEstimator::~NavGraphEstimator()
+{
+	if (publish_pose_) {
+		blackboard_->close(pos3d_if_);
+	}
 }
 
 bool
@@ -54,24 +73,66 @@ NavGraphEstimator::can_provide_exec_time(const Skill &skill) const
 float
 NavGraphEstimator::get_execution_time(const Skill &skill)
 {
-	float       current_pose_x = last_pose_x_;
-	float       current_pose_y = last_pose_y_;
-	std::string source_name    = get_property(source_names_);
-	if (source_name != "") {
-		const std::string start = skill.skill_args.at(source_name);
-		if (navgraph_->node_exists(start)) {
-			current_pose_x = navgraph_->node(start).x();
-			current_pose_y = navgraph_->node(start).y();
+	std::string start = get_property(source_names_);
+	if (start == "") {
+		start = navgraph_->closest_node(last_pose_x_, last_pose_y_).name();
+	}
+	const std::string end      = skill.skill_args.at(get_property(dest_names_));
+	float             duration = 0.f;
+	if (navgraph_->node_exists(start) && navgraph_->node_exists(end)) {
+		NavGraphPath            path      = navgraph_->search_path(start, end);
+		NavGraphPath::Traversal traversal = path.traversal();
+		while (traversal.next()) {
+			if (!traversal.last()) {
+				const NavGraphNode &current = traversal.current();
+				const NavGraphNode &next    = traversal.peek_next();
+				duration += current.distance(next);
+			}
 		}
 	}
-	return navgraph_->node(skill.skill_args.at(get_property(dest_names_)))
-	         .distance(current_pose_x, current_pose_y)
-	       / speed_;
+	return duration / speed_;
+}
+
+void
+NavGraphEstimator::update_pose_along_path(const Skill &skill)
+{
+	std::string start = get_property(source_names_);
+	if (start == "") {
+		start = navgraph_->closest_node(last_pose_x_, last_pose_y_).name();
+	}
+	const std::string end = skill.skill_args.at(get_property(dest_names_));
+	if (navgraph_->node_exists(start) && navgraph_->node_exists(end)) {
+		NavGraphPath            path      = navgraph_->search_path(start, end);
+		NavGraphPath::Traversal traversal = path.traversal();
+		while (traversal.next()) {
+			const NavGraphNode &current  = traversal.current();
+			double              trans[3] = {current.x(), current.y(), 0};
+			pos3d_if_->set_translation(trans);
+			pos3d_if_->write();
+			if (!traversal.last()) {
+				const NavGraphNode          &next = traversal.peek_next();
+				std::chrono::duration<float> duration(current.distance(next) / speed_);
+				std::this_thread::sleep_for(duration);
+			}
+		}
+	}
+}
+
+void
+NavGraphEstimator::start_execute(const Skill &skill)
+{
+	if (publish_pose_) {
+		// Start a thread to update the value
+		pose_publisher_ = std::async(&NavGraphEstimator::update_pose_along_path, this, skill);
+	}
 }
 
 std::pair<SkillerInterface::SkillStatusEnum, std::string>
 NavGraphEstimator::end_execute(const Skill &skill)
 {
+	if (publish_pose_ && pose_publisher_.valid()) {
+		pose_publisher_.wait();
+	}
 	auto node    = navgraph_->node(skill.skill_args.at("place"));
 	last_pose_x_ = node.x();
 	last_pose_y_ = node.y();
