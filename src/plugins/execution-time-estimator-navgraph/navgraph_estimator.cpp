@@ -70,7 +70,7 @@ NavGraphEstimator::get_execution_time(const Skill &skill)
 }
 
 std::pair<SkillerInterface::SkillStatusEnum, std::string>
-NavGraphEstimator::execute(const Skill &skill)
+NavGraphEstimator::end_execute(const Skill &skill)
 {
 	auto node    = navgraph_->node(skill.skill_args.at("place"));
 	last_pose_x_ = node.x();

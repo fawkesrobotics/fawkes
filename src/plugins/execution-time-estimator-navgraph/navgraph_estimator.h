@@ -38,7 +38,8 @@ public:
 	                  const std::string &cfg_prefix);
 	float get_execution_time(const Skill &skill) override;
 	bool  can_provide_exec_time(const Skill &skill) const override;
-	std::pair<SkillerInterface::SkillStatusEnum, std::string> execute(const Skill &skill) override;
+	std::pair<SkillerInterface::SkillStatusEnum, std::string>
+	end_execute(const Skill &skill) override;
 
 private:
 	LockPtr<NavGraph>           navgraph_;

@@ -121,6 +121,7 @@ SkillerSimulatorExecutionThread::loop()
 			skiller_if_->set_error("");
 			skiller_if_->set_status(SkillerInterface::S_RUNNING);
 			current_skill_runtime_ = get_skill_runtime(m->skill_string());
+			start_execute_skill(m->skill_string());
 			logger->log_info(name(),
 			                 "Executing '%s', will take %.2f seconds",
 			                 m->skill_string(),
@@ -158,7 +159,7 @@ SkillerSimulatorExecutionThread::loop()
 			Time now = Time();
 			if (Time() > skill_starttime_ + current_skill_runtime_) {
 				logger->log_info(name(), "Skill '%s' is final", skiller_if_->skill_string());
-				auto [exec_status, error] = execute_skill(skiller_if_->skill_string());
+				auto [exec_status, error] = end_execute_skill(skiller_if_->skill_string());
 				skiller_if_->set_skill_string(skiller_if_->skill_string());
 				skiller_if_->set_error(error.c_str());
 				skiller_if_->set_status(exec_status);
@@ -185,9 +186,16 @@ SkillerSimulatorExecutionThread::get_skill_runtime(const std::string &skill) con
 	return provider->get_execution_time(skill);
 }
 
-std::pair<fawkes::SkillerInterface::SkillStatusEnum, std::string>
-SkillerSimulatorExecutionThread::execute_skill(const std::string &skill)
+void
+SkillerSimulatorExecutionThread::start_execute_skill(const std::string &skill)
 {
 	auto provider = execution_time_estimator_manager_->get_provider(skill);
-	return provider->execute(skill);
+	return provider->start_execute(skill);
+}
+
+std::pair<fawkes::SkillerInterface::SkillStatusEnum, std::string>
+SkillerSimulatorExecutionThread::end_execute_skill(const std::string &skill)
+{
+	auto provider = execution_time_estimator_manager_->get_provider(skill);
+	return provider->end_execute(skill);
 }

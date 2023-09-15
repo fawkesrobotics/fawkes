@@ -61,9 +61,13 @@ using Skill = ExecutionTimeEstimator::Skill;
  * @param skill The skill object to check.
  * @return true if this estimator can give an execution time estimate for the given skill.
  *
- * @fn std::pair<SkillerInterface::SkillStatusEnum, std::string> ExecutionTimeEstimator::execute(const Skill &skill) const
- * Let the estimator know that we are executing this skill, so it can apply
+ * @fn void ExecutionTimeEstimator::start_execute(const Skill &skill) const
+ * Let the estimator know that we start executing this skill, so it can apply
  * possible side effects.
+ * @param skill The skill to execute
+ *
+ * @fn std::pair<SkillerInterface::SkillStatusEnum, std::string> ExecutionTimeEstimator::end_execute(const Skill &skill) const
+ * Let the estimator know that we are ending the execution of this skill to determine the final status
  * @param skill The skill to execute
  * @return skill status after simulated execution along with an error description in case the skill fails
  *

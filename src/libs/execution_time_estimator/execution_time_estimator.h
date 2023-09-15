@@ -76,10 +76,11 @@ public:
 	virtual float get_execution_time(const Skill &skill) = 0;
 	virtual bool  can_execute(const Skill &skill);
 	virtual std::pair<SkillerInterface::SkillStatusEnum, std::string>
-	execute(const Skill &skill)
+	end_execute(const Skill &skill)
 	{
 		return std::make_pair(SkillerInterface::SkillStatusEnum::S_FINAL, "");
 	};
+	virtual void start_execute(const Skill &skill){};
 
 protected:
 	std::map<std::string, Skill> get_skills_from_config(const std::string &path) const;
