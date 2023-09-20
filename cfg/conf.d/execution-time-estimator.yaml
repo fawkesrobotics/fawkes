@@ -41,6 +41,8 @@ plugins/execution-time-estimator:
   # Estimates exec times of driving skills by taking distances from NavGraph
   # as reference.
   navgraph:
+    # publish pose while skill execution
+    pose-update: true
     # misc options
     priority: 1
     speed: 0.5

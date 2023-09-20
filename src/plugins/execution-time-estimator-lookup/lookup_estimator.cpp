@@ -148,7 +148,7 @@ LookupEstimator::get_execution_time(const Skill &skill)
 }
 
 std::pair<SkillerInterface::SkillStatusEnum, std::string>
-LookupEstimator::execute(const Skill &skill)
+LookupEstimator::end_execute(const Skill &skill)
 {
 	return make_pair(outcome_, error_);
 }
