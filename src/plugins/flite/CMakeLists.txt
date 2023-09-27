@@ -43,7 +43,7 @@ if(PLUGIN_flite)
     FLite)
 
   if(NOT FLITE_ROOT)
-    disable_taget(flite)
+    disable_target(flite)
     build_skipped_message("flite" "flite[-devel] dependency")
   endif()
 else()
