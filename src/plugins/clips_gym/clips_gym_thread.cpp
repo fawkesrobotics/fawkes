@@ -238,7 +238,7 @@ ClipsGymThread::step(std::string next_goal)
 	//Transform string to goal
 	//std::string n_goal = "TOWER-C1#b#d#";
 	//std::string goalID = getGoalId(next_goal);
-
+	logger->log_info(name(), "currentExecutableGoalsCG1", currentExecutableGoals.size());
 	std::string goalID = getGoalIdByString(currentExecutableGoals, next_goal);
 
 	if (goalID == "") {

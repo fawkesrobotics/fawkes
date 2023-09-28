@@ -229,6 +229,8 @@ ClipsGymThread::step(std::string next_goal)
 	std::cout << "next_goal from python: " << next_goal << std::endl;
 	ClipsObservationInfo obs_info = ClipsObservationInfo();
 	obs_info.reward               = 0;
+
+    logger->log_info(name(), "currentExecutableGoalsCG", currentExecutableGoals.size());
 	//Transform string to goal
 	//std::string n_goal = "TOWER-C1#b#d#";
 	//std::string goalID = getGoalId(next_goal);
