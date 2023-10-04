@@ -70,11 +70,14 @@ bool
 trainingRlAgent(Configuration *config)
 {
 	bool        is_done       = false;
-	std::string rl_agent_name = config->get_string("/rl-agent/name");
+	std::string rl_agent_name = config->get_string("/rl-agent/save-agent-name");
 	std::string rl_agent_dir  = getConfigStringReplacedBasedir(config, "/rl-agent/dir");
 	std::cout << "RL agent path: " << rl_agent_dir << std::endl;
 	std::string training_script = config->get_string("/python/training-script");
 	std::string training_dir    = getConfigStringReplacedBasedir(config, "/python/dir");
+
+	std::string cfg_load_agent 		= config->get_bool("/rl-agent/load-agent")? "True" : "False";
+	std::string cfg_load_agent_name = config->get_string("/rl-agent/load-agent-name");
 
 	std::string env             = config->get_string("/rl-agent/env_name");
 	std::string env_dir         = getConfigStringReplacedBasedir(config, "/python/env-dir");
@@ -120,6 +123,12 @@ trainingRlAgent(Configuration *config)
 		std::cout << "RL Agent: " + rl_agent_dir + "/" + rl_agent_name << std::endl;
 		py::str file_name = (py::str)("file_name = \"" + rl_agent_dir + "/" + rl_agent_name + "\"");
 		py::exec(file_name, main_namespace);
+
+		py::str load_agent = (py::str)("load_agent = " + cfg_load_agent + "");
+		py::exec(load_agent, main_namespace);
+
+		py::str load_agent_name = (py::str)("load_agent_name = \"" + rl_agent_dir + "/" + cfg_load_agent_name + "\"");
+		py::exec(load_agent_name, main_namespace);
 
 		//Value of training timesteps
 		py::str timesteps = (py::str)("timesteps = " + std::to_string(training_laps)); //1000
@@ -230,7 +239,7 @@ RLTestThread::init()
 
 	/* Reading config values */
 	cfg_rl_agent_active  = config->get_bool("/rl-agent/active");
-	cfg_rl_agent_name    = config->get_string("/rl-agent/name");
+	cfg_rl_agent_name    = config->get_string("/rl-agent/save-agent-name");
 	cfg_rl_agent_dir     = getConfigStringReplacedBasedir(config, "/rl-agent/dir");
 	cfg_python_dir       = getConfigStringReplacedBasedir(config, "/python/dir");
 	cfg_env_dir          = getConfigStringReplacedBasedir(config, "/python/env-dir");

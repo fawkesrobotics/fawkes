@@ -60,11 +60,14 @@ PyGuard::getInstance()
 void
 PyGuard::loadConfig(fawkes::Configuration *config)
 {
-	std::string cfg_rl_agent_name = config->get_string("/rl-agent/name");
+	std::string cfg_rl_agent_name = config->get_string("/rl-agent/save_agent_name");
 	std::string cfg_rl_agent_dir  = getConfigStringReplacedBasedirT(config, "/rl-agent/dir");
 
 	cfg_executing_script       = config->get_string("/python/execution-script");
 	std::string cfg_python_dir = getConfigStringReplacedBasedirT(config, "/python/dir");
+
+	std::string cfg_load_agent = config->get_string("/rl-agent/load_agent");
+	std::string cfg_load_agent_name = config->get_string("/rl-agent/load_agent_name");
 
 	std::string cfg_env             = config->get_string("/rl-agent/env_name");
 	std::string cfg_env_dir         = getConfigStringReplacedBasedirT(config, "/python/env-dir");
@@ -93,6 +96,12 @@ PyGuard::loadConfig(fawkes::Configuration *config)
 		py::str file_name =
 		  (py::str)("file_name = \"" + cfg_rl_agent_dir + "/" + cfg_rl_agent_name + "\"");
 		py::exec(file_name, py_scope);
+
+		py::str load_agent = (py::str)("load_agent = " + cfg_load_agent);
+		py::exec(load_agent, py_scope);
+
+		py::str load_agent_name = (py::str)("load_agent_name = \"" + cfg_rl_agent_dir + "/" + cfg_load_agent_name + "\"");
+		py::exec(load_agent_name, py_scope);
 
 	} catch (py::error_already_set &e) {
 		py::module::import("traceback").attr("print_exception")(e.type(), e.value(), e.trace());

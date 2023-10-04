@@ -124,7 +124,7 @@ if __name__ == '__main__':
     #print("Script: Config values for path: " + dir_path)
     print("Script: Creating env")
     
-    callback_max_episodes = StopTrainingOnMaxEpisodes(max_episodes=25, verbose=1)
+    callback_max_episodes = StopTrainingOnMaxEpisodes(max_episodes=15, verbose=1)
 
     checkpoint_callback = CheckpointCallback(save_freq=200,save_path=agent_tmp_path)
     
@@ -147,39 +147,44 @@ if __name__ == '__main__':
     #env = Monitor(env,monitor_path)
     #print("Env {} created".format(env_name))
     #obs = env.reset()
-    
-    #print("Observations: ", env.obs_dict[:5])
-    #print("Observation space: ",env.observation_space[:5])
+    f = open("obs.txt", 'w')
+    print("Observations before: ", env.obs_dict, file=f)
+    print("Observation space before: ",env.observation_space, file=f)
     #print("Action space: ",env.action_space[:5])
     #print("Actions: ", env.action_dict)
 
     #Mask environment
     #env = ActionMasker(env, mask_fn)  # Wrap to enable masking
+    if load_agent:
+        model = MaskablePPO.load(load_agent_name, env=env)
+        file_name = load_agent_name
+        print("Previous Agent loaded")
+    else:
+        print("Creating new Agent")
+        # MaskablePPO behaves the same as SB3's PPO unless the env is wrapped
+        # with ActionMasker. If the wrapper is detected, the masks are automatically
+        # retrieved and used when learning. Note that MaskablePPO does not accept
+        # a new action_mask_fn kwarg, as it did in an earlier draft.
+        # params with default value
+        m_learning_rate = 0.0003 #0.6 # large -> unstable? small -slow learning
+        m_gamma = 0.99
+        m_gae_lambda = 0.95
+        m_ent_coef =  0.0
+        m_vf_coef = 0.5
+        m_max_grad_norm = 0.5
+        m_batch_size = 64
+        #m_n_epochs = 10
+        # params with own set value
+        m_n_steps= 3
+        m_seed = 42
+        m_verbose = 1
 
-    # MaskablePPO behaves the same as SB3's PPO unless the env is wrapped
-    # with ActionMasker. If the wrapper is detected, the masks are automatically
-    # retrieved and used when learning. Note that MaskablePPO does not accept
-    # a new action_mask_fn kwarg, as it did in an earlier draft.
-    # params with default value
-    m_learning_rate = 0.0003 #0.6 # large -> unstable? small -slow learning
-    m_gamma = 0.99
-    m_gae_lambda = 0.95
-    m_ent_coef =  0.0
-    m_vf_coef = 0.5
-    m_max_grad_norm = 0.5
-    m_batch_size = 64
-    #m_n_epochs = 10
-    # params with own set value
-    m_n_steps= 3
-    m_seed = 42
-    m_verbose = 1
-
-    model = MaskablePPO(MaskableActorCriticPolicy, env,
-     learning_rate=m_learning_rate, gamma= m_gamma, gae_lambda=m_gae_lambda,
-     ent_coef=m_ent_coef, vf_coef=m_vf_coef, max_grad_norm=m_max_grad_norm, batch_size=m_batch_size,
-     n_steps= m_n_steps, seed=m_seed, verbose=m_verbose)
-     #n_epochs=m_n_epochs
-    #model = PPO(MlpPolicy, env, verbose=0)
+        model = MaskablePPO(MaskableActorCriticPolicy, env,
+        learning_rate=m_learning_rate, gamma= m_gamma, gae_lambda=m_gae_lambda,
+        ent_coef=m_ent_coef, vf_coef=m_vf_coef, max_grad_norm=m_max_grad_norm, batch_size=m_batch_size,
+        n_steps= m_n_steps, seed=m_seed, verbose=m_verbose)
+        #n_epochs=m_n_epochs
+        #model = PPO(MlpPolicy, env, verbose=0)
 
     print("Set logger")
     model.set_logger(sb3_logger)
@@ -189,7 +194,9 @@ if __name__ == '__main__':
     # Random Agent, before training
     #mean_reward_before_train = evaluate(model)
     #print("Mean reward: ",mean_reward_before_train)
-
+    print("Observations after: ", env.obs_dict, file=f)
+    print("Observation space after: ",env.observation_space, file=f)
+    f.close()
     print("\n\n\nFinished training the rl agent\n\n\n")
     print ("Saving the agent at: ", file_name)
     model.save(file_name)
