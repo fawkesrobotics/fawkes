@@ -72,8 +72,8 @@ private:
 
 	//	rclcpp::executors::MultiThreadedExecutor executor;
 	//	rclcpp::executors::SingleThreadedExecutor executor;
-	rclcpp::executors::MultiThreadedExecutor *mult_executor;
-	std::chrono::duration<double>             period = std::chrono::milliseconds(10);
+	std::shared_ptr<rclcpp::executors::MultiThreadedExecutor> mult_executor;
+	std::chrono::duration<double>                             period = std::chrono::milliseconds(10);
 };
 
 #endif
