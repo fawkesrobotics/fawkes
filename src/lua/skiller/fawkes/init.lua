@@ -86,7 +86,7 @@ end
 function process_skiller_messages()
 	 local write_skiller_if = false
 	 local skill_enqueued = false
-	 
+
 	 while not skiller_if:msgq_empty() do
 			local m = skiller_if:msgq_first()
 			local mtype = m:type()
@@ -115,7 +115,7 @@ function process_skiller_messages()
 						write_skiller_if = true
 				 elseif skiller_if:exclusive_controller() ~= "" then
 						print_warn("%s tried to release exclusive control, but it's not the controller",
-											 m:sender_thread_name())						
+											 m:sender_thread_name())
 				 end
 
 			elseif mtype == "ExecSkillMessage" then
@@ -186,7 +186,7 @@ function process_skiller_messages()
 			skiller_if:msgq_pop()
 	 end
 
-	 if write_skiller_if then 
+	 if write_skiller_if then
 			skiller_if:write()
 	 end
 end

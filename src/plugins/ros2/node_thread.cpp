@@ -88,6 +88,7 @@ ROS2NodeThread::init()
 
 		ros_namespace = std::string("/") + ros_namespace;
 	}
+	logger->log_warn(name(), ros_namespace.c_str());
 
 	if (node_handle == NULL || !node_handle->get_node_options().context()->is_valid()) {
 		node_handle = rclcpp::Node::make_shared(node_name, ros_namespace);
