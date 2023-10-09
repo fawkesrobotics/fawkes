@@ -194,6 +194,7 @@ end
 function publish_skill_status()
 	 local old_status = skiller_if:status()
 	 local new_status = skillenv.get_overall_status()
+	 skiller_if:set_status(old_status)
 
 	 if old_status ~= new_status then
       skiller_if:set_status(new_status)
