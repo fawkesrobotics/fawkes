@@ -124,7 +124,7 @@ if __name__ == '__main__':
     #print("Script: Config values for path: " + dir_path)
     print("Script: Creating env")
     
-    callback_max_episodes = StopTrainingOnMaxEpisodes(max_episodes=15, verbose=1)
+    callback_max_episodes = StopTrainingOnMaxEpisodes(max_episodes=20, verbose=1)
 
     checkpoint_callback = CheckpointCallback(save_freq=200,save_path=agent_tmp_path)
     
@@ -175,7 +175,7 @@ if __name__ == '__main__':
         m_batch_size = 64
         #m_n_epochs = 10
         # params with own set value
-        m_n_steps= 3
+        m_n_steps= 100
         m_seed = 42
         m_verbose = 1
 
