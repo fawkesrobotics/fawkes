@@ -23,6 +23,9 @@
 set(BUILD_WITH_ROS_2
     ON
     CACHE BOOL "Build with ROS 2")
+set(ROS_2_INSTALL_DIR
+    "/usr/lib64/ros2-humble"
+    CACHE STRING "ROS 2 install directory")
 if(BUILD_WITH_ROS_2)
   find_package(ament_cmake QUIET)
   remember_dependency(ament_cmake)
@@ -72,7 +75,7 @@ function(depend_on_ros2_libs target libs)
     depend_on_find_package_libs(${target} "${libs}")
     foreach(lib ${libs})
       target_include_directories(
-        ${target} PUBLIC "/usr/lib64/ros2/include${${lib}_INCLUDE_DIRS}/")
+        ${target} PUBLIC "${ROS_2_INSTALL_DIR}/include/${${lib}_INCLUDE_DIRS}/")
 
       if("${lib}" STREQUAL "std_msgs")
         target_include_directories(${target}
@@ -80,7 +83,7 @@ function(depend_on_ros2_libs target libs)
       endif()
       if("${lib}" STREQUAL "image_transport")
         target_include_directories(${target}
-                                   PUBLIC "/usr/lib64/ros2/include/${lib}")
+                                   PUBLIC "${ROS_2_INSTALL_DIR}/include/${lib}")
       endif()
     endforeach()
   else()
