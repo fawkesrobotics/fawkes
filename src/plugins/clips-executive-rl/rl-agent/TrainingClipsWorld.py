@@ -35,6 +35,7 @@ from ClipsWorld import ClipsWorld#, LiteralSpace2, LiteralActionWrapper, Literal
 from stable_baselines3.common.logger import configure
 
 #Action Masking
+from MultiRobotMaskablePPO import MultiRobotMaskablePPO
 from sb3_contrib.common.maskable.policies import MaskableActorCriticPolicy
 from sb3_contrib.common.wrappers import ActionMasker
 from sb3_contrib.ppo_mask import MaskablePPO
@@ -124,7 +125,7 @@ if __name__ == '__main__':
     #print("Script: Config values for path: " + dir_path)
     print("Script: Creating env")
     
-    callback_max_episodes = StopTrainingOnMaxEpisodes(max_episodes=20, verbose=1)
+    callback_max_episodes = StopTrainingOnMaxEpisodes(max_episodes=10, verbose=1)
 
     checkpoint_callback = CheckpointCallback(save_freq=200,save_path=agent_tmp_path)
     
@@ -175,14 +176,20 @@ if __name__ == '__main__':
         m_batch_size = 64
         #m_n_epochs = 10
         # params with own set value
-        m_n_steps= 100
+        m_n_steps= 30
         m_seed = 42
         m_verbose = 1
-
+        """
         model = MaskablePPO(MaskableActorCriticPolicy, env,
         learning_rate=m_learning_rate, gamma= m_gamma, gae_lambda=m_gae_lambda,
         ent_coef=m_ent_coef, vf_coef=m_vf_coef, max_grad_norm=m_max_grad_norm, batch_size=m_batch_size,
         n_steps= m_n_steps, seed=m_seed, verbose=m_verbose)
+        """
+        model = MultiRobotMaskablePPO(MaskableActorCriticPolicy, env,
+        learning_rate=m_learning_rate, gamma= m_gamma, gae_lambda=m_gae_lambda,
+        ent_coef=m_ent_coef, vf_coef=m_vf_coef, max_grad_norm=m_max_grad_norm, batch_size=m_batch_size,
+        n_steps= m_n_steps, seed=m_seed, verbose=m_verbose, n_robots=2)
+        
         #n_epochs=m_n_epochs
         #model = PPO(MlpPolicy, env, verbose=0)
 
