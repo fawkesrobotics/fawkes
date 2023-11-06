@@ -25,7 +25,7 @@
 #include <blackboard/interface_listener.h>
 #include <core/threading/thread.h>
 #include <plugins/clips/aspect/clips_feature.h>
-
+#include <algorithm>
 #include <chrono>
 #include <map>
 #include <mutex>
@@ -91,6 +91,9 @@ public:
 	std::vector<std::string> getAllFormulatedGoals();
 	//std::vector<std::string> getAllFormulatedExecutableGoals();
 	std::vector<GoalAction> getAllFormulatedExecutableGoals();
+	void 					waitForFreeRobot();
+	void 					unlockRobot();
+	std::vector<GoalAction> getExecutableGoalsForFreeRobot();
 
 	std::vector<std::string> getParamNameDomainObjectsComb(std::string param_name,
 	                                                       std::string param_type);
@@ -137,6 +140,9 @@ protected:
 	static ClipsGymThread *thread_instance;
 	static std::mutex      mutex;
 
+	std::string			freeRobot;
+	bool				lockRobot = false;
+
 	//helper functions
 	std::vector<std::string> splitActionToGoalParams(std::string action);
 	std::string              getClipsSlotValuesAsString(std::vector<CLIPS::Value> slot_values);
@@ -151,5 +157,6 @@ protected:
 	std::list<Param> extractGoalParamsFromClipsValues(std::vector<CLIPS::Value> slot_values);
 
 	std::vector<GoalAction> currentExecutableGoals;
+	std::vector<std::string> enterFieldIDs;
 };
 //#endif

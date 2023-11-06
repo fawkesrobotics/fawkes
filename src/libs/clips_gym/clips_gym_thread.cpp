@@ -99,6 +99,9 @@ PYBIND11_MODULE(libfawkes_clips_gym, m)
 	  .def("resetCX", &ClipsGymThread::resetCX)
 	  .def("create_rl_env_state_from_facts", &ClipsGymThread::create_rl_env_state_from_facts)
 	  .def("getAllFormulatedGoals", &ClipsGymThread::getAllFormulatedGoals)
+	  .def("unlockRobot", &ClipsGymThread::unlockRobot)
+	  .def("waitForFreeRobot", &ClipsGymThread::waitForFreeRobot)
+	  .def("getExecutableGoalsForFreeRobot", &ClipsGymThread::getExecutableGoalsForFreeRobot)
 	  .def("getAllFormulatedExecutableGoals", &ClipsGymThread::getAllFormulatedExecutableGoals)
 	  .def("generateActionSpace", &ClipsGymThread::generateActionSpace)
 	  .def("generateObservationSpace", &ClipsGymThread::generateObservationSpace)
@@ -119,39 +122,7 @@ void
 ClipsGymThread::init()
 {
 	std::cout << "Hello World!-from ClipsGymThread" << std::endl;
-
-	//std::string temp = config->get_string("/goal-space/TOWER-C1/buttom");
-	//std::cout << temp << std::endl;
-
-	/* std::vector<std::string> goalClasses = config->get_strings("/goal-space/classes");
-	for(std::string c: goalClasses)
-	{
-		std::cout << c <<std::endl;
-		std::string temp = "/param-names/"+c;
-		std::cout << temp << std::endl;
-
-		std::vector<std::string> params = config->get_strings("/param-names/"+c);
-		for(std::string p: params)
-		{	
-			std::string cfg_param = "/param-names/param-types/"+p;
-			std::cout << "is string: " <<config->is_string(cfg_param) <<std::endl;
-			
-			if(config->is_list(cfg_param) == 1)
-			{
-				std::vector<std::string> type_list = config->get_strings(cfg_param);
-				for(std::string t: type_list)
-				{
-					std::cout << p <<": " <<t<< std::endl;
-				}
-			}
-			else if(config->is_string(cfg_param) == 1)
-			{
-				std::string type = config->get_string(cfg_param);
-				std::cout << p <<": " <<type<< std::endl;
-			}
-		}
-	} */
-	//wakeup(); //activates loop
+	lockRobot = false;
 }
 
 /* Checks if rl-waiting fact exists and sleeps */
@@ -545,7 +516,10 @@ ClipsGymThread::getGoalIdByString(std::vector<GoalAction> goals, std::string goa
 		logger->log_info(name(), "Before filter: %s", g.getGoalString().c_str());
 		filterParams(&g);
 		logger->log_info(name(), "After filter: %s", g.getGoalString().c_str());
-		if (g.getGoalString() == goal_str) {
+		if (g.getGoalString() == goal_str && std::find(enterFieldIDs.begin(), enterFieldIDs.end(), g.getId()) == enterFieldIDs.end()) {
+			if (goal_str == "ENTER-FIELD"){
+				enterFieldIDs.push_back(g.getId());
+			}
 			return g.getId();
 		}
 	}
@@ -695,6 +669,180 @@ ClipsGymThread::getAllFormulatedGoals()
 	return maskedGoals;
 }
 
+
+void
+ClipsGymThread::waitForFreeRobot()
+{
+	logger->log_info(name(), "RL: Waiting for finished selection... %d ", lockRobot);
+	fawkes::LockPtr<CLIPS::Environment> clips = getClipsEnv();
+	while(lockRobot){
+		py::gil_scoped_release release;
+		std::this_thread::sleep_for(1000ms);
+		py::gil_scoped_acquire acquire;
+	}
+	logger->log_info(name(), "RL: Waiting for free robot... ");
+	lockRobot = true;
+	bool robotFound = false;
+
+	freeRobot = "None";
+	while(!robotFound) {
+		//py::gil_scoped_release release;
+		std::this_thread::sleep_for(100ms);
+		//py::gil_scoped_acquire acquire;
+		clips.lock();
+		CLIPS::Fact::pointer fact = clips->get_facts();
+		while(fact) {
+			CLIPS::Template::pointer 	tmpl = fact->get_template();
+			std::string					fact_name = tmpl->name();
+			if(fact_name == "wm-fact" && getClipsSlotValuesAsString(fact->slot_value("key")).find("robot-waiting") != std::string::npos) {
+				std::string key = getClipsSlotValuesAsString(fact->slot_value("key"));
+				size_t pos = key.find("#r#");
+				freeRobot = key.substr(pos+3);
+				
+				CLIPS::Fact::pointer g_fact = clips->get_facts();
+				while (g_fact) {
+					CLIPS::Template::pointer g_tmpl  = g_fact->get_template();
+					std::string              g_fact_name = g_tmpl->name();
+					CLIPS::Fact::pointer 	 gm = NULL;
+					if (g_fact_name == "goal") {
+						std::string goalid = getClipsSlotValuesAsString(g_fact->slot_value("id"));
+						//logger->log_info(name(), "RL: Goal found with id %s", goalid.c_str());
+						CLIPS::Fact::pointer gm_fact = clips->get_facts();
+						while (gm_fact) {				
+							CLIPS::Template::pointer 	gm_tmpl = gm_fact->get_template();
+							std::string					gm_fact_name = gm_tmpl->name();
+							if (gm_fact_name == "goal-meta"){
+								std::string gm_goalid = getClipsSlotValuesAsString(gm_fact->slot_value("goal-id"));
+								//logger->log_info(name(), "RL: Goal-meta fact found with id %s", gm_goalid.c_str());
+								if (gm_goalid == goalid) {
+									
+									gm = gm_fact;
+									break;
+								}
+							}
+							gm_fact = gm_fact->next();
+						}
+						//logger->log_info(name(), "RL: Correct Goal-meta fact found");
+						std::string assigned_to	  = getClipsSlotValuesAsString(gm->slot_value("assigned-to"));
+						std::string mode          = getClipsSlotValuesAsString(g_fact->slot_value("mode"));
+						std::string is_executable = getClipsSlotValuesAsString(g_fact->slot_value("is-executable"));
+
+						if (mode == "FORMULATED" && is_executable == "TRUE" && assigned_to == freeRobot) {
+							robotFound = true;
+							break;
+						}
+					}
+					g_fact = g_fact->next();
+				}
+				if(robotFound){
+					break;
+				}
+			}
+			//logger->log_info(name(), "RL: Waiting for free robot...");
+			fact = fact->next();
+		}
+		clips.unlock();
+
+	}
+	logger -> log_info(name(), "Free Robot %s", freeRobot.c_str());
+}
+
+void
+ClipsGymThread::unlockRobot()
+{
+	freeRobot = "None";
+	lockRobot = false;
+}
+
+std::vector<GoalAction>
+ClipsGymThread::getExecutableGoalsForFreeRobot()
+{
+	std::cout << "In ClipsGymThread get all executable goals for free robot" << std::endl;
+	fawkes::LockPtr<CLIPS::Environment> clips = getClipsEnv();
+	logger->log_info(name(), "RL: Executable Goals for %s", freeRobot.c_str());
+	clips.lock();
+	bool goalsExecutable = false;
+	std::vector<GoalAction> maskedGoals;
+
+	while (!goalsExecutable){
+		clips.unlock();
+		//logger->log_info(name(), "RL: No Executable goals found, retrying...");
+		std::this_thread::sleep_for(10ms);
+		clips.lock();
+		CLIPS::Fact::pointer fact = clips->get_facts();
+		
+		while (fact) {
+			CLIPS::Template::pointer tmpl  = fact->get_template();
+			std::string              fact_name = tmpl->name();
+			CLIPS::Fact::pointer 	 gm = NULL;
+			if (fact_name == "goal") {
+				std::string goalid = getClipsSlotValuesAsString(fact->slot_value("id"));
+				//logger->log_info(name(), "RL: Goal found with id %s", goalid.c_str());
+				CLIPS::Fact::pointer gm_fact = clips->get_facts();
+				while (gm_fact) {				
+					CLIPS::Template::pointer 	gm_tmpl = gm_fact->get_template();
+					std::string					gm_fact_name = gm_tmpl->name();
+					if (gm_fact_name == "goal-meta"){
+						std::string gm_goalid = getClipsSlotValuesAsString(gm_fact->slot_value("goal-id"));
+						//logger->log_info(name(), "RL: Goal-meta fact found with id %s", gm_goalid.c_str());
+						if (gm_goalid == goalid) {
+							
+							gm = gm_fact;
+							break;
+						}
+					}
+					gm_fact = gm_fact->next();
+				}
+				//logger->log_info(name(), "RL: Correct Goal-meta fact found");
+				std::string assigned_to	  = getClipsSlotValuesAsString(gm->slot_value("assigned-to"));
+				std::string mode          = getClipsSlotValuesAsString(fact->slot_value("mode"));
+				std::string is_executable = getClipsSlotValuesAsString(fact->slot_value("is-executable"));
+
+				if (mode == "FORMULATED" && (is_executable == "FALSE" || assigned_to != freeRobot)) {
+					std::string goal_id = getClipsSlotValuesAsString(fact->slot_value("id"));
+					//logger->log_info(name(), "Goal is not executable: %s", goal_id.c_str());
+				}
+				if (mode == "FORMULATED" && is_executable == "TRUE" && assigned_to == freeRobot) {
+					std::string goal_class      = getClipsSlotValuesAsString(fact->slot_value("class"));
+					py::list    allowed_classes = getGoalClassList();
+					auto        vec             = allowed_classes.cast<std::vector<std::string>>();
+					std::vector<std::string>::iterator loc = std::find(vec.begin(), vec.end(), goal_class);
+					if (loc == vec.end()) {
+						logger->log_info(name(), "not in List %s", goal_class.c_str());
+					} else {
+						std::string goal_id = getClipsSlotValuesAsString(fact->slot_value("id"));
+						GoalAction  goal    = GoalAction(goal_class, goal_id);
+
+						std::list params = extractGoalParamsFromClipsValues(fact->slot_value("params"));
+						goal.setParams(params);
+
+						filterParams(&goal);
+						std::cout << "Params String of goal action after Filter" << goal.getParamsString()
+								<< std::endl;
+						goalsExecutable = true;
+						maskedGoals.push_back(goal);
+
+						logger->log_info(name(),
+										"RL: %s",
+										goal.getGoalString().c_str());
+					}
+				}
+			}
+			fact = fact->next();
+		}
+		//logger->log_info(name(), "RL: Executable Goals found %d", goalsExecutable);
+	}
+	//std::cout<<maskedGoals <<std::endl;
+	logger->log_info(name(), "RL: Finished passing all executable goals");
+	clips.unlock();
+
+	currentExecutableGoals = maskedGoals;
+
+	return maskedGoals;
+}
+
+
+
 //std::vector<std::string>
 std::vector<GoalAction>
 ClipsGymThread::getAllFormulatedExecutableGoals()
@@ -812,7 +960,7 @@ ClipsGymThread::resetCX()
 		clips.unlock();
 		elapsed_time += wait_time;
 	}
-
+	enterFieldIDs.clear();
 	logger->log_info(name(), "RL: Finished resetCX");
 }
 
