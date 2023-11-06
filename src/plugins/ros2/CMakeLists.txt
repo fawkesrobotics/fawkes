@@ -122,23 +122,6 @@ else()
   plugin_disabled_message(ros2-tf2)
 endif()
 
-if(PLUGIN_ros2-images)
-  add_library(ros2-images MODULE image_plugin.cpp image_thread.cpp)
-  depend_on_ros2(ros2-images)
-  depend_on_ros2_libs(ros2-images "sensor_msgs;image_transport")
-  target_link_libraries(
-    ros2-images
-    fawkescore
-    fawkesutils
-    fawkesaspects
-    fawkesblackboard
-    fawkesinterface
-    fawkesros2aspect
-    fvutils)
-else()
-  plugin_disabled_message(ros2-images)
-endif()
-
 if(PLUGIN_ros2-laserscan)
   add_library(ros2-laserscan MODULE laserscan_plugin.cpp laserscan_thread.cpp)
   depend_on_ros2(ros2-laserscan)
