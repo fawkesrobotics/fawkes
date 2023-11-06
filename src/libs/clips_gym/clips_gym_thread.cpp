@@ -516,10 +516,7 @@ ClipsGymThread::getGoalIdByString(std::vector<GoalAction> goals, std::string goa
 		logger->log_info(name(), "Before filter: %s", g.getGoalString().c_str());
 		filterParams(&g);
 		logger->log_info(name(), "After filter: %s", g.getGoalString().c_str());
-		if (g.getGoalString() == goal_str && std::find(enterFieldIDs.begin(), enterFieldIDs.end(), g.getId()) == enterFieldIDs.end()) {
-			if (goal_str == "ENTER-FIELD"){
-				enterFieldIDs.push_back(g.getId());
-			}
+		if (g.getGoalString() == goal_str) {
 			return g.getId();
 		}
 	}
@@ -960,7 +957,6 @@ ClipsGymThread::resetCX()
 		clips.unlock();
 		elapsed_time += wait_time;
 	}
-	enterFieldIDs.clear();
 	logger->log_info(name(), "RL: Finished resetCX");
 }
 

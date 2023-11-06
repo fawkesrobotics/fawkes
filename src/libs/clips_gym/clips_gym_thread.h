@@ -157,6 +157,5 @@ protected:
 	std::list<Param> extractGoalParamsFromClipsValues(std::vector<CLIPS::Value> slot_values);
 
 	std::vector<GoalAction> currentExecutableGoals;
-	std::vector<std::string> enterFieldIDs;
 };
 //#endif
