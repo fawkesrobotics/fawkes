@@ -60,14 +60,14 @@ PyGuard::getInstance()
 void
 PyGuard::loadConfig(fawkes::Configuration *config)
 {
-	std::string cfg_rl_agent_name = config->get_string("/rl-agent/save_agent_name");
+	std::string cfg_rl_agent_name = config->get_string("/rl-agent/save-agent-name");
 	std::string cfg_rl_agent_dir  = getConfigStringReplacedBasedirT(config, "/rl-agent/dir");
 
 	cfg_executing_script       = config->get_string("/python/execution-script");
 	std::string cfg_python_dir = getConfigStringReplacedBasedirT(config, "/python/dir");
 
-	std::string cfg_load_agent = config->get_string("/rl-agent/load_agent");
-	std::string cfg_load_agent_name = config->get_string("/rl-agent/load_agent_name");
+	std::string cfg_load_agent = config->get_string("/rl-agent/load-agent");
+	std::string cfg_load_agent_name = config->get_string("/rl-agent/load-agent-name");
 
 	std::string cfg_env             = config->get_string("/rl-agent/env_name");
 	std::string cfg_env_dir         = getConfigStringReplacedBasedirT(config, "/python/env-dir");
