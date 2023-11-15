@@ -176,7 +176,7 @@ if __name__ == '__main__':
         m_batch_size = 64
         #m_n_epochs = 10
         # params with own set value
-        m_n_steps= 30
+        m_n_steps= 50
         m_seed = 42
         m_verbose = 1
         """
@@ -188,7 +188,7 @@ if __name__ == '__main__':
         model = MultiRobotMaskablePPO(MaskableActorCriticPolicy, env,
         learning_rate=m_learning_rate, gamma= m_gamma, gae_lambda=m_gae_lambda,
         ent_coef=m_ent_coef, vf_coef=m_vf_coef, max_grad_norm=m_max_grad_norm, batch_size=m_batch_size,
-        n_steps= m_n_steps, seed=m_seed, verbose=m_verbose, n_robots=2)
+        n_steps= m_n_steps, seed=m_seed, verbose=m_verbose, n_robots=3)
         
         #n_epochs=m_n_epochs
         #model = PPO(MlpPolicy, env, verbose=0)

@@ -957,6 +957,7 @@ ClipsGymThread::resetCX()
 		clips.unlock();
 		elapsed_time += wait_time;
 	}
+	unlockRobot();
 	logger->log_info(name(), "RL: Finished resetCX");
 }
 
