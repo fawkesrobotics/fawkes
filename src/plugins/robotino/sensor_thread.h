@@ -30,6 +30,9 @@
 #include <aspect/logging.h>
 #include <core/threading/thread.h>
 
+#include <chrono>
+#include <ctime>
+#include <stdlib.h>
 #include <string>
 #include <vector>
 
@@ -76,8 +79,10 @@ private: // methods
 private: // members
 	RobotinoComThread *com_;
 
-	bool        cfg_enable_gyro_;
-	std::string cfg_imu_iface_id_;
+	int				      battery_counter = 0;
+	bool                                  cfg_enable_gyro_;
+	std::string                           cfg_imu_iface_id_;
+	std::chrono::system_clock::time_point last_battery_warning;
 
 	fawkes::BatteryInterface        *batt_if_;
 	fawkes::RobotinoSensorInterface *sens_if_;
