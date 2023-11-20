@@ -176,9 +176,14 @@ if __name__ == '__main__':
         m_batch_size = 64
         #m_n_epochs = 10
         # params with own set value
-        m_n_steps= 50
+        m_n_steps= 10
         m_seed = 42
         m_verbose = 1
+        n_robots = 3
+        time_based = True
+        n_time = 450
+        deadzone = 10
+        wait_for_all_robots = False
         """
         model = MaskablePPO(MaskableActorCriticPolicy, env,
         learning_rate=m_learning_rate, gamma= m_gamma, gae_lambda=m_gae_lambda,
@@ -188,7 +193,8 @@ if __name__ == '__main__':
         model = MultiRobotMaskablePPO(MaskableActorCriticPolicy, env,
         learning_rate=m_learning_rate, gamma= m_gamma, gae_lambda=m_gae_lambda,
         ent_coef=m_ent_coef, vf_coef=m_vf_coef, max_grad_norm=m_max_grad_norm, batch_size=m_batch_size,
-        n_steps= m_n_steps, seed=m_seed, verbose=m_verbose, n_robots=3)
+        n_steps= m_n_steps, seed=m_seed, verbose=m_verbose, n_robots=n_robots, time_based=time_based, n_time=n_time, deadzone=deadzone, 
+        wait_for_all_robots=wait_for_all_robots)
         
         #n_epochs=m_n_epochs
         #model = PPO(MlpPolicy, env, verbose=0)
