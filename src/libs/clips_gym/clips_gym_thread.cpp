@@ -683,9 +683,9 @@ ClipsGymThread::waitForFreeRobot()
 
 	freeRobot = "None";
 	while(!robotFound) {
-		//py::gil_scoped_release release;
+		py::gil_scoped_release release;
 		std::this_thread::sleep_for(100ms);
-		//py::gil_scoped_acquire acquire;
+		py::gil_scoped_acquire acquire;
 		clips.lock();
 		CLIPS::Fact::pointer fact = clips->get_facts();
 		while(fact) {
@@ -756,8 +756,8 @@ ClipsGymThread::getExecutableGoalsForFreeRobot()
 {
 	std::cout << "In ClipsGymThread get all executable goals for free robot" << std::endl;
 	fawkes::LockPtr<CLIPS::Environment> clips = getClipsEnv();
-	logger->log_info(name(), "RL: Executable Goals for %s", freeRobot.c_str());
 	clips.lock();
+	logger->log_info(name(), "RL: Executable Goals for %s", freeRobot.c_str());
 	bool goalsExecutable = false;
 	std::vector<GoalAction> maskedGoals;
 
@@ -766,6 +766,7 @@ ClipsGymThread::getExecutableGoalsForFreeRobot()
 		//logger->log_info(name(), "RL: No Executable goals found, retrying...");
 		std::this_thread::sleep_for(10ms);
 		clips.lock();
+		logger->log_info(name(), "RL: Iterating goals");
 		CLIPS::Fact::pointer fact = clips->get_facts();
 		
 		while (fact) {
