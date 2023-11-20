@@ -39,7 +39,7 @@ from sb3_contrib.common.maskable.buffers import MaskableDictRolloutBuffer, Maska
 from sb3_contrib.common.maskable.policies import MaskableActorCriticPolicy
 from sb3_contrib.common.maskable.utils import get_action_masks, is_masking_supported
 from sb3_contrib.ppo_mask.policies import CnnPolicy, MlpPolicy, MultiInputPolicy
-
+from MultiRobotMaskableRolloutBuffer import MultiRobotMaskableRolloutBuffer, MultiRobotMaskableDictRolloutBuffer
 from threading import Thread, Lock
 import threading
 from sb3_contrib.ppo_mask import MaskablePPO
@@ -119,8 +119,13 @@ class MultiRobotMaskablePPO(MaskablePPO):
         seed: Optional[int] = None,
         device: Union[th.device, str] = "auto",
         _init_setup_model: bool = True,
-        n_robots: int = 3
+        n_robots: int = 3,
+        time_based: bool = False,
+        n_time: int = 450,
+        deadzone: int = 10,
+        wait_for_all_robots: bool = True
     ):
+        self.time_based = time_based
         super().__init__(
             policy,
             env,
@@ -146,11 +151,55 @@ class MultiRobotMaskablePPO(MaskablePPO):
             _init_setup_model=_init_setup_model,
         )
         self.n_robots = n_robots
+        
+        self.n_time = n_time
+        self.deadzone = deadzone
+        self.wait_for_all_robots = wait_for_all_robots
         self.mutex = Lock()
         self.n_current_steps = 0
         self.no_callback = False
         self.rollouts_gathered = False
         print("init MAMPPO")
+
+    def _setup_model(self) -> None:
+        self._setup_lr_schedule()
+        self.set_random_seed(self.seed)
+
+        buffer_cls = MultiRobotMaskableDictRolloutBuffer if isinstance(self.observation_space, spaces.Dict) else MultiRobotMaskableRolloutBuffer
+
+        self.policy = self.policy_class(
+            self.observation_space,
+            self.action_space,
+            self.lr_schedule,
+            **self.policy_kwargs,  # pytype:disable=not-instantiable
+        )
+        self.policy = self.policy.to(self.device)
+
+        if not isinstance(self.policy, MaskableActorCriticPolicy):
+            raise ValueError("Policy must subclass MaskableActorCriticPolicy")
+
+        if self.time_based:
+            buffer_size = 1000
+        else:
+            buffer_size = self.n_steps
+        
+        self.rollout_buffer = buffer_cls(
+            buffer_size,
+            self.observation_space,
+            self.action_space,
+            self.device,
+            gamma=self.gamma,
+            gae_lambda=self.gae_lambda,
+            n_envs=self.n_envs,
+        )
+
+        # Initialize schedules for policy/value clipping
+        self.clip_range = get_schedule_fn(self.clip_range)
+        if self.clip_range_vf is not None:
+            if isinstance(self.clip_range_vf, (float, int)):
+                assert self.clip_range_vf > 0, "`clip_range_vf` must be positive, " "pass `None` to deactivate vf clipping"
+
+            self.clip_range_vf = get_schedule_fn(self.clip_range_vf)
     
     def collect_rollouts(
         self,
@@ -178,7 +227,7 @@ class MultiRobotMaskablePPO(MaskablePPO):
         """
 
         assert isinstance(
-            rollout_buffer, (MaskableRolloutBuffer, MaskableDictRolloutBuffer)
+            rollout_buffer, (MultiRobotMaskableRolloutBuffer, MultiRobotMaskableDictRolloutBuffer)
         ), "RolloutBuffer doesn't support action masking"
         assert self._last_obs is not None, "No previous observation was provided"
         # Switch to eval mode (this affects batch norm / dropout)
@@ -195,38 +244,62 @@ class MultiRobotMaskablePPO(MaskablePPO):
 
         callback.on_rollout_start()
 
-        #TODO Threading
-        while self.n_current_steps < n_rollout_steps:
-            if len(threads) < self.n_robots:
-                t = Thread(target= self._do_step, args = (env, callback, rollout_buffer, use_masking))
-                threads.append(t)
-                #print(f"Thread appended, new length: {len(threads)}")
-                t.start()
-            threads_alive =[]
-            for thread in threads:
-                if not thread.is_alive():
-                    #print("Thread not alive")
-                    thread.join()
-                    if self.no_callback:
-                        return False
-                else:
-                    #print("Thread alive, appending")
-                    threads_alive.append(thread)
-            threads = threads_alive
-            #print(f"Number of Threads after cleanup {len(threads)}")
-        print("Rollouts gathered, waiting for steps to conclude")
-        self.rollouts_gathered = True
-        while len(threads) > 0:
-            for thread in threads:
+        if self.time_based:
+            start_time = time.time()
+            while time.time() - start_time < self.n_time:
+                if len(threads) < self.n_robots and time.time() - start_time < self.n_time - self.deadzone:
+                    t = Thread(target= self._do_step_time_based, args = (env, callback, rollout_buffer, use_masking))
+                    threads.append(t)
+                    #print(f"Thread appended, new length: {len(threads)}")
+                    t.start()
                 threads_alive =[]
-                if not thread.is_alive():
-                    thread.join()
-                    if self.no_callback:
-                        return False
-                else:
-                    threads_alive.append(thread)
+                for thread in threads:
+                    if not thread.is_alive():
+                        #print("Thread not alive")
+                        thread.join()
+                        if self.no_callback:
+                            return False
+                    else:
+                        #print("Thread alive, appending")
+                        threads_alive.append(thread)
                 threads = threads_alive
-        print("Steps concluded, updating policy")
+                #print(f"Number of Threads after cleanup {len(threads)}")
+        else:
+            while self.n_current_steps < n_rollout_steps:
+                if len(threads) < self.n_robots:
+                    t = Thread(target= self._do_step, args = (env, callback, rollout_buffer, use_masking))
+                    threads.append(t)
+                    #print(f"Thread appended, new length: {len(threads)}")
+                    t.start()
+                threads_alive =[]
+                for thread in threads:
+                    if not thread.is_alive():
+                        #print("Thread not alive")
+                        thread.join()
+                        if self.no_callback:
+                            return False
+                    else:
+                        #print("Thread alive, appending")
+                        threads_alive.append(thread)
+                threads = threads_alive
+                #print(f"Number of Threads after cleanup {len(threads)}")
+        
+        print("Rollouts gathered")
+        self.rollouts_gathered = True
+        if self.wait_for_all_robots:
+            print("Waiting for steps to conclude")
+            while len(threads) > 0:
+                for thread in threads:
+                    threads_alive =[]
+                    if not thread.is_alive():
+                        thread.join()
+                        if self.no_callback:
+                            return False
+                    else:
+                        threads_alive.append(thread)
+                    threads = threads_alive
+            print("Steps concluded")
+        print("Updating policy")
         with th.no_grad():
             # Compute value for the last timestep
             # Masking is not needed here, the choice of action doesn't matter.
@@ -238,7 +311,7 @@ class MultiRobotMaskablePPO(MaskablePPO):
         callback.on_rollout_end()
 
         return True
-    #TODO: Mutex
+
     def _do_step(
         self,
         env: VecEnv,
@@ -280,6 +353,79 @@ class MultiRobotMaskablePPO(MaskablePPO):
 
         self._update_info_buffer(infos)
         self.n_current_steps += 1
+
+        if isinstance(self.action_space, spaces.Discrete):
+            # Reshape in case of discrete action
+            actions = actions.reshape(-1, 1)
+
+        # Handle timeout by bootstraping with value function
+        # see GitHub issue #633
+        for idx, done in enumerate(dones):
+            if (
+                done
+                and infos[idx].get("terminal_observation") is not None
+                and infos[idx].get("TimeLimit.truncated", False)
+            ):
+                terminal_obs = self.policy.obs_to_tensor(infos[idx]["terminal_observation"])[0]
+                with th.no_grad():
+                    terminal_value = self.policy.predict_values(terminal_obs)[0]
+                rewards[idx] += self.gamma * terminal_value
+            
+        if not self.rollouts_gathered:
+            rollout_buffer.add(
+                self._last_obs,
+                actions,
+                rewards,
+                self._last_episode_starts,
+                values,
+                log_probs,
+                action_masks=action_masks,
+            )
+        self._last_obs = new_obs
+        self._last_episode_starts = dones
+        print(f"RL: finished step in thread {current_thread}")
+
+
+    def _do_step_time_based(
+        self,
+        env: VecEnv,
+        callback: BaseCallback,
+        rollout_buffer: RolloutBuffer,
+        use_masking: bool = True,
+    ):
+        current_thread = threading.get_ident()
+        print(f"In new Thread {current_thread}")
+        #with self.mutex:
+        #print(f"Mutex aquired Thread {current_thread}")
+            #self._last_obs = env.getCurrentObs()
+        with th.no_grad():
+            # Convert to pytorch tensor or to TensorDict
+            obs_tensor = obs_as_tensor(self._last_obs, self.device)
+            print(f"RL: before get_action masks, Thread {current_thread}")
+            # This is the only change related to invalid action masking
+                
+            if use_masking:
+                action_masks = get_action_masks(env)
+            print(f"RL: after get_action masks, Thread {current_thread}")
+            actions, values, log_probs = self.policy(obs_tensor, action_masks=action_masks)
+            actions = actions.cpu().numpy()
+        print(f"Calling step in thread {current_thread}")
+        new_obs, rewards, dones, infos = env.step(actions)
+        #with self.mutex:
+        if infos[0].get("outcome")=="FAILED":
+            self._last_obs = new_obs
+            print(f"RL: step failed, returning... (Thread {current_thread})")
+            return
+        self.num_timesteps += env.num_envs
+
+        # Give access to local variables
+        callback.update_locals(locals())
+        if not callback.on_step():
+            self.no_callback = True
+            print(f"RL: no callback, returning... (Thread {current_thread})")
+            return
+
+        self._update_info_buffer(infos)
 
         if isinstance(self.action_space, spaces.Discrete):
             # Reshape in case of discrete action
