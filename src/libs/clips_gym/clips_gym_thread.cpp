@@ -688,60 +688,48 @@ ClipsGymThread::waitForFreeRobot()
 		py::gil_scoped_acquire acquire;
 		clips.lock();
 		CLIPS::Fact::pointer fact = clips->get_facts();
+		std::vector<std::string> free_robots;
+		std::vector<CLIPS::Fact::pointer> goal_facts;
+		std::vector<CLIPS::Fact::pointer> goal_meta_facts;
 		while(fact) {
 			CLIPS::Template::pointer 	tmpl = fact->get_template();
 			std::string					fact_name = tmpl->name();
 			if(fact_name == "wm-fact" && getClipsSlotValuesAsString(fact->slot_value("key")).find("robot-waiting") != std::string::npos) {
 				std::string key = getClipsSlotValuesAsString(fact->slot_value("key"));
 				size_t pos = key.find("#r#");
-				freeRobot = key.substr(pos+3);
-				
-				CLIPS::Fact::pointer g_fact = clips->get_facts();
-				while (g_fact) {
-					CLIPS::Template::pointer g_tmpl  = g_fact->get_template();
-					std::string              g_fact_name = g_tmpl->name();
-					CLIPS::Fact::pointer 	 gm = NULL;
-					if (g_fact_name == "goal") {
-						std::string goalid = getClipsSlotValuesAsString(g_fact->slot_value("id"));
-						//logger->log_info(name(), "RL: Goal found with id %s", goalid.c_str());
-						CLIPS::Fact::pointer gm_fact = clips->get_facts();
-						while (gm_fact) {				
-							CLIPS::Template::pointer 	gm_tmpl = gm_fact->get_template();
-							std::string					gm_fact_name = gm_tmpl->name();
-							if (gm_fact_name == "goal-meta"){
-								std::string gm_goalid = getClipsSlotValuesAsString(gm_fact->slot_value("goal-id"));
-								//logger->log_info(name(), "RL: Goal-meta fact found with id %s", gm_goalid.c_str());
-								if (gm_goalid == goalid) {
-									
-									gm = gm_fact;
-									break;
-								}
-							}
-							gm_fact = gm_fact->next();
-						}
-						//logger->log_info(name(), "RL: Correct Goal-meta fact found");
-						std::string assigned_to	  = getClipsSlotValuesAsString(gm->slot_value("assigned-to"));
-						std::string mode          = getClipsSlotValuesAsString(g_fact->slot_value("mode"));
-						std::string is_executable = getClipsSlotValuesAsString(g_fact->slot_value("is-executable"));
-
-						if (mode == "FORMULATED" && is_executable == "TRUE" && assigned_to == freeRobot) {
-							robotFound = true;
-							break;
-						}
-					}
-					g_fact = g_fact->next();
-				}
-				if(robotFound){
-					break;
-				}
+				free_robots.push_back(key.substr(pos+3));
 			}
-			//logger->log_info(name(), "RL: Waiting for free robot...");
+			else if(fact_name == "goal"){
+				goal_facts.push_back(fact);
+			}
+			else if(fact_name == "goal-meta"){
+				goal_meta_facts.push_back(fact);
+			}
 			fact = fact->next();
 		}
+		for(std::string r : free_robots){
+			for(CLIPS::Fact::pointer g : goal_facts){
+				std::string goalid 			= getClipsSlotValuesAsString(g->slot_value("id"));
+				std::string mode        	= getClipsSlotValuesAsString(g->slot_value("mode"));
+				std::string is_executable 	= getClipsSlotValuesAsString(g->slot_value("is-executable"));
+				if(mode == "FORMULATED" && is_executable == "TRUE"){
+					for(CLIPS::Fact::pointer gm : goal_meta_facts){
+						std::string gm_goalid 		= getClipsSlotValuesAsString(gm->slot_value("goal-id"));
+						std::string assigned_to		= getClipsSlotValuesAsString(gm->slot_value("assigned-to"));
+						if(gm_goalid == goalid && assigned_to == r){
+							freeRobot = r;
+							robotFound = true;
+							logger -> log_info(name(), "Free Robot %s", freeRobot.c_str());
+							clips.unlock();
+							return;
+						}
+					}
+				}
+			}
+		}
 		clips.unlock();
-
+		logger -> log_info(name(), "No free Robot found, retrying...");
 	}
-	logger -> log_info(name(), "Free Robot %s", freeRobot.c_str());
 }
 
 void
@@ -958,7 +946,7 @@ ClipsGymThread::resetCX()
 		clips.unlock();
 		elapsed_time += wait_time;
 	}
-	unlockRobot();
+	//unlockRobot();
 	logger->log_info(name(), "RL: Finished resetCX");
 }
 
