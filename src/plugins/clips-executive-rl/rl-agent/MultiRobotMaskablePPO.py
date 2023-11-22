@@ -155,7 +155,6 @@ class MultiRobotMaskablePPO(MaskablePPO):
         self.n_time = n_time
         self.deadzone = deadzone
         self.wait_for_all_robots = wait_for_all_robots
-        self.mutex = Lock()
         self.n_current_steps = 0
         self.no_callback = False
         self.rollouts_gathered = False
@@ -321,9 +320,6 @@ class MultiRobotMaskablePPO(MaskablePPO):
     ):
         current_thread = threading.get_ident()
         print(f"In new Thread {current_thread}")
-        #with self.mutex:
-        #print(f"Mutex aquired Thread {current_thread}")
-            #self._last_obs = env.getCurrentObs()
         with th.no_grad():
             # Convert to pytorch tensor or to TensorDict
             obs_tensor = obs_as_tensor(self._last_obs, self.device)
@@ -337,15 +333,17 @@ class MultiRobotMaskablePPO(MaskablePPO):
             actions = actions.cpu().numpy()
         print(f"Calling step in thread {current_thread}")
         new_obs, rewards, dones, infos = env.step(actions)
-        #with self.mutex:
         if infos[0].get("outcome")=="FAILED":
-            self._last_obs = new_obs
             print(f"RL: step failed, returning... (Thread {current_thread})")
             return
         self.num_timesteps += env.num_envs
-
+        print(f"Vecenv: {env.reset_infos}")
+        if self.no_callback:
+            print(f"RL: training has finished in another step function, returning... (Thread {current_thread})")
+            return
         # Give access to local variables
         callback.update_locals(locals())
+        
         if not callback.on_step():
             self.no_callback = True
             print(f"RL: no callback, returning... (Thread {current_thread})")
@@ -395,8 +393,6 @@ class MultiRobotMaskablePPO(MaskablePPO):
     ):
         current_thread = threading.get_ident()
         print(f"In new Thread {current_thread}")
-        #with self.mutex:
-        #print(f"Mutex aquired Thread {current_thread}")
             #self._last_obs = env.getCurrentObs()
         with th.no_grad():
             # Convert to pytorch tensor or to TensorDict
@@ -411,14 +407,13 @@ class MultiRobotMaskablePPO(MaskablePPO):
             actions = actions.cpu().numpy()
         print(f"Calling step in thread {current_thread}")
         new_obs, rewards, dones, infos = env.step(actions)
-        #with self.mutex:
         if infos[0].get("outcome")=="FAILED":
-            self._last_obs = new_obs
             print(f"RL: step failed, returning... (Thread {current_thread})")
             return
         self.num_timesteps += env.num_envs
 
         # Give access to local variables
+ 
         callback.update_locals(locals())
         if not callback.on_step():
             self.no_callback = True
@@ -457,4 +452,6 @@ class MultiRobotMaskablePPO(MaskablePPO):
         self._last_obs = new_obs
         self._last_episode_starts = dones
         print(f"RL: finished step in thread {current_thread}")
+
+        
 
