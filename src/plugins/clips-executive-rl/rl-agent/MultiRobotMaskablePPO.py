@@ -333,11 +333,10 @@ class MultiRobotMaskablePPO(MaskablePPO):
             actions = actions.cpu().numpy()
         print(f"Calling step in thread {current_thread}")
         new_obs, rewards, dones, infos = env.step(actions)
-        if infos[0].get("outcome")=="FAILED":
-            print(f"RL: step failed, returning... (Thread {current_thread})")
+        if infos[0].get("outcome")=="NO-GOAL-ID":
+            print(f"RL: action not executable, returning... (Thread {current_thread})")
             return
         self.num_timesteps += env.num_envs
-        print(f"Vecenv: {env.reset_infos}")
         if self.no_callback:
             print(f"RL: training has finished in another step function, returning... (Thread {current_thread})")
             return
@@ -347,6 +346,11 @@ class MultiRobotMaskablePPO(MaskablePPO):
         if not callback.on_step():
             self.no_callback = True
             print(f"RL: no callback, returning... (Thread {current_thread})")
+            return
+        print(f"n_episodes: {callback.callbacks[0].n_episodes}")
+        print(f"max episodes: {callback.callbacks[0]._total_max_episodes}")
+        if infos[0].get("outcome")=="RESET":
+            print(f"RL: step from previous episode, returning... (Thread {current_thread})")
             return
 
         self._update_info_buffer(infos)
