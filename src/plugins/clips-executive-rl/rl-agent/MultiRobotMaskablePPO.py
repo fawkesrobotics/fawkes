@@ -247,7 +247,7 @@ class MultiRobotMaskablePPO(MaskablePPO):
             start_time = time.time()
             while time.time() - start_time < self.n_time:
                 if len(threads) < self.n_robots and time.time() - start_time < self.n_time - self.deadzone:
-                    t = Thread(target= self._do_step_time_based, args = (env, callback, rollout_buffer, use_masking))
+                    t = Thread(target= self._do_step, args = (env, callback, rollout_buffer, use_masking))
                     threads.append(t)
                     #print(f"Thread appended, new length: {len(threads)}")
                     t.start()
@@ -383,75 +383,6 @@ class MultiRobotMaskablePPO(MaskablePPO):
         self._last_episode_starts = dones
         print(f"RL: finished step in thread {current_thread}")
 
-
-    def _do_step_time_based(
-        self,
-        env: VecEnv,
-        callback: BaseCallback,
-        rollout_buffer: RolloutBuffer,
-        use_masking: bool = True,
-    ):
-        current_thread = threading.get_ident()
-        print(f"In new Thread {current_thread}")
-            #self._last_obs = env.getCurrentObs()
-        with th.no_grad():
-            # Convert to pytorch tensor or to TensorDict
-            obs_tensor = obs_as_tensor(self._last_obs, self.device)
-            print(f"RL: before get_action masks, Thread {current_thread}")
-            # This is the only change related to invalid action masking
-                
-            if use_masking:
-                action_masks = get_action_masks(env)
-            print(f"RL: after get_action masks, Thread {current_thread}")
-            actions, values, log_probs = self.policy(obs_tensor, action_masks=action_masks)
-            actions = actions.cpu().numpy()
-        print(f"Calling step in thread {current_thread}")
-        new_obs, rewards, dones, infos = env.step(actions)
-        if infos[0].get("outcome")=="FAILED":
-            print(f"RL: step failed, returning... (Thread {current_thread})")
-            return
-        self.num_timesteps += env.num_envs
-
-        # Give access to local variables
- 
-        callback.update_locals(locals())
-        if not callback.on_step():
-            self.no_callback = True
-            print(f"RL: no callback, returning... (Thread {current_thread})")
-            return
-
-        self._update_info_buffer(infos)
-
-        if isinstance(self.action_space, spaces.Discrete):
-            # Reshape in case of discrete action
-            actions = actions.reshape(-1, 1)
-
-        # Handle timeout by bootstraping with value function
-        # see GitHub issue #633
-        for idx, done in enumerate(dones):
-            if (
-                done
-                and infos[idx].get("terminal_observation") is not None
-                and infos[idx].get("TimeLimit.truncated", False)
-            ):
-                terminal_obs = self.policy.obs_to_tensor(infos[idx]["terminal_observation"])[0]
-                with th.no_grad():
-                    terminal_value = self.policy.predict_values(terminal_obs)[0]
-                rewards[idx] += self.gamma * terminal_value
-            
-        if not self.rollouts_gathered:
-            rollout_buffer.add(
-                self._last_obs,
-                actions,
-                rewards,
-                self._last_episode_starts,
-                values,
-                log_probs,
-                action_masks=action_masks,
-            )
-        self._last_obs = new_obs
-        self._last_episode_starts = dones
-        print(f"RL: finished step in thread {current_thread}")
 
         
 
