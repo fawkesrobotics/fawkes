@@ -79,6 +79,7 @@ PYBIND11_MODULE(libfawkes_clips_gym, m)
 	  .def(py::init<>())
 	  .def_readonly("observation", &ClipsObservationInfo::observation)
 	  .def_readonly("reward", &ClipsObservationInfo::reward)
+	  .def_readonly("team_points", &ClipsObservationInfo::team_points)
 	  .def_readonly("done", &ClipsObservationInfo::done)
 	  .def_readonly("info", &ClipsObservationInfo::info);
 
@@ -200,7 +201,6 @@ ClipsGymThread::step(std::string next_goal)
 	std::cout << "next_goal from python: " << next_goal << std::endl;
 	ClipsObservationInfo obs_info = ClipsObservationInfo();
 	obs_info.reward               = 0;
-
     logger->log_info(name(), "currentExecutableGoalsCG", currentExecutableGoals.size());
 	//Transform string to goal
 	//std::string n_goal = "TOWER-C1#b#d#";

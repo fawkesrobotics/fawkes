@@ -31,6 +31,7 @@ public:
 
 	//std::list<int>
 	std::string observation;
+   int         team_points;
 	int         reward;
 	bool        done;
 	std::string info;
