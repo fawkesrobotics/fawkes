@@ -142,9 +142,11 @@ if __name__ == '__main__':
     #print(obs_space)
     
     #env = env_creator(env_name, dir_path, render)
-
+    if load_agent: 
+        file_name = load_agent_name
+    agent_name = file_name.split("/rl-agent/", 1)[1].split(".", 1)[0]
     monitor_path = dir_path +"/monitoring/"
-    env = ClipsWorld()#(action_space, obs_space)# render='blocks_render')#,render) #, seed=0)
+    env = ClipsWorld(agent_name=agent_name)#(action_space, obs_space)# render='blocks_render')#,render) #, seed=0)
     #env = Monitor(env,monitor_path)
     #print("Env {} created".format(env_name))
     #obs = env.reset()
@@ -158,7 +160,6 @@ if __name__ == '__main__':
     #env = ActionMasker(env, mask_fn)  # Wrap to enable masking
     if load_agent:
         model = MultiRobotMaskablePPO.load(load_agent_name, env=env)
-        file_name = load_agent_name
         print("Previous Agent loaded")
     else:
         print("Creating new Agent")
@@ -176,7 +177,7 @@ if __name__ == '__main__':
         m_batch_size = 64
         #m_n_epochs = 10
         # params with own set value
-        m_n_steps= 50
+        m_n_steps= 100
         m_seed = 42
         m_verbose = 1
         n_robots = 3
