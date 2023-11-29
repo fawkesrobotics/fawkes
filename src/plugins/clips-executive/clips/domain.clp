@@ -666,17 +666,18 @@
     (if (or (eq (fact-slot-value ?parent type) negation)
             (eq (fact-slot-value ?parent type) atom))then
       (remove-precondition ?parent)
-    )
-    (if (and (eq (fact-slot-value ?parent type) disjunction)
-             (not (any-factp ((?sibling pddl-formula)) (eq (fact-slot-value ?parent id)
-                                                           ?sibling:part-of))
-             )
-             (not (any-factp ((?sibling pddl-predicate)) (eq (fact-slot-value ?parent id)
+    else
+      (if (and (eq (fact-slot-value ?parent type) disjunction)
+               (not (any-factp ((?sibling pddl-formula)) (eq (fact-slot-value ?parent id)
                                                              ?sibling:part-of))
-             )
-        )
-      then
-      (remove-precondition ?parent)
+               )
+               (not (any-factp ((?sibling pddl-predicate)) (eq (fact-slot-value ?parent id)
+                                                               ?sibling:part-of))
+               )
+          )
+        then
+        (remove-precondition ?parent)
+      )
     )
   ))
   then
@@ -685,7 +686,6 @@
                             (type conjunction)
               )
       )
-      (retract ?precond-fact)
   )
   (retract ?precond-fact)
 )
