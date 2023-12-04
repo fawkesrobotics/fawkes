@@ -21,50 +21,53 @@
 # *****************************************************************************
 
 set(PLUGIN_ros2
-    ON
-    CACHE BOOL "Build ros2 plugin")
+  ON
+  CACHE BOOL "Build ros2 plugin")
 set(PLUGIN_ros2-cx-skiller
-    ON
-    CACHE BOOL "Build ros2 cx-skiller plugin")
+  ON
+  CACHE BOOL "Build ros2 cx-skiller plugin")
 set(PLUGIN_ros2-talkerpub
-    ON
-    CACHE BOOL "Build ros2-talkerpub plugin")
+  ON
+  CACHE BOOL "Build ros2-talkerpub plugin")
 set(PLUGIN_ros2-tf2
-    ON
-    CACHE BOOL "Build ros2-tf2 plugin")
+  ON
+  CACHE BOOL "Build ros2-tf2 plugin")
 set(PLUGIN_ros2-images
-    ON
-    CACHE BOOL "Build ros2-images plugin")
+  ON
+  CACHE BOOL "Build ros2-images plugin")
 set(PLUGIN_ros2-laserscan
-    ON
-    CACHE BOOL "Build ros2-laserscan plugin")
+  ON
+  CACHE BOOL "Build ros2-laserscan plugin")
 set(PLUGIN_ros2-irscan
-    ON
-    CACHE BOOL "Build ros2-irscan plugin")
+  ON
+  CACHE BOOL "Build ros2-irscan plugin")
 set(PLUGIN_ros2-odometry
-    ON
-    CACHE BOOL "Build ros2-odometry plugin")
+  ON
+  CACHE BOOL "Build ros2-odometry plugin")
 set(PLUGIN_ros2-cmdvel
-    ON
-    CACHE BOOL "Build ros2-cmdvel plugin")
+  ON
+  CACHE BOOL "Build ros2-cmdvel plugin")
 set(PLUGIN_ros2-navigator
-    ON
-    CACHE BOOL "Build ros2-navigator plugin")
+  ON
+  CACHE BOOL "Build ros2-navigator plugin")
 set(PLUGIN_ros2-dynamic-reconfigure
-    ON
-    CACHE BOOL "Build ros2-dynamic-reconfigure plugin")
+  ON
+  CACHE BOOL "Build ros2-dynamic-reconfigure plugin")
 set(PLUGIN_ros2-joint
-    ON
-    CACHE BOOL "Build ros2-joint plugin")
+  ON
+  CACHE BOOL "Build ros2-joint plugin")
 set(PLUGIN_ros2-robot-description
-    ON
-    CACHE BOOL "Build ros2-robot-description plugin")
+  ON
+  CACHE BOOL "Build ros2-robot-description plugin")
 set(PLUGIN_ros2-clock
-    ON
-    CACHE BOOL "Build ros2-clock plugin")
+  ON
+  CACHE BOOL "Build ros2-clock plugin")
 set(PLUGIN_ros2-imu
-    ON
-    CACHE BOOL "Build ros2-imu plugin")
+  ON
+  CACHE BOOL "Build ros2-imu plugin")
+set(PLUGIN_ros2-cx-navgraph
+  ON
+  CACHE BOOL "Build ros2 cx-navgraph plugin")
 add_subdirectory(aspect)
 
 if(PLUGIN_ros2)
@@ -85,7 +88,7 @@ endif()
 
 if(PLUGIN_ros2-cx-skiller)
   add_library(ros2-cx-skiller MODULE cx_skiller_plugin.cpp
-                                     cx_skiller_thread.cpp skill_node.cpp)
+    cx_skiller_thread.cpp skill_node.cpp)
   depend_on_ros2(ros2-cx-skiller)
   depend_on_ros2_libs(
     ros2-cx-skiller
@@ -277,7 +280,7 @@ endif()
 
 if(PLUGIN_ros2-dynamic-reconfigure)
   add_library(ros2-dynamic-reconfigure MODULE dynamic_reconfigure_plugin.cpp
-                                              dynamic_reconfigure_thread.cpp)
+    dynamic_reconfigure_thread.cpp)
   depend_on_ros2(ros2-dynamic-reconfigure)
   depend_on_ros2_libs(ros2-dynamic-reconfigure dynamic_reconfigure)
   target_link_libraries(
@@ -339,11 +342,33 @@ endif()
 
 if(PLUGIN_ros2-robot-description)
   add_library(ros2-robot-description MODULE robot_description_plugin.cpp
-                                            robot_description_thread.cpp)
+    robot_description_thread.cpp)
   depend_on_ros2(ros2-robot-description)
   target_link_libraries(ros2-robot-description fawkescore fawkesutils
-                        fawkesaspects fawkesros2aspect)
+    fawkesaspects fawkesros2aspect)
 
 else()
   plugin_disabled_message(ros2-robot-description)
+endif()
+
+if(PLUGIN_ros2-cx-navgraph)
+  add_library(ros2-cx-navgraph MODULE navgraph_plugin.cpp
+    navgraph_thread.cpp navgraph_node.cpp)
+  depend_on_ros2(ros2-cx-navgraph)
+  depend_on_ros2_libs(
+    ros2-cx-navgraph
+    "rmw;rosidl_typesupport_interface;rcl_interfaces;cx_msgs;lifecycle_msgs;rclcpp_lifecycle"
+  )
+  target_link_libraries(
+    ros2-cx-navgraph
+    fawkescore
+    fawkesutils
+    fawkesaspects
+    fawkesblackboard
+    fawkesinterface
+    NavGraphGeneratorInterface
+    NavGraphWithMPSGeneratorInterface
+    fawkesros2aspect)
+else()
+  plugin_disabled_message(ros2-cx-navgraph)
 endif()

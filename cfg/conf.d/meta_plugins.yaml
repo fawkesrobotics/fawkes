@@ -13,6 +13,7 @@ fawkes/meta_plugins:
     - ros2
     - skiller
     - ros2-cx-skiller
+    - ros2-cx-navgraph
 
   # Meta plugin for the clips-executive without planner integration
   m-clips-executive-test:
