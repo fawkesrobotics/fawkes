@@ -36,6 +36,7 @@ import clips_gym
 from sb3_contrib.common.maskable.policies import MaskableActorCriticPolicy
 from sb3_contrib.common.wrappers import ActionMasker
 from sb3_contrib.ppo_mask import MaskablePPO
+import MultiRobotMaskablePPO
 
 
 if __name__ == '__main__':
@@ -55,8 +56,8 @@ if __name__ == '__main__':
     #set to current env state given by c++
     
     #file_name = "~/fawkes/src/plugins/rl-test/rl-agent/MaskablePPOAgent_d"
-    print("ExecutingClipsWorld: Config Value agent file name: ", file_name)
-    model = MaskablePPO.load(file_name, env=env)
+    print("ExecutingClipsWorld: Config Value agent file name: ", load_agent_name)
+    model = MultiRobotMaskablePPO.load(load_agent_name, env=env)
 
     print("ExecutingClipsWorld: Model loaded - before predicting")
     #valid_actions = mask_fn(env)#TODO set current env state
@@ -66,7 +67,7 @@ if __name__ == '__main__':
     env.set_state_from_facts(obs)
 
     # action is the position in the discrete action space
-    action, _ = model.predict(env.get_state(), action_masks = env.action_masks(), deterministic=True)#, action_masks=valid_actions)
+    action, _ = model.predict(env.get_state(), action_masks = env.action_masks_exec(), deterministic=True)#, action_masks=valid_actions)
     print("ExecutingClipsWorld: predicted action {0}".format(action))
     
     goal = env.action_dict[action]
