@@ -30,7 +30,7 @@ import pddlgym
 #sys.path.append("~/fawkes/src/plugins/clips_gym/")
 # Wrapper for PDDLGym for discrete action and observation space
 #from PDDLExtension import BlocksWorld, LiteralSpace2, LiteralActionWrapper, LiteralObsWrapper
-from ClipsWorld import ClipsWorld#, LiteralSpace2, LiteralActionWrapper, LiteralObsWrapper
+from ClipsWorld import ClipsWorld #, LiteralSpace2, LiteralActionWrapper, LiteralObsWrapper
 
 from stable_baselines3.common.logger import configure
 
@@ -177,13 +177,13 @@ if __name__ == '__main__':
         m_batch_size = 64
         #m_n_epochs = 10
         # params with own set value
-        m_n_steps= 100
+        m_n_steps= 20
         m_seed = 42
         m_verbose = 1
         n_robots = 3
         time_based = False
-        n_time = 1000
-        deadzone = 10
+        n_time = 300
+        deadzone = 5
         wait_for_all_robots = False
         """
         model = MaskablePPO(MaskableActorCriticPolicy, env,

@@ -72,6 +72,8 @@ PyGuard::loadConfig(fawkes::Configuration *config)
 	std::string cfg_env             = config->get_string("/rl-agent/env_name");
 	std::string cfg_env_dir         = getConfigStringReplacedBasedirT(config, "/python/env-dir");
 	std::string cfg_bin_plugins_dir = getConfigStringReplacedBasedirT(config, "/python/plugins-dir");
+	std::string	cfg_bin_lib_dir  	= getConfigStringReplacedBasedirT(config, "/python/lib-dir");
+
 	std::cout << "Execution script: " << cfg_executing_script << std::endl;
 
 	try {
@@ -82,11 +84,14 @@ PyGuard::loadConfig(fawkes::Configuration *config)
 		py::str sysPathAppend2 = (py::str)("sys.path.append(\"" + cfg_python_dir + "\")");
 		py::str sysPathAppend3 = (py::str)("sys.path.append(\"" + cfg_env_dir + "\")");
 		py::str sysPathAppend4 = (py::str)("sys.path.append(\"" + cfg_bin_plugins_dir + "\")");
+		py::str sysPathAppend5 = (py::str)("sys.path.append(\"" + cfg_bin_lib_dir + "\")");
+		
 
 		py::exec(sysPathAppend1, py_scope);
 		py::exec(sysPathAppend2, py_scope);
 		py::exec(sysPathAppend3, py_scope);
 		py::exec(sysPathAppend4, py_scope);
+		py::exec(sysPathAppend5, py_scope);
 		py::exec("print(\"added config directories to sys.path\")");
 		py::exec("print(sys.path)", py_scope);
 
@@ -96,12 +101,6 @@ PyGuard::loadConfig(fawkes::Configuration *config)
 		py::str file_name =
 		  (py::str)("file_name = \"" + cfg_rl_agent_dir + "/" + cfg_rl_agent_name + "\"");
 		py::exec(file_name, py_scope);
-
-		py::str load_agent = (py::str)("load_agent = " + cfg_load_agent);
-		py::exec(load_agent, py_scope);
-
-		py::str load_agent_name = (py::str)("load_agent_name = \"" + cfg_rl_agent_dir + "/" + cfg_load_agent_name + "\"");
-		py::exec(load_agent_name, py_scope);
 
 	} catch (py::error_already_set &e) {
 		py::module::import("traceback").attr("print_exception")(e.type(), e.value(), e.trace());
@@ -185,11 +184,10 @@ PyGuard::predict()
 		py::exec("print(\"PyGuard obs: \",obs)", py_scope);
 
 		py::exec(
-		  "action, _ = model.predict(obs, action_masks = env.action_masks(), deterministic=True)",
+		  "action, _ = model.predict(obs, action_masks = env.action_masks_exec(), deterministic=True)",
 		  py_scope);
 		py::exec("print(\"Predicted action: \", action)", py_scope);
-
-		py::exec("goal = env.action_dict[action]", py_scope);
+		py::exec("goal = env.action_dict[int(action)]", py_scope);
 		py::exec("print(\"Predicted goal: \", goal)", py_scope);
 		action_str = py_scope["goal"].cast<std::string>();
 

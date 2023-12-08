@@ -115,6 +115,8 @@ class MultiRobotMaskableRolloutBuffer(RolloutBuffer):
             self.returns[batch_inds].flatten(),
             self.action_masks[batch_inds].reshape(-1, self.mask_dims),
         )
+        print(self.observations)
+        print(self.observations.sum())
         return MaskableRolloutBufferSamples(*map(self.to_torch, data))
 
 

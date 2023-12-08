@@ -24,13 +24,9 @@ import os
 import imageio
 import gym
 
-sys.path.append("~/fawkes/src/plugins/clips_gym/")
-sys.path.append("~/fawkes/plugins")
-
 # Wrapper for PDDLGym for discrete action and observation space
 #from PDDLExtension import BlocksWorld, LiteralSpace2, LiteralActionWrapper, LiteralObsWrapper
 from ClipsWorld import ClipsWorld#, LiteralSpace2, LiteralActionWrapper, LiteralObsWrapper
-import clips_gym
 
 #Action Masking
 from sb3_contrib.common.maskable.policies import MaskableActorCriticPolicy

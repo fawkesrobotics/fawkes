@@ -187,7 +187,7 @@ RLTestThread::executeRlAgent(std::string fact_string)
 		py::exec(sysPathAppend4, py_scope);
 		py::exec(sysPathAppend5, py_scope);
 		py::exec("print(\"added config directories to sys.path\")");
-		py::exec("print(sys.path)", py_scope);
+		py::exec("print(sys.path)");
 
 		std::cout << "RL Agent file: " + cfg_rl_agent_dir + "/" + cfg_rl_agent_name << std::endl;
 		py::str file_name =

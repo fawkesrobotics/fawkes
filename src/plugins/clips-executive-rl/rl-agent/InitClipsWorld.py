@@ -40,6 +40,7 @@ from sb3_contrib.common.wrappers import ActionMasker
 from sb3_contrib.ppo_mask import MaskablePPO
 from stable_baselines3 import PPO
 from stable_baselines3.ppo.policies import MlpPolicy
+from MultiRobotMaskablePPO import MultiRobotMaskablePPO
 
 
 print("Hello after SB3 import in initClipsWorld")
@@ -54,7 +55,7 @@ if __name__ == '__main__':
     
 
     print("ExecutingClipsWorld: Config Value agent file name: ", file_name)
-    model = MaskablePPO.load(file_name, env=env)
+    model = MultiRobotMaskablePPO.load(file_name, env=env)
     
     print ("Loaded the agent from file")
     
