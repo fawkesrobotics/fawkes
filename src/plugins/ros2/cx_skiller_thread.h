@@ -1,5 +1,5 @@
 /***************************************************************************
- *  imu_thread.h - Thread to publish IMU data to ROS
+ *  cx_skiler_thread - Thread to manage an executor for the ROS 2 CX
  *
  *  Created: Oct 2023
  *  Copyright  2023  Tarik Viehmann <viehmann@kbsg.rwth-aachen.de>
@@ -18,8 +18,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef _PLUGINS_ROS2_IMU_THREAD_H_
-#define _PLUGINS_ROS2_IMU_THREAD_H_
+#ifndef _PLUGINS_ROS2_CX_SKILLER_THREAD_H_
+#define _PLUGINS_ROS2_CX_SKILLER_THREAD_H_
 
 #include "skill_node.h"
 
@@ -50,4 +50,4 @@ private:
 	fawkes::SkillerInterface          *skiller_iface_;
 };
 
-#endif /* PLUGINS_ROS_CXSkiller_THREAD_H__ */
+#endif /* PLUGINS_ROS2_CX_SKILLER_THREAD_H_ */

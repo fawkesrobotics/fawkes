@@ -2,7 +2,7 @@
  *  skill_node.cpp
  *
  *  Created: 04 August 2023
- *  Copyright  2023 Daniel Swoboda
+ *  Copyright  2023 Tarik Viehmann
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

@@ -24,8 +24,8 @@
 
 using namespace fawkes;
 
-/** Plugin to publish IMU data to ROS.
- * @author Till Hofmann
+/** Plugin to act as Executor for the ROS 2 CLIPS-Executive
+ * @author Tarik Viehmann
  */
 class ROS2CXSkillerPlugin : public fawkes::Plugin
 {
