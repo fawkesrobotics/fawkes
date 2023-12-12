@@ -89,6 +89,12 @@ ROS2NavgraphNode::on_activate(const rclcpp_lifecycle::State &state)
 		    navgraph_update_station_by_tag_received(request, response);
 	    });
 
+	nav_graph_publisher_ =
+	  this->create_publisher<cx_msgs::msg::NavGraphInterfaceMessage>("navgraph-interface", 10);
+	nav_graph_with_mps_publisher_ =
+	  this->create_publisher<cx_msgs::msg::NavGraphWithMPSInterfaceMessage>(
+	    "navgraph-with-mps-interface", 10);
+
 	return rclcpp_lifecycle::LifecycleNode::on_activate(state);
 }
 
@@ -162,13 +168,44 @@ ROS2NavgraphNode::navgraph_update_station_by_tag_received(
 }
 
 /** Handle interface changes.
- * If the Skiller interface changes, publish updated data to ROS.
+ * If either of the navgraph interfaces changes, publish updated data to ROS.
  * @param interface interface instance that you supplied to bbil_add_data_interface()
  */
 void
 ROS2NavgraphNode::bb_interface_data_refreshed(Interface *interface) noexcept
 {
 	RCLCPP_INFO(rclcpp::get_logger(get_name()), "GOT MESSAGE FROM INTERFACE '%s'", interface->type());
-}
+	if (interface->type() == "NavGraphWithMPSGeneratorInterface") {
+		NavGraphWithMPSGeneratorInterface *navgraph_mps_interface =
+		  dynamic_cast<NavGraphWithMPSGeneratorInterface *>(interface);
+		if (!navgraph_mps_interface)
+			return;
+		navgraph_mps_interface->read();
 
+		bool final = navgraph_mps_interface->is_final();
+
+		auto message  = cx_msgs::msg::NavGraphWithMPSInterfaceMessage();
+		message.final = final;
+
+		nav_graph_with_mps_publisher_->publish(message);
+
+	} else if (interface->type() == "NavGraphGeneratorInterface") {
+		NavGraphGeneratorInterface *navgraph_interface =
+		  dynamic_cast<NavGraphGeneratorInterface *>(interface);
+		if (!navgraph_interface)
+			return;
+		navgraph_interface->read();
+
+		bool        final     = navgraph_interface->is_final();
+		bool        ok        = navgraph_interface->is_ok();
+		std::string error_msg = navgraph_interface->error_message();
+
+		auto message      = cx_msgs::msg::NavGraphInterfaceMessage();
+		message.final     = final;
+		message.ok        = ok;
+		message.error_msg = error_msg;
+
+		nav_graph_publisher_->publish(message);
+	}
+}
 } // namespace fawkes

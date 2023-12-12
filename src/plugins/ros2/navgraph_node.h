@@ -27,6 +27,8 @@
 #include <interfaces/NavGraphWithMPSGeneratorInterface.h>
 
 #include <chrono>
+#include <cx_msgs/msg/nav_graph_interface_message.hpp>
+#include <cx_msgs/msg/nav_graph_with_mps_interface_message.hpp>
 #include <cx_msgs/srv/nav_graph_interface_compute.hpp>
 #include <cx_msgs/srv/nav_graph_interface_generate_waitzones.hpp>
 #include <cx_msgs/srv/nav_graph_interface_set_bounding_box.hpp>
@@ -86,6 +88,9 @@ private:
 	  navgraph_set_bounding_box_service_;
 	rclcpp::Service<cx_msgs::srv::NavGraphInterfaceUpdateStationByTag>::SharedPtr
 	  navgraph_update_station_by_tag_service_;
+	rclcpp::Publisher<cx_msgs::msg::NavGraphInterfaceMessage>::SharedPtr nav_graph_publisher_;
+	rclcpp::Publisher<cx_msgs::msg::NavGraphWithMPSInterfaceMessage>::SharedPtr
+	  nav_graph_with_mps_publisher_;
 };
 } // namespace fawkes
 #endif // !NAVGRAPH_NODE_H
