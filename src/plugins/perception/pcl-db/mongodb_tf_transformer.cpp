@@ -94,8 +94,8 @@ MongoDBTransformer::restore_tf_doc(const bsoncxx::document::view &doc,
 	tx          = trans[0].get_double();
 	ty          = trans[1].get_double();
 	tz          = trans[2].get_double();
-	frame       = doc["frame"].get_utf8().value.to_string();
-	child_frame = doc["child_frame"].get_utf8().value.to_string();
+	frame       = std::string(doc["frame"].get_string().value);
+	child_frame = std::string(doc["child_frame"].get_string().value);
 
 	tf::Quaternion q(rx, ry, rz, rw);
 	tf::assert_quaternion_valid(q);
@@ -124,7 +124,7 @@ MongoDBTransformer::restore(long start_msec, long end_msec, long new_start_msec)
 	//std::list<std::string> collections = mongodb_client_->database(database_).list_collection_names();
 	std::list<std::string> collections;
 	for (auto c : mongodb_client_->database(database_).list_collections()) {
-		collections.push_back(c["name"].get_utf8().value.to_string());
+		collections.push_back(std::string(c["name"].get_string().value));
 	}
 
 	std::list<std::string>::iterator c;

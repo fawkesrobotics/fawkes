@@ -142,14 +142,14 @@ main(int argc, char **argv)
 		//auto it = cursor.begin();
 		for (auto doc : cursor) {
 			auto imgdoc = doc["image"];
-			if (imgdoc["colorspace"].get_utf8().value.to_string() == "RGB") {
+			if (std::string(imgdoc["colorspace"].get_string().value) == "RGB") {
 #if MONGOCXX_VERSION_MAJOR > 3 || (MONGOCXX_VERSION_MAJOR == 3 && MONGOCXX_VERSION_MINOR >= 6)
 				types::bson_value::view file_id = imgdoc["data"]["id"].get_value();
 #else
 				types::value file_id = imgdoc["data"]["id"].get_value();
 #endif
-				std::string filename = imgdoc["data"]["filename"].get_utf8().value.to_string();
-				std::string image_id = imgdoc["image_id"].get_utf8().value.to_string();
+				std::string filename = std::string(imgdoc["data"]["filename"].get_string().value);
+				std::string image_id = std::string(imgdoc["image_id"].get_string().value);
 
 				std::string out_filename;
 				char       *fntmp;

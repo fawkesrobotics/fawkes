@@ -101,7 +101,7 @@ OpenraveRobotMemoryThread::construct_scene()
 		for (auto block : cursor) {
 			//logger->log_info(name(), "Adding: %s", cfg_prefix.c_str(), to_json(block).c_str());
 			std::string block_name =
-			  block[config->get_string(cfg_prefix + "name-key")].get_utf8().value.to_string();
+			  std::sring(block[config->get_string(cfg_prefix + "name-key")].get_string().value);
 			if (std::find(added_objects_.begin(), added_objects_.end(), block_name)
 			    == added_objects_.end()) {
 				//add new object

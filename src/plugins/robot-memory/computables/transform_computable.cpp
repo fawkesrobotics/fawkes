@@ -90,13 +90,13 @@ TransformComputable::compute_transform(const document::view &query, const std::s
 
 	//transform them is possible
 	std::list<document::value> res;
-	std::string                target_frame = query["frame"].get_utf8().value.to_string();
+	std::string                target_frame = std::string(query["frame"].get_string().value);
 	auto                       it           = cur.begin();
 	while (it != cur.end()) {
 		document::view pos = *it;
 		if (pos.find("frame") != pos.end() && pos.find("translation") != pos.end()
 		    && pos.find("rotation") != pos.end()) {
-			std::string src_frame = pos["frame"].get_utf8().value.to_string();
+			std::string src_frame = std::string(pos["frame"].get_string().value);
 			Time        now(0, 0);
 			if (tf_->can_transform(target_frame.c_str(), src_frame.c_str(), now)) {
 				basic::document       res_pos;

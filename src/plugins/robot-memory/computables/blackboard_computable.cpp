@@ -75,11 +75,11 @@ std::list<document::value>
 BlackboardComputable::compute_interfaces(const document::view &query, const std::string &collection)
 {
 	std::list<document::value> res;
-	std::string                type  = query["interface"].get_utf8().value.to_string();
+	std::string                type  = std::string(query["interface"].get_string().value);
 	std::string                id    = "*";
 	auto                       id_it = query.find("id");
 	if (id_it != query.end()) {
-		id = query["id"].get_utf8().value.to_string();
+		id = std::string(query["id"].get_string().value);
 	}
 	//get all matching interfaces
 	for (Interface *interface : blackboard_->open_multiple_for_reading(type.c_str(), id.c_str())) {

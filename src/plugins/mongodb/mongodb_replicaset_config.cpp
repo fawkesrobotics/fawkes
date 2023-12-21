@@ -219,7 +219,7 @@ MongoDBReplicaSetConfig::leader_elect(bool force)
 			}
 		}
 	} catch (mongocxx::operation_exception &e) {
-		if (boost::optional<bsoncxx::document::value> error = e.raw_server_error()) {
+		if (std::optional<bsoncxx::document::value> error = e.raw_server_error()) {
 			bsoncxx::array::view writeErrors = error->view()["writeErrors"].get_array();
 			// Do not use writeErrors.length(), which is not the number of errors!
 			auto num_errors = std::distance(writeErrors.begin(), writeErrors.end());
@@ -417,7 +417,7 @@ MongoDBReplicaSetConfig::rs_init()
 		if (!ok) {
 			logger->log_error(name(),
 			                  "RS initialization failed: %s",
-			                  reply.view()["errmsg"].get_utf8().value.to_string().c_str());
+			                  std::string(reply.view()["errmsg"].get_string().value).c_str());
 		} else {
 			logger->log_debug(name(),
 			                  "RS initialized successfully: %s",
@@ -461,7 +461,7 @@ MongoDBReplicaSetConfig::rs_monitor(const bsoncxx::document::view &status_reply)
 	int                   last_member_id{0};
 	bsoncxx::array::view  members_view{status_reply["members"].get_array().value};
 	for (bsoncxx::array::element member : members_view) {
-		std::string member_name = member["name"].get_utf8().value.to_string();
+		std::string member_name = std::string(member["name"].get_string().value);
 		members.insert(member_name);
 		last_member_id = std::max(int(member["_id"].get_int32()), last_member_id);
 		if (member["self"] && member["self"].get_bool()) {
@@ -512,7 +512,7 @@ MongoDBReplicaSetConfig::rs_monitor(const bsoncxx::document::view &status_reply)
 				bsoncxx::array::view members_view{config["members"].get_array().value};
 				new_config.append(basic::kvp("members", [&](basic::sub_array array) {
 					for (bsoncxx::array::element member : members_view) {
-						std::string host = member["host"].get_utf8().value.to_string();
+						std::string host = std::string(member["host"].get_string().value);
 						if (hosts_.find(host) == hosts_.end()) {
 							logger->log_warn(name(),
 							                 "Removing '%s', "
@@ -552,7 +552,7 @@ MongoDBReplicaSetConfig::rs_monitor(const bsoncxx::document::view &status_reply)
 			if (!ok) {
 				logger->log_error(name(),
 				                  "RS reconfig failed: %s (DB error)",
-				                  reply.view()["errmsg"].get_utf8().value.to_string().c_str());
+				                  std::string(reply.view()["errmsg"].get_string().value).c_str());
 			}
 		} catch (mongocxx::operation_exception &e) {
 			logger->log_warn(name(), "RS reconfig failed: %s (exception)", e.what());
