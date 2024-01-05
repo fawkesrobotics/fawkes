@@ -47,10 +47,12 @@ public:
 	void add_tf_prefix(std::string &frame_id);
 
 protected:
-	rclcpp::Node::SharedPtr node_handle;
+	rclcpp::Node::SharedPtr                                   node_handle;
+	std::shared_ptr<rclcpp::executors::MultiThreadedExecutor> executor;
 
 private:
-	void init_ROS2Aspect(rclcpp::Node::SharedPtr node_handle);
+	void init_ROS2Aspect(rclcpp::Node::SharedPtr                                   node_handle,
+	                     std::shared_ptr<rclcpp::executors::MultiThreadedExecutor> executor);
 	void finalize_ROS2Aspect();
 	//	bool tf_prefix_enabled_;
 	//	std::string cfg_tf_prefix_;

@@ -88,6 +88,7 @@ ROS2NodeThread::init()
 
 		ros_namespace = std::string("/") + ros_namespace;
 	}
+	logger->log_warn(name(), ros_namespace.c_str());
 
 	if (node_handle == NULL || !node_handle->get_node_options().context()->is_valid()) {
 		node_handle = rclcpp::Node::make_shared(node_name, ros_namespace);
@@ -99,15 +100,13 @@ ROS2NodeThread::init()
 
 	bool yield_before_execute = true;
 
-	mult_executor = new rclcpp::executors::MultiThreadedExecutor(rclcpp::ExecutorOptions(),
+	mult_executor =
+	  std::make_shared<rclcpp::executors::MultiThreadedExecutor>(rclcpp::ExecutorOptions(),
 	                                                             2u,
 	                                                             yield_before_execute);
+	ros2_aspect_inifin_.set_executor(mult_executor);
 
-	if (cfg_async_spinning_) {
-		mult_executor->add_node(node_handle);
-		std::thread executor_thread(
-		  std::bind(&rclcpp::executors::MultiThreadedExecutor::spin, mult_executor));
-	}
+	mult_executor->add_node(node_handle);
 }
 
 void
@@ -120,7 +119,7 @@ ROS2NodeThread::finalize()
 void
 ROS2NodeThread::loop()
 {
-	if (!cfg_async_spinning_) {
-		rclcpp::spin_some(node_handle);
+	if (!mult_executor->is_spinning()) {
+		mult_executor->spin();
 	}
 }

@@ -52,8 +52,11 @@ ROS2AspectIniFin::init(Thread *thread)
 	if (!node_handle_) {
 		throw CannotInitializeThreadException("ROS2 node handle has not been set.");
 	}
+	if (!executor_) {
+		throw CannotInitializeThreadException("ROS2 executor has not been set.");
+	}
 
-	ros2_thread->init_ROS2Aspect(node_handle_);
+	ros2_thread->init_ROS2Aspect(node_handle_, executor_);
 }
 
 void
@@ -77,6 +80,15 @@ void
 ROS2AspectIniFin::set_node_handle(rclcpp::Node::SharedPtr node_handle)
 {
 	node_handle_ = node_handle;
+}
+
+/** Set the ROS2 executor to use for aspect initialization.
+ * @param executor ROS2 executor to pass to threads with ROS2Aspect.
+ */
+void
+ROS2AspectIniFin::set_executor(std::shared_ptr<rclcpp::executors::MultiThreadedExecutor> executor)
+{
+	executor_ = executor;
 }
 
 } // end namespace fawkes

@@ -27,6 +27,7 @@
 #include <aspect/inifins/inifin.h>
 #include <plugins/ros2/aspect/ros2.h>
 
+#include <rclcpp/executors/multi_threaded_executor.hpp>
 #include <rclcpp/rclcpp.hpp>
 
 namespace fawkes {
@@ -40,10 +41,12 @@ public:
 	virtual void finalize(Thread *thread);
 
 	void set_node_handle(rclcpp::Node::SharedPtr node_handle);
+	void set_executor(std::shared_ptr<rclcpp::executors::MultiThreadedExecutor> executor);
 
 private:
-	rclcpp::Node::SharedPtr node_handle_;
-	std::string             tf_prefix_;
+	rclcpp::Node::SharedPtr                                   node_handle_;
+	std::shared_ptr<rclcpp::executors::MultiThreadedExecutor> executor_;
+	std::string                                               tf_prefix_;
 };
 
 } // end namespace fawkes
