@@ -65,9 +65,6 @@ set(PLUGIN_ros2-clock
 set(PLUGIN_ros2-imu
   ON
   CACHE BOOL "Build ros2-imu plugin")
-set(PLUGIN_ros2-cx-navgraph
-  ON
-  CACHE BOOL "Build ros2 cx-navgraph plugin")
 add_subdirectory(aspect)
 
 if(PLUGIN_ros2)
@@ -349,26 +346,4 @@ if(PLUGIN_ros2-robot-description)
 
 else()
   plugin_disabled_message(ros2-robot-description)
-endif()
-
-if(PLUGIN_ros2-cx-navgraph)
-  add_library(ros2-cx-navgraph MODULE navgraph_plugin.cpp
-    navgraph_thread.cpp navgraph_node.cpp)
-  depend_on_ros2(ros2-cx-navgraph)
-  depend_on_ros2_libs(
-    ros2-cx-navgraph
-    "rmw;rosidl_typesupport_interface;rcl_interfaces;cx_msgs;lifecycle_msgs;rclcpp_lifecycle"
-  )
-  target_link_libraries(
-    ros2-cx-navgraph
-    fawkescore
-    fawkesutils
-    fawkesaspects
-    fawkesblackboard
-    fawkesinterface
-    NavGraphGeneratorInterface
-    NavGraphWithMPSGeneratorInterface
-    fawkesros2aspect)
-else()
-  plugin_disabled_message(ros2-cx-navgraph)
 endif()
