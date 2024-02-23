@@ -7,6 +7,12 @@ fawkes/meta_plugins:
 
   # Meta plugin with useful base plugins for the Robotino
   robotino_default: robotino,joystick,robotino-joystick,webview
+  # Meta plugin for running as client for the ros2 clips executive
+  m-ros2-skiller:
+    - flite
+    - ros2
+    - skiller
+    - ros2-cx-skiller
 
   # Meta plugin for the clips-executive without planner integration
   m-clips-executive-test:

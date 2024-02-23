@@ -23,6 +23,9 @@
 set(PLUGIN_ros2
     ON
     CACHE BOOL "Build ros2 plugin")
+set(PLUGIN_ros2-cx-skiller
+    ON
+    CACHE BOOL "Build ros2 cx-skiller plugin")
 set(PLUGIN_ros2-talkerpub
     ON
     CACHE BOOL "Build ros2-talkerpub plugin")
@@ -78,6 +81,27 @@ if(PLUGIN_ros2)
     fawkesros2aspect)
 else()
   plugin_disabled_message(ros2)
+endif()
+
+if(PLUGIN_ros2-cx-skiller)
+  add_library(ros2-cx-skiller MODULE cx_skiller_plugin.cpp
+                                     cx_skiller_thread.cpp skill_node.cpp)
+  depend_on_ros2(ros2-cx-skiller)
+  depend_on_ros2_libs(
+    ros2-cx-skiller
+    "rmw;rosidl_typesupport_interface;rcl_interfaces;cx_msgs;cx_skill_execution"
+  )
+  target_link_libraries(
+    ros2-cx-skiller
+    fawkescore
+    fawkesutils
+    fawkesaspects
+    fawkesblackboard
+    fawkesinterface
+    SkillerInterface
+    fawkesros2aspect)
+else()
+  plugin_disabled_message(ros2-cx-skiller)
 endif()
 
 if(PLUGIN_ros2-talkerpub)

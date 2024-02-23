@@ -59,9 +59,11 @@ ROS2Aspect::~ROS2Aspect()
  * @param node_handle ROS2 node handle
  */
 void
-ROS2Aspect::init_ROS2Aspect(rclcpp::Node::SharedPtr node_handle)
+ROS2Aspect::init_ROS2Aspect(rclcpp::Node::SharedPtr                                   node_handle,
+                            std::shared_ptr<rclcpp::executors::MultiThreadedExecutor> executor)
 {
 	this->node_handle = node_handle;
+	this->executor    = executor;
 	//        cfg_tf_prefix_ = config->get_string_or_default("/ros2/tf/tf_prefix", "");
 	//        cfg_tf_prefix_exclusions_ = config->get_strings_or_defaults("/ros2/tf/tf_prefix_exclusions", std::vector<std::string>());
 	//
