@@ -28,6 +28,8 @@
 #include <logging/logger.h>
 #include <utils/time/wait.h>
 
+#include <boost/optional.hpp>
+
 #include <bsoncxx/builder/basic/document.hpp>
 #include <chrono>
 #include <iterator>
@@ -57,9 +59,9 @@ MongoDBReplicaSetConfig::MongoDBReplicaSetConfig(const std::string &cfgname,
                                                  const std::string &prefix,
                                                  const std::string &bootstrap_prefix)
 : Thread("MongoDBReplicaSet", Thread::OPMODE_CONTINUOUS),
-  leader_elec_query_(bsoncxx::builder::basic::document()),
-  leader_elec_query_force_(bsoncxx::builder::basic::document()),
-  leader_elec_update_(bsoncxx::builder::basic::document())
+  leader_elec_query_(bsoncxx::builder::basic::document().extract()),
+  leader_elec_query_force_(bsoncxx::builder::basic::document().extract()),
+  leader_elec_update_(bsoncxx::builder::basic::document().extract())
 {
 	set_name("MongoDBReplicaSet|%s", cfgname.c_str());
 	config_name_      = cfgname;
@@ -219,7 +221,7 @@ MongoDBReplicaSetConfig::leader_elect(bool force)
 			}
 		}
 	} catch (mongocxx::operation_exception &e) {
-		if (std::optional<bsoncxx::document::value> error = e.raw_server_error()) {
+		if (boost::optional<bsoncxx::document::value> error = e.raw_server_error()) {
 			bsoncxx::array::view writeErrors = error->view()["writeErrors"].get_array();
 			// Do not use writeErrors.length(), which is not the number of errors!
 			auto num_errors = std::distance(writeErrors.begin(), writeErrors.end());
@@ -271,7 +273,7 @@ void
 MongoDBReplicaSetConfig::loop()
 {
 	timewait_->mark_start();
-	bsoncxx::document::value reply{bsoncxx::builder::basic::document()};
+	bsoncxx::document::value reply{bsoncxx::builder::basic::document().extract()};
 	ReplicaSetStatus         status = rs_status(reply);
 
 	if (status.primary_status == MongoDBManagedReplicaSetInterface::NO_PRIMARY) {
@@ -410,7 +412,7 @@ MongoDBReplicaSetConfig::rs_init()
 {
 	// using default configuration, this will just add ourself
 	auto cmd = basic::make_document(basic::kvp("replSetInitiate", basic::document{}));
-	bsoncxx::document::value reply{bsoncxx::builder::basic::document()};
+	bsoncxx::document::value reply{bsoncxx::builder::basic::document().extract()};
 	try {
 		reply   = local_client_->database("admin").run_command(std::move(cmd));
 		bool ok = check_mongodb_ok(reply.view());
@@ -434,7 +436,7 @@ MongoDBReplicaSetConfig::rs_get_config(bsoncxx::document::value &rs_config)
 	auto cmd = basic::make_document(basic::kvp("replSetGetConfig", 1));
 
 	try {
-		bsoncxx::document::value reply{bsoncxx::builder::basic::document()};
+		bsoncxx::document::value reply{bsoncxx::builder::basic::document().extract()};
 		reply   = local_client_->database("admin").run_command(std::move(cmd));
 		bool ok = check_mongodb_ok(reply.view());
 		if (ok) {
@@ -496,7 +498,7 @@ MongoDBReplicaSetConfig::rs_monitor(const bsoncxx::document::view &status_reply)
 
 	if (!unresponsive.empty() || !new_alive.empty()) {
 		// generate new config
-		bsoncxx::document::value reply{bsoncxx::builder::basic::document()};
+		bsoncxx::document::value reply{bsoncxx::builder::basic::document().extract()};
 		if (!rs_get_config(reply)) {
 			return;
 		}
