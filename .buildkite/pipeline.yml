@@ -6,7 +6,7 @@ merged-pr-plugin: &merged-pr-plugin
     mode: checkout
 
 podman-plugin-base: &podman-plugin-base
-  image: quay.io/fawkesrobotics/fawkes-builder:f37-ros2
+  image: quay.io/fawkesrobotics/fawkes-builder:f39-ros2
   always-pull: true
   debug: true
   privileged: true

@@ -275,7 +275,7 @@ PddlRobotMemoryThread::fill_dict_from_document(ctemplate::TemplateDictionary *di
 			dict->SetValue(prefix + std::string(elem.key()), std::to_string(elem.get_double()));
 			break;
 		case type::k_utf8:
-			dict->SetValue(prefix + std::string(elem.key()), elem.get_utf8().value.to_string());
+			dict->SetValue(prefix + std::string(elem.key()), std::string(elem.get_string().value));
 			break;
 		case type::k_bool:
 			dict->SetValue(prefix + std::string(elem.key()), std::to_string(elem.get_bool()));
@@ -311,7 +311,7 @@ PddlRobotMemoryThread::fill_dict_from_document(ctemplate::TemplateDictionary *di
 				array_string += " ";
 				switch (e.type()) {
 				case type::k_int64: array_string += std::to_string(e.get_int64()); break;
-				case type::k_utf8: array_string += e.get_utf8().value.to_string(); break;
+				case type::k_utf8: array_string += std::string(e.get_string().value); break;
 				default: throw Exception("Not implemented");
 				}
 			}

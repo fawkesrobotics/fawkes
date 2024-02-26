@@ -718,7 +718,7 @@ ClipsRobotMemoryThread::clips_bson_get(void *bson, std::string field_name)
 		}
 		switch (el.type()) {
 		case bsoncxx::type::k_double: return CLIPS::Value(el.get_double());
-		case bsoncxx::type::k_utf8: return CLIPS::Value(el.get_utf8().value.to_string());
+		case bsoncxx::type::k_utf8: return CLIPS::Value(std::string(el.get_string().value));
 		case bsoncxx::type::k_bool:
 			return CLIPS::Value(el.get_bool() ? "TRUE" : "FALSE", CLIPS::TYPE_SYMBOL);
 		case bsoncxx::type::k_int32: return CLIPS::Value(el.get_int32());
@@ -792,7 +792,7 @@ ClipsRobotMemoryThread::clips_bson_get_array(void *bson, std::string field_name)
 		for (const auto e : array_view) {
 			switch (e.type()) {
 			case bsoncxx::type::k_double: rv.push_back(CLIPS::Value(e.get_double())); break;
-			case bsoncxx::type::k_utf8: rv.push_back(CLIPS::Value(e.get_utf8().value.to_string())); break;
+			case bsoncxx::type::k_utf8: rv.push_back(CLIPS::Value(std::string(e.get_string().value))); break;
 			case bsoncxx::type::k_bool:
 				rv.push_back(CLIPS::Value(e.get_bool() ? "TRUE" : "FALSE", CLIPS::TYPE_SYMBOL));
 				break;

@@ -28,6 +28,8 @@
 #include <logging/logger.h>
 #include <utils/time/wait.h>
 
+#include <boost/optional.hpp>
+
 #include <bsoncxx/builder/basic/document.hpp>
 #include <chrono>
 #include <iterator>
@@ -57,9 +59,9 @@ MongoDBReplicaSetConfig::MongoDBReplicaSetConfig(const std::string &cfgname,
                                                  const std::string &prefix,
                                                  const std::string &bootstrap_prefix)
 : Thread("MongoDBReplicaSet", Thread::OPMODE_CONTINUOUS),
-  leader_elec_query_(bsoncxx::builder::basic::document()),
-  leader_elec_query_force_(bsoncxx::builder::basic::document()),
-  leader_elec_update_(bsoncxx::builder::basic::document())
+  leader_elec_query_(bsoncxx::builder::basic::document().extract()),
+  leader_elec_query_force_(bsoncxx::builder::basic::document().extract()),
+  leader_elec_update_(bsoncxx::builder::basic::document().extract())
 {
 	set_name("MongoDBReplicaSet|%s", cfgname.c_str());
 	config_name_      = cfgname;
@@ -271,7 +273,7 @@ void
 MongoDBReplicaSetConfig::loop()
 {
 	timewait_->mark_start();
-	bsoncxx::document::value reply{bsoncxx::builder::basic::document()};
+	bsoncxx::document::value reply{bsoncxx::builder::basic::document().extract()};
 	ReplicaSetStatus         status = rs_status(reply);
 
 	if (status.primary_status == MongoDBManagedReplicaSetInterface::NO_PRIMARY) {
@@ -410,14 +412,14 @@ MongoDBReplicaSetConfig::rs_init()
 {
 	// using default configuration, this will just add ourself
 	auto cmd = basic::make_document(basic::kvp("replSetInitiate", basic::document{}));
-	bsoncxx::document::value reply{bsoncxx::builder::basic::document()};
+	bsoncxx::document::value reply{bsoncxx::builder::basic::document().extract()};
 	try {
 		reply   = local_client_->database("admin").run_command(std::move(cmd));
 		bool ok = check_mongodb_ok(reply.view());
 		if (!ok) {
 			logger->log_error(name(),
 			                  "RS initialization failed: %s",
-			                  reply.view()["errmsg"].get_utf8().value.to_string().c_str());
+			                  std::string(reply.view()["errmsg"].get_string().value).c_str());
 		} else {
 			logger->log_debug(name(),
 			                  "RS initialized successfully: %s",
@@ -434,7 +436,7 @@ MongoDBReplicaSetConfig::rs_get_config(bsoncxx::document::value &rs_config)
 	auto cmd = basic::make_document(basic::kvp("replSetGetConfig", 1));
 
 	try {
-		bsoncxx::document::value reply{bsoncxx::builder::basic::document()};
+		bsoncxx::document::value reply{bsoncxx::builder::basic::document().extract()};
 		reply   = local_client_->database("admin").run_command(std::move(cmd));
 		bool ok = check_mongodb_ok(reply.view());
 		if (ok) {
@@ -461,7 +463,7 @@ MongoDBReplicaSetConfig::rs_monitor(const bsoncxx::document::view &status_reply)
 	int                   last_member_id{0};
 	bsoncxx::array::view  members_view{status_reply["members"].get_array().value};
 	for (bsoncxx::array::element member : members_view) {
-		std::string member_name = member["name"].get_utf8().value.to_string();
+		std::string member_name = std::string(member["name"].get_string().value);
 		members.insert(member_name);
 		last_member_id = std::max(int(member["_id"].get_int32()), last_member_id);
 		if (member["self"] && member["self"].get_bool()) {
@@ -496,7 +498,7 @@ MongoDBReplicaSetConfig::rs_monitor(const bsoncxx::document::view &status_reply)
 
 	if (!unresponsive.empty() || !new_alive.empty()) {
 		// generate new config
-		bsoncxx::document::value reply{bsoncxx::builder::basic::document()};
+		bsoncxx::document::value reply{bsoncxx::builder::basic::document().extract()};
 		if (!rs_get_config(reply)) {
 			return;
 		}
@@ -512,7 +514,7 @@ MongoDBReplicaSetConfig::rs_monitor(const bsoncxx::document::view &status_reply)
 				bsoncxx::array::view members_view{config["members"].get_array().value};
 				new_config.append(basic::kvp("members", [&](basic::sub_array array) {
 					for (bsoncxx::array::element member : members_view) {
-						std::string host = member["host"].get_utf8().value.to_string();
+						std::string host = std::string(member["host"].get_string().value);
 						if (hosts_.find(host) == hosts_.end()) {
 							logger->log_warn(name(),
 							                 "Removing '%s', "
@@ -552,7 +554,7 @@ MongoDBReplicaSetConfig::rs_monitor(const bsoncxx::document::view &status_reply)
 			if (!ok) {
 				logger->log_error(name(),
 				                  "RS reconfig failed: %s (DB error)",
-				                  reply.view()["errmsg"].get_utf8().value.to_string().c_str());
+				                  std::string(reply.view()["errmsg"].get_string().value).c_str());
 			}
 		} catch (mongocxx::operation_exception &e) {
 			logger->log_warn(name(), "RS reconfig failed: %s (exception)", e.what());

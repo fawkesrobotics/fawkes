@@ -841,7 +841,7 @@ RobotMemory::mutex_try_lock(const std::string &name, const std::string &identity
 			return false;
 		}
 		auto new_view = new_doc->view();
-		return (new_view["locked-by"].get_utf8().value.to_string() == locked_by
+		return (std::string(new_view["locked-by"].get_string().value) == locked_by
 		        && new_view["locked"].get_bool());
 
 	} catch (operation_exception &e) {

@@ -189,7 +189,7 @@ public:
 
 							bool found = false;
 							for (unsigned int j = 0; j < fields.length(); ++j) {
-								if ((fields[j]["name"].get_utf8().value.to_string() == pf.name)
+								if ((std::string(fields[j]["name"].get_string().value) == pf.name)
 								    && (fields[j]["offset"].get_int64() == (int64_t)pf.offset)
 								    && (fields[j]["datatype"].get_int64() == pf.datatype)
 								    && (fields[j]["count"].get_int64() == (int64_t)pf.count)) {
@@ -307,7 +307,7 @@ protected: // methods
 				actual_times[i] = timestamp;
 				fawkes::Time actual_time((long)actual_times[i]);
 
-				lpcl->header.frame_id = pcldoc["frame_id"].get_utf8().value.to_string();
+				lpcl->header.frame_id = std::string(pcldoc["frame_id"].get_string().value);
 				lpcl->is_dense        = pcldoc["is_dense"].get_bool();
 				lpcl->width           = pcldoc["width"].get_int64();
 				lpcl->height          = pcldoc["height"].get_int64();

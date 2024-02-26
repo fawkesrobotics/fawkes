@@ -277,7 +277,7 @@ MongoLogPointCloudThread::loop()
 		if (reply.view()["ok"].get_double() != 1) {
 			logger->log_warn(name(),
 			                 "fsync error: %s",
-			                 reply.view()["errmsg"].get_utf8().value.to_string().c_str());
+			                 std::string(reply.view()["errmsg"].get_string().value).c_str());
 		}
 	}
 	wait_->wait();

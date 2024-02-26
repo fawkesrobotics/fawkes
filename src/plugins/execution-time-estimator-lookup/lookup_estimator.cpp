@@ -136,7 +136,7 @@ LookupEstimator::get_execution_time(const Skill &skill)
 			                         + " when looking up skill exec duration.")
 			                          .c_str());
 		}
-		error_   = doc["error"].get_utf8().value.to_string();
+		error_   = std::string(doc["error"].get_string().value);
 		outcome_ = SkillerInterface::SkillStatusEnum(doc["outcome"].get_int32().value);
 		return res / speed_;
 	} catch (mongocxx::operation_exception &e) {

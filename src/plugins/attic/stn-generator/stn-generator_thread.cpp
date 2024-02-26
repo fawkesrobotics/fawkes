@@ -114,9 +114,9 @@ StnGeneratorThread::loop()
 					args += " ";
 				}
 				first = false;
-				args += arg.get_utf8().value.to_string();
+				args += std::string(arg.get_string().value);
 			}
-			std::string action_name = a["name"].get_utf8().value.to_string();
+			std::string action_name = std::string(a["name"].get_string().value;
 			stn_->add_plan_action(action_name, args);
 			logger->log_debug(name(), "Added Plan action %s to STN", action_name.c_str());
 		}
