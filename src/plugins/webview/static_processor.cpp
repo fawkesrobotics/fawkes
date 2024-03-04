@@ -35,6 +35,7 @@
 #include <climits>
 #include <cstdlib>
 #include <cstring>
+#include <fstream>
 #include <functional>
 #include <regex>
 #include <string>
