@@ -32,6 +32,7 @@
 #include <blackboard/interface_observer.h>
 #include <core/threading/mutex.h>
 #include <core/threading/thread.h>
+#include <interfaces/Position3DInterface.h>
 #include <interfaces/TransformInterface.h>
 #include <plugins/ros2/aspect/ros2.h>
 
@@ -103,10 +104,14 @@ private:
 	std::vector<std::string> cfg_tf_prefix_exclusions_;
 	float                    cfg_update_interval_;
 
+	std::string global_frame_id_;
+	std::string cfg_pose_ifname_;
+
 	bool tf_prefix_enabled_;
 
 	std::list<std::string>                  ros2_frames_;
 	std::list<fawkes::TransformInterface *> tfifs_;
+	fawkes::Position3DInterface            *pos3d_if_;
 
 	rclcpp::Subscription<tf2_msgs::msg::TFMessage>::SharedPtr sub_tf_;
 	rclcpp::Subscription<tf2_msgs::msg::TFMessage>::SharedPtr sub_static_tf_;

@@ -68,6 +68,9 @@ ROS2TF2Thread::init()
 	cfg_use_namespace_ = config->get_bool_or_default("/ros2/tf/use_namespace", false);
 	tf_prefix_enabled_ = false;
 
+	global_frame_id_ = config->get_string("/frames/fixed");
+	cfg_pose_ifname_ = config->get_string("/plugins/amcl/pose_interface_id");
+
 	if (cfg_tf_prefix_ == "$HOSTNAME") {
 		HostInfo hinfo;
 		// namespace must not contain characters other than alphanumerics, '_', or '/'
@@ -124,6 +127,10 @@ ROS2TF2Thread::init()
 
 	bbio_add_observed_create("TransformInterface", "/tf*");
 	blackboard->register_observer(this);
+
+	pos3d_if_ = blackboard->open_for_writing<Position3DInterface>(cfg_pose_ifname_.c_str());
+	pos3d_if_->set_frame(global_frame_id_.c_str());
+	pos3d_if_->write();
 }
 
 void
@@ -134,6 +141,7 @@ ROS2TF2Thread::finalize()
 
 	rclcpp::shutdown();
 
+	blackboard->close(pos3d_if_);
 	std::list<TransformInterface *>::iterator i;
 	for (i = tfifs_.begin(); i != tfifs_.end(); ++i) {
 		blackboard->close(*i);
@@ -176,6 +184,20 @@ ROS2TF2Thread::loop()
 				tf2_msgs::msg::TFMessage tmsg;
 				tmsg.transforms.push_back(create_transform_stamped(*i));
 				pub_tf_->publish(tmsg);
+			}
+			if (strcmp(frame, "map") == 0) {
+				double *trans = (*i)->translation();
+				double *rot   = (*i)->rotation();
+
+				if (pos3d_if_->visibility_history() >= 0) {
+					pos3d_if_->set_visibility_history(pos3d_if_->visibility_history() + 1);
+				} else {
+					pos3d_if_->set_visibility_history(1);
+				}
+
+				pos3d_if_->set_translation(trans);
+				pos3d_if_->set_rotation(rot);
+				pos3d_if_->write();
 			}
 		}
 	}
