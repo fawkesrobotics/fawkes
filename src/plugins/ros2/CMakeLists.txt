@@ -149,7 +149,7 @@ else()
   plugin_disabled_message(ros2-tf2)
 endif()
 
-if(PLUGIN_ros2-tf-oneway)
+if(PLUGIN_ros2-tf2-oneway)
   add_library(ros2-tf-oneway MODULE tf2_oneway_plugin.cpp tf2_oneway_thread.cpp)
   depend_on_ros2(ros2-tf-oneway)
   depend_on_tf(ros2-tf-oneway)
