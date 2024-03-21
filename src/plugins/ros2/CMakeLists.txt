@@ -32,6 +32,9 @@ set(PLUGIN_ros2-talkerpub
 set(PLUGIN_ros2-tf2
     ON
     CACHE BOOL "Build ros2-tf2 plugin")
+set(PLUGIN_ros2-tf2-oneway
+    ON
+    CACHE BOOL "Build ros2-tf2-oneway plugin")
 set(PLUGIN_ros2-images
     ON
     CACHE BOOL "Build ros2-images plugin")
@@ -144,6 +147,32 @@ if(PLUGIN_ros2-tf2)
   endif()
 else()
   plugin_disabled_message(ros2-tf2)
+endif()
+
+if(PLUGIN_ros2-tf-oneway)
+  add_library(ros2-tf-oneway MODULE tf2_oneway_plugin.cpp tf2_oneway_thread.cpp)
+  depend_on_ros2(ros2-tf-oneway)
+  depend_on_tf(ros2-tf-oneway)
+  depend_on_ros2_libs(ros2-tf-oneway "tf2;tf2_msgs")
+  target_link_libraries(
+    ros2-tf-oneway
+    fawkescore
+    fawkesutils
+    fawkesaspects
+    fawkesblackboard
+    fawkesinterface
+    fawkesros2aspect
+    fawkestf
+    TransformInterface)
+  depend_on_ros2_libs(ros2-tf-oneway tf2 tfs_deps_found)
+
+  if(tf2_deps_found)
+    target_compile_definitions(ros2-tf PUBLIC HAVE_TF2_MSGS)
+  else()
+    build_skipped_message("ros2-tf tf2 support" "ros2-tf-oneway[-devel]")
+  endif()
+else()
+  plugin_disabled_message(ros2-tf-oneway)
 endif()
 
 if(PLUGIN_ros2-images)
