@@ -36,11 +36,12 @@ ROS2LaserBridgeThread::~ROS2LaserBridgeThread() {
 void ROS2LaserBridgeThread::init() {
   std::string ros_namespace = config->get_string_or_default("/ros2/namespace", "");
 
-  laser_sub_ = node_handle->create_subscription<sensor_msgs::msg::LaserScan>(ros_namespace + "/front/sick_scan/scan", 10,
+  laser_sub_ = node_handle->create_subscription<sensor_msgs::msg::LaserScan>("/" + ros_namespace + "/front/sick_scan/scan", 10,
   std::bind(&ROS2LaserBridgeThread::laser_callback, this, std::placeholders::_1));
   cloud_ = new pcl::PointCloud<pcl::PointXYZ>();
   cloud_->width = 0;
   cloud_->height = 1;
+  cloud_->header.frame_id = "front_laser";
   pcl_manager->add_pointcloud("front-filtered-1080", cloud_);
 }
 
