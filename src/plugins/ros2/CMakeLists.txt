@@ -41,6 +41,9 @@ set(PLUGIN_ros2-images
 set(PLUGIN_ros2-laserscan
     ON
     CACHE BOOL "Build ros2-laserscan plugin")
+set(PLUGIN_ros2-laserbridge
+    ON
+    CACHE BOOL "Build ros2-laserbridge plugin")
 set(PLUGIN_ros2-irscan
     ON
     CACHE BOOL "Build ros2-irscan plugin")
@@ -211,6 +214,26 @@ if(PLUGIN_ros2-laserscan)
     Laser1080Interface)
 else()
   plugin_disabled_message(ros2-laserscan)
+endif()
+
+if(PLUGIN_ros2-laserbridge)
+  add_library(ros2-laserbridge MODULE laserbridge_plugin.cpp laserbridge_thread.cpp)
+  depend_on_ros2(ros2-laserbridge)
+  depend_on_ros2_libs(ros2-laserbridge sensor_msgs)
+  depend_on_pcl(ros2-laserbridge)
+  target_link_libraries(
+    ros2-laserbridge
+    m
+    fawkescore
+    fawkesutils
+    fawkesaspects
+    fawkespcl_utils
+    fawkesblackboard
+    fawkesinterface
+    fawkesros2aspect
+    fvutils)
+else()
+  plugin_disabled_message(ros2-laserbridge)
 endif()
 
 if(PLUGIN_ros2-irscan)
