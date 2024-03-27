@@ -231,6 +231,9 @@ if(PLUGIN_ros2-laserbridge)
     fawkesblackboard
     fawkesinterface
     fawkesros2aspect
+    Laser360Interface
+    Position3DInterface
+    fawkestf
     fvutils)
 else()
   plugin_disabled_message(ros2-laserbridge)
