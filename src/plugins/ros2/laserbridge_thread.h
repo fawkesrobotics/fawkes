@@ -5,7 +5,12 @@
 #include <core/threading/thread.h>
 #include <aspect/configurable.h>
 #include <aspect/pointcloud.h>
+#include <aspect/tf.h>
+#include <aspect/clock.h>
+#include <aspect/blackboard.h>
 #include <core/utils/refptr.h>
+
+#include <interfaces/Position3DInterface.h>
 
 #include <mutex>
 
@@ -15,7 +20,10 @@
 
 class ROS2LaserBridgeThread : public fawkes::Thread,
                               public fawkes::ROS2Aspect,
+                              public fawkes::ClockAspect,
                               public fawkes::ConfigurableAspect,
+                              public fawkes::TransformAspect,
+                              public fawkes::BlackBoardAspect,
                               public fawkes::PointCloudAspect
 {
 public:
@@ -34,6 +42,9 @@ private:
 
   std::mutex mutex_;
 
+  int beams_used_;
+  std::string target_frame_;
+	fawkes::Position3DInterface *if_front_dist_;
 };
 
 #endif // _PLUGINS_ROS2_LASER_BRIDGE_H_

@@ -23,11 +23,13 @@
 //         type: circle_sector
 //         from: 765
 //         to: 335
+#include <tf/types.h>
 
 using namespace fawkes;
-ROS2LaserBridgeThread::ROS2LaserBridgeThread() : Thread("LaserBridgeThread", Thread::OPMODE_WAITFORWAKEUP) {
+ROS2LaserBridgeThread::ROS2LaserBridgeThread() : Thread("LaserBridgeThread", Thread::OPMODE_WAITFORWAKEUP),
+  TransformAspect(TransformAspect::ONLY_PUBLISHER, "ros2-laserbridge")
 
-}
+{}
 
 ROS2LaserBridgeThread::~ROS2LaserBridgeThread() {
 }
@@ -43,13 +45,20 @@ void ROS2LaserBridgeThread::init() {
   cloud_->height = 1;
   cloud_->header.frame_id = "front_laser";
   pcl_manager->add_pointcloud("front-filtered-1080", cloud_);
+
+	// read config values
+	beams_used_   = config->get_int("plugins/laser-front-dist/number_beams_used");
+	target_frame_ = config->get_string("plugins/laser-front-dist/target_frame");
+
+	if_front_dist_ = blackboard->open_for_writing<Position3DInterface>(
+	  config->get_string("plugins/laser-front-dist/output_result_interface").c_str());
+
 }
 
 #define INCREMENT 2 * M_PI / 1080
 
 void ROS2LaserBridgeThread::laser_callback(const sensor_msgs::msg::LaserScan::SharedPtr scan) {
-    // fawkes::RefPtr<pcl::PointCloud<pcl::PointXYZ>> cloud;
-    // cloud = new pcl::PointCloud<pcl::PointXYZ>();
+
     // Assuming the laser scanner is horizontally mounted and scan is in the x-y plane
     if (scan->ranges.size() == 0) return;
     if (scan->ranges.size() != cloud_->size()){
@@ -75,7 +84,34 @@ void ROS2LaserBridgeThread::laser_callback(const sensor_msgs::msg::LaserScan::Sh
       point.y = range * sin(angle);
       point.z = 0;  // Since this is a 2D laser scan, z will be 0
     }
-    // pcl_manager->set_cloud("front-filtered-1080", cloud);
+
+    int center_beam_index = scan->ranges.size() / 2;
+
+    float sum = 0.0;
+
+    for (int i = center_beam_index - beams_used_ / 2; i < center_beam_index + beams_used_ / 2; i++) {
+      if (!std::isnormal(scan->ranges[i])) {
+        // this is invalid
+        if_front_dist_->set_visibility_history(-1);
+        if_front_dist_->write();
+        return;
+      }
+      sum += scan->ranges[i];
+    }
+
+    float average = sum / (float)beams_used_;
+    std::string frame_ = "front_laser";
+
+    tf::Transform        transform(tf::create_quaternion_from_yaw(M_PI), tf::Vector3(average, 0, 0));
+    Time                 time(clock);
+    tf::StampedTransform stamped_transform(transform, time, frame_.c_str(), target_frame_.c_str());
+    tf_publisher->send_transform(stamped_transform);
+
+    // write result
+    if_front_dist_->set_visibility_history(1);
+    if_front_dist_->set_translation(0, average);
+    if_front_dist_->set_frame(frame_.c_str());
+    if_front_dist_->write();
 
 }
 
