@@ -53,6 +53,9 @@ set(PLUGIN_ros2-odometry
 set(PLUGIN_ros2-cmdvel
     ON
     CACHE BOOL "Build ros2-cmdvel plugin")
+set(PLUGIN_ros2-motorinterface
+    ON
+    CACHE BOOL "Build ros2-motorinterface plugin")
 set(PLUGIN_ros2-navigator
     ON
     CACHE BOOL "Build ros2-navigator plugin")
@@ -328,6 +331,24 @@ if(PLUGIN_ros2-cmdvel)
     MotorInterface)
 else()
   plugin_disabled_message(ros2-cmdvel)
+endif()
+
+if(PLUGIN_ros2-motorinterface)
+  add_library(ros2-motorinterface MODULE motorinterface_thread.cpp motorinterface_plugin.cpp)
+  depend_on_ros2(ros2-motorinterface)
+  depend_on_ros2_libs(ros2-motorinterface geometry_msgs)
+  target_link_libraries(
+    ros2-motorinterface
+    m
+    fawkescore
+    fawkesutils
+    fawkesaspects
+    fawkesblackboard
+    fawkesinterface
+    fawkesros2aspect
+    MotorInterface)
+else()
+  plugin_disabled_message(ros2-motorinterface)
 endif()
 
 if(PLUGIN_ros2-dynamic-reconfigure)
