@@ -25,6 +25,7 @@
 #include <aspect/blocked_timing.h>
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
+#include <aspect/clock.h>
 #include <core/threading/thread.h>
 #include <core/utils/lockptr.h>
 #include <plugins/ros2/aspect/ros2.h>
@@ -42,6 +43,7 @@ class ROS2MotorInterfaceThread : public fawkes::Thread,
                          public fawkes::ConfigurableAspect,
                          public fawkes::BlackBoardAspect,
                          public fawkes::BlackBoardInterfaceListener,
+                         public fawkes::ClockAspect,
                          public fawkes::ROS2Aspect
 {
 public:

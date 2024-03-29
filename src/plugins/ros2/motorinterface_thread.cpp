@@ -22,6 +22,7 @@
 
 #include <interfaces/MotorInterface.h>
 
+#include <cstdint>
 #include <geometry_msgs/msg/twist.hpp>
 #include <rclcpp/rclcpp.hpp>
 
@@ -33,7 +34,7 @@ using namespace fawkes;
  */
 
 /** Constructor. */
-ROS2MotorInterfaceThread::ROS2MotorInterfaceThread() : Thread("ROS2MotorInterfaceThread", Thread::OPMODE_WAITFORWAKEUP),
+ROS2MotorInterfaceThread::ROS2MotorInterfaceThread() : Thread("ROS2MotorInterfaceThread", Thread::OPMODE_CONTINUOUS),
 																											BlackBoardInterfaceListener("ROS2MotorInterfaceThread")
 {
 }
@@ -86,4 +87,10 @@ ROS2MotorInterfaceThread::bb_interface_message_received(fawkes::Interface *inter
 void
 ROS2MotorInterfaceThread::loop()
 {
+	fawkes::Time now(clock);
+
+	fawkes::Time stamp = now.stamp();
+
+
+	uint32_t delta = now.get_nsec() - node_handle->get_clock()->now().nanoseconds();
 }

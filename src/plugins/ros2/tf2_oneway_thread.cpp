@@ -254,7 +254,7 @@ ROS2TF2OThread::publish_transform_to_fawkes(const geometry_msgs::msg::TransformS
 		child_frame_id = std::regex_replace(child_frame_id, std::regex(cfg_tf_prefix_), "");
 	}
 
-	fawkes::Time time(ts.header.stamp.sec, (ts.header.stamp.nanosec / 1000) - 400);
+	fawkes::Time time(ts.header.stamp.sec - 1, (ts.header.stamp.nanosec / 1000));
 
 	fawkes::tf::Transform        tr(fawkes::tf::Quaternion(r.x, r.y, r.z, r.w),
                            fawkes::tf::Vector3(t.x, t.y, t.z));
