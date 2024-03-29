@@ -27,7 +27,6 @@
 
 //using namespace ros;
 using namespace fawkes;
-using std::placeholders::_1;
 /** @class ROS2MotorInterfaceThread "MotorInterface_thread.h"
  * Thread to translate ROS2 twist messages to navigator transrot messages.
  * @author Gjorgji Nikolovski
@@ -45,6 +44,9 @@ ROS2MotorInterfaceThread::init()
 	std::string motor_if_id = config->get_string("/ros2/MotorInterface/motor_interface_id");
 	motor_if_               = blackboard->open_for_writing<MotorInterface>(motor_if_id.c_str());
 	pub_                    = node_handle->create_publisher<geometry_msgs::msg::Twist>("cmd_vel", 10);
+	bbil_add_message_interface(motor_if_);
+
+	blackboard->register_listener(this);
 }
 
 void
@@ -56,7 +58,6 @@ ROS2MotorInterfaceThread::finalize()
 bool
 ROS2MotorInterfaceThread::bb_interface_message_received(fawkes::Interface *interface,
 																					 fawkes::Message   *message) throw() {
-
 	if (!message->is_of_type<MotorInterface::TransRotMessage>()) {
 		logger->log_warn(name(), "Received unknown message type on motor interface");
 		return false;

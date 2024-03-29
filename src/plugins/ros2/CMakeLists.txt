@@ -337,6 +337,7 @@ if(PLUGIN_ros2-motorinterface)
   add_library(ros2-motorinterface MODULE motorinterface_thread.cpp motorinterface_plugin.cpp)
   depend_on_ros2(ros2-motorinterface)
   depend_on_ros2_libs(ros2-motorinterface geometry_msgs)
+  target_compile_options(ros2-motorinterface PRIVATE -Wno-stringop-overflow)
   target_link_libraries(
     ros2-motorinterface
     m
