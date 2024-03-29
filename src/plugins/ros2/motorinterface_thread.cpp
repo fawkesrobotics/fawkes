@@ -58,19 +58,29 @@ ROS2MotorInterfaceThread::finalize()
 bool
 ROS2MotorInterfaceThread::bb_interface_message_received(fawkes::Interface *interface,
 																					 fawkes::Message   *message) throw() {
-	if (!message->is_of_type<MotorInterface::TransRotMessage>()) {
-		logger->log_warn(name(), "Received unknown message type on motor interface");
-		return false;
+	if (message->is_of_type<MotorInterface::TransRotMessage>()){
+		MotorInterface::TransRotMessage *msg = (MotorInterface::TransRotMessage *)message;
+
+		auto cmd = geometry_msgs::msg::Twist();
+		cmd.linear.x  = msg->vx();
+		cmd.linear.y  = msg->vy();
+		cmd.angular.z = msg->omega();
+		pub_->publish(cmd);
+		return true;
 	}
 
-	MotorInterface::TransRotMessage *msg = (MotorInterface::TransRotMessage *)message;
+  if(message->is_of_type<MotorInterface::AcquireControlMessage>()) {
+		MotorInterface::AcquireControlMessage *msg = (MotorInterface::AcquireControlMessage *)message;
 
-	auto cmd = geometry_msgs::msg::Twist();
-	cmd.linear.x  = msg->vx();
-	cmd.linear.y  = msg->vy();
-	cmd.angular.z = msg->omega();
-	pub_->publish(cmd);
-	return true;
+		motor_if_->set_controller(msg->controller());
+		motor_if_->set_controller_thread_name(msg->controller_thread_name());
+		motor_if_->write();
+
+		return true;
+	}
+
+	logger->log_warn(name(), "Received unknown message type on motor interface");
+	return false;
 }
 
 void
