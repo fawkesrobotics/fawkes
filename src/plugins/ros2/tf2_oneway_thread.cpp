@@ -234,53 +234,6 @@ ROS2TF2OThread::conditional_close(Interface *interface) noexcept
 	}
 }
 
-geometry_msgs::msg::TransformStamped
-ROS2TF2OThread::create_transform_stamped(TransformInterface *tfif, const Time *time)
-{
-	double *translation = tfif->translation();
-	double *rotation    = tfif->rotation();
-	if (!time)
-		time = tfif->timestamp();
-
-	geometry_msgs::msg::Vector3 t;
-	t.x = translation[0];
-	t.y = translation[1];
-	t.z = translation[2];
-	geometry_msgs::msg::Quaternion r;
-	r.x = rotation[0];
-	r.y = rotation[1];
-	r.z = rotation[2];
-	r.w = rotation[3];
-	geometry_msgs::msg::Transform tr;
-	tr.translation = t;
-	tr.rotation    = r;
-
-	geometry_msgs::msg::TransformStamped ts;
-	ts.header.stamp    = rclcpp::Time(time->get_sec(), time->get_nsec());
-	ts.header.frame_id = tfif->frame();
-	ts.child_frame_id  = tfif->child_frame();
-
-	if (tf_prefix_enabled_ == true) {
-		if (std::find(cfg_tf_prefix_exclusions_.begin(),
-		              cfg_tf_prefix_exclusions_.end(),
-		              ts.header.frame_id)
-		    == cfg_tf_prefix_exclusions_.end()) {
-			// cfg_tf_prefix_exclusions_ does not contain ts.header.frame_id so we can add the prefix.
-			ts.header.frame_id.insert(0, cfg_tf_prefix_);
-		}
-		if (std::find(cfg_tf_prefix_exclusions_.begin(),
-		              cfg_tf_prefix_exclusions_.end(),
-		              ts.child_frame_id)
-		    == cfg_tf_prefix_exclusions_.end()) {
-			// cfg_tf_prefix_exclusions_ does not contain ts.header.frame_id so we can add the prefix.
-			ts.child_frame_id.insert(0, cfg_tf_prefix_);
-		}
-	}
-	ts.transform = tr;
-
-	return ts;
-}
-
 void
 ROS2TF2OThread::publish_transform_to_fawkes(const geometry_msgs::msg::TransformStamped &ts,
                                            bool                                        static_tf)
@@ -301,7 +254,7 @@ ROS2TF2OThread::publish_transform_to_fawkes(const geometry_msgs::msg::TransformS
 		child_frame_id = std::regex_replace(child_frame_id, std::regex(cfg_tf_prefix_), "");
 	}
 
-	fawkes::Time time(ts.header.stamp.sec, ts.header.stamp.nanosec / 1000);
+	fawkes::Time time(ts.header.stamp.sec, (ts.header.stamp.nanosec / 1000) - 400);
 
 	fawkes::tf::Transform        tr(fawkes::tf::Quaternion(r.x, r.y, r.z, r.w),
                            fawkes::tf::Vector3(t.x, t.y, t.z));
