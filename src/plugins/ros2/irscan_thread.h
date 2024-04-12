@@ -52,8 +52,7 @@ public:
 
 	virtual void init();
 	virtual void finalize();
-	// for BlackBoardInterfaceListener
-	virtual void bb_interface_data_refreshed(fawkes::Interface *interface) throw() override;
+	virtual void loop();
 
 protected:
 	virtual void
