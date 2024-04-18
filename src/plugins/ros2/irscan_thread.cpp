@@ -57,9 +57,6 @@ ROS2IrScanThread::init()
 	msg.scan_time       = 0.1;
 	msg.range_min       = 0.02;
 	msg.range_max       = 0.12;
-
-	bbil_add_data_interface(sens_if_);
-	blackboard->register_listener(this);
 }
 
 void
@@ -70,17 +67,12 @@ ROS2IrScanThread::finalize()
 }
 
 void
-ROS2IrScanThread::bb_interface_data_refreshed(fawkes::Interface *interface) throw()
+ROS2IrScanThread::loop()
 {
-	RobotinoSensorInterface *sensor_data_msg = dynamic_cast<RobotinoSensorInterface *>(interface);
-	if (!sensor_data_msg)
-		return;
-
-	sensor_data_msg->read();
-
-	const Time *time = sensor_data_msg->timestamp();
+	sens_if_->read();
+	const Time *time = sens_if_->timestamp();
 	msg.header.stamp = rclcpp::Time(time->get_sec(), time->get_nsec());
-	msg.ranges.assign(sensor_data_msg->distance(), sensor_data_msg->distance() + 9);
+	msg.ranges.assign(sens_if_->distance(), sens_if_->distance() + 9);
 	for (uint8_t i = 0; i < 9; ++i) {
 		if (msg.ranges[i] < 1) {
 			msg.ranges[i] = msg.ranges[i] + 0.225f;

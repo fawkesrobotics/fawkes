@@ -32,12 +32,18 @@ set(PLUGIN_ros2-talkerpub
 set(PLUGIN_ros2-tf2
     ON
     CACHE BOOL "Build ros2-tf2 plugin")
+set(PLUGIN_ros2-tf2-oneway
+    ON
+    CACHE BOOL "Build ros2-tf2-oneway plugin")
 set(PLUGIN_ros2-images
     ON
     CACHE BOOL "Build ros2-images plugin")
 set(PLUGIN_ros2-laserscan
     ON
     CACHE BOOL "Build ros2-laserscan plugin")
+set(PLUGIN_ros2-laserbridge
+    ON
+    CACHE BOOL "Build ros2-laserbridge plugin")
 set(PLUGIN_ros2-irscan
     ON
     CACHE BOOL "Build ros2-irscan plugin")
@@ -47,6 +53,9 @@ set(PLUGIN_ros2-odometry
 set(PLUGIN_ros2-cmdvel
     ON
     CACHE BOOL "Build ros2-cmdvel plugin")
+set(PLUGIN_ros2-motorinterface
+    ON
+    CACHE BOOL "Build ros2-motorinterface plugin")
 set(PLUGIN_ros2-navigator
     ON
     CACHE BOOL "Build ros2-navigator plugin")
@@ -146,6 +155,32 @@ else()
   plugin_disabled_message(ros2-tf2)
 endif()
 
+if(PLUGIN_ros2-tf2-oneway)
+  add_library(ros2-tf-oneway MODULE tf2_oneway_plugin.cpp tf2_oneway_thread.cpp)
+  depend_on_ros2(ros2-tf-oneway)
+  depend_on_tf(ros2-tf-oneway)
+  depend_on_ros2_libs(ros2-tf-oneway "tf2;tf2_msgs")
+  target_link_libraries(
+    ros2-tf-oneway
+    fawkescore
+    fawkesutils
+    fawkesaspects
+    fawkesblackboard
+    fawkesinterface
+    fawkesros2aspect
+    fawkestf
+    TransformInterface)
+  depend_on_ros2_libs(ros2-tf-oneway tf2 tfs_deps_found)
+
+  if(tf2_deps_found)
+    target_compile_definitions(ros2-tf PUBLIC HAVE_TF2_MSGS)
+  else()
+    build_skipped_message("ros2-tf tf2 support" "ros2-tf-oneway[-devel]")
+  endif()
+else()
+  plugin_disabled_message(ros2-tf-oneway)
+endif()
+
 if(PLUGIN_ros2-images)
   add_library(ros2-images MODULE image_plugin.cpp image_thread.cpp)
   depend_on_ros2(ros2-images)
@@ -182,6 +217,29 @@ if(PLUGIN_ros2-laserscan)
     Laser1080Interface)
 else()
   plugin_disabled_message(ros2-laserscan)
+endif()
+
+if(PLUGIN_ros2-laserbridge)
+  add_library(ros2-laserbridge MODULE laserbridge_plugin.cpp laserbridge_thread.cpp)
+  depend_on_ros2(ros2-laserbridge)
+  depend_on_ros2_libs(ros2-laserbridge sensor_msgs)
+  depend_on_pcl(ros2-laserbridge)
+  target_link_libraries(
+    ros2-laserbridge
+    m
+    fawkescore
+    fawkesutils
+    fawkesaspects
+    fawkespcl_utils
+    fawkesblackboard
+    fawkesinterface
+    fawkesros2aspect
+    Laser360Interface
+    Position3DInterface
+    fawkestf
+    fvutils)
+else()
+  plugin_disabled_message(ros2-laserbridge)
 endif()
 
 if(PLUGIN_ros2-irscan)
@@ -273,6 +331,25 @@ if(PLUGIN_ros2-cmdvel)
     MotorInterface)
 else()
   plugin_disabled_message(ros2-cmdvel)
+endif()
+
+if(PLUGIN_ros2-motorinterface)
+  add_library(ros2-motorinterface MODULE motorinterface_thread.cpp motorinterface_plugin.cpp)
+  depend_on_ros2(ros2-motorinterface)
+  depend_on_ros2_libs(ros2-motorinterface geometry_msgs)
+  target_compile_options(ros2-motorinterface PRIVATE -Wno-stringop-overflow)
+  target_link_libraries(
+    ros2-motorinterface
+    m
+    fawkescore
+    fawkesutils
+    fawkesaspects
+    fawkesblackboard
+    fawkesinterface
+    fawkesros2aspect
+    MotorInterface)
+else()
+  plugin_disabled_message(ros2-motorinterface)
 endif()
 
 if(PLUGIN_ros2-dynamic-reconfigure)
