@@ -34,15 +34,6 @@ if(PLUGIN_skiller)
   add_library(skiller MODULE skiller_feature.cpp exec_thread.cpp
                              skiller_plugin.cpp)
 
-  optional_depend_on_pkgconfig_libs(skiller "${NAVGRAPH_DEPS}"
-                                    NAVGRAPH_DEPS_FOUND)
-  if(NAVGRAPH_DEPS_FOUND)
-    target_sources(skiller PRIVATE skiller_navgraph_feature.cpp)
-    target_link_libraries(skiller fawkesnavgraphaspect)
-    target_compile_definitions(skiller PUBLIC HAVE_NAVGRAPH)
-  else()
-    build_skipped_message("skiller navgraph feature" "navgraph dependencies")
-  endif()
   target_link_libraries(
     skiller
     fawkescore
