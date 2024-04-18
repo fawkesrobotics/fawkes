@@ -1,5 +1,6 @@
 #include "laserbridge_thread.h"
 #include <cmath>
+#include <mutex>
 
 // NEED TO INJECT INTO PCL_MANAGER THE front-filtered-1080 TOPIC IT IS JUST:
 // A POINCLOUD WITH ALL MESSUREMNTS FROM THE FRONT LASER BUT FILTERED
@@ -26,8 +27,9 @@
 #include <tf/types.h>
 
 using namespace fawkes;
-ROS2LaserBridgeThread::ROS2LaserBridgeThread() : Thread("LaserBridgeThread", Thread::OPMODE_WAITFORWAKEUP),
-  TransformAspect(TransformAspect::ONLY_PUBLISHER, "ros2-laserbridge")
+ROS2LaserBridgeThread::ROS2LaserBridgeThread() : Thread("LaserBridgeThread", Thread::OPMODE_CONTINUOUS),
+  TransformAspect(TransformAspect::ONLY_PUBLISHER, "ros2-laserbridge"),
+ BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE), ros2_cloud_()
 
 {}
 
@@ -58,16 +60,16 @@ void ROS2LaserBridgeThread::init() {
 #define INCREMENT 2 * M_PI / 1080
 
 void ROS2LaserBridgeThread::laser_callback(const sensor_msgs::msg::LaserScan::SharedPtr scan) {
-
+  std::lock_guard lock(main_loop);
     // Assuming the laser scanner is horizontally mounted and scan is in the x-y plane
     if (scan->ranges.size() == 0) return;
-    if (scan->ranges.size() != cloud_->size()){
-        cloud_->points.resize(scan->ranges.size());
-        cloud_->height = 1;
-        cloud_->width = scan->ranges.size();
+    if (scan->ranges.size() != ros2_cloud_.size()){
+        ros2_cloud_.points.resize(scan->ranges.size());
+        ros2_cloud_.height = 1;
+        ros2_cloud_.width = scan->ranges.size();
     }
     for (unsigned int i = 0; i < scan->ranges.size(); ++i) {
-      pcl::PointXYZ &point = cloud_->points[i];
+      pcl::PointXYZ &point = ros2_cloud_.points[i];
       if (scan->ranges[i] < scan->range_min || scan->ranges[i] > scan->range_max){
         point.x = point.y = point.z = std::numeric_limits<float>::quiet_NaN();
         continue;
@@ -116,6 +118,19 @@ void ROS2LaserBridgeThread::laser_callback(const sensor_msgs::msg::LaserScan::Sh
 }
 
 
+void ROS2LaserBridgeThread::loop() {
+  std::lock_guard lock(main_loop);
+    if (cloud_->size() != ros2_cloud_.size()){
+        cloud_->points.resize(ros2_cloud_.size());
+        cloud_->height = 1;
+        cloud_->width = ros2_cloud_.size();
+    }
+    for (unsigned int i = 0; i < cloud_->width; ++i) {
+      cloud_->points[i] = ros2_cloud_[i];
+    }
+
+
+}
 void ROS2LaserBridgeThread::finalize() {
 
 }
