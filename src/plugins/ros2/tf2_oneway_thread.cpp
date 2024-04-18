@@ -261,7 +261,7 @@ ROS2TF2OThread::publish_transform_to_fawkes(const geometry_msgs::msg::TransformS
 	fawkes::tf::Transform        tr(fawkes::tf::Quaternion(r.x, r.y, r.z, r.w),
                            fawkes::tf::Vector3(t.x, t.y, t.z));
 
-	fawkes::tf::StampedTransform st(tr, now, frame_id, child_frame_id);
+	fawkes::tf::StampedTransform st(tr, time, frame_id, child_frame_id);
 
 	if (tf_publishers.find(child_frame_id) == tf_publishers.end()) {
 		try {

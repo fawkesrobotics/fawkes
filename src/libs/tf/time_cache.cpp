@@ -277,9 +277,8 @@ TimeCache::find_closest(TransformStorage *&one,
 		one = &(*storage_.rbegin());
 		return 1;
 	} else if (target_time > latest_time) {
-		// Catch cases that would require extrapolation
-		create_extrapolation_exception2(target_time, latest_time, error_str);
-		return 0;
+		one = &(*storage_.begin());
+		return 1;
 	} else if (target_time < earliest_time) {
 		create_extrapolation_exception3(target_time, earliest_time, error_str);
 		return 0;
