@@ -27,7 +27,7 @@
 #include <tf/types.h>
 
 using namespace fawkes;
-ROS2LaserBridgeThread::ROS2LaserBridgeThread() : Thread("LaserBridgeThread", Thread::OPMODE_CONTINUOUS),
+ROS2LaserBridgeThread::ROS2LaserBridgeThread() : Thread("LaserBridgeThread", Thread::OPMODE_WAITFORWAKEUP),
   TransformAspect(TransformAspect::ONLY_PUBLISHER, "ros2-laserbridge"),
  BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE), ros2_cloud_()
 
