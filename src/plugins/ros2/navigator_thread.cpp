@@ -111,152 +111,91 @@ ROS2NavigatorThread::send_goal()
 	goal_.pose.pose.orientation.y = q.y();
 	goal_.pose.pose.orientation.z = q.z();
 	goal_.pose.pose.orientation.w = q.w();
-    if (future_goal_handle_.valid() && future_goal_handle_.wait_for(std::chrono::seconds(20)) == std::future_status::ready) {
-		  logger->log_info(name(), "Previous goal finished finally");
-    } else {
-		  logger->log_warn(name(), "Previous goal did not finish, send new one anyways");
-    }
-	auto send_goal_options = rclcpp_action::Client<NavigateToPose>::SendGoalOptions();
-	send_goal_options.result_callback =
-	  [this](const rclcpp_action::ClientGoalHandle<NavigateToPose>::WrappedResult result) {
-		  logger->log_info(name(), "Goal finished and we got the callback we wanted");
-		  if (!future_goal_handle_.valid()) {
-			  logger->log_error(name(), "But the Goal Handle is invalid");
-			  nav_if_->set_final(true);
-			  nav_if_->set_error_code(NavigatorInterface::ERROR_UNKNOWN_PLACE);
-			  nav_if_->write();
-			  return;
-		  }
-		  auto goal_handle = future_goal_handle_.get();
-		  //for (std::size_t i = 0; i < UUID_SIZE; i++) {
-		  //    if (result.goal_id[i] != goal_handle->get_goal_id()[i]) {
-		  //  	  logger->log_error(name(), "Goal ID missmatch!!!");
-		  //  	  nav_if_->set_final(true);
-		  //  	  nav_if_->set_error_code(NavigatorInterface::ERROR_UNKNOWN_PLACE);
-		  //  	  nav_if_->write();
-		  //  	  return;
-		  //    }
-		  //}
-		  switch (result.code) {
-		  case rclcpp_action::ResultCode::SUCCEEDED: {
-			  if (!goal_handle) {
-				  throw std::runtime_error("Goal was rejected by the action server");
-			  }
-			  pose_if_->read();
-
-			  //  		logger->log_info(name(), "Finished successfully");
-
-			  // Check if we reached the goal
-			  fawkes::tf::Quaternion q_base_rotation;
-			  q_base_rotation.setX(pose_if_->rotation(0));
-			  q_base_rotation.setY(pose_if_->rotation(1));
-			  q_base_rotation.setZ(pose_if_->rotation(2));
-			  q_base_rotation.setW(pose_if_->rotation(3));
-
-			  double base_position_x   = pose_if_->translation(0);
-			  double base_position_y   = pose_if_->translation(1);
-			  double base_position_yaw = fawkes::tf::get_yaw(q_base_rotation);
-
-			  double diff_x   = fabs(base_position_x - goal_position_x);
-			  double diff_y   = fabs(base_position_y - goal_position_y);
-			  double diff_yaw = normalize_mirror_rad(base_position_yaw - goal_position_yaw);
-
-			  // Check if we reached the goal
-			  //fawkes::tf::Quaternion q_base_rotation;
-			  //q_base_rotation.setX(base_position.pose.orientation.x);
-			  //q_base_rotation.setY(base_position.pose.orientation.y);
-			  //q_base_rotation.setZ(base_position.pose.orientation.z);
-			  //q_base_rotation.setW(base_position.pose.orientation.w);
-
-			  //double base_position_x   = base_position.pose.position.x;
-			  //double base_position_y   = base_position.pose.position.y;
-			  //double base_position_yaw = fawkes::tf::get_yaw(q_base_rotation);
-
-			  //double diff_x   = fabs(base_position_x - goal_position_x);
-			  //double diff_y   = fabs(base_position_y - goal_position_y);
-			  //double diff_yaw = normalize_mirror_rad(base_position_yaw - goal_position_yaw);
-			  //if (diff_x >= goal_tolerance_trans || diff_y >= goal_tolerance_trans
-			  //    || diff_yaw >= goal_tolerance_yaw) {
-			  //} else {
-			  nav_if_->set_final(true);
-			  nav_if_->set_error_code(NavigatorInterface::ERROR_NONE);
-			  nav_if_->write();
-			  //}
-			  std::stringstream ss;
-			  for (std::size_t i = 0; i < 16; i++) {
-				  if (i != 0) {
-					  ss << ", ";
-				  }
-				  ss << "0x" << std::hex << static_cast<int>(result.goal_id[i]);
-			  }
-			  logger->log_warn(name(), ("Succeeded goal with id: " + ss.str()).c_str());
-
-			  auto val = result.result;
-		  } break;
-
-		  case rclcpp_action::ResultCode::ABORTED: {
-			  nav_if_->set_final(true);
-			  nav_if_->set_error_code(NavigatorInterface::ERROR_PATH_GEN_FAIL);
-			  nav_if_->write();
-			  std::stringstream ss;
-			  for (std::size_t i = 0; i < 16; i++) {
-				  if (i != 0) {
-					  ss << ", ";
-				  }
-				  ss << "0x" << std::hex << static_cast<int>(result.goal_id[i]);
-			  }
-			  logger->log_warn(name(), ("Aborted goal with id: " + ss.str()).c_str());
-
-			  auto val = result.result;
-
-		  } break;
-
-		  case rclcpp_action::ResultCode::CANCELED: {
-			  nav_if_->set_final(true);
-			  nav_if_->set_error_code(NavigatorInterface::ERROR_UNKNOWN_PLACE);
-			  nav_if_->write();
-			  std::stringstream ss;
-			  for (std::size_t i = 0; i < 16; i++) {
-				  if (i != 0) {
-					  ss << ", ";
-				  }
-				  ss << "0x" << std::hex << static_cast<int>(result.goal_id[i]);
-			  }
-			  logger->log_warn(name(), ("Canceled goal with id: " + ss.str()).c_str());
-
-			  auto val = result.result;
-		  } break;
-		  default: {
-			  std::stringstream ss;
-			  for (std::size_t i = 0; i < 16; i++) {
-				  if (i != 0) {
-					  ss << ", ";
-				  }
-				  ss << "0x" << std::hex << static_cast<int>(result.goal_id[i]);
-			  }
-			  logger->log_error(name(), "Unknown result code received");
-			  nav_if_->set_final(true);
-			  nav_if_->set_error_code(NavigatorInterface::ERROR_UNKNOWN_PLACE);
-			  nav_if_->write();
-		  } break;
-		  }
-		  //logger->log_info(name(), "Goal DONE");
-	  };
+	auto send_goal_options        = rclcpp_action::Client<NavigateToPose>::SendGoalOptions();
 	send_goal_options.goal_response_callback =
-	  [this](
+	  [this, send_goal_options](
 	    std::shared_ptr<rclcpp_action::ClientGoalHandle<nav2_msgs::action::NavigateToPose>> handle) {
+		  const rclcpp_action::GoalUUID response_uuid = handle->get_goal_id();
 		  if (!handle) {
 			  logger->log_error(name(), "goal handle rejected by server");
 			  return;
 		  } else {
 			  logger->log_info(name(), "goal handle accepted by server");
+			  ac_->async_get_result(
+			    handle,
+			    [this, response_uuid](
+			      const rclcpp_action::ClientGoalHandle<NavigateToPose>::WrappedResult result) {
+				    logger->log_info(name(), "Goal finished and we got the callback we wanted");
+				    if (!future_goal_handle_.valid()) {
+					    logger->log_error(name(), "But the Goal Handle is invalid");
+					    nav_if_->set_final(true);
+					    nav_if_->set_error_code(NavigatorInterface::ERROR_UNKNOWN_PLACE);
+					    nav_if_->write();
+					    return;
+				    }
+				    const rclcpp_action::GoalUUID result_uuid = result.goal_id;
+				    for (std::size_t i = 0; i < UUID_SIZE; i++) {
+					    if (result_uuid[i] != response_uuid[i]) {
+						    logger->log_error(name(), "Goal ID missmatch!!!");
+						    break;
+					    }
+				    }
+				    switch (result.code) {
+				    case rclcpp_action::ResultCode::SUCCEEDED: {
+					    pose_if_->read();
+					    // Check if we reached the goal
+					    fawkes::tf::Quaternion q_base_rotation;
+					    q_base_rotation.setX(pose_if_->rotation(0));
+					    q_base_rotation.setY(pose_if_->rotation(1));
+					    q_base_rotation.setZ(pose_if_->rotation(2));
+					    q_base_rotation.setW(pose_if_->rotation(3));
+
+					    nav_if_->set_final(true);
+					    nav_if_->set_error_code(NavigatorInterface::ERROR_NONE);
+					    nav_if_->write();
+					    auto val = result.result;
+				    } break;
+
+				    case rclcpp_action::ResultCode::ABORTED: {
+					    nav_if_->set_final(true);
+					    nav_if_->set_error_code(NavigatorInterface::ERROR_PATH_GEN_FAIL);
+					    nav_if_->write();
+					    auto val = result.result;
+
+				    } break;
+
+				    case rclcpp_action::ResultCode::CANCELED: {
+					    nav_if_->set_final(true);
+					    nav_if_->set_error_code(NavigatorInterface::ERROR_UNKNOWN_PLACE);
+					    nav_if_->write();
+					    auto val = result.result;
+				    } break;
+				    default: {
+					    std::stringstream ss;
+					    for (std::size_t i = 0; i < 16; i++) {
+						    if (i != 0) {
+							    ss << ", ";
+						    }
+						    ss << "0x" << std::hex << static_cast<int>(result.goal_id[i]);
+					    }
+					    logger->log_error(name(), "Unknown result code received");
+					    nav_if_->set_final(true);
+					    nav_if_->set_error_code(NavigatorInterface::ERROR_UNKNOWN_PLACE);
+					    nav_if_->write();
+				    } break;
+				    }
+				    return;
+			    });
 		  }
+		  //logger->log_info(name(), "Goal DONE");
 	  };
+
 	send_goal_options.feedback_callback =
 	  [this](rclcpp_action::ClientGoalHandle<NavigateToPose>::SharedPtr,
 	         const std::shared_ptr<const NavigateToPose::Feedback> feedback) {
 		  base_position = feedback->current_pose;
 	  };
+
 	future_goal_handle_ = ac_->async_send_goal(goal_, send_goal_options);
 }
 
