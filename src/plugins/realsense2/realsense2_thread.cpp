@@ -241,7 +241,7 @@ Realsense2Thread::start_camera()
 
 		rs2::config rgb_rs_config;
 		rgb_rs_config.enable_device(rs_device_.get_info(RS2_CAMERA_INFO_SERIAL_NUMBER));
-		244     rgb_rs_config.enable_stream(
+        rgb_rs_config.enable_stream(
         RS2_STREAM_COLOR, image_width_, image_height_, RS2_FORMAT_RGB8, rgb_frame_rate_);
         rs2::pipeline_profile rgb_rs_pipeline_profile_ = rgb_rs_pipe_->start(rgb_rs_config);
         auto                  rgb_stream =
