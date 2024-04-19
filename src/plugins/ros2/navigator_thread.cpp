@@ -111,7 +111,11 @@ ROS2NavigatorThread::send_goal()
 	goal_.pose.pose.orientation.y = q.y();
 	goal_.pose.pose.orientation.z = q.z();
 	goal_.pose.pose.orientation.w = q.w();
-
+    if (future_goal_handle_.valid() && future_goal_handle_.wait_for(std::chrono::seconds(20)) == std::future_status::ready) {
+		  logger->log_info(name(), "Previous goal finished finally");
+    } else {
+		  logger->log_warn(name(), "Previous goal did not finish, send new one anyways");
+    }
 	auto send_goal_options = rclcpp_action::Client<NavigateToPose>::SendGoalOptions();
 	send_goal_options.result_callback =
 	  [this](const rclcpp_action::ClientGoalHandle<NavigateToPose>::WrappedResult result) {
