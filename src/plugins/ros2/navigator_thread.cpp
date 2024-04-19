@@ -124,15 +124,15 @@ ROS2NavigatorThread::send_goal()
 			  return;
 		  }
 		  auto goal_handle = future_goal_handle_.get();
-		  for (std::size_t i = 0; i < UUID_SIZE; i++) {
-			  if (result.goal_id[i] != goal_handle->get_goal_id()[i]) {
-				  logger->log_error(name(), "Goal ID missmatch!!!");
-				  nav_if_->set_final(true);
-				  nav_if_->set_error_code(NavigatorInterface::ERROR_UNKNOWN_PLACE);
-				  nav_if_->write();
-				  return;
-			  }
-		  }
+		  //for (std::size_t i = 0; i < UUID_SIZE; i++) {
+		  //    if (result.goal_id[i] != goal_handle->get_goal_id()[i]) {
+		  //  	  logger->log_error(name(), "Goal ID missmatch!!!");
+		  //  	  nav_if_->set_final(true);
+		  //  	  nav_if_->set_error_code(NavigatorInterface::ERROR_UNKNOWN_PLACE);
+		  //  	  nav_if_->write();
+		  //  	  return;
+		  //    }
+		  //}
 		  switch (result.code) {
 		  case rclcpp_action::ResultCode::SUCCEEDED: {
 			  if (!goal_handle) {
