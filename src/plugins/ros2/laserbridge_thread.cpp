@@ -1,5 +1,6 @@
 #include "laserbridge_thread.h"
 #include <cmath>
+#include <limits>
 #include <mutex>
 
 // NEED TO INJECT INTO PCL_MANAGER THE front-filtered-1080 TOPIC IT IS JUST:
@@ -89,7 +90,7 @@ void ROS2LaserBridgeThread::laser_callback(const sensor_msgs::msg::LaserScan::Sh
 
     int center_beam_index = scan->ranges.size() / 2;
 
-    float sum = 0.0;
+    float min = std::numeric_limits<float>::infinity();
 
     for (int i = center_beam_index - beams_used_ / 2; i < center_beam_index + beams_used_ / 2; i++) {
       if (!std::isnormal(scan->ranges[i])) {
@@ -98,20 +99,21 @@ void ROS2LaserBridgeThread::laser_callback(const sensor_msgs::msg::LaserScan::Sh
         if_front_dist_->write();
         return;
       }
-      sum += scan->ranges[i];
+      if(min > scan->ranges[i]){
+        min = scan->ranges[i];
+      }
     }
 
-    float average = sum / (float)beams_used_;
     std::string frame_ = "front_laser";
 
-    tf::Transform        transform(tf::create_quaternion_from_yaw(M_PI), tf::Vector3(average, 0, 0));
+    tf::Transform        transform(tf::create_quaternion_from_yaw(M_PI), tf::Vector3(min, 0, 0));
     Time                 time(clock);
     tf::StampedTransform stamped_transform(transform, time, frame_.c_str(), target_frame_.c_str());
     tf_publisher->send_transform(stamped_transform);
 
     // write result
     if_front_dist_->set_visibility_history(1);
-    if_front_dist_->set_translation(0, average);
+    if_front_dist_->set_translation(0, min);
     if_front_dist_->set_frame(frame_.c_str());
     if_front_dist_->write();
 
