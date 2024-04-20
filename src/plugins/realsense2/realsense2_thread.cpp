@@ -249,11 +249,11 @@ Realsense2Thread::start_camera()
         rgb_intrinsics_              = rgb_stream.get_intrinsics();
         rs2::color_sensor rgb_sensor = rs_device_.first<rs2::color_sensor>();
         // Set exposure time
-        if (rgb_sensor.supports(RS2_OPTION_EXPOSURE)) {
-          rgb_sensor.set_option(RS2_OPTION_EXPOSURE, 1000);
-        } else {
-          std::cerr << "Exposure control not supported on this device" << std::endl;
-        }
+       // if (rgb_sensor.supports(RS2_OPTION_EXPOSURE)) {
+         // rgb_sensor.set_option(RS2_OPTION_EXPOSURE, 600);
+       // } else {
+         // std::cerr << "Exposure control not supported on this device" << std::endl;
+        //}
         // Increase gain if needed
         if (rgb_sensor.supports(RS2_OPTION_GAIN)) {
           rgb_sensor.set_option(RS2_OPTION_GAIN, 100.0);
