@@ -24,6 +24,8 @@
 
 #include <pddl_parser/pddl_exception.h>
 
+#include <sstream>
+
 /** @class PreconditionToCLIPSFactVisitor "precondition_visitor.h"
  * Translate a PDDL precondition into CLIPS facts.
  * @author Till Hofmann

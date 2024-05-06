@@ -101,7 +101,7 @@ RRDThread::generate_graphs()
 		//}
 
 		rrd_clear_error();
-		rrd_info_t *i = rrd_graph_v(argc, (char **)argv);
+		rrd_info_t *i = rrd_graph_v(argc, (const char **)argv);
 		if (i == NULL) {
 			throw Exception("Creating graph %s (for RRD %s) failed: %s",
 			                (*g)->get_name(),
@@ -155,7 +155,7 @@ RRDThread::add_rrd(RRDDefinition *rrd_def)
 
 		// Create RRD file
 		rrd_clear_error();
-		if (rrd_create(i, (char **)rrd_argv) == -1) {
+		if (rrd_create(i, (const char **)rrd_argv) == -1) {
 			throw Exception("Creating RRD %s failed: %s", rrd_def->get_name(), rrd_get_error());
 		}
 	}
@@ -253,7 +253,7 @@ RRDThread::add_data(const char *rrd_name, const char *format, ...)
 			//}
 
 			rrd_clear_error();
-			if (rrd_update(i, (char **)rrd_argv) == -1) {
+			if (rrd_update(i, (const char **)rrd_argv) == -1) {
 				free(data);
 				throw Exception("Failed to update RRD %s: %s", rrd_name, rrd_get_error());
 			}

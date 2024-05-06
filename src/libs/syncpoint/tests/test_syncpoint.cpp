@@ -347,7 +347,7 @@ struct waiter_thread_params
 	/** timeout in nsec */
 	uint timeout_nsec = 0;
 	/** current status of the thread */
-	atomic<ThreadStatus> status;
+	atomic<ThreadStatus> status = ThreadStatus::PENDING ;
 	/** Mutex to protect cond_running */
 	Mutex mutex_running;
 	/** WaitCondition to indicate that the thread is running */
@@ -1055,7 +1055,7 @@ struct emitter_thread_data
 	RefPtr<SyncPointManager> manager;
 	std::string              name;
 	std::string              sp_name;
-	atomic<ThreadStatus>     status;
+	atomic<ThreadStatus>     status = ThreadStatus::PENDING;
 	Mutex                    mutex_running;
 	WaitCondition            cond_running = WaitCondition(&mutex_running);
 	Mutex                    mutex_finished;

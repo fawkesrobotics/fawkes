@@ -1,4 +1,4 @@
-FROM quay.io/fawkesrobotics/fawkes-builder:f39-ros2
+FROM quay.io/fawkesrobotics/fawkes-builder:f40-ros2
 
 COPY . /workdir
 WORKDIR /workdir/build
