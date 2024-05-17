@@ -477,9 +477,10 @@
     else
       (bind ?index (member$ ?param ?grounded-names))
       (if (not ?index) then
-        (assert (domain-error (error-type unknown-parameter) (error-msg
-          (str-cat "PDDL Predicate has unknown parameter " ?param)))
-        )
+        (printout error "PDDL Predicate has unknown parameter " ?param " (" ?grounded-names " vs " ?names  ") " crlf)
+        ; (assert (domain-error (error-type unknown-parameter) (error-msg
+        ;   (str-cat "PDDL Predicate has unknown parameter " ?param)))
+        ; )
         (return FALSE)
       else
         (bind ?values
