@@ -1155,3 +1155,23 @@
                         " but has " (length$ ?param-names) " parameters,"
                         " should be 2."))))
 )
+
+(defrule domain-grounding-cleanup-predicates
+  (grounded-pddl-predicate (grounding ?g))
+  (not (pddl-grounding (id ?g)))
+  =>
+  (do-for-all-facts ((?precond grounded-pddl-predicate))
+                    (eq ?precond:grounding ?g)
+    (retract ?precond)
+  )
+)
+
+(defrule domain-grounding-cleanup-formulas
+  (grounded-pddl-formula (grounding ?g))
+  (not (pddl-grounding (id ?g)))
+  =>
+  (do-for-all-facts ((?precond grounded-pddl-formula))
+                    (eq ?precond:grounding ?g)
+    (retract ?precond)
+  )
+)
