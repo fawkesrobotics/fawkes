@@ -136,8 +136,8 @@ OpenNiImageThread::init()
   case XN_PIXEL_FORMAT_RGB24:            pixel_format = "RGB24"; cfg_copy_mode_ = CONVERT_RGB; break;
   case XN_PIXEL_FORMAT_YUV422:           pixel_format = "YUV422"; break;
   case XN_PIXEL_FORMAT_GRAYSCALE_8_BIT:  pixel_format = "Gray8"; break;
-  case XN_PIXEL_FORMAT_GRAYSCALE_16_BIT: pixel_format = "Gray16"; break; 	
-  case XN_PIXEL_FORMAT_MJPEG:            pixel_format = "MJPEG"; break; 	
+  case XN_PIXEL_FORMAT_GRAYSCALE_16_BIT: pixel_format = "Gray16"; break;
+  case XN_PIXEL_FORMAT_MJPEG:            pixel_format = "MJPEG"; break;
   }
 
   XnUInt64 input_format;

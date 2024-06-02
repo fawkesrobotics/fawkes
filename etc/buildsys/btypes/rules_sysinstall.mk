@@ -244,4 +244,3 @@ $(DESTDIR)$(EXEC_MANDIR)/%: $(MANDIR)/%
 	else \
 		echo -e "$(INDENT_PRINT)$(TYELLOW)--- Cannot copy man page $* (does not exist)$(TNORMAL)"; \
 	fi
-

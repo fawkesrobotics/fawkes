@@ -106,7 +106,7 @@ components:
           type: array
           items:
             type: string
-            
+
 
     Fact:
       type: object

@@ -61,7 +61,7 @@ else -- >= Lua 5.2
     return f
   end
   -- [*] might simulate with table keyed by coroutine.running()
-  
+
   -- 5.1 style `setfenv` implemented in 5.2
   function _M.setfenv(f, t)
     local f = envhelper(f, 'setfenv')

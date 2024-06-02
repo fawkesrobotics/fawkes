@@ -23,7 +23,7 @@ endif
 ifndef __buildsys_ros2_mk_
 __buildsys_ros2_mk_ := 1
 
-  ros2-pkg-path = 
+  ros2-pkg-path =
   ros2-have-pkgs    = $(if $(strip $(subst 1,,$(foreach p,$1,$(call ros2-have-pkg,$p)))),0,1)
   ros2-pkgs-cflags  = $(foreach p,$1,$(call ros2-pkg-cflags,$p) )
   ros2-pkgs-lflags  = $(foreach p,$1,$(call ros2-pkg-lflags,$p) )

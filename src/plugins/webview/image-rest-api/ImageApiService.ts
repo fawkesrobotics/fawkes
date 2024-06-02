@@ -33,9 +33,9 @@ export class ImageApiService
 		  params = params.set("pretty", pretty.toString());
 		}
     let headers = new HttpHeaders();
-		
+
     headers = headers.set('Accept', 'application/json');
-    return this.http.get<ImageInfo[]>(`${this.config.get('apiurl')}/images`, 
+    return this.http.get<ImageInfo[]>(`${this.config.get('apiurl')}/images`,
 		  { headers: headers, params: params,
 		    observe: 'body', responseType: 'json' })	;
 	}
@@ -50,8 +50,8 @@ export class ImageApiService
 		  params = params.set("pretty", pretty.toString());
 		}
     let headers = new HttpHeaders();
-		
-    return this.http.get(`${this.config.get('apiurl')}/images/${encodeURIComponent(String(id))}`, 
+
+    return this.http.get(`${this.config.get('apiurl')}/images/${encodeURIComponent(String(id))}`,
 		  { headers: headers, params: params,
 		    observe: 'response', responseType: 'text' })	;
 	}

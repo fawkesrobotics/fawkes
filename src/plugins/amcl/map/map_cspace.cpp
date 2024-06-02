@@ -287,7 +287,7 @@ void map_update_cspace(map_t *map, double max_occ_dist)
       cell = map->cells + MAP_INDEX(map, i, j);
       if (cell->occ_state != +1)
         continue;
-          
+
       cell->occ_dist = 0;
 
       // Update adjacent cells
@@ -307,7 +307,7 @@ void map_update_cspace(map_t *map, double max_occ_dist)
       }
     }
   }
-  
+
   return;
 }
 #endif

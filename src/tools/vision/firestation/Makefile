@@ -77,4 +77,3 @@ warning_avahi:
 endif
 
 include $(BUILDSYSDIR)/base.mk
-

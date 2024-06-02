@@ -186,7 +186,7 @@ predicate acquireExpr(Expr acquire, string kind) {
   exists(FunctionCall fc, Function f, string name |
     fc = acquire and
     f = fc.getTarget() and
-    name = f.getName() and 
+    name = f.getName() and
     (
       (
         name = "fopen" and
@@ -212,7 +212,7 @@ predicate releaseExpr(Expr release, Expr resource, string kind) {
   exists(FunctionCall fc, Function f, string name |
     fc = release and
     f = fc.getTarget() and
-    name = f.getName() and 
+    name = f.getName() and
     (
       (
         name = "fclose" and
@@ -343,7 +343,7 @@ predicate unreleasedResource(Resource r, Expr acquire, File f, int acquireLine) 
       not d.isDefaulted() and
       not d.isDeleted() |
       exists(d.getBlock())
-    ) 
+    )
 }
 
 predicate freedInSameMethod(Resource r, Expr acquire) {
@@ -368,7 +368,7 @@ predicate leakedInSameMethod(Resource r, Expr acquire) {
       // near to where it's acquired, and might be stored elsewhere.
       fc.getAnArgument().getAChild*() = r.getAnAccess() and
       fc.getEnclosingFunction() = acquire.getEnclosingFunction()
-    ) or exists(Variable v, Expr e | 
+    ) or exists(Variable v, Expr e |
       // `r` (or something computed from it) is stored in another variable
       // near to where it's acquired, and might be released through that
       // variable.
@@ -445,4 +445,3 @@ where unreleasedResource(r, acquire, f, _) and
       not automaticallyReleased(acquire) and
       not r.getDeclaringType() instanceof TemplateClass // template classes may contain insufficient information for this analysis; results from instantiations will usually suffice.
 select acquire, message
-

@@ -1,0 +1,130 @@
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Library General Public License for more details.
+#
+# Read the full text in the LICENSE.GPL file in the doc directory.
+
+# General
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: '^.*\.pgm$'
+      - id: end-of-file-fixer
+        exclude: '^.*\.pgm$'
+      - id: check-added-large-files
+      - id: check-executables-have-shebangs
+      - id: check-shebang-scripts-are-executable
+      - id: check-xml
+  - repo: https://github.com/pre-commit/mirrors-clang-format
+    rev: v17.0.6
+    hooks:
+      - id: clang-format
+        types_or: [c++, c]
+  - repo: https://github.com/adrienverge/yamllint.git
+    rev: v1.26.3
+    hooks:
+      - id: yamllint
+        args: ['--config-file=config.yaml']
+        exclude: .buildkite/steps.yml
+  - repo: https://github.com/jorisroovers/gitlint
+    rev: v0.19.1
+    hooks:
+      - id: gitlint
+  - repo: https://github.com/Lucas-C/pre-commit-hooks
+    rev: v1.5.5
+    hooks:
+      - id: forbid-crlf
+      - id: remove-crlf
+      - id: insert-license
+        stages: [push]
+        files: \.(clp|pddl)$
+        args:
+          - --fuzzy-match-generates-todo
+          - --license-filepath
+          - LICENSE
+          - --comment-style
+          - ;
+          - --use-current-year
+          - --allow-past-years
+      - id: insert-license
+        stages: [push]
+        files: \.(cpp|hpp)$
+        args:
+          - --fuzzy-match-generates-todo
+          - --license-filepath
+          - LICENSE
+          - --use-current-year
+          - --allow-past-years
+      - id: insert-license
+        stages: [push]
+        files: \.py$
+        args:
+          - --fuzzy-match-generates-todo
+          - --license-filepath
+          - LICENSE
+          - --use-current-year
+          - --allow-past-years
+  # C++
+  - repo: https://github.com/cheshirekow/cmake-format-precommit
+    rev: v0.6.13
+    hooks:
+      - id: cmake-format
+        args: [--in-place, --config, .cmake-format]
+      - id: cmake-lint
+        args: [-c=.cmakelint.py]
+        exclude: etc/cmake/
+  # Python
+  - repo: https://github.com/psf/black
+    rev: 24.2.0
+    hooks:
+      - id: black
+        language_version: python3
+        args: [--line-length=120]
+        additional_dependencies: [pip-autoremove]
+  - repo: https://github.com/asottile/reorder-python-imports
+    rev: v3.12.0
+    hooks:
+      - id: reorder-python-imports
+        args:
+          - --py39-plus
+  - repo: https://github.com/pycqa/flake8
+    rev: '7.0.0'
+    hooks:
+      - id: flake8
+        exclude: .cmakelint.py
+        args:
+          - --max-line-length=120
+          - --ignore=E203,W503
+  - repo: https://github.com/PyCQA/autoflake.git
+    rev: 'v2.3.0'
+    hooks:
+      - id: autoflake
+        name: Remove unused variables and imports
+        args:
+          - --in-place
+          - --expand-star-imports
+          - --remove-duplicate-keys
+          - --remove-unused-variables
+          - --remove-all-unused-imports
+  # XML
+  - repo: local
+    hooks:
+      - id: xmllint
+        name: xmllint
+        entry: xmllint
+        args: ["--noout"]
+        language: system
+        types: [xml]
+      - id: check-license
+        name: check-license
+        entry: etc/licscripts/check_license.bash
+        language: system
+        exclude: '^.*(\.js|\.css|README|\.md|notes_on_migration|TODO|CMakeLists.txt|\.buildkite.*)$'

@@ -21,21 +21,21 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-/*   Solving the Minimum Assignment Problem using the 
+/*   Solving the Minimum Assignment Problem using the
  *   Hungarian Method.
  *
  *   ** This file may be freely copied and distributed! **
  *
- *   Parts of the used code was originally provided by the 
+ *   Parts of the used code was originally provided by the
  *   "Stanford GraphGase", but I made changes to this code.
- *   As asked by  the copyright node of the "Stanford GraphGase", 
+ *   As asked by  the copyright node of the "Stanford GraphGase",
  *   I hereby proclaim that this file are *NOT* part of the
  *   "Stanford GraphGase" distrubition!
  *
  *   This file is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied 
+ *   but WITHOUT ANY WARRANTY; without even the implied
  *   warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
- *   PURPOSE.  
+ *   PURPOSE.
  */
 
 #include "hungarian.h"

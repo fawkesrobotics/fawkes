@@ -37,4 +37,3 @@ yamllint:
 	fi
 
 endif # __buildsys_root_yamllint_mk_
-

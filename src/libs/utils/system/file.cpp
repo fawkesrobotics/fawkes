@@ -58,8 +58,8 @@ UnableToOpenFileException::UnableToOpenFileException(const char *filename, int e
  * @author Daniel Beck
  */
 
-/** Constructor. 
- * Independent of the FileOpenMethod files are created with 
+/** Constructor.
+ * Independent of the FileOpenMethod files are created with
  * permissions 660
  * @param filename the filename
  * @param method the method determines what is done if a file with the

@@ -31,7 +31,7 @@ module("fawkes.stringext")
 -- @return string with concatenated strings
 function string.join(delimiter, list)
    local len = #list
-   if len == 0 then 
+   if len == 0 then
       return ""
    end
    local rv = list[1]

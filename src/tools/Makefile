@@ -21,4 +21,3 @@ SUBDIRS = plugin logview config plugin_gui netloggui \
 
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/rules.mk
-

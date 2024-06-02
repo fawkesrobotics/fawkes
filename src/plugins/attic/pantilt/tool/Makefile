@@ -25,4 +25,3 @@ BINS_all = $(BINDIR)/ffptu
 BINS_build = $(BINS_all)
 
 include $(BUILDSYSDIR)/base.mk
-

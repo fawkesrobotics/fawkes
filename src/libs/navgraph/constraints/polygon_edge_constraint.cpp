@@ -1,5 +1,5 @@
 /***************************************************************************
- *  polygon_constraint.cpp - 
+ *  polygon_constraint.cpp -
  *
  *  Created: Mon Jan 19 11:20:31 2015 (next to Super-C waiting for demo)
  *  Copyright  2015  Tim Niemueller

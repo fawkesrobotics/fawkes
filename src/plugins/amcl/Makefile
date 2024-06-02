@@ -54,7 +54,7 @@ LIBS_all    = $(LIBDIR)/libfawkes_amcl_pf.$(SOEXT) \
               $(LIBDIR)/libfawkes_amcl_sensors.$(SOEXT) \
               $(LIBDIR)/libfawkes_amcl_utils.$(SOEXT)
 PLUGINS_all = $(PLUGINDIR)/amcl.$(SOEXT) \
-              $(PLUGINDIR)/map-lasergen.$(SOEXT) 
+              $(PLUGINDIR)/map-lasergen.$(SOEXT)
 
 # throw exceptions instead of aborting
 CFLAGS += -DUSE_ASSERT_EXCEPTION -DUSE_MAP_PUB
@@ -97,7 +97,7 @@ ifeq ($(HAVE_TF),1)
   LIBS_build    = $(LIBS_all)
 
   ifeq ($(HAVE_CPP11),1)
-    PLUGINS_build += $(PLUGINDIR)/map-lasergen.$(SOEXT) 
+    PLUGINS_build += $(PLUGINDIR)/map-lasergen.$(SOEXT)
   else
     WARN_TARGETS += warning_cpp11
   endif

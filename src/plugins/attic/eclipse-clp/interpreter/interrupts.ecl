@@ -31,4 +31,3 @@ use_interrupts(M) :-
     call(assert(expand_interrupts([],stop_interrupts)))@M,
     call(assert((expand_interrupts([X|L],pconc(X,E)) :- expand_interrupts(L,E))))@M,
     writeln("asserted all").
-

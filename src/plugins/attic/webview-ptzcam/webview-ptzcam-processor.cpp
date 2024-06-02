@@ -56,7 +56,7 @@ using namespace fawkes;
  * @param post_powerup_time time in seconds by which to delay reponse when
  * turning on PTU and camera after inactivity
  * @param presets pan/tilt preset values
- * @param blackboard blackboard to open interfaces 
+ * @param blackboard blackboard to open interfaces
  * @param logger logger to report problems
  */
 WebviewPtzCamRequestProcessor::WebviewPtzCamRequestProcessor(

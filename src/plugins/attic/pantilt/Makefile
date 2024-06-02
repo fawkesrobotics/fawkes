@@ -39,4 +39,3 @@ PLUGINS_all = $(PLUGINDIR)/pantilt.so
 PLUGINS_build = $(PLUGINS_all)
 
 include $(BUILDSYSDIR)/base.mk
-

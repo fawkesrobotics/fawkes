@@ -154,4 +154,3 @@ function cancel_cb(goal_handle, action_server)
    skiller.ros.graph.publish()
    if nodemon then nodemon:set_running() end
 end
-

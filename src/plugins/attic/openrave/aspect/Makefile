@@ -26,4 +26,3 @@ LIBS_all = $(LIBDIR)/libfawkesopenraveaspect.so
 LIBS_build = $(LIBS_all)
 
 include $(BUILDSYSDIR)/base.mk
-

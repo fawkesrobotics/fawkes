@@ -102,7 +102,7 @@ function steps_to_intercept(max_steps, robot_velocity, rob_x, rob_y, ball_x, bal
    local cur_steps = math.ceil(max_steps / 2)
    local temp_steps = math.ceil(cur_steps / 2)
 
-   local go_x, go_y = ball_rel_x, ball_rel_y 
+   local go_x, go_y = ball_rel_x, ball_rel_y
 
    while (temp_steps >= 1) do
       temp_steps = math.ceil(temp_steps)
@@ -140,6 +140,6 @@ function steps_to_intercept(max_steps, robot_velocity, rob_x, rob_y, ball_x, bal
       cur_steps = cur_steps + 1
       go_x = predict_steps(ball_x, vel_x, cur_steps, noise_z) - rob_x
       go_y = predict_steps(ball_y, vel_y, cur_steps, noise_z) - rob_y
-   end   
+   end
    return cur_steps, go_x, go_y
 end

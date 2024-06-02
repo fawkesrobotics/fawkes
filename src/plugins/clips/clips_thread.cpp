@@ -2,7 +2,7 @@
 /***************************************************************************
  *  clips_thread.cpp -  CLIPS environment providing Thread
  *
- *  Created: Sat Jun 16 14:40:56 2012 
+ *  Created: Sat Jun 16 14:40:56 2012
  *  Copyright  2006-2012  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/

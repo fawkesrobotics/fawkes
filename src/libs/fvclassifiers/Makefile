@@ -85,4 +85,3 @@ LIBS_all = $(LIBDIR)/libfvclassifiers.so
 LIBS_build = $(LIBS_all)
 
 include $(BUILDSYSDIR)/base.mk
-

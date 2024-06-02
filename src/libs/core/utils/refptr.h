@@ -38,7 +38,7 @@ namespace fawkes {
  * zero, the contained object is deleted
  *
  * Fawkes uses RefPtr so that you don't need to remember
- * to delete the object explicitly, or know when a method expects you to delete 
+ * to delete the object explicitly, or know when a method expects you to delete
  * the object that it returns.
  *
  * Note that RefPtr is thread-safe.
@@ -60,7 +60,7 @@ public:
 
 	/** Constructor that takes ownership.
    *
-   * This takes ownership of @a cpp_object, so it will be deleted when the 
+   * This takes ownership of @a cpp_object, so it will be deleted when the
    * last RefPtr is deleted, for instance when it goes out of scope.
    * @param cpp_object C++ object to take ownership of
    */
@@ -175,7 +175,7 @@ public:
 
 	/** Static cast to derived class.
    *
-   * Like the dynamic cast; the notation is 
+   * Like the dynamic cast; the notation is
    * @code
    *   ptr_derived = RefPtr<Derived>::cast_static(ptr_base);
    * @endcode

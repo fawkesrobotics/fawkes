@@ -32,7 +32,7 @@
 
 using namespace fawkes;
 
-/** @class ClipsRobotMemoryThread 'clips_robot_memory_thread.h' 
+/** @class ClipsRobotMemoryThread 'clips_robot_memory_thread.h'
  * CLIPS feature to access the robot memory.
  * MongoDB access through CLIPS first appeared in the RCLL referee box.
  * @author Tim Niemueller
@@ -792,7 +792,9 @@ ClipsRobotMemoryThread::clips_bson_get_array(void *bson, std::string field_name)
 		for (const auto e : array_view) {
 			switch (e.type()) {
 			case bsoncxx::type::k_double: rv.push_back(CLIPS::Value(e.get_double())); break;
-			case bsoncxx::type::k_utf8: rv.push_back(CLIPS::Value(std::string(e.get_string().value))); break;
+			case bsoncxx::type::k_utf8:
+				rv.push_back(CLIPS::Value(std::string(e.get_string().value)));
+				break;
 			case bsoncxx::type::k_bool:
 				rv.push_back(CLIPS::Value(e.get_bool() ? "TRUE" : "FALSE", CLIPS::TYPE_SYMBOL));
 				break;

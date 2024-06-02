@@ -58,7 +58,7 @@ VelocityFromGlobal::VelocityFromGlobal(GlobalPositionModel *model,
   initialStateVarianceBall[1][0] = 0.00;
   initialStateVarianceBall[0][1] = 0.00;
   initialStateVarianceBall[1][1] = 2.00;
-  kalman_filter->setInitialStateCovariance( initialStateVarianceBall ); 
+  kalman_filter->setInitialStateCovariance( initialStateVarianceBall );
 
   // process noise for ball pos kf
   CMatrix<float> processVarianceBall(2,2);

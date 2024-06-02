@@ -113,4 +113,3 @@ ifeq ($(call gcc_atleast_version,4,6),1)
 endif
 
 endif # __buildsys_gcc_mk_
-

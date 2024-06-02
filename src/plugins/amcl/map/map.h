@@ -142,7 +142,7 @@ void map_draw_wifi(map_t *map, struct _rtk_fig_t *fig, int index);
 #define MAP_VALID(map, i, j) ((i >= 0) && (i < map->size_x) && (j >= 0) && (j < map->size_y))
 
 // Compute the cell index for the given map coords.
-#define MAP_INDEX(map, i, j) ((i) + (j)*map->size_x)
+#define MAP_INDEX(map, i, j) ((i) + (j) * map->size_x)
 
 /// @endcond
 

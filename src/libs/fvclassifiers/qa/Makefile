@@ -64,4 +64,3 @@ ifeq ($(HAVE_SIFTPP),1)
 endif
 
 include $(BUILDSYSDIR)/base.mk
-

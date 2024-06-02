@@ -127,7 +127,7 @@ local function generate_dotgraph(fsm, g, subgraph_name)
    else
       gmod.setv(g, "rankdir", rankdir)
       gmod.setv(g, "penwidth", "2.0")
-      if not integrated_subfsm then 
+      if not integrated_subfsm then
 	 gmod.setv(g, "compound")
       end
 

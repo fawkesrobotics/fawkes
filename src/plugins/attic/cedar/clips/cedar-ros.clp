@@ -175,7 +175,7 @@
 		  (published $?mpub) (subscribed $?msub) (services $?msrv))
   (ros-node (name ?n) (published $?pub) (subscribed $?sub) (services $?srv))
   ; Match monitored ROS node, match all missing-* slots already here, doing that
-  ; only in the (or ...) constraint would fail our printouts due to undeclared variables 
+  ; only in the (or ...) constraint would fail our printouts due to undeclared variables
   ?mf <- (monitor-ros-node (name ?n) (state ALIVE)
 	   (missing-published $?mp) (missing-subscribed $?ms) (missing-services $?mr))
   ; Mind the connective constraints: this is just the shortest way of matching the

@@ -95,4 +95,3 @@ PLUGINS_all =	$(PLUGINDIR)/test_plugin.so
 PLUGINS_build = $(PLUGINS_all)
 
 include $(BUILDSYSDIR)/base.mk
-

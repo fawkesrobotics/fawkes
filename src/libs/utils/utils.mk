@@ -17,4 +17,3 @@ ifneq ($(wildcard /usr/include/sys/inotify.h $(SYSROOT)/usr/include/*-linux-gnu*
   HAVE_INOTIFY=1
   CFLAGS += -DHAVE_INOTIFY
 endif
-

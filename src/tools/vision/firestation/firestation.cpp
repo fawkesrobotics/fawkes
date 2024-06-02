@@ -112,7 +112,7 @@ Firestation::Firestation(Glib::RefPtr<Gtk::Builder> builder)
 #if GTK_VERSION_GE(3, 0)
 	Glib::RefPtr<Gtk::FileFilter> filter_jpg = Gtk::FileFilter::create();
 #else
-	Gtk::FileFilter *filter_jpg   = Gtk::manage(new Gtk::FileFilter());
+	Gtk::FileFilter *filter_jpg = Gtk::manage(new Gtk::FileFilter());
 #endif
 	filter_jpg->set_name("JPEG");
 	filter_jpg->add_pattern("*.jpg");

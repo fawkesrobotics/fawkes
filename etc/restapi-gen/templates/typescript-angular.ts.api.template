@@ -131,4 +131,3 @@ export class {{ name | sanitize }}ApiService {
 %    endfor
 % endfor
 }
-

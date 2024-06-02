@@ -29,7 +29,6 @@
 #include <utils/time/wait.h>
 
 #include <boost/optional.hpp>
-
 #include <bsoncxx/builder/basic/document.hpp>
 #include <chrono>
 #include <iterator>

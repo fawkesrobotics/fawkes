@@ -243,7 +243,7 @@
 	(assert (wm-robmem-sync-map-entry (wm-fact-id ?id) (wm-fact-key ?key-prefix ?rest)
 																		(wm-fact-idx (fact-index ?wf))
 																		(update-timestamp ?now)))
-	
+
 	(wm-robmem-sync-fact-update ?wf ?identity ?now)
 )
 

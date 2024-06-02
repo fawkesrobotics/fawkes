@@ -61,4 +61,3 @@ warning_boost_system:
 endif
 
 include $(BUILDSYSDIR)/base.mk
-

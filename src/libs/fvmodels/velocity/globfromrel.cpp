@@ -72,7 +72,7 @@ VelocityGlobalFromRelative::VelocityGlobalFromRelative(VelocityModel         *re
   initialStateVarianceBall[1][0] = 0.00;
   initialStateVarianceBall[0][1] = 0.00;
   initialStateVarianceBall[1][1] = 5.00;
-  kalman_filter->setInitialStateCovariance( initialStateVarianceBall ); 
+  kalman_filter->setInitialStateCovariance( initialStateVarianceBall );
 
   // process noise for ball pos kf, initial estimates, refined in calc()
   kalman_filter->setProcessCovariance( 1.f, 1.f );

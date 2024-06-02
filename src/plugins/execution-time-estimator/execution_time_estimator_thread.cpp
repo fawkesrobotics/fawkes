@@ -1,5 +1,5 @@
 /***************************************************************************
- *  execution_time_estimator_thread.cpp - 
+ *  execution_time_estimator_thread.cpp -
  *
  *  Created: Thu 23 Apr 2020 17:07:11 CEST 17:07
  *  Copyright  2020  Till Hofmann <hofmann@kbsg.rwth-aachen.de>

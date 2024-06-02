@@ -34,7 +34,7 @@ foreach my $line (@warning_lines){
     } else {
       $should_print = 0;
     }
-  } 
+  }
   if($should_print != 0) {
     print("$line","\n");
   }

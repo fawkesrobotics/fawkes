@@ -1,5 +1,5 @@
 /***************************************************************************
- *  test_uuid.cpp - 
+ *  test_uuid.cpp -
  *
  *  Created: Tue 17 Nov 2020 15:09:33 CET 15:09
  *  Copyright  2020  Till Hofmann <hofmann@kbsg.rwth-aachen.de>

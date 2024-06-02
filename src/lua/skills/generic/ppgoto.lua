@@ -138,6 +138,3 @@ function PPGOTO:reset()
       ppnavi:msgq_enqueue_copy(ppnavi.StopMessage:new())
    end
 end
-
-
-

@@ -30,7 +30,7 @@
 		  Labels must be given as key-value pairs of the form
 		  "key=value[,key=value...]".
 	  </field>
-	  
+
 	  <field type="uint64" name="sample_count">
 		  The number of all samples.
     </field>

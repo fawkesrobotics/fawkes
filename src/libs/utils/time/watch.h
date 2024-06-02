@@ -3,7 +3,7 @@
  *  watch.h - A stopwatch
  *
  *  Generated: Sun June 03 00:44:22 2007
- *  Copyright  2007  Daniel Beck 
+ *  Copyright  2007  Daniel Beck
  *
  ****************************************************************************/
 

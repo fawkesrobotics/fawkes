@@ -4,9 +4,9 @@
   <constants>
     <enum name="LastMsgStatus">
       <comment>Status of the last send message</comment>
-      <item name="Succeeded">Message was successful send</item> 
-      <item name="Failed">Message failed</item> 
-    </enum> 
+      <item name="Succeeded">Message was successful send</item>
+      <item name="Failed">Message failed</item>
+    </enum>
   </constants>
   <data>
     <comment>

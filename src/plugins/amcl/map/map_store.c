@@ -204,7 +204,7 @@ int map_load_wifi(map_t *map, const char *filename, int index)
       cell->wifi_levels[index] = level;
     }
   }
-  
+
   fclose(file);
 
   return 0;

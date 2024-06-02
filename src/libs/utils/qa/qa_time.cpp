@@ -3,7 +3,7 @@
  *  qa_time.cpp - QA app for watch, clock, timesoure, ...
  *
  *  Generated: Sun June 03 22:33:22 2007
- *  Copyright  2007  Daniel Beck 
+ *  Copyright  2007  Daniel Beck
  *
  ****************************************************************************/
 

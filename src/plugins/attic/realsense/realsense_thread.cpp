@@ -28,7 +28,7 @@
 
 using namespace fawkes;
 
-/** @class RealsenseThread 'realsense_thread.h' 
+/** @class RealsenseThread 'realsense_thread.h'
  * Driver for the Intel RealSense Camera providing Depth Data as Pointcloud
  * Inspired by Intel® RealSense™ Camera - F200 ROS Nodelet
  * @author Johannes Rothe

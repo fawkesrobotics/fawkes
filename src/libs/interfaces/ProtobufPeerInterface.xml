@@ -32,4 +32,3 @@
     <field type="string" name="cipher" length="255">Cipher name</field>
   </message>
 </interface>
-

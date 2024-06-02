@@ -23,19 +23,19 @@
   =>
   (bind ?*FAWKES-BATTERY-VOLTAGE-LOW* ?v)
 )
-  
+
 (defrule fawkes-battery-config-voltage-crit
   (confval (path "/cedar/fawkes/battery/voltage-crit") (type FLOAT) (value ?v))
   =>
   (bind ?*FAWKES-BATTERY-VOLTAGE-CRIT* ?v)
 )
-  
+
 (defrule fawkes-battery-config-soc-low
   (confval (path "/cedar/fawkes/battery/soc-low") (type FLOAT) (value ?v))
   =>
   (bind ?*FAWKES-BATTERY-SOC-LOW* ?v)
 )
-  
+
 (defrule fawkes-battery-config-soc-crit
   (confval (path "/cedar/fawkes/battery/soc-crit") (type FLOAT) (value ?v))
   =>

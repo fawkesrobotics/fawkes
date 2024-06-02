@@ -10,4 +10,3 @@ export class DefaultPipe implements PipeTransform {
     return value || defaultValue;
   }
 }
-

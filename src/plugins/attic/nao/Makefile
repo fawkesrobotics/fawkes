@@ -119,4 +119,3 @@ info_naoqiroot:
 endif
 
 include $(BUILDSYSDIR)/base.mk
-

@@ -194,7 +194,7 @@ pf_matrix_t pf_matrix_inverse(pf_matrix_t a, double *det)
 
   A = gsl_matrix_view_array((double*) a.m, 3, 3);
   Ai = gsl_matrix_view_array((double*) ai.m, 3, 3);
-  
+
   // Do LU decomposition
   p = gsl_permutation_alloc(3);
   gsl_linalg_LU_decomp(&A.matrix, p, &signum);

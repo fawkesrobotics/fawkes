@@ -181,10 +181,10 @@ FilterLaplace::apply()
 /** Calculate a Laplacian of Gaussian kernel.
  * The kernel is calculated with the formula
  * \f[
- *   roundf( \frac{-1}{\pi * \sigma^4} * 
+ *   roundf( \frac{-1}{\pi * \sigma^4} *
  *           ( 1 - \frac{w^2 + h^2}{2 * \sigma^2} )
  *           * e^{-\frac{w^2 + h^2}{2 * \sigma^2}} * \mathtt{scale} )
- * \f]			   
+ * \f]
  *
  * @param kernel buffer contains kernel upon return
  * @param sigma sigma for formula

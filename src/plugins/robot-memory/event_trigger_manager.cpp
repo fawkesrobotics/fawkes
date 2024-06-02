@@ -1,6 +1,6 @@
 /***************************************************************************
  *  event_trigger_manager.cpp - Manager to realize triggers on events in the robot memory
- *    
+ *
  *
  *  Created: 3:53:46 PM 2016
  *  Copyright  2016  Frederik Zwilling

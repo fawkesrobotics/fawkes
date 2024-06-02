@@ -43,4 +43,3 @@ warning_naoqi:
 endif
 
 include $(BUILDSYSDIR)/base.mk
-

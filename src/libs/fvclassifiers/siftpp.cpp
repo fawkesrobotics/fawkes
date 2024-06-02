@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  siftpp.cpp - siftpp based classifier 
+ *  siftpp.cpp - siftpp based classifier
  *
  *  Created: Sat Apr 12 10:15:23 2008
  *  Copyright 2008 Stefan Schiffer [stefanschiffer.de]
@@ -48,7 +48,7 @@ namespace firevision {
  * SIFTPP classifier.
  *
  * This class provides a classifier that uses SIFTPP to detect objects in a given
- * image by matching features. The objects are reported back as regions of interest. 
+ * image by matching features. The objects are reported back as regions of interest.
  * Each ROI contains an object. ROIs with 11x11 are matched features.
  *
  * This code uses siftpp from http://vision.ucla.edu/~vedaldi/code/siftpp/siftpp.html

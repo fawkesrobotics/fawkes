@@ -35,4 +35,3 @@ BINS_all = 	$(BINDIR)/qa_or_env \
 BINS_build = $(BINS_all)
 
 include $(BUILDSYSDIR)/base.mk
-

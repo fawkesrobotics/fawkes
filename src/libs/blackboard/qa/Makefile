@@ -73,4 +73,3 @@ BINS_all =  $(BINDIR)/qa_bb_memmgr     \
 BINS_build = $(BINS_all)
 
 include $(BUILDSYSDIR)/base.mk
-

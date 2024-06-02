@@ -10,7 +10,7 @@ SYNOPSIS
 [verse]
 'fawkes' [-h] [-C] [-c db-file] [-d sql-file] [-q[qqq]] [-l level]
 	[-L loggers] [-p plugins] [-u user] [-g group]
-	[-Dpid-file] [-Dpid-file -k] [-Dpid-file -s] 
+	[-Dpid-file] [-Dpid-file -k] [-Dpid-file -s]
 
 DESCRIPTION
 -----------

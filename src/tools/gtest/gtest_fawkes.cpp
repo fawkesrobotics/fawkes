@@ -1,6 +1,6 @@
 /***************************************************************************
  *  gtest_fawkes.cpp - Unit testing in a Fawkes plugin requiring the framework
- *    
+ *
  *
  *  Created: Aug 24, 2016 11:40:46 PM 2016
  *  Copyright  2016  Frederik Zwilling

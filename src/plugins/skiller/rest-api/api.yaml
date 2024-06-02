@@ -141,7 +141,7 @@ components:
         - kind
         - apiVersion
         - name
-        
+
       properties:
         kind:
           type: string

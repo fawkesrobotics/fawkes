@@ -105,4 +105,3 @@ export namespace {{ name }} {
 %-   endfor
 %- endif
 }
-

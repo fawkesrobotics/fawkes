@@ -41,11 +41,11 @@ using std::placeholders::_1;
 #include <sensor_msgs/msg/laser_scan.hpp>
 
 class ROS2IrScanThread : public fawkes::Thread,
-                            public fawkes::ConfigurableAspect,
-                            public fawkes::BlockedTimingAspect,
-                            public fawkes::BlackBoardAspect,
-                            public fawkes::ROS2Aspect,
-                            public fawkes::BlackBoardInterfaceListener
+                         public fawkes::ConfigurableAspect,
+                         public fawkes::BlockedTimingAspect,
+                         public fawkes::BlackBoardAspect,
+                         public fawkes::ROS2Aspect,
+                         public fawkes::BlackBoardInterfaceListener
 {
 public:
 	ROS2IrScanThread();

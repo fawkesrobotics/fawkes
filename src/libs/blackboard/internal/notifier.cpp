@@ -43,7 +43,7 @@ namespace fawkes {
 /** @class BlackBoardNotifier <blackboard/internal/notifier.h>
  * BlackBoard notifier.
  * This class is used by the BlackBoard to notify listeners and observers
- * of changes. 
+ * of changes.
  *
  * @author Tim Niemueller
  */

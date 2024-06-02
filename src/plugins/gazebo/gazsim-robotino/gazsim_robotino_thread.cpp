@@ -41,7 +41,7 @@ using namespace fawkes;
 using namespace gazebo;
 
 /** @class RobotinoSimThread "gazsim_robotino_thread.h"
- * Thread simulate the Robotino in Gazebo 
+ * Thread simulate the Robotino in Gazebo
  * by sending needed informations to the Robotino-plugin in Gazebo
  * and recieving sensordata from Gazebo
  * @author Frederik Zwilling

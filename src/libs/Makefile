@@ -74,5 +74,3 @@ protoboard: core aspect blackboard interface interfaces
 
 include $(BUILDSYSDIR)/rules.mk
 include $(LIBSRCDIR)/extlibs.mk
-
-

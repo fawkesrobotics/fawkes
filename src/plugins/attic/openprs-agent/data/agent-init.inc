@@ -27,4 +27,3 @@ load external "mod_skiller" "init"
 declare predicate  agent-init
 
 load opf "agent-init.opf"
-

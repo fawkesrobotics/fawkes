@@ -38,7 +38,7 @@ using namespace fawkes;
 /** Small example hread serializing with other threads using a wait condition.
  * Run the program and see them printing out numbers serialized.
  *
- * NOTE: This can be done more easily by using ThreadList and Threads in 
+ * NOTE: This can be done more easily by using ThreadList and Threads in
  * wait-for-wakeup mode! This is just a demonstration to improve understanding
  * of sync constructs.
  */

@@ -9,4 +9,3 @@ for d in $DIRS; do
 		find $d -name "*.$ext" -exec ./replace_license.pl {} \;
 	done
 done
-

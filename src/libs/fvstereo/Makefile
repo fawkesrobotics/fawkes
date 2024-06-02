@@ -69,4 +69,3 @@ triclops:
 	else \
 		echo -e "$(INDENT_PRINT)$(TRED)--> Cannot create $(TRICLOPS_SDK)/lib/libtriclops.so$(TNORMAL), Triclops SDK not found or incomplete.$(TNORMAL)"; \
 	fi
-

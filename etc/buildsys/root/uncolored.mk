@@ -15,4 +15,3 @@
 
 # Uncolored implicit targets
 uncolored-%: % ; @:
-

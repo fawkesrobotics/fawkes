@@ -283,7 +283,7 @@ POSSIBILITY OF SUCH DAMAGES.
 
 			 RUNTIME EXCEPTION
 
-Linking this library statically or dynamically with other modules is making 
+Linking this library statically or dynamically with other modules is making
 a combined work based on this library. Thus, the terms and conditions of the
 GNU General Public License cover the whole combination.
 

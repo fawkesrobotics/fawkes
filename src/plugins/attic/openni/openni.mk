@@ -42,4 +42,3 @@ ifeq ($(HAVE_OPENNI),1)
     CFLAGS_OPENNI += -Wno-attributes
   endif
 endif
-

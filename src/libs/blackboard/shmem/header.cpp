@@ -152,7 +152,7 @@ BlackBoardSharedMemoryHeader::initialize(void *memptr)
 }
 
 /** Set data of this header
- * Sets the internal pointer to the shared memory header data 
+ * Sets the internal pointer to the shared memory header data
  * to the data retrieved from the shared memory segment.
  * @param memptr pointer to the memory
  */

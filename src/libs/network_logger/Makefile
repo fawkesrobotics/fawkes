@@ -25,4 +25,3 @@ LIBS_all = $(LIBDIR)/libfawkesnetworklogger.so
 LIBS_build = $(LIBS_all)
 
 include $(BUILDSYSDIR)/base.mk
-

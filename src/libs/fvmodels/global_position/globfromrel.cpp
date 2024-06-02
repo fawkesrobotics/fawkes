@@ -83,7 +83,7 @@ GlobalFromRelativePos::get_x() const
        << "     ( " << m_pRelaModel->getX() << " * " << cos(m_fPhi) << ") -" << endl
        << "       " << m_pRelaModel->getY() << " * " << sin(m_fPhi) << "    ) + " << m_fPosX << endl
        << "     ( " << m_pRelaModel->getX() * cos(m_fPhi) << ") -" << endl
-       << "       " << m_pRelaModel->getY() * sin(m_fPhi) << ")   ) + " << m_fPosX << endl 
+       << "       " << m_pRelaModel->getY() * sin(m_fPhi) << ")   ) + " << m_fPosX << endl
        << "  ---> " << (m_pRelaModel->getX() * cos(m_fPhi) - m_pRelaModel->getY() * sin(m_fPhi)) + m_fPosX << flush;
   */
 	return (m_pRelaModel->get_x() * cos(m_fPhi) - m_pRelaModel->get_y() * sin(m_fPhi)) + m_fPosX;
@@ -102,7 +102,7 @@ GlobalFromRelativePos::get_y() const
        << "     ( " << m_pRelaModel->getX() << " * " << sin(m_fPhi) << ") +" << endl
        << "       " << m_pRelaModel->getY() << " * " << cos(m_fPhi) << "    ) + " << m_fPosY << endl
        << "     ( " << m_pRelaModel->getX() * sin(m_fPhi) << ") +" << endl
-       << "       " << m_pRelaModel->getY() * cos(m_fPhi) << ")   ) + " << m_fPosY << endl 
+       << "       " << m_pRelaModel->getY() * cos(m_fPhi) << ")   ) + " << m_fPosY << endl
        << "  ---> " << (m_pRelaModel->getX() * sin(m_fPhi) + m_pRelaModel->getY() * cos(m_fPhi)) + m_fPosY << flush;
   */
 	return (m_pRelaModel->get_x() * sin(m_fPhi) + m_pRelaModel->get_y() * cos(m_fPhi)) + m_fPosY;

@@ -54,7 +54,7 @@ namespace fawkes {
  */
 
 /** Constructor.
- * @param type mutex type 
+ * @param type mutex type
  */
 Mutex::Mutex(Type type)
 {

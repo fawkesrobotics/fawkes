@@ -29,4 +29,3 @@ foreach $licfile (@LIC_SEARCH) {
 
 printf("** File %s did NOT match, control\n", $ARGV[2]);
 exit(1);
-

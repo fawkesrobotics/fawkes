@@ -31,7 +31,7 @@ namespace fawkes {
  * Given an action name and parameters, transform to skill string according to
  * some predetermined mapping.
  *
- * 
+ *
  * A mapping is a tuple of two elements:
  *  - parameter key or path element (left of the colon)
  *  - parameter value
@@ -71,7 +71,7 @@ namespace fawkes {
  *  - $n: the n'th capture (may also be $nn for 10 <= nn <= 99)
  * Note that regular expression matching is performed case-insensitive, that
  * is because PDDL itself is also case-insensitive.
- * 
+ *
  *
  * == Examples ==
  * Examples contain three elements, the typed PDDL operator name with

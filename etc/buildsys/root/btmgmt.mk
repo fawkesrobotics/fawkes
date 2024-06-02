@@ -49,10 +49,9 @@ switch-buildtype:
 
 # Easier to remember target than having to remember BT variable
 switch-buildtype-%:
-	$(SILENT)$(MAKE) --no-print-directory switch-buildtype BT=$* 
+	$(SILENT)$(MAKE) --no-print-directory switch-buildtype BT=$*
 
 print-buildtype:
 	$(SILENTSYMB) echo -e "$(INDENT_PRINT)--- Current build type: $(BUILD_TYPE)";
 
 endif # __buildsys_root_btmgmt_mk_
-

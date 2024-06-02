@@ -61,4 +61,3 @@ $(WARN_TARGETS_CRUIZCORE_BOOST): warning_cruizcore_boost_%:
 endif
 
 include $(BUILDSYSDIR)/base.mk
-

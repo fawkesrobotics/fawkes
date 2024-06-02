@@ -28,4 +28,3 @@ sed -e 's/^\(.*Generated automatically .*\) on .*$/\1/' | \
 awk '/^#if defined/ { f=1 }; f { t = t "\n" $0 }; !f {print}; f && /^#endif/ {print "extern \"C\" {" t "\n}\n"; f=0}' | \
 awk "/^\*\/$/ { print; while ((getline line < \"${license}\") > 0) print line; print \"\n#include <core/exception.h>\" }; ! /^\*\/$/ { print }" \
 > "${output_path}/${target}_tolua.cpp"
-

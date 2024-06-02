@@ -175,7 +175,7 @@ WebReply::set_request(WebRequest *request)
 }
 
 /** Called just before the reply is sent.
- * Sets no-caching flags if caching has been disabled. 
+ * Sets no-caching flags if caching has been disabled.
  */
 void
 WebReply::pack_caching()

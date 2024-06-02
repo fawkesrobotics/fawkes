@@ -79,4 +79,3 @@ BINS_gui += $(BINDIR)/fv_qa_colormap
 BINS_all = $(BINS_cons) $(BINS_gui)
 
 include $(BUILDSYSDIR)/base.mk
-

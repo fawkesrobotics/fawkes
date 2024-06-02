@@ -3,7 +3,7 @@
  *  watch.cpp - A stopwatch
  *
  *  Generated: Sun June 03 15:38:24 2007
- *  Copyright  2007  Daniel Beck 
+ *  Copyright  2007  Daniel Beck
  *
  ****************************************************************************/
 
@@ -28,7 +28,7 @@
 namespace fawkes {
 
 /** @class Watch <utils/time/watch.h>
- * This is a stop-watch. Also, one can request the current time from the 
+ * This is a stop-watch. Also, one can request the current time from the
  * clock. Every watch counts time w.r.t. a certain time source.
  * @author Daniel Beck
  */
@@ -159,7 +159,7 @@ Watch::watch_time()
 }
 
 /** Returns the current clock time.
- * @return the current clock time 
+ * @return the current clock time
  */
 Time
 Watch::clock_time()

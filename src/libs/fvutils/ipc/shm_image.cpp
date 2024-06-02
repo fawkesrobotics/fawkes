@@ -976,7 +976,7 @@ SharedMemoryImageBufferMetaData::SharedMemoryImageBufferMetaData()
 /** Value constructor.
  * @param image_id Image buffer ID
  * @param frame_id Coordinate frame ID
- * @param colorspace Colorspace 
+ * @param colorspace Colorspace
  * @param width Image width
  * @param height Image height
  * @param mem_size Shared memory buffer size

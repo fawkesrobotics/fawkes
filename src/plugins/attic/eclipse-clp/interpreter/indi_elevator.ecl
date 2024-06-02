@@ -37,7 +37,7 @@
 % permission.  The University of Toronto makes no representations about
 % the suitability of this software for any purpose.  It is provided "as
 % is" without express or implied warranty.
-% 
+%
 % THE UNIVERSITY OF TORONTO DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS
 % SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
 % FITNESS, IN NO EVENT SHALL THE UNIVERSITY OF TORONTO BE LIABLE FOR ANY
@@ -45,7 +45,7 @@
 % RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF
 % CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
 % CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
-% 
+%
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -83,24 +83,24 @@ handle_update(update).
 %
 % No user input is required.
 
-% Interface to the outside world via read and write 
+% Interface to the outside world via read and write
 execute(A,Sr) :- ask_execute(A,Sr).
 exog_occurs(_) :- fail.
 
 fl(N) :- N=1; N=2; N=3; N=4; N=5; N=6.    % the 6 elevator floors
 
-% Actions 
+% Actions
 prim_action(down).              % elevator down one floor
 prim_action(up).                % elevator up one floor
 prim_action(off(N)) :- fl(N).   % turn off call button on floor n
 prim_action(open).              % open elevator door
 prim_action(close).             % close elevator door
 
-% Fluents 
+% Fluents
 prim_fluent(floor).             % the floor the elevator is on (1 to 6)
 prim_fluent(light(N)) :- fl(N). % call button of floor n (on or off)
 
-% Causal laws 
+% Causal laws
 causes_val(up,   floor, N, N is floor+1).
 causes_val(down, floor, N, N is floor-1).
 causes_val(off(N), light(N), off, true).  % Note: nothing turns a light on
@@ -138,10 +138,10 @@ proc(handle_reqs(Max),      % handle all elevator reqs in Max steps
                           serve_floor(n),
                           handle_reqs(m) ] )))).
 
-proc(minimize_motion(Max),  % iterative deepening search 
+proc(minimize_motion(Max),  % iterative deepening search
     ndet( handle_reqs(Max), pi(m, [?(m is Max+1), minimize_motion(m)]))).
 
-proc(dumb_control, minimize_motion(0) ).           % always fails 
+proc(dumb_control, minimize_motion(0) ).           % always fails
 proc(smart_control, search(minimize_motion(0)) ).  % eventually succeeds
 
 

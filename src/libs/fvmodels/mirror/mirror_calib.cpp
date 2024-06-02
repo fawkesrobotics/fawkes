@@ -71,7 +71,7 @@ namespace firevision {
  *     center point of the mirror.
  * (6) Again do steps (3) and (5) with the new center point.
  * (7) Generate bulb files. The polar coordinates of each pixel are determined
- *     as follows: 
+ *     as follows:
  *    (a) Determine the polar coordinates of the pixel.
  *    (b) Get the two mark streams that enclose the pixel.
  *    (c) Do linear interpolation in both mark streams to get two distances.
@@ -890,7 +890,7 @@ public:
 		return yuv_buffer_;
 	}
 	/** YUV buffer.
-   * @return 
+   * @return
    */
 	inline const unsigned char *
 	yuv_buffer() const
@@ -954,7 +954,7 @@ public:
 		return premarks_;
 	}
 	/** The (final) marks.
-   * @return 
+   * @return
    */
 	inline MarkList &
 	marks()
@@ -1052,7 +1052,7 @@ MirrorCalibTool::~MirrorCalibTool()
  * rotation so that the things, which lie at angle `ori' wrt. the Y axis, lie
  * on the X axis of the rotated image.
  * For example: if the marks are 120 degrees counter-clock-wise from the robot,
- * the image needs to be rotated 120 degrees clock-wise (then the marks are 
+ * the image needs to be rotated 120 degrees clock-wise (then the marks are
  * in front of the robot, i.e. Y axis) and then 90 degrees clock-wise
  * (to get the marks from the Y axis to the X axis).
  *
@@ -1989,7 +1989,7 @@ MirrorCalibTool::draw_line(unsigned char *yuv_buffer,
 	}
 }
 
-/** Draws a crosshair with the lines in the directions of the keys of 
+/** Draws a crosshair with the lines in the directions of the keys of
  * the mark map.
  * @param yuv_buffer The in/out parameter for the image.
  */

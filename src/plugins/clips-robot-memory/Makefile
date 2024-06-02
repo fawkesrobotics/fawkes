@@ -2,7 +2,7 @@
 #         Makefile Build System for Fawkes: clips_robot_memory Plugin
 #                            -------------------
 #   Created on Mon Aug 29 15:41:47 2016
- 
+
 #   Copyright (C) 2016 by Frederik Zwilling
 #
 #*****************************************************************************

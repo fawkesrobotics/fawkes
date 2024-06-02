@@ -32,7 +32,7 @@ namespace fawkes {
 
 /** @class AStarState <utils/search/astar_state.h>
  *  This is the abstract(!) class for an A* State.
- * 
+ *
  * @author Stefan Jacobs
  */
 class AStarState

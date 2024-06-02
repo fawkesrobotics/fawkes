@@ -80,7 +80,7 @@ PluginNetworkHandler::~PluginNetworkHandler()
  * All files with the extension .so in the PLUGINDIR are returned.
  * @param num_plugins pointer to an unsigned int where the number
  * of all plugins is stored
- * @param plugin_list pointer to the string array where the list of 
+ * @param plugin_list pointer to the string array where the list of
  * all plugins is stored. Memory is allocated at this address and
  * has to be freed by the caller!
  */

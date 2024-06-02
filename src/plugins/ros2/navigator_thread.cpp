@@ -128,14 +128,14 @@ ROS2NavigatorThread::send_goal()
 			  if (result.goal_id[i] != goal_handle->get_goal_id()[i]) {
 				  logger->log_error(name(), "Goal ID missmatch!!!");
 				  nav_if_->set_final(true);
-				  auto new_goal = NavigateToPose::Goal();
+				  auto new_goal                 = NavigateToPose::Goal();
 				  new_goal.pose.header.frame_id = "map";
 				  new_goal.pose.header.stamp    = node_handle->get_clock()->now();
 				  new_goal.pose.pose.position.x = nav_if_->dest_x();
 				  new_goal.pose.pose.position.y = nav_if_->dest_y();
-				  auto empty_opt = rclcpp_action::Client<NavigateToPose>::SendGoalOptions();
+				  auto empty_opt                = rclcpp_action::Client<NavigateToPose>::SendGoalOptions();
 				  nav_if_->set_error_code(NavigatorInterface::ERROR_UNKNOWN_PLACE);
-			          ac_->async_send_goal(new_goal, empty_opt);
+				  ac_->async_send_goal(new_goal, empty_opt);
 				  nav_if_->write();
 				  return;
 			  }

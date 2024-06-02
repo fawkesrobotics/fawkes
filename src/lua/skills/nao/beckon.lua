@@ -88,10 +88,10 @@ BECKON:add_transition(FINAL, "vars.current_num > vars.num", "All arm movements e
 function MOVE_UP:init()
    self.args = { time_sec = 0.4, tolerance = 0.3 }
    if self.fsm.vars.left then
-      self.args.l_elbow_roll = -1.5	 
+      self.args.l_elbow_roll = -1.5
    end
    if self.fsm.vars.right then
-      self.args.r_elbow_roll =  1.5	 
+      self.args.r_elbow_roll =  1.5
    end
 end
 

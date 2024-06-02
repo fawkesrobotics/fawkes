@@ -1553,7 +1553,7 @@ ProtobufCommPlexilAdapter::pb_peer_destroy(PLEXIL::Command *cmd)
 	m_execInterface.notifyOfExternalEvent();
 }
 
-/** Setup crypto for peer. 
+/** Setup crypto for peer.
  * @param peer_id ID of the peer to destroy
  * @param crypto_key encryption key
  * @param cipher cipher suite, see BufferEncryptor for supported types

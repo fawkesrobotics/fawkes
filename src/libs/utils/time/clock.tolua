@@ -3,7 +3,7 @@
  *  clock.tolua - A central clock - tolua++ template
  *
  *  Created: Wed Mar 12 23:25:14 2008
- *  Copyright  2007       Daniel Beck 
+ *  Copyright  2007       Daniel Beck
  *             2007-2008  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
@@ -62,4 +62,3 @@ class Clock
 };
 
 }
-

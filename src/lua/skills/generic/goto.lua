@@ -1,6 +1,6 @@
 
 ----------------------------------------------------------------------------
---  goto.lua - 
+--  goto.lua -
 --
 --  Created: Thu Aug 14 14:32:47 2008
 --  modified by Victor MatarÃ©
@@ -84,7 +84,7 @@ function INIT:init()
     else
       self.fsm.vars.target_valid = false
     end
-  end 
+  end
 
   if self.fsm.vars.target_valid then
     local rel_pos = tf.transform({

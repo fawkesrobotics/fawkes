@@ -34,7 +34,7 @@ using namespace fawkes;
 using namespace mongocxx;
 using namespace bsoncxx;
 
-/** @class StnGeneratorThread 'stn-generator_thread.h' 
+/** @class StnGeneratorThread 'stn-generator_thread.h'
  * Generates an STN representation of a sequential task plan
  * @author Matthias Loebach
  */

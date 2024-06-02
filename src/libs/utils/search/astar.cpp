@@ -28,11 +28,11 @@ namespace fawkes {
 
 /** @class AStar <utils/search/astar.h>
  * This is an implementation of the A* search algorithm.
- * 
+ *
  * @author Stefan Jacobs, Martin Liebenberg
  */
 /** @var AStar::closed_list
- * 	 This is AStars closed_list.	
+ * 	 This is AStars closed_list.
  */
 /** @var AStar::solution
  * 	This is the final solution vector.
