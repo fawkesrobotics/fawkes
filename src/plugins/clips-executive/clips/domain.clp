@@ -477,9 +477,10 @@
     else
       (bind ?index (member$ ?param ?grounded-names))
       (if (not ?index) then
-        (assert (domain-error (error-type unknown-parameter) (error-msg
-          (str-cat "PDDL Predicate has unknown parameter " ?param)))
-        )
+        (printout error "PDDL Predicate has unknown parameter " ?param " (" ?grounded-names " vs " ?names  ") " crlf)
+        ; (assert (domain-error (error-type unknown-parameter) (error-msg
+        ;   (str-cat "PDDL Predicate has unknown parameter " ?param)))
+        ; )
         (return FALSE)
       else
         (bind ?values
@@ -692,20 +693,16 @@
 
 (deffunction domain-retract-grounding
   "Retract all groundings and grounded formulas associated with plan-actions"
-  ()
-  (do-for-all-facts ((?grounding pddl-grounding)) TRUE
-                    (if (any-factp ((?plan-action plan-action))
-                                      (eq ?plan-action:precondition ?grounding:id))
-                      then
-                      (do-for-all-facts ((?precond grounded-pddl-predicate))
-                                        (eq ?precond:grounding ?grounding:id)
-                        (retract ?precond))
-                      (do-for-all-facts ((?precond grounded-pddl-formula))
-                                        (eq ?precond:grounding ?grounding:id)
-                        (retract ?precond))
-                    )
+  (?action-precond)
+  (do-for-all-facts ((?grounding pddl-grounding)) (eq ?action-precond ?grounding:id)
+                    (do-for-all-facts ((?precond grounded-pddl-predicate))
+                                      (eq ?precond:grounding ?grounding:id)
+                      (retract ?precond))
+                    (do-for-all-facts ((?precond grounded-pddl-formula))
+                                      (eq ?precond:grounding ?grounding:id)
+                      (retract ?precond))
                     (do-for-all-facts ((?plan-action plan-action))
-                                      (eq ?plan-action:precondition ?grounding:id)
+                                      (and (eq ?plan-action:precondition ?grounding:id) (neq ?plan-action:precondition nil))
                       (modify ?plan-action (precondition nil))
                     )
                     (retract ?grounding)
@@ -766,7 +763,9 @@
                           (predicate ?pred))
   =>
   (remove-precondition ?pre)
-  (domain-retract-grounding)
+  (delayed-do-for-all-facts ((?g pddl-grounding)) TRUE
+    (domain-retract-grounding ?g:id)
+  )
 )
 
 (defrule domain-replace-precond-on-sensed-val-effect-of-exog-action
@@ -813,7 +812,9 @@
   (modify ?pre (part-of ?precond) (id (sym-cat ?precond 1)))
 
   ; If there are any grounded preconditions, we need to recompute them.
-  (domain-retract-grounding)
+  (delayed-do-for-all-facts ((?g pddl-grounding)) TRUE
+    (domain-retract-grounding ?g:id)
+  )
 )
 
 (defrule domain-ground-effect-precondition
@@ -1021,19 +1022,19 @@
 (defrule domain-action-final
   "After the effects of an action have been applied, change it to FINAL."
   (declare (salience ?*SALIENCE-DOMAIN-APPLY*))
-  ?a <- (plan-action (id ?action-id) (state EFFECTS-APPLIED))
+  ?a <- (plan-action (id ?action-id) (state EFFECTS-APPLIED) (precondition ?pre))
   =>
   (modify ?a (state FINAL))
-  (domain-retract-grounding)
+  (domain-retract-grounding ?pre)
 )
 
 (defrule domain-action-failed
   "An action has failed."
   (declare (salience ?*SALIENCE-DOMAIN-APPLY*))
-  ?a <- (plan-action (id ?action-id) (state EXECUTION-FAILED))
+  ?a <- (plan-action (id ?action-id) (state EXECUTION-FAILED) (precondition ?pre))
   =>
   (modify ?a (state FAILED))
-  (domain-retract-grounding)
+  (domain-retract-grounding ?pre)
 )
 
 (defrule domain-check-if-action-is-executable-without-precondition
@@ -1153,4 +1154,24 @@
     (error-msg (str-cat "Predicate " ?id " is an equality precondition"
                         " but has " (length$ ?param-names) " parameters,"
                         " should be 2."))))
+)
+
+(defrule domain-grounding-cleanup-predicates
+  (grounded-pddl-predicate (grounding ?g))
+  (not (pddl-grounding (id ?g)))
+  =>
+  (do-for-all-facts ((?precond grounded-pddl-predicate))
+                    (eq ?precond:grounding ?g)
+    (retract ?precond)
+  )
+)
+
+(defrule domain-grounding-cleanup-formulas
+  (grounded-pddl-formula (grounding ?g))
+  (not (pddl-grounding (id ?g)))
+  =>
+  (do-for-all-facts ((?precond grounded-pddl-formula))
+                    (eq ?precond:grounding ?g)
+    (retract ?precond)
+  )
 )
