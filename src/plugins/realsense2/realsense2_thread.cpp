@@ -248,6 +248,23 @@ Realsense2Thread::start_camera()
 		  rgb_rs_pipeline_profile_.get_stream(RS2_STREAM_COLOR).as<rs2::video_stream_profile>();
 		rgb_intrinsics_              = rgb_stream.get_intrinsics();
 		rs2::color_sensor rgb_sensor = rs_device_.first<rs2::color_sensor>();
+		if (rgb_sensor.supports(RS2_OPTION_ENABLE_AUTO_EXPOSURE)) {
+			// Enable auto-exposure
+			rgb_sensor.set_option(RS2_OPTION_ENABLE_AUTO_EXPOSURE, 1); // 1 to enable, 0 to disable
+		} else {
+			logger->log_info(name(), "Auto-exposure not supported on this device");
+			// Set exposure time
+			if (rgb_sensor.supports(RS2_OPTION_EXPOSURE)) {
+				rgb_sensor.set_option(RS2_OPTION_EXPOSURE, 600);
+			} else {
+				logger->log_info(name(), "Exposure control not supported on this device");
+				std::cerr << "Exposure control not supported on this device" << std::endl;
+			}
+		}
+		// Increase gain if needed
+		if (rgb_sensor.supports(RS2_OPTION_GAIN)) {
+			rgb_sensor.set_option(RS2_OPTION_GAIN, 50.0);
+		}
 		logger->log_info(name(),
 		                 "RGB Height: %d RGB Width: %d FPS: %d PPX: %f PPY: %f FX: %f FY: %f MODEL: %i "
 		                 "COEFFS: %f %f %f %f %f",
