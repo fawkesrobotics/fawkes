@@ -6,7 +6,7 @@ info:
     Fawkes Backend Info REST API.
     Provides backend meta information to the frontend.
   contact:
-    name:  Tim Niemueller
+    name: Tim Niemueller
     email: niemueller@kbsg.rwth-aachen.de
   license:
     name: Apache 2.0
@@ -20,7 +20,7 @@ paths:
   /backends:
     get:
       tags:
-      - public
+        - public
       summary: Get list of backends.
       operationId: list_backends
       description: |

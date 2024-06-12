@@ -10,6 +10,7 @@
 #
 # Read the full text in the LICENSE.GPL file in the doc directory.
 
+exclude: ".*/attic/.*"
 # General
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -33,7 +34,8 @@ repos:
     hooks:
       - id: yamllint
         args: ['--config-file=config.yaml']
-        exclude: .buildkite/steps.yml
+        exclude: >-
+          ^(\.buildkite/steps\.yml|\.buildkite/steps\.d/20-webview-frontend\.yml)$
   - repo: https://github.com/jorisroovers/gitlint
     rev: v0.19.1
     hooks:
@@ -127,4 +129,4 @@ repos:
         name: check-license
         entry: etc/licscripts/check_license.bash
         language: system
-        exclude: '^.*(\.js|\.css|README|\.md|notes_on_migration|TODO|CMakeLists.txt|\.buildkite.*)$'
+        exclude: '^.*(\.js|\.css|README|\.md|notes_on_migration|TODO|CMakeLists.txt|\.buildkite.*|doc/DEPENDENCIES)$'

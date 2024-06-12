@@ -6,7 +6,7 @@ info:
     CLIPS REST API.
     Enables access to CLIPS environments.
   contact:
-    name:  Tim Niemueller
+    name: Tim Niemueller
     email: niemueller@kbsg.rwth-aachen.de
   license:
     name: Apache 2.0
@@ -20,7 +20,7 @@ paths:
   /clips/{env}/facts:
     get:
       tags:
-      - public
+        - public
       summary: get all facts
       operationId: get_facts
       description: |
@@ -63,7 +63,7 @@ paths:
   /clips/:
     get:
       tags:
-      - public
+        - public
       summary: list all environments
       operationId: list_environments
       description: |

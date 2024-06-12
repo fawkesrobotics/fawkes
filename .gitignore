@@ -52,3 +52,5 @@
 # Log and stats files
 *.log
 /buildstats.db
+
+*.mypy_cache/

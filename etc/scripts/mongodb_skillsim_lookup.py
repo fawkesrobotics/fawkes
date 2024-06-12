@@ -49,11 +49,11 @@ def time_diff_in_sec(end, start):
 def split_skill_string(skill):
     """Separate skill name and arguments from a fawkes skill string."""
     skill = skill.strip().replace(" ", "").replace("\n", "")
-    skill_regex = "([\w_-]+)\{(.*)\}"
+    skill_regex = r"([\w_-]+)\{(.*)\}"
     try_match = re.match(skill_regex, skill)
     if try_match:
         name, args_str = try_match.group(1, 2)
-        arg_regex = '([\w_-]+)=\\"([\w_-]+)\\"(?:,)?'
+        arg_regex = r'([\w_-]+)=\\"([\w_-]+)\\"(?:,)?'
         # split along the regex, filtering empty matches
         arg_list = list(filter(None, re.split(arg_regex, args_str)))
         # convert list to dictionary with even odd matching
@@ -154,7 +154,7 @@ class MongoInterface:
         for dur in durations:
             doc = {"outcome": 1, "error": "", "name": skill_name, "duration": dur}
             args_dict = dict()
-            if skill_args != None:
+            if skill_args is not None:
                 for arg in skill_args:
                     if len(arg) == 1:
                         args_dict[arg[0]] = ".*"
@@ -430,7 +430,7 @@ example call: ./mongodb_skillsim_lookup.py generate -d -n \
   """
     args = parser.parse_args(args=None if sys.argv[1:] else ["--help"])
     # validate inputs
-    if args == None:
+    if args is None:
         parser.exit(1)
 
     mongoIf = MongoInterface(args.mongodb_uri, args.db, args.collection, args.dry_run)

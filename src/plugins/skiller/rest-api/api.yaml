@@ -7,7 +7,7 @@ info:
     Visualize, monitor, and instruct the Skill Execution Run-Time of
     the Lua-based Behavior Engine.
   contact:
-    name:  Tim Niemueller
+    name: Tim Niemueller
     email: niemueller@kbsg.rwth-aachen.de
   license:
     name: Apache 2.0
@@ -21,7 +21,7 @@ paths:
   /skiller/skills:
     get:
       tags:
-      - public
+        - public
       summary: Get list of available skills.
       operationId: list_skills
       description: |
@@ -47,7 +47,7 @@ paths:
   /skiller/skills/{id}:
     get:
       tags:
-      - public
+        - public
       summary: Get information about a specific skill.
       operationId: get_skill
       description: |
@@ -81,7 +81,7 @@ paths:
 
     delete:
       tags:
-      - public
+        - public
       summary: Stop a currently running skill.
       operationId: stop_skill
       description: |
@@ -104,7 +104,7 @@ paths:
   /skiller/call:
     post:
       tags:
-      - public
+        - public
       summary: Execute a new skill.
       operationId: exec_skill
       description: |
