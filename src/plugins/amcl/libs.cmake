@@ -20,6 +20,10 @@
 #
 # *****************************************************************************
 
+# Function: add_amcl_extra_libs
+# Usage: add_amcl_extra_libs
+#
+# A function to add the extra depedencies for the amcl only needed in amcl.cmake
 function(add_amcl_extra_libs)
   # Additional standalone libraries built from within this plugin
 

@@ -26,6 +26,10 @@ remember_dependency(libxml)
 pkg_check_modules(glibmm-2.4 glibmm-2.4>=2.46)
 remember_dependency(glibmm-2.4)
 
+# Function: depend_on_libxml
+# Usage: depend_on_libxml(TARGET_NAME)
+#
+# Adds the dependency for libxml to the target.
 function(depend_on_libxml target)
   target_compile_definitions(${target} PRIVATE HAVE_LIBXMLPP)
   if(libxml_FOUND)

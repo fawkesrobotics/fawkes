@@ -25,6 +25,7 @@ include(yamlcpp)
 
 set(NAVGRAPH_DEPS ${YAMLCPP_DEPS};${EIGEN3_DEPS})
 
+# links target against the navgraph library
 function(depend_on_navgraph target)
   depend_on_yamlcpp(${target})
   depend_on_eigen3(${target})

@@ -77,6 +77,10 @@ if(BUILD_WITH_ROS_2)
   endif()
 endif()
 
+# Function: depend_on_ros2
+# Usage: depend_on_ros2(TARGET_NAME)
+#
+# Adds the target dependencies for ros2.
 function(depend_on_ros2 target)
   depend_on_ros2_libs(${target}
                       "rclcpp;rmw;rosidl_typesupport_interface;rcl_interfaces")
@@ -86,6 +90,10 @@ function(depend_on_ros2 target)
                                           -Wno-deprecated-declarations)
 endfunction()
 
+# Function: depend_on_ros2_libs
+# Usage: depend_on_ros2_libs(TARGET_NAME, LIB_NAME)
+#
+# Adds the ros2 Library as a dependency.
 function(depend_on_ros2_libs target libs)
   if(BUILD_WITH_ROS_2 AND ROS_2_FOUND)
     depend_on_find_package_libs(${target} "${libs}")

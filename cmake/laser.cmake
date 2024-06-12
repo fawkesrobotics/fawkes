@@ -21,6 +21,8 @@
 # *****************************************************************************
 
 set(URG_GBX_DEPS "flexiport;hokuyoaist")
+
+# Adds the urg library to the target
 function(depend_on_laser target)
   optional_depend_on_pkgconfig_libs(${target} "${URG_GBX_DEPS}"
                                     URG_GBX_DEPS_FOUND)

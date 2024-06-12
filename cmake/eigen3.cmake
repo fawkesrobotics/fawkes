@@ -22,6 +22,10 @@
 
 set(EIGEN3_DEPS "eigen3")
 
+# Function: depend_on_eigen3
+# Usage: depend_on_eigen3(TARGET_NAME)
+#
+# Add the dependencies for eigen3 to the target.
 function(depend_on_eigen3 target)
   depend_on_pkgconfig_libs(${target} eigen3)
   target_compile_options(

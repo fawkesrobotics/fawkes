@@ -26,6 +26,10 @@ if(urdfdom_headers_4_FOUND)
   set(HAVE_URDFDOM_TYPES_H 1)
 endif()
 
+# Function: deppend_on_kdl_parser
+# Usage: depend_on_kdl_parser(TARGET_NAME)
+#
+# Adds the necessary dependencies for kdl_parser to the target.
 function(depend_on_kdl_parser target)
   optional_depend_on_pkgconfig_libs(${target} urdfdom_headers_4
                                     urdfdom_headers_4_deps_found)
