@@ -162,11 +162,11 @@
 				)
 			)
 		)
-	else	
+	else
 		(bind ?rv (wm-split-string-sym ?id "/"))
 	)
 
-	(return ?rv)			 
+	(return ?rv)
 )
 
 (deffunction wm-key-arg-is-multifield (?key ?l)

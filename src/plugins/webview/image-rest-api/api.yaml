@@ -6,7 +6,7 @@ info:
     Fawkes Image REST API.
     Access images through a REST API.
   contact:
-    name:  Tim Niemueller
+    name: Tim Niemueller
     email: niemueller@kbsg.rwth-aachen.de
   license:
     name: Apache 2.0
@@ -20,7 +20,7 @@ paths:
   /images:
     get:
       tags:
-      - public
+        - public
       summary: Get list of images.
       operationId: list_images
       description: |
@@ -47,7 +47,7 @@ paths:
   /images/{id+}:
     get:
       tags:
-      - public
+        - public
       summary: Get an image.
       operationId: get_image
       description: Get an image.

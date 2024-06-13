@@ -126,7 +126,7 @@
 ;;      `smart-tabs-insinuate'.
 
 ;;; Code:
-
+
 (require 'advice)
 (require 'cl-lib)
 

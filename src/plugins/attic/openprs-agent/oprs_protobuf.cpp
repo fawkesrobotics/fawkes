@@ -201,7 +201,7 @@ OpenPRSProtobuf::oprs_pb_peer_destroy(long int peer_id)
 	}
 }
 
-/** Setup crypto for peer. 
+/** Setup crypto for peer.
  * @param peer_id ID of the peer to destroy
  * @param crypto_key encryption key
  * @param cipher cipher suite, see BufferEncryptor for supported types

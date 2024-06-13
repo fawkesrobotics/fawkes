@@ -21,4 +21,3 @@ ifeq ($(HAVE_PLAYERCC),1)
   CFLAGS_PLAYERCC  = $(shell $(PKGCONFIG) --cflags 'playerc++')
   LDFLAGS_PLAYERCC = $(shell $(PKGCONFIG) --libs 'playerc++')
 endif
-

@@ -77,7 +77,7 @@ CannotFinalizeThreadException::CannotFinalizeThreadException(Exception &e) : Exc
  * @param thread thread to prepare finalization for
  * @return true if nothing prevents finalization, false otherwise
  * @see Thread::prepare_finalize()
- * 
+ *
  *
  * @fn void ThreadFinalizer::finalize(Thread *thread) = 0
  * Finalize a thread.

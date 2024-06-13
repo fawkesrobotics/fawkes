@@ -48,8 +48,8 @@ end
 --- These  functions round x to the nearest integer, but round halfway cases away from zero.
 -- @param r number to round
 -- @return rounded number
-function math.round(r) 
-  if r >= 0 then return math.floor(r + .5) 
+function math.round(r)
+  if r >= 0 then return math.floor(r + .5)
   else return math.ceil(r - .5) end
 end
 
@@ -61,7 +61,7 @@ function math.normalize_mirror_rad(angle_rad)
   end
 end
 
---- Determines the distance between two angle provided as radians. 
+--- Determines the distance between two angle provided as radians.
 --  @param angle_rad1 first angle in radian
 --  @param angle_rad2 second angle in radian
 --  @return distance between the two angles

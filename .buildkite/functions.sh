@@ -71,7 +71,7 @@ git_repo_stash()
 }
 
 git_repo_changed()
-{		
+{
 		local LOCAL_HEAD=$(git rev-parse @)      || return 2
 		local REMOTE_HEAD=$(git rev-parse @{u})  || return 2
 		local BASE_HEAD=$(git merge-base @ @{u}) || return 2
@@ -79,7 +79,7 @@ git_repo_changed()
 		[ -n "$LOCAL_HEAD" ]  || return 3
 		[ -n "$REMOTE_HEAD" ] || return 3
 		[ -n "$BASE_HEAD" ]   || return 3
-		
+
 		if [ $LOCAL_HEAD = $REMOTE_HEAD ]; then
 				echo up-to-date
 				return 1
@@ -170,7 +170,7 @@ git_repo_pull()
 		if [ "$OP" != "no-fetch" ]; then
 				git_repo_fetch
 		fi
-		
+
 		local REMOTE_URL=$(git config --get remote.origin.url)
 		local REPO_DIR=$(pwd)
 		local REPO_NAME=$(basename $REPO_DIR)
@@ -217,7 +217,7 @@ git_repo_pull_cond_build()
 		local REPO_NAME=$(basename $REPO_DIR/)
 		local REPO_CHANGED=$(git_repo_changed) || exit $?
 		local BUILD_CMD=${1:-make -j4 all gui}
-		
+
 		case "$REPO_CHANGED" in
 				pull)
 						git_repo_pull no-fetch || exit $?
@@ -266,7 +266,7 @@ print_sechead()
 		if (( ( HALF_WIDTH_L * 2 + ${#SECHEAD} ) < 64 )); then
 				HALF_WIDTH_R=$(( HALF_WIDTH_R + 1 ))
 		fi
-	  
+
 		echo -e "\n"
 		echo -e "\033[1;32m##########################################################################\033[0m"
 		printf "\\033[1;32m###\\033[0m %${HALF_WIDTH_L}s \\033[1;33m%s\\033[0m %${HALF_WIDTH_R}s \\033[1;32m###\\033[0m\n" "" "$SECHEAD" ""
@@ -343,7 +343,7 @@ patch_check_needs_clean_all()
 {
 		local PATCHES=$@
 		local APPLIED_ANY=1
-		
+
 		for p in $PATCHES; do
 				if patch_check_needs_clean $p; then
 						return 0

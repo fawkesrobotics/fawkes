@@ -33,4 +33,3 @@ ifeq ($(HAVE_PROTOBUF),1)
 endif
 
 endif # __buildsys_protobuf_mk_
-

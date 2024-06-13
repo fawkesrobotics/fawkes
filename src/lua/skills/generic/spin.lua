@@ -65,4 +65,3 @@ end
 function SPIN:exit()
    send_transrot(0, 0, 0)
 end
-

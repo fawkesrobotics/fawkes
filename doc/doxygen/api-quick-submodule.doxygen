@@ -5,4 +5,3 @@
 @INCLUDE      = base.doxygen
 @INCLUDE      = quick.doxygen
 @INCLUDE      = submodule.doxygen
-

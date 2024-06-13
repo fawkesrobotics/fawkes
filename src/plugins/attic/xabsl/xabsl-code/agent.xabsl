@@ -4,4 +4,3 @@ include "symbols.xabsl";
 include "option-intercept.xabsl";
 
 agent interceptor("Interceptor", intercept_ball);
-

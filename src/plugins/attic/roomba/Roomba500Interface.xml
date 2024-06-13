@@ -87,7 +87,7 @@
   </constants>
   <data>
     <comment>
-      Roomba 500 hardware interface.      
+      Roomba 500 hardware interface.
     </comment>
     <field type="Mode" name="mode">Open Interface mode.</field>
     <field type="bool" name="wheel_drop_left">Left wheel drop sensor.</field>
@@ -157,7 +157,7 @@
       bumper signal.</field>
     <field type="uint16" name="light_bump_front_right">Raw front right
       bumper signal.</field>
-    <field type="uint16" name="light_bump_right">Raw right bumper signal.</field>  
+    <field type="uint16" name="light_bump_right">Raw right bumper signal.</field>
     <field type="InfraredCharacter" name="ir_opcode_left">
       Left receiver opcode.</field>
     <field type="InfraredCharacter" name="ir_opcode_right">

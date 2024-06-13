@@ -18,4 +18,3 @@ ifeq ($(HAVE_BLUEZ),1)
   CFLAGS_BLUEZ  = -DHAVE_BLUEZ$(shell $(PKGCONFIG) --cflags 'bluez')
   LDFLAGS_BLUEZ = $(shell $(PKGCONFIG) --libs 'bluez')
 endif
-

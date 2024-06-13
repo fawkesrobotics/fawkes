@@ -193,4 +193,3 @@ PLUGINS_build += $(PLUGINDIR)/ros2.so \
 #                 #$(PLUGINDIR)/ros2-position-3d.so
 
 include $(BUILDSYSDIR)/base.mk
-

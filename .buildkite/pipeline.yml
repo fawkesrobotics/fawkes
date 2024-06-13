@@ -6,29 +6,24 @@ merged-pr-plugin: &merged-pr-plugin
     mode: checkout
 
 podman-plugin-base: &podman-plugin-base
-  image: quay.io/fawkesrobotics/fawkes-builder:f39-ros2
+  image: quay.io/fawkesrobotics/fawkes-builder:f40-ros2
   always-pull: true
   debug: true
   privileged: true
   environment: ["BUILDKITE", "BUILDKITE_LABEL"]
 
 steps:
-  - label: ":memo: Linter"
-    command: .buildkite/lint
+  - label: ":memo: pre-commit-checks"
+    commands:
+      - pre-commit run --all-files --hook-stage manual
     plugins:
       - *merged-pr-plugin
       - compono/podman#main:
           <<: *podman-plugin-base
           environment:
-            - BUILDKITE
-            - BUILDKITE_REPO
-            - BUILDKITE_BRANCH
-            - BUILDKITE_COMMIT
-            - BUILDKITE_LABEL
-            - BUILDKITE_BUILD_CREATOR
-            - BUILDKITE_BUILD_CREATOR_EMAIL
-            # the following is set by the agent environment (ansible)
-            - SSH_DEPLOY_PRIVKEY_COMMITTERS
+            - PRE_COMMIT_HOME=/var/cache/ccache/.pre-commit
+          volumes:
+            - "/var/lib/buildkite-agent/ccache_fedora:/var/cache/ccache:z"
 
   - wait
 

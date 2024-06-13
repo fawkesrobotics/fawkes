@@ -72,4 +72,3 @@ end
 function BACK_OFF:init()
    self.args["relgoto"] = {x=-self.fsm.vars.dist, y=0, ori=0, backwards=true}
 end
-

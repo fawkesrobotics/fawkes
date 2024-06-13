@@ -81,7 +81,7 @@ end
 
 --- Execute init routines.
 -- This executes the init method. This may contain some general code
--- executed for every state for derived states. 
+-- executed for every state for derived states.
 -- @param ... Any parameters, passed to the init() function.
 function JumpState:do_init(...)
    local rv = { self:try_transitions(true) }
@@ -307,7 +307,7 @@ end
 -- @param time in milliseconds
 -- @return time difference
 function difftime(starttime)
-	local	time=fawkes.Time:new() 
+	local	time=fawkes.Time:new()
 	return (time:in_msec() - starttime)
 end
 

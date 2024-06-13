@@ -112,7 +112,7 @@ Firestation::Firestation(Glib::RefPtr<Gtk::Builder> builder)
 #if GTK_VERSION_GE(3, 0)
 	Glib::RefPtr<Gtk::FileFilter> filter_jpg = Gtk::FileFilter::create();
 #else
-	Gtk::FileFilter *filter_jpg   = Gtk::manage(new Gtk::FileFilter());
+	Gtk::FileFilter *filter_jpg = Gtk::manage(new Gtk::FileFilter());
 #endif
 	filter_jpg->set_name("JPEG");
 	filter_jpg->add_pattern("*.jpg");
@@ -1188,7 +1188,7 @@ Firestation::mc_simulate_clicks()
 		} // EDGE_DETECTION
 		for (int j = 1; j <= 2 * 8; ++j) {
 			image_click(NULL);
-		}                  // COMBINATION
+		} // COMBINATION
 		image_click(NULL); // PRE_MARKING
 		image_click(NULL); // FINAL_MARKING
 	}

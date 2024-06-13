@@ -44,4 +44,3 @@ fi
 endef
 
 endif # __buildsys_download_mk_
-

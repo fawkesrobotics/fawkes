@@ -114,5 +114,3 @@ ifeq ($(HAVE_BULLET),1)
     CFLAGS_TF += $(CFLAGS_CPP11)
   endif
 endif
-
-

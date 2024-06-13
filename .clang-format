@@ -5,7 +5,7 @@ AlignAfterOpenBracket: Align
 AlignConsecutiveAssignments: true
 AlignConsecutiveDeclarations: true
 AlignEscapedNewlines: Left
-AlignOperands:   true
+AlignOperands: true
 AlignTrailingComments: true
 AllowAllParametersOfDeclarationOnNextLine: false
 AllowShortBlocksOnASingleLine: true
@@ -20,21 +20,21 @@ AlwaysBreakTemplateDeclarations: true
 BinPackArguments: false
 BinPackParameters: false
 BraceWrapping:
-  AfterClass:            true
+  AfterClass: true
   AfterControlStatement: false
-  AfterEnum:             false
-  AfterFunction:         true
-  AfterNamespace:        false
-  AfterObjCDeclaration:  false
-  AfterStruct:           true
-  AfterUnion:            false
-  AfterExternBlock:      false
-  BeforeCatch:           false
-  BeforeElse:            false
-  IndentBraces:          false
-  SplitEmptyFunction:    true
-  SplitEmptyRecord:      true
-  SplitEmptyNamespace:   false
+  AfterEnum: false
+  AfterFunction: true
+  AfterNamespace: false
+  AfterObjCDeclaration: false
+  AfterStruct: true
+  AfterUnion: false
+  AfterExternBlock: false
+  BeforeCatch: false
+  BeforeElse: false
+  IndentBraces: false
+  SplitEmptyFunction: true
+  SplitEmptyRecord: true
+  SplitEmptyNamespace: false
 BreakBeforeBraces: Custom
 BreakBeforeInheritanceComma: false
 BreakBeforeTernaryOperators: true
@@ -51,7 +51,7 @@ ConstructorInitializerIndentWidth: 0
 Cpp11BracedListStyle: true
 ContinuationIndentWidth: 2
 DerivePointerAlignment: false
-DisableFormat:   false
+DisableFormat: false
 ExperimentalAutoDetectBinPacking: false
 FixNamespaceComments: true
 ForEachMacros:
@@ -60,26 +60,26 @@ ForEachMacros:
   - BOOST_FOREACH
 IncludeBlocks: Regroup
 IncludeCategories:
-  - Regex:    '^".*"'
+  - Regex: '^".*"'
     Priority: 1
-  - Regex:    '^<.*/.*\.h>'
+  - Regex: '^<.*/.*\.h>'
     Priority: 2
-  - Regex:    '^<.*>'
+  - Regex: '^<.*>'
     Priority: 3
-  - Regex:    '^<.*/.*\.h>'
+  - Regex: '^<.*/.*\.h>'
     Priority: 4
-  - Regex:    '.*'
+  - Regex: '.*'
     Priority: 5
 IncludeIsMainRegex: '(Test)?$'
 IndentCaseLabels: false
 IndentPPDirectives: AfterHash
-IndentWidth:     2
+IndentWidth: 2
 IndentWrappedFunctionNames: false
 JavaScriptQuotes: Leave
 JavaScriptWrapImports: true
 KeepEmptyLinesAtTheStartOfBlocks: false
 MacroBlockBegin: ''
-MacroBlockEnd:   ''
+MacroBlockEnd: ''
 MaxEmptyLinesToKeep: 1
 NamespaceIndentation: None
 ObjCBlockIndentWidth: 2
@@ -94,12 +94,12 @@ PenaltyExcessCharacter: 1000
 PenaltyReturnTypeOnItsOwnLine: 60
 PointerAlignment: Right
 RawStringFormats:
-  - Language:        TextProto
-    BasedOnStyle:    google
+  - Language: TextProto
+    BasedOnStyle: google
     Delimiters:
       - pb
 ReflowComments: false
-SortIncludes:    true
+SortIncludes: true
 SortUsingDeclarations: true
 SpaceAfterCStyleCast: false
 SpaceAfterTemplateKeyword: true
@@ -107,12 +107,12 @@ SpaceBeforeAssignmentOperators: true
 SpaceBeforeParens: ControlStatements
 SpaceInEmptyParentheses: false
 SpacesBeforeTrailingComments: 1
-SpacesInAngles:  false
+SpacesInAngles: false
 SpacesInContainerLiterals: false
 SpacesInCStyleCastParentheses: false
 SpacesInParentheses: false
 SpacesInSquareBrackets: false
-Standard:        Cpp11
+Standard: Cpp11
 TabWidth: 2
 UseTab: ForIndentation
 ...

@@ -347,7 +347,7 @@ struct waiter_thread_params
 	/** timeout in nsec */
 	uint timeout_nsec = 0;
 	/** current status of the thread */
-	atomic<ThreadStatus> status = ThreadStatus::PENDING ;
+	atomic<ThreadStatus> status = ThreadStatus::PENDING;
 	/** Mutex to protect cond_running */
 	Mutex mutex_running;
 	/** WaitCondition to indicate that the thread is running */

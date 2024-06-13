@@ -101,7 +101,7 @@ function transform6D(src_pos, src_frame, target_frame)
       print_error("tfutils.transform6D: invalid input data: tolua.type(src_pos) = %s", tolua.type(src_pos.ori))
       return nil
    end
-   
+
    to_sp = fawkes.tf.StampedPose:new()
    tf:transform_pose(target_frame, from_sp, to_sp)
 
@@ -135,9 +135,3 @@ function tf_age(src_frame, target_frame)
    tf:lookup_transform(src_frame, target_frame, transform)
    return (fawkes.Time:new() - transform.stamp)
 end
-
-
-
-
-
-

@@ -37,4 +37,3 @@ $(OBJDIR):
 
 .PHONY: nothing
 nothing: ; @:
-

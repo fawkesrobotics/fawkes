@@ -25,21 +25,25 @@ set(BUILD_WITH_ROS_2
 
 # Fetch the ROS_DISTRO environment variable
 if(DEFINED ENV{ROS_DISTRO})
-    set(ROS_DISTRO $ENV{ROS_DISTRO})
+  set(ROS_DISTRO $ENV{ROS_DISTRO})
 else()
-    set(BUILD_WITH_ROS_2 OFF CACHE BOOL "Build with ROS 2" FORCE)
-    message(WARNING "ROS_DISTRO environment variable is not set. BUILD_WITH_ROS_2 is forced to OFF.")
+  set(BUILD_WITH_ROS_2 OFF CACHE BOOL "Build with ROS 2" FORCE)
+  message(WARNING "ROS_DISTRO environment variable is not set. \
+BUILD_WITH_ROS_2 is forced to OFF.")
 endif()
 
-# Construct the ROS_2_INSTALL_DIR path using the ROS_DISTRO variable if BUILD_WITH_ROS_2 is ON
+# Construct the ROS_2_INSTALL_DIR path using the ROS_DISTRO variable
+# if BUILD_WITH_ROS_2 is ON
 if(BUILD_WITH_ROS_2)
-    set(ROS_2_INSTALL_DIR "/usr/lib64/ros2-${ROS_DISTRO}" CACHE STRING "ROS 2 install directory")
+  set(ROS_2_INSTALL_DIR "/usr/lib64/ros2-${ROS_DISTRO}" CACHE STRING
+    "ROS 2 install directory")
 
-    # Check if the constructed ROS_2_INSTALL_DIR exists
-    if(NOT EXISTS "${ROS_2_INSTALL_DIR}")
-        set(BUILD_WITH_ROS_2 OFF CACHE BOOL "Build with ROS 2" FORCE)
-        message(WARNING "The directory of ROS_2_INSTALL_DIR ( ${ROS_2_INSTALL_DIR} ) does not exist. BUILD_WITH_ROS_2 is forced to OFF.")
-    endif()
+  # Check if the constructed ROS_2_INSTALL_DIR exists
+  if(NOT EXISTS "${ROS_2_INSTALL_DIR}")
+    set(BUILD_WITH_ROS_2 OFF CACHE BOOL "Build with ROS 2" FORCE)
+    message(WARNING "The directory of ROS_2_INSTALL_DIR ( \
+${ROS_2_INSTALL_DIR} ) does not exist. BUILD_WITH_ROS_2 is forced to OFF.")
+  endif()
 endif()
 
 if(BUILD_WITH_ROS_2)
@@ -77,6 +81,10 @@ if(BUILD_WITH_ROS_2)
   endif()
 endif()
 
+# Function: depend_on_ros2
+# Usage: depend_on_ros2(TARGET_NAME)
+#
+# Adds the target dependencies for ros2.
 function(depend_on_ros2 target)
   depend_on_ros2_libs(${target}
                       "rclcpp;rmw;rosidl_typesupport_interface;rcl_interfaces")
@@ -86,6 +94,10 @@ function(depend_on_ros2 target)
                                           -Wno-deprecated-declarations)
 endfunction()
 
+# Function: depend_on_ros2_libs
+# Usage: depend_on_ros2_libs(TARGET_NAME, LIB_NAME)
+#
+# Adds the ros2 Library as a dependency.
 function(depend_on_ros2_libs target libs)
   if(BUILD_WITH_ROS_2 AND ROS_2_FOUND)
     depend_on_find_package_libs(${target} "${libs}")

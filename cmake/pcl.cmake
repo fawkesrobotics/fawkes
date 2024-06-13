@@ -42,6 +42,11 @@ endif()
 if(EXISTS "${CMAKE_SYSROOT}/usr/include/vtk/vtkVersion.h")
   set(CFLAGS_VTK -I/usr/include/vtk)
 endif()
+
+# Function to depend on PCL
+# usage: depend_on_pcl(target)
+#
+# Adds the necessary include directories and libraries to the target
 function(depend_on_pcl target)
   depend_on_pkgconfig_libs(${target} ${PCL_COMMON})
   depend_on_eigen3(${target})
@@ -51,6 +56,7 @@ function(depend_on_pcl target)
                       -Wno-overloaded-virtual -Wno-array-bounds)
 endfunction()
 
+# Function to depend on PCL extra libs
 function(depend_on_pcl_extra_libs target libs)
   set(pcl_libs)
   foreach(pcl_lib ${libs})

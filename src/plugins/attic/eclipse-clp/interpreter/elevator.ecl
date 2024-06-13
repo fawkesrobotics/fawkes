@@ -65,8 +65,8 @@ poss(turnoff(N),S) :- golog:holds(on(N),S).
 
 /* SSAs for primitive fluents */
 /*
-holds(current_floor(M),do(E,S)) :- 
-	E = up(M); 
+holds(current_floor(M),do(E,S)) :-
+	E = up(M);
 	E = down(M);
 	not E = up(N), not E = down(N), holds(current_floor(M), S).
 
@@ -94,8 +94,8 @@ holds(current_floor(4),s0) :- write('initial 3').
 
 :- local holds/2.
 holds(current_floor(4),s0).
-holds(current_floor(M),doo(E,S)) :- 
-	E = up(M); 
+holds(current_floor(M),doo(E,S)) :-
+	E = up(M);
 	E = down(M);
 	not E = up(N), not E = down(N), golog:holds(current_floor(M), S).
 holds(on(3),s0).
@@ -111,15 +111,15 @@ run :-
       terminate(_),!,
       log_info("Are you here?"),
       log_info("Terminated")
-      )      
+      )
       ;*/
       ensure_attached,
-      log_info("Request: doo(control,s0,S)"), 
+      log_info("Request: doo(control,s0,S)"),
       trace(doo(control,s0,S)),
 		  log_info("Result: %w",[S]),
       repeat, %will loop infinitly, needed for testing tktool attachment
-      fail   
+      fail
     ).
-		
+
 
 :- log_info("Loading elevator agent done").

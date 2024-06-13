@@ -92,7 +92,7 @@ BoxRelative::BoxRelative(unsigned int image_width,
   initialStateVarianceBox[1][0] = 0.00;
   initialStateVarianceBox[0][1] = 0.00;
   initialStateVarianceBox[1][1] = DEFAULT_Y_VARIANCE;
-  kalman_filter->setInitialStateCovariance( initialStateVarianceBox ); 
+  kalman_filter->setInitialStateCovariance( initialStateVarianceBox );
 
   // process noise for box pos kf
   kalman_filter->setProcessCovariance( DEFAULT_X_VARIANCE, DEFAULT_Y_VARIANCE );

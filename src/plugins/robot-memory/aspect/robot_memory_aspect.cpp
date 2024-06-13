@@ -1,6 +1,6 @@
 /***************************************************************************
  *  robot_memory_aspect.cpp - Aspect providing the robot memory
- *    
+ *
  *
  *  Created: Aug 23, 2016 1:26:08 PM 2016
  *  Copyright  2016  Frederik Zwilling

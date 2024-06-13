@@ -63,4 +63,3 @@ class NavGraph
 NavGraph *  load_yaml_navgraph(std::string filename);
 
 }
-

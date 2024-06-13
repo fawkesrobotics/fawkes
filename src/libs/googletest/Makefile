@@ -71,4 +71,3 @@ info_sysgtest:
 endif
 
 include $(BUILDSYSDIR)/base.mk
-

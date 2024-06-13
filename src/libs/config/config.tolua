@@ -35,10 +35,10 @@ class Configuration
     ~ValueIterator();
     bool          next();
     bool          valid();
-    
+
     const char *  path();
     const char *  type();
-    
+
     bool          is_float();
     bool          is_uint();
     bool          is_int();

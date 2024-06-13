@@ -35,7 +35,7 @@
 				First try the CLOSEST_EDGE method. If that yields no result,
 				use the CLOSEST_NODE method as a fallback.
       </item>
-    </enum> 
+    </enum>
     <enum name="FilterType">
       <comment>Post-processing filtering type.</comment>
       <item name="FILTER_EDGES_BY_MAP">
@@ -79,7 +79,7 @@
 				The edge is added as-is, it may overlap or intersect with
 				other edges.
       </item>
-    </enum> 
+    </enum>
     <enum name="Algorithm">
       <comment>
 				Available generator algorithms.
@@ -99,7 +99,7 @@
 	      - add-diagonals: enable adding of diagonal edges in grid cells
 	        (bool, optional, default: false)
       </item>
-    </enum> 
+    </enum>
   </constants>
   <data>
     <comment>
@@ -209,7 +209,7 @@
     <comment></comment>
     <field type="string" name="name" length="64">
       ID of the obstacle to remove.
-    </field>    
+    </field>
   </message>
   <message name="AddPointOfInterest">
     <comment>
@@ -289,7 +289,7 @@
     <comment>Remove a specific point of interest.</comment>
     <field type="string" name="name" length="64">
       ID of the obstacle to remove.
-    </field>    
+    </field>
   </message>
   <message name="Compute">
     <comment>

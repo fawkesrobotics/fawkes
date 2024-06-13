@@ -105,4 +105,3 @@ endif
 $(LUALIBDIR)/fawkesutils.$(SOEXT): | $(LIBDIR)/libfawkesutils.$(SOEXT)
 
 include $(BUILDSYSDIR)/base.mk
-

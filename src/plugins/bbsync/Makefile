@@ -26,4 +26,3 @@ PLUGINS_all = $(PLUGINDIR)/bbsync.so
 PLUGINS_build = $(PLUGINS_all)
 
 include $(BUILDSYSDIR)/base.mk
-

@@ -29,9 +29,9 @@ namespace firevision {
 
 #define RGB_PIXEL_SIZE 3
 #define RGB_PIXEL_AT(RGB, width, x, y) \
-	((RGB_t *)(RGB + ((y) * (width)*RGB_PIXEL_SIZE) + (x)*RGB_PIXEL_SIZE))
+	((RGB_t *)(RGB + ((y) * (width) * RGB_PIXEL_SIZE) + (x) * RGB_PIXEL_SIZE))
 #define RGB_CLEAR_PIXEL(RGB, width, x, y) \
-	memset(RGB + ((y) * (width)*RGB_PIXEL_SIZE) + (x)*RGB_PIXEL_SIZE, 0, RGB_PIXEL_SIZE);
+	memset(RGB + ((y) * (width) * RGB_PIXEL_SIZE) + (x) * RGB_PIXEL_SIZE, 0, RGB_PIXEL_SIZE);
 #define RGB_RED_AT(RGB, width, x, y) (RGB_PIXEL_AT(RGB, (width), (x), (y))->R)
 #define RGB_GREEN_AT(RGB, width, x, y) (RGB_PIXEL_AT(RGB, (width), (x), (y))->G)
 #define RGB_BLUE_AT(RGB, width, x, y) (RGB_PIXEL_AT(RGB, (width), (x), (y))->B)

@@ -36,4 +36,3 @@ described  via the  usage of errno.   On the other  hand these  are generic
 software construction exceptions like null pointer exceptions.
 
 Rule of thumb: Use Fawkes Core Library, don't hack it.
-

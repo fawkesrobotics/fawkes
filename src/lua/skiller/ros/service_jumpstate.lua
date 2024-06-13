@@ -52,7 +52,7 @@ end
 
 --- Set parameters of message.
 -- Given a table of input values this function iterates over the messages
--- fields and sets the message value fields appropriately. If the input 
+-- fields and sets the message value fields appropriately. If the input
 local function set_params(msg, input)
    for _, f in ipairs(msg.spec.fields) do
       if f.is_builtin then

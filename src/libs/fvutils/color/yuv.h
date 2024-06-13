@@ -28,7 +28,7 @@
 namespace firevision {
 
 #define YUV422PA_MACROPIXEL_AT(YUV, width, x, y) \
-	((unsigned char *)YUV + (y) * (width)*2 + ((x) - ((x) % 2)) * 2)
+	((unsigned char *)YUV + (y) * (width) * 2 + ((x) - ((x) % 2)) * 2)
 
 #define YUV422_PLANAR_Y_AT(YUV, width, x, y) *(YUV + (y) * (width) + (x))
 

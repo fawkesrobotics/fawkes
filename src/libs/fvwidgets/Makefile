@@ -59,4 +59,3 @@ HDRS_libfvwidgets = $(patsubst %.o,%.h,$(OBJS_libfvwidgets))
 OBJS_all = $(OBJS_libfvwidgets)
 
 include $(BUILDSYSDIR)/base.mk
-

@@ -9,7 +9,7 @@
     <field type="string" length="1024" name="error">Error of last query</field>
     <field type="string" length="1024" name="result">Result of last query</field>
   </data>
-  
+
   <message name="Query">
     <comment>
       Query to execute.

@@ -121,7 +121,7 @@ local skill_env_template = {
    clock    = clock,
    tf       = tf,
 	 blackboard = blackboard,
-	 
+
    -- Packages
    math     = math,
    os       = { date = os.date, getenv = os.getenv, time = os.time, difftime = os.difftime },
@@ -396,7 +396,7 @@ function get_error(machine)
       else
          rv_human = rv_human .. ", "
       end
-      
+
       rv_human = rv_human .. e[1] .. " (" .. e[2] .. ")"
    end
 
@@ -538,7 +538,7 @@ function update_grapher_config(skdbg, graphdir, colored)
 	 params_changed = true
       end
    end
-	 
+
    return params_changed
 end
 

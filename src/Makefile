@@ -24,4 +24,3 @@ include $(BUILDSYSDIR)/rules.mk
 # error. This is also necessary for working parallel build (i.e. for dual core)
 mainapp plugins tools: libs
 tools: mainapp plugins
-

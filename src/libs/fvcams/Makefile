@@ -150,4 +150,3 @@ warning_v4l2:
 endif
 
 include $(BUILDSYSDIR)/base.mk
-

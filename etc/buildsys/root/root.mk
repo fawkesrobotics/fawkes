@@ -32,4 +32,3 @@ include $(BUILDSYSDIR)/root/git-hooks.mk
 include $(BUILDSYSDIR)/root/test.mk
 
 endif # __buildsys_root_root_mk_
-

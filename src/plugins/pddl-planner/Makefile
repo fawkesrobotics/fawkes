@@ -2,7 +2,7 @@
 #         Makefile Build System for Fawkes: pddl-planner Plugin
 #                            -------------------
 #   Created on Wed Dec  7 19:09:44 2016
- 
+
 #   Copyright (C) 2016 by Frederik Zwilling
 #
 #*****************************************************************************

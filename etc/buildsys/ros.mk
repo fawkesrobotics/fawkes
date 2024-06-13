@@ -21,7 +21,7 @@ ifndef __buildsys_ros_mk_
 __buildsys_ros_mk_ := 1
 
 HAVE_ROSVERSION := $(if $(shell type -p rosversion; echo $${?/1/}),1,0)
-HAVE_PKGCONFIG := 
+HAVE_PKGCONFIG :=
 
 ifeq ($(HAVE_ROSVERSION), 1)
   ROS_VERSION = $(shell rosversion -d)
@@ -71,4 +71,3 @@ ifeq ($(HAVE_ROS),1)
 endif
 
 endif # __buildsys_ros_mk_
-

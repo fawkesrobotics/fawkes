@@ -27,7 +27,7 @@ LIBS_realsense = m fawkescore fawkesutils fawkesaspects fawkesbaseapp \
                       fawkesblackboard fawkesinterface \
                       fawkespcl_utils SwitchInterface
 
-OBJS_realsense = realsense_plugin.o realsense_thread.o 
+OBJS_realsense = realsense_plugin.o realsense_thread.o
 
 OBJS_all    = $(OBJS_realsense)
 PLUGINS_all = $(PLUGINDIR)/realsense.$(SOEXT)

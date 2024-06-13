@@ -59,7 +59,7 @@ OmniRelative::OmniRelative(MirrorModel *mirror_model)
   initialStateVarianceBall[1][0] = 0.00;
   initialStateVarianceBall[0][1] = 0.00;
   initialStateVarianceBall[1][1] = DEFAULT_Y_VARIANCE;
-  kalman_filter->setInitialStateCovariance( initialStateVarianceBall ); 
+  kalman_filter->setInitialStateCovariance( initialStateVarianceBall );
 
   // process noise for ball pos kf
   kalman_filter->setProcessCovariance( DEFAULT_X_VARIANCE, DEFAULT_Y_VARIANCE );

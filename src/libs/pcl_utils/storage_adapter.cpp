@@ -39,7 +39,7 @@ namespace pcl_utils {
  * Transform to specific PointCloudStorageAdapter.
  * @return transformed PointCloudStorageAdapter
  * @exception Exception thrown if storage adapter is not of requested point type or does not exist
- * 
+ *
  * @fn StorageAdapter * StorageAdapter::clone() const
  * Clone this storage adapter.
  * @return cloned copy

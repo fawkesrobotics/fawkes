@@ -310,7 +310,7 @@ ifeq ($(HAVE_ROS),1)
       $(LDFLAGS) -lpthread
       PLUGINS_build += $(PLUGINDIR)/ros-skiller.so
     else
-      WARN_TARGETS += warning_actionlib      
+      WARN_TARGETS += warning_actionlib
     endif
   else
     WARN_TARGETS += warning_fawkes_msgs
@@ -372,4 +372,3 @@ warning_imu:
 endif
 
 include $(BUILDSYSDIR)/base.mk
-

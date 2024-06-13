@@ -42,4 +42,3 @@ endif
 $(LUALIBDIR)/fawkesblackboard.$(SOEXT): | $(LIBDIR)/libfawkesblackboard.$(SOEXT)
 
 include $(BUILDSYSDIR)/base.mk
-

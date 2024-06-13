@@ -48,4 +48,3 @@ warning_tolua_wrapper:
 endif # OBJSSUBMAKE is 1
 
 endif # __buildsys_lua_mk_
-

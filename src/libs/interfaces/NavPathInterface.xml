@@ -56,8 +56,8 @@
     <field type="string" length="64" name="path_node_38">Path Node</field>
     <field type="string" length="64" name="path_node_39">Path Node</field>
     <field type="string" length="64" name="path_node_40">Path Node</field>
-   
+
     <field type="uint32" name="path_length">Length of path</field>
-  
+
   </data>
 </interface>

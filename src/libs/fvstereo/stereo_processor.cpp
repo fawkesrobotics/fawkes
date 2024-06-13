@@ -97,7 +97,7 @@ namespace firevision {
  * This will return the YUV buffer of the reference image. This is only available
  * after calling calculate_yuv().
  * @return YUV buffer of the reference image
- * 
+ *
  * @fn virtual unsigned char *  StereoProcessor::yuv_buffer_left() = 0
  * Get YUV-formatted buffer of left camera.
  * This will return the YUV buffer of the auxiliary image. This is only available

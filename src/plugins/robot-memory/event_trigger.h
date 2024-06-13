@@ -1,6 +1,6 @@
 /***************************************************************************
  *  event_trigger.h - Class for handling EventTriggers (such as a subscriber)
- *    
+ *
  *
  *  Created: 7:03:38 PM 2016
  *  Copyright  2016  Frederik Zwilling

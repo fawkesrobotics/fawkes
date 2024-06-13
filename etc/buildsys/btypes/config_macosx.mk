@@ -25,4 +25,3 @@ LIBDIRS_BASE    += /opt/local/lib
 LDFLAGS_MINIMUM  = $(addprefix -L,$(wildcard $(LIBDIRS_BASE))) -rdynamic -fPIC $(LDFLAGS_OPENMP) -lstdc++
 LDFLAGS_SHARED   = -dynamiclib
 SOEXT            = dylib
-

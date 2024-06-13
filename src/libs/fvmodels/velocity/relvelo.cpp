@@ -71,7 +71,7 @@ VelocityFromRelative::VelocityFromRelative(RelativePositionModel *model,
   initialStateVarianceBall[1][0] =    0.0;
   initialStateVarianceBall[0][1] =    0.0;
   initialStateVarianceBall[1][1] = var_meas_y;
-  kalman_filter->setInitialStateCovariance( initialStateVarianceBall ); 
+  kalman_filter->setInitialStateCovariance( initialStateVarianceBall );
 
   // process noise for ball pos kf, initial estimates, refined in calc()
   kalman_filter->setProcessCovariance( var_proc_x, var_proc_y );

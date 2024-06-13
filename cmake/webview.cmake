@@ -22,6 +22,10 @@
 
 set(WEBVIEW_DEPS "libmicrohttpd;RapidJSON")
 
+# Function: depend_on_webview
+# Usage: depend_on_webview(TARGET_NAME)
+#
+# Adds the dependency for the webview plugin to the target.
 function(depend_on_webview target)
   target_link_libraries(${target} ${libmicrohttpd_LDFLAGS} ${RAPIDJOSN_LDFLAGS})
   target_compile_options(${target} PRIVATE ${libmicrohttpd_CFLAGS}

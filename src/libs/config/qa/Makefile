@@ -31,7 +31,7 @@ OBJS_qa_config_yaml = qa_yaml.o
 LIBS_qa_config_yaml = fawkescore fawkesconfig
 
 OBJS_all = $(OBJS_qa_config_sqlite) $(OBJS_qa_config_net_list_content) \
-	   $(OBJS_qa_config_yaml) 
+	   $(OBJS_qa_config_yaml)
 # $(OBJS_qa_config_change_handler)
 BINS_all = $(BINDIR)/qa_config_sqlite 				\
 	$(BINDIR)/qa_config_yaml 				\
@@ -41,4 +41,3 @@ BINS_all = $(BINDIR)/qa_config_sqlite 				\
 BINS_build = $(BINS_all)
 
 include $(BUILDSYSDIR)/base.mk
-

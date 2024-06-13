@@ -74,7 +74,7 @@ NavGraphNodeConstraint::name()
 /** Perform compuations before graph search and to indicate re-planning.
  * The compute method is called on all constraints just before a path
  * search is performed and to check if re-planning should be tried.
- * 
+ *
  * It can be used for example to cache results for the coming search
  * run. The search guarantees that for each complete search run
  * compute() is called once and only once and that no two search runs

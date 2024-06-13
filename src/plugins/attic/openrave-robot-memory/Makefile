@@ -2,7 +2,7 @@
 #         Makefile Build System for Fawkes: openrave-robot-memory Plugin
 #                            -------------------
 #   Created on Thu Nov 24 13:14:33 2016
- 
+
 #   Copyright (C) 2016 by Frederik Zwilling
 #
 #*****************************************************************************

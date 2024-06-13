@@ -33,7 +33,7 @@ class Uuid
   std::string get_string() const;
 };
 
-class Interface 
+class Interface
 {
   bool                    oftype(const char *interface_type) const;
   const void *            datachunk() const;

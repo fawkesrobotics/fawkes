@@ -60,7 +60,7 @@ public:
 	static void log_error(const char *component, Exception &e);
 
 private:
-	LibLogger(){};
+	LibLogger() {};
 
 	static MultiLogger *logger;
 	static Mutex       *mutex;

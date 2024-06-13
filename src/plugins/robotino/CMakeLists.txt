@@ -48,8 +48,8 @@ if(PLUGIN_robotino)
   if(TF_DEPS_FOUND)
     depend_on_tf(robotino)
     set_source_files_properties(
-      sensor_thread.cpp PROPERTIES COMPILE_OPTIONS
-                                   "-Wno-reorder -Wno-unused-function")
+      sensor_thread.cpp PROPERTIES
+      COMPILE_OPTIONS "-Wno-reorder -Wno-unused-function")
   endif()
 
   target_link_libraries(

@@ -158,7 +158,7 @@ public:
 
 protected:
 	/** A way to see what frames have been cached.
-   * Useful for debugging. Use this call internally. 
+   * Useful for debugging. Use this call internally.
    */
 	std::string all_frames_as_string_no_lock() const;
 

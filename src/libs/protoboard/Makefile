@@ -32,7 +32,7 @@ LIBS_libfawkesprotoboard = \
   ProtobufPeerInterface
 
 OBJS_libfawkesprotoboard = protobuf_thread.o protobuf_to_bb.o blackboard_manager.o
- 
+
 LIBS_all = $(LIBDIR)/libfawkesprotoboard.$(SOEXT)
 OBJS_all = $(OBJS_libfawkesprotoboard)
 
@@ -67,4 +67,3 @@ warning_old_gcc:
 endif
 
 include $(BUILDSYSDIR)/base.mk
-

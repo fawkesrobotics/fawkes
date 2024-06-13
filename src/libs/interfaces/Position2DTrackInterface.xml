@@ -7,15 +7,15 @@
     </comment>
 
     <field type="float" name="track_x_positions" length="30">
-      X-Positions of the track. The first array-element is the oldest position of the track, 
+      X-Positions of the track. The first array-element is the oldest position of the track,
       the last is the newest.
     </field>
     <field type="float" name="track_y_positions" length="30">
-      Y-Positions of the track. The first array-element is the oldest position of the track, 
+      Y-Positions of the track. The first array-element is the oldest position of the track,
       the last is the newest.
     </field>
     <field type="int32" name="track_timestamps" length="30">
-      Timestamps of the track. The first array-element is the oldest position of the track, 
+      Timestamps of the track. The first array-element is the oldest position of the track,
       the last is the newest.
     </field>
     <field type="uint32" name="length">Length of the Tracks (i.e. up to which index there are valid positions).</field>

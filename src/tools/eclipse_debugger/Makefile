@@ -45,7 +45,7 @@ LIBS_ffeclipse_debugger = stdc++ m fawkescore fawkesutils fawkesnetcomm fawkesbl
 OBJS_ffeclipse_debugger = main.o eclipse_debugger.o
 
 OBJS_all = $(OBJS_ffeclipse_debugger)
-BINS_all = $(BINDIR)/ffeclipse-debugger 
+BINS_all = $(BINDIR)/ffeclipse-debugger
 
 ifeq ($(HAVE_GUI),1)
   BINS_gui = $(BINS_all)
@@ -69,4 +69,3 @@ warning_eclipsedebugger:
 endif
 
 include $(BUILDSYSDIR)/base.mk
-

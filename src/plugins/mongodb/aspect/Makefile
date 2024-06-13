@@ -32,4 +32,3 @@ ifeq ($(HAVE_MONGODB),1)
 endif
 
 include $(BUILDSYSDIR)/base.mk
-

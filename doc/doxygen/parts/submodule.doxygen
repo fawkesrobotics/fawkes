@@ -8,4 +8,3 @@
 INPUT                  = fawkes/doc/doxygen \
                          fawkes/src \
                          src
-

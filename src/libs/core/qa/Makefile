@@ -56,4 +56,3 @@ BINS_all =	$(BINDIR)/qa_core_mutex_count		\
 BINS_build = $(BINS_all)
 
 include $(BUILDSYSDIR)/base.mk
-

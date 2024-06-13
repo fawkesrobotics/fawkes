@@ -200,4 +200,3 @@ function AgentSkillExecJumpState:finished()
    return self.skill_status ~= skillstati.S_RUNNING
       and self.skill_status ~= skillstati.S_INACTIVE
 end
-

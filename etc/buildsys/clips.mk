@@ -53,4 +53,3 @@ ifeq ($(HAVE_CLIPS),1)
 endif
 
 endif # __buildsys_clips_mk_
-

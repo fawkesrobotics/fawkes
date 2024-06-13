@@ -4,7 +4,7 @@
  *
  *  Created: Sat Sep 21 20:56:38 2013
  *  Copyright  2013  Frederik Zwilling
- *                   
+ *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

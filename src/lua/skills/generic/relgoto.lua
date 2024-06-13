@@ -101,5 +101,3 @@ function MOVING:init()
       self.fsm.vars.ori)
    fsm.vars.goto_msgid = navigator:msgq_enqueue(msg)
 end
-
-

@@ -2,7 +2,7 @@
 /***************************************************************************
  *  qa_yaml.cpp - QA for YAML configuration storage
  *
- *  Created: Wed Aug 01 18:53:22 2012 
+ *  Created: Wed Aug 01 18:53:22 2012
  *  Copyright  2012  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/

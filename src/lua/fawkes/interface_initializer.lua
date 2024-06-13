@@ -71,7 +71,7 @@ function write()
 			if v:changed() then
 				 v:write()
 			end
-	 end	 
+	 end
 end
 
 function preload(interfaces_writing_preload)
@@ -108,7 +108,7 @@ function init_interfaces(module, table)
       assert(t.id, "Interface dependency '" .. t.v .. "' of " .. name .. " does not have an id field")
 
 			local uid = t.type .. "::" .. t.id
-			
+
 			if t.writing then
 				 if not interfaces_writing[uid] then
 						print_debug("Opening interface %s for writing", uid)

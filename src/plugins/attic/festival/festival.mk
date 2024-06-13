@@ -37,4 +37,3 @@ ifneq ($(wildcard $(SYSROOT)/usr/include/festival/festival.h),)
 else
   FESTIVAL_ERROR=festival[-devel] not installed
 endif
-

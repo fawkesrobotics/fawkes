@@ -189,7 +189,7 @@ function SkillQueue:stop()
    assert(skiller, "SkillQueue:stop(): Interface not set")
 
    local msg = skiller.StopExecMessage:new()
-   skiller:msgq_enqueue_copy(msg)  
+   skiller:msgq_enqueue_copy(msg)
 end
 
 --- Reset skill queue.

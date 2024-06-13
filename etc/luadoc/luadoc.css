@@ -1,16 +1,16 @@
-body { 
-    margin-left: 1em; 
-    margin-right: 1em; 
+body {
+    margin-left: 1em;
+    margin-right: 1em;
     font-family: arial, helvetica, geneva, sans-serif;
 	background-color:#ffffff; margin:0px;
 }
 
 code {
-    font-family: "Andale Mono", monospace; 
+    font-family: "Andale Mono", monospace;
 }
 
 tt {
-    font-family: "Andale Mono", monospace; 
+    font-family: "Andale Mono", monospace;
 }
 
 body, td, th { font-size: 11pt; }
@@ -36,10 +36,10 @@ h3 { padding-top: 1em; }
 
 p { margin-left: 1em; }
 
-p.name { 
-    font-family: "Andale Mono", monospace; 
+p.name {
+    font-family: "Andale Mono", monospace;
     padding-top: 1em;
-    margin-left: 0em; 
+    margin-left: 0em;
 }
 
 blockquote { margin-left: 3em; }
@@ -61,14 +61,14 @@ pre.example {
     padding: 1em;
     margin-left: 1em;
     margin-right: 1em;
-    font-family: "Andale Mono", monospace; 
+    font-family: "Andale Mono", monospace;
     font-size: smaller;
 }
 
 
-hr { 
+hr {
     margin-left: 0em;
-	background: #00007f; 
+	background: #00007f;
 	border: 0px;
 	height: 1px;
 }
@@ -192,20 +192,20 @@ div.header, div.footer { margin-left: 0em; }
 }
 
 @media print {
-	body { 
+	body {
 		font: 12pt "Times New Roman", "TimeNR", Times, serif;
 	}
 	a { font-weight:bold; color: #004080; text-decoration: underline; }
-	
-	#main	{		background-color: #ffffff;		border-left: 0px;	}	
+
+	#main	{		background-color: #ffffff;		border-left: 0px;	}
 	#container	{		margin-left: 2%;		margin-right: 2%;		background-color: #ffffff;	}
-	
+
 	#content	{		margin-left: 0px;		padding: 1em;		border-left: 0px;		border-right: 0px;		background-color: #ffffff;	}
-	
+
 	#navigation	{		display: none;
 	}
 	pre.example {
-		font-family: "Andale Mono", monospace; 
+		font-family: "Andale Mono", monospace;
 		font-size: 10pt;
 		page-break-inside: avoid;
 	}
@@ -283,4 +283,3 @@ dl.table dd {padding-bottom: 1em;}
 dl.table h3 {padding: 0; margin: 0; font-size: medium;}
 
 #TODO: make module_list, file_list, function_list, table_list inherit from a list
-

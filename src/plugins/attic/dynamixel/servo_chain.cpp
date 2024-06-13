@@ -480,9 +480,9 @@ DynamixelChain::data_available()
 }
 
 /** Discover devices on the bus.
- * This method will send a PING instruction to either the broadcast ID 
+ * This method will send a PING instruction to either the broadcast ID
  * (servos.size() == 0) or by iterating the given servos vector and collect responses.
- * This assumes that the return delay time is set appropriately 
+ * This assumes that the return delay time is set appropriately
  * that all responses can be received without collisions, and that the difference
  * between the time of two consecutive servos is smaller than the given timeout
  * (note that this might be void if you have one servo with ID 1 and one with

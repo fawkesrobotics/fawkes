@@ -34,4 +34,3 @@ ifneq ($(wildcard $(SYSROOT)/usr/include/GL/glut.h),)
   CFLAGS_GLUT = -DHAVE_GLUT
   LDFLAGS_GLUT = -lglut
 endif
-

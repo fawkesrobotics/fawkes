@@ -20,4 +20,3 @@ SUBDIRS = src
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/rules.mk
 include $(BUILDSYSDIR)/root/root.mk
-

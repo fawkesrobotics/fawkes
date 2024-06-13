@@ -44,7 +44,7 @@
       ; appand value directly for singlefields
       (bson-append ?doc (str-replace ?slot "-" "_") (fact-slot-value ?fact ?slot))
     )
-  )      
+  )
   (return ?doc)
 )
 

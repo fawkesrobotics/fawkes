@@ -69,12 +69,12 @@ protected:
 class LumaQualifier : public Qualifier
 {
 public:
-	LumaQualifier(){};
+	LumaQualifier() {};
 	LumaQualifier(unsigned char *buffer,
 	              unsigned int   width,
 	              unsigned int   height,
 	              colorspace_t   colorspace);
-	virtual ~LumaQualifier(){};
+	virtual ~LumaQualifier() {};
 
 	virtual int get(fawkes::upoint_t pixel);
 };
@@ -82,12 +82,12 @@ public:
 class SkyblueQualifier : public Qualifier
 {
 public:
-	SkyblueQualifier(){};
+	SkyblueQualifier() {};
 	SkyblueQualifier(unsigned char *buffer,
 	                 unsigned int   width,
 	                 unsigned int   height,
 	                 colorspace_t   colorspace);
-	virtual ~SkyblueQualifier(){};
+	virtual ~SkyblueQualifier() {};
 
 	virtual int get(fawkes::upoint_t pixel);
 
@@ -98,12 +98,12 @@ private:
 class YellowQualifier : public Qualifier
 {
 public:
-	YellowQualifier(){};
+	YellowQualifier() {};
 	YellowQualifier(unsigned char *buffer,
 	                unsigned int   width,
 	                unsigned int   height,
 	                colorspace_t   colorspace);
-	virtual ~YellowQualifier(){};
+	virtual ~YellowQualifier() {};
 
 	virtual int get(fawkes::upoint_t pixel);
 

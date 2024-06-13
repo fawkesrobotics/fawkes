@@ -3,7 +3,7 @@
  *  timesource.h - A clock's timesource
  *
  *  Created: Sun Jun 03 10:58:19 2007
- *  Copyright  2007  Daniel Beck 
+ *  Copyright  2007  Daniel Beck
  *
  ****************************************************************************/
 

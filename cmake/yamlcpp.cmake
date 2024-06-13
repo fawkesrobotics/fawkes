@@ -21,6 +21,11 @@
 # *****************************************************************************
 
 set(YAMLCPP_DEPS "yaml-cpp")
+
+# Function: depend_on_yamlcpp
+# Usage: depend_on_yamlcpp(TARGET_NAME)
+#
+# This function adds the yamlcpp dependency to the target.
 function(depend_on_yamlcpp target)
   target_compile_options(${target} PUBLIC -DHAVE_YAMLCPP ${yaml-cpp_CFLAGS})
   target_link_libraries(${target} ${yaml-cpp_LDFLAGS})

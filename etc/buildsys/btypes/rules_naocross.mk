@@ -42,4 +42,3 @@ deploy:
 			echo -e "$(INDENT_PRINT)--- $(TYELLOW)Transmission failed, retrying$(TNORMAL)"; \
 		fi; \
 	done
-

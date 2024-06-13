@@ -42,7 +42,7 @@
       <item name="INVALID_CONFIG">
 	      The cluster has an invalid configuration. This requires manual
 	      intervention, the cluster cannot recover automatically.
-	      
+
 	      (mongo-cxx-driver exceptoin with code InvalidReplicaSetConfig)
       </item>
       <item name="REMOVED">
@@ -55,7 +55,7 @@
 	      There has been an error when handling the result, most likely
 	      caused by an unknown replica state (for a new MongoDB version).
       </item>
-    </enum> 
+    </enum>
 
     <enum name="ReplicaSetPrimaryStatus">
 	    <comment>
@@ -72,7 +72,7 @@
 	      The replica set currently has no primary.
 	      We are going to initiate a leader election shortly.
       </item>
-    </enum> 
+    </enum>
   </constants>
 
 	<data>

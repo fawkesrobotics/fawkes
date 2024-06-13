@@ -74,4 +74,3 @@ warning_navgraph:
 endif
 
 include $(BUILDSYSDIR)/base.mk
-

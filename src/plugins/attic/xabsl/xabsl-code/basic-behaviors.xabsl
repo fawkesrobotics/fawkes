@@ -6,4 +6,3 @@ namespace basic_behaviors("Basic Behaviors") {
     float ori;
   }
 }
-

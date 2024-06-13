@@ -143,7 +143,7 @@ NetworkNameResolverThread::resolve_name_immediately(const std::string &name,
 		/*
   } else {
     printf("NOT ordering avahi_thread lookup\n");
-    if ( ! avahi_thread ) 
+    if ( ! avahi_thread )
       printf("No avahi resolver\n");
     if ( ! f ) {
       printf(".local not found\n");

@@ -6,4 +6,3 @@ services:
       context: .
       dockerfile: Dockerfile
     image: base_image
-

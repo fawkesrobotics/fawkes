@@ -1,5 +1,5 @@
 /***************************************************************************
- *  gazsim_localization_plugin.cpp - Plugin provides 
+ *  gazsim_localization_plugin.cpp - Plugin provides
  *     the simulated position of a robot in Gazeo
  *
  *  Created: Thu Aug 08 17:37:38 2013

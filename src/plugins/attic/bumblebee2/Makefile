@@ -75,4 +75,3 @@ warning_opencv:
 endif
 
 include $(BUILDSYSDIR)/base.mk
-

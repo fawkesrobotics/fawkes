@@ -166,7 +166,7 @@ public:
 
 	/** Get first message casted to the desired type.
    * @param msg reference to pointer to message of desired type, upon successful
-   * return points to the message. 
+   * return points to the message.
    * @return message casted to desired type (same as msg parameter)
    * @exception TypeMismatchException thrown if message is not of desired type
    */
@@ -177,7 +177,7 @@ public:
    * This method allows to combine a call to msgq_first_is() and msgq_first()
    * into a single call.
    * @param msg reference to pointer to message of desired type, upon successful
-   * return points to the message. 
+   * return points to the message.
    * @return pointer to message if it is of the desired type, 0 otherwise
    */
 	template <class MessageType>
