@@ -9,7 +9,7 @@
 # GNU Library General Public License for more details.
 #
 # Read the full text in the LICENSE.GPL file in the doc directory.
-
+default_stages: [pre-commit, pre-push]
 exclude: ".*/attic/.*"
 # General
 repos:
@@ -47,35 +47,6 @@ repos:
     hooks:
       - id: forbid-crlf
       - id: remove-crlf
-      - id: insert-license
-        stages: [push]
-        files: \.(clp|pddl)$
-        args:
-          - --fuzzy-match-generates-todo
-          - --license-filepath
-          - LICENSE
-          - --comment-style
-          - ;
-          - --use-current-year
-          - --allow-past-years
-      - id: insert-license
-        stages: [push]
-        files: \.(cpp|hpp)$
-        args:
-          - --fuzzy-match-generates-todo
-          - --license-filepath
-          - LICENSE
-          - --use-current-year
-          - --allow-past-years
-      - id: insert-license
-        stages: [push]
-        files: \.py$
-        args:
-          - --fuzzy-match-generates-todo
-          - --license-filepath
-          - LICENSE
-          - --use-current-year
-          - --allow-past-years
   # C++
   - repo: https://github.com/cheshirekow/cmake-format-precommit
     rev: v0.6.13
