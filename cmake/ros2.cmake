@@ -25,21 +25,25 @@ set(BUILD_WITH_ROS_2
 
 # Fetch the ROS_DISTRO environment variable
 if(DEFINED ENV{ROS_DISTRO})
-    set(ROS_DISTRO $ENV{ROS_DISTRO})
+  set(ROS_DISTRO $ENV{ROS_DISTRO})
 else()
-    set(BUILD_WITH_ROS_2 OFF CACHE BOOL "Build with ROS 2" FORCE)
-    message(WARNING "ROS_DISTRO environment variable is not set. BUILD_WITH_ROS_2 is forced to OFF.")
+  set(BUILD_WITH_ROS_2 OFF CACHE BOOL "Build with ROS 2" FORCE)
+  message(WARNING "ROS_DISTRO environment variable is not set. \
+BUILD_WITH_ROS_2 is forced to OFF.")
 endif()
 
-# Construct the ROS_2_INSTALL_DIR path using the ROS_DISTRO variable if BUILD_WITH_ROS_2 is ON
+# Construct the ROS_2_INSTALL_DIR path using the ROS_DISTRO variable
+# if BUILD_WITH_ROS_2 is ON
 if(BUILD_WITH_ROS_2)
-    set(ROS_2_INSTALL_DIR "/usr/lib64/ros2-${ROS_DISTRO}" CACHE STRING "ROS 2 install directory")
+  set(ROS_2_INSTALL_DIR "/usr/lib64/ros2-${ROS_DISTRO}" CACHE STRING
+    "ROS 2 install directory")
 
-    # Check if the constructed ROS_2_INSTALL_DIR exists
-    if(NOT EXISTS "${ROS_2_INSTALL_DIR}")
-        set(BUILD_WITH_ROS_2 OFF CACHE BOOL "Build with ROS 2" FORCE)
-        message(WARNING "The directory of ROS_2_INSTALL_DIR ( ${ROS_2_INSTALL_DIR} ) does not exist. BUILD_WITH_ROS_2 is forced to OFF.")
-    endif()
+  # Check if the constructed ROS_2_INSTALL_DIR exists
+  if(NOT EXISTS "${ROS_2_INSTALL_DIR}")
+    set(BUILD_WITH_ROS_2 OFF CACHE BOOL "Build with ROS 2" FORCE)
+    message(WARNING "The directory of ROS_2_INSTALL_DIR ( \
+${ROS_2_INSTALL_DIR} ) does not exist. BUILD_WITH_ROS_2 is forced to OFF.")
+  endif()
 endif()
 
 if(BUILD_WITH_ROS_2)
