@@ -36,7 +36,7 @@
 #include <unistd.h>
 
 #define BITS_PER_LONG (sizeof(long) * 8)
-#define NBITS(x) ((((x)-1) / BITS_PER_LONG) + 1)
+#define NBITS(x) ((((x) - 1) / BITS_PER_LONG) + 1)
 #define OFF(x) ((x) % BITS_PER_LONG)
 #define BIT(x) (1UL << OFF(x))
 #define LONG(x) ((x) / BITS_PER_LONG)

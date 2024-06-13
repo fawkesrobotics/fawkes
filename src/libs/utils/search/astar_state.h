@@ -42,10 +42,10 @@ public:
    * @param cost_sofar costs for the path so far
    * @param parent parent search state (maybe NULL for first state)
    */
-	AStarState(float cost_sofar, AStarState *parent) : parent(parent), path_cost(cost_sofar){};
+	AStarState(float cost_sofar, AStarState *parent) : parent(parent), path_cost(cost_sofar) {};
 
 	/** Destructor. */
-	virtual ~AStarState(){};
+	virtual ~AStarState() {};
 
 	// ***** You have to implement the following 4 methods! ***** //
 	// ***** ============================================== ***** //

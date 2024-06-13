@@ -57,8 +57,8 @@ protected:
 	virtual void flush_device()                                                  = 0;
 
 private:
-	virtual void config_tag_changed(const char *new_tag){};
-	virtual void config_comment_changed(const fawkes::Configuration::ValueIterator *v){};
+	virtual void config_tag_changed(const char *new_tag) {};
+	virtual void config_comment_changed(const fawkes::Configuration::ValueIterator *v) {};
 	virtual void config_value_changed(const fawkes::Configuration::ValueIterator *v);
 	virtual void config_value_erased(const char *path);
 

@@ -109,10 +109,10 @@ public:
 	                 const fawkes::Time  &timestamp,
 	                 const std::string   &frame_id,
 	                 const std::string   &child_frame_id)
-	: tf::Transform(input), stamp(timestamp), frame_id(frame_id), child_frame_id(child_frame_id){};
+	: tf::Transform(input), stamp(timestamp), frame_id(frame_id), child_frame_id(child_frame_id) {};
 
 	/** Default constructor only to be used for preallocation */
-	StampedTransform(){};
+	StampedTransform() {};
 
 	/** Set the inherited Transform data.
    * @param input transform to set
@@ -135,7 +135,7 @@ public:
 	/** Default constructor.
    * Default constructor used only for preallocation.
    */
-	Stamped() : stamp(0, 0), frame_id("NO_ID_STAMPED_DEFAULT_CONSTRUCTION"){};
+	Stamped() : stamp(0, 0), frame_id("NO_ID_STAMPED_DEFAULT_CONSTRUCTION") {};
 
 	/** Constructor.
    * @param input transform
@@ -143,7 +143,7 @@ public:
    * @param frame_id frame ID the transform is relative to
    */
 	Stamped(const T &input, const fawkes::Time &timestamp, const std::string &frame_id)
-	: T(input), stamp(timestamp), frame_id(frame_id){};
+	: T(input), stamp(timestamp), frame_id(frame_id) {};
 
 	/** Set the data element.
    * @param input data to set this instance to

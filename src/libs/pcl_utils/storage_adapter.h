@@ -37,7 +37,7 @@ class StorageAdapter
 {
 public:
 	/** Virtual empty destructor. */
-	virtual ~StorageAdapter(){};
+	virtual ~StorageAdapter() {};
 
 	template <typename PointT>
 	bool is_pointtype() const;

@@ -101,7 +101,7 @@ Transformer::Transformer(float cache_time) : BufferCore(cache_time), enabled_(tr
 }
 
 /** Destructor. */
-Transformer::~Transformer(){};
+Transformer::~Transformer() {};
 
 /** Set enabled status of transformer.
  * @param enabled true to enable, false to disable

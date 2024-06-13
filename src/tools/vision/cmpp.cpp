@@ -124,8 +124,8 @@ main(int argc, char **argv)
 						cmpp->set(y, w, h, max_color);
 					}
 				} // h
-			}   // w
-		}     // d
+			} // w
+		} // d
 
 		ColormapFile cmout(cm_depth, cm_width, cm_height);
 		cmout.add_colormap(cmpp);

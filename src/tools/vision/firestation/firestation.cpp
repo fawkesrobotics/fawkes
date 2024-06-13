@@ -1188,7 +1188,7 @@ Firestation::mc_simulate_clicks()
 		} // EDGE_DETECTION
 		for (int j = 1; j <= 2 * 8; ++j) {
 			image_click(NULL);
-		}                  // COMBINATION
+		} // COMBINATION
 		image_click(NULL); // PRE_MARKING
 		image_click(NULL); // FINAL_MARKING
 	}
