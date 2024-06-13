@@ -14,7 +14,7 @@ exclude: ".*/attic/.*"
 # General
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
+    rev: v4.6.0
     hooks:
       - id: trailing-whitespace
         exclude: '^.*\.pgm$'
@@ -25,12 +25,12 @@ repos:
       - id: check-shebang-scripts-are-executable
       - id: check-xml
   - repo: https://github.com/pre-commit/mirrors-clang-format
-    rev: v17.0.6
+    rev: v18.1.6
     hooks:
       - id: clang-format
         types_or: [c++, c]
   - repo: https://github.com/adrienverge/yamllint.git
-    rev: v1.26.3
+    rev: v1.35.1
     hooks:
       - id: yamllint
         args: ['--config-file=config.yaml']
@@ -85,14 +85,14 @@ repos:
         exclude: etc/cmake/
   # Python
   - repo: https://github.com/psf/black
-    rev: 24.2.0
+    rev: 24.4.2
     hooks:
       - id: black
         language_version: python3
         args: [--line-length=120]
         additional_dependencies: [pip-autoremove]
   - repo: https://github.com/asottile/reorder-python-imports
-    rev: v3.12.0
+    rev: v3.13.0
     hooks:
       - id: reorder-python-imports
         args:
@@ -106,7 +106,7 @@ repos:
           - --max-line-length=120
           - --ignore=E203,W503
   - repo: https://github.com/PyCQA/autoflake.git
-    rev: 'v2.3.0'
+    rev: 'v2.3.1'
     hooks:
       - id: autoflake
         name: Remove unused variables and imports
