@@ -19,13 +19,7 @@ steps:
       - git clone https://github.com/fawkesrobotics/fawkes.git /fawkes
       - cd /fawkes
       - git reset --hard ${BUILDKITE_COMMIT}
-      - pre-commit run --all-files
-      - git config user.name "Tim Wendt"
-      - git config user.email "tim.wendt@alumni.fh-aachen.de"
-      - pre-commit install
-      - git fetch
-      - git rebase -f origin/master --exec 'git commit --amend --no-edit'
-      - git log
+      - pre-commit run --all-files --hook-stage manual
     plugins:
       - docker#v3.8.0:
           image: quay.io/fawkesrobotics/fawkes-builder:f40-ros2
