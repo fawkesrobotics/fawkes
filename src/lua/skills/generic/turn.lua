@@ -68,7 +68,7 @@ function TURN:init()
     local angle = self.fsm.vars.angle or 0
     local velocity = self.fsm.vars.velocity or 0
 
-    -- cartesian goto
+    -- cartesian moveto
     local m = navigator.TurnMessage:new(angle, velocity)
     self.fsm.vars.msgid = navigator:msgq_enqueue_copy(m)
 end

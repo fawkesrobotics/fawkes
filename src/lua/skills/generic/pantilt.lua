@@ -55,7 +55,7 @@ Move PTU to specified position in requested time.
 This moves the PTU to the position and calculates the velocities such that
 the pan and tilt movements finish about at the same time. If the time is too
 short the maximum velocities will be chosen, possibly loosing the synchronized
-move. Other parameters are similar to the other goto call style.
+move. Other parameters are similar to the other moveto call style.
 
 All call styles support an optional argument ptu="PTU" to define the PTU in
 question.
@@ -137,7 +137,7 @@ fsm:add_transitions{
         "DECIDE_MODE",
         "GOTO",
         precond = "vars.pan ~= nil and vars.tilt ~= nil",
-        desc = "goto parms"
+        desc = "moveto parms"
     }, {"DECIDE_MODE", "STOP", precond = "vars.stop"},
     {"DECIDE_MODE", "PARK", precond = "vars.park"},
     {"DECIDE_MODE", "SPEED", precond = "vars.max_speed"},

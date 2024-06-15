@@ -22,8 +22,8 @@ module(..., fawkes.modinit.register_all);
 print("Initializing Lua skill space for Nao robots")
 
 -- Generic skills for all platforms
-skillenv.use_skill("skills.generic.relgoto")
-skillenv.use_skill("skills.generic.goto")
+skillenv.use_skill("skills.generic.relmoveto")
+skillenv.use_skill("skills.generic.moveto")
 skillenv.use_skill("skills.generic.turn")
 skillenv.use_skill("skills.generic.say")
 
@@ -35,7 +35,7 @@ skillenv.use_skill("skills.nao.getup")
 skillenv.use_skill("skills.nao.park")
 skillenv.use_skill("skills.nao.servo")
 
--- skillenv.use_skill("skills.nao.naorelgoto")
+-- skillenv.use_skill("skills.nao.naorelmoveto")
 -- skillenv.use_skill("skills.nao.naoturn")
 skillenv.use_skill("skills.nao.naostrafe")
 -- skillenv.use_skill("skills.nao.head_pantilt")

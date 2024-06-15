@@ -60,7 +60,7 @@ end
 -- @return true if interface has no writer.
 function jc_iface_no_writer(state) return not jaco_bi:has_writer() end
 
-function jc_goto(state)
+function jc_moveto(state)
     for _, arm in ipairs(state.fsm.vars.arms) do
         print("checking arm")
         if type(arm) ~= "table" then return false end
@@ -100,7 +100,7 @@ fsm:add_transitions{
     {"INIT", "READY", cond = true, desc = "initialized"},
 
     {"READY", "FAILED", precond = jc_iface_no_writer, desc = "no writer"},
-    {"READY", "GOTO", precond = jc_goto, desc = "move arms"},
+    {"READY", "GOTO", precond = jc_moveto, desc = "move arms"},
     {"READY", "GRIPPER", precond = jc_gripper, desc = "move gripper"},
     {"READY", "PARAMS", precond = jc_params, desc = "set planner params"}, {
         "READY",
@@ -168,7 +168,7 @@ function GOTO:init()
         local e1 = arm.e1 or math.pi / 2 + math.atan2(y, x)
         local e2 = arm.e2 or math.pi / 2
         local e3 = arm.e3 or 0
-        -- printf("goto: "..x.."  "..y.."  "..z.."  "..e1.."  "..e2.."  "..e3)
+        -- printf("moveto: "..x.."  "..y.."  "..z.."  "..e1.."  "..e2.."  "..e3)
         pos[i] = {x = x, y = y, z = z, e1 = e1, e2 = e2, e3 = e3}
     end
 

@@ -1,5 +1,5 @@
 ----------------------------------------------------------------------------
---  relgoto.lua
+--  relmoveto.lua
 --
 --  Created: Thu Aug 14 14:32:47 2008
 --  Copyright  2008  Tim Niemueller [www.niemueller.de]
@@ -21,7 +21,7 @@
 module(..., skillenv.module_init)
 
 -- Crucial skill information
-name = "relgoto"
+name = "relmoveto"
 fsm = SkillHSM:new{name = name, start = "CHECK_INPUT", debug = false}
 depends_skills = nil
 depends_interfaces = {
@@ -44,7 +44,7 @@ function can_navigate() return navigator:has_writer() end
 -- end
 
 function target_reached()
-    if navigator:msgid() == fsm.vars.goto_msgid then
+    if navigator:msgid() == fsm.vars.moveto_msgid then
         if navigator:is_final() and navigator:error_code() ~= 0 then
             return false
         end
@@ -54,14 +54,14 @@ function target_reached()
 end
 
 function navi_failure()
-    if navigator:msgid() == fsm.vars.goto_msgid then
+    if navigator:msgid() == fsm.vars.moveto_msgid then
         return navigator:is_final() and navigator:error_code() ~= 0
     end
     return false
 end
 
 function not_our_msgid()
-    return navigator:msgid() ~= fsm.vars.goto_msgid and os.time() >
+    return navigator:msgid() ~= fsm.vars.moveto_msgid and os.time() >
                fsm.vars.msgid_timeout
 end
 
@@ -102,5 +102,5 @@ function MOVING:init()
     local msg = navigator.CartesianGotoMessage:new(self.fsm.vars.x,
                                                    self.fsm.vars.y,
                                                    self.fsm.vars.ori)
-    fsm.vars.goto_msgid = navigator:msgq_enqueue(msg)
+    fsm.vars.moveto_msgid = navigator:msgq_enqueue(msg)
 end

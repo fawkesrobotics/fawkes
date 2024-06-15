@@ -35,7 +35,7 @@ This skill moves the katana arm by a given relative position (no rotation taken)
 Possible call modes:
 
 katana_rel{x=X, y=Y, z=Z}
- Moves katana on straight line (relative goto). At least one argument needs to be given
+ Moves katana on straight line (relative moveto). At least one argument needs to be given
  X: relative x position
  Y: relative y position
  Z: relative z position

@@ -1,5 +1,5 @@
 ----------------------------------------------------------------------------
---  ppgoto.lua - generic pathplan goto
+--  ppmoveto.lua - generic pathplan moveto
 --
 --  Created: Tue Jun 16 10:34:23 2009
 --  Copyright  2008-2009  Tim Niemueller [www.niemueller.de]
@@ -20,31 +20,31 @@
 module(..., skillenv.module_init)
 
 -- Crucial skill information
-name = "ppgoto"
+name = "ppmoveto"
 fsm = SkillHSM:new{name = name, start = "PPGOTO", debug = true}
 depends_skills = nil
 depends_interfaces = {
     {v = "ppnavi", id = "Pathplan", type = "NavigatorInterface"}
 }
 
-documentation = [==[Pathplan goto skill.
+documentation = [==[Pathplan moveto skill.
 This skill takes you to a place using a pathplan facility. The path planning
 itself is not implemented in the skill, rather it uses the NavigatorInterface
 to instruct the appropriate component.
 
 There are several forms to call this skill:
-1. ppgoto{x=X, y=Y[, ori=ORI]}
-   This will goto the position giving in the global cartesian coordinates,
+1. ppmoveto{x=X, y=Y[, ori=ORI]}
+   This will moveto the position giving in the global cartesian coordinates,
    optionally with the given orientation. The path planner will use the plan
    nodes to go as close to the desired position as possible and will issue a
-   relative goto to reach the final position from there.
-2. ppgoto{place=PLACE}
+   relative moveto to reach the final position from there.
+2. ppmoveto{place=PLACE}
    Go to the given place.
-2. ppgoto{place=PLACE, ori=ORI}
+2. ppmoveto{place=PLACE, ori=ORI}
    Go to the given place and attain the given orientation.
    This will override any orientation that might be set for the node.
-3. ppgoto{stop=true}
-   Stop the current pathplan goto.
+3. ppmoveto{stop=true}
+   Stop the current pathplan moveto.
 
 Parameters:
 x, y:      global world cartesian coordinates of target point
@@ -108,7 +108,7 @@ fsm:add_transitions{
 
 function PPGOTO:init()
     if self.fsm.vars.x ~= nil and self.fsm.vars.y ~= nil then
-        -- cartesian goto
+        -- cartesian moveto
         local x = self.fsm.vars.x or 0 -- self.fsm.vars[1]
         local y = self.fsm.vars.y or 0 -- self.fsm.vars[2]
         local ori = self.fsm.vars.ori or math.nan
@@ -116,7 +116,7 @@ function PPGOTO:init()
         printf("Sending CartesianGotoMessage(%f, %f, %f)", x, y, ori)
         self.fsm.vars.msgid = ppnavi:msgq_enqueue_copy(m)
     elseif self.fsm.vars.place ~= nil then
-        -- place goto
+        -- place moveto
         local place = self.fsm.vars.place
         if self.fsm.vars.ori ~= nil then
             local ori = self.fsm.vars.ori
@@ -142,7 +142,7 @@ function PPGOTO:loop() self.wait_start = self.wait_start + 1 end
 
 function PPGOTO:reset()
     if ppnavi:has_writer() and not ppnavi:is_final() then
-        printf("ppgoto: sending stop");
+        printf("ppmoveto: sending stop");
         ppnavi:msgq_enqueue_copy(ppnavi.StopMessage:new())
     end
 end

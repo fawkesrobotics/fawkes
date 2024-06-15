@@ -54,7 +54,7 @@ plugins/execution-time-estimator:
     whitelist:
       # defaults to target place as specified above
       movement:
-        name: goto
+        name: moveto
       # a sill with different start and target arg names
       from-to-move:
         name: move
@@ -75,4 +75,4 @@ plugins/execution-time-estimator:
     # whitelist and blacklist
     blacklist:
       movement:
-        name: goto
+        name: moveto

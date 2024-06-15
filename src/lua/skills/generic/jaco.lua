@@ -175,22 +175,21 @@ function use_skill(skill_name, iface_name)
             "MODE_RETRACT",
             precond = "vars.mode == 'retract'",
             desc = "initialize arm"
-        },
-        {
+        }, {
             "READY",
             "GOTO_HOME",
             precond = "vars.pos == 'home'",
-            desc = "goto home pos"
+            desc = "moveto home pos"
         }, {
             "READY",
             "GOTO_RETRACT",
             precond = "vars.pos == 'retract'",
-            desc = "goto retract pos"
+            desc = "moveto retract pos"
         }, {"READY", "STOP", precond = "vars.pos == 'stop'", desc = "stop"}, {
             "READY",
             "GOTO",
             precond = "vars.x ~= nil and vars.y ~= nil and vars.z ~= nil",
-            desc = "goto parms"
+            desc = "moveto parms"
         },
         {"READY", "GRIPPER", precond = "vars.gripper", desc = "move gripper"},
         {
@@ -323,7 +322,7 @@ function use_skill(skill_name, iface_name)
         local e1 = self.fsm.vars.e1 or math.pi / 2 + math.atan2(y, x)
         local e2 = self.fsm.vars.e2 or math.pi / 2
         local e3 = self.fsm.vars.e3 or 0
-        -- printf("goto: "..x.."  "..y.."  "..z.."  "..e1.."  "..e2.."  "..e3)
+        -- printf("moveto: "..x.."  "..y.."  "..z.."  "..e1.."  "..e2.."  "..e3)
 
         local m
         if self.fsm.vars.type == "ang" then

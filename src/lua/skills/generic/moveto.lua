@@ -1,5 +1,5 @@
 ----------------------------------------------------------------------------
---  goto.lua -
+--  moveto.lua -
 --
 --  Created: Thu Aug 14 14:32:47 2008
 --  modified by Victor MatarÃ©
@@ -21,9 +21,9 @@
 module(..., skillenv.module_init)
 
 -- Crucial skill information
-name = "goto"
+name = "moveto"
 fsm = SkillHSM:new{name = name, start = "INIT"}
-depends_skills = {"relgoto"}
+depends_skills = {"relmoveto"}
 depends_interfaces = {
     {v = "navigator", type = "NavigatorInterface", id = "Navigator"}
 }
@@ -60,7 +60,7 @@ fsm:define_states{
     {
         "SKILL_RELGOTO",
         SkillJumpState,
-        skills = {{relgoto}},
+        skills = {{relmoveto}},
         final_to = "FINAL",
         fail_to = "FAILED"
     }
@@ -125,7 +125,7 @@ function INIT:init()
 end
 
 function SKILL_RELGOTO:init()
-    self.args["relgoto"] = {
+    self.args["relmoveto"] = {
         x = self.fsm.vars.rel_x,
         y = self.fsm.vars.rel_y,
         ori = self.fsm.vars.rel_ori

@@ -1,5 +1,5 @@
 ----------------------------------------------------------------------------
---  fake_relgoto.lua - Imitate a relgoto skill with chance of error
+--  fake_relmoveto.lua - Imitate a relmoveto skill with chance of error
 --
 --  Created: Thu Feb 28 20:25:46 2019 +0100
 --  Copyright  2018-2019  Tim Niemueller [www.niemueller.org]
@@ -19,7 +19,7 @@
 module(..., skillenv.module_init)
 
 -- Crucial skill information
-name = "relgoto"
+name = "relmoveto"
 fsm = SkillHSM:new{name = name, start = "INIT"}
 depends_skills = {}
 depends_interfaces = {}

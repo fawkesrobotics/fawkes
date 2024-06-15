@@ -128,12 +128,12 @@ fsm:add_transitions{
         "DECIDE_MODE",
         "GOTO",
         precond = "vars.x ~= nil and vars.y ~= nil and vars.z ~= nil",
-        desc = "goto parms"
+        desc = "moveto parms"
     }, {
         "DECIDE_MODE",
         "GOTO_OBJECT",
         precond = "vars.object ~= nil",
-        desc = "goto obj params"
+        desc = "moveto obj params"
     }, {
         "DECIDE_MODE",
         "PLANNERPARAMS",

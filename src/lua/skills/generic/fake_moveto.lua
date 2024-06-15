@@ -1,5 +1,5 @@
 ----------------------------------------------------------------------------
---  fake_goto.lua - Imitate a goto skill with parametrized chance of error
+--  fake_moveto.lua - Imitate a moveto skill with parametrized chance of error
 --
 --  Created: Tue Aug 14 20:11:19 2018
 --  Copyright  2018  Tim Niemueller [www.niemueller.de]
@@ -19,7 +19,7 @@
 module(..., skillenv.module_init)
 
 -- Crucial skill information
-name = "goto"
+name = "moveto"
 fsm = SkillHSM:new{name = name, start = "INIT"}
 depends_skills = {}
 depends_interfaces = {}

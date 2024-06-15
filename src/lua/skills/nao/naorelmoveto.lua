@@ -1,5 +1,5 @@
 ----------------------------------------------------------------------------
---  relgoto.lua - generic relative goto
+--  relmoveto.lua - generic relative moveto
 --
 --  Created: Thu Aug 14 14:28:19 2008
 --  Copyright  2008  Tim Niemueller [www.niemueller.de]
@@ -20,7 +20,7 @@
 module(..., skillenv.module_init)
 
 -- Crucial skill information
-name = "relgoto"
+name = "relmoveto"
 fsm = SkillHSM:new{name = name, start = "RELGOTO", debug = true}
 depends_skills = {"servo"}
 depends_interfaces = {
@@ -31,22 +31,22 @@ depends_interfaces = {
 local p = require("predicates.soccer.general")
 local np = require("predicates.nao")
 
-documentation = [==[Relative goto skill - tries to keep the ball insight.
+documentation = [==[Relative moveto skill - tries to keep the ball insight.
 This skill takes you to a position given in relative coordinates in the robot-local
 coordinate system. The orientation is the final orientation, nothing is said about the
-intermediate orientation while on the way. The margin is the precision of the relgoto
-command. The relgoto is considered final if the current (x,y) is in a radius of the
-given margin around the destination. For example is the margin is 0.5 then the relgoto
+intermediate orientation while on the way. The margin is the precision of the relmoveto
+command. The relmoveto is considered final if the current (x,y) is in a radius of the
+given margin around the destination. For example is the margin is 0.5 then the relmoveto
 is considered final if the robot is in a circle of 0.5m radius around the target point.
 The default margin is 0.2m.
 
 There are several forms to call this skill:
-1. relgoto(x, y[, ori[, margin]])
-   This will goto the position giving in the relative cartesian coordinates, optionally with
+1. relmoveto(x, y[, ori[, margin]])
+   This will moveto the position giving in the relative cartesian coordinates, optionally with
    the given orientation.
-2. relgoto{x=X, y=Y[, ori=ORI][, margin=MARGIN]}
+2. relmoveto{x=X, y=Y[, ori=ORI][, margin=MARGIN]}
    Go to the relative cartesian coordinates (X,Y) with the optional final orientation ORI.
-3. relgoto{phi=PHI, dist=DIST[, ori=ORI], [margin=MARGIN]}
+3. relmoveto{phi=PHI, dist=DIST[, ori=ORI], [margin=MARGIN]}
    Same as 1., but with named arguments.
 
 Parameters:
@@ -55,12 +55,12 @@ x, y:      robot-relative cartesian coordinates of target point
 ori:       orientation of robot at destination, radian offset from current value
            clock-wise positive
 margin:    radius of a circle around the destination point, if the robot is within
-           that circle the goto is considered final.
+           that circle the moveto is considered final.
 
 The skill is S_RUNNING as long as the target can still be reached, S_FINAL if the target
 has been reached (at least once, the robot might move afterwards for example if it did not
 brake fast enough or if another robot crashed into this robot). The skill is S_FAILED if
-the navigator started processing another goto message.
+the navigator started processing another moveto message.
 ]==]
 
 -- Initialize as skill module
@@ -76,7 +76,7 @@ function RELGOTO:init()
 
         if self.fsm.vars.x ~= nil and self.fsm.vars.y ~= nil or self.fsm.vars[1] ~=
             nil and self.fsm.vars[2] ~= nil then
-            -- cartesian goto
+            -- cartesian moveto
             local x = self.fsm.vars.x or self.fsm.vars[1]
             local y = self.fsm.vars.y or self.fsm.vars[2]
             local ori = self.fsm.vars.ori or self.fsm.vars[3] or
@@ -85,7 +85,7 @@ function RELGOTO:init()
             printf("Sending CartesianGotoMessage(%f, %f, %f)", x, y, ori)
             self.fsm.vars.msgid = navigator:msgq_enqueue_copy(m)
         elseif self.fsm.vars.phi ~= nil and self.fsm.vars.dist ~= nil then
-            -- polar goto
+            -- polar moveto
             local phi, dist = self.fsm.vars.phi, self.fsm.vars.dist
             local ori = self.fsm.vars.ori or phi
             local m = navigator.PolarGotoMessage:new(phi, dist, ori)
@@ -111,7 +111,7 @@ function RELGOTO:loop()
 end
 
 function RELGOTO:reset()
-    -- printf("relgoto: sending stop");
+    -- printf("relmoveto: sending stop");
     -- navigator:msgq_enqueue_copy(navigator.StopMessage:new())
 end
 

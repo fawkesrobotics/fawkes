@@ -59,7 +59,7 @@ fsm:add_state(SERVO)
 fsm:new_jump_state("PRINTERR")
 
 function PRINTERR:init()
-    for k, v in pairs(self.fsm.vars.goto_wait) do
+    for k, v in pairs(self.fsm.vars.moveto_wait) do
         if math.abs(naojoints[k](naojoints) - v) > self.fsm.vars.tolerance then
             self.fsm.error = string.format(
                                  "%s servo timeout. actual: %f  expected: %f  " ..
@@ -73,9 +73,9 @@ function PRINTERR:init()
 end
 PRINTERR:add_transition("FAILED", true, "Error printed")
 
-function SERVO:maybe_enqueue_goto(servo, value)
+function SERVO:maybe_enqueue_moveto(servo, value)
     if value ~= nil then
-        self.fsm.vars.goto_wait[servo] = value
+        self.fsm.vars.moveto_wait[servo] = value
         local m = naojoints.GotoAngleMessage:new(
                       naojoints["SERVO_" .. tostring(servo)], value,
                       self.fsm.vars.time_sec)
@@ -84,7 +84,7 @@ function SERVO:maybe_enqueue_goto(servo, value)
 end
 
 function SERVO:init()
-    self.fsm.vars.goto_wait = {}
+    self.fsm.vars.moveto_wait = {}
     self.fsm.vars.tolerance = tonumber(self.fsm.vars.tolerance) or
                                   DEFAULT_TOLERANCE
     self.fsm.vars.time_sec = tonumber(self.fsm.vars.time_sec) or
@@ -150,7 +150,7 @@ function SERVO:init()
                                                   self.fsm.vars.body_angles
                                                       .r_elbow_roll or 0.0)
         for k, v in pairs(self.fsm.vars.body_angles) do
-            self.fsm.vars.goto_wait[k] = v or 0.0
+            self.fsm.vars.moveto_wait[k] = v or 0.0
         end
         naojoints:msgq_enqueue_copy(m)
     else
@@ -167,15 +167,15 @@ function SERVO:init()
                 "r_hip_yaw_pitch", "r_hip_roll", "r_hip_pitch", "r_knee_pitch",
                 "r_ankle_pitch", "r_ankle_roll", "r_shoulder_pitch",
                 "r_shoulder_roll", "r_elbow_yaw", "r_elbow_roll"
-            }) do self:maybe_enqueue_goto(s, self.fsm.vars[s]) end
+            }) do self:maybe_enqueue_moveto(s, self.fsm.vars[s]) end
         end
     end
 end
 
--- check if the goto is finished
+-- check if the moveto is finished
 function SERVO:jumpcond_done()
     local finished = true
-    for k, v in pairs(self.fsm.vars.goto_wait) do
+    for k, v in pairs(self.fsm.vars.moveto_wait) do
         -- the following effectively calls the get method for the given servo
         if math.abs(naojoints[k](naojoints) - v) > self.fsm.vars.tolerance then
             finished = false

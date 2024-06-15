@@ -21,11 +21,11 @@ local _G = _G
 require("fawkes.modinit")
 module(..., fawkes.modinit.register_all);
 
--- skillenv.use_skill("skills.generic.relgoto")
--- skillenv.use_skill("skills.generic.goto")
+-- skillenv.use_skill("skills.generic.relmoveto")
+-- skillenv.use_skill("skills.generic.moveto")
 skillenv.use_skill("skills.generic.say")
-skillenv.use_skill("skills.generic.fake_goto")
-skillenv.use_skill("skills.generic.fake_relgoto")
+skillenv.use_skill("skills.generic.fake_moveto")
+skillenv.use_skill("skills.generic.fake_relmoveto")
 
 if _G.HAVE_ROS then
     local action_skill = require("skiller.ros.action_skill")

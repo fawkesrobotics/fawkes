@@ -22,7 +22,7 @@ module(..., skillenv.module_init)
 -- Crucial skill information
 name = "align_at_table"
 fsm = SkillHSM:new{name = name, start = "INIT", debug = false}
-depends_skills = {"relgoto", "pantilt"}
+depends_skills = {"relmoveto", "pantilt"}
 depends_interfaces = {
     {v = "table_pos", type = "Position3DInterface", id = "Tabletop"},
     {v = "table_detect", type = "SwitchInterface", id = "tabletop-objects"},
@@ -140,7 +140,7 @@ fsm:define_states{
     {
         "ALIGN_AT_TABLE",
         SkillJumpState,
-        skills = {{"relgoto"}},
+        skills = {{"relmoveto"}},
         final_to = "WAIT_FOR_STOPPING",
         fail_to = "WAIT_FOR_STOPPING"
     },
@@ -154,7 +154,7 @@ fsm:define_states{
     {
         "POSITION_AT_TABLE",
         SkillJumpState,
-        skills = {{"relgoto"}},
+        skills = {{"relmoveto"}},
         final_to = "RESTORE_PTU",
         fail_to = "FAILED"
     },
@@ -245,7 +245,7 @@ end
 
 function ALIGN_AT_TABLE:init()
     navigator:msgq_enqueue_copy(navigator.SetEscapingMessage:new(false))
-    self.args["relgoto"] = {x = 0, y = 0, ori = self.fsm.vars.table_yaw}
+    self.args["relmoveto"] = {x = 0, y = 0, ori = self.fsm.vars.table_yaw}
 end
 
 function POSITION_AT_TABLE:init()
@@ -253,7 +253,7 @@ function POSITION_AT_TABLE:init()
     navigator:msgq_enqueue_copy(navigator.SetDriveModeMessage:new(
                                     navigator.AllowBackward))
 
-    self.args["relgoto"] = {
+    self.args["relmoveto"] = {
         x = self.fsm.vars.table_distance - self.fsm.vars.dist - DIST_TO_FRONT,
         y = 0,
         ori = 0

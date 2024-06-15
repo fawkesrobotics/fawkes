@@ -22,7 +22,7 @@ module(..., skillenv.module_init)
 -- Crucial skill information
 name = "align_laserht"
 fsm = SkillHSM:new{name = name, start = "INIT", debug = true}
-depends_skills = {"relgoto"}
+depends_skills = {"relmoveto"}
 depends_interfaces = {
     {v = "laserht", type = "ObjectPositionInterface", id = "LaserLine"}
 }
@@ -49,7 +49,7 @@ fsm:define_states{
     {
         "ALIGN",
         SkillJumpState,
-        skills = {{"relgoto"}},
+        skills = {{"relmoveto"}},
         final_to = "FINAL",
         fail_to = "FAILED"
     }
@@ -80,5 +80,5 @@ end
 function CALC_ORI:exit() self.fsm.vars.ori = self.ori / self.counter end
 
 function ALIGN:init()
-    self.args["relgoto"] = {x = 0, y = 0, ori = self.fsm.vars.ori}
+    self.args["relmoveto"] = {x = 0, y = 0, ori = self.fsm.vars.ori}
 end
