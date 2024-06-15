@@ -23,6 +23,7 @@
 /bin/
 /bin/access_log
 /bin_*/
+/build/
 /cfg/*.db
 /cfg/*.key
 /cfg/*.crt

@@ -1,4 +1,3 @@
-
 ----------------------------------------------------------------------------
 --  or_object.lua - object handling in openrave
 --
@@ -6,7 +5,6 @@
 --  Copyright  2011-2014  Bahram Maleki-Fard
 --
 ----------------------------------------------------------------------------
-
 --  This program is free software; you can redistribute it and/or modify
 --  it under the terms of the GNU General Public License as published by
 --  the Free Software Foundation; either version 2 of the License, or
@@ -18,19 +16,18 @@
 --  GNU Library General Public License for more details.
 --
 --  Read the full text in the LICENSE.GPL file in the doc directory.
-
 -- Initialize module
 module(..., skillenv.module_init)
 
 -- Crucial skill information
-name               = "or_object"
-fsm                = SkillHSM:new{name=name, start="INIT", debug=false}
-depends_skills     = {}
+name = "or_object"
+fsm = SkillHSM:new{name = name, start = "INIT", debug = false}
+depends_skills = {}
 depends_interfaces = {
-   {v = "if_openrave", type = "OpenRaveInterface", id="OpenRAVE"}
+    {v = "if_openrave", type = "OpenRaveInterface", id = "OpenRAVE"}
 }
 
-documentation      = [==[OpenRAVE object handling skill.
+documentation = [==[OpenRAVE object handling skill.
 
 This skill provides object manipulation for objects in OpenRAVE.
 It basically allows all the object manipulation posiibilities provided in
@@ -109,196 +106,206 @@ skillenv.skill_module(...)
 -- Jumpconditions
 -- Check if message handling is final
 function jc_msg_final(state)
-   return state.fsm.vars.msgid == if_openrave:msgid() and
-          if_openrave:is_final()
+    return state.fsm.vars.msgid == if_openrave:msgid() and
+               if_openrave:is_final()
 end
 
 function add_object(o)
-   if not (o.name and o.path) then
-      return 0
-   end
-   return if_openrave:msgq_enqueue_copy(if_openrave.AddObjectMessage:new( o.name, o.path ))
+    if not (o.name and o.path) then return 0 end
+    return if_openrave:msgq_enqueue_copy(
+               if_openrave.AddObjectMessage:new(o.name, o.path))
 end
 function delete_object(o)
-   if not type(o)=="string" then
-      return 0
-   end
-   return if_openrave:msgq_enqueue_copy(if_openrave.DeleteObjectMessage:new( o ))
+    if not type(o) == "string" then return 0 end
+    return if_openrave:msgq_enqueue_copy(if_openrave.DeleteObjectMessage:new(o))
 end
 function attach_object(o)
-   if type(o)=="string" then
-      return if_openrave:msgq_enqueue_copy(if_openrave.AttachObjectMessage:new( o, "" ))
-   elseif type(o)=="table" and o.name and o.manip_name then
-      return if_openrave:msgq_enqueue_copy(if_openrave.AttachObjectMessage:new( o.name, o.manip_name ))
-   else
-      return 0
-   end
+    if type(o) == "string" then
+        return if_openrave:msgq_enqueue_copy(
+                   if_openrave.AttachObjectMessage:new(o, ""))
+    elseif type(o) == "table" and o.name and o.manip_name then
+        return if_openrave:msgq_enqueue_copy(
+                   if_openrave.AttachObjectMessage:new(o.name, o.manip_name))
+    else
+        return 0
+    end
 end
 function release_object(o)
-   if not type(o)=="string" then
-      return 0
-   end
-   return if_openrave:msgq_enqueue_copy(if_openrave.ReleaseObjectMessage:new( o ))
+    if not type(o) == "string" then return 0 end
+    return
+        if_openrave:msgq_enqueue_copy(if_openrave.ReleaseObjectMessage:new(o))
 end
 function move_object(o)
-   if not (o.name and o.x and o.y and o.z) then
-      return 0
-   end
-   return if_openrave:msgq_enqueue_copy(if_openrave.MoveObjectMessage:new( o.name, o.x, o.y, o.z ))
+    if not (o.name and o.x and o.y and o.z) then return 0 end
+    return if_openrave:msgq_enqueue_copy(
+               if_openrave.MoveObjectMessage:new(o.name, o.x, o.y, o.z))
 end
 function rotate_object(o)
-   if not (o.name and o.x and o.y and o.z) then
-      return 0
-   end
+    if not (o.name and o.x and o.y and o.z) then return 0 end
 
-   if o.w then
-      return if_openrave:msgq_enqueue_copy(if_openrave.RotateObjectMessage:new( o.name, o.x, o.y, o.z, o.w ))
-   else
-      return if_openrave:msgq_enqueue_copy(if_openrave.RotateObjectMessage:new( o.name, o.x, o.y, o.z ))
-   end
+    if o.w then
+        return if_openrave:msgq_enqueue_copy(
+                   if_openrave.RotateObjectMessage:new(o.name, o.x, o.y, o.z,
+                                                       o.w))
+    else
+        return if_openrave:msgq_enqueue_copy(
+                   if_openrave.RotateObjectMessage:new(o.name, o.x, o.y, o.z))
+    end
 end
 function rename_object(o)
-   if not (o.name and o.new_name) then
-      return 0
-   end
-   return if_openrave:msgq_enqueue_copy(if_openrave.RenameObjectMessage:new( o.name, o.new_name ))
+    if not (o.name and o.new_name) then return 0 end
+    return if_openrave:msgq_enqueue_copy(
+               if_openrave.RenameObjectMessage:new(o.name, o.new_name))
 end
 
 -- States
 fsm:define_states{
-   export_to=_M,
-   closure={if_openrave=if_openrave},
+    export_to = _M,
+    closure = {if_openrave = if_openrave},
 
-   {"INIT", JumpState},
+    {"INIT", JumpState},
 
-   {"ADD",         JumpState},
-   {"DELETE",      JumpState},
-   {"DELETE_ALL",  JumpState},
-   {"ATTACH",      JumpState},
-   {"RELEASE",     JumpState},
-   {"RELEASE_ALL", JumpState},
-   {"MOVE",        JumpState},
-   {"ROTATE",      JumpState},
-   {"RENAME",      JumpState},
+    {"ADD", JumpState},
+    {"DELETE", JumpState},
+    {"DELETE_ALL", JumpState},
+    {"ATTACH", JumpState},
+    {"RELEASE", JumpState},
+    {"RELEASE_ALL", JumpState},
+    {"MOVE", JumpState},
+    {"ROTATE", JumpState},
+    {"RENAME", JumpState},
 
-   {"PROCESS",      JumpState},
+    {"PROCESS", JumpState},
 
-   {"CHECK", JumpState},
-   {"CHECK_PROCESS", JumpState}
+    {"CHECK", JumpState},
+    {"CHECK_PROCESS", JumpState}
 }
 
 -- Transitions
-fsm:add_transitions {
-   --~ {"INIT", "FAILED", precond="not if_openrave:has_writer()", desc="no writer for interface"},
+fsm:add_transitions{ -- ~ {"INIT", "FAILED", precond="not if_openrave:has_writer()", desc="no writer for interface"},
+    {"INIT", "ADD", cond = "vars.add", desc = "add"},
+    {"INIT", "DELETE", cond = "vars.delete", desc = "delete"},
+    {"INIT", "DELETE_ALL", cond = "vars.delete_all", desc = "delete all"},
+    {"INIT", "ATTACH", cond = "vars.attach", desc = "attach"},
+    {"INIT", "RELEASE", cond = "vars.release", desc = "release"},
+    {"INIT", "RELEASE_ALL", cond = "vars.release_all", desc = "release all"},
+    {"INIT", "MOVE", cond = "vars.move", desc = "move"},
+    {"INIT", "ROTATE", cond = "vars.rotate", desc = "rotate"},
+    {"INIT", "RENAME", cond = "vars.rename", desc = "rename"},
+    {"INIT", "FAILED", cond = true, desc = "unknown argument"},
 
-   {"INIT", "ADD", cond="vars.add", desc="add"},
-   {"INIT", "DELETE", cond="vars.delete", desc="delete"},
-   {"INIT", "DELETE_ALL", cond="vars.delete_all", desc="delete all"},
-   {"INIT", "ATTACH", cond="vars.attach", desc="attach"},
-   {"INIT", "RELEASE", cond="vars.release", desc="release"},
-   {"INIT", "RELEASE_ALL", cond="vars.release_all", desc="release all"},
-   {"INIT", "MOVE", cond="vars.move", desc="move"},
-   {"INIT", "ROTATE", cond="vars.rotate", desc="rotate"},
-   {"INIT", "RENAME", cond="vars.rename", desc="rename"},
-   {"INIT", "FAILED", cond=true, desc="unknown argument"},
+    {"DELETE_ALL", "CHECK", cond = jc_msg_final, desc = "final"},
+    {"RELEASE_ALL", "CHECK", cond = jc_msg_final, desc = "final"},
 
-   {"DELETE_ALL", "CHECK", cond=jc_msg_final, desc="final"},
-   {"RELEASE_ALL", "CHECK", cond=jc_msg_final, desc="final"},
+    {"ADD", "PROCESS", cond = true, desc = "set up"},
+    {"DELETE", "PROCESS", cond = true, desc = "set up"},
+    {"ATTACH", "PROCESS", cond = true, desc = "set up"},
+    {"RELEASE", "PROCESS", cond = true, desc = "set up"},
+    {"MOVE", "PROCESS", cond = true, desc = "set up"},
+    {"ROTATE", "PROCESS", cond = true, desc = "set up"},
+    {"RENAME", "PROCESS", cond = true, desc = "set up"}, {
+        "PROCESS",
+        "FAILED",
+        precond = "type(vars.objects) ~= 'table'",
+        desc = "arguments needs to be a table"
+    }, {
+        "PROCESS",
+        "FAILED",
+        precond = "#vars.objects == 0",
+        desc = "empty argument table"
+    },
+    {
+        "PROCESS",
+        "FAILED",
+        cond = "vars.bad_args",
+        desc = "insufficient arguments"
+    }, {"PROCESS", "CHECK_PROCESS", cond = jc_msg_final, desc = "final"}, {
+        "CHECK_PROCESS",
+        "CHECK",
+        precond = "#vars.objects == 0",
+        desc = "all objects processed"
+    },
+    {"CHECK_PROCESS", "PROCESS", precond = true, desc = "process next object"},
 
-   {"ADD", "PROCESS", cond=true, desc="set up"},
-   {"DELETE", "PROCESS", cond=true, desc="set up"},
-   {"ATTACH", "PROCESS", cond=true, desc="set up"},
-   {"RELEASE", "PROCESS", cond=true, desc="set up"},
-   {"MOVE", "PROCESS", cond=true, desc="set up"},
-   {"ROTATE", "PROCESS", cond=true, desc="set up"},
-   {"RENAME", "PROCESS", cond=true, desc="set up"},
-
-   {"PROCESS", "FAILED", precond="type(vars.objects) ~= 'table'", desc="arguments needs to be a table"},
-   {"PROCESS", "FAILED", precond="#vars.objects == 0", desc="empty argument table"},
-   {"PROCESS", "FAILED", cond="vars.bad_args", desc="insufficient arguments"},
-   {"PROCESS", "CHECK_PROCESS", cond=jc_msg_final, desc="final"},
-
-   {"CHECK_PROCESS", "CHECK", precond="#vars.objects == 0", desc="all objects processed"},
-   {"CHECK_PROCESS", "PROCESS", precond=true, desc="process next object"},
-
-   {"CHECK", "FINAL", cond="vars.success", desc="command succeeded"},
-   {"CHECK", "FAILED", cond=true, desc="command failed"}
+    {"CHECK", "FINAL", cond = "vars.success", desc = "command succeeded"},
+    {"CHECK", "FAILED", cond = true, desc = "command failed"}
 }
 
 function INIT:init()
-   self.fsm.vars.done = false
-   self.fsm.vars.success = true
-   self.fsm.vars.bad_args = false
+    self.fsm.vars.done = false
+    self.fsm.vars.success = true
+    self.fsm.vars.bad_args = false
 
-   self.fsm.vars.objects = {}
-   self.fsm.vars.func = nil
+    self.fsm.vars.objects = {}
+    self.fsm.vars.func = nil
 end
 
 function DELETE_ALL:init()
-   self.fsm.vars.msgid = if_openrave:msgq_enqueue_copy(if_openrave.DeleteAllObjectsMessage:new())
+    self.fsm.vars.msgid = if_openrave:msgq_enqueue_copy(
+                              if_openrave.DeleteAllObjectsMessage:new())
 end
 
 function RELEASE_ALL:init()
-   self.fsm.vars.msgid = if_openrave:msgq_enqueue_copy(if_openrave.ReleaseAllObjectsMessage:new())
+    self.fsm.vars.msgid = if_openrave:msgq_enqueue_copy(
+                              if_openrave.ReleaseAllObjectsMessage:new())
 end
 
 function ADD:init()
-   self.fsm.vars.objects = self.fsm.vars.add
-   self.fsm.vars.func = add_object
+    self.fsm.vars.objects = self.fsm.vars.add
+    self.fsm.vars.func = add_object
 end
 
 function DELETE:init()
-   self.fsm.vars.objects = self.fsm.vars.delete
-   self.fsm.vars.func = delete_object
+    self.fsm.vars.objects = self.fsm.vars.delete
+    self.fsm.vars.func = delete_object
 end
 
 function ATTACH:init()
-   self.fsm.vars.objects = self.fsm.vars.attach
-   self.fsm.vars.func = attach_object
+    self.fsm.vars.objects = self.fsm.vars.attach
+    self.fsm.vars.func = attach_object
 end
 
 function RELEASE:init()
-   self.fsm.vars.objects = self.fsm.vars.release
-   self.fsm.vars.func = release_object
+    self.fsm.vars.objects = self.fsm.vars.release
+    self.fsm.vars.func = release_object
 end
 
 function MOVE:init()
-   self.fsm.vars.objects = self.fsm.vars.move
-   self.fsm.vars.func = move_object
+    self.fsm.vars.objects = self.fsm.vars.move
+    self.fsm.vars.func = move_object
 end
 
 function ROTATE:init()
-   self.fsm.vars.objects = self.fsm.vars.rotate
-   self.fsm.vars.func = rotate_object
+    self.fsm.vars.objects = self.fsm.vars.rotate
+    self.fsm.vars.func = rotate_object
 end
 
 function RENAME:init()
-   self.fsm.vars.objects = self.fsm.vars.rename
-   self.fsm.vars.func = rename_object
+    self.fsm.vars.objects = self.fsm.vars.rename
+    self.fsm.vars.func = rename_object
 end
-
 
 function PROCESS:init()
-   local obj = self.fsm.vars.objects[1]
-   if obj == nil then
-      --print("Object is nil. Forgot table-brackets or string-quotes?")
-      self.fsm.vars.bad_args = true
-      return
-   end
+    local obj = self.fsm.vars.objects[1]
+    if obj == nil then
+        -- print("Object is nil. Forgot table-brackets or string-quotes?")
+        self.fsm.vars.bad_args = true
+        return
+    end
 
-   self.fsm.vars.msgid = self.fsm.vars.func( obj )
-   if self.fsm.vars.msgid == 0 then
-      --print("Insufficient arguments for this object")
-      self.fsm.vars.bad_args = true
-   else
-      --print("Processed one of "..#self.fsm.vars.objects.." remaining objects")
-      table.remove(self.fsm.vars.objects, 1)
-   end
+    self.fsm.vars.msgid = self.fsm.vars.func(obj)
+    if self.fsm.vars.msgid == 0 then
+        -- print("Insufficient arguments for this object")
+        self.fsm.vars.bad_args = true
+    else
+        -- print("Processed one of "..#self.fsm.vars.objects.." remaining objects")
+        table.remove(self.fsm.vars.objects, 1)
+    end
 end
 function PROCESS:exit()
-   self.fsm.vars.success = self.fsm.vars.success and if_openrave:is_success()
+    self.fsm.vars.success = self.fsm.vars.success and if_openrave:is_success()
 end
 
 function CHECK:init()
-   self.fsm.vars.success = self.fsm.vars.success and if_openrave:is_success()
+    self.fsm.vars.success = self.fsm.vars.success and if_openrave:is_success()
 end

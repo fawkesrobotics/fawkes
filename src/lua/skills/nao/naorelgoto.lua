@@ -1,4 +1,3 @@
-
 ----------------------------------------------------------------------------
 --  relgoto.lua - generic relative goto
 --
@@ -6,7 +5,6 @@
 --  Copyright  2008  Tim Niemueller [www.niemueller.de]
 --
 ----------------------------------------------------------------------------
-
 --  This program is free software; you can redistribute it and/or modify
 --  it under the terms of the GNU General Public License as published by
 --  the Free Software Foundation; either version 2 of the License, or
@@ -18,24 +16,22 @@
 --  GNU Library General Public License for more details.
 --
 --  Read the full text in the LICENSE.GPL file in the doc directory.
-
 -- Initialize module
 module(..., skillenv.module_init)
 
 -- Crucial skill information
-name               = "relgoto"
-fsm                = SkillHSM:new{name=name, start="RELGOTO", debug=true}
-depends_skills     = {"servo"}
+name = "relgoto"
+fsm = SkillHSM:new{name = name, start = "RELGOTO", debug = true}
+depends_skills = {"servo"}
 depends_interfaces = {
-   {v = "naomotion", id = "NaoQi Motion", type = "HumanoidMotionInterface"},
-   {v = "navigator", id = "Navigator", type = "NavigatorInterface"}
+    {v = "naomotion", id = "NaoQi Motion", type = "HumanoidMotionInterface"},
+    {v = "navigator", id = "Navigator", type = "NavigatorInterface"}
 }
 
 local p = require("predicates.soccer.general")
 local np = require("predicates.nao")
 
-
-documentation      = [==[Relative goto skill - tries to keep the ball insight.
+documentation = [==[Relative goto skill - tries to keep the ball insight.
 This skill takes you to a position given in relative coordinates in the robot-local
 coordinate system. The orientation is the final orientation, nothing is said about the
 intermediate orientation while on the way. The margin is the precision of the relgoto
@@ -74,67 +70,65 @@ skillenv.skill_module(...)
 fsm:new_jump_state("RELGOTO")
 
 function RELGOTO:init()
-   if navigator:has_writer() then
-      local vm = navigator.MaxVelocityMessage:new(1.0)
-      navigator:msgq_enqueue_copy(vm)
+    if navigator:has_writer() then
+        local vm = navigator.MaxVelocityMessage:new(1.0)
+        navigator:msgq_enqueue_copy(vm)
 
-      if self.fsm.vars.x ~= nil and self.fsm.vars.y ~= nil or
-	 self.fsm.vars[1] ~= nil and self.fsm.vars[2] ~= nil then
-	 -- cartesian goto
-	 local x = self.fsm.vars.x or self.fsm.vars[1]
-	 local y = self.fsm.vars.y or self.fsm.vars[2]
-	 local ori = self.fsm.vars.ori or self.fsm.vars[3] or math.atan2(y, x)
-	 local m = navigator.CartesianGotoMessage:new(x, y, ori)
-	 printf("Sending CartesianGotoMessage(%f, %f, %f)", x, y, ori)
-	 self.fsm.vars.msgid = navigator:msgq_enqueue_copy(m)
-      elseif self.fsm.vars.phi ~= nil and self.fsm.vars.dist ~= nil then
-	 -- polar goto
-	 local phi, dist = self.fsm.vars.phi, self.fsm.vars.dist
-	 local ori = self.fsm.vars.ori or phi
-	 local m = navigator.PolarGotoMessage:new(phi, dist, ori)
-	 printf("Sending PolarGotoMessage(%f, %f, %f)", phi, dist, ori)
-	 self.fsm.vars.msgid = navigator:msgq_enqueue_copy(m)
-      else
-	 self.param_fail = true
-      end
-   end
-   self.wait_start = 1
-   print("end init");
+        if self.fsm.vars.x ~= nil and self.fsm.vars.y ~= nil or self.fsm.vars[1] ~=
+            nil and self.fsm.vars[2] ~= nil then
+            -- cartesian goto
+            local x = self.fsm.vars.x or self.fsm.vars[1]
+            local y = self.fsm.vars.y or self.fsm.vars[2]
+            local ori = self.fsm.vars.ori or self.fsm.vars[3] or
+                            math.atan2(y, x)
+            local m = navigator.CartesianGotoMessage:new(x, y, ori)
+            printf("Sending CartesianGotoMessage(%f, %f, %f)", x, y, ori)
+            self.fsm.vars.msgid = navigator:msgq_enqueue_copy(m)
+        elseif self.fsm.vars.phi ~= nil and self.fsm.vars.dist ~= nil then
+            -- polar goto
+            local phi, dist = self.fsm.vars.phi, self.fsm.vars.dist
+            local ori = self.fsm.vars.ori or phi
+            local m = navigator.PolarGotoMessage:new(phi, dist, ori)
+            printf("Sending PolarGotoMessage(%f, %f, %f)", phi, dist, ori)
+            self.fsm.vars.msgid = navigator:msgq_enqueue_copy(m)
+        else
+            self.param_fail = true
+        end
+    end
+    self.wait_start = 1
+    print("end init");
 end
 
 function RELGOTO:loop()
-   self.wait_start = self.wait_start + 1
+    self.wait_start = self.wait_start + 1
 
-   if p.ball_visible then
-     local m = naomotion.YawPitchHeadMessage:new(
-                   np.head_yaw_to_center_ball,
-                   np.head_pitch_to_center_ball,
-                   0.3)
-     naomotion:msgq_enqueue_copy(m)
-   end
+    if p.ball_visible then
+        local m = naomotion.YawPitchHeadMessage:new(np.head_yaw_to_center_ball,
+                                                    np.head_pitch_to_center_ball,
+                                                    0.3)
+        naomotion:msgq_enqueue_copy(m)
+    end
 end
 
 function RELGOTO:reset()
-   --printf("relgoto: sending stop");
-   --navigator:msgq_enqueue_copy(navigator.StopMessage:new())
+    -- printf("relgoto: sending stop");
+    -- navigator:msgq_enqueue_copy(navigator.StopMessage:new())
 end
 
-function RELGOTO:jumpcond_paramfail()
-   return self.param_fail
-end
+function RELGOTO:jumpcond_paramfail() return self.param_fail end
 
 function RELGOTO:jumpcond_navifail()
-   return (self.fsm.vars.msgid == 0
-	   or (self.fsm.vars.msgid ~= navigator:msgid() and self.wait_start > 2)
-	   or not navigator:has_writer()
-	   or self.failed)
+    return (self.fsm.vars.msgid == 0 or
+               (self.fsm.vars.msgid ~= navigator:msgid() and self.wait_start > 2) or
+               not navigator:has_writer() or self.failed)
 end
 
 function RELGOTO:jumpcond_navifinal()
-   --printf("msgid: %d/%d  final: %s", self.fsm.vars.msgid, navigator:msgid(), tostring(navigator:is_final()))
-   return self.fsm.vars.msgid == navigator:msgid() and navigator:is_final()
+    -- printf("msgid: %d/%d  final: %s", self.fsm.vars.msgid, navigator:msgid(), tostring(navigator:is_final()))
+    return self.fsm.vars.msgid == navigator:msgid() and navigator:is_final()
 end
 
-RELGOTO:add_transition(FAILED, RELGOTO.jumpcond_paramfail, "Invalid/insufficient parameters")
+RELGOTO:add_transition(FAILED, RELGOTO.jumpcond_paramfail,
+                       "Invalid/insufficient parameters")
 RELGOTO:add_transition(FAILED, RELGOTO.jumpcond_navifail, "Navigator failure")
 RELGOTO:add_transition(FINAL, RELGOTO.jumpcond_navifinal, "Position reached")

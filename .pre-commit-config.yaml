@@ -89,6 +89,10 @@ repos:
           - --remove-duplicate-keys
           - --remove-unused-variables
           - --remove-all-unused-imports
+  - repo: https://github.com/Koihik/LuaFormatter.git
+    rev: 29afe10
+    hooks:
+      - id: luaformatter
   # XML
   - repo: local
     hooks:

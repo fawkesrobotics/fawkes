@@ -1,4 +1,3 @@
-
 ------------------------------------------------------------------------
 --  depinit.lua - Dependency initializer functions
 --
@@ -7,7 +6,6 @@
 --             2010       Carnegie Mellon University
 --             2010       Intel Research Pittsburgh
 ------------------------------------------------------------------------
-
 --  This program is free software; you can redistribute it and/or modify
 --  it under the terms of the GNU General Public License as published by
 --  the Free Software Foundation; either version 2 of the License, or
@@ -19,7 +17,6 @@
 --  GNU Library General Public License for more details.
 --
 --  Read the full text in the LICENSE.GPL file in the doc directory.
-
 require("fawkes.modinit")
 
 ---Dependency initializer functions.
@@ -36,16 +33,11 @@ local module_initializers = {}
 -- arguments. The module m, and a table to which fields should be added (the
 -- index metatable). The initializer should not set values directly on the
 -- module.
-function add_module_initializer(di)
-   table.insert(module_initializers, di)
-end
-
+function add_module_initializer(di) table.insert(module_initializers, di) end
 
 --- Initialize module with registered initializers.
 -- @param module module table to initialize, considered read-only
 -- @param table add anythin you want to export to a module to this table
 function init_module(module, table)
-   for _, mi in ipairs(module_initializers) do
-      mi(module, table)
-   end
+    for _, mi in ipairs(module_initializers) do mi(module, table) end
 end

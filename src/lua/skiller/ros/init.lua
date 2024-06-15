@@ -1,4 +1,3 @@
-
 ----------------------------------------------------------------------------
 --  init.lua - Skiller ROS dependent bits
 --
@@ -8,7 +7,6 @@
 --             2010-2011  Carnegie Mellon University
 --             2010       Intel Labs Pittsburgh
 ----------------------------------------------------------------------------
-
 --  This program is free software; you can redistribute it and/or modify
 --  it under the terms of the GNU General Public License as published by
 --  the Free Software Foundation; either version 2 of the License, or
@@ -20,7 +18,6 @@
 --  GNU Library General Public License for more details.
 --
 --  Read the full text in the LICENSE.GPL file in the doc directory.
-
 module("skiller.ros", package.seeall)
 
 require("roslua")
@@ -34,123 +31,123 @@ local nodemon
 -- the same arguments as printf (from fawkes.logprint), i.e. a format string
 -- and a suitable number of additional arguments for the format entities, as
 -- for string.format().
-print_fail  = fawkes.logprint.print_warn
+print_fail = fawkes.logprint.print_warn
 print_final = fawkes.logprint.print_info
 
 function init(args)
-   local args = args or {}
-   roslua.init_node{node_name = args.node_name or "skiller",
-		    no_signal_handler = args.no_signal_handler,
-                    no_print_funcs    = args.no_print_funcs}
+    local args = args or {}
+    roslua.init_node {
+        node_name = args.node_name or "skiller",
+        no_signal_handler = args.no_signal_handler,
+        no_print_funcs = args.no_print_funcs
+    }
 
-   local run_nodemon = args.run_nodemon or false
-   if roslua.has_param("skiller/nodemon") then
-      run_nodemon = roslua.get_param("skiller/nodemon")
-   end
+    local run_nodemon = args.run_nodemon or false
+    if roslua.has_param("skiller/nodemon") then
+        run_nodemon = roslua.get_param("skiller/nodemon")
+    end
 
-   if run_nodemon then
-      local ok, nodemonmod = pcall(require, "nodemon")
-      if ok then
-	 nodemon = nodemonmod.NodeStatePublisher:new("skiller", "skiller")
-      else
-	 print_warn("Node monitoring disabled (module nodemon not found):\n%s",
-		    nodemonmod)
-      end
-   end
+    if run_nodemon then
+        local ok, nodemonmod = pcall(require, "nodemon")
+        if ok then
+            nodemon = nodemonmod.NodeStatePublisher:new("skiller", "skiller")
+        else
+            print_warn(
+                "Node monitoring disabled (module nodemon not found):\n%s",
+                nodemonmod)
+        end
+    end
 
-   if not args.no_action_server then
-      skiller_as = actionlib.action_server("~exec", "skiller/ExecSkill",
-					   goal_cb, spin_cb, cancel_cb)
-      skiller.ros.graph.init()
-   end
+    if not args.no_action_server then
+        skiller_as = actionlib.action_server("~exec", "skiller/ExecSkill",
+                                             goal_cb, spin_cb, cancel_cb)
+        skiller.ros.graph.init()
+    end
 
-   skillenv = require("skiller.skillenv")
+    skillenv = require("skiller.skillenv")
 
-   if nodemon then nodemon:set_running() end
+    if nodemon then nodemon:set_running() end
 end
-
 
 function goal_cb(goal_handle, action_server)
-   local stamp = goal_handle.goalmsg.values.header.values.stamp
-   action_server:cancel_goals_before(stamp)
-   goal_handle.vars.skillstring =
-      goal_handle.goalmsg.values.goal.values.skillstring
-   printf("Starting goal %s (%s)", goal_handle.goal_id,
-          goal_handle.vars.skillstring)
-   local sksf, err = loadstring(goal_handle.vars.skillstring)
-   if sksf then
-      skillenv.reset_all()
-      local sandbox = skillenv.gensandbox()
-      setfenv(sksf, sandbox)
-      goal_handle.vars.sksf = sksf
-      printf("Accepting goal %s", goal_handle.goal_id)
-      goal_handle:accept(goal_handle.vars.skillstring)
-      if nodemon then nodemon:set_running() end
-   else
-      local errstr = string.format("%s|%s", goal_handle.vars.skillstring, err)
-      print_error("lua_error_skillstring: " .. errstr)
-      if nodemon then
-	 nodemon:set_error("lua_error_skillstring", errstr)
-	 nodemon:set_recovering("autorecover", "ready for new skill calls")
-	 nodemon:set_running()
-      end
-      goal_handle:reject(errstr)
-   end
+    local stamp = goal_handle.goalmsg.values.header.values.stamp
+    action_server:cancel_goals_before(stamp)
+    goal_handle.vars.skillstring = goal_handle.goalmsg.values.goal.values
+                                       .skillstring
+    printf("Starting goal %s (%s)", goal_handle.goal_id,
+           goal_handle.vars.skillstring)
+    local sksf, err = loadstring(goal_handle.vars.skillstring)
+    if sksf then
+        skillenv.reset_all()
+        local sandbox = skillenv.gensandbox()
+        setfenv(sksf, sandbox)
+        goal_handle.vars.sksf = sksf
+        printf("Accepting goal %s", goal_handle.goal_id)
+        goal_handle:accept(goal_handle.vars.skillstring)
+        if nodemon then nodemon:set_running() end
+    else
+        local errstr = string.format("%s|%s", goal_handle.vars.skillstring, err)
+        print_error("lua_error_skillstring: " .. errstr)
+        if nodemon then
+            nodemon:set_error("lua_error_skillstring", errstr)
+            nodemon:set_recovering("autorecover", "ready for new skill calls")
+            nodemon:set_running()
+        end
+        goal_handle:reject(errstr)
+    end
 end
-
 
 function spin_cb(goal_handle, action_server)
-   skillenv.reset_status()
-   local ok, errmsg = xpcall(goal_handle.vars.sksf, debug.traceback)
-   if not ok then
-      local errstr = string.format("%s|%s", goal_handle.vars.skillstring, errmsg)
-      print_error("lua_error_skill: " .. errstr)
+    skillenv.reset_status()
+    local ok, errmsg = xpcall(goal_handle.vars.sksf, debug.traceback)
+    if not ok then
+        local errstr = string.format("%s|%s", goal_handle.vars.skillstring,
+                                     errmsg)
+        print_error("lua_error_skill: " .. errstr)
 
-      local result = action_server.actspec.result_spec:instantiate()
-      result.values.errmsg = errstr
-      if nodemon then
-	 nodemon:set_error("lua_error_skill", errstr)
-	 nodemon:set_recovering("autorecover: ready for new skill calls")
-	 nodemon:set_running()
-      end
-      goal_handle:abort(result, errstr)
-   else
-      local running, final, failed = skillenv.get_status()
+        local result = action_server.actspec.result_spec:instantiate()
+        result.values.errmsg = errstr
+        if nodemon then
+            nodemon:set_error("lua_error_skill", errstr)
+            nodemon:set_recovering("autorecover: ready for new skill calls")
+            nodemon:set_running()
+        end
+        goal_handle:abort(result, errstr)
+    else
+        local running, final, failed = skillenv.get_status()
 
-      if failed > 0 then
-	 local result = action_server.actspec.result_spec:instantiate()
-	 local errstr_machine, errstr_human = skillenv.get_error()
+        if failed > 0 then
+            local result = action_server.actspec.result_spec:instantiate()
+            local errstr_machine, errstr_human = skillenv.get_error()
 
-	 result.values.errmsg = errstr_machine
-	 print_fail("%s", errstr_human)
-	 if nodemon then
-	    nodemon:set_error("lua_error_skill", errstr_machine)
-	    nodemon:set_recovering("autorecover", "ready for new skill calls")
-	    nodemon:set_running()
-	 end
-	 goal_handle:abort(result, errstr)
-      elseif final > 0 and running == 0 then
-	 print_final("exec_final: %s", goal_handle.vars.skillstring)
-	 local result = action_server.actspec.result_spec:instantiate()
-	 goal_handle:finish(result)
-      elseif running > 0 then
-	 -- nothing to do
-      end
-   end
+            result.values.errmsg = errstr_machine
+            print_fail("%s", errstr_human)
+            if nodemon then
+                nodemon:set_error("lua_error_skill", errstr_machine)
+                nodemon:set_recovering("autorecover",
+                                       "ready for new skill calls")
+                nodemon:set_running()
+            end
+            goal_handle:abort(result, errstr)
+        elseif final > 0 and running == 0 then
+            print_final("exec_final: %s", goal_handle.vars.skillstring)
+            local result = action_server.actspec.result_spec:instantiate()
+            goal_handle:finish(result)
+        elseif running > 0 then
+            -- nothing to do
+        end
+    end
 
-   local active_skill = skiller.skillenv.get_active_skills()
-   local fsm
-   if active_skill then
-      fsm = skiller.skillenv.get_skill_fsm(active_skill)
-   end
-   skiller.ros.graph.publish(fsm)
+    local active_skill = skiller.skillenv.get_active_skills()
+    local fsm
+    if active_skill then fsm = skiller.skillenv.get_skill_fsm(active_skill) end
+    skiller.ros.graph.publish(fsm)
 end
 
-
 function cancel_cb(goal_handle, action_server)
-   print_warn("Goal %s (%s) cancelled",
-	      goal_handle.goal_id, goal_handle.vars.skillstring)
-   skillenv.reset_all()
-   skiller.ros.graph.publish()
-   if nodemon then nodemon:set_running() end
+    print_warn("Goal %s (%s) cancelled", goal_handle.goal_id,
+               goal_handle.vars.skillstring)
+    skillenv.reset_all()
+    skiller.ros.graph.publish()
+    if nodemon then nodemon:set_running() end
 end

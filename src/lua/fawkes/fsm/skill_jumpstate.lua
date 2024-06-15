@@ -1,4 +1,3 @@
-
 ------------------------------------------------------------------------
 --  skill_jumpstates.lua - HSM jumpstate specifically class for executing skills
 --
@@ -6,7 +5,6 @@
 --  Copyright  20015  Bahram Maleki-Fard
 --
 ------------------------------------------------------------------------
-
 --  This program is free software; you can redistribute it and/or modify
 --  it under the terms of the GNU General Public License as published by
 --  the Free Software Foundation; either version 2 of the License, or
@@ -18,7 +16,6 @@
 --  GNU Library General Public License for more details.
 --
 --  Read the full text in the LICENSE.GPL file in the doc directory.
-
 require("fawkes.modinit")
 
 --- This module serves as a parent class that implements a specific type
@@ -33,10 +30,9 @@ SkillJumpState = {}
 SkillJumpState.__index = SkillJumpState
 
 function SkillJumpState:implemented_by(impl_class)
-   assert(impl_class, "SkillJumpState requires an implementation class as argument")
+    assert(impl_class,
+           "SkillJumpState requires an implementation class as argument")
 
-   for k,v in pairs(impl_class) do
-     SkillJumpState[k] = v
-   end
-   SkillJumpState.__index = SkillJumpState
+    for k, v in pairs(impl_class) do SkillJumpState[k] = v end
+    SkillJumpState.__index = SkillJumpState
 end
