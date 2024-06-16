@@ -1,4 +1,3 @@
-
 ------------------------------------------------------------------------
 --  hsm.lua - Lua Hybrid State Machines (HSM)
 --
@@ -7,7 +6,6 @@
 --             2010  Carnegie Mellon University
 --             2010  Intel Labs Pittsburgh
 ------------------------------------------------------------------------
-
 --  This program is free software; you can redistribute it and/or modify
 --  it under the terms of the GNU General Public License as published by
 --  the Free Software Foundation; either version 2 of the License, or
@@ -19,7 +17,6 @@
 --  GNU Library General Public License for more details.
 --
 --  Read the full text in the LICENSE.GPL file in the doc directory.
-
 require("fawkes.modinit")
 
 --- This module provides a Hybrid State Machine (HSM).
@@ -35,10 +32,10 @@ require("fawkes.modinit")
 -- @author Tim Niemueller
 module(..., fawkes.modinit.module_init)
 
-local jumpstmod  = require("fawkes.fsm.jumpstate")
-JumpState        = jumpstmod.JumpState
-local fsmmod     = require("fawkes.fsm")
-FSM              = fsmmod.FSM
+local jumpstmod = require("fawkes.fsm.jumpstate")
+JumpState = jumpstmod.JumpState
+local fsmmod = require("fawkes.fsm")
+FSM = fsmmod.FSM
 
 HSM = {}
 
@@ -46,22 +43,20 @@ HSM = {}
 -- Parameters are the same as for FSM.
 -- @see FSM:new()
 function HSM:new(o)
-   local o = FSM:new(o)
+    local o = FSM:new(o)
 
-   setmetatable(o, self)
-   setmetatable(self, FSM)
-   self.__index = self
+    setmetatable(o, self)
+    setmetatable(self, FSM)
+    self.__index = self
 
-   o.default_transitions = {}
+    o.default_transitions = {}
 
-   return o
+    return o
 end
 
 --- Simple state generation not supported for SkillHSM.
 -- Throws an error. Only jump states can be created for SkillHSMs.
-function HSM:new_state()
-   error("Only jump states can be created for a HSM")
-end
+function HSM:new_state() error("Only jump states can be created for a HSM") end
 
 --- Define states of this HSM.
 -- This method takes a table describing the states that this state machines
@@ -96,52 +91,52 @@ end
 -- }
 -- </code>
 function HSM:define_states(states)
-   local export_to = states.export_to
-   local closure   = states.closure
+    local export_to = states.export_to
+    local closure = states.closure
 
-   -- export already existing states
-   if export_to then
-      for name, state in pairs(self.states) do
-         export_to[name] = state
-      end
-   end
+    -- export already existing states
+    if export_to then
+        for name, state in pairs(self.states) do export_to[name] = state end
+    end
 
-   for _, s in ipairs(states) do
-      local name, class
-      if type(s) == "string" then
-         name = s
-         class = JumpState
-      else
-         name  = s[1]
-         class = s[2]
-      end
-      assert(not self.states[name], "HSM[" .. self.name .. "] state with name "
-             .. tostring(name) .. " already defined")
-      assert(class, "HSM[" .. self.name .. "] class instance for state "
-             .. tostring(name) .. " not defined")
+    for _, s in ipairs(states) do
+        local name, class
+        if type(s) == "string" then
+            name = s
+            class = JumpState
+        else
+            name = s[1]
+            class = s[2]
+        end
+        assert(not self.states[name],
+               "HSM[" .. self.name .. "] state with name " .. tostring(name) ..
+                   " already defined")
+        assert(class,
+               "HSM[" .. self.name .. "] class instance for state " ..
+                   tostring(name) .. " not defined")
 
-      -- Generate base table for new instance
-      local o = {}
-      -- copy the values, otherwise instances would use the definition table
-      if type(s) == "table" then
-         for k, v in pairs(s) do o[k] = v end
-         table.remove(o, 1, 2) -- remove positional args
-      end
-      o.name    = name
-      o.fsm     = self
-      o.closure = closure
+        -- Generate base table for new instance
+        local o = {}
+        -- copy the values, otherwise instances would use the definition table
+        if type(s) == "table" then
+            for k, v in pairs(s) do o[k] = v end
+            table.remove(o, 1, 2) -- remove positional args
+        end
+        o.name = name
+        o.fsm = self
+        o.closure = closure
 
-      -- Create state and assert as subclass
-      local s = class:new(o)
-      assert(JumpState.is_instance(s), "State class is not a sub-class of JumpState")
+        -- Create state and assert as subclass
+        local s = class:new(o)
+        assert(JumpState.is_instance(s),
+               "State class is not a sub-class of JumpState")
 
-      -- add to structures and possibly export
-      self.states[name] = s
-      self:apply_deftrans(s)
-      if export_to then export_to[s.name] = s end
-   end
+        -- add to structures and possibly export
+        self.states[name] = s
+        self:apply_deftrans(s)
+        if export_to then export_to[s.name] = s end
+    end
 end
-
 
 --- Define transitions.
 -- This method takes a table of transitions to add. All states used for
@@ -176,87 +171,93 @@ end
 -- A desc string field can be set to an alternative description of the
 -- transition used in the graph display.
 function HSM:add_transitions(trans)
-   for _,t in ipairs(trans) do
-      if t[2] then -- Normal from -> to transition
-         assert(t[1], "Must have an originating state")
-         assert(not t.precond_only, "The field 'precond_only' is not supported anymore! Use 'precond' instead"
-                                     .. " to treat is exclusively as a precondition. Do not forget to remote 'cond' then."
-                                     .. " See documentation.")
-         assert(not (t[3] and t.cond), "Only one of cond field and third index may be set as condition")
+    for _, t in ipairs(trans) do
+        if t[2] then -- Normal from -> to transition
+            assert(t[1], "Must have an originating state")
+            assert(not t.precond_only,
+                   "The field 'precond_only' is not supported anymore! Use 'precond' instead" ..
+                       " to treat is exclusively as a precondition. Do not forget to remote 'cond' then." ..
+                       " See documentation.")
+            assert(not (t[3] and t.cond),
+                   "Only one of cond field and third index may be set as condition")
 
-         local trans_string = tostring(t[1]) .." -> " .. tostring(t[2])
+            local trans_string = tostring(t[1]) .. " -> " .. tostring(t[2])
 
-         local from  = assert(self.states[t[1]],
-                              "Originating state does not exist for transition "
-                                 .. trans_string)
-         local to    = assert(self.states[t[2]],
-                              "Destination state does not exist for transition "
-                                 .. trans_string)
+            local from = assert(self.states[t[1]],
+                                "Originating state does not exist for transition " ..
+                                    trans_string)
+            local to = assert(self.states[t[2]],
+                              "Destination state does not exist for transition " ..
+                                  trans_string)
 
-         local cond    = t[3] or t.cond
-         local precond = t.precond
-         assert(not (t.cond_and_precond and (cond or t.precond)),
-                "When 'cond_and_precond' field is set, you may not set 'cond' or 'precond'")
+            local cond = t[3] or t.cond
+            local precond = t.precond
+            assert(not (t.cond_and_precond and (cond or t.precond)),
+                   "When 'cond_and_precond' field is set, you may not set 'cond' or 'precond'")
 
-         if cond and precond == true then
-            print_warn("ATTENTION: You have set the field 'cond' and set 'precond=true' for the transition ".. trans_string.."."
-                        .." This adds a regular condition (cond) and a precondition (precond), which means your cond will be skipped due to 'precond=true'."
-                        .." Please check if this is intended or a remainer of the old condition setting syntax.")
-         end
-
-         if t.cond_and_precond then
-            --print("cond_and_precond set for "..trans_string.." : "..tostring(t.cond_and_precond))
-            cond    = t.cond_and_precond
-            precond = t.cond_and_precond
-         end
-
-         assert(cond or precond or t.timeout,
-                "You must have a condition or a timeout for transition "
-                   .. trans_string)
-
-         -- If we only get a time as timeout assume jump to normal to state
-         if t.timeout then
-            local timeout_to, timeout_time, timeout_err
-            if type(t.timeout) == "number" then
-               timeout_time = t.timeout
-               timeout_to   = to.name
-            else
-               assert(type(t.timeout) == "table", "Timeout must be number or table")
-               timeout_time = t.timeout.time or t.timeout[1]
-               timeout_to   = t.timeout.to   or t.timeout[2] or to.name
-               timeout_err  = t.timeout.error
+            if cond and precond == true then
+                print_warn(
+                    "ATTENTION: You have set the field 'cond' and set 'precond=true' for the transition " ..
+                        trans_string .. "." ..
+                        " This adds a regular condition (cond) and a precondition (precond), which means your cond will be skipped due to 'precond=true'." ..
+                        " Please check if this is intended or a remainer of the old condition setting syntax.")
             end
-            assert(self.states[timeout_to], "Timeout destination state "
-                   .. tostring(timeout_to)
-                   .. " does not exist for transition " .. trans_string)
 
-            from:set_timeout(timeout_time, timeout_to, timeout_err, t.desc)
-         end
+            if t.cond_and_precond then
+                -- print("cond_and_precond set for "..trans_string.." : "..tostring(t.cond_and_precond))
+                cond = t.cond_and_precond
+                precond = t.cond_and_precond
+            end
 
-         -- We might have no condition but still a useful transition,
-         -- i.e. if a timeout is set
-         if cond then
-            --print("Adding condition for "..trans_string.." : "..tostring(cond))
-            local new_t = from:add_new_transition(to, cond, t.desc, t.error)
-            if t.dotattr then new_t.dotattr = t.dotattr end
-            if t.hide then new_t.hide = true end
-         end
-         if precond then
-            --print("Adding precondition for "..trans_string.." : "..tostring(precond))
-            local new_t = from:add_new_precondition(to, precond, t.desc, t.error)
-            if t.dotattr then new_t.dotattr = t.dotattr end
-            if t.hide then new_t.hide = true end
-         end
+            assert(cond or precond or t.timeout,
+                   "You must have a condition or a timeout for transition " ..
+                       trans_string)
 
-      else -- default transition
-         local to = assert(self.states[t[1]], "Destination state " .. tostring(t[1])
-                           .. " does not exist for default transition")
-         assert(t.cond, "Default transition must have a jump condition")
-         self:add_default_transition(to.name, t.cond, t.desc)
-      end
-   end
+            -- If we only get a time as timeout assume jump to normal to state
+            if t.timeout then
+                local timeout_to, timeout_time, timeout_err
+                if type(t.timeout) == "number" then
+                    timeout_time = t.timeout
+                    timeout_to = to.name
+                else
+                    assert(type(t.timeout) == "table",
+                           "Timeout must be number or table")
+                    timeout_time = t.timeout.time or t.timeout[1]
+                    timeout_to = t.timeout.to or t.timeout[2] or to.name
+                    timeout_err = t.timeout.error
+                end
+                assert(self.states[timeout_to],
+                       "Timeout destination state " .. tostring(timeout_to) ..
+                           " does not exist for transition " .. trans_string)
+
+                from:set_timeout(timeout_time, timeout_to, timeout_err, t.desc)
+            end
+
+            -- We might have no condition but still a useful transition,
+            -- i.e. if a timeout is set
+            if cond then
+                -- print("Adding condition for "..trans_string.." : "..tostring(cond))
+                local new_t = from:add_new_transition(to, cond, t.desc, t.error)
+                if t.dotattr then new_t.dotattr = t.dotattr end
+                if t.hide then new_t.hide = true end
+            end
+            if precond then
+                -- print("Adding precondition for "..trans_string.." : "..tostring(precond))
+                local new_t = from:add_new_precondition(to, precond, t.desc,
+                                                        t.error)
+                if t.dotattr then new_t.dotattr = t.dotattr end
+                if t.hide then new_t.hide = true end
+            end
+
+        else -- default transition
+            local to = assert(self.states[t[1]],
+                              "Destination state " .. tostring(t[1]) ..
+                                  " does not exist for default transition")
+            assert(t.cond, "Default transition must have a jump condition")
+            self:add_default_transition(to.name, t.cond, t.desc)
+        end
+    end
 end
-
 
 --- Convenience method to create a new jump state.
 -- It is recommended NOT to use this method, but rather use define_states() and
@@ -275,23 +276,22 @@ end
 -- @param export_to if passed a table this method will assign the state to a field
 -- with the name of the state in that table.
 function HSM:new_jump_state(name, transitions, vars, export_to)
-   assert(name, "HSM:new_jump_state: Name must be given")
-   assert(self.states[name] == nil, "HSM:new_state: State with name " .. name .. " already exists")
-   local o = {name = name, fsm = self, transitions = transitions}
-   if vars then
-      assert(type(vars) == "table", "HSM:new_state: vars parameter must be a table")
-      for k,v in pairs(vars) do
-         o[k] = v
-      end
-   end
-   local s = JumpState:new(o)
-   self:apply_deftrans(s)
-   self.states[name] = s
-   if export_to then e[name] = s end
+    assert(name, "HSM:new_jump_state: Name must be given")
+    assert(self.states[name] == nil,
+           "HSM:new_state: State with name " .. name .. " already exists")
+    local o = {name = name, fsm = self, transitions = transitions}
+    if vars then
+        assert(type(vars) == "table",
+               "HSM:new_state: vars parameter must be a table")
+        for k, v in pairs(vars) do o[k] = v end
+    end
+    local s = JumpState:new(o)
+    self:apply_deftrans(s)
+    self.states[name] = s
+    if export_to then e[name] = s end
 
-   return s
+    return s
 end
-
 
 --- Add default transition.
 -- A default transition is a transition that is added to every added state. Here,
@@ -304,41 +304,45 @@ end
 -- be a plain copy of the code as string or a verbal description, used for
 -- debugging and graph generation
 function HSM:add_default_transition(state, jumpcond, description)
-   if self.debug then
-      printf("%s: Adding default transition -> %s on %s (%s)",
-             self.name, tostring(state), tostring(jumpcond), tostring(description or ""))
-   end
-   table.insert(self.default_transitions, {state=state, jumpcond=jumpcond, description=description})
-   for _,st in pairs(self.states) do
-      self:apply_deftrans(st)
-   end
+    if self.debug then
+        printf("%s: Adding default transition -> %s on %s (%s)", self.name,
+               tostring(state), tostring(jumpcond), tostring(description or ""))
+    end
+    table.insert(self.default_transitions, {
+        state = state,
+        jumpcond = jumpcond,
+        description = description
+    })
+    for _, st in pairs(self.states) do self:apply_deftrans(st) end
 end
-
 
 --- Apply default transitions to given state.
 -- @param state state to assign default transitions to
 function HSM:apply_deftrans(state)
-   assert(type(state) == "table" and state.name, "Passed state must be a state object")
+    assert(type(state) == "table" and state.name,
+           "Passed state must be a state object")
 
-   for i,t in ipairs(self.default_transitions) do
-      local compto = type(t.state) == "table" and state or state.name
+    for i, t in ipairs(self.default_transitions) do
+        local compto = type(t.state) == "table" and state or state.name
 
-      if compto ~= t.state
-         and state.name ~= self.exit_state and state.name ~= self.fail_state then
+        if compto ~= t.state and state.name ~= self.exit_state and state.name ~=
+            self.fail_state then
 
-         local exists = false
-         for _,t2 in ipairs(state.transitions) do
-            if t2.deftransindex == i then
-               exists = true
-               break;
+            local exists = false
+            for _, t2 in ipairs(state.transitions) do
+                if t2.deftransindex == i then
+                    exists = true
+                    break
+                end
             end
-         end
-         if not exists then
-            printf("Adding transition %s -> %s (%s, %s)", state.name, tostring(t.state),
-                   tostring(t.jumpcond), tostring(t.description or ""))
-            local tr = state:add_new_transition(t.state, t.jumpcond, t.description)
-            tr.deftransindex = i
-         end
-      end
-   end
+            if not exists then
+                printf("Adding transition %s -> %s (%s, %s)", state.name,
+                       tostring(t.state), tostring(t.jumpcond),
+                       tostring(t.description or ""))
+                local tr = state:add_new_transition(t.state, t.jumpcond,
+                                                    t.description)
+                tr.deftransindex = i
+            end
+        end
+    end
 end

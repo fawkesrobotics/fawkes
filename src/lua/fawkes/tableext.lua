@@ -1,4 +1,3 @@
-
 ------------------------------------------------------------------------
 --  tableext.lua - table package extensions
 --
@@ -7,7 +6,6 @@
 --             2010  Carnegie Mellon University
 --             2010  Intel Labs Pittsburgh
 ------------------------------------------------------------------------
-
 --  This program is free software; you can redistribute it and/or modify
 --  it under the terms of the GNU General Public License as published by
 --  the Free Software Foundation; either version 2 of the License, or
@@ -19,7 +17,6 @@
 --  GNU Library General Public License for more details.
 --
 --  Read the full text in the LICENSE.GPL file in the doc directory.
-
 local _G = _G;
 local table = table;
 local type = type
@@ -45,19 +42,19 @@ module("fawkes.tableext");
 -- to false.
 -- @return new table with a deep copy of t
 function table.deepcopy(t, assign_metatable)
-   assert(type(t) == "table", "Argument must be of type table")
-   local assign_metatable = assign_metatable or false
+    assert(type(t) == "table", "Argument must be of type table")
+    local assign_metatable = assign_metatable or false
 
-   local result = {}
-   for k,v in pairs(t) do
-      if type(v) == "table" then
-	 result[k] = table.deepcopy(v)
-      else
-	 result[k] = v
-      end
-   end
+    local result = {}
+    for k, v in pairs(t) do
+        if type(v) == "table" then
+            result[k] = table.deepcopy(v)
+        else
+            result[k] = v
+        end
+    end
 
-   if assign_metatable then setmetatable(result, getmetatable(t)) end
+    if assign_metatable then setmetatable(result, getmetatable(t)) end
 
-   return result
+    return result
 end

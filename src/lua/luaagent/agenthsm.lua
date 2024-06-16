@@ -1,4 +1,3 @@
-
 ----------------------------------------------------------------------------
 --  agenthsm.lua - Hybrid State Machine for agents, closely related to FSM
 --
@@ -7,7 +6,6 @@
 --             2010       Carnegie Mellon University
 --             2010       Intel Labs Pittsburgh
 ----------------------------------------------------------------------------
-
 --  This program is free software; you can redistribute it and/or modify
 --  it under the terms of the GNU General Public License as published by
 --  the Free Software Foundation; either version 2 of the License, or
@@ -19,7 +17,6 @@
 --  GNU Library General Public License for more details.
 --
 --  Read the full text in the LICENSE.GPL file in the doc directory.
-
 require("fawkes.modinit")
 
 --- Hybrid State Machine for agents.
@@ -29,30 +26,32 @@ module(..., fawkes.modinit.module_init)
 local hsmmod = require("fawkes.hsm")
 local jsmod = require("fawkes.fsm.jumpstate")
 
-local HSM    = hsmmod.HSM
-JumpState    = jsmod.JumpState
+local HSM = hsmmod.HSM
+JumpState = jsmod.JumpState
 
 AgentHSM = {}
 
 --- Create new AgentHSM.
 function AgentHSM:new(o)
-   local f = HSM:new(o)
-   setmetatable(f, self)
-   setmetatable(self, HSM)
-   self.__index = self
+    local f = HSM:new(o)
+    setmetatable(f, self)
+    setmetatable(self, HSM)
+    self.__index = self
 
-   f:clear_states()
-   f.exit_state = "FINAL"
-   f.fail_state = "FAILED"
-   f:define_states{ export_to = o.export_to,
-                    {"FINAL", JumpState}, {"FAILED", JumpState}}
+    f:clear_states()
+    f.exit_state = "FINAL"
+    f.fail_state = "FAILED"
+    f:define_states{
+        export_to = o.export_to,
+        {"FINAL", JumpState},
+        {"FAILED", JumpState}
+    }
 
-   return f
+    return f
 end
-
 
 --- Simple state generation not supported for AgentHSM.
 -- Throws an error. Only jump states can be created for AgentHSMs.
 function AgentHSM:new_state()
-   error("Only jump states can be created for an AgentHSM")
+    error("Only jump states can be created for an AgentHSM")
 end
