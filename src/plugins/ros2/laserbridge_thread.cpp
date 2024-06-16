@@ -27,7 +27,7 @@
 //This plugin injects the laser scan data from ROS2 into the fawkes pcl_manager
 //Therefore the laser-data is first filterd like in the default config for laser-filter:
 //i.e. remove all date from within the robotino and only keep those inside certain angles
-//The plugin also calculates the average distance of a set of beams in the front of the robot
+//The plugin also calculates the minimum distance of a set of beams in the front of the robot
 //and publishes it to the front-dist interface
 
 using namespace fawkes;
@@ -104,7 +104,7 @@ ROS2LaserBridgeThread::laser_callback(const sensor_msgs::msg::LaserScan::SharedP
 
 	int center_beam_index = scan->ranges.size() / 2;
 
-	float sum = 0.0;
+	float min = std::numeric_limits<float>::infinity();
 
 	for (int i = center_beam_index - beams_used_ / 2; i < center_beam_index + beams_used_ / 2; i++) {
 		if (!std::isnormal(scan->ranges[i])) {
@@ -113,20 +113,21 @@ ROS2LaserBridgeThread::laser_callback(const sensor_msgs::msg::LaserScan::SharedP
 			if_front_dist_->write();
 			return;
 		}
-		sum += scan->ranges[i];
+		if (min > scan->ranges[i]) {
+			min = scan->ranges[i];
+		}
 	}
 
-	float       average = sum / (float)beams_used_;
-	std::string frame_  = "front_laser";
+	std::string frame_ = "front_laser";
 
-	tf::Transform        transform(tf::create_quaternion_from_yaw(M_PI), tf::Vector3(average, 0, 0));
+	tf::Transform        transform(tf::create_quaternion_from_yaw(M_PI), tf::Vector3(min, 0, 0));
 	Time                 time(clock);
 	tf::StampedTransform stamped_transform(transform, time, frame_.c_str(), target_frame_.c_str());
 	tf_publisher->send_transform(stamped_transform);
 
 	// write result
 	if_front_dist_->set_visibility_history(1);
-	if_front_dist_->set_translation(0, average);
+	if_front_dist_->set_translation(0, min);
 	if_front_dist_->set_frame(frame_.c_str());
 	if_front_dist_->write();
 }
