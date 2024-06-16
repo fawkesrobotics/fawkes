@@ -32,8 +32,8 @@ using namespace fawkes;
  * @param cfg_prefix configuration prefix specific for the ros/navigator
  */
 ROS2NavigatorThread::ROS2NavigatorThread(std::string &cfg_prefix)
-: Thread("ROS2NavigatorThread", Thread::OPMODE_CONTINUOUS),
-  //  BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT),
+: Thread("ROS2NavigatorThread", Thread::OPMODE_WAITFORWAKEUP),
+  BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT),
   cfg_prefix_(cfg_prefix)
 {
 }
@@ -524,7 +524,6 @@ ROS2NavigatorThread::loop()
 			nav_if_->msgq_pop();
 		} // while
 	}
-	usleep(100000);
 }
 
 void
