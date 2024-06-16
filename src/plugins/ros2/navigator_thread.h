@@ -53,6 +53,7 @@ class ROS2NavigatorThread : public fawkes::Thread,
                             //                           public fawkes::BlockedTimingAspect,
                             public fawkes::LoggingAspect,
                             public fawkes::BlackBoardAspect,
+                            public fawkes::BlockedTimingAspect,
                             public fawkes::ConfigurableAspect,
                             public fawkes::ROS2Aspect,
                             public fawkes::TransformAspect

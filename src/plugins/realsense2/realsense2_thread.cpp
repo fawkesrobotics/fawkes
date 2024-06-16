@@ -35,9 +35,7 @@ using namespace fawkes;
  */
 
 Realsense2Thread::Realsense2Thread()
-: Thread("Realsense2Thread", Thread::OPMODE_WAITFORWAKEUP),
-  BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE),
-  switch_if_(NULL)
+: Thread("Realsense2Thread", Thread::OPMODE_CONTINUOUS), switch_if_(NULL)
 {
 }
 
@@ -52,8 +50,10 @@ Realsense2Thread::init()
 	  config->get_string_or_default((cfg_prefix + "switch_if_name").c_str(), "realsense2");
 	restart_after_num_errors_ =
 	  config->get_uint_or_default((cfg_prefix + "restart_after_num_errors").c_str(), 50);
-	frame_rate_  = config->get_uint_or_default((cfg_prefix + "frame_rate").c_str(), 30);
-	laser_power_ = config->get_float_or_default((cfg_prefix + "laser_power").c_str(), -1);
+	frame_rate_   = config->get_uint_or_default((cfg_prefix + "frame_rate").c_str(), 30);
+	laser_power_  = config->get_float_or_default((cfg_prefix + "laser_power").c_str(), -1);
+	int frequency = config->get_float_or_default((cfg_prefix + "loop_time").c_str(), 66333);
+	sleep_time_   = std::chrono::microseconds(frequency);
 
 	cfg_use_switch_ = config->get_bool_or_default((cfg_prefix + "use_switch").c_str(), true);
 
@@ -187,6 +187,7 @@ Realsense2Thread::loop()
 			start_camera();
 		}
 	}
+	std::this_thread::sleep_for(sleep_time_);
 }
 
 void
