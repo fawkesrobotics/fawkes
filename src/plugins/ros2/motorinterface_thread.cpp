@@ -29,7 +29,7 @@ using namespace fawkes;
 
 /** Constructor. */
 ROS2MotorInterfaceThread::ROS2MotorInterfaceThread()
-: Thread("ROS2MotorInterfaceThread", Thread::OPMODE_CONTINUOUS),
+: Thread("ROS2MotorInterfaceThread", Thread::OPMODE_WAITFORWAKEUP),
   BlackBoardInterfaceListener("ROS2MotorInterfaceThread")
 {
 }

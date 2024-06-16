@@ -57,7 +57,7 @@
       The ratio of the most likely identity showing up in the history
       and the length of the history.
     </field>
-    
+
     <field type="float" name="sec_since_detection">
       Time in seconds since the last successful detection.
     </field>
@@ -140,4 +140,3 @@
     <comment>Stop searching for a specific person, return to recognition.</comment>
   </message>
 </interface>
-

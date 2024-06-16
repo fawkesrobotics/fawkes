@@ -717,7 +717,7 @@ BufferCore::can_transform_internal(CompactFrameID      target_id,
  * @param source_frame The frame from which to transform
  * @param time The time at which to transform
  * @param error_msg A pointer to a string which will be filled with why the transform failed, if not NULL
- * @return True if the transform is possible, false otherwise 
+ * @return True if the transform is possible, false otherwise
  */
 bool
 BufferCore::can_transform(const std::string  &target_frame,
@@ -749,7 +749,7 @@ BufferCore::can_transform(const std::string  &target_frame,
  * @param source_time The time from which to transform
  * @param fixed_frame The frame in which to treat the transform as constant in time
  * @param error_msg A pointer to a string which will be filled with why the transform failed, if not NULL
- * @return true if the transform is possible, false otherwise 
+ * @return true if the transform is possible, false otherwise
  */
 bool
 BufferCore::can_transform(const std::string  &target_frame,
@@ -867,7 +867,7 @@ BufferCore::all_frames_as_string() const
 }
 
 /** A way to see what frames have been cached.
- * Useful for debugging. Use this call internally. 
+ * Useful for debugging. Use this call internally.
  * @return all current frames as a single string
  */
 std::string

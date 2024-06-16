@@ -32,6 +32,10 @@ if(BUILD_WITH_ROS_1)
   endif()
 endif()
 
+# Function: depend_on_ros_libs
+# Usage: depend_on_ros_libs(TARGET_NAME, LIBS_NAME)
+#
+# Adds the ros libs as dependencies to the target.
 function(depend_on_ros_libs target libs)
   if(BUILD_WITH_ROS_1 AND ROS_1_FOUND)
     depend_on_pkgconfig_libs(${target} ${libs})
@@ -48,12 +52,20 @@ function(depend_on_ros_libs target libs)
   endif()
 endfunction()
 
+# Function: depend_on_ros
+# Usage: depend_on_ros(TARGET_NAME)
+#
+# Add the necessary dependencies for ros to the target.
 function(depend_on_ros target)
   depend_on_ros_libs(${target} roscpp)
   target_compile_options(${target} PUBLIC -DHAVE_ROS)
   target_compile_options(${target} PRIVATE -DBOOST_BIND_GLOBAL_PLACEHOLDERS)
 endfunction()
 
+# Function optional_depend_on_ros_libs
+# Usage: optional_deppend_on_ros_libs(TARGET_NAME, LIBS_NAME, SUCCESS_BOOL)
+#
+# Adds the necessary dependencies for ros as optional
 function(optional_depend_on_ros_libs target libs success)
   if(BUILD_WITH_ROS_1 AND ROS_1_FOUND)
     optional_depend_on_pkgconfig_libs(${target} "${libs}" local_success)

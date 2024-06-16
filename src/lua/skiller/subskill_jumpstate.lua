@@ -230,7 +230,7 @@ function SubSkillJumpState:do_init()
 
    self:skill_reset()
    self.skill_status = skillstati.S_RUNNING
-   
+
    self.args = {}
 
    -- initialize empty tables to compare expected arguments (exp_args) and potential unexpected arguments (unexp_args)
@@ -253,13 +253,13 @@ function SubSkillJumpState:do_init()
    exp_args = table.deepcopy(self.args)
 
    self:init()
-   
+
    -- copy actual arguments table to single out unexpected arguments
    unexp_args = table.deepcopy(self.args)
 
    -- compare keys of copies to determine unexpected key names
    for act_args_key,act_args_val in pairs(unexp_args) do
-      for exp_args_key,act_args_val in pairs(exp_args) do 
+      for exp_args_key,act_args_val in pairs(exp_args) do
          if act_args_key == exp_args_key then
             unexp_args[act_args_key] = nil
          end

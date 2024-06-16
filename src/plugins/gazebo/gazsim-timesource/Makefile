@@ -1,5 +1,5 @@
 #*****************************************************************************
-#               Makefile Build System for Fawkes: Gazsim-timesource 
+#               Makefile Build System for Fawkes: Gazsim-timesource
 #                            -------------------
 #   Created on Sat Jun 16 14:42:34 2012
 #   Copyright (C) 2006-2012 by Tim Niemueller, AllemaniACs RoboCup Team
@@ -72,4 +72,3 @@ endif
 
 
 include $(BUILDSYSDIR)/base.mk
-

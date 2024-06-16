@@ -4,7 +4,7 @@
  *
  *  Generated: Wed Aug 30 22:46:20 2006
  *  Copyright  2006  Tim Niemueller [www.niemueller.de]
- *             2007  Daniel Beck 
+ *             2007  Daniel Beck
  *
  ****************************************************************************/
 
@@ -41,7 +41,7 @@ class File
 {
 public:
 	/** What to do when a file with the same name
-   * already exists 
+   * already exists
    */
 	typedef enum {
 		OVERWRITE, /**< overwrite the existing file */

@@ -103,4 +103,3 @@ $(WARN_TARGETS_SICK_TIM55X_BOOST): warning_sick_tim55x_boost_%:
 endif
 
 include $(BUILDSYSDIR)/base.mk
-

@@ -21,7 +21,9 @@
 # *****************************************************************************
 
 set(TF_DEPS "bullet")
-
+# Function: depend_on_tf
+# Usage: depend_on_tf(TARGET_NAME)
+# Adds the ros_tf dependency  to the target
 function(depend_on_tf target)
   set(tf_cflags -DHAVE_TF -DBT_INFINITY -DBT_USE_DOUBLE_PRECISION
                 -DB_EULER_DEFAULT_ZYX -O2)

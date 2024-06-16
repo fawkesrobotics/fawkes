@@ -50,4 +50,3 @@ linkscripts:
 
 
 endif # __buildsys_root_linkscripts_mk_
-

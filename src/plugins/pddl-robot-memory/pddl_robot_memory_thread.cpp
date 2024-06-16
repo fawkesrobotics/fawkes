@@ -33,7 +33,7 @@ using namespace mongocxx;
 using namespace bsoncxx;
 using namespace bsoncxx::builder;
 
-/** @class PddlRobotMemoryThread 'pddl_robot_memory_thread.h' 
+/** @class PddlRobotMemoryThread 'pddl_robot_memory_thread.h'
  * Generate PDDL files from the robot memory
  *
  * This plugin uses the template engine ctemplate to generate a pddl

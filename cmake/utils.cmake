@@ -40,6 +40,12 @@ if(NOT WIN32)
   set(BOLD_WHITE "${Esc}[1;37m")
 endif()
 
+# Function optioal_depend_on_boost_libs
+# Usage: optional_depend_on_boost_libs(TARGET_NAME LIBS SUCCESS)
+#
+# Adds optional dependencies on boost libraries to a target. If the libraries
+# are not found, the target is excluded from the build.
+# Success returns if they are found.
 function(optional_depend_on_boost_libs target libs success)
   set(${success}
       1
@@ -63,11 +69,14 @@ function(optional_depend_on_boost_libs target libs success)
   target_include_directories(${target} PUBLIC ${Boost_INCLUDE_DIR})
 endfunction()
 
+# Disables a target
 function(disable_target target)
   set_target_properties(${target} PROPERTIES EXCLUDE_FROM_ALL 1
                                              EXCLUDE_FROM_DEFAULT_BUILD 1)
 endfunction()
 
+# Adds a target as a dependency to another target
+# (be careful with circle dependencies)
 function(build_depends_on target other_target)
   if($<TARGET_PROPERTY:${other_target},EXCLUDE_FROM_ALL>)
     disable_target(${target})
@@ -76,6 +85,7 @@ function(build_depends_on target other_target)
   endif()
 endfunction()
 
+# Links the target against the boost libs
 function(depend_on_boost_libs target libs)
   foreach(lib ${libs})
     string(TOUPPER ${lib} COMPONENT)
@@ -96,6 +106,8 @@ function(depend_on_boost_libs target libs)
   target_include_directories(${target} PUBLIC ${Boost_INCLUDE_DIR})
 endfunction()
 
+# A wrapper for pkg_check_modules.
+# Specify the target and the libraries to link against
 function(depend_on_pkgconfig_libs target libs)
   foreach(lib ${libs})
     set(tmp_list)
@@ -115,6 +127,8 @@ function(depend_on_pkgconfig_libs target libs)
   endforeach()
 endfunction()
 
+# Same as depend_on_pkgconfig_libs but with a success variable
+# if the libraries are found
 function(optional_depend_on_pkgconfig_libs target libs success)
   set(${success}
       1
@@ -137,6 +151,7 @@ function(optional_depend_on_pkgconfig_libs target libs success)
   endforeach()
 endfunction()
 
+# A wrapper for find_package to link target against libraries
 function(depend_on_find_package_libs target libs)
   # We need to disable style linting of cache variables for ${lib}_ vars
   # cmake-lint: disable=C0103
@@ -171,6 +186,7 @@ function(depend_on_find_package_libs target libs)
   endforeach()
 endfunction()
 
+# Ennforces certain permssions on certain files/folders
 macro(SET_COMMON_PROPERTIES_OF_TARGETS_RECUCURSIVE targets dir)
   get_property(
     subdirectories
@@ -210,6 +226,7 @@ macro(SET_COMMON_PROPERTIES_OF_TARGETS_RECUCURSIVE targets dir)
   endforeach()
 endmacro()
 
+# Ennforces certain permssions on certain files/folders
 function(set_common_properties_of_targets var)
   set(targets)
   set_common_properties_of_targets_recucursive(targets
@@ -219,50 +236,60 @@ function(set_common_properties_of_targets var)
       PARENT_SCOPE)
 endfunction()
 
+# Ussses chache to remember dependencies
 function(remember_dependency dep)
   set(_FAWKES_DEPENDENCIES_CHECKED
       "${dep};${_FAWKES_DEPENDENCIES_CHECKED}"
       CACHE INTERNAL "")
 endfunction()
 
+# Function to set the output directory for the plugins
 function(set_output_directory_plugins)
   set(CMAKE_LIBRARY_OUTPUT_DIRECTORY
       ${PROJECT_SOURCE_DIR}/plugins
       PARENT_SCOPE)
 endfunction()
 
+# Function to set the output directory for the libraries
 function(set_output_directory_libs)
   set(CMAKE_LIBRARY_OUTPUT_DIRECTORY
       ${CMAKE_BINARY_DIR}/src/libs/
       PARENT_SCOPE)
 endfunction()
 
+# Function to unset the output directory
 function(unset_output_directory)
   unset(CMAKE_LIBRARY_OUTPUT_DIRECTORY PARENT_SCOPE)
 endfunction()
 
+# Used to print that a plugin is disabled
 function(plugin_disabled_message plugin)
   message(
     STATUS "${BOLD_GREEN}Skip building disabled ${plugin} plugin${COLOR_RESET}")
 endfunction()
 
+# Used to print that a build is skipped
 function(build_skipped_message component reason)
   message(
     STATUS
       "${BOLD_WHITE}Omitting ${component} (${reason} required)${COLOR_RESET}")
 endfunction()
 
+# Used to print that a target is skipped
 function(target_skipped_message component reason)
   message(
     STATUS
       "${BOLD_MAGENTA}Omitting ${component} (${reason} required)${COLOR_RESET}")
 endfunction()
 
+# Used to print that a executable is disabled
 function(executable_disabled_message exe)
   message(
     STATUS "${BOLD_BLUE}Skip building disabled ${exe} executable${ColorReset}")
 endfunction()
 
+# Used to print that a library cannot be built by cmake
+# (not in use since all plugins are built by cmake)
 function(cmake_not_implemented target)
   add_custom_target(
     ${target} ALL
@@ -274,11 +301,13 @@ function(cmake_not_implemented target)
     VERBATIM)
 endfunction()
 
+# Used to create a symlink and make sure that the symlink stays up to date
 function(create_symlink source destination)
   get_filename_component(target ${source} NAME)
   create_symlink_custom_target(${target} ${source} ${destination}/${target})
 endfunction()
 
+# creates a symlink for a target
 function(create_symlink_custom_target target source destination)
   add_custom_target(
     ${target} ALL
@@ -292,7 +321,8 @@ function(create_symlink_custom_target target source destination)
     COMMAND ${CMAKE_COMMAND} -E create_symlink
             ${CMAKE_CURRENT_SOURCE_DIR}/${source} ${destination}
     COMMENT
-      "${BOLD_BLUE}Created symlink: ${CMAKE_CURRENT_SOURCE_DIR}/${target} -> ${destination}${COLOR_RESET}"
+      "${BOLD_BLUE}Created symlink: ${CMAKE_CURRENT_SOURCE_DIR}/${target} \
+-> ${destination}${COLOR_RESET}"
   )
 endfunction()
 
@@ -313,6 +343,7 @@ if(${_index} GREATER -1)
   set(CPP_20_FOUND 1)
 endif()
 
+# Used to set the cpp version of a target
 function(depend_on_cpp_version target version)
   if(${CPP_${version}_FOUND})
     target_compile_features(${target} PRIVATE cxx_std_${version})

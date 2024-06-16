@@ -35,11 +35,11 @@
 doo([],S,S,_).
 
 /* sequence */
-doo([H|T],S,S1,M) :- 
+doo([H|T],S,S1,M) :-
 	doo(H,S,S2,M), doo(T,S2,S1,M).
 
 /* test action */
-doo(?(P),S,S,M) :- 
+doo(?(P),S,S,M) :-
 	holds(P,S,M).
 
 /* non-deterministic choice */
@@ -47,15 +47,15 @@ doo(E1 # E2,S,S1,M) :-
 	doo(E1,S,S1,M); doo(E2,S,S1,M).
 
 /* if-then-else */
-doo(if(P,E1,E2),S,S1,M) :- 
+doo(if(P,E1,E2),S,S1,M) :-
 	doo([?(P),E1] # [?(neg(P)),E2],S,S1,M).
 
 /* star operator */
-doo(star(E),S,S1,M) :- 
+doo(star(E),S,S1,M) :-
 	doo([] # [E,star(E)],S,S1,M).
 
 /* while */
-doo(while(P,E),S,S1,M) :- 
+doo(while(P,E),S,S1,M) :-
 	doo([star([?(P),E]),?(neg(P))],S,S1,M).
 
 /* non-deterministic choice of arguments */
@@ -70,7 +70,7 @@ doo(E,S,S1,M) :-
 	call(proc(E,E1))@M, /*writeln('proc jojo'(E)),*/ doo(E1,S,S1,M).
 
 /* primitive action call */
-doo(E,S,doo(E,S),M) :- 
+doo(E,S,doo(E,S),M) :-
 	call(prim_action(E))@M, call(poss(E,S))@M.
 
 sub(_X1,_X2,T1,T2) :- var(T1), T2=T1.

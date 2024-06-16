@@ -20,6 +20,10 @@
 #
 # *****************************************************************************
 
+# Function: depend_on_libcrypto
+# Usage: depend_on_libcrypto(TARGET_NAME)
+#
+# Adds the libcrypto as dependencies to the target.
 function(depend_on_libcrypto target)
   optional_depend_on_pkgconfig_libs(${target} libcrypto libcrypto_dep_found)
   if(libcrypto_dep_found)

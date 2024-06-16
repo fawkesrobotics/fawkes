@@ -9,7 +9,7 @@
       Dummy field
     </field>
   </data>
-  
+
   <message name="ConstructScene">
     <comment>
       Construct the scene from data in the RobotMemory

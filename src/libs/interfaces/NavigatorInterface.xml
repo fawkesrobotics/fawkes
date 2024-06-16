@@ -48,12 +48,12 @@
      <item name="AllowBackward">Moving allow backward constant</item>
      <item name="Backward">Moving backward constant</item>
      <item name="ESCAPE">Escape constant</item>
-  </enum> 
+  </enum>
   <enum name="OrientationMode">
      <comment>Orientation mode enum</comment>
-     <item name="OrientAtTarget">Orient when at target, if orientation is given</item> 
-     <item name="OrientDuringTravel">Orient during travel BUT NOT at target, if omnidirectional platform and orientation is given</item> 
-  </enum> 
+     <item name="OrientAtTarget">Orient when at target, if orientation is given</item>
+     <item name="OrientDuringTravel">Orient during travel BUT NOT at target, if omnidirectional platform and orientation is given</item>
+  </enum>
   </constants>
   <data>
     <comment>

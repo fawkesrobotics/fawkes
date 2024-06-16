@@ -19,4 +19,3 @@ include $(BASEDIR)/etc/buildsys/config.mk
 SUBDIRS = basics ballposlog
 
 include $(BUILDSYSDIR)/rules.mk
-

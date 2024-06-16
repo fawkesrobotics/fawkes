@@ -53,3 +53,4 @@
 *.log
 /buildstats.db
 
+*.mypy_cache/

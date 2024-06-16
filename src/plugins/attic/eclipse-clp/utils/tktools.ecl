@@ -1,5 +1,5 @@
 /***************************************************************************
- *  tktools.ecl - A module needed to connect with tktools via eclipsebugger 
+ *  tktools.ecl - A module needed to connect with tktools via eclipsebugger
  *  for remote debugging
  *
  *  Created: Tue Jan 29 12:44:54 2013
@@ -41,7 +41,7 @@ fin :- bb_close_interface("EclipseDebuggerInterface::eclipse_clp_connect"),
 %% event handlers
 handle_check_debug_msg(check_debug_msg) :-
   bb_recv_messages("EclipseDebuggerInterface::eclipse_clp_connect", List),
-  eval_list(List). 
+  eval_list(List).
 
 %% set event handlers
 :- set_event_handler(check_debug_msg, handle_check_debug_msg/1).

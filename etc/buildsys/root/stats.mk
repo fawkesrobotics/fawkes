@@ -109,4 +109,3 @@ stats-print: $(if $(filter stats-print,$(MAKECMDGOALS)),,| src)
 	echo
 
 endif # __buildsys_root_stats_mk_
-

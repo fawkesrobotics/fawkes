@@ -131,8 +131,8 @@ void map_draw_wifi(map_t *map, struct _rtk_fig_t *fig, int index);
  **************************************************************************/
 
 // Convert from map index to world coords
-#define MAP_WXGX(map, i) (map->origin_x + ((i)-map->size_x / 2) * map->scale)
-#define MAP_WYGY(map, j) (map->origin_y + ((j)-map->size_y / 2) * map->scale)
+#define MAP_WXGX(map, i) (map->origin_x + ((i) - map->size_x / 2) * map->scale)
+#define MAP_WYGY(map, j) (map->origin_y + ((j) - map->size_y / 2) * map->scale)
 
 // Convert from world coords to map coords
 #define MAP_GXWX(map, x) (floor((x - map->origin_x) / map->scale + 0.5) + map->size_x / 2)
@@ -142,7 +142,7 @@ void map_draw_wifi(map_t *map, struct _rtk_fig_t *fig, int index);
 #define MAP_VALID(map, i, j) ((i >= 0) && (i < map->size_x) && (j >= 0) && (j < map->size_y))
 
 // Compute the cell index for the given map coords.
-#define MAP_INDEX(map, i, j) ((i) + (j)*map->size_x)
+#define MAP_INDEX(map, i, j) ((i) + (j) * map->size_x)
 
 /// @endcond
 

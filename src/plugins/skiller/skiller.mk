@@ -28,4 +28,3 @@ ifneq ($(PKGCONFIG),)
     LDFLAGS_TERMCAP=$(shell $(PKGCONFIG) --libs 'ncurses')
   endif
 endif
-

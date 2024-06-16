@@ -23,7 +23,7 @@ OPTIONS
 
   'author_name'::
 	The author's name, for the plugin description
-	
+
   'plugin_name'::
 	Name of the plugin, seperate multiple words with a dash
 
@@ -31,18 +31,18 @@ OPTIONS
 	Short description of the plugin
 
   'directory'::
-	Path to the directory where the files should be 
+	Path to the directory where the files should be
 	generated in
 
 EXAMPLE
 -------
 
  *ffgenplugin "John Doe" move-robot "Move the robot forward for a meter" ../src/plugins/move-robot*::
-	Will generate the following files: 
-		Makefile 
+	Will generate the following files:
+		Makefile
 		move-robot_plugin.cpp
 		move-robot_thread.h
-		move-robot_thread.cpp 
+		move-robot_thread.cpp
 	in the directory ../src/plugins/move-robot
 
 SEE ALSO

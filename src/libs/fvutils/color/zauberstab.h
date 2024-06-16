@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *  zauberstab.h - Header of class "Zauberstab"
- *                 which offers methods for finding 
+ *                 which offers methods for finding
  *                 maximal, color-contiguous region
  *                 around a seed pixel
  *

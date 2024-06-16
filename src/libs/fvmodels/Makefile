@@ -58,4 +58,3 @@ LIBS_all = $(LIBDIR)/libfvmodels.so
 LIBS_build = $(LIBS_all)
 
 include $(BUILDSYSDIR)/base.mk
-

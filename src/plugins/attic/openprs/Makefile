@@ -62,7 +62,7 @@ FILES_openprs_files   = $(subst $(SRCDIR)/,,$(wildcard $(addprefix $(SRCDIR)/dat
 DESTDIR_openprs_files = $(EXEC_SHAREDIR)/openprs/data
 
 ifeq ($(HAVE_OPENPRS),1)
-  CFLAGS  += $(CFLAGS_OPENPRS)  $(CFLAGS_OPENPRS_MP) 
+  CFLAGS  += $(CFLAGS_OPENPRS)  $(CFLAGS_OPENPRS_MP)
   LDFLAGS += $(LDFLAGS_OPENPRS) $(LDFLAGS_OPENPRS_MP)
 
   CFLAGS_mod_utils    = $(CFLAGS_mod_skiller)
@@ -98,4 +98,3 @@ warning_openprs:
 endif
 
 include $(BUILDSYSDIR)/base.mk
-

@@ -273,7 +273,7 @@ function FSM:loop()
          self:trans(state_or_err)
       else
          self:set_error("Loop exception: " .. tostring(state_or_err))
-	 
+
 	 self:trans(self.states[self.fail_state])
       end
    elseif self.error == "" and self.previous then

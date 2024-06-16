@@ -47,7 +47,7 @@ class ServiceBrowseHandler
 {
 public:
 	/** Virtual destructor */
-	virtual ~ServiceBrowseHandler(){};
+	virtual ~ServiceBrowseHandler() {};
 
 	/** All results have been retrieved.
    * If you read the DNS-SD specs you will see that there is no explicit

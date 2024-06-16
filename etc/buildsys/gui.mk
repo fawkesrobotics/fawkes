@@ -150,4 +150,3 @@ warning_hildonmm:
 endif
 
 endif # __gui_mk_
-

@@ -36,7 +36,7 @@
       This interface provides can be used by graphing applications to
       provide a graphing service to other components. This is intended
       to be used for debugging purposes. Usage of the interface should
-      be optional to turn it off during a competition. 
+      be optional to turn it off during a competition.
 
       Add* messages will add the given object permanently, so the
       graphical display can be considered as a scenegraph. The message

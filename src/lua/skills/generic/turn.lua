@@ -75,5 +75,3 @@ function TURN:init()
    local m = navigator.TurnMessage:new(angle, velocity)
    self.fsm.vars.msgid = navigator:msgq_enqueue_copy(m)
 end
-
-

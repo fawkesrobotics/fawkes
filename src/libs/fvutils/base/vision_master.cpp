@@ -89,7 +89,7 @@ namespace firevision {
  * restarted the camera does not have to be re-opened. The time to wait is
  * defined by the implementation.
  * @param thread thread to unregister
- * 
+ *
  * @fn CameraControl * VisionMaster::acquire_camctrl(const char *cam_string)
  * Retrieve a CameraControl for the specified camera string.
  * This control (if available) can be used to control certain aspects of the Camera.

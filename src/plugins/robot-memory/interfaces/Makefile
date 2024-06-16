@@ -24,4 +24,3 @@ endif
 include $(BUILDSYSDIR)/interface.mk
 
 include $(BUILDSYSDIR)/base.mk
-

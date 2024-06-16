@@ -43,7 +43,7 @@
 ;       (! (= @times (cdr @times)))
 ;     )
 ;     ;(! (printf (format "*** Final latest (%d %d)\n" (car @latest) (cadr @latest))))
-;     
+;
 ;  )
 ;  :properties ((COALESCE T))
 ;  :effects ((=> (time (first @latest) (second @latest))))
@@ -86,7 +86,7 @@
 ;     :body ()
 ;     :effects ((~> (fawkes-time $t_sec $t_usec $syst_sec $syst_usec)) (=> (time $t_sec $t_usec)))
 ; )
- 
+
 ; (defop time-update
 ;     :invocation (fawkes-time $t_sec $t_usec $syst_sec $syst_usec)
 ;     :context ((? (fawkes-time $t2_sec $t2_usec $syst2_sec $syst2_usec)))

@@ -61,4 +61,3 @@ LIBS_all = $(LIBDIR)/libfawkesconfig.so $(LUALIBDIR)/fawkesconfig.so
 $(LUALIBDIR)/fawkesconfig.so: | $(LIBDIR)/libfawkesconfig.so
 
 include $(BUILDSYSDIR)/base.mk
-

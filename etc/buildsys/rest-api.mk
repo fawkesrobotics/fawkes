@@ -109,4 +109,3 @@ warning_tolua_wrapper:
 endif # OBJSSUBMAKE is 1
 
 endif # __buildsys_rest_api_mk_
-

@@ -223,7 +223,7 @@ SimpleColorClassifier::classify()
 					rv->push_back(r);
 				}
 			} // End if enough neighbours
-		}   // end if is orange
+		} // end if is orange
 
 		++(*scanline_model);
 	}

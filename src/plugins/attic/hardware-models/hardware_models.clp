@@ -30,4 +30,3 @@
   (slot component (type SYMBOL))
   (slot transition (type SYMBOL))
 )
-

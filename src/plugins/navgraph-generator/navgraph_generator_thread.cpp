@@ -328,7 +328,7 @@ NavGraphGeneratorThread::loop()
 		navgraph->add_node_and_connect(NavGraphNode(navgraph->format_name("AREA-%u", ++ci),
 		                                            centroid.x(), centroid.y()),
 		                               NavGraph::CLOSEST_EDGE_OR_NODE);
-		
+
 	}
   */
 

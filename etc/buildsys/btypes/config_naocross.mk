@@ -89,4 +89,3 @@ RSYNC_NAOQIMODS = $(addsuffix .so*,$(addprefix $(LIBDIR)/lib,$(NAOQI_MODS)))
 RSYNC_USER = nao
 RSYNC_HOST = nao-1.local
 HOST       = $(RSYNC_HOST)
-

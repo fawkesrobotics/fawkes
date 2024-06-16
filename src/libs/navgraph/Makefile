@@ -69,4 +69,3 @@ generators: | $(LIBDIR)/libfawkesnavgraph.$(SOEXT)
 endif
 
 include $(BUILDSYSDIR)/base.mk
-

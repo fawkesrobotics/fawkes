@@ -20,20 +20,18 @@
 #  GNU Library General Public License for more details.
 #
 #  Read the full text in the LICENSE.GPL file in the doc directory.
-
-
 """
 Extract skill durations from the skiller messages obtained via mongodb
 blackboard logger or sample durations from mixed gaussian distributions.
 """
-
 import argparse
-import pymongo
 import re
-import textwrap
 import sys
-import numpy as np
+import textwrap
+
 import matplotlib.pyplot as plt
+import numpy as np
+import pymongo
 import scipy.stats as ss
 
 # Accourding to SkillStatusEnum
@@ -44,18 +42,18 @@ S_FAILED = 3
 
 
 def time_diff_in_sec(end, start):
-    """ Computee the time diff in seconds from ms precision times. """
+    """Computee the time diff in seconds from ms precision times."""
     return int(max((end - start) / 1000, 0))
 
 
 def split_skill_string(skill):
-    """ Separate skill name and arguments from a fawkes skill string. """
+    """Separate skill name and arguments from a fawkes skill string."""
     skill = skill.strip().replace(" ", "").replace("\n", "")
-    skill_regex = "([\w_-]+)\{(.*)\}"
+    skill_regex = r"([\w_-]+)\{(.*)\}"
     try_match = re.match(skill_regex, skill)
     if try_match:
         name, args_str = try_match.group(1, 2)
-        arg_regex = '([\w_-]+)=\\"([\w_-]+)\\"(?:,)?'
+        arg_regex = r'([\w_-]+)=\\"([\w_-]+)\\"(?:,)?'
         # split along the regex, filtering empty matches
         arg_list = list(filter(None, re.split(arg_regex, args_str)))
         # convert list to dictionary with even odd matching
@@ -67,23 +65,21 @@ def split_skill_string(skill):
 
 
 def drop_collection(mongodb_uri, database, collection):
-    """ Drop a collection from a mongodb instance. """
+    """Drop a collection from a mongodb instance."""
     curr_client = pymongo.MongoClient(mongodb_uri)
     curr_client[database][collection].drop()
 
 
 class GaussSampler:
-    """ Sampler to obtain points from a meixture of gaussians. """
+    """Sampler to obtain points from a meixture of gaussians."""
 
     def __init__(self, quantity, dist_weights, gauss_params, upper_bound, lower_bound):
-        """ Sample points from a bounded and weighted mixture of gaussians. """
+        """Sample points from a bounded and weighted mixture of gaussians."""
         self.dist_weights = dist_weights
         self.lower_bound = lower_bound
         self.upper_bound = upper_bound
         if len(self.dist_weights) != len(gauss_params):
-            print(
-                "Number of distribution weights do not match number of distributions!"
-            )
+            print("Number of distribution weights do not match number of distributions!")
             diff = len(gauss_params) - len(dist_weights)
             if diff < 0:
                 print("Ignoring trailing distribution weights")
@@ -92,9 +88,7 @@ class GaussSampler:
                 print("Assuming default weights of 1")
                 self.dist_weights.extend([1] * diff)
         # normalize weights
-        self.dist_weights = np.array(
-            [float(i) / sum(self.dist_weights) for i in self.dist_weights]
-        )
+        self.dist_weights = np.array([float(i) / sum(self.dist_weights) for i in self.dist_weights])
         # create samples
         self.samples = []
         self.gauss_params = gauss_params
@@ -109,9 +103,7 @@ class GaussSampler:
                 p=self.dist_weights,
             )
             # create the samples from the respective gaussian
-            temp = np.fromiter(
-                (ss.norm.rvs(*(gauss_params[i])) for i in mixture_idx), dtype=np.float64
-            )
+            temp = np.fromiter((ss.norm.rvs(*(gauss_params[i])) for i in mixture_idx), dtype=np.float64)
             # remember mixed sampled extremas for plotting
             self.sample_min = min(self.sample_min, temp.min())
             self.sample_max = max(self.sample_max, temp.max())
@@ -130,7 +122,7 @@ class GaussSampler:
                 break
 
     def display(self, bin_size):
-        """ Show the sampled points using pyplot. """
+        """Show the sampled points using pyplot."""
         xs = np.linspace(self.sample_min, self.sample_max, 2000)
         ys = np.zeros_like(xs)
         for (l, s), w in zip(self.gauss_params, self.dist_weights):
@@ -148,21 +140,21 @@ class GaussSampler:
 
 
 class MongoInterface:
-    """ Interface to a mongodb instance. """
+    """Interface to a mongodb instance."""
 
     def __init__(self, dst_mongodb_uri, dst_database, dst_collection, dry_run):
-        """ Set up a connection to a mongodb collection. """
+        """Set up a connection to a mongodb collection."""
         self.client = pymongo.MongoClient(dst_mongodb_uri)
         self.dst_mongodb_uri = dst_mongodb_uri
         self.lookup_col = self.client[dst_database][dst_collection]
         self.dry_run = dry_run
 
     def upload(self, durations, skill_name, skill_args):
-        """ Upload skill exec time entries, randomly sample from skill arg choices. """
+        """Upload skill exec time entries, randomly sample from skill arg choices."""
         for dur in durations:
             doc = {"outcome": 1, "error": "", "name": skill_name, "duration": dur}
             args_dict = dict()
-            if skill_args != None:
+            if skill_args is not None:
                 for arg in skill_args:
                     if len(arg) == 1:
                         args_dict[arg[0]] = ".*"
@@ -173,10 +165,8 @@ class MongoInterface:
             if not self.dry_run:
                 self.lookup_col.insert_one(doc)
 
-    def transform(
-        self, src_mongodb_uri, src_database, src_collection, lower_bound, upper_bound
-    ):
-        """ Transform blackboard log data from the Skiller to exec time entries. """
+    def transform(self, src_mongodb_uri, src_database, src_collection, lower_bound, upper_bound):
+        """Transform blackboard log data from the Skiller to exec time entries."""
         if src_mongodb_uri != self.dst_mongodb_uri:
             self.clone_collection(src_mongodb_uri, src_database, src_collection)
         col = self.client[src_database][src_collection]
@@ -204,14 +194,9 @@ class MongoInterface:
                         "error": skill_end["error"],
                         "name": name,
                         "args": args,
-                        "duration": time_diff_in_sec(
-                            skill_end["timestamp"], skill_start["timestamp"]
-                        ),
+                        "duration": time_diff_in_sec(skill_end["timestamp"], skill_start["timestamp"]),
                     }
-                    if (
-                        lookup_entry["duration"] > upper_bound
-                        or lookup_entry["duration"] < lower_bound
-                    ):
+                    if lookup_entry["duration"] > upper_bound or lookup_entry["duration"] < lower_bound:
                         print(
                             "duration out of bounds, omitting: {} seconds\n{}\n{}".format(
                                 lookup_entry["duration"], skill_start, skill_end
@@ -228,18 +213,16 @@ class MongoInterface:
             self.client.drop_database(src_database)
 
     def clone_collection(self, src_mongodb_uri, src_database, src_collection):
-        """ Clone a mongodb collection to the client. """
+        """Clone a mongodb collection to the client."""
         # drop "mongodb://" suffix from uri
         src_conn = src_mongodb_uri[10:]
         if src_conn[-1] == "/":
             src_conn = src_conn[:-1]
-        self.client.admin.command(
-            {"cloneCollection": src_database + "." + src_collection, "from": src_conn}
-        )
+        self.client.admin.command({"cloneCollection": src_database + "." + src_collection, "from": src_conn})
 
 
 def main():
-    """ Obtain data for the lookup execution time estimator. """
+    """Obtain data for the lookup execution time estimator."""
     header = """
 ###############################################################################
 #                                                                             #
@@ -290,9 +273,7 @@ def main():
         action="store_true",
         help="clear all old data from the collection",
     )
-    subparsers = parser.add_subparsers(
-        help="Source of the execution time data", dest="subparser"
-    )
+    subparsers = parser.add_subparsers(help="Source of the execution time data", dest="subparser")
     bb_parser = subparsers.add_parser(
         "bblog",
         parents=[common],
@@ -440,9 +421,8 @@ def main():
         action="store_true",
         help="skip drawing the sample range",
     )
-    parser.epilog = (
-        "--- Arguments common to all sub-parsers ---"
-        + common.format_help().replace(common.format_usage(), "")
+    parser.epilog = "--- Arguments common to all sub-parsers ---" + common.format_help().replace(
+        common.format_usage(), ""
     )
     random_parser.epilog = """
 example call: ./mongodb_skillsim_lookup.py generate -d -n \
@@ -450,7 +430,7 @@ example call: ./mongodb_skillsim_lookup.py generate -d -n \
   """
     args = parser.parse_args(args=None if sys.argv[1:] else ["--help"])
     # validate inputs
-    if args == None:
+    if args is None:
         parser.exit(1)
 
     mongoIf = MongoInterface(args.mongodb_uri, args.db, args.collection, args.dry_run)
@@ -458,9 +438,7 @@ example call: ./mongodb_skillsim_lookup.py generate -d -n \
         print("Drop collection before uploading...")
         drop_collection(args.mongodb_uri, args.db, args.collection)
     if args.subparser == "bblog":
-        mongoIf.transform(
-            args.src_uri, args.src_db, args.src_col, args.lower_bound, args.upper_bound
-        )
+        mongoIf.transform(args.src_uri, args.src_db, args.src_col, args.lower_bound, args.upper_bound)
         if args.drop_src_col:
             drop_collection(args.src_mongodb_uri, args.src_db, args.src_col)
     elif args.subparser == "generate":

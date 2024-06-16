@@ -29,4 +29,3 @@ endif
 ifeq ($(HAVE_LIBCRYPTO),1)
   CFLAGS += -DHAVE_LIBCRYPTO
 endif
-

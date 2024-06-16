@@ -110,11 +110,11 @@ RobotinoSensorThread::loop()
 		batt_if_->write();
 
 		if (data.bat_voltage < 17200) {
-			if(battery_counter > 100) {
-				battery_counter = 0;
-				std::chrono::system_clock::time_point now = std::chrono::system_clock::now();	
+			if (battery_counter > 100) {
+				battery_counter                           = 0;
+				std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
 
-				std::chrono::duration<double> elapsed_seconds = now- last_battery_warning;
+				std::chrono::duration<double> elapsed_seconds = now - last_battery_warning;
 				if (elapsed_seconds.count() > 300) {
 					last_battery_warning = std::chrono::system_clock::now();
 
@@ -124,7 +124,8 @@ RobotinoSensorThread::loop()
 					  data.bat_voltage);
 					//To send the notification to all ssh clients there has to be a shared DBUS over ssh
 					//See https://nikhilism.com/post/2023/remote-dbus-notifications/ for mor informations
-					std::system("notify-send -u critical -i battery-low -t 10000 \"$(hostname)\" \"Battery is running low!\"");
+					std::system("notify-send -u critical -i battery-low -t 10000 \"$(hostname)\" \"Battery "
+					            "is running low!\"");
 				}
 			} else {
 				battery_counter++;

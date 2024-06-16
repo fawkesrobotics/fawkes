@@ -4,4 +4,3 @@
 @INCLUDE_PATH = fawkes/doc/doxygen/parts
 @INCLUDE      = base.doxygen
 @INCLUDE      = submodule.doxygen
-

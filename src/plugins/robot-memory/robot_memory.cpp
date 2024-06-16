@@ -1,6 +1,6 @@
 /***************************************************************************
  *  robot_memory.cpp - Class for storing and querying information in the RobotMemory
- *    
+ *
  *  Created: Aug 23, 2016 1:34:32 PM 2016
  *  Copyright  2016  Frederik Zwilling
  *             2017 Tim Niemueller [www.niemueller.de]

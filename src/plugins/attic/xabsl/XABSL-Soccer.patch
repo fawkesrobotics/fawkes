@@ -3,11 +3,11 @@ diff -urN XABSL/ascii-soccer/teams/brute/main.c my-XABSL/ascii-soccer/teams/brut
 +++ my-XABSL/ascii-soccer/teams/brute/main.c	2018-05-29 23:23:13.892907638 +0200
 @@ -8,6 +8,7 @@
  	Tucker Balch	tucker@cc.gatech.edu
- 
+
  ===========================================================================*/
 +/// @cond XABSL
  #include "players.h"
- 
+
  int unique_name(push_from_the_east)(int obstacles[9], int ball_direction);
 @@ -196,3 +197,5 @@
  void UN(game_over)()
@@ -20,51 +20,51 @@ diff -urN XABSL/ascii-soccer/teams/comm1/main.c my-XABSL/ascii-soccer/teams/comm
 +++ my-XABSL/ascii-soccer/teams/comm1/main.c	2018-05-29 23:23:13.892907638 +0200
 @@ -5,6 +5,7 @@
  	Tucker Balch	tucker@cc.gatech.edu
- 
+
  ===========================================================================*/
 +/// @cond XABSL
  #include "players.h"
- 
+
  /*forward refs*/
 @@ -246,4 +247,5 @@
  {
  }
- 
+
 +/// @endcond
- 
+
 diff -urN XABSL/ascii-soccer/teams/diagonal/main.c my-XABSL/ascii-soccer/teams/diagonal/main.c
 --- XABSL/ascii-soccer/teams/diagonal/main.c	2006-02-17 16:20:26.000000000 +0100
 +++ my-XABSL/ascii-soccer/teams/diagonal/main.c	2018-05-29 23:23:13.892907638 +0200
 @@ -5,6 +5,7 @@
  	Tucker Balch	tucker@cc.gatech.edu
- 
+
  ===========================================================================*/
 +/// @cond XABSL
  #include "players.h"
- 
+
  /*forward refs*/
 @@ -202,4 +203,5 @@
  {
  }
- 
+
 +/// @endcond
- 
+
 diff -urN XABSL/ascii-soccer/teams/example/main.c my-XABSL/ascii-soccer/teams/example/main.c
 --- XABSL/ascii-soccer/teams/example/main.c	2006-02-17 16:20:26.000000000 +0100
 +++ my-XABSL/ascii-soccer/teams/example/main.c	2018-05-29 23:23:13.893907648 +0200
 @@ -8,7 +8,7 @@
  	Tucker Balch	tucker@cc.gatech.edu
- 
+
  ===========================================================================*/
 -
 +/// @cond XABSL
  #include "players.h"
- /* 
+ /*
  players.h includes a rather unusual macro, UN().  This macro
 @@ -204,4 +204,4 @@
  {
  }
- 
+
 -
 +/// @endcond
 diff -urN XABSL/ascii-soccer/teams/kickers2/main.c my-XABSL/ascii-soccer/teams/kickers2/main.c
@@ -72,71 +72,71 @@ diff -urN XABSL/ascii-soccer/teams/kickers2/main.c my-XABSL/ascii-soccer/teams/k
 +++ my-XABSL/ascii-soccer/teams/kickers2/main.c	2018-05-29 23:23:13.893907648 +0200
 @@ -5,6 +5,7 @@
  	Tucker Balch	tucker@cc.gatech.edu
- 
+
  ===========================================================================*/
 +/// @cond XABSL
  #include "players.h"
- 
- 
+
+
 @@ -329,3 +330,4 @@
  }
- 
- 
+
+
 +/// @endcond XABSL
 diff -urN XABSL/ascii-soccer/teams/random/main.c my-XABSL/ascii-soccer/teams/random/main.c
 --- XABSL/ascii-soccer/teams/random/main.c	2006-02-17 16:20:26.000000000 +0100
 +++ my-XABSL/ascii-soccer/teams/random/main.c	2018-05-29 23:23:13.893907648 +0200
 @@ -7,6 +7,7 @@
  	Tucker Balch	tucker@cc.gatech.edu
- 
+
  ===========================================================================*/
 +/// @cond XABSL
  #include "players.h"
- 
+
  /*forward ref*/
 @@ -193,3 +194,4 @@
  {
  }
- 
+
 +/// @endcond
 diff -urN XABSL/ascii-soccer/teams/rollers/main.c my-XABSL/ascii-soccer/teams/rollers/main.c
 --- XABSL/ascii-soccer/teams/rollers/main.c	2006-02-17 16:20:26.000000000 +0100
 +++ my-XABSL/ascii-soccer/teams/rollers/main.c	2018-05-29 23:23:13.893907648 +0200
 @@ -22,6 +22,7 @@
- 
- 
+
+
  ===========================================================================*/
 +/// @cond XABSL
- 
+
  #include <stdlib.h>
  #include "players.h"
 @@ -590,3 +591,4 @@
  }
- 
- 
+
+
 +/// @endcond
 diff -urN XABSL/ascii-soccer/teams/spaniels/main.c my-XABSL/ascii-soccer/teams/spaniels/main.c
 --- XABSL/ascii-soccer/teams/spaniels/main.c	2006-02-17 16:20:26.000000000 +0100
 +++ my-XABSL/ascii-soccer/teams/spaniels/main.c	2018-05-29 23:23:13.893907648 +0200
 @@ -16,6 +16,7 @@
  	Greg Eisenhauer		eisen@cc.gatech.edu
- 
+
  ===========================================================================*/
 +/// @cond XABSL
  #include "players.h"
- 
+
  /*forward refs*/
 @@ -258,3 +259,4 @@
  }
- 
- 
+
+
 +/// @endcond XABSL
 diff -urN XABSL/Xabsl/compiler/language_elements.rb my-XABSL/Xabsl/compiler/language_elements.rb
 --- XABSL/Xabsl/compiler/language_elements.rb	2006-09-26 18:39:55.000000000 +0200
 +++ my-XABSL/Xabsl/compiler/language_elements.rb	2018-05-29 23:32:38.267707495 +0200
 @@ -828,10 +828,10 @@
  			raise InternalError.new if children.size == 0
- 			
+
  			case children[0]
 -			when TTSTag:
 +			when TTSTag
@@ -148,7 +148,7 @@ diff -urN XABSL/Xabsl/compiler/language_elements.rb my-XABSL/Xabsl/compiler/lang
  				out << "i#{ENDL}"
  				children[0].to_ic(out)
 @@ -1817,11 +1817,11 @@
- 
+
  		def valid_child le
  			case @children.size
 -			when 0:
@@ -161,7 +161,7 @@ diff -urN XABSL/Xabsl/compiler/language_elements.rb my-XABSL/Xabsl/compiler/lang
 +			when 2
  				return le.class == EX2Tag && (self.out_type == :any || le.in_type == :any || self.out_type == le.in_type)
  			end
- 
+
 diff -urN XABSL/Xabsl/compiler/symbol_table.rb my-XABSL/Xabsl/compiler/symbol_table.rb
 --- XABSL/Xabsl/compiler/symbol_table.rb	2006-09-26 18:39:55.000000000 +0200
 +++ my-XABSL/Xabsl/compiler/symbol_table.rb	2018-05-29 23:33:05.146139642 +0200
@@ -181,7 +181,7 @@ diff -urN XABSL/Xabsl/compiler/syntax_tree_builder.rb my-XABSL/Xabsl/compiler/sy
 --- XABSL/Xabsl/compiler/syntax_tree_builder.rb	2006-09-26 18:39:55.000000000 +0200
 +++ my-XABSL/Xabsl/compiler/syntax_tree_builder.rb	2018-05-29 23:35:34.002532929 +0200
 @@ -649,9 +649,9 @@
- 						
+
  			symbol = cc.sc.from_code(val[-3], symbols)
  			case symbol
 -			when OptionSymbol:
@@ -194,7 +194,7 @@ diff -urN XABSL/Xabsl/compiler/syntax_tree_builder.rb my-XABSL/Xabsl/compiler/sy
  				raise InternalError.new
 @@ -779,11 +779,11 @@
  			symbol = cc.sc.from_code(val[0], [DecimalOutputSymbol, BooleanOutputSymbol, EnumOutputSymbol])
- 					
+
  			case symbol #the tag that defined the symbol name
 -			when DecimalOutputSymbol:
 +			when DecimalOutputSymbol
@@ -218,7 +218,7 @@ diff -urN XABSL/Xabsl/compiler/syntax_tree_builder.rb my-XABSL/Xabsl/compiler/sy
  					if(tag.class == child.class)
 @@ -1105,37 +1105,37 @@
  			tag = nil
- 			
+
  			case symbol #the tag that defined the symbol name
 -			when DecimalInputSymbol:
 +			when DecimalInputSymbol
@@ -283,7 +283,7 @@ diff -urN XABSL/Xabsl/compiler/tokenizer.rb my-XABSL/Xabsl/compiler/tokenizer.rb
 +++ my-XABSL/Xabsl/compiler/tokenizer.rb	2018-05-29 23:33:38.991683804 +0200
 @@ -182,9 +182,9 @@
  					when /\A((.|\n|\r)*?)(\*\/)/
- 						
+
  						case comment_mode
 -						when :doc_comment:
 +						when :doc_comment
@@ -305,7 +305,7 @@ diff -urN XABSL/Xabsl/compiler/xabsl.rb my-XABSL/Xabsl/compiler/xabsl.rb
  require 'vcproj'
 -require 'ftools'
 +require 'fileutils'
- 
+
 @@ -137,11 +137,11 @@
  					out << "#{option_symbol.identifier} #{option_symbol.value_symbols.size}"
  					option_symbol.value_symbols.each do |parameter_symbol|
@@ -328,7 +328,7 @@ diff -urN XABSL/Xabsl/compiler/xabsl.rb my-XABSL/Xabsl/compiler/xabsl.rb
 -					when BooleanOutputSymbol, DecimalOutputSymbol, EnumOutputSymbol:
 +					when BooleanOutputSymbol, DecimalOutputSymbol, EnumOutputSymbol
  						if symbol.internal
- 							internal_output_symbols << symbol 
+ 							internal_output_symbols << symbol
  						end
 -					when EnumSymbol:
 +					when EnumSymbol
@@ -355,20 +355,20 @@ diff -urN XABSL/Xabsl/XabslEngine/XabslAction.cpp my-XABSL/Xabsl/XabslEngine/Xab
 +++ my-XABSL/Xabsl/XabslEngine/XabslAction.cpp	2018-05-29 23:23:13.894907657 +0200
 @@ -1,3 +1,4 @@
 +/// @cond XABSL
- /** 
+ /**
  * @file XabslAction.cpp
  *
 @@ -6,7 +7,6 @@
  * @author <a href="http://www.sim.informatik.tu-darmstadt.de/pers/card/risler.html">Max Risler</a>
  */
- 
+
 -
  #include "XabslAction.h"
  #include "XabslOption.h"
- 
+
 @@ -348,3 +348,5 @@
  }
- 
+
  } // namespace
 +
 +/// @endcond
@@ -378,7 +378,7 @@ diff -urN XABSL/Xabsl/XabslEngine/XabslAction.h my-XABSL/Xabsl/XabslEngine/Xabsl
 @@ -9,6 +9,8 @@
  #ifndef __XabslAction_h_
  #define __XabslAction_h_
- 
+
 +/// @cond XABSL
 +
  #include "XabslBasicBehavior.h"
@@ -387,16 +387,16 @@ diff -urN XABSL/Xabsl/XabslEngine/XabslAction.h my-XABSL/Xabsl/XabslEngine/Xabsl
 @@ -40,6 +42,8 @@
        pTimeFunction(pTimeFunction)
    {}
- 
+
 +  virtual ~Action() {}
 +
- 
-   /** 
+
+   /**
    * Creates an action definition.
 @@ -321,4 +325,6 @@
- 
+
  } // namespace
- 
+
 +/// @endcond
 +
  #endif //__XabslAction_h_
@@ -405,13 +405,13 @@ diff -urN XABSL/Xabsl/XabslEngine/XabslAgent.cpp my-XABSL/Xabsl/XabslEngine/Xabs
 +++ my-XABSL/Xabsl/XabslEngine/XabslAgent.cpp	2018-05-29 23:23:13.895907666 +0200
 @@ -1,3 +1,4 @@
 +/// @cond XABSL
- /** 
+ /**
  * @file XabslAgent.cpp
- * 
+ *
 @@ -25,3 +26,4 @@
- 
+
  } // namespace
- 
+
 +/// @endcond
 diff -urN XABSL/Xabsl/XabslEngine/XabslAgent.h my-XABSL/Xabsl/XabslEngine/XabslAgent.h
 --- XABSL/Xabsl/XabslEngine/XabslAgent.h	2006-09-26 10:35:04.000000000 +0200
@@ -419,16 +419,16 @@ diff -urN XABSL/Xabsl/XabslEngine/XabslAgent.h my-XABSL/Xabsl/XabslEngine/XabslA
 @@ -9,6 +9,8 @@
  #ifndef __XabslAgent_h_
  #define __XabslAgent_h_
- 
+
 +/// @cond XABSL
 +
  #include "XabslBehavior.h"
  #include "XabslTools.h"
- 
+
 @@ -47,4 +49,6 @@
- 
+
  } // namespace
- 
+
 +/// @endcond
 +
  #endif // __XabslAgent_h_
@@ -438,36 +438,36 @@ diff -urN XABSL/Xabsl/XabslEngine/XabslArray.h my-XABSL/Xabsl/XabslEngine/XabslA
 @@ -12,6 +12,8 @@
  #ifndef __XabslArray_h_
  #define __XabslArray_h_
- 
+
 +/// @cond XABSL
 +
  #include <stdlib.h>
  #include <string.h>
- 
+
 @@ -265,6 +267,8 @@
- 
+
  } // namespace
- 
+
 +/// @endcond
 +
  #endif // __XabslArray_h_
- 
- 
+
+
 diff -urN XABSL/Xabsl/XabslEngine/XabslBasicBehavior.h my-XABSL/Xabsl/XabslEngine/XabslBasicBehavior.h
 --- XABSL/Xabsl/XabslEngine/XabslBasicBehavior.h	2006-09-26 10:35:04.000000000 +0200
 +++ my-XABSL/Xabsl/XabslEngine/XabslBasicBehavior.h	2018-05-29 23:25:28.889149742 +0200
 @@ -11,6 +11,8 @@
  #ifndef __XabslBasicBehavior_h_
  #define __XabslBasicBehavior_h_
- 
+
 +/// @cond XABSL
 +
  #include "XabslTools.h"
  #include "XabslBehavior.h"
- 
+
 @@ -39,7 +41,7 @@
    };
-   
+
    /** Destructor */
 -  ~BasicBehavior()
 +  virtual ~BasicBehavior()
@@ -475,29 +475,29 @@ diff -urN XABSL/Xabsl/XabslEngine/XabslBasicBehavior.h my-XABSL/Xabsl/XabslEngin
      delete parameters;
    }
 @@ -52,5 +54,7 @@
- 
+
  } // namespace
- 
+
 +/// @endcond
 +
  #endif // __XabslBasicBehavior_h_
- 
+
 diff -urN XABSL/Xabsl/XabslEngine/XabslBehavior.h my-XABSL/Xabsl/XabslEngine/XabslBehavior.h
 --- XABSL/Xabsl/XabslEngine/XabslBehavior.h	2006-09-26 10:35:04.000000000 +0200
 +++ my-XABSL/Xabsl/XabslEngine/XabslBehavior.h	2018-05-29 23:23:13.896907675 +0200
 @@ -9,6 +9,8 @@
  #ifndef __XabslBehavior_h_
  #define __XabslBehavior_h_
- 
+
 +/// @cond XABSL
 +
  #include "XabslArray.h"
  #include "XabslSymbols.h"
- 
+
 @@ -61,4 +63,6 @@
- 
+
  } // namespace
- 
+
 +/// @endcond
 +
  #endif //__XabslBehavior_h_
@@ -506,13 +506,13 @@ diff -urN XABSL/Xabsl/XabslEngine/XabslBooleanExpression.cpp my-XABSL/Xabsl/Xabs
 +++ my-XABSL/Xabsl/XabslEngine/XabslBooleanExpression.cpp	2018-05-29 23:23:13.896907675 +0200
 @@ -1,3 +1,4 @@
 +/// @cond XABSL
- /** 
+ /**
  * @file XabslBooleanExpression.cpp
  *
 @@ -467,3 +468,5 @@
- 
+
  } // namespace
- 
+
 +/// @endcond XABSL
 +
 diff -urN XABSL/Xabsl/XabslEngine/XabslBooleanExpression.h my-XABSL/Xabsl/XabslEngine/XabslBooleanExpression.h
@@ -521,16 +521,16 @@ diff -urN XABSL/Xabsl/XabslEngine/XabslBooleanExpression.h my-XABSL/Xabsl/XabslE
 @@ -10,6 +10,8 @@
  #ifndef __XabslBooleanExpression_h_
  #define __XabslBooleanExpression_h_
- 
+
 +/// @cond XABSL
 +
  #include "XabslDecimalExpression.h"
- 
- namespace xabsl 
+
+ namespace xabsl
 @@ -481,4 +483,6 @@
- 
+
  } // namespace
- 
+
 +/// @endcond
 +
  #endif //__XabslBooleanExpression_h_
@@ -539,13 +539,13 @@ diff -urN XABSL/Xabsl/XabslEngine/XabslDecimalExpression.cpp my-XABSL/Xabsl/Xabs
 +++ my-XABSL/Xabsl/XabslEngine/XabslDecimalExpression.cpp	2018-05-29 23:23:13.897907684 +0200
 @@ -1,3 +1,4 @@
 +/// @cond XABSL
- /** 
+ /**
  * @file XabslDecimalExpression.cpp
  *
 @@ -349,3 +350,4 @@
- 
+
  } // namespace
- 
+
 +/// @endcond
 diff -urN XABSL/Xabsl/XabslEngine/XabslDecimalExpression.h my-XABSL/Xabsl/XabslEngine/XabslDecimalExpression.h
 --- XABSL/Xabsl/XabslEngine/XabslDecimalExpression.h	2006-09-26 10:35:04.000000000 +0200
@@ -553,16 +553,16 @@ diff -urN XABSL/Xabsl/XabslEngine/XabslDecimalExpression.h my-XABSL/Xabsl/XabslE
 @@ -11,6 +11,8 @@
  #ifndef __XabslDecimalExpression_h_
  #define __XabslDecimalExpression_h_
- 
+
 +/// @cond XABSL
 +
  #include "XabslSymbols.h"
- 
- namespace xabsl 
+
+ namespace xabsl
 @@ -401,4 +403,6 @@
- 
+
  } // namespace
- 
+
 +/// @endcond
 +
  #endif //__XabslDecimalExpression_h_
@@ -571,13 +571,13 @@ diff -urN XABSL/Xabsl/XabslEngine/XabslEngine.cpp my-XABSL/Xabsl/XabslEngine/Xab
 +++ my-XABSL/Xabsl/XabslEngine/XabslEngine.cpp	2018-05-29 23:23:13.897907684 +0200
 @@ -1,3 +1,4 @@
 +/// @cond XABSL
- /** 
+ /**
  * @file XabslEngine.cpp
  *
 @@ -351,3 +352,4 @@
- 
+
  } // namespace
- 
+
 +/// @endcond XABSL
 diff -urN XABSL/Xabsl/XabslEngine/XabslEngine.h my-XABSL/Xabsl/XabslEngine/XabslEngine.h
 --- XABSL/Xabsl/XabslEngine/XabslEngine.h	2006-09-26 10:35:04.000000000 +0200
@@ -585,32 +585,32 @@ diff -urN XABSL/Xabsl/XabslEngine/XabslEngine.h my-XABSL/Xabsl/XabslEngine/Xabsl
 @@ -11,6 +11,8 @@
  #ifndef __XabslEngine_h_
  #define __XabslEngine_h_
- 
+
 +/// @cond XABSL
 +
  #include "XabslAgent.h"
  #include "XabslOption.h"
- 
+
 @@ -160,5 +162,7 @@
- 
+
  } // namespace
- 
+
 +/// @endcond
 +
  #endif // __XabslEngine_h_
- 
+
 diff -urN XABSL/Xabsl/XabslEngine/XabslEnumeratedExpression.cpp my-XABSL/Xabsl/XabslEngine/XabslEnumeratedExpression.cpp
 --- XABSL/Xabsl/XabslEngine/XabslEnumeratedExpression.cpp	2006-09-26 10:35:04.000000000 +0200
 +++ my-XABSL/Xabsl/XabslEngine/XabslEnumeratedExpression.cpp	2018-05-29 23:23:13.898907694 +0200
 @@ -1,3 +1,4 @@
 +/// @cond XABSL
- /** 
+ /**
  * @file XabslEnumeratedExpression.cpp
  *
 @@ -271,3 +272,4 @@
- 
+
  } // namespace
- 
+
 +/// @endcond
 diff -urN XABSL/Xabsl/XabslEngine/XabslEnumeratedExpression.h my-XABSL/Xabsl/XabslEngine/XabslEnumeratedExpression.h
 --- XABSL/Xabsl/XabslEngine/XabslEnumeratedExpression.h	2006-09-26 10:35:04.000000000 +0200
@@ -618,16 +618,16 @@ diff -urN XABSL/Xabsl/XabslEngine/XabslEnumeratedExpression.h my-XABSL/Xabsl/Xab
 @@ -9,6 +9,8 @@
  #ifndef __XabslEnumeratedExpression_h_
  #define __XabslEnumeratedExpression_h_
- 
+
 +/// @cond XABSL
 +
  #include "XabslSymbols.h"
  #include "XabslDecimalExpression.h"
- 
+
 @@ -279,4 +281,6 @@
- 
+
  } // namespace
- 
+
 +/// @endcond
 +
  #endif //__XabslEnumeratedExpression_h_
@@ -640,9 +640,9 @@ diff -urN XABSL/Xabsl/XabslEngine/XabslOption.cpp my-XABSL/Xabsl/XabslEngine/Xab
  * @file XabslOption.cpp
  *
 @@ -168,3 +169,4 @@
- 
+
  } // namespace
- 
+
 +/// @endcond XABSL
 diff -urN XABSL/Xabsl/XabslEngine/XabslOption.h my-XABSL/Xabsl/XabslEngine/XabslOption.h
 --- XABSL/Xabsl/XabslEngine/XabslOption.h	2006-09-26 10:35:04.000000000 +0200
@@ -650,25 +650,25 @@ diff -urN XABSL/Xabsl/XabslEngine/XabslOption.h my-XABSL/Xabsl/XabslEngine/Xabsl
 @@ -10,6 +10,8 @@
  #ifndef __XabslOption_h_
  #define __XabslOption_h_
- 
+
 +/// @cond XABSL
 +
  #include "XabslState.h"
  #include "XabslBehavior.h"
- 
+
 @@ -68,7 +70,7 @@
      unsigned long (*pTimeFunction)());
-   
+
    /** Destructor. Deletes the states */
 -  ~Option();
 +  virtual ~Option();
-   
-   /** 
+
+   /**
    * Creates the option and it's states from the intermediate code.
 @@ -112,4 +114,6 @@
- 
+
  } // namespace
- 
+
 +/// @endcond
 +
  #endif //__XabslOption_h_
@@ -677,13 +677,13 @@ diff -urN XABSL/Xabsl/XabslEngine/XabslParameters.cpp my-XABSL/Xabsl/XabslEngine
 +++ my-XABSL/Xabsl/XabslEngine/XabslParameters.cpp	2018-05-29 23:23:13.901907721 +0200
 @@ -1,3 +1,4 @@
 +/// @cond XABSL
- /** 
+ /**
  * @file XabslParameters.cpp
  *
 @@ -282,3 +283,4 @@
- 
+
  } // namespace
- 
+
 +/// @endcond XABSL
 diff -urN XABSL/Xabsl/XabslEngine/XabslParameters.h my-XABSL/Xabsl/XabslEngine/XabslParameters.h
 --- XABSL/Xabsl/XabslEngine/XabslParameters.h	2006-09-26 10:35:04.000000000 +0200
@@ -691,40 +691,40 @@ diff -urN XABSL/Xabsl/XabslEngine/XabslParameters.h my-XABSL/Xabsl/XabslEngine/X
 @@ -9,6 +9,8 @@
  #ifndef __XabslParameters_h_
  #define __XabslParameters_h_
- 
+
 +/// @cond XABSL
 +
  #include "XabslTools.h"
- 
- namespace xabsl 
+
+ namespace xabsl
 @@ -66,7 +68,7 @@
    * @param parameter The reference to a parameter
    */
    void registerDecimal(const char* name, double& parameter);
--  
+-
 +
-   /** 
+   /**
    * Registers a reference to a boolean parameter at the parameters array.
    * @param name The name of the parameter
 @@ -199,6 +201,8 @@
- 
+
  } // namespace
- 
+
 +/// @endcond
 +
  #endif // __XabslParameters_h_
- 
- 
+
+
 diff -urN XABSL/Xabsl/XabslEngine/XabslState.cpp my-XABSL/Xabsl/XabslEngine/XabslState.cpp
 --- XABSL/Xabsl/XabslEngine/XabslState.cpp	2006-09-26 10:35:04.000000000 +0200
 +++ my-XABSL/Xabsl/XabslEngine/XabslState.cpp	2018-05-29 23:23:13.903907740 +0200
 @@ -1,3 +1,4 @@
 +/// @cond XABSL
- /** 
+ /**
  * @file XabslState.cpp
  *
 @@ -19,8 +20,8 @@
- 
+
  State::State(const char* name, ErrorHandler& errorHandler,
                           unsigned long (*pTimeFunction)())
 -: NamedItem(name), errorHandler(errorHandler), decisionTree(0),
@@ -733,11 +733,11 @@ diff -urN XABSL/Xabsl/XabslEngine/XabslState.cpp my-XABSL/Xabsl/XabslEngine/Xabs
 +  pTimeFunction(pTimeFunction)
  {
  }
- 
+
 @@ -108,3 +109,4 @@
- 
+
  } // namespace
- 
+
 +/// @endcond
 diff -urN XABSL/Xabsl/XabslEngine/XabslState.h my-XABSL/Xabsl/XabslEngine/XabslState.h
 --- XABSL/Xabsl/XabslEngine/XabslState.h	2006-09-26 10:35:04.000000000 +0200
@@ -745,16 +745,16 @@ diff -urN XABSL/Xabsl/XabslEngine/XabslState.h my-XABSL/Xabsl/XabslEngine/XabslS
 @@ -9,6 +9,8 @@
  #ifndef __XabslState_h_
  #define __XabslState_h_
- 
+
 +/// @cond XABSL
 +
  #include "XabslStatement.h"
  #include "XabslBasicBehavior.h"
  #include "XabslDecimalExpression.h"
 @@ -108,4 +110,6 @@
- 
+
  } // namespace
- 
+
 +/// @endcond
 +
  #endif //__XabslState_h_
@@ -763,13 +763,13 @@ diff -urN XABSL/Xabsl/XabslEngine/XabslStatement.cpp my-XABSL/Xabsl/XabslEngine/
 +++ my-XABSL/Xabsl/XabslEngine/XabslStatement.cpp	2018-05-29 23:23:13.903907740 +0200
 @@ -1,3 +1,4 @@
 +/// @cond XABSL
- /** 
+ /**
  * @file XabslStatement.cpp
  *
 @@ -125,3 +126,4 @@
- 
+
  } // namespace
- 
+
 +/// @endcond
 diff -urN XABSL/Xabsl/XabslEngine/XabslStatement.h my-XABSL/Xabsl/XabslEngine/XabslStatement.h
 --- XABSL/Xabsl/XabslEngine/XabslStatement.h	2006-09-26 10:35:04.000000000 +0200
@@ -777,16 +777,16 @@ diff -urN XABSL/Xabsl/XabslEngine/XabslStatement.h my-XABSL/Xabsl/XabslEngine/Xa
 @@ -9,6 +9,8 @@
  #ifndef __XabslStatement_h_
  #define __XabslStatement_h_
- 
+
 +/// @cond XABSL
 +
  #include "XabslBooleanExpression.h"
- 
- namespace xabsl 
+
+ namespace xabsl
 @@ -140,4 +142,6 @@
- 
+
  } // namespace
- 
+
 +/// @endcond
 +
  #endif // __XabslStatement_h_
@@ -799,9 +799,9 @@ diff -urN XABSL/Xabsl/XabslEngine/XabslSymbols.cpp my-XABSL/Xabsl/XabslEngine/Xa
  * @file XabslSymbols.cpp
  *
 @@ -420,3 +421,4 @@
- 
+
  } // namespace
- 
+
 +/// @endcond
 diff -urN XABSL/Xabsl/XabslEngine/XabslSymbols.h my-XABSL/Xabsl/XabslEngine/XabslSymbols.h
 --- XABSL/Xabsl/XabslEngine/XabslSymbols.h	2006-09-26 10:35:04.000000000 +0200
@@ -809,12 +809,12 @@ diff -urN XABSL/Xabsl/XabslEngine/XabslSymbols.h my-XABSL/Xabsl/XabslEngine/Xabs
 @@ -10,6 +10,8 @@
  #ifndef __XabslSymbols_h_
  #define __XabslSymbols_h_
- 
+
 +/// @cond XABSL
 +
  #include "XabslTools.h"
  #include "XabslParameters.h"
- 
+
 @@ -84,7 +86,7 @@
  * @param pVariable A pointer to the variable that the symbol stands for
    */
@@ -822,33 +822,33 @@ diff -urN XABSL/Xabsl/XabslEngine/XabslSymbols.h my-XABSL/Xabsl/XabslEngine/Xabs
 -    : NamedItem(name), pV(pVariable), pI(0), pF(0), parameters(errorHandler)
 +    : NamedItem(name), parameters(errorHandler), pV(pVariable), pI(0), pF(0)
    {};
-   
-   
+
+
 @@ -97,7 +99,7 @@
      FunctionProvider* pInstance,
      T (FunctionProvider::*pFunction)(),
      ErrorHandler& errorHandler)
 -    : NamedItem(name), pV(0), pI(pInstance), pF(pFunction), parameters(errorHandler) {};
 +    : NamedItem(name), parameters(errorHandler), pV(0), pI(pInstance), pF(pFunction) {};
-   
+
    /** returns the value of the symbol */
    T getValue() const
 @@ -194,7 +196,7 @@
    */
-   EnumeratedInputSymbol(const char* name, Enumeration* enumeration, const int* pVariable, 
+   EnumeratedInputSymbol(const char* name, Enumeration* enumeration, const int* pVariable,
      ErrorHandler& errorHandler)
--    : enumeration(enumeration), InputSymbol<int>(name, pVariable, errorHandler) 
+-    : enumeration(enumeration), InputSymbol<int>(name, pVariable, errorHandler)
 +    : InputSymbol<int>(name, pVariable, errorHandler), enumeration(enumeration)
    {};
-   
-   /** Constructor 
+
+   /** Constructor
 @@ -206,7 +208,7 @@
    EnumeratedInputSymbol(const char* name, Enumeration* enumeration, FunctionProvider* pInstance,
      int (FunctionProvider::*pFunction)(),
      ErrorHandler& errorHandler)
 -    : enumeration(enumeration), InputSymbol<int>(name, pInstance, pFunction, errorHandler) {};
 +    : InputSymbol<int>(name, pInstance, pFunction, errorHandler), enumeration(enumeration) {};
- 
+
    /** Pointer to the list of enumeration elements */
    Enumeration* enumeration;
 @@ -229,7 +231,7 @@
@@ -858,8 +858,8 @@ diff -urN XABSL/Xabsl/XabslEngine/XabslSymbols.h my-XABSL/Xabsl/XabslEngine/Xabs
 -    : NamedItem(name), pV(pVariable), pI(0), pSetF(0), pGetF(0), activeValueWasSet(false)
 +    : NamedItem(name), activeValueWasSet(false), pV(pVariable), pI(0), pSetF(0), pGetF(0)
    {};
-   
-   
+
+
 @@ -244,7 +246,7 @@
      FunctionProvider* pInstance,
      void (FunctionProvider::*pSetFunction)(T),
@@ -867,12 +867,12 @@ diff -urN XABSL/Xabsl/XabslEngine/XabslSymbols.h my-XABSL/Xabsl/XabslEngine/Xabs
 -    : NamedItem(name), pV(0), pI(pInstance), pSetF(pSetFunction), pGetF(pGetFunction), activeValueWasSet(false)
 +    : NamedItem(name), activeValueWasSet(false), pV(0), pI(pInstance), pSetF(pSetFunction), pGetF(pGetFunction)
    {};
- 
- 
+
+
 @@ -604,4 +606,6 @@
- 
+
  } // namespace
- 
+
 +/// @endcond
 +
  #endif //__XabslSymbols_h_
@@ -885,9 +885,9 @@ diff -urN XABSL/Xabsl/XabslEngine/XabslTools.cpp my-XABSL/Xabsl/XabslEngine/Xabs
  * @file XabslTools.cpp
  *
 @@ -47,3 +48,4 @@
- 
+
  } // namespace
- 
+
 +/// @endcond
 diff -urN XABSL/Xabsl/XabslEngine/XabslTools.h my-XABSL/Xabsl/XabslEngine/XabslTools.h
 --- XABSL/Xabsl/XabslEngine/XabslTools.h	2006-09-26 10:35:04.000000000 +0200
@@ -895,26 +895,26 @@ diff -urN XABSL/Xabsl/XabslEngine/XabslTools.h my-XABSL/Xabsl/XabslEngine/XabslT
 @@ -11,6 +11,8 @@
  #ifndef __XabslTools_h_
  #define __XabslTools_h_
- 
+
 +/// @cond XABSL
 +
  #include "XabslArray.h"
- 
- namespace xabsl 
+
+ namespace xabsl
 @@ -49,6 +51,9 @@
    /** constructor */
    ErrorHandler() : errorsOccurred(false) {};
- 
+
 +  /** destructor */
 +  virtual ~ErrorHandler() {}
 +
-   /** 
+   /**
    * Prints out an error
    * @param text The text to display
 @@ -101,4 +106,6 @@
- 
+
  } // namespace
- 
+
 +/// @endcond
 +
  #endif //__XabslTools_h_
@@ -922,17 +922,17 @@ diff -urN XABSL/XabslExampleAgentTeam/MyBasicBehaviors.cpp my-XABSL/XabslExample
 --- XABSL/XabslExampleAgentTeam/MyBasicBehaviors.cpp	2006-09-27 19:35:16.000000000 +0200
 +++ my-XABSL/XabslExampleAgentTeam/MyBasicBehaviors.cpp	2018-05-29 23:23:13.906907767 +0200
 @@ -6,6 +6,7 @@
-     
+
        author: Martin Lötzsch
  ===========================================================================*/
 +/// @cond XABSL
- 
+
  #include "MyBasicBehaviors.h"
- 
+
 @@ -82,3 +83,4 @@
    if (worldState.local_area[action][worldState.activePlayerNumber] != EMPTY) action=DO_NOTHING;
  }
- 
+
 +/// @endcond
 diff -urN XABSL/XabslExampleAgentTeam/MyBasicBehaviors.h my-XABSL/XabslExampleAgentTeam/MyBasicBehaviors.h
 --- XABSL/XabslExampleAgentTeam/MyBasicBehaviors.h	2006-09-27 15:17:00.000000000 +0200
@@ -940,7 +940,7 @@ diff -urN XABSL/XabslExampleAgentTeam/MyBasicBehaviors.h my-XABSL/XabslExampleAg
 @@ -10,6 +10,8 @@
  #ifndef __MyBasicBehaviors_h_
  #define __MyBasicBehaviors_h_
- 
+
 +/// @cond XABSL
 +
  #include "../Xabsl/XabslEngine/XabslBasicBehavior.h"
@@ -949,7 +949,7 @@ diff -urN XABSL/XabslExampleAgentTeam/MyBasicBehaviors.h my-XABSL/XabslExampleAg
 @@ -62,4 +64,6 @@
    int& action; // the action to be generated
  };
- 
+
 +/// @endcond
 +
  #endif //__MyBasicBehaviors_h_
@@ -959,16 +959,16 @@ diff -urN XABSL/XabslExampleAgentTeam/Tools.h my-XABSL/XabslExampleAgentTeam/Too
 @@ -10,6 +10,8 @@
  #ifndef __Tools_h_
  #define __Tools_h_
- 
+
 +/// @cond XABSL
 +
  #include <fstream>
  #include <sys/timeb.h>
- 
+
 @@ -78,4 +80,6 @@
    return (sysTime.time * 1000 + sysTime.millitm);
  }
- 
+
 +/// @endcond XABSL
 +
  #endif //__Tools_h_
@@ -976,13 +976,13 @@ diff -urN XABSL/XabslExampleAgentTeam/WorldState.cpp my-XABSL/XabslExampleAgentT
 --- XABSL/XabslExampleAgentTeam/WorldState.cpp	2006-09-27 19:35:16.000000000 +0200
 +++ my-XABSL/XabslExampleAgentTeam/WorldState.cpp	2018-05-29 23:23:13.907907776 +0200
 @@ -6,6 +6,7 @@
-     
+
        author: Martin Lötzsch
  ===========================================================================*/
 +/// @cond XABSL
- 
+
  #include "WorldState.h"
- 
+
 @@ -187,3 +188,4 @@
  {
    return (double)ball_y;
@@ -994,17 +994,17 @@ diff -urN XABSL/XabslExampleAgentTeam/WorldState.h my-XABSL/XabslExampleAgentTea
 @@ -10,6 +10,8 @@
  #ifndef __WorldState_h_
  #define __WorldState_h_
- 
+
 +/// @cond XABSL
 +
  #include "../Xabsl/XabslEngine/XabslSymbols.h"
  #include "../ascii-soccer/soccer.h"
- 
+
 @@ -70,6 +72,6 @@
    void printField(xabsl::ErrorHandler& errorHandler); // prints the field containing debug informations
  };
- 
+
 -
 +/// @endcond
- 
+
  #endif //__WorldState_h_

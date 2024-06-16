@@ -1,6 +1,6 @@
 /***************************************************************************
  *  computable.h - Class holding information for a single computable
- *    
+ *
  *
  *  Created: 6:57:45 PM 2016
  *  Copyright  2016  Frederik Zwilling

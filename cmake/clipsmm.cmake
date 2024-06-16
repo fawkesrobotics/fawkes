@@ -20,6 +20,10 @@
 #
 # *****************************************************************************
 
+# Function: depend_on_clipsmm
+# Usage: depend_on_clipsm(TARGET_NAME)
+#
+# Links the target to clipsmm.
 function(depend_on_clipsmm target)
   depend_on_pkgconfig_libs(${target} clipsmm-1.0)
   target_compile_options(${target} PUBLIC -DHAVE_CLIPS ${CLIPSMM_CFLAGS})

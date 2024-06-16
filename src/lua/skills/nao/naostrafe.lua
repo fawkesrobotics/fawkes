@@ -2,7 +2,7 @@
 ----------------------------------------------------------------------------
 --  naostrafe.lua - nao strafe skill
 --
---  Created: 
+--  Created:
 --  Copyright  2009  Patrick Podbregar
 --
 ----------------------------------------------------------------------------
@@ -84,4 +84,3 @@ STRAFE.nowriter_interfaces = {naomotion}
 STRAFE:add_transition(FAILED, JumpState.jumpcond_nowriter, "no naomotion writer")
 STRAFE:add_transition(FAILED, STRAFE.jumpcond_motionfail, "naomotion failure")
 STRAFE:add_transition(FINAL, STRAFE.jumpcond_motionfinal, "strafe final")
-

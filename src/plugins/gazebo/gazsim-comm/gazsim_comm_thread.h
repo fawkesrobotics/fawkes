@@ -6,7 +6,7 @@
  *
  *  Created: Thu Sep 12 11:07:43 2013
  *  Copyright  2013  Frederik Zwilling
- *                   
+ *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

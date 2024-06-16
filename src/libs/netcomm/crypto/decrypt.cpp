@@ -54,7 +54,7 @@ MessageDecryptionException::MessageDecryptionException(const char *msg) : Except
  * This implementation uses OpenSSL for the AES encryption (in fact it uses the
  * accompanying libcrypto that comes with OpenSSL, not libopenssl itself). It is
  * almost everywhere available and easy to use.
- * 
+ *
  * @see MessageEncryptor
  * @ingroup NetComm
  * @author Tim Niemueller

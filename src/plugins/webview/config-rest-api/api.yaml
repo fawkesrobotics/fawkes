@@ -6,7 +6,7 @@ info:
     Fawkes Configuration REST API.
     Retrieve information from the configuration.
   contact:
-    name:  Tim Niemueller
+    name: Tim Niemueller
     email: niemueller@kbsg.rwth-aachen.de
   license:
     name: Apache 2.0
@@ -20,7 +20,7 @@ paths:
   /config:
     get:
       tags:
-      - public
+        - public
       summary: Get information from the configuration.
       operationId: get_config
       description: |

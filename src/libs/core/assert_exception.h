@@ -39,6 +39,6 @@
 #define assert(expr)                 \
 	((expr) ? __ASSERT_VOID_CAST(0)    \
 	        : throw fawkes::Exception( \
-	          "Assertion '%s' failed in %s:%u", __STRING(expr), __FILE__, __LINE__))
+	            "Assertion '%s' failed in %s:%u", __STRING(expr), __FILE__, __LINE__))
 
 #endif

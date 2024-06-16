@@ -34,7 +34,7 @@ namespace fawkes {
 
 /** @class BlackBoardInterfaceListener <blackboard/interface_listener.h>
  * BlackBoard interface listener.
- * Derive this class if you want to be notified of specific BlackBoard 
+ * Derive this class if you want to be notified of specific BlackBoard
  * events regarding instances of interfaces.
  *
  * The bb_interface_* methods are called during the appropriate operation. The

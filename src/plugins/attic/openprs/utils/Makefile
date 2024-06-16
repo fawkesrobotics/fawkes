@@ -52,4 +52,3 @@ warning_libdaemon:
 endif
 
 include $(BUILDSYSDIR)/base.mk
-

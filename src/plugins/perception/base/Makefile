@@ -36,4 +36,3 @@ PLUGINS_all = $(PLUGINDIR)/fvbase.so
 PLUGINS_build = $(PLUGINS_all)
 
 include $(BUILDSYSDIR)/base.mk
-

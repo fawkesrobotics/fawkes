@@ -94,4 +94,3 @@ $(OPENPRS_WARN_TARGETS_BOOST): warning_openprs_boost_%:
 endif
 
 endif # __buildsys_openprs_mk_
-

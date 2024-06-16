@@ -53,8 +53,8 @@ execute(Action, _) :-
   wait.
 
 % do not allow normal action execution.
-execute(Action,_) :- 
-  simulate_execution, !, 
+execute(Action,_) :-
+  simulate_execution, !,
   log_error("Simulation of action %w failed", [Action]),
   fail.
 

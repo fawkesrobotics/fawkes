@@ -39,7 +39,7 @@ using namespace fawkes;
  * @author Daniel Beck
  */
 
-/** @class fawkes::ServiceModel gui_utils/service_model.h 
+/** @class fawkes::ServiceModel gui_utils/service_model.h
  * Abstract base class for widgets that allow to view the detected
  * services of a certain type.
  *

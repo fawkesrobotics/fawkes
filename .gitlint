@@ -39,4 +39,3 @@ regex=^[^:]+: [^:]+ .*$
 # By specifying this rule, developers can only change the file when they explicitly reference
 # it in the commit message.
 #files=.buildkite/pipeline.yml,.buildkite/build,.buildkite/lint,.buildkite/check,README.md
-

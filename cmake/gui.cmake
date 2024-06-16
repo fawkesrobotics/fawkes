@@ -26,6 +26,10 @@ if(NOT GTKMM_FOUND)
 endif()
 remember_dependency(GTKMM)
 
+# Function: depend_on_gui
+# Usage: depend_on_gui(TARGET_NAME)
+#
+# Adds the necessary dependencies for gui to the target.
 function(depend_on_gui target)
   depend_on_pkgconfig_libs(${target} "cairomm-1.0;GTKMM;gthread-2.0")
   optional_depend_on_pkgconfig_libs(${target} giomm-2.4 giomm_dep_found)

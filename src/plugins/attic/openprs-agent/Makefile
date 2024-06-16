@@ -102,4 +102,3 @@ warning_protobuf_comm:
 endif
 
 include $(BUILDSYSDIR)/base.mk
-

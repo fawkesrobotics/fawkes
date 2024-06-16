@@ -45,7 +45,7 @@
 
 (deffunction cx-debug-unwatch-facts ($?templates)
 	(bind ?deftemplates (get-deftemplate-list))
-	(printout debug "Unwatching fact templates " ?templates crlf) 
+	(printout debug "Unwatching fact templates " ?templates crlf)
 	(foreach ?v ?templates
 		(bind ?v-sym (sym-cat ?v))
 		(if (member$ ?v-sym ?deftemplates)
@@ -57,7 +57,7 @@
 
 (deffunction cx-debug-unwatch-rules ($?rules)
 	(bind ?defrules (get-defrule-list))
-	(printout debug "Unwatching rules " ?rules crlf) 
+	(printout debug "Unwatching rules " ?rules crlf)
 	(foreach ?v ?rules
 		(bind ?v-sym (sym-cat ?v))
 		(if (member$ ?v-sym ?defrules)

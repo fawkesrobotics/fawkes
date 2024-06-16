@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *  zauberstab.cpp - Implementation of class "Zauberstab"
- *                   which offers methods for finding 
+ *                   which offers methods for finding
  *                   maximal, color-contiguous region
  *                   around a seed pixel
  *
@@ -272,7 +272,7 @@ Zauberstab::privFindRegion(unsigned int seedX, unsigned int seedY)
 		uSeed = uSeed / cnt;
 		vSeed = vSeed / cnt;
 	}
-	/* initial slice 
+	/* initial slice
      thru seed pixel (seedX, seedY) */
 	ZSlice *tmp = NULL;
 	tmp         = findSlice(seedX, seedY, vSeed, uSeed);

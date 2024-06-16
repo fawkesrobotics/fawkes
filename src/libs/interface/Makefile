@@ -41,4 +41,3 @@ endif
 $(LUALIBDIR)/fawkesinterface.so: | $(LIBDIR)/libfawkesinterface.so
 
 include $(BUILDSYSDIR)/base.mk
-

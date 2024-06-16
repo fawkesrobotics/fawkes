@@ -1,6 +1,6 @@
 /***************************************************************************
  *  robot_memory_inifin.h - RobotMemoryAspect initializer/finalizer
- *    
+ *
  *
  *  Created: Aug 23, 2016 1:28:04 PM 2016
  *  Copyright  2016  Frederik Zwilling

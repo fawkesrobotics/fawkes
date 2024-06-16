@@ -41,12 +41,12 @@ namespace fawkes {
 /** @class FileLogger <logging/file.h>
  * Interface for logging to a specified file.
  * The FileLogger will pipe all output into the given file. The
- * output will be prepended by a single character which determines the 
+ * output will be prepended by a single character which determines the
  * type of output (E for error, W for warning, etc.).
  *
  */
 
-/** Constructor. 
+/** Constructor.
  * The filename is generated from the filename pattern by replacing '$time' with
  * the current time.
  * @param filename_pattern the name pattern of the log-file

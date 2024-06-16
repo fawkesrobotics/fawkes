@@ -616,7 +616,7 @@ DynamixelDriverThread::set_velocity(unsigned int servo_id, float vel)
 /** Set desired speed.
  * When the servo is set to wheel mode, bit 10 of the speed value is used
  * to either move cw (1) or ccw (0).
- * @param speed the speed 
+ * @param speed the speed
  */
 void
 DynamixelDriverThread::set_speed(unsigned int servo_id, unsigned int speed)

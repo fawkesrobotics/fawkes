@@ -2,7 +2,7 @@
 /***************************************************************************
  *  binomial_coefficient.h - function for computing the binomial coefficient
  *
- *  Generated: Sun Nov 04 17:29:46 2007 
+ *  Generated: Sun Nov 04 17:29:46 2007
  *  Copyright  2007  Martin Liebenberg
  *
  ****************************************************************************/
@@ -28,7 +28,7 @@ namespace fawkes {
 
 /** @class BinomialCoefficient <utils/math/binomial_coefficient.h>
  *  Contains method to compute the binomial coefficient.
- * 
+ *
  *  @author Martin Liebenberg
  */
 

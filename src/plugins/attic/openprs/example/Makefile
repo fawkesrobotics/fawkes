@@ -42,4 +42,3 @@ warning_openprs:
 endif
 
 include $(BUILDSYSDIR)/base.mk
-

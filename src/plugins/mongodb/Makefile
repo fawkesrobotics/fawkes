@@ -77,4 +77,3 @@ $(WARN_TARGETS_MONGODB_BOOST): warning_mongodb_boost_%:
 endif
 
 include $(BUILDSYSDIR)/base.mk
-

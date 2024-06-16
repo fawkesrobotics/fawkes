@@ -342,10 +342,7 @@ yuv422packed_to_bgr_with_alpha_plainc(const unsigned char *YUV,
 #	define RES 6
 
 #	define RZ(i) (i >> (BITRES - RES))
-#	define FOUR(i) \
-		{             \
-			i, i, i, i  \
-		}
+#	define FOUR(i) {i, i, i, i}
 
 __aligned(8) const volatile unsigned short _const_crvcrv[4] = FOUR(RZ(CRV));
 __aligned(8) const volatile unsigned short _const_cbucbu[4] = FOUR(RZ(CBU));

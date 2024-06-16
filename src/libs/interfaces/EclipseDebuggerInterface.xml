@@ -9,6 +9,5 @@
   <message name="Connection">
     <comment>Ask the writer (in the current usecase the readylog agent) for a connection.</comment>
   </message>
-  
-</interface>
 
+</interface>

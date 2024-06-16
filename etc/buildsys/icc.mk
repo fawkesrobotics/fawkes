@@ -33,4 +33,3 @@ CFLAGS_BASE      += -wd177,383,810,869,981,1418,1572
 LDFLAGS_BASE     += -L$(ICC_PATH)/lib -lguide -lpthread
 CFLAGS_OPENMP     = -openmp
 LDFLAGS_OPENMP    = -lgomp
-

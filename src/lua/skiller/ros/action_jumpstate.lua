@@ -66,7 +66,7 @@ end
 
 --- Set parameters of message.
 -- Given a table of input values this function iterates over the messages
--- fields and sets the message value fields appropriately. If the input 
+-- fields and sets the message value fields appropriately. If the input
 local function set_params(msg, input)
    assert(msg, "ActionJumpState: message is nil")
    for _, f in ipairs(msg.spec.fields) do

@@ -22,6 +22,10 @@
 
 find_package(Protobuf)
 
+# Function: depend_on_protobuf
+# Usage: depend_on_protobuf(TARGET_NAME)
+#
+# Adds the dependency for the Protobuf Libaries to the target.
 function(depend_on_protobuf target)
   if(Protobuf_FOUND)
     target_link_libraries(${target} ${Protobuf_LIBRARIES})
@@ -32,6 +36,10 @@ function(depend_on_protobuf target)
   endif()
 endfunction()
 
+# Function: depend_on_protobuff_comm
+# Usage: depend_on_protobuff_comm
+#
+# Adds the dependency for the protofbuff_comm package to the target.
 function(depend_on_protobuf_comm target)
   depend_on_pkgconfig_libs(${target} protobuf_comm)
 endfunction()

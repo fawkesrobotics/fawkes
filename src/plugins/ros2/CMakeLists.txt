@@ -156,7 +156,8 @@ else()
 endif()
 
 if(PLUGIN_ros2-tf2-oneway)
-  add_library(ros2-tf2-oneway MODULE tf2_oneway_plugin.cpp tf2_oneway_thread.cpp)
+  add_library(ros2-tf2-oneway MODULE tf2_oneway_plugin.cpp
+                                     tf2_oneway_thread.cpp)
   depend_on_ros2(ros2-tf2-oneway)
   depend_on_tf(ros2-tf2-oneway)
   depend_on_ros2_libs(ros2-tf2-oneway "tf2;tf2_msgs")
@@ -220,7 +221,8 @@ else()
 endif()
 
 if(PLUGIN_ros2-laserbridge)
-  add_library(ros2-laserbridge MODULE laserbridge_plugin.cpp laserbridge_thread.cpp)
+  add_library(ros2-laserbridge MODULE laserbridge_plugin.cpp
+                                      laserbridge_thread.cpp)
   depend_on_ros2(ros2-laserbridge)
   depend_on_ros2_libs(ros2-laserbridge sensor_msgs)
   depend_on_pcl(ros2-laserbridge)
@@ -334,7 +336,8 @@ else()
 endif()
 
 if(PLUGIN_ros2-motorinterface)
-  add_library(ros2-motorinterface MODULE motorinterface_thread.cpp motorinterface_plugin.cpp)
+  add_library(ros2-motorinterface MODULE motorinterface_thread.cpp
+                                         motorinterface_plugin.cpp)
   depend_on_ros2(ros2-motorinterface)
   depend_on_ros2_libs(ros2-motorinterface geometry_msgs)
   target_compile_options(ros2-motorinterface PRIVATE -Wno-stringop-overflow)

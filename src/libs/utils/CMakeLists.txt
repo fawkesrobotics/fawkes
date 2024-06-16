@@ -91,8 +91,8 @@ if(libmagic_dep_found)
 else()
   build_skipped_message(
     fwakesutils
-    "Restricted file type detection support (file[-devel] (libmagic)) not installed"
-  )
+    "Restricted file type detection support (file[-devel] (libmagic)) \
+not installed")
 endif()
 
 optional_depend_on_pkgconfig_libs(fawkesutils libdaemon libdaemon_dep_found)

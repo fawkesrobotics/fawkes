@@ -130,17 +130,17 @@ typedef struct
 } FUSE_image_message_header_t;
 
 /*
-  uint32_t  roi_x;			*< ROI X coordinate 
-  uint32_t  roi_y;			*< ROI Y coordinate 
-  uint32_t  roi_width;		*< ROI width 
-  uint32_t  roi_height;		*< ROI height 
+  uint32_t  roi_x;			*< ROI X coordinate
+  uint32_t  roi_y;			*< ROI Y coordinate
+  uint32_t  roi_width;		*< ROI width
+  uint32_t  roi_height;		*< ROI height
   // Circle relative to ROI
 
-  int32_t   circle_x;			*< circle x coordinate 
-  int32_t   circle_y;			*< circle y coordinate 
-  uint32_t  circle_radius;		*< circle radius 
-  uint32_t  flag_circle_found :  1;	*< circle found, 1 if found 
-  uint32_t  flag_reserved     : 31;	*< reserved for future use 
+  int32_t   circle_x;			*< circle x coordinate
+  int32_t   circle_y;			*< circle y coordinate
+  uint32_t  circle_radius;		*< circle radius
+  uint32_t  flag_circle_found :  1;	*< circle found, 1 if found
+  uint32_t  flag_reserved     : 31;	*< reserved for future use
 */
 
 /** Image request message. */

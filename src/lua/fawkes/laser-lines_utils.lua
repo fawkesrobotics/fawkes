@@ -60,4 +60,3 @@ function center(line)
       line:bearing()
    )
 end
-

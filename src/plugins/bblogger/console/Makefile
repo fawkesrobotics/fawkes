@@ -27,4 +27,3 @@ BINS_build = $(BINS_all)
 MANPAGES_all =  $(MANDIR)/man1/ffbblog.1
 
 include $(BUILDSYSDIR)/base.mk
-

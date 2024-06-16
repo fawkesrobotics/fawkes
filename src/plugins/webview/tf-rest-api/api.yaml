@@ -6,7 +6,7 @@ info:
     Fawkes Transforms REST API.
     Transforms information and some calculations.
   contact:
-    name:  Tim Niemueller
+    name: Tim Niemueller
     email: niemueller@kbsg.rwth-aachen.de
   license:
     name: Apache 2.0
@@ -20,7 +20,7 @@ paths:
   /transforms/graph:
     get:
       tags:
-      - public
+        - public
       summary: Get transform graph.
       operationId: get_graph
       description: |

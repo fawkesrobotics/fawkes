@@ -12,7 +12,7 @@
       Is the generation finished?
     </field>
   </data>
-  
+
   <message name="Generate">
     <comment>
       Call to generate PDDL Problem

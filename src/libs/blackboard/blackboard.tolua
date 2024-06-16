@@ -45,18 +45,18 @@ function fawkes.BlackBoard:open_for_reading(interface_type, identifier)
 	require("interfaces."..interface_type)
   local interface = self:open_for_reading_generic(interface_type, identifier)
   return tolua.cast(interface, "fawkes::" .. interface:type())
-end  
+end
 
 function fawkes.BlackBoard:open_for_writing(interface_type, identifier)
 	require("interfaces."..interface_type)
   local interface = self:open_for_writing_generic(interface_type, identifier)
   return tolua.cast(interface, "fawkes::" .. interface:type())
-end  
+end
 
 function fawkes.BlackBoard:close(interface)
   local gen_interface = tolua.cast(interface, "fawkes::Interface")
 	self:close_generic(gen_interface)
-end  
+end
 
 $]
 

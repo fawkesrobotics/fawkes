@@ -6,7 +6,7 @@ info:
     CLIPS Executive REST API.
     Enables access to goals, plans, and all items in the domain model.
   contact:
-    name:  Tim Niemueller
+    name: Tim Niemueller
     email: niemueller@kbsg.rwth-aachen.de
   license:
     name: Apache 2.0
@@ -20,7 +20,7 @@ paths:
   /clips-executive/goals:
     get:
       tags:
-      - clips-executive
+        - clips-executive
       summary: List goals
       operationId: list_goals
       description: |
@@ -43,31 +43,31 @@ paths:
         '400':
           description: bad input parameter
 
-    # post:
-    #   tags:
-    #   - clips-executive
-    #   summary: Add a new goal.
-    #   operationId: add_goal
-    #   description: |
-    #     Add a new goal.
-    #   requestBody:
-    #     content:
-    #       application/json:
-    #         schema:
-    #           $ref: '#/components/schemas/Goal'
-    #     description: Inventory item to add
-    #   responses:
-    #     '201':
-    #       description: item created
-    #     '400':
-    #       description: 'invalid input, object invalid'
-    #     '409':
-    #       description: an existing item already exists
+          # post:
+          #   tags:
+          #   - clips-executive
+          #   summary: Add a new goal.
+          #   operationId: add_goal
+          #   description: |
+          #     Add a new goal.
+          #   requestBody:
+          #     content:
+          #       application/json:
+          #         schema:
+          #           $ref: '#/components/schemas/Goal'
+          #     description: Inventory item to add
+          #   responses:
+          #     '201':
+          #       description: item created
+          #     '400':
+          #       description: 'invalid input, object invalid'
+          #     '409':
+          #       description: an existing item already exists
 
   /clips-executive/goals/{id}:
     get:
       tags:
-      - clips-executive
+        - clips-executive
       summary: Get information about a specific goal.
       operationId: get_goal
       description: |
@@ -99,7 +99,7 @@ paths:
   /clips-executive/plans:
     get:
       tags:
-      - clips-executive
+        - clips-executive
       summary: List plans
       operationId: list_plans
       description: |
@@ -125,7 +125,7 @@ paths:
   /clips-executive/plans/{goal-id}/{id}:
     get:
       tags:
-      - clips-executive
+        - clips-executive
       summary: Get a specific plan.
       operationId: get_plan
       description: |
@@ -163,7 +163,7 @@ paths:
   /clips-executive/domain-objects:
     get:
       tags:
-      - clips-executive
+        - clips-executive
       summary: List domain objects.
       operationId: list_domain_objects
       description: |
@@ -189,7 +189,7 @@ paths:
   /clips-executive/domain-predicates:
     get:
       tags:
-      - clips-executive
+        - clips-executive
       summary: List domain predicates.
       operationId: list_domain_predicates
       description: |
@@ -215,7 +215,7 @@ paths:
   /clips-executive/domain-facts:
     get:
       tags:
-      - clips-executive
+        - clips-executive
       summary: List domain facts.
       operationId: list_domain_facts
       description: |
@@ -241,7 +241,7 @@ paths:
   /clips-executive/domain-operators:
     get:
       tags:
-      - clips-executive
+        - clips-executive
       summary: List domain operators.
       operationId: list_domain_operators
       description: |
@@ -267,7 +267,7 @@ paths:
   /clips-executive/pddl-groundings:
     get:
       tags:
-      - clips-executive
+        - clips-executive
       summary: List pddl groundings.
       operationId: list_pddl_groundings
       description: |
@@ -293,7 +293,7 @@ paths:
   /clips-executive/pddl-groundings/{id}:
     get:
       tags:
-      - clips-executive
+        - clips-executive
       summary: List pddl groundings with id.
       operationId: get_pddl_groundings
       description: |
@@ -324,7 +324,7 @@ paths:
   /clips-executive/pddl-formulas:
     get:
       tags:
-      - clips-executive
+        - clips-executive
       summary: List pddl formulas.
       operationId: list_pddl_formulas
       description: |
@@ -350,7 +350,7 @@ paths:
   /clips-executive/pddl-formulas/{id}:
     get:
       tags:
-      - clips-executive
+        - clips-executive
       summary: List pddl formula with id.
       operationId: get_pddl_formulas
       description: |
@@ -381,7 +381,7 @@ paths:
   /clips-executive/pddl-predicates:
     get:
       tags:
-      - clips-executive
+        - clips-executive
       summary: List pddl predicates.
       operationId: list_pddl_predicates
       description: |
@@ -407,7 +407,7 @@ paths:
   /clips-executive/pddl-predicates/{id}:
     get:
       tags:
-      - clips-executive
+        - clips-executive
       summary: List pddl predicate with id.
       operationId: get_pddl_predicates
       description: |
@@ -438,7 +438,7 @@ paths:
   /clips-executive/grounded-pddl-formulas:
     get:
       tags:
-      - clips-executive
+        - clips-executive
       summary: List grounded pddl formulas.
       operationId: list_grounded_pddl_formulas
       description: |
@@ -464,7 +464,7 @@ paths:
   /clips-executive/grounded-pddl-formulas/{id}:
     get:
       tags:
-      - clips-executive
+        - clips-executive
       summary: List grounded pddl formula with id.
       operationId: get_grounded_pddl_formulas
       description: |
@@ -495,7 +495,7 @@ paths:
   /clips-executive/grounded-pddl-predicates:
     get:
       tags:
-      - clips-executive
+        - clips-executive
       summary: List grounded pddl predicates.
       operationId: list_grounded_pddl_predicates
       description: |
@@ -521,7 +521,7 @@ paths:
   /clips-executive/grounded-pddl-predicates/{id}:
     get:
       tags:
-      - clips-executive
+        - clips-executive
       summary: List grounded pddl predicate with id.
       operationId: get_grounded_pddl_predicates
       description: |
@@ -599,7 +599,7 @@ components:
           format: symbol
           example: PARENT-GOAL
         priority:
-          #type: string
+          # type: string
           type: integer
           format: int64
         parameters:

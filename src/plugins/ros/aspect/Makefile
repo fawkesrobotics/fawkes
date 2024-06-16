@@ -43,4 +43,3 @@ warning_ros:
 endif
 
 include $(BUILDSYSDIR)/base.mk
-

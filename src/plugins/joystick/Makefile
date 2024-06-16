@@ -35,7 +35,7 @@ LIBS_joystick_teleop = m fawkescore fawkesutils fawkesaspects \
 		       JoystickInterface MotorInterface Laser360Interface
 OBJS_joystick_teleop = joystick_teleop_plugin.o joystick_teleop_thread.o
 
-OBJS_all = $(OBJS_joystick) $(OBJS_ffjoystick) $(OBJS_ffkbjoystick) $(OBJS_joystick_teleop) 
+OBJS_all = $(OBJS_joystick) $(OBJS_ffjoystick) $(OBJS_ffkbjoystick) $(OBJS_joystick_teleop)
 
 BINS_all     = $(BINDIR)/ffkbjoystick \
                $(BINDIR)/ffjoystick

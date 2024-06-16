@@ -104,4 +104,3 @@ exec_skill_id(Skill, Arguments, MsgID) :-
 exec_skill_id2(Skillmsg, MsgID) :-
     bb_send_message("SkillerInterface::Skiller", "ExecSkillMessage", [["skill_string", Skillmsg]], MsgID),
     wait_until_processed(MsgID).
-

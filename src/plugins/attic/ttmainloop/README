@@ -34,4 +34,3 @@ The plugin replaces the standard main loop with a similar loop that has addition
  * Build the plugin
  * Load the plugin, main loop is replaced, depending on the interval time information about hook run-time is printed and time.log is written.
  * Use the [source:trunk/src/plugins/ttmainloop/chart.gnuplot chart.gnuplot] script in the ttmainloop directory to plot the data with {{{gnuplot chart.gnuplot}}} (time.log file must be in the current directory).
-

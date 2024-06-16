@@ -28,7 +28,7 @@
 using namespace fawkes;
 using namespace bsoncxx;
 
-/** @class OpenraveRobotMemoryThread 'openrave-robot-memory_thread.h' 
+/** @class OpenraveRobotMemoryThread 'openrave-robot-memory_thread.h'
  * Creates an OpenRave Scene for motion planning from data in the robot memory
  * @author Frederik Zwilling
  */

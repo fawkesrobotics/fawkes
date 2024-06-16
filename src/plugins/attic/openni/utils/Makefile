@@ -52,4 +52,3 @@ warning_openni:
 endif
 
 include $(BUILDSYSDIR)/base.mk
-

@@ -41,4 +41,3 @@ ifneq ($(PKGCONFIG),)
   CFLAGS_ALSA  = $(shell $(PKGCONFIG) --cflags 'alsa')
   LDFLAGS_ALSA = $(shell $(PKGCONFIG) --libs 'alsa')
 endif
-

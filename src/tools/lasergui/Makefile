@@ -60,4 +60,3 @@ warning_lasergui:
 endif
 
 include $(BUILDSYSDIR)/base.mk
-

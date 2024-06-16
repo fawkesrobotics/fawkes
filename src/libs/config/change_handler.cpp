@@ -36,7 +36,7 @@ namespace fawkes {
  * for the given component changes so that appropriate adjustement of the
  * behavior or a proper re-initialisation of a specific component can
  * be conducted.
- * @author Tim Niemueller 
+ * @author Tim Niemueller
  *
  * @fn void ConfigurationChangeHandler::config_tag_changed(const char *new_tag)
  * Called whenever the tag has changed.

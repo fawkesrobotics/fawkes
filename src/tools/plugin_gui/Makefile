@@ -43,4 +43,3 @@ warning_plugin_gui:
 endif
 
 include $(BUILDSYSDIR)/base.mk
-

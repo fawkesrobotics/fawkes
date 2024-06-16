@@ -166,7 +166,7 @@ fv_jpeg_error_exit(j_common_ptr cinfo)
 /**
  * set momory-jpeg image to JPEG lib Info struct
  * @param cinfo  JPEG lib decompress infomation structure
- * @param ptr    JPEG image 
+ * @param ptr    JPEG image
  * @param size   JPEG image size
  */
 GLOBAL(void)

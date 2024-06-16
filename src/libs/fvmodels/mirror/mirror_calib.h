@@ -134,7 +134,7 @@ private:
 		StepName             step;
 		ImageList::size_type image_index;
 		bool                 centering_done;
-		CalibrationState() : step(SHARPENING), image_index(0), centering_done(false){};
+		CalibrationState() : step(SHARPENING), image_index(0), centering_done(false) {};
 	};
 	/// @endcond
 

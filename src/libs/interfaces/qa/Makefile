@@ -26,4 +26,3 @@ BINS_all =	$(BINDIR)/qa_interface_msgq
 BINS_build = $(BINS_all)
 
 include $(BUILDSYSDIR)/base.mk
-

@@ -456,8 +456,8 @@ CruizCoreXG1010AcquisitionThread::resync()
       logger->log_warn(name(), "EC: %s\n", ec_.message().c_str());
     } while (!ec_ && bytes_read_ > 0);
   } catch (boost::system::system_error &e) {
-    // ignore, just assume done, if there really is an error we'll                   
-    // catch it later on                                                             
+    // ignore, just assume done, if there really is an error we'll
+    // catch it later on
   }
 
   send_init_packet(/ enable transfer / true);

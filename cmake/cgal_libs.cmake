@@ -20,6 +20,10 @@
 #
 # *****************************************************************************
 
+# Function: depend_on_cgal_libs
+# Usage: depend_on_cgal_libs(TARGET_NAME)
+#
+# Adds dependencies for cgal to the target.
 function(depend_on_cgal_libs target)
   if(NOT CGAL IN_LIST _FAWKES_DEPENDENCIES_CHECKED)
     find_package(CGAL)

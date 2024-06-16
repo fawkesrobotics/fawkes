@@ -80,7 +80,7 @@ public:
 	{
 		return std::make_pair(SkillerInterface::SkillStatusEnum::S_FINAL, "");
 	};
-	virtual void start_execute(const Skill &skill){};
+	virtual void start_execute(const Skill &skill) {};
 
 protected:
 	std::map<std::string, Skill> get_skills_from_config(const std::string &path) const;

@@ -36,4 +36,3 @@ if _G.HAVE_ROS then
 
    action_skill.use("test.fibo", "/fibonacci", "actionlib_tutorials/Fibonacci")
 end
-

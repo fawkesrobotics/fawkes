@@ -85,7 +85,7 @@ KalmanFilter1D::predict() const
 }
 
 /** Predicts the next position based on the past observations. Equivalent
- * to predict(vel, 1, 0.0). 
+ * to predict(vel, 1, 0.0).
  * @param vel The velocity of the object, 0.0 by default.
  * @return predicted value
  */
@@ -108,7 +108,7 @@ KalmanFilter1D::predict(float vel, int steps, float noise_z) const
 }
 
 /** Predicts the next position based on the past observations.
- * @param mu Explicitely 
+ * @param mu Explicitely
  * @param vel The velocity of the object, 0.0 by default.
  * @param steps The steps to look into the future, 1 by default.
  * @param noise_z Sensor noise.

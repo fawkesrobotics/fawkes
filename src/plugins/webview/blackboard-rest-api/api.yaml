@@ -6,7 +6,7 @@ info:
     Fawkes Blackboard REST API.
     Access blackboard data through a REST API.
   contact:
-    name:  Tim Niemueller
+    name: Tim Niemueller
     email: niemueller@kbsg.rwth-aachen.de
   license:
     name: Apache 2.0
@@ -20,7 +20,7 @@ paths:
   /blackboard/interfaces:
     get:
       tags:
-      - public
+        - public
       summary: Get list of interfaces.
       operationId: list_interfaces
       description: |
@@ -47,7 +47,7 @@ paths:
   /blackboard/interfaces/{type}/{id+}:
     get:
       tags:
-      - public
+        - public
       summary: Get information about a specific interface.
       operationId: get_interface_info
       description: Get information about a specific interface.
@@ -85,7 +85,7 @@ paths:
   /blackboard/interfaces/{type}/{id+}/data:
     get:
       tags:
-      - public
+        - public
       summary: Get data of a specific interface.
       operationId: get_interface_data
       description: Get data of a specific interface.
@@ -123,7 +123,7 @@ paths:
   /blackboard/graph:
     get:
       tags:
-      - public
+        - public
       summary: Get blackboard graph
       operationId: get_graph
       description: |

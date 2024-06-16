@@ -5,4 +5,3 @@ namespace symbols("Symbols") {
   /** Y coordinate of relative position of the ball */
   float input ball.relative_y;
 }
-

@@ -3,7 +3,7 @@
  *  qa_timebug.cpp - QA app to find a potential bug related to the Time class
  *
  *  Created: Tue Dec 18 10:38:30 2007
- *  Copyright  2007  Tim Niemueller 
+ *  Copyright  2007  Tim Niemueller
  *
  ****************************************************************************/
 

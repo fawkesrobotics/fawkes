@@ -18,7 +18,7 @@
 
 set -e
 set -u
-GOOD_LICENSES=("GPL-2+" "GPL-3" "BSD-3-clause" "BSD-3-clause and/or GPL-2+")
+GOOD_LICENSES=("GPL-2+" "GPL-3" "GPL-3+" "BSD-3-clause" "BSD-3-clause and/or GPL-2+" "Apache-2.0")
 is_good_license () {
   local good_license
   for good_license in "${GOOD_LICENSES[@]}" ; do

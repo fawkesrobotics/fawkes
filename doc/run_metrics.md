@@ -62,4 +62,3 @@ install default datasources and dashboards.
 docker run --name=grafana -d --net=host \
   -v $FAWKES_DIR/cfg/grafana:/etc/grafana grafana/grafana
 ```
-

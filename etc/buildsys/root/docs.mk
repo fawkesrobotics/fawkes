@@ -47,4 +47,3 @@ GIT_FILES = git ls-files --full-name \*.{h,cpp} | awk '{ print "'$$(git rev-pars
 	$(SILENT) cd src/lua; $(LUADOC) -d $(DOCDIR)/lua/$* $*
 
 endif # __buildsys_root_docs_mk_
-

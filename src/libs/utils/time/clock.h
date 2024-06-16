@@ -3,7 +3,7 @@
  *  clock.h - A central clock
  *
  *  Generated: Sun Jun 03 00:16:29 2007
- *  Copyright  2007  Daniel Beck 
+ *  Copyright  2007  Daniel Beck
  *             2007  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/

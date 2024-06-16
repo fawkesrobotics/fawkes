@@ -40,4 +40,3 @@ if type -p gmake >/dev/null; then
 	MAKE=gmake
 fi
 export MAKE
-

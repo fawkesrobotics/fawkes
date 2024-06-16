@@ -38,4 +38,3 @@ warning_clips:
 endif
 
 include $(BUILDSYSDIR)/base.mk
-

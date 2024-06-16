@@ -28,10 +28,9 @@ $#include <logging/component.h>
 namespace fawkes {
 class ComponentLogger
 {
-  virtual void log_debug(std::string message); 
+  virtual void log_debug(std::string message);
   virtual void log_info(std::string message);
   virtual void log_warn(std::string message);
   virtual void log_error(std::string message);
 };
 }
-

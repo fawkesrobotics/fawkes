@@ -133,7 +133,7 @@ WebPageReply::body()
 	return merged_body_;
 }
 
-/** 
+/**
  * Enable or disable the Fawkes Navigationbar (default enabled)
  * @param enabled enabled
  */
@@ -151,7 +151,7 @@ WebPageReply::get_navbar_enabled()
 {
 	return navbar_enabled_;
 }
-/** 
+/**
  * Enable or disable the Fawkes Webview footer (default enabled)
  * @param enabled enabled
  */

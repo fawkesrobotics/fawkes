@@ -36,7 +36,7 @@ then
 	# this fawkes instance is indeed a sub-module!:
 	BASEDIR=$(realpath $BASEDIR/..)
 fi
-	
+
 STATSFILE=$(realpath $BASEDIR/buildstats.db)
 
 LABEL=${BUILDKITE_LABEL:-:question: Unknown System}

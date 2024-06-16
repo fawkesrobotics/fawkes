@@ -58,7 +58,7 @@ function TriggerManager:remove_trigger(event, func)
 	    table.remove(self.triggers[event], i)
 	 end
       end
-   end    
+   end
 end
 
 function TriggerManager:trigger(event, ...)

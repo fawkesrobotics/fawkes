@@ -1,6 +1,6 @@
 /***************************************************************************
  *  clips_rm_trigger.h - Class holding information and callback for trigger in CLIPS
- *    
+ *
  *
  *  Created: 11:57:31 AM 2016
  *  Copyright  2016  Frederik Zwilling

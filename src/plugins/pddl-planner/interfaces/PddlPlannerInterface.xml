@@ -18,7 +18,7 @@
       Currently selected planner
     </field>
   </data>
-  
+
   <message name="Plan">
     <comment>
       Start PDDL planner and parse result

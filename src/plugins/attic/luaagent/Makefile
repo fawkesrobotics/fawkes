@@ -56,4 +56,3 @@ warning_tolua:
 endif
 
 include $(BUILDSYSDIR)/base.mk
-

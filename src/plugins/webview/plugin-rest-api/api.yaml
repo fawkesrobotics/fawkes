@@ -6,7 +6,7 @@ info:
     Fawkes Plugin REST API.
     List, load, and unload plugins.
   contact:
-    name:  Tim Niemueller
+    name: Tim Niemueller
     email: niemueller@kbsg.rwth-aachen.de
   license:
     name: Apache 2.0
@@ -20,7 +20,7 @@ paths:
   /plugins:
     get:
       tags:
-      - public
+        - public
       summary: Get list of plugins.
       operationId: list_plugins
       description: |
@@ -47,7 +47,7 @@ paths:
   /plugins/{name}:
     get:
       tags:
-      - public
+        - public
       summary: Get information about specific plugin.
       operationId: get_plugin
       description: |
@@ -78,7 +78,7 @@ paths:
 
     put:
       tags:
-      - public
+        - public
       summary: Load a plugin.
       operationId: set_plugin_state
       description: |

@@ -45,4 +45,3 @@ warning_sdl:
 endif
 
 include $(BUILDSYSDIR)/base.mk
-

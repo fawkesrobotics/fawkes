@@ -4,4 +4,3 @@
 @INCLUDE_PATH = doc/doxygen/parts
 @INCLUDE      = base.doxygen
 @INCLUDE      = quick.doxygen
-

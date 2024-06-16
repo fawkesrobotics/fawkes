@@ -102,7 +102,7 @@ namespace fawkes {
  * prepare_finalize() will hang until this event happens. This can be prevented
  * with set_prepfin_conc_loop() which allows to set that prepare_finalize() and
  * loop() may be executed concurrently.
- * 
+ *
  * After prepare_finalize() has been run the thread implementation will stop the
  * loop() from being executed. However, the thread will still run, for example it will
  * wait for wakeup. This way it can be ensured that other threads will continue
@@ -1017,7 +1017,7 @@ Thread::wakeup()
 
 /** Wake up thread and wait for barrier afterwards.
  * If the thread is being used in wait for wakeup mode this will wake up the
- * waiting thread. Additionally after the loop is finished 
+ * waiting thread. Additionally after the loop is finished
  * @param barrier barrier to wait for after loop
  */
 void

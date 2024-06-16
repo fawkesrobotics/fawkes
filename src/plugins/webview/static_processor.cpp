@@ -39,7 +39,6 @@
 #include <functional>
 #include <regex>
 #include <string>
-#include <fstream>
 #include <unistd.h>
 
 using namespace fawkes;

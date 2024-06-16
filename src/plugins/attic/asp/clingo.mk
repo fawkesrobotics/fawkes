@@ -39,4 +39,3 @@ else
     CLINGO_ERROR=Clingo not found and CLINGO_DIR not set
   endif
 endif
-

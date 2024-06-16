@@ -48,7 +48,6 @@ class SwitchInterface;
 }
 
 class Realsense2Thread : public fawkes::Thread,
-                         public fawkes::BlockedTimingAspect,
                          public fawkes::LoggingAspect,
                          public fawkes::ConfigurableAspect,
                          public fawkes::BlackBoardAspect,
@@ -131,6 +130,8 @@ private:
 	size_t      name_it_;
 	uint        rgb_error_counter_ = 0;
 	std::string serial_no_;
+
+	std::chrono::microseconds sleep_time_;
 };
 
 #endif

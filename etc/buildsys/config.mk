@@ -231,7 +231,7 @@ TCYANBG		= \033[46m
 TGREYBG		= \033[47m
 endif
 
-### If we are in the fawkes sub module include the top config 
+### If we are in the fawkes sub module include the top config
 ifeq ($(SUBMODULE_INTERN),1)
   include $(TOP_BASEDIR)/etc/buildsys/config.mk
 endif
@@ -281,4 +281,3 @@ ifeq ($(ARCH),x86_64)
 endif
 
 endif # __buildsys_config_mk_
-

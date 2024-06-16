@@ -43,7 +43,7 @@ namespace firevision {
  * Set dimenins of scaled image buffer.
  * @param width image width
  * @param height height
- * 
+ *
  * @fn void Scaler::set_original_buffer(unsigned char *buffer)
  * Set original image buffer.
  * @param buffer YUV 422 planar buffer

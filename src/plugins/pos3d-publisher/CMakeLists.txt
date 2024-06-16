@@ -28,22 +28,22 @@ set(PLUGIN_pos3d-publisher
 
 # add_subdirectory(interfaces)
 if(PLUGIN_pos3d-publisher)
-    add_library(pos3d-publisher MODULE pos3d_publisher_plugin.cpp
-        pos3d_publisher_thread.cpp)
+  add_library(pos3d-publisher MODULE pos3d_publisher_plugin.cpp
+                                     pos3d_publisher_thread.cpp)
 
-    depend_on_tf(pos3d-publisher)
-    target_link_libraries(
-        pos3d-publisher
-        fawkescore
-        fawkesutils
-        fawkesaspects
-        fawkesbaseapp
-        fawkesblackboard
-        fawkesinterface
-        fawkestf)
+  depend_on_tf(pos3d-publisher)
+  target_link_libraries(
+    pos3d-publisher
+    fawkescore
+    fawkesutils
+    fawkesaspects
+    fawkesbaseapp
+    fawkesblackboard
+    fawkesinterface
+    fawkestf)
 
-    target_compile_features(pos3d-publisher PUBLIC cxx_std_17)
+  target_compile_features(pos3d-publisher PUBLIC cxx_std_17)
 
 else()
-    plugin_disabled_message("pos3d-publisher")
+  plugin_disabled_message("pos3d-publisher")
 endif()

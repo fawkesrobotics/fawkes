@@ -179,8 +179,8 @@ public:
 	{
 		return scale;
 	}
-	virtual void set_scale(double scale){};
-	virtual void set_translation(double tx, double ty){};
+	virtual void set_scale(double scale) {};
+	virtual void set_translation(double tx, double ty) {};
 
 	virtual void
 	get_translation(double &tx, double &ty)

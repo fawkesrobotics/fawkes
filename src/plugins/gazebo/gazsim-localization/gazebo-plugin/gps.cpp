@@ -90,7 +90,7 @@ Gps::Reset()
 }
 
 /** Sending position to Fawkes
- * 
+ *
  */
 void
 Gps::send_position()

@@ -38,4 +38,3 @@ class KalmanFilter1D
     float predict(float mu, float vel, int steps, float noise_z) const;
 };
 }
-

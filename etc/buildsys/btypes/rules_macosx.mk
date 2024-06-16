@@ -50,4 +50,3 @@ $(PLUGINDIR)/%.dylib: $$(OBJS_$$*)
 		echo -e "$(INDENT_PRINT)--- $(TRED)Plugin has no plugin_description symbol. Forgot PLUGIN_DESCRIPTION?$(TNORMAL)"; \
 		exit 3; \
 	fi
-

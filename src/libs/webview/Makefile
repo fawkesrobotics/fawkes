@@ -42,4 +42,3 @@ warning_rapidjson:
 endif
 
 include $(BUILDSYSDIR)/base.mk
-

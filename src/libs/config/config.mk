@@ -28,4 +28,3 @@ ifeq ($(HAVE_YAMLCPP),1)
     CFLAGS_YAMLCPP += -DHAVE_YAMLCPP_NODE_MARK
   endif
 endif
-

@@ -1,5 +1,5 @@
 /***************************************************************************
- *  gazsim_localization_thread.h - Thread provides 
+ *  gazsim_localization_thread.h - Thread provides
  *     the simulated position of a robot in Gazeo
  *
  *  Created: Thu Aug 08 17:45:31 2013

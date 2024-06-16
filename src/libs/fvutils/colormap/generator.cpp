@@ -68,7 +68,7 @@ namespace firevision {
  * @fn bool ColormapGenerator::has_histograms()
  * Check if this generator has histograms.
  * @return true, if this generator has histograms, false otherwise
- * 
+ *
  * @fn std::map< std::string, Histogram *> *  ColormapGenerator::get_histograms()
  * Get histograms.
  * @return a map of histograms, if any.

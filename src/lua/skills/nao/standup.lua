@@ -93,4 +93,3 @@ TURNON:get_transitions(STANDUP).dotattr = {labeloffsety = 18, labelrotate = -14,
 FROM_FRONT:get_transitions(WAIT).dotattr = { labeloffsety = -5, labelrotate = 10 }
 FROM_BACK:get_transitions(WAIT).dotattr = { labeloffsety = -5 }
 GETUP:get_transitions(FINAL).dotattr = { labeloffsety = -5 }
-

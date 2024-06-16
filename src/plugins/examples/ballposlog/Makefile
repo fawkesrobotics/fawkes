@@ -24,4 +24,3 @@ PLUGINS_all = $(PLUGINDIR)/ballposlog.so
 PLUGINS_build = $(PLUGINS_all)
 
 include $(BUILDSYSDIR)/base.mk
-

@@ -22,7 +22,7 @@ import { DomainFact } from '../models/DomainFact';
 
 @Injectable()
 export class ClipsExecutiveApiService {
- 
+
   constructor(private config: ConfigurationService,
               private http: HttpClient)
   {}
@@ -90,7 +90,7 @@ export class ClipsExecutiveApiService {
    */
   private handleError<T> (operation = 'operation', result?: T) {
     return (error: any): Observable<T> => {
-      
+
       // TODO: send the error to remote logging infrastructure
       console.error(error); // log to console instead
 

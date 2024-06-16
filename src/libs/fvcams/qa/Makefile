@@ -32,4 +32,3 @@ BINS_all = $(BINDIR)/fv_qa_fwcam
 BINS_build = $(BINS_all)
 
 include $(BUILDSYSDIR)/base.mk
-

@@ -54,4 +54,3 @@ warning_bluez:
 endif
 
 include $(BUILDSYSDIR)/base.mk
-

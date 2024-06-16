@@ -73,10 +73,10 @@ private:
 	void entries_delete();
 	void entries_get_from_config();
 
-	virtual void config_tag_changed(const char *new_tag){};
-	virtual void config_comment_changed(const fawkes::Configuration::ValueIterator *v){};
+	virtual void config_tag_changed(const char *new_tag) {};
+	virtual void config_comment_changed(const fawkes::Configuration::ValueIterator *v) {};
 	virtual void config_value_changed(const fawkes::Configuration::ValueIterator *v);
-	virtual void config_value_erased(const char *path){};
+	virtual void config_value_erased(const char *path) {};
 };
 
 #endif

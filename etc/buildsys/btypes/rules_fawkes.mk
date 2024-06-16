@@ -35,4 +35,3 @@ $(PLUGINDIR)/%.so: $$(OBJS_$$(call nametr,$$*))
 		echo -e "$(INDENT_PRINT)[ERR] $(TRED)Plugin has no plugin_description symbol. Forgot PLUGIN_DESCRIPTION?$(TNORMAL)"; \
 		exit 3; \
 	fi
-

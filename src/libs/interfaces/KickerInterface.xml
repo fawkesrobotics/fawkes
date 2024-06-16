@@ -19,7 +19,7 @@
   </constants>
   <data>
     <comment>
-      In these variables it is stored how often the right, center or 
+      In these variables it is stored how often the right, center or
       left kick have been triggered.
     </comment>
     <field type="int32" name="num_kicks_left">
@@ -52,4 +52,3 @@
     <field type="GuideBallSideEnum" name="guide_ball_side">Side where to guide the ball and erect the arm.</field>
   </message>
 </interface>
-

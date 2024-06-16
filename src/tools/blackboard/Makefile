@@ -33,4 +33,3 @@ BINS_all = $(BINDIR)/bb_cleanup	\
 BINS_build = $(BINS_all)
 
 include $(BUILDSYSDIR)/base.mk
-

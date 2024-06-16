@@ -2,7 +2,7 @@
 #         Makefile Build System for Fawkes: pddl_robot_memory Plugin
 #                            -------------------
 #   Created on Thu Oct 13 13:34:05 2016
- 
+
 #   Copyright (C) 2016 by Frederik Zwilling
 #
 #*****************************************************************************

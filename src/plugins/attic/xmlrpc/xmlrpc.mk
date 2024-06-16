@@ -56,4 +56,3 @@ else
 			  -lxmlrpc_xmltok -lxmlrpc_server
   endif
 endif
-

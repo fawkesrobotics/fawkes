@@ -32,8 +32,8 @@ using namespace fawkes;
  * @param cfg_prefix configuration prefix specific for the ros/navigator
  */
 ROS2NavigatorThread::ROS2NavigatorThread(std::string &cfg_prefix)
-: Thread("ROS2NavigatorThread", Thread::OPMODE_CONTINUOUS),
-  //  BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT),
+: Thread("ROS2NavigatorThread", Thread::OPMODE_WAITFORWAKEUP),
+  BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT),
   cfg_prefix_(cfg_prefix)
 {
 }
@@ -128,14 +128,14 @@ ROS2NavigatorThread::send_goal()
 			  if (result.goal_id[i] != goal_handle->get_goal_id()[i]) {
 				  logger->log_error(name(), "Goal ID missmatch!!!");
 				  nav_if_->set_final(true);
-				  auto new_goal = NavigateToPose::Goal();
+				  auto new_goal                 = NavigateToPose::Goal();
 				  new_goal.pose.header.frame_id = "map";
 				  new_goal.pose.header.stamp    = node_handle->get_clock()->now();
 				  new_goal.pose.pose.position.x = nav_if_->dest_x();
 				  new_goal.pose.pose.position.y = nav_if_->dest_y();
-				  auto empty_opt = rclcpp_action::Client<NavigateToPose>::SendGoalOptions();
+				  auto empty_opt                = rclcpp_action::Client<NavigateToPose>::SendGoalOptions();
 				  nav_if_->set_error_code(NavigatorInterface::ERROR_UNKNOWN_PLACE);
-			          ac_->async_send_goal(new_goal, empty_opt);
+				  ac_->async_send_goal(new_goal, empty_opt);
 				  nav_if_->write();
 				  return;
 			  }
@@ -524,7 +524,6 @@ ROS2NavigatorThread::loop()
 			nav_if_->msgq_pop();
 		} // while
 	}
-	usleep(100000);
 }
 
 void

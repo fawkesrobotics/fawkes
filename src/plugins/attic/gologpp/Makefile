@@ -58,4 +58,3 @@ warning_gologpp:
 endif
 
 include $(BUILDSYSDIR)/base.mk
-
