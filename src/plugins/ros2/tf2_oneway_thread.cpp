@@ -147,8 +147,12 @@ ROS2TF2OThread::loop()
 		std::string parent;
 		if (tf_buffer_->_getParent(frame, t, parent)) {
 			geometry_msgs::msg::TransformStamped transform =
-			  tf_buffer_->lookupTransform(frame, parent, t);
-			publish_transform_to_fawkes(transform, false);
+			  tf_buffer_->lookupTransform(parent, frame, t);
+			bool is_static = false;
+			if (transform.header.stamp.sec == 0) {
+				is_static = true;
+			}
+			publish_transform_to_fawkes(transform, is_static);
 		}
 	}
 	// tf_msg_queue_mutex_->lock();
