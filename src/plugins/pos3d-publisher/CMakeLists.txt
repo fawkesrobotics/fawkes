@@ -40,6 +40,7 @@ if(PLUGIN_pos3d-publisher)
     fawkesbaseapp
     fawkesblackboard
     fawkesinterface
+    Position3DInterface
     fawkestf)
 
   target_compile_features(pos3d-publisher PUBLIC cxx_std_17)

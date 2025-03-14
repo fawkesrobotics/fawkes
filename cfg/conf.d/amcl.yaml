@@ -90,6 +90,8 @@ plugins/amcl:
   laser_interface_id: Laser urg filtered
   # Pose blackboard interface ID
   pose_interface_id: Pose
+  pose_interface_id_agent: PoseAgent
+  agent_scale_factor: 30
 
   # Coordinate frame IDs
   odom_frame_id: !frame odom
