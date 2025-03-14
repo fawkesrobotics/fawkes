@@ -64,8 +64,12 @@ protected:
 
 private:
 	fawkes::Position3DInterface *pos3d_if_;
+	fawkes::Position3DInterface *pos3d_if_agent_;
 	std::string                  global_frame_id_;
 	std::string                  cfg_pose_ifname_;
+	std::string                  cfg_pose_ifname_agent_;
+	unsigned int                 loop_nr_        = 0;
+	unsigned int                 loop_threshold_ = 0;
 };
 
 #endif

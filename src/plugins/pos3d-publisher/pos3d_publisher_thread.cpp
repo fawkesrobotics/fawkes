@@ -46,13 +46,19 @@ Pos3dPublisherThread::~Pos3dPublisherThread()
 void
 Pos3dPublisherThread::init()
 {
-	global_frame_id_ = config->get_string("/frames/fixed");
-	cfg_pose_ifname_ = config->get_string("/plugins/amcl/pose_interface_id");
+	global_frame_id_       = config->get_string("/frames/fixed");
+	cfg_pose_ifname_       = config->get_string("/plugins/amcl/pose_interface_id");
+	cfg_pose_ifname_agent_ = config->get_string("/plugins/amcl/pose_interface_id_agent");
+	loop_threshold_        = config->get_int("/plugins/amcl/agent_scale_factor");
 	blackboard->register_observer(this);
 
 	pos3d_if_ = blackboard->open_for_writing<Position3DInterface>(cfg_pose_ifname_.c_str());
 	pos3d_if_->set_frame(global_frame_id_.c_str());
 	pos3d_if_->write();
+	pos3d_if_agent_ =
+	  blackboard->open_for_writing<Position3DInterface>(cfg_pose_ifname_agent_.c_str());
+	pos3d_if_agent_->set_frame(global_frame_id_.c_str());
+	pos3d_if_agent_->write();
 }
 
 void
@@ -61,6 +67,7 @@ Pos3dPublisherThread::finalize()
 	blackboard->unregister_listener(this);
 	blackboard->unregister_observer(this);
 	blackboard->close(pos3d_if_);
+	blackboard->close(pos3d_if_agent_);
 }
 
 #define TARGET "map"
@@ -71,6 +78,8 @@ Pos3dPublisherThread::loop()
 {
 	bool world_frame_exists = tf_listener->frame_exists(TARGET);
 	bool robot_frame_exists = tf_listener->frame_exists(SOURCE);
+
+	loop_nr_++;
 
 	if (!world_frame_exists || !robot_frame_exists) {
 		logger->log_warn(name(),
@@ -102,5 +111,21 @@ Pos3dPublisherThread::loop()
 		pos3d_if_->set_translation(transform.getOrigin());
 		pos3d_if_->set_rotation(transform.getRotation());
 		pos3d_if_->write();
+
+		if (loop_nr_ > loop_threshold_) {
+			if (pos3d_if_agent_->visibility_history() >= 0) {
+				pos3d_if_agent_->set_visibility_history(pos3d_if_agent_->visibility_history() + 1);
+			} else {
+				pos3d_if_agent_->set_visibility_history(1);
+			}
+			pos3d_if_agent_->set_visibility_history(pos3d_if_agent_->visibility_history() + 1);
+			pos3d_if_agent_->set_translation(transform.getOrigin());
+			pos3d_if_agent_->set_rotation(transform.getRotation());
+			pos3d_if_agent_->write();
+		}
+	}
+
+	if (loop_nr_ > loop_threshold_) {
+		loop_nr_ = 0;
 	}
 }
