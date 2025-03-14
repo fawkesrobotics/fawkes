@@ -160,7 +160,7 @@ if(PLUGIN_ros2-tf2-oneway)
                                      tf2_oneway_thread.cpp)
   depend_on_ros2(ros2-tf2-oneway)
   depend_on_tf(ros2-tf2-oneway)
-  depend_on_ros2_libs(ros2-tf2-oneway "tf2;tf2_msgs")
+  depend_on_ros2_libs(ros2-tf2-oneway "tf2;tf2_msgs;tf2_geometry_msgs;geometry_msgs")
   target_link_libraries(
     ros2-tf2-oneway
     fawkescore

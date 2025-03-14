@@ -57,6 +57,8 @@ ROS2TF2OThread::~ROS2TF2OThread()
 void
 ROS2TF2OThread::init()
 {
+	tf_buffer_    = std::make_unique<tf2_ros::Buffer>(node_handle->get_clock());
+	tf_listener_  = std::make_unique<tf2_ros::TransformListener>(*tf_buffer_);
 	active_queue_ = 0;
 	seq_num_      = 0;
 	last_update_->set_clock(clock);
@@ -97,16 +99,16 @@ ROS2TF2OThread::init()
 		tf_static_topic.insert(0, 1, '/');
 	}
 
-	sub_tf_ = node_handle->create_subscription<tf2_msgs::msg::TFMessage>(
-	  tf_topic,
-	  1,
-	  std::bind(&ROS2TF2OThread::tf_message_cb_dynamic, this, _1),
-	  rclcpp::SubscriptionOptionsWithAllocator<std::allocator<void>>(subopts));
-	sub_static_tf_ = node_handle->create_subscription<tf2_msgs::msg::TFMessage>(
-	  tf_static_topic,
-	  rclcpp::QoS(1).transient_local(),
-	  std::bind(&ROS2TF2OThread::tf_message_cb_static, this, _1),
-	  rclcpp::SubscriptionOptionsWithAllocator<std::allocator<void>>(subopts));
+	// sub_tf_ = node_handle->create_subscription<tf2_msgs::msg::TFMessage>(
+	//   tf_topic,
+	//   1,
+	//   std::bind(&ROS2TF2OThread::tf_message_cb_dynamic, this, _1),
+	//   rclcpp::SubscriptionOptionsWithAllocator<std::allocator<void>>(subopts));
+	// sub_static_tf_ = node_handle->create_subscription<tf2_msgs::msg::TFMessage>(
+	//   tf_static_topic,
+	//   rclcpp::QoS(1).transient_local(),
+	//   std::bind(&ROS2TF2OThread::tf_message_cb_static, this, _1),
+	//   rclcpp::SubscriptionOptionsWithAllocator<std::allocator<void>>(subopts));
 
 	tfifs_ = blackboard->open_multiple_for_reading<TransformInterface>("/tf*");
 	std::list<TransformInterface *>::iterator i;
@@ -139,24 +141,34 @@ ROS2TF2OThread::finalize()
 void
 ROS2TF2OThread::loop()
 {
-	tf_msg_queue_mutex_->lock();
-	unsigned int queue = active_queue_;
-	active_queue_      = 1 - active_queue_;
-	tf_msg_queue_mutex_->unlock();
-	while (!tf2_msg_queues_[queue].empty()) {
-		const std::pair<bool, tf2_msgs::msg::TFMessage::ConstPtr> &q   = tf2_msg_queues_[queue].front();
-		const tf2_msgs::msg::TFMessage::ConstPtr                  &msg = q.second;
-		const size_t                                               tsize = msg->transforms.size();
-		for (size_t i = 0; i < tsize; ++i) {
-			publish_transform_to_fawkes(msg->transforms[i], q.first);
+	std::vector<std::string> frame_names = tf_buffer_->getAllFrameNames();
+	tf2::TimePoint           t           = tf2::TimePoint(std::chrono::nanoseconds(0));
+	for (std::string frame : frame_names) {
+		std::string parent;
+		if (tf_buffer_->_getParent(frame, t, parent)) {
+			geometry_msgs::msg::TransformStamped transform =
+			  tf_buffer_->lookupTransform(frame, parent, t);
+			publish_transform_to_fawkes(transform, false);
 		}
-		tf2_msg_queues_[queue].pop();
 	}
+	// tf_msg_queue_mutex_->lock();
+	// unsigned int queue = active_queue_;
+	// active_queue_      = 1 - active_queue_;
+	// tf_msg_queue_mutex_->unlock();
+	// while (!tf2_msg_queues_[queue].empty()) {
+	// 	const std::pair<bool, tf2_msgs::msg::TFMessage::ConstPtr> &q   = tf2_msg_queues_[queue].front();
+	// 	const tf2_msgs::msg::TFMessage::ConstPtr                  &msg = q.second;
+	// 	const size_t                                               tsize = msg->transforms.size();
+	// 	for (size_t i = 0; i < tsize; ++i) {
+	// 		publish_transform_to_fawkes(msg->transforms[i], q.first);
+	// 	}
+	// 	tf2_msg_queues_[queue].pop();
+	// }
 
-	fawkes::Time now(clock);
-	if ((now - last_update_) > cfg_update_interval_) {
-		last_update_->stamp();
-	}
+	// fawkes::Time now(clock);
+	// if ((now - last_update_) > cfg_update_interval_) {
+	// 	last_update_->stamp();
+	// }
 }
 
 void
@@ -280,21 +292,21 @@ ROS2TF2OThread::publish_transform_to_fawkes(const geometry_msgs::msg::TransformS
 	}
 }
 
-void
-ROS2TF2OThread::tf_message_cb_static(const tf2_msgs::msg::TFMessage::SharedPtr msg)
-{
-	tf_message_cb(msg, true);
-}
+// void
+// ROS2TF2OThread::tf_message_cb_static(const tf2_msgs::msg::TFMessage::SharedPtr msg)
+// {
+// 	tf_message_cb(msg, true);
+// }
 
-void
-ROS2TF2OThread::tf_message_cb_dynamic(const tf2_msgs::msg::TFMessage::SharedPtr msg)
-{
-	tf_message_cb(msg, false);
-}
+// void
+// ROS2TF2OThread::tf_message_cb_dynamic(const tf2_msgs::msg::TFMessage::SharedPtr msg)
+// {
+// 	tf_message_cb(msg, false);
+// }
 
-void
-ROS2TF2OThread::tf_message_cb(const tf2_msgs::msg::TFMessage::SharedPtr tf2_message, bool stat)
-{
-	MutexLocker lock(tf_msg_queue_mutex_);
-	tf2_msg_queues_[active_queue_].push(std::make_pair(stat, tf2_message));
-}
+// void
+// ROS2TF2OThread::tf_message_cb(const tf2_msgs::msg::TFMessage::SharedPtr tf2_message, bool stat)
+// {
+// 	MutexLocker lock(tf_msg_queue_mutex_);
+// 	tf2_msg_queues_[active_queue_].push(std::make_pair(stat, tf2_message));
+// }

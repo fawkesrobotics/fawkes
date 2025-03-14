@@ -40,6 +40,9 @@
 #include <queue>
 using std::placeholders::_1;
 
+#include "tf2_ros/buffer.h"
+#include "tf2_ros/transform_listener.h"
+
 #include <geometry_msgs/msg/quaternion.hpp>
 #include <geometry_msgs/msg/transform.hpp>
 #include <geometry_msgs/msg/transform_stamped.hpp>
@@ -76,9 +79,9 @@ public:
 	                                         fawkes::Uuid       instance_serial) noexcept;
 
 private:
-	void tf_message_cb_dynamic(const tf2_msgs::msg::TFMessage::SharedPtr msg);
-	void tf_message_cb_static(const tf2_msgs::msg::TFMessage::SharedPtr msg);
-	void tf_message_cb(const tf2_msgs::msg::TFMessage::SharedPtr msg, bool stat);
+	// void tf_message_cb_dynamic(const tf2_msgs::msg::TFMessage::SharedPtr msg);
+	// void tf_message_cb_static(const tf2_msgs::msg::TFMessage::SharedPtr msg);
+	// void tf_message_cb(const tf2_msgs::msg::TFMessage::SharedPtr msg, bool stat);
 
 	void conditional_close(fawkes::Interface *interface) throw();
 	void publish_transform_to_fawkes(const geometry_msgs::msg::TransformStamped &ts,
@@ -106,8 +109,8 @@ private:
 	std::list<std::string>                  ros2_frames_;
 	std::list<fawkes::TransformInterface *> tfifs_;
 
-	rclcpp::Subscription<tf2_msgs::msg::TFMessage>::SharedPtr sub_tf_;
-	rclcpp::Subscription<tf2_msgs::msg::TFMessage>::SharedPtr sub_static_tf_;
+	// rclcpp::Subscription<tf2_msgs::msg::TFMessage>::SharedPtr sub_tf_;
+	// rclcpp::Subscription<tf2_msgs::msg::TFMessage>::SharedPtr sub_static_tf_;
 
 	fawkes::Mutex                                                  *tf_msg_queue_mutex_;
 	unsigned int                                                    active_queue_;
@@ -115,7 +118,9 @@ private:
 	fawkes::Mutex                                                  *seq_num_mutex_;
 	unsigned int                                                    seq_num_;
 
-	fawkes::Time *last_update_;
+	fawkes::Time                               *last_update_;
+	std::unique_ptr<tf2_ros::Buffer>            tf_buffer_;
+	std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
 };
 
 #endif
