@@ -41,5 +41,8 @@ endfunction()
 #
 # Adds the dependency for the protofbuff_comm package to the target.
 function(depend_on_protobuf_comm target)
-  depend_on_pkgconfig_libs(${target} protobuf_comm)
+  depend_on_find_package_libs(${target} ProtobufComm)
+  if(ProtobufComm_FOUND)
+    target_link_libraries(${target}  ProtobufComm::protobuf_comm)
+  endif()
 endfunction()
