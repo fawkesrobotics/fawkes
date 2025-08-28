@@ -443,11 +443,11 @@
 		(do-for-fact ((?m mutex)) (eq ?m:name ?id)
       (if ?locked then
         (if (eq ?locked-by (cx-identity)) then
-          (if (or (eq ?m:request LOCK) (eq ?m:request RENEW-LOCK)) then
+          (if (or (eq ?m:request LOCK) (and (eq ?m:request RENEW-LOCK) (eq ?locked-by ?m:locked-by))) then
             ; Mutex is locked by us and we requested it, all good.
             (modify ?m (response ACQUIRED))
            else
-             (if (eq ?m:state OPEN) then
+             (if (or (eq ?m:state OPEN) (neq ?locked-by ?m:locked-by))  then
                ; Mutex is newly locked by us but we never requested it.
                (printout error "Acquired a mutex without a request,"
                                " releasing the mutex again!" crlf)
